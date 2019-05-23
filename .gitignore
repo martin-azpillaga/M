@@ -8,10 +8,10 @@ target/
 *.prefs
 *.classpath
 *.launch
-Samples/
 bin/
 *._trace
 src-gen/
 xtend-gen/
 *.jar
+#Ecore model
 generated/
