@@ -1,0 +1,9 @@
+grammar games.minim.M with org.eclipse.xtext.common.Terminals
+
+generate m "http://www.minim.games/M"
+
+Model:
+	greetings+=Greeting*;
+	
+Greeting:
+	'Hello' name=ID '!';

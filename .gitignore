@@ -1,0 +1,11 @@
+# Eclipse runtime metadata
+.metadata/
+# Eclipse runtime project
+*.project
+# Eclipse generated game folders
+src-gen/
+target/
+*.prefs
+*.classpath
+*.launch
+Samples/
