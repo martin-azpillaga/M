@@ -90,8 +90,6 @@ class Cleaning extends LazyLinker
 				val memberUri = URI.createURI('platform:/resource'+member.fullPath)
 				
 				model.eResource.resourceSet.getResource(memberUri,true)
-				
-				println(memberUri.toString + ' added')
 			}
 		}
 	}
@@ -552,8 +550,6 @@ class MScopeProvider extends AbstractMScopeProvider
 			game = context.eResource.resourceSet.getResource(URI.createURI(Cleaning.deducedURI),false).contents.get(0) as Game
 			engine = context.eResource.resourceSet.getResource(URI.createURI(Cleaning.engineURI),false).contents.get(0) as Game
 		}
-		
-		println(reference.name)
 		
 		var collection = collection(context,reference)
 		

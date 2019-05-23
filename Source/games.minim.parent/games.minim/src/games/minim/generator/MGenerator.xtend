@@ -1,19 +1,15 @@
 package games.minim.generator
 
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.generator.AbstractGenerator
-import org.eclipse.xtext.generator.IFileSystemAccess2
-import org.eclipse.xtext.generator.IGeneratorContext
-import org.eclipse.emf.ecore.resource.Resource
-import org.eclipse.xtext.generator.AbstractGenerator
-import org.eclipse.xtext.generator.IFileSystemAccess2
-import org.eclipse.xtext.generator.IGeneratorContext
-import org.eclipse.emf.common.util.URI
-import games.minim.m.Game
-import org.eclipse.emf.common.util.BasicEList
-import games.minim.m.Entity
-import games.minim.scoping.Cleaning
 import games.minim.m.Control
+import games.minim.m.Entity
+import games.minim.m.Game
+import games.minim.scoping.Cleaning
+import org.eclipse.emf.common.util.BasicEList
+import org.eclipse.emf.common.util.URI
+import org.eclipse.emf.ecore.resource.Resource
+import org.eclipse.xtext.generator.AbstractGenerator
+import org.eclipse.xtext.generator.IFileSystemAccess2
+import org.eclipse.xtext.generator.IGeneratorContext
 
 class MGenerator extends AbstractGenerator 
 {
@@ -21,7 +17,7 @@ class MGenerator extends AbstractGenerator
 	{
 		println("generate "+resource.contents.get(0).class)
 		var content = resource.contents.get(0)
-		if (content instanceof games.minim.m.Game)
+		if (content instanceof Game)
 		{
 			var file = resource.URI.path
 			var projectPath = file.substring(9)
