@@ -3,7 +3,7 @@ scale 5 2 appearance sprite.ship
 extent 1 1 category [ship] mask [shipProjectile]
 motorAxis gamepad.leftX motorSpeed 10 0 shootButton gamepad.south
 deathSensor detect [alien projectile] goodness 
-gunCreation entity.goodBullet creationVelocity 0 30 creationCategory [shipProjectile].
+gunCreation entity.goodBullet creationVelocity 0 30.
 
 alien has
 scale 10 4 appearance sprite.alien
@@ -15,8 +15,8 @@ evilness hive.
 
 bullet has
 scale 1 1 appearance sprite.bullet
-extent 1 1 deathSensor [ship alien shipProjectile evilProjectile wall space defense]
-scoreSensor [alien] team [single] worth 1
+extent 1 1 deathSensor detect [ship alien shipProjectile evilProjectile wall space defense]
+scoreSensor detect [alien] team [single] worth 1
 category [genericProjectile].
 
 goodBullet based on bullet has 
@@ -36,10 +36,10 @@ extent 2 50 category [wall].
 defense has
 scale 1 1 appearance sprite.defense
 extent 0.5 0.5 category [defense]
-deathSensor [shipProjectile evilProjectile alien].
+deathSensor detect [shipProjectile evilProjectile alien].
 
-board has maximum 1, position 0 0, scale 5 10,
-team red, scene entity.menu, number 0.
+board has scale 5 10,
+team [single], scene entity.menu, number 0.
 
 audioEffect has
 audiosource audio.yay, lifetime 5s.
@@ -47,11 +47,10 @@ audiosource audio.yay, lifetime 5s.
 player has rotation 0 0 10,
 viewDistance 1000, viewAngle 50, position 0 0, clearColor 0.5 0.5 0.5 1.
 
-
 hud has 
 canvas 100 100 contains
-	left_board based on board has team blue, position -25 40.
-	right_board based on board has team red, position 25 40.
+	left_board based on board has team [blue], position -25 40.
+	right_board based on board has team [red], position 25 40.
 .
 
 menu contains

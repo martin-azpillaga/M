@@ -2475,6 +2475,7 @@ class HybridUnity implements Framework
 					case SQRT: result = '''math.sqrt(«expression.parameters.get(0).toCode»)'''
 					case TAN: result = '''math.tan(«expression.parameters.get(0).toCode»)'''
 					case RANDOM: result = '''main.random.NextFloat(«expression.parameters.get(0).toCode».x,«expression.parameters.get(0).toCode».y)'''
+					case CREATE: result = '''GameObject.Instantiate(«(expression.parameters.get(0) as Access).toCode»)'''
 				}
 			}
 		}

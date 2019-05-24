@@ -49,7 +49,6 @@ import org.eclipse.xtext.scoping.Scopes
 
 import static games.minim.m.EngineTransformationType.*
 import static games.minim.m.MPackage.Literals.*
-import games.minim.m.SubrutineCall
 import games.minim.m.Call
 
 class EngineComponent extends NameImpl
@@ -123,9 +122,9 @@ class Cleaning extends LazyLinker
 		if (deducedResource === null)
 		{
 			deducedResource = model.eResource.resourceSet.createResource(URI.createURI(deducedURI))
-			var game = MFactory.eINSTANCE.createGame
-		  	game.clear
-		  	deducedResource.contents.add(game)
+			deduced = MFactory.eINSTANCE.createGame
+		  	deduced.clear
+		  	deducedResource.contents.add(deduced)
 		}
 		else
 		{
@@ -164,6 +163,9 @@ class Cleaning extends LazyLinker
 		game.input2DComponents.clear
 		game.spriteComponents.clear
 		game.audioComponents.clear
+		game.meshComponents.clear
+		game.materialComponents.clear
+		game.textComponents.clear
 	}
 	
 	def reset(Game game)
