@@ -478,7 +478,7 @@ class HybridUnity implements Framework
 			public enum «enumeration.name»_type
 			{
 				«FOR value : enumeration.values»
-				«value.name» = 0b«Math.pow(10,enumeration.values.indexOf(value)) as int»,
+				«value.name» = 0b«Math.pow(10,enumeration.values.indexOf(value)) as long»,
 				«ENDFOR»
 			}
 			''')
