@@ -38,8 +38,12 @@ scale 1 1 appearance sprite.defense
 extent 0.5 0.5 category [defense]
 deathSensor detect [shipProjectile evilProjectile alien].
 
-board has scale 5 10,
-team [single], scene entity.menu, number 0.
+wincondition has
+evilnessAmount 0, scene entity.menu.
+
+board has 
+scale 5 10,
+team [single], number 0.
 
 audioEffect has
 audiosource audio.yay, lifetime 5s.
@@ -78,7 +82,7 @@ shoot:
 for each entity a with triggered shootButton
 {
 	creation = create(a.gunCreation)
-	creation.position = <a.position.x, a.position.y+a.scale.y/2>
+	creation.position = <a.position.x, a.position.y+a.scale.y>
 	creation.velocity = a.creationVelocity
 }
 
@@ -121,7 +125,7 @@ for each entity a with enter hiveSensor
 {
 	for each entity b with hive
 	{
-		b.position = <b.position.x,b.position.y-b.scale.y/2>
+		b.position = <b.position.x,b.position.y-b.scale.y>
 	}
 	break
 }
@@ -136,7 +140,7 @@ evilShoot:
 for each entity a with timed out gunTimer
 {
 	creation = create(a.gunCreation)
-	creation.position = <a.position.x,a.position.y-a.scale.y/2>
+	creation.position = <a.position.x,a.position.y-a.scale.y>
 	creation.velocity = a.creationVelocity
 }
 
@@ -151,19 +155,19 @@ for each entity a with evilness enter deathSensor
 }
 
 win:
-evils = 0
-for each entity a with evilness
+for each entity a
 {
-	evils = evils++
-}
-if evils = 0
-{
-	for each entity c
+	initialize evils
+	for each entity b with evilness
 	{
-		create(c.scene)
+		evils = evils++
 	}
-	for each entity b
+	if evils = a.evilnessAmount
 	{
-		destroy(b)
+		create (a.scene)
+		for each entity c
+		{
+			destroy (c)
+		}
 	}
 }

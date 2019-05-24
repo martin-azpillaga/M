@@ -1,7 +1,7 @@
 ball has
 position 0 0, scale 2 2, appearance sprite.ball,
-mass 1, radius 0.5, restitution 1, category balls,
-speed_up_sensor detect paddles, respawn_sensor detect goals,
+mass 1, radius 0.5, restitution 1, category [balls],
+speed_up_sensor detect [paddles], respawn_sensor detect [goals],
 servable_tag, respawn_point 0 0, angle -1 1, length 10 20.
 
 paddle has
@@ -11,15 +11,15 @@ motion gamepad.leftY, direction 0 10.
 
 goal has
 position 0 0, scale 2 100, appearance sprite.goal,
-extent 1 1, restitution 1, category goals,
-score_sensor detect balls, team red, worth 1, effect entity.audioEffect.
+extent 1 1, restitution 1, category [goals],
+score_sensor detect [balls], team [red], worth 1, effect entity.audioEffect.
 
 wall has
 position 0 0, scale 100 2, appearance sprite.wall,
 extent 1 1, restitution 1.
 
 board has maximum 1, position 0 0, scale 5 10,
-team red, scene entity.menu, number 0.
+team [red], scene entity.menu, number 0.
 
 audioEffect has
 audiosource audio.yay, lifetime 5s.
@@ -38,16 +38,16 @@ emission 1 1 1 1, range 2.
 
 hud has 
 canvas 100 100 contains
-	left_board based on board has team blue, position -25 40.
-	right_board based on board has team red, position 25 40.
+	left_board based on board has team [blue], position -25 40.
+	right_board based on board has team [red], position 25 40.
 .
 
 playground contains
 	ball based on ball.
-	left_paddle  based on paddle has position -45 0, motion gamepad.leftY, team red.
-	right_paddle based on paddle has position  45 0, motion gamepad.rightY, team blue.
-	left_goal based on goal has position -50 0, team red.
-	right_goal based on goal has position 50 0, team blue.
+	left_paddle  based on paddle has position -45 0, motion gamepad.leftY, team [red].
+	right_paddle based on paddle has position  45 0, motion gamepad.rightY, team [blue].
+	left_goal based on goal has position -50 0, team [red].
+	right_goal based on goal has position 50 0, team [blue].
 	top_wall based on wall has position 0 50.
 	bottom_wall based on wall has position 0 -50.
 	player based on player.

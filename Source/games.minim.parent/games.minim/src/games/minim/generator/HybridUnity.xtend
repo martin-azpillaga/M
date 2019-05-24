@@ -23,9 +23,7 @@ import games.minim.m.EngineComponentType
 import games.minim.m.EngineVoidType
 import games.minim.m.Entity
 import games.minim.m.Enumeration
-import games.minim.m.Expression
 import games.minim.m.Game
-import games.minim.m.Immediate
 import games.minim.m.Increment
 import games.minim.m.Input2
 import games.minim.m.Input2D
@@ -85,6 +83,7 @@ import static games.minim.generator.HybridUnity.AssetType.*
 import static games.minim.generator.UnityComponent.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
+import games.minim.m.Expression
 
 enum Folder {Assets,Code,Tests,Packages,Settings,
 		Clips,Meshes,Materials,Sprites,Audios,PhysicsMaterials,
@@ -2451,10 +2450,6 @@ class HybridUnity implements Framework
 					result = 'float.Parse ('+result+')'
 				}
 			}
-		}
-		else if (expression instanceof Immediate)
-		{
-			result = '''«expression.value.toCode»f'''
 		}
 		else if (expression instanceof Pop)
 		{

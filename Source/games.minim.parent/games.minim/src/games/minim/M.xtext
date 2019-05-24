@@ -41,13 +41,13 @@ Game:
 	transformations21+=Name '.'
 	voids+=Name '.')?
 ;
-Named: System|Entity|Function|Subrutine;
 Expression: ArithmeticExpression | BooleanExpression;
 System returns Control:	name=ID ':'	commands+=Command+;
 
-Command: Control|Assignment|SubrutineCall|Break;
+Command: Control|Assignment|SubrutineCall|Break|Initialization;
 
 Break: {Break} 'break';
+Initialization: 'initialize' variable=Name;
 
 Control:
 	  {Loop} 'for' 'each' 'entity' group=Name 
@@ -84,7 +84,6 @@ SubrutineCall:
 Atomic returns ArithmeticExpression: 
 	( =>({Access} group=[Name] '.' component=[Name] range?=TILT?)
 	| =>({Pop} variable=[Name])
-	| =>({Immediate} value=Number)
 	| =>({Join} '<' x=ArithmeticExpression ',' y=ArithmeticExpression '>')
 	| =>({Call}) function=[Name] '(' parameters+=ArithmeticExpression (',' parameters+=ArithmeticExpression)* ')'
 	) ('.' field=FieldType)? ;

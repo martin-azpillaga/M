@@ -50,6 +50,7 @@ import org.eclipse.xtext.scoping.Scopes
 import static games.minim.m.EngineTransformationType.*
 import static games.minim.m.MPackage.Literals.*
 import games.minim.m.Call
+import games.minim.m.Initialization
 
 class EngineComponent extends NameImpl
 {
@@ -222,7 +223,7 @@ class Cleaning extends LazyLinker
 					case TEXT: game.textComponents.add(component)
 					case UI_SCALE_MODE: {}
 					case VELOCITY: game.real2Components.add(component)
-					case VIEW_ANGLE: {}
+					case VIEW_ANGLE: game.real1Components.add(component)
 					case VIEW_DISTANCE: game.real1Components.add(component)
 	  		}
 	  	}
@@ -722,6 +723,7 @@ class MScopeProvider extends AbstractMScopeProvider
 		{
 			if (container instanceof Control)
 			{
+				result.addAll(container.commands.filter(Initialization).map[variable])
 				result.addAll(container.commands.filter(VariableAssignment).map[variable])
 			}
 			container = container.eContainer
