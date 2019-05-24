@@ -84,6 +84,7 @@ import static games.minim.generator.UnityComponent.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
 import games.minim.m.Expression
+import games.minim.m.Initialization
 
 enum Folder {Assets,Code,Tests,Packages,Settings,
 		Clips,Meshes,Materials,Sprites,Audios,PhysicsMaterials,
@@ -2195,7 +2196,9 @@ class HybridUnity implements Framework
 				«IF command.entities»
 				var entity_«group» = entity_array_«group»[i_«group»];
 				«ENDIF»
+				«IF customComponents.size > 0 || unityComponents.size > 0 || command.entities»
 				
+				«ENDIF»
 				«FOR comm : command.commands»
 				«run(comm)»
 				«ENDFOR»
@@ -2299,6 +2302,7 @@ class HybridUnity implements Framework
 			var container = command.getContainerOfType(Control)
 			var declared = new HashSet<String>
 			declared.addAll(container.commands.subList(0, container.commands.indexOf(command)).filter(VariableAssignment).map[variable.name])
+			declared.addAll(container.commands.subList(0, container.commands.indexOf(command)).filter(Initialization).map[variable.name])
 			var superContainer = container.eContainer
 			while( superContainer !== null)
 			{
@@ -2306,6 +2310,7 @@ class HybridUnity implements Framework
 				{
 					if (!(superContainer instanceof Check))
 					{	
+						declared.addAll(superContainer.commands.subList(0, superContainer.commands.indexOf(container)).filter(Initialization).map[variable.name])
 						declared.addAll(superContainer.commands.subList(0, superContainer.commands.indexOf(container)).filter(VariableAssignment).map[variable.name])
 					}
 					container = superContainer
@@ -2330,6 +2335,10 @@ class HybridUnity implements Framework
 			'''
 			break;
 			'''
+		}
+		else if (command instanceof Initialization)
+		{
+			'''var «command.variable.name» = 0;'''
 		}
 		else if (command instanceof SubrutineCall)
 		{
