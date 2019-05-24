@@ -84,6 +84,7 @@ import static games.minim.generator.UnityComponent.*
 import static extension org.eclipse.xtext.EcoreUtil2.*
 import games.minim.m.Expression
 import games.minim.m.Initialization
+import games.minim.m.EngineTransformationType
 
 enum Folder {Assets,Code,Tests,Packages,Settings,
 		Clips,Meshes,Materials,Sprites,Audios,PhysicsMaterials,
@@ -2316,16 +2317,89 @@ class HybridUnity implements Framework
 				}
 				superContainer = superContainer.eContainer
 			}
+			var extra = ''
+			var expression = command.expression
+			if (expression instanceof Call)
+			{
+				var function = expression.function
+				if (function instanceof EngineTransformation)
+				{
+					if (function.type == EngineTransformationType.CREATE)
+					{
+						var customComponents = new HashSet<String>
+						var unityComponents = new HashSet<String>
+						container = command.getContainerOfType(Control)
+						var accesses = EcoreUtil2.getAllContentsOfType(container, ComponentAssignment).filter[it.group.name == command.variable.name]
+						for (access : accesses)
+						{
+							val component = access.component
+							if (!(component instanceof EngineComponent) && !(component instanceof EventComponent))
+							{
+								if (game.referenceComponents.exists[it.name==component.name]
+									|| game.spriteComponents.exists[it.name==component.name]
+									|| game.audioComponents.exists[it.name==component.name]
+									|| game.timerComponents.exists[it.name==component.name]
+									|| game.sensorComponents.exists[it.name==component.name]
+									|| game.triggerComponents.exists[it.name==component.name]
+									|| game.rangeComponents.exists[it.name==component.name]
+									|| game.input2DComponents.exists[it.name==component.name]
+								)
+								{
+									unityComponents.add(component.name)
+								}
+								else
+								{
+									customComponents.add(component.name)
+								}
+							}
+							else if (component instanceof EngineComponent)
+							{
+								if (component.unityComponent == MonoBehaviour)
+								{
+									if (component.type == EngineComponentType.TEXT || component.type == EngineComponentType.NUMBER)
+									{
+										unityComponents.add('Text')
+									}
+								}
+								else
+								{
+									unityComponents.add(component.unityComponent.toString)
+								}
+							}
+							else if (component instanceof EventComponent)
+							{
+								customComponents.add(component.name)
+							}
+						}
+						extra = 
+						'''
+						var «command.variable.name»_entity = «command.variable.name».GetComponent<GameObjectEntity>().Entity;
+						«FOR c : unityComponents»
+						var «c»_«command.variable.name» = EntityManager.GetComponentObject<«c»>(«command.variable.name»_entity);
+						«ENDFOR»
+						«FOR c : customComponents»
+						var «c»_«command.variable.name» = EntityManager.GetComponentData<«c»>(«command.variable.name»_entity);
+						«ENDFOR»
+						'''
+					}
+				}
+			}
 			if (declared.contains(command.variable.name))
 			{
 				'''
 				«command.variable.name» = «command.expression.toCode»;
+				«IF extra != ''»
+				«extra»
+				«ENDIF»
 				'''
 			}
 			else
 			{
 				'''
 				var «command.variable.name» = «command.expression.toCode»;
+				«IF extra != ''»
+				«extra»
+				«ENDIF»
 				'''
 			}
 		}
@@ -2478,7 +2552,7 @@ class HybridUnity implements Framework
 					case SQRT: result = '''math.sqrt(«expression.parameters.get(0).toCode»)'''
 					case TAN: result = '''math.tan(«expression.parameters.get(0).toCode»)'''
 					case RANDOM: result = '''main.random.NextFloat(«expression.parameters.get(0).toCode».x,«expression.parameters.get(0).toCode».y)'''
-					case CREATE: result = '''GameObject.Instantiate(«expression.parameters.get(0).toCode»)'''
+					case CREATE: result = '''Object.Instantiate(«expression.parameters.get(0).toCode»)'''
 					case JOIN: 
 					{
 						if (expression.parameters.size == 2)
