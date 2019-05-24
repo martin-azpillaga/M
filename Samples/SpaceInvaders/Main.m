@@ -82,7 +82,7 @@ shoot:
 for each entity a with triggered shootButton
 {
 	creation = create(a.gunCreation)
-	creation.position = <a.position.x, a.position.y+a.scale.y>
+	creation.position = join(x(a.position), y(a.position)+y(a.scale))
 	creation.velocity = a.creationVelocity
 }
 
@@ -125,7 +125,7 @@ for each entity a with enter hiveSensor
 {
 	for each entity b with hive
 	{
-		b.position = <b.position.x,b.position.y-b.scale.y>
+		b.position = join(x(b.position),y(b.position)-y(b.scale))
 	}
 	break
 }
@@ -140,7 +140,7 @@ evilShoot:
 for each entity a with timed out gunTimer
 {
 	creation = create(a.gunCreation)
-	creation.position = <a.position.x,a.position.y-a.scale.y>
+	creation.position = join(x(a.position),y(a.position)-y(a.scale))
 	creation.velocity = a.creationVelocity
 }
 

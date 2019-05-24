@@ -90,7 +90,7 @@ serve:
 for each entity a with servable_tag
 {
 	angle = random(a.angle)
-	a.velocity = <cos(angle),sin(angle)> * random(a.length)
+	a.velocity = join(cos(angle),sin(angle)) * random(a.length)
 	remove(servable_tag, a)
 }
 

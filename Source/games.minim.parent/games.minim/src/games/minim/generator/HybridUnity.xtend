@@ -27,7 +27,6 @@ import games.minim.m.Game
 import games.minim.m.Increment
 import games.minim.m.Input2
 import games.minim.m.Input2D
-import games.minim.m.Join
 import games.minim.m.Loop
 import games.minim.m.LoopEnum
 import games.minim.m.MFactory
@@ -2479,13 +2478,41 @@ class HybridUnity implements Framework
 					case SQRT: result = '''math.sqrt(«expression.parameters.get(0).toCode»)'''
 					case TAN: result = '''math.tan(«expression.parameters.get(0).toCode»)'''
 					case RANDOM: result = '''main.random.NextFloat(«expression.parameters.get(0).toCode».x,«expression.parameters.get(0).toCode».y)'''
-					case CREATE: result = '''GameObject.Instantiate(«(expression.parameters.get(0) as Access).toCode»)'''
+					case CREATE: result = '''GameObject.Instantiate(«expression.parameters.get(0).toCode»)'''
+					case JOIN: 
+					{
+						if (expression.parameters.size == 2)
+						{
+							return '''new float2(«expression.parameters.get(0).toCode», «expression.parameters.get(1).toCode»)'''
+						}
+						else if (expression.parameters.size == 3)
+						{
+							return '''new float3(«expression.parameters.get(0).toCode», «expression.parameters.get(1).toCode», «expression.parameters.get(2).toCode»)'''
+						}
+						else if (expression.parameters.size == 4)
+						{
+							return '''new float4(«expression.parameters.get(0).toCode», «expression.parameters.get(1).toCode», «expression.parameters.get(2).toCode», «expression.parameters.get(3).toCode»)'''
+						}
+					}
+					
+					case X: 
+					{
+						return '''«expression.parameters.get(0).toCode».x'''
+					}
+					case Y: 
+					{
+						return '''«expression.parameters.get(0).toCode».y'''
+					}
+					case Z: 
+					{
+						return '''«expression.parameters.get(0).toCode».z'''
+					}
+					case W: 
+					{
+						return '''«expression.parameters.get(0).toCode».w'''
+					}
 				}
 			}
-		}
-		else if (expression instanceof Join)
-		{
-			result = '''new float2(«expression.x.toCode», «expression.y.toCode»)'''
 		}
 		else if (expression instanceof Plus)
 		{
@@ -2543,14 +2570,6 @@ class HybridUnity implements Framework
 		{
 			result = '''«expression.left.toCode» «expression.type.toCode» «expression.right.toCode»'''
 		}
-		/*
-		if (expression instanceof Atomic)
-		{
-			if (expression.field != FieldType.VALUE)
-			{
-				result += '.'+expression.field
-			}
-		}*/
 		
 		return result
 	}

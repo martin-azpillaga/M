@@ -37,8 +37,7 @@ Game:
 	fonts+=Name '.'
 	enumerations+=Enum '.'
 	
-	transformations11+=Name '.'
-	transformations21+=Name '.'
+	transformations+=Name '.'
 	voids+=Name '.')?
 ;
 Expression: ArithmeticExpression | BooleanExpression;
@@ -82,11 +81,10 @@ SubrutineCall:
 ;
 
 Atomic returns ArithmeticExpression: 
-	( =>({Access} group=[Name] '.' component=[Name] range?=TILT?)
-	| =>({Pop} variable=[Name])
-	| =>({Join} '<' x=ArithmeticExpression ',' y=ArithmeticExpression '>')
-	| =>({Call}) function=[Name] '(' parameters+=ArithmeticExpression (',' parameters+=ArithmeticExpression)* ')'
-	) ('.' field=FieldType)? ;
+	   ({Access} group=[Name] '.' component=[Name] range?=TILT?)
+	|  ({Call} function=[Name] '(' parameters+=ArithmeticExpression (',' parameters+=ArithmeticExpression)* ')')
+	|  ({Pop} variable=[Name]) 
+;
 
 Function:
 	'function' name=ID '(' parameters+=Name (',' parameters+=Name)* ')' '{' commands+=Command+ 'return' '}'
@@ -138,7 +136,8 @@ PrimaryB returns BooleanExpression:
   | {BooleanBrackets} '(' expression=BooleanExpression ')' 
   | {Not} '!' expression=PrimaryB;
 AtomicB returns BooleanExpression:
-	{Comparison} left=Addition type=RelationType right=Addition
+	  {Comparison} left=Addition type=RelationType right=Addition
+	| {BooleanVariable} variable=[Name]
 ;
 ArithmeticExpression: Addition;
 Addition returns ArithmeticExpression:
@@ -180,6 +179,6 @@ enum EngineComponentType:
 	|extent|force|restitution|friction
 	|clearColor|canvasScaler='canvas'
 	|sprite='appearance'|mesh|material|audio='audiosource'|text|number;
-enum EngineTransformationType: abs|sqrt|cos|sin|tan|exp|log|random|create;
+enum EngineTransformationType: abs|sqrt|cos|sin|tan|exp|log|random|create|x|y|z|w|join;
 enum EngineVoidType: create|destroy|add|remove;
-enum FieldType: value|x|y;
+enum FieldType: value|x|y|z|w;

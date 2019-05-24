@@ -233,15 +233,7 @@ class Cleaning extends LazyLinker
 	  		var transformation = new EngineTransformation
 	  		transformation.name = value.toString
 	  		transformation.type = value
-	  		
-	  		if (#[ABS,SIN,COS,TAN,LOG,SQRT,EXP].contains(value))
-	  		{
-	  			game.transformations11.add(transformation)
-	  		}
-	  		else if (#[RANDOM,CREATE].contains(value))
-	  		{
-	  			game.transformations21.add(transformation)
-	  		}
+	  		game.transformations.add(transformation)
 	  	}
 	  	
 	  	for (value : EngineVoidType.values)
@@ -625,7 +617,7 @@ class MScopeProvider extends AbstractMScopeProvider
 				allComponents
 			}
 			case POP__VARIABLE: (scopeVariables1(context) + recursiveGroups(context) + allComponents)
-			case CALL__FUNCTION: game.transformations11+game.transformations21 + engine.transformations11 + engine.transformations21
+			case CALL__FUNCTION: game.transformations + engine.transformations
 			case SUBRUTINE_CALL__SUBRUTINE: game.voids + engine.voids
 			case COMPONENT_ASSIGNMENT__GROUP: 
 			{
