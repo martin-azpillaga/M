@@ -1939,11 +1939,17 @@ class HybridUnity implements Framework
 			val component = access.component
 			if (game.rangeComponents.exists[it.name==component.name])
 			{
-				loops.findFirst[it.group == access.group].datas.add(rangeEvent(component))
+				if (loops.exists[it.group == access.group])
+				{
+					loops.findFirst[it.group == access.group].datas.add(rangeEvent(component))
+				}
 			}
 			else if (game.input2DComponents.exists[it.name==component.name])
 			{
-				loops.findFirst[it.group == access.group].datas.add(input2DEvent(component))
+				if (loops.exists[it.group == access.group])
+				{
+					loops.findFirst[it.group == access.group].datas.add(input2DEvent(component))
+				}
 			}
 			else if (component instanceof EngineComponent)
 			{
@@ -1955,12 +1961,17 @@ class HybridUnity implements Framework
 				{
 					engineComponent.name = 'Text'
 				}
-				
-				loops.findFirst[it.group == access.group].datas.add(engineComponent)
+				if (loops.exists[it.group == access.group])
+				{
+					loops.findFirst[it.group == access.group].datas.add(engineComponent)
+				}
 			}
 			else
 			{
-				loops.findFirst[it.group == access.group].datas.add(component)
+				if (loops.exists[it.group == access.group])
+				{
+					loops.findFirst[it.group == access.group].datas.add(component)
+				}
 			}
 		}
 		for (set : EcoreUtil2.getAllContentsOfType(system, ComponentAssignment))
@@ -1968,7 +1979,10 @@ class HybridUnity implements Framework
 			val component = set.component
 			if (game.rangeComponents.exists[it.name==component.name])
 			{
-				loops.findFirst[it.group == set.group].datas.add(rangeEvent(component))
+				if (loops.exists[it.group == set.group])
+				{
+					loops.findFirst[it.group == set.group].datas.add(rangeEvent(component))
+				}
 			}
 			else if (component instanceof EngineComponent)
 			{
@@ -1979,11 +1993,17 @@ class HybridUnity implements Framework
 				{
 					engineComponent.name = 'Text'
 				}
-				loops.findFirst[it.group == set.group].datas.add(engineComponent)
+				if (loops.exists[it.group == set.group])
+				{
+					loops.findFirst[it.group == set.group].datas.add(engineComponent)
+				}	
 			}
 			else
 			{
-				loops.findFirst[it.group == set.group].datas.add(component)
+				if (loops.exists[it.group == set.group])
+				{
+					loops.findFirst[it.group == set.group].datas.add(component)
+				}
 			}
 		}
 		for (routine : EcoreUtil2.getAllContentsOfType(system, SubrutineCall))

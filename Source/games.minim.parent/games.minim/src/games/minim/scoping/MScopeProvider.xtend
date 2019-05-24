@@ -49,6 +49,8 @@ import org.eclipse.xtext.scoping.Scopes
 
 import static games.minim.m.EngineTransformationType.*
 import static games.minim.m.MPackage.Literals.*
+import games.minim.m.SubrutineCall
+import games.minim.m.Call
 
 class EngineComponent extends NameImpl
 {
@@ -233,7 +235,7 @@ class Cleaning extends LazyLinker
 	  		{
 	  			game.transformations11.add(transformation)
 	  		}
-	  		else if (#[RANDOM].contains(value))
+	  		else if (#[RANDOM,CREATE].contains(value))
 	  		{
 	  			game.transformations21.add(transformation)
 	  		}
@@ -597,22 +599,9 @@ class MScopeProvider extends AbstractMScopeProvider
 			case MESH__VALUE: game.meshes+engine.meshes
 			case MATERIAL__VALUE: game.materials+engine.materials
 			case FONT__VALUE: game.fonts+engine.fonts
-			/*
-			case TIMER__COMPONENT: game.timerComponents + engine.timerComponents
-			case TRIGGER__COMPONENT: game.triggerComponents + engine.triggerComponents
-			case RANGE__COMPONENT: game.rangeComponents + engine.rangeComponents
-			case SENSOR__COMPONENT: game.sensorComponents + engine.sensorComponents
-			*/case SENSOR__VALUES: game.enumerations.findFirst[it.name=='category']?.values
-			//case TEXT__ASSET: game.texts + engine.texts
+			case SENSOR__VALUES: game.enumerations.findFirst[it.name=='category']?.values
 			
-			//case DESTROY__GROUP: recursiveGroups(context)
-			//case ADD__GROUP: recursiveGroups(context)
-			//case REMOVE__GROUP: recursiveGroups(context)
-			//case SET__GROUP: recursiveGroups(context)
 			case ACCESS__GROUP: recursiveGroups(context)
-			
-			//case ADD__COMPONENTS: allComponents
-			//case REMOVE__COMPONENTS: allComponents
 			
 			case LOOP__TAGS: game.tagComponents + engine.tagComponents
 			case LOOP__TIMERS: game.timerComponents + engine.timerComponents
@@ -621,8 +610,6 @@ class MScopeProvider extends AbstractMScopeProvider
 			case LOOP__STAYS: game.sensorComponents + engine.sensorComponents
 			case LOOP__EXITS: game.sensorComponents + engine.sensorComponents
 			case LOOP__EXCLUSIONS: allComponents
-			//case SET__COMPONENT: allComponents
-			//case PUSH__VARIABLE: scopeVariables1(context)
 			
 			case ACCESS__COMPONENT: 
 			{
@@ -695,6 +682,27 @@ class MScopeProvider extends AbstractMScopeProvider
 		var groups = new BasicEList<Name>
 		while (current !== null)
 		{
+			if (current instanceof Control)
+			{
+				for (command : current.commands)
+				{
+					if (command instanceof VariableAssignment)
+					{
+						var expression = command.expression
+						if (expression instanceof Call)
+						{
+							var function = expression.function
+							if (function instanceof EngineTransformation)
+							{
+								if (function.type == EngineTransformationType.CREATE)
+								{
+									groups.add(command.variable)
+								}
+							}
+						}
+					}
+				}
+			}
 			if (current instanceof Loop)
 			{
 				groups.add(current.group)

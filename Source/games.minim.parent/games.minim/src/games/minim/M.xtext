@@ -82,7 +82,7 @@ SubrutineCall:
 ;
 
 Atomic returns ArithmeticExpression: 
-	( =>({Access} group=[Name] '.' component=[Name] range?='tilt'?)
+	( =>({Access} group=[Name] '.' component=[Name] range?=TILT?)
 	| =>({Pop} variable=[Name])
 	| =>({Immediate} value=Number)
 	| =>({Join} '<' x=ArithmeticExpression ',' y=ArithmeticExpression '>')
@@ -99,7 +99,7 @@ Subrutine:
 Entity:
 	name=ID 
 	('based' 'on' base=[Entity] ('without' removed+=[Name] (',' removed+=[Name])*)?)?
-	('has'	values+=Value (',' values+=Value)*)? 
+	('has'	values+=Value (','? values+=Value)*)? 
 	('contains' children+=Entity+)? '.';
 	
 Value:
@@ -108,7 +108,7 @@ Value:
 	| {Real2} component=[Name] x=Number y=Number
 	| {Real3} component=[Name] x=Number y=Number z=Number
 	| {Real4} component=[Name] x=Number y=Number z=Number w=Number
-	| {Enumeration} component=[Name] values+=[Name]+
+	| {Enumeration} component=[Name] '['values+=[Name]+']'
 	| {Reference} component=[Name] REFERENCE entity=[Entity]
 	| {Sprite} component=[Name] SPRITE value=[Name]
 	| {Audio} component=[Name] AUDIO value=[Name]
@@ -120,7 +120,7 @@ Value:
 	| {Trigger} component=[Name] button=Button
 	| {Range} component=[Name] axis=Axis
 	| {Input2D} component=[Name] value=Input2
-	| {Sensor} component=[Name] SENSOR values+=[Name]+
+	| {Sensor} component=[Name] SENSOR '['values+=[Name]+']'
 ;
 terminal REFERENCE: 'entity.';
 terminal SPRITE: 'sprite.';
@@ -129,6 +129,7 @@ terminal SENSOR: 'detect';
 terminal MESH: 'mesh.';
 terminal MATERIAL: 'material.';
 terminal FONT: 'font.';
+terminal TILT: 'tilt';
 BooleanExpression:
   And ({Or.left=current} 'or' right=And)*;
 And returns BooleanExpression:
@@ -180,6 +181,6 @@ enum EngineComponentType:
 	|extent|force|restitution|friction
 	|clearColor|canvasScaler='canvas'
 	|sprite='appearance'|mesh|material|audio='audiosource'|text|number;
-enum EngineTransformationType: abs|sqrt|cos|sin|tan|exp|log|random;
+enum EngineTransformationType: abs|sqrt|cos|sin|tan|exp|log|random|create;
 enum EngineVoidType: create|destroy|add|remove;
 enum FieldType: value|x|y;
