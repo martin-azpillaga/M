@@ -86,6 +86,7 @@ import games.minim.m.Expression
 import games.minim.m.Initialization
 import games.minim.m.EngineTransformationType
 import games.minim.m.FieldType
+import games.minim.m.AssignmentType
 
 enum Folder {Assets,Code,Tests,Packages,Settings,
 		Clips,Meshes,Materials,Sprites,Audios,PhysicsMaterials,
@@ -2271,42 +2272,44 @@ class HybridUnity implements Framework
 		}
 		else if (command instanceof ComponentAssignment)
 		{
+			var operator = command.assignment.r
 			var component = command.component
 			var group = command.group.name
 			'''
-			«IF component instanceof EngineComponent»
-			«IF component.type == EngineComponentType.TEXT || component.type == EngineComponentType.NUMBER»
-			var «component.property»_«group» = Text_«group».«component.property»;
+			«IF component.isReferenceType»
+			«IF component instanceof EngineComponent && #[EngineComponentType.TEXT,EngineComponentType.NUMBER].contains((component as EngineComponent).type)»
+			var «component.property»_«group» «operator» Text_«group».«component.property»;
 			«ELSE»			
-			var «component.property»_«group» = «component.unityComponent.toString»_«group».«component.property»;
+			var «component.property»_«group» «operator» «component.unityComponent.toString»_«group».«component.property»;
 			«ENDIF»
 			«IF component.dimensions == 1»
-			«component.property»_«group» = «command.expression.toCode(FieldType.VALUE)»;
+			«component.property»_«group» «operator» «command.expression.toCode(FieldType.VALUE)»;
 			«ELSEIF component.dimensions == 2»
-			«component.property»_«group».x = «command.expression.toCode(FieldType.X)»;
-			«component.property»_«group».y = «command.expression.toCode(FieldType.Y)»;
+			«component.property»_«group».x «operator» «command.expression.toCode(FieldType.X)»;
+			«component.property»_«group».y «operator» «command.expression.toCode(FieldType.Y)»;
 			«ELSEIF component.dimensions == 3»
-			«component.property»_«group».x = «command.expression.toCode(FieldType.X)»;
-			«component.property»_«group».y = «command.expression.toCode(FieldType.Y)»;
-			«component.property»_«group».z = «command.expression.toCode(FieldType.Z)»;
+			«component.property»_«group».x «operator» «command.expression.toCode(FieldType.X)»;
+			«component.property»_«group».y «operator» «command.expression.toCode(FieldType.Y)»;
+			«component.property»_«group».z «operator» «command.expression.toCode(FieldType.Z)»;
 			«ELSEIF component.dimensions == 4»
-			«component.property»_«group».x = «command.expression.toCode(FieldType.X)»;
-			«component.property»_«group».y = «command.expression.toCode(FieldType.Y)»;
-			«component.property»_«group».z = «command.expression.toCode(FieldType.Z)»;
-			«component.property»_«group».w = «command.expression.toCode(FieldType.W)»;
+			«component.property»_«group».x «operator» «command.expression.toCode(FieldType.X)»;
+			«component.property»_«group».y «operator» «command.expression.toCode(FieldType.Y)»;
+			«component.property»_«group».z «operator» «command.expression.toCode(FieldType.Z)»;
+			«component.property»_«group».w «operator» «command.expression.toCode(FieldType.W)»;
 			«ELSEIF component.dimensions == -3»
-			«component.property»_«group».z = «command.expression.toCode(FieldType.VALUE)»;
+			«component.property»_«group».z «operator» «command.expression.toCode(FieldType.VALUE)»;
 			«ELSEIF component.dimensions == -1»
-			«component.property»_«group» = («command.expression.toCode(FieldType.VALUE)»).ToString();
+			«component.property»_«group» «operator» («command.expression.toCode(FieldType.VALUE)»).ToString();
 			«ENDIF»
 			
-			«IF component.type == EngineComponentType.TEXT || component.type == EngineComponentType.NUMBER»
+			«IF component instanceof EngineComponent && #[EngineComponentType.TEXT,EngineComponentType.NUMBER].contains((component as EngineComponent).type)»
 			Text_«group».«component.property» = «component.property»_«group»;
 			«ELSE»
 			«component.unityComponent.toString»_«group».«component.property» = «component.property»_«group»;
 			«ENDIF»
 			«ELSE»
-			«component.name»_«group».«value» = «command.expression.toCode(FieldType.VALUE)»;
+			«component.name»_«group».«value» «operator» «command.expression.toCode(FieldType.VALUE)»;
+			«component.name»_array_«group»[i_«group»] = «component.name»_«group»;
 			«ENDIF»
 			'''
 		}
@@ -2497,9 +2500,24 @@ class HybridUnity implements Framework
 		}
 	}
 	
-	def r(RelationType comparator)
+	def r(AssignmentType type)
 	{
-		switch comparator
+		switch type
+		{
+			case AND: '&='
+			case DECREASE: '-='
+			case DIVIDE: '/='
+			case INCREASE: '+='
+			case MODULUS: '%='
+			case MULTIPLY: '*='
+			case OR: '|='
+			case SET: '='			
+		}
+	}
+	
+	def r(RelationType type)
+	{
+		switch type
 		{
 			case EQUAL: '=='
 			case NOTEQUAL: '!='
@@ -2510,9 +2528,9 @@ class HybridUnity implements Framework
 		}		
 	}
 	
-	def r(FieldType fieldType)
+	def r(FieldType type)
 	{
-		switch fieldType
+		switch type
 		{
 			case VALUE: ''
 			case X: '.x'
@@ -2520,6 +2538,25 @@ class HybridUnity implements Framework
 			case Z: '.z'
 			case W: '.w'
 		}
+	}
+	
+	def isReferenceType(Name component)
+	{
+		if (component instanceof EngineComponent) return true
+		
+		if (game.referenceComponents.exists[it.name==component.name]
+						|| game.spriteComponents.exists[it.name==component.name]
+						|| game.audioComponents.exists[it.name==component.name]
+						|| game.timerComponents.exists[it.name==component.name]
+						|| game.sensorComponents.exists[it.name==component.name]
+						|| game.triggerComponents.exists[it.name==component.name]
+						|| game.rangeComponents.exists[it.name==component.name]
+						|| game.input2DComponents.exists[it.name==component.name]
+					)
+					{
+						return true
+					}
+		return false
 	}
 	
 	def String toCode(Expression expression, FieldType fieldType)

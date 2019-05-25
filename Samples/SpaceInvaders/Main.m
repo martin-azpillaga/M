@@ -10,7 +10,7 @@ alien has
 scale 10 4 appearance sprite.alien
 mass 1 extent 1 1 category [alien] mask [evilProjectile]
 deathSensor detect [ship space shipProjectile] hiveSensor detect [wall]
-flipSensor detect [wall] gunTimer -1s gunTimerRange 3 5 gunCreation entity.evilBullet creationVelocity 0 -30 
+flipSensor detect [wall] gunTimer -1s gunTimerRange 3 5 gunCreation entity.bullet creationVelocity 0 -30 
 autoSpeed 5 0 factor -1 autoSpeedFactor 1.1 gunOffset 0 -2
 evilness hive.
 
@@ -73,6 +73,9 @@ playground contains
 	bottomSpace based on space has position 0 -50.
 	leftWall based on wall has position -50 0.
 	rightWall based on wall has position 50 0.
+	
+	alien based on alien has position 0 0.
+	
 	player based on player.
 	canvas based on hud.
 .
@@ -145,12 +148,13 @@ for each entity a with enter hiveSensor
 	break
 }
 
+/*
 reload:
 for each entity a with timed out gunTimer
 {
 	a.gunTimer = random(a.gunTimerRange)
 }
-
+*/
 evilShoot:
 for each entity a with timed out gunTimer
 {
