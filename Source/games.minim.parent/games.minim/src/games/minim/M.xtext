@@ -161,9 +161,19 @@ Name: name=ID;
 Number:	{Decimal} negative?='-'? wholePart=INT ('.' decimalPart=INT)?;
 
 
-enum Axis: LeftX='gamepad.leftX'|LeftY='gamepad.leftY'|RightX='gamepad.rightX'|RightY='gamepad.rightY';
-enum Button: Down='gamepad.south'|Left='gamepad.west'|Right='gamepad.east'|Up='gamepad.north'|LeftTrigger='gamepad.leftTrigger'|RightTrigger='gamepad.rightTrigger';
-enum Input2: mouse='mouse.position';
+enum Axis: 
+	LeftX='gamepad.leftX'|LeftY='gamepad.leftY'|RightX='gamepad.rightX'|RightY='gamepad.rightY'
+	|LeftShoulder='gamepad.leftShoulder'|RightShoulder='gamepad.rightShoulder'
+;
+enum Button: 
+	South='gamepad.south'|West='gamepad.west'|East='gamepad.east'|North='gamepad.north'
+	|LeftTrigger='gamepad.leftTrigger'|RightTrigger='gamepad.rightTrigger'
+	|Down='gamepad.down'|Left='gamepad.left'|Right='gamepad.right'|Up='gamepad.up'
+	|Start='gamepad.start'|Select='gamepad.select'
+	|LeftStick='gamepad.leftStickPress'|RightStick='gamepad.rightStickPress'
+	|Optional='gamepad.optional'
+;
+enum Input2: mouse='mouse.position'|dpad='gamepad.dpad'|leftStick='gamepad.leftStick'|rightStick='gamepad.rightStick';
 enum RelationType: over='>'|under='<'|equal='='|notequal='!='|overorequal='>='|underorequal='<=';
 enum AssignmentType: set='='|increase='+='|decrease='-='|multiply='*='|divide='/='|modulus='%='|and='&='|or='|=';
 enum UnityComponentType returns EngineComponentType:

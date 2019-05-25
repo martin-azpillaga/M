@@ -63,7 +63,7 @@ menu contains
 		title has position 0 35, scale 40 10, text 'Space invaders'.
 		subtitle has position 0 10, scale 40 10, text 'Press start'.
 	.
-	trigger has detector gamepad.south, scene entity.playground.
+	trigger has detector gamepad.start, scene entity.playground.
 	player based on player.
 .
 

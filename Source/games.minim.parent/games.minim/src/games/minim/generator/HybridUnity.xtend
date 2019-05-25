@@ -1629,13 +1629,21 @@ class HybridUnity implements Framework
 	{
 		switch button
 		{
-			case DOWN: '<gamepad>/buttonSouth'
-			case LEFT: '<gamepad>/buttonWest'
-			case RIGHT: '<gamepad>/buttonEast'
-			case UP: '<gamepad>/buttonNorth'
+			case DOWN: '<gamepad>/dpad/down'
+			case LEFT: '<gamepad>/dpad/left'
+			case RIGHT: '<gamepad>/dpad/right'
+			case UP: '<gamepad>/dpad/up'
 			case LEFT_TRIGGER: '<gamepad>/leftTrigger'
 			case RIGHT_TRIGGER: '<gamepad>/rightTrigger'
-			
+			case EAST: '<gamepad>/buttonEast'
+			case LEFT_STICK: '<gamepad>/leftStickPress'
+			case NORTH: '<gamepad>/buttonNorth'
+			case OPTIONAL: '<gamepad>/optional'
+			case RIGHT_STICK: '<gamepad>/rightStickPress'
+			case SELECT: '<gamepad>/select'
+			case SOUTH: '<gamepad>/buttonSouth'
+			case START: '<gamepad>/start'
+			case WEST: '<gamepad>/buttonWest'
 		}
 	}
 	
@@ -1646,7 +1654,9 @@ class HybridUnity implements Framework
 			case LEFT_X: '<gamepad>/leftStick/x'
 			case LEFT_Y: '<gamepad>/leftStick/y'
 			case RIGHT_X: '<gamepad>/rightStick/x'
-			case RIGHT_Y: '<gamepad>/rightStick/y'			
+			case RIGHT_Y: '<gamepad>/rightStick/y'
+			case LEFT_SHOULDER: '<gamepad>/leftShoulder'
+			case RIGHT_SHOULDER: '<gamepad>/rightShoulder'
 		}
 	}
 	
@@ -1655,6 +1665,9 @@ class HybridUnity implements Framework
 		switch input
 		{
 			case MOUSE: '<Mouse>/position'
+			case DPAD: '<gamepad>/dpad'
+			case LEFT_STICK: '<gamepad>/leftStick'
+			case RIGHT_STICK: '<gamepad>/rightStick'
 		}
 	}
 	
@@ -2645,15 +2658,15 @@ class HybridUnity implements Framework
 		}
 		else if (expression instanceof Times)
 		{
-			result = '''«expression.left.toCode(fieldType)» * «expression.right.toCode(fieldType.VALUE)»'''
+			result = '''«expression.left.toCode(fieldType)» * «expression.right.toCode(FieldType.VALUE)»'''
 		}
 		else if (expression instanceof Divide)
 		{
-			result = '''«expression.left.toCode(fieldType)» / «expression.right.toCode(fieldType.VALUE)»'''
+			result = '''«expression.left.toCode(fieldType)» / «expression.right.toCode(FieldType.VALUE)»'''
 		}
 		else if (expression instanceof Modulus)
 		{
-			result = '''«expression.left.toCode(fieldType)» % «expression.right.toCode(fieldType.VALUE)»'''
+			result = '''«expression.left.toCode(fieldType)» % «expression.right.toCode(FieldType.VALUE)»'''
 		}
 		else if (expression instanceof Bitwise)
 		{
