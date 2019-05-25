@@ -24,7 +24,6 @@ class MGenerator extends AbstractGenerator
 			var projectName = projectPath.substring(1,projectPath.substring(1).indexOf('/')+1)
 			
 			var deduction = resource.resourceSet.getResource(URI.createURI(Cleaning.deducedURI),false).contents.get(0) as Game
-			deduction.entities.clear()
 			deduction.title = projectName
 			deduction.systems.clear
 			deduction.entities.clear

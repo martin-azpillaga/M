@@ -3,21 +3,22 @@ scale 5 2 appearance sprite.ship
 extent 1 1 category [ship] mask [shipProjectile]
 motorAxis gamepad.leftX motorSpeed 10 0 shootButton gamepad.south
 deathSensor detect [alien projectile] goodness 
-gunCreation entity.goodBullet creationVelocity 0 30.
+gunCreation entity.bullet creationVelocity 0 30 gunOffset 0 1
+velocity 0 0.
 
 alien has
 scale 10 4 appearance sprite.alien
 mass 1 extent 1 1 category [alien] mask [evilProjectile]
 deathSensor detect [ship space shipProjectile] hiveSensor detect [wall]
 flipSensor detect [wall] gunTimer -1s gunTimerRange 3 5 gunCreation entity.evilBullet creationVelocity 0 -30 
-autoSpeed 5 0 factor -1 autoSpeedFactor 1.1 
+autoSpeed 5 0 factor -1 autoSpeedFactor 1.1 gunOffset 0 -2
 evilness hive.
 
 bullet has
 scale 1 1 appearance sprite.bullet
-extent 1 1 deathSensor detect [ship alien shipProjectile evilProjectile wall space defense]
+extent 1 1 deathSensor detect [alien shipProjectile evilProjectile wall space defense]
 scoreSensor detect [alien] team [single] worth 1
-category [genericProjectile].
+category [genericProjectile] mass 1.
 
 goodBullet based on bullet has 
 category [shipProjectile].
@@ -67,10 +68,24 @@ menu contains
 .
 
 playground contains
+	ship based on ship has position 0 -40.
+	topSpace based on space has position 0 50.
+	bottomSpace based on space has position 0 -50.
+	leftWall based on wall has position -50 0.
+	rightWall based on wall has position 50 0.
 	player based on player.
 	canvas based on hud.
 .
 
+start:
+for each entity a with triggered detector
+{
+	for each entity b 
+	{
+		destroy (b)
+	}
+	create (a.scene)
+}
 
 controlLatitude:
 for each entity a
@@ -82,7 +97,7 @@ shoot:
 for each entity a with triggered shootButton
 {
 	creation = create(a.gunCreation)
-	creation.position = join(x(a.position), y(a.position)+y(a.scale))
+	creation.position = a.position + a.gunOffset
 	creation.velocity = a.creationVelocity
 }
 
@@ -140,7 +155,7 @@ evilShoot:
 for each entity a with timed out gunTimer
 {
 	creation = create(a.gunCreation)
-	creation.position = join(x(a.position),y(a.position)-y(a.scale))
+	creation.position = a.position + a.gunOffset
 	creation.velocity = a.creationVelocity
 }
 
@@ -171,3 +186,5 @@ for each entity a
 		}
 	}
 }
+
+main world contains menu.

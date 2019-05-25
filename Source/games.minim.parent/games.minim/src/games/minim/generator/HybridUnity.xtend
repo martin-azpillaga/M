@@ -645,13 +645,13 @@ class HybridUnity implements Framework
 			
 			    void AdjustComponent(Entity entity, EntityManager manager)
 			    {
-			        if (active && !manager.HasComponent<detector_triggered>(entity))
+			        if (active && !manager.HasComponent<«component.name»_triggered>(entity))
 			        {
-			            manager.AddComponentData(entity, new detector_triggered { });
+			            manager.AddComponentData(entity, new «component.name»_triggered { });
 			        }
-			        else if (!active && manager.HasComponent<detector_triggered>(entity))
+			        else if (!active && manager.HasComponent<«component.name»_triggered>(entity))
 			        {
-			            manager.RemoveComponent<detector_triggered>(entity);
+			            manager.RemoveComponent<«component.name»_triggered>(entity);
 			        }
 			    }
 			}
