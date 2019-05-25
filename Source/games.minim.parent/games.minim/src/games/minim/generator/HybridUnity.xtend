@@ -85,6 +85,7 @@ import static extension org.eclipse.xtext.EcoreUtil2.*
 import games.minim.m.Expression
 import games.minim.m.Initialization
 import games.minim.m.EngineTransformationType
+import games.minim.m.FieldType
 
 enum Folder {Assets,Code,Tests,Packages,Settings,
 		Clips,Meshes,Materials,Sprites,Audios,PhysicsMaterials,
@@ -2209,14 +2210,14 @@ class HybridUnity implements Framework
 		{
 			var condition = command.condition as Condition
 			'''
-			if («condition.condition.toCode»)
+			if («condition.condition.toCode(FieldType.VALUE)»)
 			{
 				«FOR comm : command.condition.commands»
 				«run(comm)»
 				«ENDFOR»
 			}
 			«FOR c : command.conditions»
-			else if («(c as Condition).condition.toCode»)
+			else if («(c as Condition).condition.toCode(FieldType.VALUE)»)
 			{
 				«FOR comm : c.commands»
 				«run(comm)»
@@ -2236,7 +2237,7 @@ class HybridUnity implements Framework
 		{
 			return
 			'''
-			while («command.condition.toCode»)
+			while («command.condition.toCode(FieldType.VALUE)»)
 			{
 				«FOR comm : command.commands»
 				«comm.run»
@@ -2266,25 +2267,24 @@ class HybridUnity implements Framework
 			«ELSE»			
 			var «component.property»_«group» = «component.unityComponent.toString»_«group».«component.property»;
 			«ENDIF»
-			var new_«component.property»_«group» = «command.expression.toCode»;
 			«IF component.dimensions == 1»
-			«component.property»_«group» = new_«component.property»_«group»;
+			«component.property»_«group» = «command.expression.toCode(FieldType.VALUE)»;
 			«ELSEIF component.dimensions == 2»
-			«component.property»_«group».x = new_«component.property»_«group».x;
-			«component.property»_«group».y = new_«component.property»_«group».y;
+			«component.property»_«group».x = «command.expression.toCode(FieldType.X)»;
+			«component.property»_«group».y = «command.expression.toCode(FieldType.Y)»;
 			«ELSEIF component.dimensions == 3»
-			«component.property»_«group».x = new_«component.property»_«group».x;
-			«component.property»_«group».y = new_«component.property»_«group».y;
-			«component.property»_«group».z = new_«component.property»_«group».z;
+			«component.property»_«group».x = «command.expression.toCode(FieldType.X)»;
+			«component.property»_«group».y = «command.expression.toCode(FieldType.Y)»;
+			«component.property»_«group».z = «command.expression.toCode(FieldType.Z)»;
 			«ELSEIF component.dimensions == 4»
-			«component.property»_«group».x = new_«component.property»_«group».x;
-			«component.property»_«group».y = new_«component.property»_«group».y;
-			«component.property»_«group».z = new_«component.property»_«group».z;
-			«component.property»_«group».w = new_«component.property»_«group».w;
+			«component.property»_«group».x = «command.expression.toCode(FieldType.X)»;
+			«component.property»_«group».y = «command.expression.toCode(FieldType.Y)»;
+			«component.property»_«group».z = «command.expression.toCode(FieldType.Z)»;
+			«component.property»_«group».w = «command.expression.toCode(FieldType.W)»;
 			«ELSEIF component.dimensions == -3»
-			«component.property»_«group».z = new_«component.property»_«group»;
+			«component.property»_«group».z = «command.expression.toCode(FieldType.VALUE)»;
 			«ELSEIF component.dimensions == -1»
-			«component.property»_«group» = new_«component.property»_«group».ToString();
+			«component.property»_«group» = («command.expression.toCode(FieldType.VALUE)»).ToString();
 			«ENDIF»
 			
 			«IF component.type == EngineComponentType.TEXT || component.type == EngineComponentType.NUMBER»
@@ -2293,7 +2293,7 @@ class HybridUnity implements Framework
 			«component.unityComponent.toString»_«group».«component.property» = «component.property»_«group»;
 			«ENDIF»
 			«ELSE»
-			«component.name»_«group».«value» = «command.expression.toCode»;
+			«component.name»_«group».«value» = «command.expression.toCode(FieldType.VALUE)»;
 			«ENDIF»
 			'''
 		}
@@ -2387,7 +2387,7 @@ class HybridUnity implements Framework
 			if (declared.contains(command.variable.name))
 			{
 				'''
-				«command.variable.name» = «command.expression.toCode»;
+				«command.variable.name» = «command.expression.toCode(FieldType.VALUE)»;
 				«IF extra != ''»
 				«extra»
 				«ENDIF»
@@ -2396,7 +2396,7 @@ class HybridUnity implements Framework
 			else
 			{
 				'''
-				var «command.variable.name» = «command.expression.toCode»;
+				var «command.variable.name» = «command.expression.toCode(FieldType.VALUE)»;
 				«IF extra != ''»
 				«extra»
 				«ENDIF»
@@ -2437,7 +2437,7 @@ class HybridUnity implements Framework
 						var access = command.parameters.get(0) as Access
 						return
 						'''
-						Object.Instantiate(«access.toCode»);
+						Object.Instantiate(«access.toCode(FieldType.VALUE)»);
 						'''
 					}
 					case DESTROY: 
@@ -2477,7 +2477,7 @@ class HybridUnity implements Framework
 			{
 				return
 				'''
-				«command.subrutine.name» («command.parameters.map[toCode].join(',')»); 
+				«command.subrutine.name» («command.parameters.map[toCode(FieldType.VALUE)].join(',')»); 
 				'''
 			}
 			
@@ -2497,7 +2497,19 @@ class HybridUnity implements Framework
 		}		
 	}
 	
-	def String toCode(Expression expression)
+	def r(FieldType fieldType)
+	{
+		switch fieldType
+		{
+			case VALUE: ''
+			case X: '.x'
+			case Y: '.y'
+			case Z: '.z'
+			case W: '.w'
+		}
+	}
+	
+	def String toCode(Expression expression, FieldType fieldType)
 	{
 		var result = ''
 		if (expression instanceof Access)
@@ -2523,7 +2535,7 @@ class HybridUnity implements Framework
 			}
 			var group = expression.group.name
 			
-			result = '''«name»_«group».«value»'''
+			result = '''«name»_«group».«value»«fieldType.r»'''
 			
 			if (component instanceof EngineComponent)
 			{
@@ -2535,7 +2547,7 @@ class HybridUnity implements Framework
 		}
 		else if (expression instanceof Pop)
 		{
-			result = '''«expression.variable.name»'''
+			result = '''«expression.variable.name»«fieldType.r»'''
 		}
 		else if (expression instanceof Call)
 		{
@@ -2544,105 +2556,140 @@ class HybridUnity implements Framework
 			{
 				switch (transformation.type)
 				{
-					case ABS: result = '''math.abs(«expression.parameters.get(0).toCode»)'''
-					case COS: result = '''math.cos(«expression.parameters.get(0).toCode»)'''
-					case EXP: result = '''math.exp(«expression.parameters.get(0).toCode»)'''
-					case LOG: result = '''math.log(«expression.parameters.get(0).toCode»)'''
-					case SIN: result = '''math.sin(«expression.parameters.get(0).toCode»)'''
-					case SQRT: result = '''math.sqrt(«expression.parameters.get(0).toCode»)'''
-					case TAN: result = '''math.tan(«expression.parameters.get(0).toCode»)'''
-					case RANDOM: result = '''main.random.NextFloat(«expression.parameters.get(0).toCode».x,«expression.parameters.get(0).toCode».y)'''
-					case CREATE: result = '''Object.Instantiate(«expression.parameters.get(0).toCode»)'''
+					case ABS: result = '''math.abs(«expression.parameters.get(0).toCode(fieldType)»)«fieldType.r»'''
+					case COS: result = '''math.cos(«expression.parameters.get(0).toCode(fieldType)»)«fieldType.r»'''
+					case EXP: result = '''math.exp(«expression.parameters.get(0).toCode(fieldType)»)«fieldType.r»'''
+					case LOG: result = '''math.log(«expression.parameters.get(0).toCode(fieldType)»)«fieldType.r»'''
+					case SIN: result = '''math.sin(«expression.parameters.get(0).toCode(fieldType)»)«fieldType.r»'''
+					case SQRT: result = '''math.sqrt(«expression.parameters.get(0).toCode(fieldType)»)«fieldType.r»'''
+					case TAN: result = '''math.tan(«expression.parameters.get(0).toCode(fieldType)»)«fieldType.r»'''
+					case RANDOM: result = '''main.random.NextFloat(«expression.parameters.get(0).toCode(fieldType)».x,«expression.parameters.get(0).toCode(fieldType)».y)«fieldType.r»'''
+					case CREATE: result = '''Object.Instantiate(«expression.parameters.get(0).toCode(fieldType)»)«fieldType.r»'''
 					case JOIN: 
 					{
+						switch fieldType
+						{
+							case VALUE: 
+							{
+								if (expression.parameters.size == 2)
+								{
+									return '''new float2(«expression.parameters.get(0).toCode(fieldType)», «expression.parameters.get(1).toCode(fieldType)»)«fieldType.r»'''
+								}
+								else if (expression.parameters.size == 3)
+								{
+									return '''new float3(«expression.parameters.get(0).toCode(fieldType)», «expression.parameters.get(1).toCode(fieldType)», «expression.parameters.get(2).toCode(fieldType)»)«fieldType.r»'''
+								}
+								else if (expression.parameters.size == 4)
+								{
+									return '''new float4(«expression.parameters.get(0).toCode(fieldType)», «expression.parameters.get(1).toCode(fieldType)», «expression.parameters.get(2).toCode(fieldType)», «expression.parameters.get(3).toCode(fieldType)»)«fieldType.r»'''
+								}
+							}
+							case X: 
+							{
+								return '''«expression.parameters.get(0).toCode(FieldType.VALUE)»'''
+							}
+							case Y: 
+							{
+								return '''«expression.parameters.get(1).toCode(FieldType.VALUE)»'''
+							}
+							case Z: 
+							{
+								return '''«expression.parameters.get(2).toCode(FieldType.VALUE)»'''
+							}
+							case W: 
+							{
+								return '''«expression.parameters.get(3).toCode(FieldType.VALUE)»'''
+							}
+							
+						}
 						if (expression.parameters.size == 2)
 						{
-							return '''new float2(«expression.parameters.get(0).toCode», «expression.parameters.get(1).toCode»)'''
+							return '''new float2(«expression.parameters.get(0).toCode(fieldType)», «expression.parameters.get(1).toCode(fieldType)»)«fieldType.r»'''
 						}
 						else if (expression.parameters.size == 3)
 						{
-							return '''new float3(«expression.parameters.get(0).toCode», «expression.parameters.get(1).toCode», «expression.parameters.get(2).toCode»)'''
+							return '''new float3(«expression.parameters.get(0).toCode(fieldType)», «expression.parameters.get(1).toCode(fieldType)», «expression.parameters.get(2).toCode(fieldType)»)«fieldType.r»'''
 						}
 						else if (expression.parameters.size == 4)
 						{
-							return '''new float4(«expression.parameters.get(0).toCode», «expression.parameters.get(1).toCode», «expression.parameters.get(2).toCode», «expression.parameters.get(3).toCode»)'''
+							return '''new float4(«expression.parameters.get(0).toCode(fieldType)», «expression.parameters.get(1).toCode(fieldType)», «expression.parameters.get(2).toCode(fieldType)», «expression.parameters.get(3).toCode(fieldType)»)«fieldType.r»'''
 						}
 					}
 					
 					case X: 
 					{
-						return '''«expression.parameters.get(0).toCode».x'''
+						return '''«expression.parameters.get(0).toCode(fieldType)».x'''
 					}
 					case Y: 
 					{
-						return '''«expression.parameters.get(0).toCode».y'''
+						return '''«expression.parameters.get(0).toCode(fieldType)».y'''
 					}
 					case Z: 
 					{
-						return '''«expression.parameters.get(0).toCode».z'''
+						return '''«expression.parameters.get(0).toCode(fieldType)».z'''
 					}
 					case W: 
 					{
-						return '''«expression.parameters.get(0).toCode».w'''
+						return '''«expression.parameters.get(0).toCode(fieldType)».w'''
 					}
 				}
 			}
 		}
 		else if (expression instanceof Plus)
 		{
-			result = '''«expression.left.toCode» + «expression.right.toCode»'''
+			result = '''«expression.left.toCode(fieldType)» + «expression.right.toCode(fieldType)»'''
 		}
 		else if (expression instanceof Minus)
 		{
-			result = '''«expression.left.toCode» - «expression.right.toCode»'''
+			result = '''«expression.left.toCode(fieldType)» - «expression.right.toCode(fieldType)»'''
 		}
 		else if (expression instanceof Times)
 		{
-			result = '''«expression.left.toCode» * «expression.right.toCode»'''
+			result = '''«expression.left.toCode(fieldType)» * «expression.right.toCode(fieldType.VALUE)»'''
 		}
 		else if (expression instanceof Divide)
 		{
-			result = '''«expression.left.toCode» / «expression.right.toCode»'''
+			result = '''«expression.left.toCode(fieldType)» / «expression.right.toCode(fieldType.VALUE)»'''
 		}
 		else if (expression instanceof Modulus)
 		{
-			result = '''«expression.left.toCode» % «expression.right.toCode»'''
+			result = '''«expression.left.toCode(fieldType)» % «expression.right.toCode(fieldType.VALUE)»'''
 		}
 		else if (expression instanceof Bitwise)
 		{
-			result = '''«expression.left.toCode» «expression.op» «expression.right.toCode»'''
+			result = '''«expression.left.toCode(fieldType)» «expression.op» «expression.right.toCode(fieldType)»'''
 		}
 		else if (expression instanceof Increment)
 		{
-			result = '''«expression.left.toCode»++'''
+			result = '''«expression.left.toCode(fieldType)»++'''
 		}
 		else if (expression instanceof Decrement)
 		{
-			result = '''«expression.left.toCode»--'''
+			result = '''«expression.left.toCode(fieldType)»--'''
 		}
 		else if (expression instanceof Or)
 		{
-			result = '''«expression.left.toCode» || «expression.right.toCode»'''
+			result = '''«expression.left.toCode(fieldType)» || «expression.right.toCode(fieldType)»'''
 		}
 		else if (expression instanceof And)
 		{
-			result = '''«expression.left.toCode» && «expression.right.toCode»'''
+			result = '''«expression.left.toCode(fieldType)» && «expression.right.toCode(fieldType)»'''
 		}
 		else if (expression instanceof Not)
 		{
-			result = '''! («expression.expression.toCode»)'''
+			result = '''! («expression.expression.toCode(fieldType)»)'''
 		}
 		else if (expression instanceof BooleanBrackets)
 		{
-			result = '''(«expression.expression.toCode»)'''
+			result = '''(«expression.expression.toCode(fieldType)»)'''
 		}
 		else if (expression instanceof ArithmeticBrackets)
 		{
-			result = '''(«expression.expression.toCode»)'''
+			result = '''(«expression.expression.toCode(fieldType)»)'''
 		}
 		else if (expression instanceof Comparison)
 		{
-			result = '''«expression.left.toCode» «expression.type.toCode» «expression.right.toCode»'''
+			result = '''«expression.left.toCode(fieldType)» «expression.type.toCode» «expression.right.toCode(fieldType)»'''
 		}
 		
 		return result

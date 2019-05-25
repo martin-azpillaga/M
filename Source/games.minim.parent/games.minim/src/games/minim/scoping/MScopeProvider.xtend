@@ -47,7 +47,6 @@ import org.eclipse.xtext.nodemodel.INode
 import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.Scopes
 
-import static games.minim.m.EngineTransformationType.*
 import static games.minim.m.MPackage.Literals.*
 import games.minim.m.Call
 import games.minim.m.Initialization
