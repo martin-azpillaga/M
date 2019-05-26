@@ -228,6 +228,7 @@ class StandardLibrary extends LazyLinker
 				case DOPPLER_EFFECT: game.real1Components.add(component)
 				case PITCH: game.real1Components.add(component)
 				case VOLUME: game.real1Components.add(component)
+				case TRIGGER: game.real1Components.add(component)
 	  		}
 	  	}
 	  	

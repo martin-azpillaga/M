@@ -503,6 +503,19 @@ class HybridUnity implements Framework
 					}
 				}
 				
+				void OnTriggerEnter2D(Collider2D other)
+				{
+					var other_category = other.gameObject.GetComponent<_category>();
+					if (other_category != null)
+					{
+			            if ((other_category.Value.value & «value()») != 0)
+			            {
+			                var goe = gameObject.GetComponent<GameObjectEntity>();
+			                goe.EntityManager.AddComponentData(goe.Entity, new «name»_enter { });
+						}
+					}
+				}
+				
 				void Update()
 				{
 					var goe = gameObject.GetComponent<GameObjectEntity>();
@@ -1500,6 +1513,7 @@ class HybridUnity implements Framework
 		  m_BestFit: 1
 		  m_MinSize: 1
 		  m_MaxSize: 300
+		  m_Alignment: 4
 		«ELSE»
 		«property»: «value.x.toCode»
 		«ENDIF»
@@ -1773,6 +1787,7 @@ class HybridUnity implements Framework
 				case DOPPLER_EFFECT: 'DopplerLevel '
 				case PITCH: 'pitch'
 				case VOLUME: 'volume'
+				case TRIGGER: 'isTrigger'
 			}
 		}
 		else
@@ -1834,6 +1849,7 @@ class HybridUnity implements Framework
 				case DOPPLER_EFFECT: 1
 				case PITCH: 1
 				case VOLUME: 1
+				case TRIGGER: 1
 			}
 		}
 		else
@@ -1895,6 +1911,7 @@ class HybridUnity implements Framework
 				case DOPPLER_EFFECT: AudioSource
 				case PITCH: AudioSource
 				case VOLUME: AudioSource
+				case TRIGGER: BoxCollider2D
 			}
 		}
 		else

@@ -209,7 +209,7 @@ enum UnityComponentType returns EngineComponentType:
 	|inputModule|graphicRaycaster|eventSystem|uiScaleMode|font|canvasRenderer
 ;
 enum EngineComponentType: 
-	ears|perspective|mass|position|rotation|scale
+	ears|perspective|trigger|mass|position|rotation|scale
 	|radius|velocity|acceleration|emission
 	|intensity|range|spotAngle|viewAngle|viewDistance
 	|extent|force|restitution|friction
