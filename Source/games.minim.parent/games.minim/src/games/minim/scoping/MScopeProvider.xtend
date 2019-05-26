@@ -50,6 +50,7 @@ import org.eclipse.xtext.scoping.Scopes
 import static games.minim.m.MPackage.Literals.*
 import games.minim.m.Call
 import games.minim.m.Initialization
+import games.minim.m.Constraint
 
 class EngineComponent extends NameImpl
 {
@@ -518,6 +519,50 @@ class TypeInference extends DefaultLinkingService
 				game.fonts.add(enumerationValue)
 			}
 		}
+		else if (reference == CONSTRAINT__COMPONENT)
+		{
+			var constraint = context as Constraint
+			switch constraint.event
+			{
+				case ENTER: 
+				{
+					var component = MFactory.eINSTANCE.createName
+					component.name = text
+					game.sensorComponents.add(component)
+				}
+				case EXIT: 
+				{
+					var component = MFactory.eINSTANCE.createName
+					component.name = text
+					game.sensorComponents.add(component)
+				}
+				case STAY: 
+				{
+					var component = MFactory.eINSTANCE.createName
+					component.name = text
+					game.sensorComponents.add(component)
+				}
+				case TAG: 
+				{
+					var component = MFactory.eINSTANCE.createName
+					component.name = text
+					game.tagComponents.add(component)
+				}
+				case TIMEOUT: 
+				{
+					var component = MFactory.eINSTANCE.createName
+					component.name = text
+					game.timerComponents.add(component)
+				}
+				case TRIGGER: 
+				{
+					var component = MFactory.eINSTANCE.createName
+					component.name = text
+					game.triggerComponents.add(component)
+				}
+				
+			}
+		}
 		else if (reference == ACCESS__COMPONENT)
 		{
 
@@ -601,19 +646,25 @@ class MScopeProvider extends AbstractMScopeProvider
 			
 			case ACCESS__GROUP: recursiveGroups(context)
 			
-			case LOOP__TAGS: game.tagComponents + engine.tagComponents
-			case LOOP__TIMERS: game.timerComponents + engine.timerComponents
-			case LOOP__TRIGGERS: game.triggerComponents + engine.triggerComponents
-			case LOOP__ENTERS: game.sensorComponents + engine.sensorComponents
-			case LOOP__STAYS: game.sensorComponents + engine.sensorComponents
-			case LOOP__EXITS: game.sensorComponents + engine.sensorComponents
+			case CONSTRAINT__COMPONENT:
+			{
+				var constraint = context as Constraint
+				switch constraint.event
+				{
+					case ENTER: game.sensorComponents + engine.sensorComponents
+					case EXIT: game.sensorComponents + engine.sensorComponents
+					case STAY: game.sensorComponents + engine.sensorComponents
+					case TAG: game.tagComponents + engine.tagComponents
+					case TIMEOUT: game.timerComponents + engine.timerComponents
+					case TRIGGER: game.triggerComponents + engine.triggerComponents
+				}
+			}
 			case LOOP__EXCLUSIONS: allComponents
 			
 			case ACCESS__COMPONENT: 
 			{
 				allComponents
 			}
-			case LOOP_ENUM__COMPONENT: allComponents
 			
 			case COMPONENT_ASSIGNMENT__COMPONENT: 
 			{

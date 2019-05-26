@@ -4,13 +4,10 @@ generate m "http://www.minim.games/M"
 
 Game:
 	(entities+=Entity|systems+=System)*
-	('main' 'world' 'contains' mainEntities+=[Entity]+ '.')?
+	(MAIN_ENTITIES mainEntities+=[Entity]+ '.')?
 	functions+=Function*
 	subrutines+=Subrutine*
-	(
-		'gravity' gravityX=Number gravityY=Number gravityZ=Number?
-	)?
-	('and'
+	(AND
 		title = ID '.'
 	tagComponents+=Name+ '.'
 	real1Components+=Name+ '.'
@@ -44,30 +41,34 @@ Game:
 	voids+=Name '.')?
 ;
 Expression: ArithmeticExpression | BooleanExpression;
-System returns Control:	name=ID ':'	commands+=Command+;
+System returns Control:	name=ID START_SYSTEM commands+=Command+;
 
 Command: Control|Assignment|SubrutineCall|Break|Initialization;
 
-Break: {Break} 'break';
-Initialization: 'initialize' variable=Name;
+Break: {Break} STOP_ITERATION;
+Initialization: DECLARE_VARIABLE variable=Name;
+
+Constraint:
+	negated?=NEGATE_CONSTRAINT? event=EventType? component=[Name]
+;
+
 
 Control:
-	  {Loop} 'for' 'each' 'entity' group=Name 
-	  		('with' tags+=[Name]* 
-	  		('timed' 'out' timers+=[Name]+)? 
-	  		('triggered' triggers+=[Name]+)? 
-	  		('enter' enters+=[Name]+)? 
-	  		('stay' stays+=[Name]+)? 
-	  		('exit' exits+=[Name]+)?
-	  		('without' exclusions+=[Name]+)? 
+	  {Loop} FOR_ALL_ENTITIES group=Name (CONSTRAINTS constraints+=Constraint+)?
+	  		('exclude' exclusions+=[Name]+)? 
+	  		entities?='entities'?
+	  		('data' datas+=[Name]+)?
+	  		'{' commands+=Command+ '}'
+	| {Choose} FOR_ALL_ENTITIES group=Name 'in' 'choose' number=ArithmeticExpression 'from'
+			(CONSTRAINTS constraints+=Constraint+
+	  		('exclude' exclusions+=[Name]+)? 
 	  		entities?='entities'?
 	  		('data' datas+=[Name]+)? 
 	  		)? '{' commands+=Command+ '}'
-	| {Check} 'if' condition=Condition
-			( 'else' 'if' conditions+=Condition )*
-			( 'else' '{' elseCommands+=Command+ '}' )?
-	| {While} 'while' condition=BooleanExpression '{' commands+=Command+ '}'
-	| {LoopEnum} 'for' 'each' 'value' variable=Name 'in' component=[Name] '{' commands+=Command '}'	
+	| {Check} IF condition=Condition
+			( ELSEIF conditions+=Condition )*
+			( ELSE '{' elseCommands+=Command+ '}' )?
+	| {While} WHILE condition=BooleanExpression '{' commands+=Command+ '}'	
 ;
 
 Condition returns Control:
@@ -86,7 +87,7 @@ SubrutineCall:
 Atomic returns ArithmeticExpression: 
 	   ({Access} group=[Name] '.' component=[Name] range?=TILT?)
 	|  ({Call} function=[Name] '(' parameters+=ArithmeticExpression (',' parameters+=ArithmeticExpression)* ')')
-	|  ({Pop} variable=[Name]) 
+	|  ({Pop} variable=[Name])
 ;
 
 Function:
@@ -98,9 +99,9 @@ Subrutine:
 
 Entity:
 	name=ID 
-	('based' 'on' base=[Entity] ('without' removed+=[Name] (',' removed+=[Name])*)?)?
-	('has'	values+=Value (','? values+=Value)*)? 
-	('contains' children+=Entity+)? '.';
+	(BASE_ENTITY base=[Entity] (REMOVED_COMPONENTS removed+=[Name] (',' removed+=[Name])*)?)?
+	(ENTITY_COMPONENTS	values+=Value (','? values+=Value)*)? 
+	(ENTITY_CHILDREN children+=Entity+)? '.';
 	
 Value:
 	  {Tag}   component=[Name]
@@ -116,28 +117,21 @@ Value:
 	| {Material} component=[Name] MATERIAL value=[Name]
 	| {Mesh} component=[Name] MESH value=[Name]
 	| {Font} component=[Name] FONT value=[Name]
-	| {Timer} component=[Name] seconds=Number 's'
+	| {Timer} component=[Name] seconds=Number SECONDS
 	| {Trigger} component=[Name] button=Button
 	| {Range} component=[Name] axis=Axis
 	| {Input2D} component=[Name] value=Input2
-	| {Sensor} component=[Name] SENSOR '['values+=[Name]+']'
+	| {Sensor} component=[Name] SENSOR '['values+=[Name]+']' (RAY rayX=Number rayY=Number )?
 ;
-terminal REFERENCE: 'entity.';
-terminal SPRITE: 'sprite.';
-terminal AUDIO: 'audio.';
-terminal SENSOR: 'detect';
-terminal MESH: 'mesh.';
-terminal MATERIAL: 'material.';
-terminal FONT: 'font.';
-terminal TILT: 'tilt';
+
 BooleanExpression:
-  And ({Or.left=current} 'or' right=And)*;
-And returns BooleanExpression:
-  PrimaryB ({And.left=current} op=('and') right=PrimaryB)*;
+  Boolean1 ({Or.left=current} OR right=Boolean1)*;
+Boolean1 returns BooleanExpression:
+  PrimaryB ({And.left=current} AND right=PrimaryB)*;
 PrimaryB returns BooleanExpression:
     =>AtomicB 
   | {BooleanBrackets} '(' expression=BooleanExpression ')' 
-  | {Not} '!' expression=PrimaryB;
+  | {Not} NOT expression=PrimaryB;
 AtomicB returns BooleanExpression:
 	  {Comparison} left=Addition type=RelationType right=Addition
 	| {BooleanVariable} variable=[Name]
@@ -163,7 +157,36 @@ Enum: name=ID values+=Name+;
 Name: name=ID;
 Number:	{Decimal} negative?='-'? wholePart=INT ('.' decimalPart=INT)?;
 
+terminal REFERENCE: 'entity.';
+terminal SPRITE: 'sprite.';
+terminal AUDIO: 'audio.';
+terminal SENSOR: 'detect';
+terminal MESH: 'mesh.';
+terminal MATERIAL: 'material.';
+terminal FONT: 'font.';
+terminal TILT: 'tilt';
+terminal OR: 'or';
+terminal AND: 'and';
+terminal NOT: '!';
+terminal STOP_ITERATION: 'break';
+terminal DECLARE_VARIABLE: 'initialize';
+terminal BASE_ENTITY: 'based on';
+terminal ENTITY_COMPONENTS: 'has';
+terminal REMOVED_COMPONENTS: 'without';
+terminal ENTITY_CHILDREN: 'contains';
+terminal MAIN_ENTITIES: 'main world contains';
+terminal START_SYSTEM: ':';
+terminal FOR_ALL_ENTITIES: 'for each entity';
+terminal CONSTRAINTS: 'with';
+terminal NEGATE_CONSTRAINT: 'no';
+terminal IF: 'if';
+terminal ELSEIF: 'else if';
+terminal ELSE: 'else';
+terminal WHILE: 'while';
+terminal SECONDS: 's';
+terminal RAY: 'ray';
 
+enum EventType: tag|timeout='timed out'|trigger='triggered'|enter='enter'|stay='stay'|exit='exit';
 enum Axis: 
 	LeftX='gamepad.leftX'|LeftY='gamepad.leftY'|RightX='gamepad.rightX'|RightY='gamepad.rightY'
 	|LeftShoulder='gamepad.leftShoulder'|RightShoulder='gamepad.rightShoulder'

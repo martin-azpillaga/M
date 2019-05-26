@@ -28,7 +28,6 @@ import games.minim.m.Increment
 import games.minim.m.Input2
 import games.minim.m.Input2D
 import games.minim.m.Loop
-import games.minim.m.LoopEnum
 import games.minim.m.MFactory
 import games.minim.m.Minus
 import games.minim.m.Modulus
@@ -87,6 +86,7 @@ import games.minim.m.Initialization
 import games.minim.m.EngineTransformationType
 import games.minim.m.FieldType
 import games.minim.m.AssignmentType
+import games.minim.m.EventType
 
 enum Folder {Assets,Code,Tests,Packages,Settings,
 		Clips,Meshes,Materials,Sprites,Audios,PhysicsMaterials,
@@ -2073,14 +2073,20 @@ class HybridUnity implements Framework
 			    {
 					«FOR group : groups»
 					«group.group.name» = GetComponentGroup(new ComponentType[] {«
-					(group.tags.map['''ComponentType.Create<«it.name»>()''']
-					+group.enters.map['''ComponentType.Create<«enterEvent(it).name»>()''']
-					+group.stays.map['''ComponentType.Create<«stayEvent(it).name»>()''']
-					+group.exits.map['''ComponentType.Create<«exitEvent(it).name»>()''']
-					+group.timers.map['''ComponentType.Create<«timerEvent(it).name»>()''']
-					+group.triggers.map['''ComponentType.Create<«triggerEvent(it).name»>()''']
+					(group.constraints.filter[it.event==EventType.TAG && !it.negated].map['''ComponentType.Create<«it.component.name»>()''']
+					+group.constraints.filter[it.event==EventType.ENTER && !it.negated].map['''ComponentType.Create<«enterEvent(it.component).name»>()''']
+					+group.constraints.filter[it.event==EventType.STAY && !it.negated].map['''ComponentType.Create<«stayEvent(it.component).name»>()''']
+					+group.constraints.filter[it.event==EventType.EXIT && !it.negated].map['''ComponentType.Create<«exitEvent(it.component).name»>()''']
+					+group.constraints.filter[it.event==EventType.TIMEOUT && !it.negated].map['''ComponentType.Create<«timerEvent(it.component).name»>()''']
+					+group.constraints.filter[it.event==EventType.TRIGGER && !it.negated].map['''ComponentType.Create<«triggerEvent(it.component).name»>()''']
 					+group.datas.map['''ComponentType.Create<«it.name»>()''']
-					+group.exclusions.map['''ComponentType.Subtractive<«it.name»>()''']
+					+group.constraints.filter[it.event==EventType.TAG && it.negated].map['''ComponentType.Subtractive<«it.component.name»>()''']
+					+group.constraints.filter[it.event==EventType.ENTER && it.negated].map['''ComponentType.Subtractive<«enterEvent(it.component).name»>()''']
+					+group.constraints.filter[it.event==EventType.STAY && it.negated].map['''ComponentType.Subtractive<«stayEvent(it.component).name»>()''']
+					+group.constraints.filter[it.event==EventType.EXIT && it.negated].map['''ComponentType.Subtractive<«exitEvent(it.component).name»>()''']
+					+group.constraints.filter[it.event==EventType.TIMEOUT && it.negated].map['''ComponentType.Subtractive<«timerEvent(it.component).name»>()''']
+					+group.constraints.filter[it.event==EventType.TRIGGER && it.negated].map['''ComponentType.Subtractive<«triggerEvent(it.component).name»>()''']
+					+group.constraints.filter[it.negated].map['''ComponentType.Subtractive<«it.component.name»>()''']
 					).join(', ')»});
 					«ENDFOR»
 			    }
@@ -2248,17 +2254,6 @@ class HybridUnity implements Framework
 				«ENDFOR»
 			}
 			'''
-		}
-		else if (command instanceof LoopEnum)
-		{
-			return 
-			'''
-			foreach («command.component.name»_type «command.variable.name» in System.Enum.GetValues(typeof(«command.component.name»_type)))
-			{
-				«FOR comm : command.commands»
-				«comm.run»
-				«ENDFOR»
-			}'''
 		}
 		else if (command instanceof ComponentAssignment)
 		{

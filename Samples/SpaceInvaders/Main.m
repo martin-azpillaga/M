@@ -1,17 +1,17 @@
 ship has 
 scale 5 2 appearance sprite.ship
-extent 1 1 category [ship] mask [shipProjectile]
+extent 1 1 category [ship]
 motorAxis gamepad.leftX motorSpeed 10 0 shootButton gamepad.south
 deathSensor detect [alien projectile] goodness 
-gunCreation entity.bullet creationVelocity 0 30 gunOffset 0 1
+gunCreation entity.bullet creationVelocity 0 30 gunOffset 0 1.5
 velocity 0 0.
 
 alien has
 scale 10 4 appearance sprite.alien
-mass 1 extent 1 1 category [alien] mask [evilProjectile]
+mass 1 extent 1 1 category [alien]
 deathSensor detect [ship space shipProjectile] hiveSensor detect [wall]
-flipSensor detect [wall] gunTimer -1s gunTimerRange 3 5 gunCreation entity.bullet creationVelocity 0 -30 
-autoSpeed 5 0 factor -1 autoSpeedFactor 1.1 gunOffset 0 -2
+flipSensor detect [wall] gunCreation entity.bullet creationVelocity 0 -30 
+gunOffset 0 -2.5
 evilness hive.
 
 bullet has
@@ -45,7 +45,7 @@ scene entity.menu
 autoSpeed 5 0
 autoSpeedRatio 1.1
 flipFactor -1
-gunTimer 10
+gunTimer 10s
 gunTimerRatio 0.9.
 
 board has 
@@ -98,7 +98,7 @@ for each entity a with triggered detector
 	create (a.scene)
 }
 
-controlLatitude:
+control:
 for each entity a
 {
 	a.velocity = a.motorSpeed * a.motorAxis tilt
@@ -141,7 +141,7 @@ for each entity a with enter flipSensor
 {
 	for each entity b
 	{
-		b.autoSpeed *= b.factor
+		b.autoSpeed *= b.flipFactor
 	}
 	break
 }
@@ -156,18 +156,6 @@ for each entity a with enter hiveSensor
 	break
 }
 
-load:
-for each entity a with evilness without gunTimer
-{
-	add (gunTimer, a)
-}
-/*
-reload:
-for each entity a with timed out gunTimer
-{
-	a.gunTimer = random(a.gunTimerRange)
-}
-*/
 evilShoot:
 for each entity a with timed out gunTimer
 {
@@ -181,7 +169,7 @@ for each entity a with evilness enter deathSensor
 {
 	for each entity b with evilness
 	{
-		b.autoSpeed *= b.autoSpeedFactor
+		b.autoSpeed *= b.autoSpeedRatio
 	}
 	break
 }
