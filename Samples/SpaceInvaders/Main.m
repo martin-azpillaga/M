@@ -39,8 +39,14 @@ scale 1 1 appearance sprite.defense
 extent 0.5 0.5 category [defense]
 deathSensor detect [shipProjectile evilProjectile alien].
 
-wincondition has
-evilnessAmount 0, scene entity.menu.
+hiveMind has 
+requiredEntities 1
+scene entity.menu
+autoSpeed 5 0
+autoSpeedRatio 1.1
+flipFactor -1
+gunTimer 10
+gunTimerRatio 0.9.
 
 board has 
 scale 5 10,
@@ -75,6 +81,8 @@ playground contains
 	rightWall based on wall has position 50 0.
 	
 	alien based on alien has position 0 0.
+	
+	hiveMind based on hiveMind.
 	
 	player based on player.
 	canvas based on hud.
@@ -148,6 +156,11 @@ for each entity a with enter hiveSensor
 	break
 }
 
+load:
+for each entity a with evilness without gunTimer
+{
+	add (gunTimer, a)
+}
 /*
 reload:
 for each entity a with timed out gunTimer
@@ -181,7 +194,7 @@ for each entity a
 	{
 		evils = evils++
 	}
-	if evils = a.evilnessAmount
+	if evils = a.requiredEntities
 	{
 		create (a.scene)
 		for each entity c

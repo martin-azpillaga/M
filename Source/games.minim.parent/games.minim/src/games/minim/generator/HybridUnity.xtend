@@ -198,44 +198,6 @@ class HybridUnity implements Framework
 		}
 		'''
 		)
-		
-		/*
-		if (game.entities.size > 0)
-		{
-			fileSystem.generateFile('''«Tests.folder»/Tests.asmdef''',
-			'''
-			{
-				"name": "Tests",
-			    "references": 
-			    [
-			        "Code",
-			        "Unity.Entities",
-			        "Unity.Burst",
-			        "Unity.Mathematics",
-			        "Unity.Entities.Tests",
-			        "Unity.Entities.Hybrid",
-			    ],
-			    "optionalUnityReferences": [
-			        "TestAssemblies"
-			    ]
-			}'''
-			)
-		}
-		
-		fileSystem.generateFile('''«Tools.folder»/Editor.asmdef''',
-		'''
-		{
-			"name": "Editor",
-		    "references": 
-		    [
-		        "Code",
-		        "Unity.Entities",
-		        "Unity.Burst",
-		        "Unity.Mathematics",
-		        "Unity.Entities.Hybrid"
-		    ]
-		}'''
-		)*/
 	}
 
 	def buildSettings()
@@ -287,6 +249,28 @@ class HybridUnity implements Framework
 		  productName: «game.title»
 		  enableNativePlatformBackendsForNewInputSystem: 1
 		''')
+		
+		fileSystem.generateFile('''«Settings.folder»/Physics2DSettings.asset''',
+		'''
+		%YAML 1.1
+		%TAG !u! tag:unity3d.com,2011:
+		--- !u!19 &1
+		Physics2DSettings:
+		  serializedVersion: 4
+		  m_Gravity: {x: 0, y: 0}
+		'''
+		)
+		
+		fileSystem.generateFile('''«Settings.folder»/DynamicsManager.asset''',
+		'''
+		%YAML 1.1
+		%TAG !u! tag:unity3d.com,2011:
+		--- !u!55 &1
+		PhysicsManager:
+		  serializedVersion: 10
+		  m_Gravity: {x: 0, y: 0, z: 0}
+		'''
+		)
 	}
 	
 	def art()
@@ -1786,6 +1770,9 @@ class HybridUnity implements Framework
 				case SCREEN_EXPAND: 'screenMatchMode'
 				case SCREEN_POSITION: 'anchoredPosition'
 				case SCREEN_SIZE: 'sizeDelta'
+				case DOPPLER_EFFECT: 'DopplerLevel '
+				case PITCH: 'pitch'
+				case VOLUME: 'volume'
 			}
 		}
 		else
@@ -1844,6 +1831,9 @@ class HybridUnity implements Framework
 				case SCREEN_EXPAND: 1
 				case SCREEN_POSITION: 2
 				case SCREEN_SIZE: 2
+				case DOPPLER_EFFECT: 1
+				case PITCH: 1
+				case VOLUME: 1
 			}
 		}
 		else
@@ -1902,6 +1892,9 @@ class HybridUnity implements Framework
 				case SCREEN_EXPAND: MonoBehaviour
 				case SCREEN_POSITION: RectTransform
 				case SCREEN_SIZE: RectTransform
+				case DOPPLER_EFFECT: AudioSource
+				case PITCH: AudioSource
+				case VOLUME: AudioSource
 			}
 		}
 		else
@@ -2089,9 +2082,6 @@ class HybridUnity implements Framework
 					+group.datas.map['''ComponentType.Create<«it.name»>()''']
 					+group.exclusions.map['''ComponentType.Subtractive<«it.name»>()''']
 					).join(', ')»});
-					«ENDFOR»
-					«FOR group : groups»
-					RequireForUpdate(«group.group.name»);
 					«ENDFOR»
 			    }
 			    
@@ -2711,11 +2701,11 @@ class HybridUnity implements Framework
 		}
 		else if (expression instanceof Increment)
 		{
-			result = '''«expression.left.toCode(fieldType)»++'''
+			result = '''++«expression.left.toCode(fieldType)»'''
 		}
 		else if (expression instanceof Decrement)
 		{
-			result = '''«expression.left.toCode(fieldType)»--'''
+			result = '''--«expression.left.toCode(fieldType)»'''
 		}
 		else if (expression instanceof Or)
 		{

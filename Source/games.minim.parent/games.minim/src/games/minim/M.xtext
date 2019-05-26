@@ -7,6 +7,9 @@ Game:
 	('main' 'world' 'contains' mainEntities+=[Entity]+ '.')?
 	functions+=Function*
 	subrutines+=Subrutine*
+	(
+		'gravity' gravityX=Number gravityY=Number gravityZ=Number?
+	)?
 	('and'
 		title = ID '.'
 	tagComponents+=Name+ '.'
@@ -187,6 +190,7 @@ enum EngineComponentType:
 	|radius|velocity|acceleration|emission
 	|intensity|range|spotAngle|viewAngle|viewDistance
 	|extent|force|restitution|friction
+	|volume|pitch|dopplerEffect
 	|clearColor|canvasScaler='canvas'
 	|sprite='appearance'|mesh|material|audio='audiosource'|text|number;
 enum EngineTransformationType: abs|sqrt|cos|sin|tan|exp|log|random|create|x|y|z|w|join;

@@ -1,10 +1,7 @@
 package games.minim.generator
 
-import games.minim.m.Control
-import games.minim.m.Entity
 import games.minim.m.Game
-import games.minim.scoping.Cleaning
-import org.eclipse.emf.common.util.BasicEList
+import games.minim.scoping.StandardLibrary
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
@@ -15,7 +12,6 @@ class MGenerator extends AbstractGenerator
 {
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) 
 	{
-		println("generate "+resource.contents.get(0).class)
 		var content = resource.contents.get(0)
 		if (content instanceof Game)
 		{
@@ -23,37 +19,16 @@ class MGenerator extends AbstractGenerator
 			var projectPath = file.substring(9)
 			var projectName = projectPath.substring(1,projectPath.substring(1).indexOf('/')+1)
 			
-			var deduction = resource.resourceSet.getResource(URI.createURI(Cleaning.deducedURI),false).contents.get(0) as Game
+			var deduction = resource.resourceSet.getResource(URI.createURI(StandardLibrary.deducedURI),false).contents.get(0) as Game
 			deduction.title = projectName
 			deduction.systems.clear
 			deduction.entities.clear
-			var s = new BasicEList<Control>
-			var e = new BasicEList<Entity>
-			var m = new BasicEList<Entity>
-			for (member : content.mainEntities)
-			{
-				m.add(member)
-			}
-			for (member : content.systems)
-			{
-				s.add(member)
-			}
-			for (member : content.entities)
-			{
-				e.add(member)
-			}
-			for (sys : s)
-			{
-				deduction.systems.add(sys)
-			}
-			for (ent : e)
-			{
-				deduction.entities.add(ent)
-			}
-			for (mainEntity : m)
-			{
-				deduction.mainEntities.add(mainEntity)
-			}
+			deduction.mainEntities.clear
+			
+			deduction.systems.addAll(content.systems)
+			deduction.entities.addAll(content.entities)
+			deduction.mainEntities.addAll(content.mainEntities)
+			
 			(new HybridUnity).represent(deduction, fsa)
 		}
 	}	
@@ -61,5 +36,5 @@ class MGenerator extends AbstractGenerator
 
 interface Framework
 {
-	def void represent(Game game,IFileSystemAccess2 fileSystem)
+	def void represent (Game game, IFileSystemAccess2 fileSystem)
 }

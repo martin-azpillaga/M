@@ -66,7 +66,7 @@ class EngineVoid extends NameImpl
 	public EngineVoidType type
 }
 
-class Cleaning extends LazyLinker 
+class StandardLibrary extends LazyLinker 
 {
 	Game deduced
 	
@@ -180,50 +180,53 @@ class Cleaning extends LazyLinker
 	  		component.type = value
 	  		switch value
 	  		{
-					case ACCELERATION: game.real2Components.add(component)
-					case AUDIO: game.audioComponents.add(component)
-					case BODY_TYPE: {}
-					case CANVAS: {}
-					case CANVAS_RENDERER: {}
-					case CANVAS_SCALER: game.real2Components.add(component)
-					case CLEAR_COLOR: game.real4Components.add(component)
-					case CLEAR_FLAGS: {}
-					case EARS: game.tagComponents.add(component)
-					case EMISSION: game.real4Components.add(component)
-					case EVENT_SYSTEM: {}
-					case EXTENT: game.real2Components.add(component)
-					case FONT: game.fontComponents.add(component)
-					case FORCE: game.real2Components.add(component)
-					case FRICTION: game.real1Components.add(component)
-					case GRAPHIC_RAYCASTER: {}
-					case INPUT_MODULE: {}
-					case INTENSITY: game.real1Components.add(component)
-					case LIGHT_TYPE: {}
-					case MASS: game.real1Components.add(component)
-					case MATERIAL: game.materialComponents.add(component)
-					case MESH: game.meshComponents.add(component)
-					case NEAR_CLIP: game.real1Components.add(component)
-					case NUMBER: game.real1Components.add(component)
-					case ORTHOGRAPHIC: {}
-					case ORTHOGRAPHIC_SIZE: {}
-					case PERSPECTIVE: game.tagComponents.add(component)
-					case POSITION: game.real2Components.add(component)
-					case RADIUS: game.real1Components.add(component)
-					case RANGE: game.real1Components.add(component)
-					case RESTITUTION: game.real1Components.add(component)
-					case ROTATION: game.real3Components.add(component)
-					case SCALE: game.real2Components.add(component)
-					case SCREEN_EXPAND: {}
-					case SCREEN_POSITION: {}
-					case SCREEN_SIZE: {}
-					case SERIALIZED_VERSION: {}
-					case SPOT_ANGLE: game.real1Components.add(component)
-					case SPRITE: game.spriteComponents.add(component)
-					case TEXT: game.textComponents.add(component)
-					case UI_SCALE_MODE: {}
-					case VELOCITY: game.real2Components.add(component)
-					case VIEW_ANGLE: game.real1Components.add(component)
-					case VIEW_DISTANCE: game.real1Components.add(component)
+				case ACCELERATION: game.real2Components.add(component)
+				case AUDIO: game.audioComponents.add(component)
+				case BODY_TYPE: {}
+				case CANVAS: {}
+				case CANVAS_RENDERER: {}
+				case CANVAS_SCALER: game.real2Components.add(component)
+				case CLEAR_COLOR: game.real4Components.add(component)
+				case CLEAR_FLAGS: {}
+				case EARS: game.tagComponents.add(component)
+				case EMISSION: game.real4Components.add(component)
+				case EVENT_SYSTEM: {}
+				case EXTENT: game.real2Components.add(component)
+				case FONT: game.fontComponents.add(component)
+				case FORCE: game.real2Components.add(component)
+				case FRICTION: game.real1Components.add(component)
+				case GRAPHIC_RAYCASTER: {}
+				case INPUT_MODULE: {}
+				case INTENSITY: game.real1Components.add(component)
+				case LIGHT_TYPE: {}
+				case MASS: game.real1Components.add(component)
+				case MATERIAL: game.materialComponents.add(component)
+				case MESH: game.meshComponents.add(component)
+				case NEAR_CLIP: game.real1Components.add(component)
+				case NUMBER: game.real1Components.add(component)
+				case ORTHOGRAPHIC: {}
+				case ORTHOGRAPHIC_SIZE: {}
+				case PERSPECTIVE: game.tagComponents.add(component)
+				case POSITION: game.real2Components.add(component)
+				case RADIUS: game.real1Components.add(component)
+				case RANGE: game.real1Components.add(component)
+				case RESTITUTION: game.real1Components.add(component)
+				case ROTATION: game.real3Components.add(component)
+				case SCALE: game.real2Components.add(component)
+				case SCREEN_EXPAND: {}
+				case SCREEN_POSITION: {}
+				case SCREEN_SIZE: {}
+				case SERIALIZED_VERSION: {}
+				case SPOT_ANGLE: game.real1Components.add(component)
+				case SPRITE: game.spriteComponents.add(component)
+				case TEXT: game.textComponents.add(component)
+				case UI_SCALE_MODE: {}
+				case VELOCITY: game.real2Components.add(component)
+				case VIEW_ANGLE: game.real1Components.add(component)
+				case VIEW_DISTANCE: game.real1Components.add(component)
+				case DOPPLER_EFFECT: game.real1Components.add(component)
+				case PITCH: game.real1Components.add(component)
+				case VOLUME: game.real1Components.add(component)
 	  		}
 	  	}
 	  	
@@ -246,7 +249,7 @@ class Cleaning extends LazyLinker
 	}
 }
 
-class Linking extends DefaultLinkingService 
+class TypeInference extends DefaultLinkingService 
 {
 	Game game
 	Game engine
@@ -274,11 +277,11 @@ class Linking extends DefaultLinkingService
 	
 	def checkResource(EObject context)
 	{
-		var uri = URI.createURI(Cleaning.deducedURI)
+		var uri = URI.createURI(StandardLibrary.deducedURI)
 		var resource = context.eResource.resourceSet.getResource(uri, false)
 		game = resource.contents.get(0) as Game
 		
-		uri = URI.createURI(Cleaning.engineURI)
+		uri = URI.createURI(StandardLibrary.engineURI)
 		resource = context.eResource.resourceSet.getResource(uri, false)
 		engine = resource.contents.get(0) as Game
 	}
@@ -533,6 +536,7 @@ class Linking extends DefaultLinkingService
 		}
 	}
 }
+
 class MScopeProvider extends AbstractMScopeProvider 
 {
 	Game game
@@ -543,8 +547,8 @@ class MScopeProvider extends AbstractMScopeProvider
 		
 		if (game === null)
 		{
-			game = context.eResource.resourceSet.getResource(URI.createURI(Cleaning.deducedURI),false).contents.get(0) as Game
-			engine = context.eResource.resourceSet.getResource(URI.createURI(Cleaning.engineURI),false).contents.get(0) as Game
+			game = context.eResource.resourceSet.getResource(URI.createURI(StandardLibrary.deducedURI),false).contents.get(0) as Game
+			engine = context.eResource.resourceSet.getResource(URI.createURI(StandardLibrary.engineURI),false).contents.get(0) as Game
 		}
 		
 		var collection = collection(context,reference)
