@@ -54,17 +54,10 @@ Constraint:
 
 
 Control:
-	  {Loop} FOR_ALL_ENTITIES group=Name (CONSTRAINTS constraints+=Constraint+)?
-	  		('exclude' exclusions+=[Name]+)? 
+	  {Loop} FOR (all?=ALL|number=ArithmeticExpression) ENTITIES group=Name (CONSTRAINTS constraints+=Constraint+)?
 	  		entities?='entities'?
 	  		('data' datas+=[Name]+)?
 	  		'{' commands+=Command+ '}'
-	| {Choose} FOR_ALL_ENTITIES group=Name 'in' 'choose' number=ArithmeticExpression 'from'
-			(CONSTRAINTS constraints+=Constraint+
-	  		('exclude' exclusions+=[Name]+)? 
-	  		entities?='entities'?
-	  		('data' datas+=[Name]+)? 
-	  		)? '{' commands+=Command+ '}'
 	| {Check} IF condition=Condition
 			( ELSEIF conditions+=Condition )*
 			( ELSE '{' elseCommands+=Command+ '}' )?
@@ -176,7 +169,9 @@ terminal REMOVED_COMPONENTS: 'without';
 terminal ENTITY_CHILDREN: 'contains';
 terminal MAIN_ENTITIES: 'main world contains';
 terminal START_SYSTEM: ':';
-terminal FOR_ALL_ENTITIES: 'for each entity';
+terminal FOR: 'for';
+terminal ALL: 'all';
+terminal ENTITIES: 'entity';
 terminal CONSTRAINTS: 'with';
 terminal NEGATE_CONSTRAINT: 'no';
 terminal IF: 'if';
