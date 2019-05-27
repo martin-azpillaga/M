@@ -3,12 +3,12 @@ package games.minim.generator
 import games.minim.m.Access
 import games.minim.m.And
 import games.minim.m.ArithmeticBrackets
+import games.minim.m.AssignmentType
 import games.minim.m.Audio
-import games.minim.m.Axis
+import games.minim.m.AxisType
 import games.minim.m.Bitwise
 import games.minim.m.BooleanBrackets
 import games.minim.m.Break
-import games.minim.m.Button
 import games.minim.m.Call
 import games.minim.m.Check
 import games.minim.m.Command
@@ -20,13 +20,16 @@ import games.minim.m.Decimal
 import games.minim.m.Decrement
 import games.minim.m.Divide
 import games.minim.m.EngineComponentType
+import games.minim.m.EngineTransformationType
 import games.minim.m.EngineVoidType
 import games.minim.m.Entity
 import games.minim.m.Enumeration
+import games.minim.m.EventType
+import games.minim.m.Expression
+import games.minim.m.FieldType
 import games.minim.m.Game
 import games.minim.m.Increment
-import games.minim.m.Input2
-import games.minim.m.Input2D
+import games.minim.m.Initialization
 import games.minim.m.Loop
 import games.minim.m.MFactory
 import games.minim.m.Minus
@@ -47,13 +50,15 @@ import games.minim.m.RelationType
 import games.minim.m.Sensor
 import games.minim.m.Sprite
 import games.minim.m.SubrutineCall
-import games.minim.m.Tag
 import games.minim.m.Text
 import games.minim.m.Timer
 import games.minim.m.Times
 import games.minim.m.Trigger
+import games.minim.m.TriggerType
 import games.minim.m.Value
 import games.minim.m.VariableAssignment
+import games.minim.m.Vector
+import games.minim.m.VectorType
 import games.minim.m.While
 import games.minim.m.impl.NameImpl
 import games.minim.scoping.EngineComponent
@@ -71,27 +76,20 @@ import java.util.List
 import java.util.Random
 import java.util.UUID
 import javax.imageio.ImageIO
-import org.eclipse.emf.common.util.BasicEList
 import org.eclipse.emf.common.util.EList
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.generator.IFileSystemAccess2
 
 import static games.minim.generator.Folder.*
 import static games.minim.generator.HybridUnity.AssetType.*
-import static games.minim.generator.UnityComponent.*
+import static games.minim.generator.UnityComponentType.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
-import games.minim.m.Expression
-import games.minim.m.Initialization
-import games.minim.m.EngineTransformationType
-import games.minim.m.FieldType
-import games.minim.m.AssignmentType
-import games.minim.m.EventType
 
 enum Folder {Assets,Code,Tests,Packages,Settings,
 		Clips,Meshes,Materials,Sprites,Audios,PhysicsMaterials,
 		Components,Systems,Enumerations,Prefabs,Scenes,Animators,Tools}
-enum UnityComponent
+enum UnityComponentType
 {
 	Transform, Rigidbody2D, Camera,
 	CircleCollider2D, BoxCollider2D, 
@@ -705,7 +703,7 @@ class HybridUnity implements Framework
 			[Serializable] public struct «component.name»_range : IComponentData { public float «value»; }''')
 			generateMetaFile(Components.folder, name+'.cs', component.name)
 		}
-		for (component : game.input2DComponents)
+		for (component : game.vectorComponents)
 		{
 			var name = component.name
 			fileSystem.generateFile('''«Components.folder»/«name».cs''',
@@ -1372,19 +1370,19 @@ class HybridUnity implements Framework
 		«ELSEIF value instanceof Trigger»
 		- target: {fileID: «value.component.componentHash(entity)», guid: «entity.name.uuid(Prefab)», type: 3}
 		  propertyPath: value.m_SingletonActionBindings.Array.data[0].m_Path
-		  value: «value.button.path»
+		  value: «value.value.path»
 		«ELSEIF value instanceof Range»
 		- target: {fileID: «value.component.componentHash(entity)», guid: «entity.name.uuid(Prefab)», type: 3}
 		  propertyPath: value.m_SingletonActionBindings.Array.data[0].m_Path
-		  value: «value.axis.path»
-		«ELSEIF value instanceof Input2D»
+		  value: «value.value.path»
+		«ELSEIF value instanceof Vector»
 		- target: {fileID: «value.component.componentHash(entity)», guid: «entity.name.uuid(Prefab)», type: 3}
 		  propertyPath: value.m_SingletonActionBindings.Array.data[0].m_Path
 		  value: «value.value.path»
 		«ELSEIF value instanceof Timer»
 		- target: {fileID: «value.component.componentHash(entity)», guid: «entity.name.uuid(Prefab)», type: 3}
 		  propertyPath: «value()»
-		  value: «value.seconds.toCode»
+		  value: «value.value.toCode»
 		«ELSEIF value instanceof Sensor»
 		- target: {fileID: «value.component.componentHash(entity)», guid: «entity.name.uuid(Prefab)», type: 3}
 		  propertyPath: «value()»
@@ -1451,19 +1449,19 @@ class HybridUnity implements Framework
 		«ELSEIF value instanceof Trigger»
 		- target: {fileID: «(entity.name+value.component.name).hash», guid: «entity.name.uuid(Prefab)», type: 3}
 		  propertyPath: value.m_SingletonActionBindings.Array.data[0].m_Path
-		  value: «value.button.path»
+		  value: «value.value.path»
 		«ELSEIF value instanceof Range»
 		- target: {fileID: «(entity.name+value.component.name).hash», guid: «entity.name.uuid(Prefab)», type: 3}
 		  propertyPath: value.m_SingletonActionBindings.Array.data[0].m_Path
-		  value: «value.axis.path»
-		«ELSEIF value instanceof Input2D»
+		  value: «value.value.path»
+		«ELSEIF value instanceof Vector»
 		- target: {fileID: «(entity.name+value.component.name).hash», guid: «entity.name.uuid(Prefab)», type: 3}
 		  propertyPath: value.m_SingletonActionBindings.Array.data[0].m_Path
 		  value: «value.value.path»
 		«ELSEIF value instanceof Timer»
 		- target: {fileID: «(entity.name+value.component.name).hash», guid: «entity.name.uuid(Prefab)», type: 3}
 		  propertyPath: «value()»
-		  value: «value.seconds.toCode»
+		  value: «value.value.toCode»
 		«ELSEIF value instanceof Sensor»
 		- target: {fileID: «(entity.name+value.component.name).hash», guid: «entity.name.uuid(Prefab)», type: 3}
 		  propertyPath: «value()»
@@ -1532,16 +1530,16 @@ class HybridUnity implements Framework
 		  m_Name: Value
 		  m_SingletonActionBindings:
 		  - m_Name: 
-		    m_Path: «value.button.path»
+		    m_Path: «value.value.path»
 		    m_Action: Value
 		«ELSEIF value instanceof Range»
 		«property»:
 		  m_Name: Value
 		  m_SingletonActionBindings:
 		  - m_Name: 
-		    m_Path: «value.axis.path»
+		    m_Path: «value.value.path»
 		    m_Action: Value
-		«ELSEIF value instanceof Input2D»
+		«ELSEIF value instanceof Vector»
 		«property»:
 		  m_Name: Value
 		  m_SingletonActionBindings:
@@ -1549,7 +1547,7 @@ class HybridUnity implements Framework
 		    m_Path: «value.value.path»
 		    m_Action: Value
 		«ELSEIF value instanceof Timer»
-		«property»: «value.seconds.toCode»
+		«property»: «value.value.toCode»
 		«ELSEIF value instanceof Sensor»
 		«property»: «enumerationValue(value.values, 'category')»
 		«ELSEIF value instanceof Audio»
@@ -1593,16 +1591,16 @@ class HybridUnity implements Framework
 		  m_Name: Value
 		  m_SingletonActionBindings:
 		  - m_Name: 
-		    m_Path: «value.button.path»
+		    m_Path: «value.value.path»
 		    m_Action: Value
 		«ELSEIF value instanceof Range»
 		«property»:
 		  m_Name: Value
 		  m_SingletonActionBindings:
 		  - m_Name: 
-		    m_Path: «value.axis.path»
+		    m_Path: «value.value.path»
 		    m_Action: Value
-		«ELSEIF value instanceof Input2D»
+		«ELSEIF value instanceof Vector»
 		«property»:
 		  m_Name: Value
 		  m_SingletonActionBindings:
@@ -1610,7 +1608,7 @@ class HybridUnity implements Framework
 		    m_Path: «value.value.path»
 		    m_Action: Value
 		«ELSEIF value instanceof Timer»
-		«property»: «value.seconds.toCode»
+		«property»: «value.value.toCode»
 		«ELSEIF value instanceof Sensor»
 		«property»: «enumerationValue(value.values, 'category')»
 		«ELSEIF value instanceof Audio»
@@ -1624,9 +1622,9 @@ class HybridUnity implements Framework
 		'''
 	}
 	
-	def path(Button button)
+	def path(TriggerType type)
 	{
-		switch button
+		switch type
 		{
 			case DOWN: '<gamepad>/dpad/down'
 			case LEFT: '<gamepad>/dpad/left'
@@ -1646,9 +1644,9 @@ class HybridUnity implements Framework
 		}
 	}
 	
-	def path(Axis axis)
+	def path(AxisType type)
 	{
-		switch axis
+		switch type
 		{
 			case LEFT_X: '<gamepad>/leftStick/x'
 			case LEFT_Y: '<gamepad>/leftStick/y'
@@ -1659,9 +1657,9 @@ class HybridUnity implements Framework
 		}
 	}
 	
-	def path(Input2 input)
+	def path(VectorType type)
 	{
-		switch input
+		switch type
 		{
 			case MOUSE: '<Mouse>/position'
 			case DPAD: '<gamepad>/dpad'
@@ -1685,22 +1683,6 @@ class HybridUnity implements Framework
 		return v
 	}
 	
-	def values(Value value)
-	{
-		if (value instanceof Tag) new BasicEList<Object>
-		else if (value instanceof Real1) #[value.x]
-		else if (value instanceof Real2) #[value.x,value.y]
-		else if (value instanceof Real3) #[value.x,value.y,value.z]
-		else if (value instanceof Real4) #[value.x,value.y,value.z,value.w]
-		else if (value instanceof Reference) #[value.entity]
-		else if (value instanceof Enumeration) value.values
-		else if (value instanceof Timer) #[value.seconds]
-		else if (value instanceof Sensor) value.values
-		else if (value instanceof Trigger) #[value.button]
-		else if (value instanceof Range) #[value.axis]
-		else if (value instanceof Sprite) #[value.value]
-	}
-	
 	enum AssetType
 	{
 		Sprite,Audio,Component,System,Enumeration,
@@ -1712,9 +1694,9 @@ class HybridUnity implements Framework
 		(name+type.toString).uuid
 	}
 	
-	def code(UnityComponent component)
+	def code(UnityComponentType type)
 	{
-		switch component
+		switch type
 		{
 			case Rigidbody2D: 50
 			case AudioSource: 82
@@ -1969,7 +1951,7 @@ class HybridUnity implements Framework
 					loops.findFirst[it.group == access.group].datas.add(rangeEvent(component))
 				}
 			}
-			else if (game.input2DComponents.exists[it.name==component.name])
+			else if (game.vectorComponents.exists[it.name==component.name])
 			{
 				if (loops.exists[it.group == access.group])
 				{
@@ -2172,7 +2154,7 @@ class HybridUnity implements Framework
 						|| game.sensorComponents.exists[it.name==component.name]
 						|| game.triggerComponents.exists[it.name==component.name]
 						|| game.rangeComponents.exists[it.name==component.name]
-						|| game.input2DComponents.exists[it.name==component.name]
+						|| game.vectorComponents.exists[it.name==component.name]
 					)
 					{
 						unityComponents.add(component.name)
@@ -2360,7 +2342,7 @@ class HybridUnity implements Framework
 									|| game.sensorComponents.exists[it.name==component.name]
 									|| game.triggerComponents.exists[it.name==component.name]
 									|| game.rangeComponents.exists[it.name==component.name]
-									|| game.input2DComponents.exists[it.name==component.name]
+									|| game.vectorComponents.exists[it.name==component.name]
 								)
 								{
 									unityComponents.add(component.name)
@@ -2553,7 +2535,7 @@ class HybridUnity implements Framework
 						|| game.sensorComponents.exists[it.name==component.name]
 						|| game.triggerComponents.exists[it.name==component.name]
 						|| game.rangeComponents.exists[it.name==component.name]
-						|| game.input2DComponents.exists[it.name==component.name]
+						|| game.vectorComponents.exists[it.name==component.name]
 					)
 					{
 						return true

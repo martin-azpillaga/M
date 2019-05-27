@@ -9,7 +9,6 @@ import games.minim.m.EngineVoidType
 import games.minim.m.Entity
 import games.minim.m.Enumeration
 import games.minim.m.Game
-import games.minim.m.Input2D
 import games.minim.m.Loop
 import games.minim.m.MFactory
 import games.minim.m.Name
@@ -29,10 +28,6 @@ import games.minim.m.impl.NameImpl
 import java.util.ArrayList
 import java.util.Collections
 import java.util.List
-import org.eclipse.core.resources.IFile
-import org.eclipse.core.resources.IFolder
-import org.eclipse.core.resources.IResource
-import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.emf.common.util.BasicEList
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.EObject
@@ -51,6 +46,9 @@ import static games.minim.m.MPackage.Literals.*
 import games.minim.m.Call
 import games.minim.m.Initialization
 import games.minim.m.Constraint
+import java.util.HashMap
+import games.minim.m.Access
+import games.minim.m.Vector
 
 class EngineComponent extends NameImpl
 {
@@ -69,13 +67,10 @@ class EngineVoid extends NameImpl
 
 class StandardLibrary extends LazyLinker 
 {
-	Game deduced
+	public static Resource libraryResource
+	public static HashMap<String, Resource> deductionOf
 	
-	public static String deducedURI = 'deduced'
-	public static String engineURI = 'engine'
-	public static Resource deducedResource
-	public static Resource engineResource
-	
+	/*
 	def void analyze(IResource member, EObject model)
 	{
 		if (member instanceof IFolder)
@@ -94,42 +89,44 @@ class StandardLibrary extends LazyLinker
 				model.eResource.resourceSet.getResource(memberUri,true)
 			}
 		}
-	}
+	}*/
 	def gatherResources(EObject model)
 	{
 		// From the project
 		var file = model.eResource.URI.path
 		var projectPath = file.substring(9)
 		var projectName = projectPath.substring(0,projectPath.substring(1).indexOf('/')+1)
-		var project = ResourcesPlugin.workspace.root.getProject(projectName)
+		/*var project = ResourcesPlugin.workspace.root.getProject(projectName)
 		for (member : project.members)
 		{
 			analyze(member, model)
+		}*/
+		
+		if (deductionOf === null)
+		{
+			deductionOf = new HashMap<String,Resource>
+		}
+		if (!deductionOf.containsKey(projectName))
+		{
+			var resource = model.eResource.resourceSet.createResource(URI.createURI(projectName))
+			var deduction = MFactory.eINSTANCE.createGame
+		  	deduction.clear
+		  	resource.contents.add(deduction)
+		  	
+			deductionOf.put(projectName, resource)
 		}
 		
 
-		if (engineResource === null)
+		if (games.minim.scoping.StandardLibrary.libraryResource === null)
 		{
-			engineResource = model.eResource().getResourceSet().createResource(URI.createURI(engineURI))
+			libraryResource = model.eResource.getResourceSet.createResource(URI.createURI('library'))
 			var engine = MFactory.eINSTANCE.createGame
 		  	engine.reset
-		  	engineResource.contents.add(engine)
+		  	libraryResource.contents.add(engine)
 		}
 		else
 		{
-			model.eResource.resourceSet.resources.add(engineResource)
-		}
-		
-		if (deducedResource === null)
-		{
-			deducedResource = model.eResource.resourceSet.createResource(URI.createURI(deducedURI))
-			deduced = MFactory.eINSTANCE.createGame
-		  	deduced.clear
-		  	deducedResource.contents.add(deduced)
-		}
-		else
-		{
-			model.eResource.resourceSet.resources.add(deducedResource)
+			model.eResource.resourceSet.resources.add(games.minim.scoping.StandardLibrary.libraryResource)
 		}
 	}
     override void beforeModelLinked(EObject model, IDiagnosticConsumer diagnosticsConsumer) 
@@ -142,9 +139,10 @@ class StandardLibrary extends LazyLinker
     	
 	    super.beforeModelLinked(model, diagnosticsConsumer);
 
-		if (deduced !== null)
+		for (deduction : deductionOf.values)
 		{
-			deduced.clear
+			var game = deduction.contents.get(0) as Game
+			game.clear
 		}
 	}
 	
@@ -161,7 +159,7 @@ class StandardLibrary extends LazyLinker
 		game.triggerComponents.clear
 		game.sensorComponents.clear
 		game.timerComponents.clear
-		game.input2DComponents.clear
+		game.vectorComponents.clear
 		game.spriteComponents.clear
 		game.audioComponents.clear
 		game.meshComponents.clear
@@ -171,9 +169,6 @@ class StandardLibrary extends LazyLinker
 	
 	def reset(Game game)
 	{
-		//game.clear
-		
-		
 		for (value : EngineComponentType.values)
 	  	{
 	  		var component = new EngineComponent
@@ -253,14 +248,17 @@ class StandardLibrary extends LazyLinker
 
 class TypeInference extends DefaultLinkingService 
 {
-	Game game
+	Game deduction
 	Game engine
 	
 	override List<EObject> getLinkedObjects(EObject context, EReference reference, INode node) throws IllegalNodeException 
 	{
-		if (game === null)
+		if (deduction === null)
 		{
-			checkResource(context)
+			var file = context.eResource.URI.path
+			var projectPath = file.substring(9)
+			var projectName = projectPath.substring(0,projectPath.substring(1).indexOf('/')+1)
+			deduction = StandardLibrary.deductionOf.get(projectName).contents.get(0) as Game
 		}
 		
 		var found = find(node.text)
@@ -277,6 +275,7 @@ class TypeInference extends DefaultLinkingService
 		return super.getLinkedObjects(context, reference, node)
 	}
 	
+	/*
 	def checkResource(EObject context)
 	{
 		var uri = URI.createURI(StandardLibrary.deducedURI)
@@ -286,28 +285,28 @@ class TypeInference extends DefaultLinkingService
 		uri = URI.createURI(StandardLibrary.engineURI)
 		resource = context.eResource.resourceSet.getResource(uri, false)
 		engine = resource.contents.get(0) as Game
-	}
+	}*/
 	
 	def find(String text)
 	{
 		var Name found
-		found = game.tagComponents.findFirst[it.name==text]
+		found = deduction.tagComponents.findFirst[it.name==text]
 		if (found !== null) return found
-		found = game.real1Components.findFirst[it.name==text]
+		found = deduction.real1Components.findFirst[it.name==text]
 		if (found !== null) return found
-		found = game.real2Components.findFirst[it.name==text]
+		found = deduction.real2Components.findFirst[it.name==text]
 		if (found !== null) return found
-		found = game.real3Components.findFirst[it.name==text]
+		found = deduction.real3Components.findFirst[it.name==text]
 		if (found !== null) return found
-		found = game.real4Components.findFirst[it.name==text]
+		found = deduction.real4Components.findFirst[it.name==text]
 		if (found !== null) return found
-		found = game.enumerationComponents.findFirst[it.name==text]
+		found = deduction.enumerationComponents.findFirst[it.name==text]
 		if (found !== null) return found
-		found = game.entityComponents.findFirst[it.name==text]
+		found = deduction.entityComponents.findFirst[it.name==text]
 		if (found !== null) return found
-		found = game.spriteComponents.findFirst[it.name==text]
+		found = deduction.spriteComponents.findFirst[it.name==text]
 		if (found !== null) return found
-		found = game.audioComponents.findFirst[it.name==text]
+		found = deduction.audioComponents.findFirst[it.name==text]
 		if (found !== null) return found
 		found = engine.tagComponents.findFirst[it.name==text]
 		if (found !== null) return found
@@ -348,104 +347,104 @@ class TypeInference extends DefaultLinkingService
 			{
 				var component = MFactory.eINSTANCE.createName
 				component.name = text
-				game.tagComponents.add(component)
+				deduction.tagComponents.add(component)
 			}
 			else if (context instanceof Real1)
 			{
 				var component = MFactory.eINSTANCE.createName
 				component.name = text
-				game.real1Components.add(component)
+				deduction.real1Components.add(component)
 			}
 			else if (context instanceof Real2)
 			{
 				var component = MFactory.eINSTANCE.createName
 				component.name = text
-				game.real2Components.add(component)
+				deduction.real2Components.add(component)
 			}
 			else if (context instanceof Real3)
 			{
 				var component = MFactory.eINSTANCE.createName
 				component.name = text
-				game.real3Components.add(component)
+				deduction.real3Components.add(component)
 			}
 			else if (context instanceof Real4)
 			{
 				var component = MFactory.eINSTANCE.createName
 				component.name = text
-				game.real4Components.add(component)
+				deduction.real4Components.add(component)
 			}
 			else if (context instanceof Enumeration)
 			{
 				var component = MFactory.eINSTANCE.createName
 				component.name = text
-				game.enumerationComponents.add(component)
+				deduction.enumerationComponents.add(component)
 				
 				var enumeration = MFactory.eINSTANCE.createEnum
 				enumeration.name = text
-				game.enumerations.add(enumeration)
+				deduction.enumerations.add(enumeration)
 			}
 			else if (context instanceof Reference)
 			{
 				var component = MFactory.eINSTANCE.createName
 				component.name = text
-				game.referenceComponents.add(component)
+				deduction.referenceComponents.add(component)
 			}
 			else if (context instanceof Timer)
 			{
 				var component = MFactory.eINSTANCE.createName
 				component.name = text
-				game.timerComponents.add(component)
+				deduction.timerComponents.add(component)
 			}
 			else if (context instanceof Trigger)
 			{
 				var component = MFactory.eINSTANCE.createName
 				component.name = text
-				game.triggerComponents.add(component)
+				deduction.triggerComponents.add(component)
 			}
 			else if (context instanceof Range)
 			{
 				var component = MFactory.eINSTANCE.createName
 				component.name = text
-				game.rangeComponents.add(component)
+				deduction.rangeComponents.add(component)
 			}
-			else if (context instanceof Input2D)
+			else if (context instanceof Vector)
 			{
 				var component = MFactory.eINSTANCE.createName
 				component.name = text
-				game.input2DComponents.add(component)
+				deduction.vectorComponents.add(component)
 			}
 			else if (context instanceof Sensor)
 			{
 				var component = MFactory.eINSTANCE.createName
 				component.name = text
-				game.sensorComponents.add(component)
+				deduction.sensorComponents.add(component)
 			}
 			else if (context instanceof Sprite)
 			{
 				var component = MFactory.eINSTANCE.createName
 				component.name = text
-				game.spriteComponents.add(component)
+				deduction.spriteComponents.add(component)
 			}
 			else if (context instanceof Audio)
 			{
 				var component = MFactory.eINSTANCE.createName
 				component.name = text
-				game.audioComponents.add(component)
+				deduction.audioComponents.add(component)
 			}
 		}
 		else if (reference == ENUMERATION__VALUES) 
 		{
 			val instance = context as Enumeration
-			var enumeration = game.enumerations.findFirst[it.name==instance.component.name]
+			var enumeration = deduction.enumerations.findFirst[it.name==instance.component.name]
 			if (enumeration === null)
 			{
 				enumeration = MFactory.eINSTANCE.createEnum
 				enumeration.name = instance.component.name
-				game.enumerations.add(enumeration)
+				deduction.enumerations.add(enumeration)
 				
 				var component = MFactory.eINSTANCE.createName
 				component.name = instance.component.name
-				game.enumerationComponents.add(component)
+				deduction.enumerationComponents.add(component)
 			}
 			if (!enumeration.values.exists[it.name==text])
 			{
@@ -456,16 +455,16 @@ class TypeInference extends DefaultLinkingService
 		}
 		else if (reference == SENSOR__VALUES)
 		{
-			var categories = game.enumerations.findFirst[it.name=='category']
+			var categories = deduction.enumerations.findFirst[it.name=='category']
 			if (categories === null)
 			{
 				categories = MFactory.eINSTANCE.createEnum
 				categories.name = 'category'
-				game.enumerations.add(categories) 
+				deduction.enumerations.add(categories) 
 				
 				var component = MFactory.eINSTANCE.createName
 				component.name = 'category'
-				game.enumerationComponents.add(component)
+				deduction.enumerationComponents.add(component)
 			}
 			
 			if (!categories.values.exists[it.name==text])
@@ -479,45 +478,45 @@ class TypeInference extends DefaultLinkingService
 		{
 			val enumerationValue = MFactory.eINSTANCE.createName
 			enumerationValue.name = text
-			if (!game.sprites.exists[it.name==enumerationValue.name])
+			if (!deduction.sprites.exists[it.name==enumerationValue.name])
 			{
-				game.sprites.add(enumerationValue)
+				deduction.sprites.add(enumerationValue)
 			}
 		}
 		else if (reference == AUDIO__VALUE)
 		{
 			val enumerationValue = MFactory.eINSTANCE.createName
 			enumerationValue.name = text
-			if (!game.audios.exists[it.name == enumerationValue.name])
+			if (!deduction.audios.exists[it.name == enumerationValue.name])
 			{
-				game.audios.add(enumerationValue)
+				deduction.audios.add(enumerationValue)
 			}
 		}
 		else if (reference == MESH__VALUE)
 		{
 			val enumerationValue = MFactory.eINSTANCE.createName
 			enumerationValue.name = text
-			if (!game.meshes.exists[it.name == enumerationValue.name])
+			if (!deduction.meshes.exists[it.name == enumerationValue.name])
 			{
-				game.meshes.add(enumerationValue)
+				deduction.meshes.add(enumerationValue)
 			}
 		}
 		else if (reference == MATERIAL__VALUE)
 		{
 			val enumerationValue = MFactory.eINSTANCE.createName
 			enumerationValue.name = text
-			if (!game.materials.exists[it.name == enumerationValue.name])
+			if (!deduction.materials.exists[it.name == enumerationValue.name])
 			{
-				game.materials.add(enumerationValue)
+				deduction.materials.add(enumerationValue)
 			}
 		}
 		else if (reference == FONT__VALUE)
 		{
 			val enumerationValue = MFactory.eINSTANCE.createName
 			enumerationValue.name = text
-			if (!game.fonts.exists[it.name == enumerationValue.name])
+			if (!deduction.fonts.exists[it.name == enumerationValue.name])
 			{
-				game.fonts.add(enumerationValue)
+				deduction.fonts.add(enumerationValue)
 			}
 		}
 		else if (reference == CONSTRAINT__COMPONENT)
@@ -529,44 +528,56 @@ class TypeInference extends DefaultLinkingService
 				{
 					var component = MFactory.eINSTANCE.createName
 					component.name = text
-					game.sensorComponents.add(component)
+					deduction.sensorComponents.add(component)
 				}
 				case EXIT: 
 				{
 					var component = MFactory.eINSTANCE.createName
 					component.name = text
-					game.sensorComponents.add(component)
+					deduction.sensorComponents.add(component)
 				}
 				case STAY: 
 				{
 					var component = MFactory.eINSTANCE.createName
 					component.name = text
-					game.sensorComponents.add(component)
+					deduction.sensorComponents.add(component)
 				}
 				case TAG: 
 				{
 					var component = MFactory.eINSTANCE.createName
 					component.name = text
-					game.tagComponents.add(component)
+					deduction.tagComponents.add(component)
 				}
 				case TIMEOUT: 
 				{
 					var component = MFactory.eINSTANCE.createName
 					component.name = text
-					game.timerComponents.add(component)
+					deduction.timerComponents.add(component)
 				}
 				case TRIGGER: 
 				{
 					var component = MFactory.eINSTANCE.createName
 					component.name = text
-					game.triggerComponents.add(component)
+					deduction.triggerComponents.add(component)
 				}
 				
 			}
 		}
 		else if (reference == ACCESS__COMPONENT)
 		{
-
+			var access = context as Access
+			if (access.range)
+			{
+				var component = MFactory.eINSTANCE.createName
+				component.name = text
+				deduction.rangeComponents.add(component)
+			}
+			else if (access.vector)
+			{
+				var component = MFactory.eINSTANCE.createName
+				component.name = text
+				deduction.vectorComponents.add(component)
+			}
 		}
 		else if (reference == POP__VARIABLE)
 		{
@@ -585,16 +596,19 @@ class TypeInference extends DefaultLinkingService
 
 class MScopeProvider extends AbstractMScopeProvider 
 {
-	Game game
+	Game deduction
 	Game engine
 	
 	override getScope(EObject context, EReference reference)
 	{
 		
-		if (game === null)
+		if (deduction === null)
 		{
-			game = context.eResource.resourceSet.getResource(URI.createURI(StandardLibrary.deducedURI),false).contents.get(0) as Game
-			engine = context.eResource.resourceSet.getResource(URI.createURI(StandardLibrary.engineURI),false).contents.get(0) as Game
+			var file = context.eResource.URI.path
+			var projectPath = file.substring(9)
+			var projectName = projectPath.substring(0,projectPath.substring(1).indexOf('/')+1)
+			deduction = StandardLibrary.deductionOf.get(projectName).contents.get(0) as Game
+			engine = StandardLibrary.libraryResource.contents.get(0) as Game
 		}
 		
 		var collection = collection(context,reference)
@@ -616,14 +630,14 @@ class MScopeProvider extends AbstractMScopeProvider
 			case ENTITY__BASE: 
 			{
 				var description = EcoreUtil2.getRootContainer(context) as Game
-				return description.entities + game.entities + engine.entities
+				return description.entities + deduction.entities + engine.entities
 			}
 			case ENTITY__REMOVED: allComponents
 			case VALUE__COMPONENT: allComponents
 			case REFERENCE__ENTITY: 
 			{
 				var description = EcoreUtil2.getRootContainer(context) as Game
-				return description.entities + game.entities + engine.entities
+				return description.entities + deduction.entities + engine.entities
 			}
 			case ENUMERATION__VALUES: 
 			{
@@ -631,19 +645,19 @@ class MScopeProvider extends AbstractMScopeProvider
 				{
 					val instance = context as Enumeration
 					val refName = instance.component.name
-					var enumeration = (game.enumerations+engine.enumerations).findFirst[it.name==refName]
+					var enumeration = (deduction.enumerations+engine.enumerations).findFirst[it.name==refName]
 					if (enumeration !== null)
 					{
 						return enumeration.values
 					}
 				}
 			}
-			case SPRITE__VALUE: game.sprites+engine.sprites
-			case AUDIO__VALUE: game.audios+engine.audios
-			case MESH__VALUE: game.meshes+engine.meshes
-			case MATERIAL__VALUE: game.materials+engine.materials
-			case FONT__VALUE: game.fonts+engine.fonts
-			case SENSOR__VALUES: game.enumerations.findFirst[it.name=='category']?.values
+			case SPRITE__VALUE: deduction.sprites+engine.sprites
+			case AUDIO__VALUE: deduction.audios+engine.audios
+			case MESH__VALUE: deduction.meshes+engine.meshes
+			case MATERIAL__VALUE: deduction.materials+engine.materials
+			case FONT__VALUE: deduction.fonts+engine.fonts
+			case SENSOR__VALUES: deduction.enumerations.findFirst[it.name=='category']?.values
 			
 			case ACCESS__GROUP: recursiveGroups(context)
 			
@@ -652,16 +666,14 @@ class MScopeProvider extends AbstractMScopeProvider
 				var constraint = context as Constraint
 				switch constraint.event
 				{
-					case ENTER: game.sensorComponents + engine.sensorComponents
-					case EXIT: game.sensorComponents + engine.sensorComponents
-					case STAY: game.sensorComponents + engine.sensorComponents
-					case TAG: game.tagComponents + engine.tagComponents
-					case TIMEOUT: game.timerComponents + engine.timerComponents
-					case TRIGGER: game.triggerComponents + engine.triggerComponents
+					case ENTER: deduction.sensorComponents + engine.sensorComponents
+					case EXIT: deduction.sensorComponents + engine.sensorComponents
+					case STAY: deduction.sensorComponents + engine.sensorComponents
+					case TAG: deduction.tagComponents + engine.tagComponents
+					case TIMEOUT: deduction.timerComponents + engine.timerComponents
+					case TRIGGER: deduction.triggerComponents + engine.triggerComponents
 				}
 			}
-			case LOOP__EXCLUSIONS: allComponents
-			
 			case ACCESS__COMPONENT: 
 			{
 				allComponents
@@ -672,8 +684,8 @@ class MScopeProvider extends AbstractMScopeProvider
 				allComponents
 			}
 			case POP__VARIABLE: (scopeVariables1(context) + recursiveGroups(context) + allComponents)
-			case CALL__FUNCTION: game.transformations + engine.transformations
-			case SUBRUTINE_CALL__SUBRUTINE: game.voids + engine.voids
+			case CALL__FUNCTION: deduction.transformations + engine.transformations
+			case SUBRUTINE_CALL__SUBRUTINE: deduction.voids + engine.voids
 			case COMPONENT_ASSIGNMENT__GROUP: 
 			{
 				recursiveGroups(context)
@@ -694,21 +706,21 @@ class MScopeProvider extends AbstractMScopeProvider
 	
 	def allComponents()
 	{
-		return game.tagComponents
-		+game.real1Components
-		+game.real2Components
-		+game.real3Components
-		+game.real4Components
-		+game.enumerationComponents
-		+game.referenceComponents
-		+game.timerComponents
-		+game.sensorComponents
-		+game.triggerComponents
-		+game.rangeComponents
-		+game.input2DComponents
-		+game.spriteComponents
-		+game.audioComponents
-		+game.textComponents
+		return deduction.tagComponents
+		+deduction.real1Components
+		+deduction.real2Components
+		+deduction.real3Components
+		+deduction.real4Components
+		+deduction.enumerationComponents
+		+deduction.referenceComponents
+		+deduction.timerComponents
+		+deduction.sensorComponents
+		+deduction.triggerComponents
+		+deduction.rangeComponents
+		+deduction.vectorComponents
+		+deduction.spriteComponents
+		+deduction.audioComponents
+		+deduction.textComponents
 		+engine.tagComponents
 		+engine.real1Components
 		+engine.real2Components
@@ -720,7 +732,7 @@ class MScopeProvider extends AbstractMScopeProvider
 		+engine.sensorComponents
 		+engine.triggerComponents
 		+engine.rangeComponents
-		+engine.input2DComponents
+		+engine.vectorComponents
 		+engine.spriteComponents
 		+engine.audioComponents
 		+engine.textComponents

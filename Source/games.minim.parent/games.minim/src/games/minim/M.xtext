@@ -19,7 +19,7 @@ Game:
 	timerComponents+=Name '.'
 	triggerComponents+=Name '.'
 	rangeComponents+=Name '.'
-	input2DComponents+=Name '.'
+	vectorComponents+=Name '.'
 	sensorComponents+=Name '.'
 	textComponents+=Name '.'
 	entityComponents+=Name '.'
@@ -78,7 +78,7 @@ SubrutineCall:
 ;
 
 Atomic returns ArithmeticExpression: 
-	   ({Access} group=[Name] '.' component=[Name] range?=TILT?)
+	   ({Access} group=[Name] '.' component=[Name] (range?=TILT|vector?=VECTOR)?)
 	|  ({Call} function=[Name] '(' parameters+=ArithmeticExpression (',' parameters+=ArithmeticExpression)* ')')
 	|  ({Pop} variable=[Name])
 ;
@@ -110,10 +110,10 @@ Value:
 	| {Material} component=[Name] MATERIAL value=[Name]
 	| {Mesh} component=[Name] MESH value=[Name]
 	| {Font} component=[Name] FONT value=[Name]
-	| {Timer} component=[Name] seconds=Number SECONDS
-	| {Trigger} component=[Name] button=Button
-	| {Range} component=[Name] axis=Axis
-	| {Input2D} component=[Name] value=Input2
+	| {Timer} component=[Name] value=Number SECONDS
+	| {Trigger} component=[Name] value=TriggerType
+	| {Range} component=[Name] value=AxisType
+	| {Vector} component=[Name] value=VectorType
 	| {Sensor} component=[Name] SENSOR '['values+=[Name]+']' (RAY rayX=Number rayY=Number )?
 ;
 
@@ -158,6 +158,7 @@ terminal MESH: 'mesh.';
 terminal MATERIAL: 'material.';
 terminal FONT: 'font.';
 terminal TILT: 'tilt';
+terminal VECTOR: 'vector';
 terminal OR: 'or';
 terminal AND: 'and';
 terminal NOT: '!';
@@ -182,11 +183,11 @@ terminal SECONDS: 's';
 terminal RAY: 'ray';
 
 enum EventType: tag|timeout='timed out'|trigger='triggered'|enter='enter'|stay='stay'|exit='exit';
-enum Axis: 
+enum AxisType: 
 	LeftX='gamepad.leftX'|LeftY='gamepad.leftY'|RightX='gamepad.rightX'|RightY='gamepad.rightY'
 	|LeftShoulder='gamepad.leftShoulder'|RightShoulder='gamepad.rightShoulder'
 ;
-enum Button: 
+enum TriggerType: 
 	South='gamepad.south'|West='gamepad.west'|East='gamepad.east'|North='gamepad.north'
 	|LeftTrigger='gamepad.leftTrigger'|RightTrigger='gamepad.rightTrigger'
 	|Down='gamepad.down'|Left='gamepad.left'|Right='gamepad.right'|Up='gamepad.up'
@@ -194,7 +195,7 @@ enum Button:
 	|LeftStick='gamepad.leftStickPress'|RightStick='gamepad.rightStickPress'
 	|Optional='gamepad.optional'
 ;
-enum Input2: mouse='mouse.position'|dpad='gamepad.dpad'|leftStick='gamepad.leftStick'|rightStick='gamepad.rightStick';
+enum VectorType: mouse='mouse.position'|dpad='gamepad.dpad'|leftStick='gamepad.leftStick'|rightStick='gamepad.rightStick';
 enum RelationType: over='>'|under='<'|equal='='|notequal='!='|overorequal='>='|underorequal='<=';
 enum AssignmentType: set='='|increase='+='|decrease='-='|multiply='*='|divide='/='|modulus='%='|and='&='|or='|=';
 enum UnityComponentType returns EngineComponentType:
