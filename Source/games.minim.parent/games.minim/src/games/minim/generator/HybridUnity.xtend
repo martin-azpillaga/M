@@ -92,9 +92,9 @@ enum Folder {Assets,Code,Tests,Packages,Settings,
 enum UnityComponentType
 {
 	Transform, Rigidbody2D, Camera,
-	CircleCollider2D, BoxCollider2D,
+	CircleCollider2D, BoxCollider2D, Collider,
 	AudioListener, Light,
-	Text, Ray, RectTransform, MonoBehaviour,
+	Text, ray, RectTransform, MonoBehaviour,
 	MeshFilter, MeshRenderer, AudioSource,
 	SpriteRenderer, Canvas, CanvasRenderer
 }
@@ -474,7 +474,7 @@ class HybridUnity implements Framework
 	
 	def components()
 	{
-		if (game.entities.exists[it.values.map[component].filter(EngineComponent).exists[it.type == EngineComponentType.RAY]])
+		if (true)//game.entities.exists[it.values.map[component].filter(EngineComponent).exists[it.type == EngineComponentType.RAY]])
 		{
 			fileSystem.generateFile('''«Components.folder»/ray.cs''',
 			'''
@@ -486,6 +486,7 @@ class HybridUnity implements Framework
 				
 			    private void Update()
 			    {
+			    	Debug.DrawRay(transform.position, transform.position + new Vector3(«value».x, «value».y, 0));
 			        var result = Physics2D.RaycastAll (new Vector2(transform.position.x, transform.position.y), «value», «value».magnitude);
 			        foreach (var hit in result)
 			        {
@@ -535,7 +536,7 @@ class HybridUnity implements Framework
 					}
 				}
 				
-				void OnTriggerEnter2D(Collider2D other)
+				public void OnTriggerEnter2D(Collider2D other)
 				{
 					var other_category = other.gameObject.GetComponent<_category>();
 					if (other_category != null)
@@ -1112,6 +1113,17 @@ class HybridUnity implements Framework
 				yamlComponents.get(light).add(real1Value(EngineComponentType.LIGHT_TYPE, 1))
 			}
 		}
+		var collider = yamlComponents.keySet.filter(EngineComponent).findFirst[it.unityComponent == Collider]
+		var circleCollider = yamlComponents.keySet.filter(EngineComponent).findFirst[it.unityComponent == CircleCollider2D]
+		var boxCollider = yamlComponents.keySet.filter(EngineComponent).findFirst[it.unityComponent == BoxCollider2D]
+		if (circleCollider !== null && collider === null)
+		{
+			yamlComponents.get(circleCollider).add(real1Value(EngineComponentType.TRIGGER, 1))
+		}
+		if (boxCollider !== null && collider === null)
+		{
+			yamlComponents.get(boxCollider).add(real1Value(EngineComponentType.TRIGGER, 1))
+		}
 	}
 	
 	def real1Value(EngineComponentType name, float x)
@@ -1210,7 +1222,7 @@ class HybridUnity implements Framework
 		  «value.yaml1Inner»
 		  «ENDFOR»
 		  «IF component instanceof EngineComponent»
-		  «IF component.unityComponent == Ray»
+		  «IF component.unityComponent == ray»
 		  m_Script: {fileID: 11500000, guid: «component.name.uuid», type: 3}
 		  «ELSE»
 		  m_Script: {fileID: «component.script», guid: f70555f144d8491a825f0804e09c671c, type: 3}
@@ -1230,9 +1242,11 @@ class HybridUnity implements Framework
 		    m_TransformParent: {fileID: «(entity.eContainer as Entity).transformHash»}
 		    «ENDIF»
 		    m_Modifications:
+		    «IF entity.name != entity.base.name»
 		    - target: {fileID: «entity.base.name.hash», guid: «entity.base.name.uuid(Prefab)», type: 3}
 		      propertyPath: m_Name
 		      value: «entity.name»
+		    «ENDIF»
 		    «FOR value : transformValues»
 		    «value.yaml2(entity.base)»
 		    «ENDFOR»
@@ -1752,10 +1766,11 @@ class HybridUnity implements Framework
 			case SpriteRenderer: 212
 			case BoxCollider2D: 61
 			case Text: 114
-			case Ray: 114
+			case ray: 114
 			case Canvas: 223
 			case CanvasRenderer: 222
 			case MonoBehaviour: 114
+			case Collider: 0
 		}
 	}
 	
@@ -1776,10 +1791,11 @@ class HybridUnity implements Framework
 			case SpriteRenderer: 'SpriteRenderer'
 			case BoxCollider2D: 'BoxCollider2D'
 			case Text: 'MonoBehaviour'
-			case Ray: 'MonoBehaviour'
+			case ray: 'MonoBehaviour'
 			case Canvas: 'Canvas'
 			case CanvasRenderer: 'CanvasRenderer'
 			case MonoBehaviour: 'MonoBehaviour'
+			case Collider: 'Collider'
 		}
 	}
 	
@@ -1965,9 +1981,8 @@ class HybridUnity implements Framework
 				case PITCH: AudioSource
 				case VOLUME: AudioSource
 				case TRIGGER: BoxCollider2D
-				case PHYSICAL: {
-				}
-				case RAY: Ray
+				case PHYSICAL: Collider
+				case RAY: ray
 			}
 		}
 		else
@@ -2152,7 +2167,6 @@ class HybridUnity implements Framework
 					+group.constraints.filter[it.event==EventType.EXIT && it.negated].map['''ComponentType.Subtractive<«exitEvent(it.component).name»>()''']
 					+group.constraints.filter[it.event==EventType.TIMEOUT && it.negated].map['''ComponentType.Subtractive<«timerEvent(it.component).name»>()''']
 					+group.constraints.filter[it.event==EventType.TRIGGER && it.negated].map['''ComponentType.Subtractive<«triggerEvent(it.component).name»>()''']
-					+group.constraints.filter[it.negated].map['''ComponentType.Subtractive<«it.component.name»>()''']
 					).join(', ')»});
 					«ENDFOR»
 			    }
@@ -2316,30 +2330,31 @@ class HybridUnity implements Framework
 			var operator = command.assignment.r
 			var component = command.component
 			var group = command.group.name
+			var property = component.property.replace(' ','')
 			'''
 			«IF component.isReferenceType»
-			var «component.property»_«group» «operator» «component.unityComponent.toString»_«group».«component.property»;
+			var «property»_«group» «operator» «component.unityComponent.toString»_«group».«property»;
 			«IF component.dimensions == 1»
-			«component.property»_«group» «operator» «command.expression.toCode(FieldType.VALUE)»;
+			«property»_«group» «operator» «command.expression.toCode(FieldType.VALUE)»;
 			«ELSEIF component.dimensions == 2»
-			«component.property»_«group».x «operator» «command.expression.toCode(FieldType.X)»;
-			«component.property»_«group».y «operator» «command.expression.toCode(FieldType.Y)»;
+			«property»_«group».x «operator» «command.expression.toCode(FieldType.X)»;
+			«property»_«group».y «operator» «command.expression.toCode(FieldType.Y)»;
 			«ELSEIF component.dimensions == 3»
-			«component.property»_«group».x «operator» «command.expression.toCode(FieldType.X)»;
-			«component.property»_«group».y «operator» «command.expression.toCode(FieldType.Y)»;
-			«component.property»_«group».z «operator» «command.expression.toCode(FieldType.Z)»;
+			«property»_«group».x «operator» «command.expression.toCode(FieldType.X)»;
+			«property»_«group».y «operator» «command.expression.toCode(FieldType.Y)»;
+			«property»_«group».z «operator» «command.expression.toCode(FieldType.Z)»;
 			«ELSEIF component.dimensions == 4»
-			«component.property»_«group».x «operator» «command.expression.toCode(FieldType.X)»;
-			«component.property»_«group».y «operator» «command.expression.toCode(FieldType.Y)»;
-			«component.property»_«group».z «operator» «command.expression.toCode(FieldType.Z)»;
-			«component.property»_«group».w «operator» «command.expression.toCode(FieldType.W)»;
+			«property»_«group».x «operator» «command.expression.toCode(FieldType.X)»;
+			«property»_«group».y «operator» «command.expression.toCode(FieldType.Y)»;
+			«property»_«group».z «operator» «command.expression.toCode(FieldType.Z)»;
+			«property»_«group».w «operator» «command.expression.toCode(FieldType.W)»;
 			«ELSEIF component.dimensions == -3»
-			«component.property»_«group».z «operator» «command.expression.toCode(FieldType.VALUE)»;
+			«property»_«group».z «operator» «command.expression.toCode(FieldType.VALUE)»;
 			«ELSEIF component.dimensions == -1»
-			«component.property»_«group» «operator» («command.expression.toCode(FieldType.VALUE)»).ToString();
+			«property»_«group» «operator» («command.expression.toCode(FieldType.VALUE)»).ToString();
 			«ENDIF»
 			
-			«component.unityComponent.toString»_«group».«component.property» = «component.property»_«group»;
+			«component.unityComponent.toString»_«group».«property» = «property»_«group»;
 			«ELSE»
 			«component.name»_«group».«value» «operator» «command.expression.toCode(FieldType.VALUE)»;
 			«component.name»_array_«group»[i_«group»] = «component.name»_«group»;
