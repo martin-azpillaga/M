@@ -92,9 +92,9 @@ enum Folder {Assets,Code,Tests,Packages,Settings,
 enum UnityComponentType
 {
 	Transform, Rigidbody2D, Camera,
-	CircleCollider2D, BoxCollider2D, 
+	CircleCollider2D, BoxCollider2D,
 	AudioListener, Light,
-	MonoBehaviour, RectTransform,
+	Text, Ray, RectTransform, MonoBehaviour,
 	MeshFilter, MeshRenderer, AudioSource,
 	SpriteRenderer, Canvas, CanvasRenderer
 }
@@ -474,6 +474,40 @@ class HybridUnity implements Framework
 	
 	def components()
 	{
+		if (game.entities.exists[it.values.map[component].filter(EngineComponent).exists[it.type == EngineComponentType.RAY]])
+		{
+			fileSystem.generateFile('''«Components.folder»/ray.cs''',
+			'''
+			using UnityEngine;
+			
+			public class ray : MonoBehaviour
+			{
+				public Vector2 «value»;
+				
+			    private void Update()
+			    {
+			        var result = Physics2D.RaycastAll (new Vector2(transform.position.x, transform.position.y), «value», «value».magnitude);
+			        foreach (var hit in result)
+			        {
+			            if (hit.transform.gameObject != gameObject)
+			            {
+			                foreach (var c in GetComponents<Interface>())
+			                {
+			                    c.OnTriggerEnter2D(hit.collider);
+			                }
+			            }
+			        }
+			    }
+			}
+			
+			public interface Interface
+			{
+			    void OnTriggerEnter2D(Collider2D other);
+			}
+			'''
+			)
+			generateMetaFile(Components.folder, 'ray.cs', 'ray')
+		}
 		for (component : game.sensorComponents)
 		{
 			var name = component.name
@@ -483,7 +517,7 @@ class HybridUnity implements Framework
 			using UnityEngine;
 			using Unity.Entities;
 			
-			public class «name» : MonoBehaviour
+			public class «name» : MonoBehaviour, Interface
 			{
 				public category_type «value()»;
 				bool now;
@@ -1170,16 +1204,19 @@ class HybridUnity implements Framework
 		  m_Script: {fileID: 11500000, guid: 5bf10cdea1344482e91a4f2b58506b77, type: 3}
 		«FOR component : yamlComponents.keySet»
 		--- !u!«component.unityComponent.code» &«component.componentHash(entity)»
-		«component.unityComponent.toString»:
+		«component.unityComponent.codeName»:
 		  m_GameObject: {fileID: «entity.name.hash»}
 		  «FOR value : yamlComponents.get(component)»
 		  «value.yaml1Inner»
 		  «ENDFOR»
-		  «IF !(component instanceof EngineComponent)»
+		  «IF component instanceof EngineComponent»
+		  «IF component.unityComponent == Ray»
 		  m_Script: {fileID: 11500000, guid: «component.name.uuid», type: 3}
-		  «ENDIF»
-		  «IF component.script !== null»
+		  «ELSE»
 		  m_Script: {fileID: «component.script», guid: f70555f144d8491a825f0804e09c671c, type: 3}
+		  «ENDIF»
+		  «ELSE»
+		  m_Script: {fileID: 11500000, guid: «component.name.uuid», type: 3}
 		  «ENDIF»
 		«ENDFOR»
 		«
@@ -1261,6 +1298,10 @@ class HybridUnity implements Framework
 			{
 				return 708705254
 			}
+			else if (component.type == EngineComponentType.RAY)
+			{
+				return 'ray'.hash
+			}
 		}
 		else
 		{
@@ -1314,7 +1355,7 @@ class HybridUnity implements Framework
 		{
 			if (property.contains(' '))
 			{
-				
+				property = property.replace(' ','')
 			}
 			else
 			{
@@ -1710,9 +1751,35 @@ class HybridUnity implements Framework
 			case RectTransform: 224
 			case SpriteRenderer: 212
 			case BoxCollider2D: 61
-			case MonoBehaviour: 114
+			case Text: 114
+			case Ray: 114
 			case Canvas: 223
 			case CanvasRenderer: 222
+			case MonoBehaviour: 114
+		}
+	}
+	
+	def codeName(UnityComponentType type)
+	{
+		switch type
+		{
+			case Rigidbody2D: 'Rigidbody2D'
+			case AudioSource: 'AudioSource'
+			case AudioListener: 'AudioListener'
+			case Light: 'Light'
+			case MeshRenderer: 'MeshRenderer'
+			case MeshFilter: 'MeshFilter'
+			case Camera: 'Camera'
+			case Transform: 'Transform'
+			case CircleCollider2D: 'CircleCollider2D'
+			case RectTransform: 'RectTransform'
+			case SpriteRenderer: 'SpriteRenderer'
+			case BoxCollider2D: 'BoxCollider2D'
+			case Text: 'MonoBehaviour'
+			case Ray: 'MonoBehaviour'
+			case Canvas: 'Canvas'
+			case CanvasRenderer: 'CanvasRenderer'
+			case MonoBehaviour: 'MonoBehaviour'
 		}
 	}
 	
@@ -1770,6 +1837,8 @@ class HybridUnity implements Framework
 				case PITCH: 'pitch'
 				case VOLUME: 'volume'
 				case TRIGGER: 'isTrigger'
+				case RAY: '''«value()» '''.toString
+				case PHYSICAL: {}
 			}
 		}
 		else
@@ -1832,6 +1901,8 @@ class HybridUnity implements Framework
 				case PITCH: 1
 				case VOLUME: 1
 				case TRIGGER: 1
+				case PHYSICAL: 0
+				case RAY: 2
 			}
 		}
 		else
@@ -1866,34 +1937,37 @@ class HybridUnity implements Framework
 				case SCALE: Transform
 				case SPOT_ANGLE: Light
 				case SPRITE: SpriteRenderer
-				case TEXT: MonoBehaviour
+				case TEXT: Text
 				case VELOCITY: Rigidbody2D
 				case VIEW_ANGLE: Camera
 				case VIEW_DISTANCE: Camera
 				case CLEAR_COLOR: Camera
-				case NUMBER: MonoBehaviour
+				case NUMBER: Text
 				case CANVAS: Canvas
 				case BODY_TYPE: Rigidbody2D
 				case SERIALIZED_VERSION: Rigidbody2D
-				case CANVAS_SCALER: MonoBehaviour
-				case EVENT_SYSTEM: MonoBehaviour
-				case GRAPHIC_RAYCASTER: MonoBehaviour
-				case INPUT_MODULE: MonoBehaviour
-				case UI_SCALE_MODE: MonoBehaviour
-				case FONT: MonoBehaviour
+				case CANVAS_SCALER: Text
+				case EVENT_SYSTEM: Text
+				case GRAPHIC_RAYCASTER: Text
+				case INPUT_MODULE: Text
+				case UI_SCALE_MODE: Text
+				case FONT: Text
 				case CANVAS_RENDERER: CanvasRenderer
 				case ORTHOGRAPHIC: Camera
 				case ORTHOGRAPHIC_SIZE: Camera
 				case NEAR_CLIP: Camera
 				case CLEAR_FLAGS: Camera
 				case LIGHT_TYPE: Light
-				case SCREEN_EXPAND: MonoBehaviour
+				case SCREEN_EXPAND: Text
 				case SCREEN_POSITION: RectTransform
 				case SCREEN_SIZE: RectTransform
 				case DOPPLER_EFFECT: AudioSource
 				case PITCH: AudioSource
 				case VOLUME: AudioSource
 				case TRIGGER: BoxCollider2D
+				case PHYSICAL: {
+				}
+				case RAY: Ray
 			}
 		}
 		else
@@ -1964,10 +2038,6 @@ class HybridUnity implements Framework
 				engineComponent.name = component.unityComponent.toString
 				engineComponent.type = component.type
 				
-				if (component.type == EngineComponentType.TEXT || component.type == EngineComponentType.NUMBER)
-				{
-					engineComponent.name = 'Text'
-				}
 				if (loops.exists[it.group == access.group])
 				{
 					loops.findFirst[it.group == access.group].datas.add(engineComponent)
@@ -1996,10 +2066,7 @@ class HybridUnity implements Framework
 				var engineComponent = new EngineComponent
 				engineComponent.name = component.unityComponent.toString
 				engineComponent.type = component.type
-				if (component.type == EngineComponentType.TEXT || component.type == EngineComponentType.NUMBER)
-				{
-					engineComponent.name = 'Text'
-				}
+
 				if (loops.exists[it.group == set.group])
 				{
 					loops.findFirst[it.group == set.group].datas.add(engineComponent)
@@ -2044,7 +2111,7 @@ class HybridUnity implements Framework
 	
 	def systems()
 	{
-		for (system : game.systems)
+		for (system : game.systems.filter(games.minim.m.System))
 		{	
 			var name = system.name
 			
@@ -2116,7 +2183,7 @@ class HybridUnity implements Framework
 				
 		        World.DisposeAllWorlds();
 		        var world = new World("world");
-				«FOR system : game.systems»
+				«FOR system : game.systems.filter(games.minim.m.System)»
 				world.CreateManager<«system.name»>();
 		        «ENDFOR»
 		        World.Active = world;
@@ -2166,17 +2233,7 @@ class HybridUnity implements Framework
 				}
 				else if (component instanceof EngineComponent)
 				{
-					if (component.unityComponent == MonoBehaviour)
-					{
-						if (component.type == EngineComponentType.TEXT || component.type == EngineComponentType.NUMBER)
-						{
-							unityComponents.add('Text')
-						}
-					}
-					else
-					{
-						unityComponents.add(component.unityComponent.toString)
-					}
+					unityComponents.add(component.unityComponent.toString)
 				}
 				else if (component instanceof EventComponent)
 				{
@@ -2233,10 +2290,10 @@ class HybridUnity implements Framework
 				«ENDFOR»
 			}
 			«ENDFOR»
-			«IF command.elseCommands.size > 0»
+			«IF command.commands.size > 0»
 			else
 			{
-				«FOR comm : command.elseCommands»
+				«FOR comm : command.commands»
 				«run(comm)»
 				«ENDFOR»
 			}
@@ -2261,11 +2318,7 @@ class HybridUnity implements Framework
 			var group = command.group.name
 			'''
 			«IF component.isReferenceType»
-			«IF component instanceof EngineComponent && #[EngineComponentType.TEXT,EngineComponentType.NUMBER].contains((component as EngineComponent).type)»
-			var «component.property»_«group» «operator» Text_«group».«component.property»;
-			«ELSE»			
 			var «component.property»_«group» «operator» «component.unityComponent.toString»_«group».«component.property»;
-			«ENDIF»
 			«IF component.dimensions == 1»
 			«component.property»_«group» «operator» «command.expression.toCode(FieldType.VALUE)»;
 			«ELSEIF component.dimensions == 2»
@@ -2286,11 +2339,7 @@ class HybridUnity implements Framework
 			«component.property»_«group» «operator» («command.expression.toCode(FieldType.VALUE)»).ToString();
 			«ENDIF»
 			
-			«IF component instanceof EngineComponent && #[EngineComponentType.TEXT,EngineComponentType.NUMBER].contains((component as EngineComponent).type)»
-			Text_«group».«component.property» = «component.property»_«group»;
-			«ELSE»
 			«component.unityComponent.toString»_«group».«component.property» = «component.property»_«group»;
-			«ENDIF»
 			«ELSE»
 			«component.name»_«group».«value» «operator» «command.expression.toCode(FieldType.VALUE)»;
 			«component.name»_array_«group»[i_«group»] = «component.name»_«group»;
@@ -2354,17 +2403,7 @@ class HybridUnity implements Framework
 							}
 							else if (component instanceof EngineComponent)
 							{
-								if (component.unityComponent == MonoBehaviour)
-								{
-									if (component.type == EngineComponentType.TEXT || component.type == EngineComponentType.NUMBER)
-									{
-										unityComponents.add('Text')
-									}
-								}
-								else
-								{
-									unityComponents.add(component.unityComponent.toString)
-								}
+								unityComponents.add(component.unityComponent.toString)
 							}
 							else if (component instanceof EventComponent)
 							{
@@ -2553,14 +2592,7 @@ class HybridUnity implements Framework
 			var value = value()
 			if (component instanceof EngineComponent)
 			{
-				if (component.type == EngineComponentType.TEXT || component.type == EngineComponentType.NUMBER)
-				{
-					name = 'Text'
-				}
-				else
-				{
-					name = component.unityComponent.name
-				}
+				name = component.unityComponent.name
 				value = component.property	
 			}
 			else if (game.rangeComponents.exists[it.name == component.name])

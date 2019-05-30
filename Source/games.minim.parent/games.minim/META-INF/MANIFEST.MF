@@ -22,11 +22,11 @@ Export-Package: games.minim.m,
  games.minim.services,
  games.minim,
  games.minim.m.impl,
- games.minim.validation,
  games.minim.generator,
  games.minim.serializer,
  games.minim.parser.antlr.internal,
  games.minim.scoping,
  games.minim.parser.antlr,
- games.minim.m.util
+ games.minim.m.util,
+ games.minim.validation
 Import-Package: org.apache.log4j

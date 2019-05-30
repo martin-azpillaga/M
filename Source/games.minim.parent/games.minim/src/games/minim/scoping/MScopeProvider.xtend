@@ -1,14 +1,17 @@
 
 package games.minim.scoping
 
+import games.minim.m.Access
 import games.minim.m.Audio
+import games.minim.m.Call
+import games.minim.m.Constraint
 import games.minim.m.Control
 import games.minim.m.EngineComponentType
 import games.minim.m.EngineTransformationType
 import games.minim.m.EngineVoidType
-import games.minim.m.Entity
 import games.minim.m.Enumeration
 import games.minim.m.Game
+import games.minim.m.Initialization
 import games.minim.m.Loop
 import games.minim.m.MFactory
 import games.minim.m.Name
@@ -24,9 +27,11 @@ import games.minim.m.Tag
 import games.minim.m.Timer
 import games.minim.m.Trigger
 import games.minim.m.VariableAssignment
+import games.minim.m.Vector
 import games.minim.m.impl.NameImpl
 import java.util.ArrayList
 import java.util.Collections
+import java.util.HashMap
 import java.util.List
 import org.eclipse.emf.common.util.BasicEList
 import org.eclipse.emf.common.util.URI
@@ -43,12 +48,6 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.Scopes
 
 import static games.minim.m.MPackage.Literals.*
-import games.minim.m.Call
-import games.minim.m.Initialization
-import games.minim.m.Constraint
-import java.util.HashMap
-import games.minim.m.Access
-import games.minim.m.Vector
 
 class EngineComponent extends NameImpl
 {
@@ -95,7 +94,7 @@ class StandardLibrary extends LazyLinker
 		// From the project
 		var file = model.eResource.URI.path
 		var projectPath = file.substring(9)
-		var projectName = projectPath.substring(0,projectPath.substring(1).indexOf('/')+1)
+		var projectName = projectPath.substring(1,projectPath.substring(1).indexOf('/')+1)
 		/*var project = ResourcesPlugin.workspace.root.getProject(projectName)
 		for (member : project.members)
 		{
@@ -111,13 +110,14 @@ class StandardLibrary extends LazyLinker
 			var resource = model.eResource.resourceSet.createResource(URI.createURI(projectName))
 			var deduction = MFactory.eINSTANCE.createGame
 		  	deduction.clear
+		  	deduction.title = projectName
 		  	resource.contents.add(deduction)
 		  	
 			deductionOf.put(projectName, resource)
 		}
 		
 
-		if (games.minim.scoping.StandardLibrary.libraryResource === null)
+		if (StandardLibrary.libraryResource === null)
 		{
 			libraryResource = model.eResource.getResourceSet.createResource(URI.createURI('library'))
 			var engine = MFactory.eINSTANCE.createGame
@@ -126,7 +126,7 @@ class StandardLibrary extends LazyLinker
 		}
 		else
 		{
-			model.eResource.resourceSet.resources.add(games.minim.scoping.StandardLibrary.libraryResource)
+			model.eResource.resourceSet.resources.add(StandardLibrary.libraryResource)
 		}
 	}
     override void beforeModelLinked(EObject model, IDiagnosticConsumer diagnosticsConsumer) 
@@ -224,6 +224,8 @@ class StandardLibrary extends LazyLinker
 				case PITCH: game.real1Components.add(component)
 				case VOLUME: game.real1Components.add(component)
 				case TRIGGER: game.real1Components.add(component)
+				case RAY: game.real2Components.add(component)
+				case PHYSICAL: game.tagComponents.add(component)
 	  		}
 	  	}
 	  	
@@ -257,9 +259,53 @@ class TypeInference extends DefaultLinkingService
 		{
 			var file = context.eResource.URI.path
 			var projectPath = file.substring(9)
-			var projectName = projectPath.substring(0,projectPath.substring(1).indexOf('/')+1)
+			var projectName = projectPath.substring(1,projectPath.substring(1).indexOf('/')+1)
 			deduction = StandardLibrary.deductionOf.get(projectName).contents.get(0) as Game
+			engine = StandardLibrary.libraryResource.contents.get(0) as Game
 		}
+		/*
+		if (reference == ENTITY__REFERENCE)
+		{
+			var found = deduction.entities.findFirst[it.name==node.text]
+			if (found !== null)
+			{
+				var c = context as Entity
+				/*
+				}found.removed.clear
+				found.removed.addAll(c.removed)
+				found.children.clear
+				found.children.addAll(c.children)
+				return Collections.singletonList(found)
+			}
+			else
+			{
+				var entity = MFactory.eINSTANCE.createEntity
+				entity.name = node.text
+				deduction.entities.add(entity)
+				return Collections.singletonList(entity)
+			}
+		}
+		
+		else if (reference == SYSTEM__REFERENCE)
+		{
+			var found = deduction.systems.filter(System).findFirst[it.name==node.text]
+			if (found !== null)
+			{
+				
+				var c = context as System
+				found.commands.clear
+				found.commands.addAll(c.commands)
+				
+				return Collections.singletonList(found)
+			}
+			else
+			{
+				var system = MFactory.eINSTANCE.createSystem
+				system.name = node.text
+				deduction.systems.add(system)
+				return Collections.singletonList(system)
+			}
+		}*/
 		
 		var found = find(node.text)
 		
@@ -307,6 +353,12 @@ class TypeInference extends DefaultLinkingService
 		found = deduction.spriteComponents.findFirst[it.name==text]
 		if (found !== null) return found
 		found = deduction.audioComponents.findFirst[it.name==text]
+		if (found !== null) return found
+		found = deduction.textComponents.findFirst[it.name==text]
+		if (found !== null) return found
+		found = deduction.meshComponents.findFirst[it.name==text]
+		if (found !== null) return found
+		found = deduction.materialComponents.findFirst[it.name==text]
 		if (found !== null) return found
 		found = engine.tagComponents.findFirst[it.name==text]
 		if (found !== null) return found
@@ -601,12 +653,11 @@ class MScopeProvider extends AbstractMScopeProvider
 	
 	override getScope(EObject context, EReference reference)
 	{
-		
 		if (deduction === null)
 		{
 			var file = context.eResource.URI.path
 			var projectPath = file.substring(9)
-			var projectName = projectPath.substring(0,projectPath.substring(1).indexOf('/')+1)
+			var projectName = projectPath.substring(1,projectPath.substring(1).indexOf('/')+1)
 			deduction = StandardLibrary.deductionOf.get(projectName).contents.get(0) as Game
 			engine = StandardLibrary.libraryResource.contents.get(0) as Game
 		}
@@ -692,14 +743,7 @@ class MScopeProvider extends AbstractMScopeProvider
 			}
 			case GAME__MAIN_ENTITIES: 
 			{
-				var result = new BasicEList<Entity>
-				for (resource : context.eResource.resourceSet.resources)
-				{
-					var game = resource.contents.get(0) as Game
-					result.addAll(game.entities)	
-				}
-				
-				return result
+				(context.eResource.contents.get(0) as Game).entities
 			}
 		}
 	}

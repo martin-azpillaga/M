@@ -41,7 +41,7 @@ Game:
 	voids+=Name '.')?
 ;
 Expression: ArithmeticExpression | BooleanExpression;
-System returns Control:	name=ID START_SYSTEM commands+=Command+;
+System returns Control:	{System} name=ID START_SYSTEM commands+=Command+;
 
 Command: Control|Assignment|SubrutineCall|Break|Initialization;
 
@@ -60,7 +60,7 @@ Control:
 	  		'{' commands+=Command+ '}'
 	| {Check} IF condition=Condition
 			( ELSEIF conditions+=Condition )*
-			( ELSE '{' elseCommands+=Command+ '}' )?
+			( ELSE '{' commands+=Command+ '}' )?
 	| {While} WHILE condition=BooleanExpression '{' commands+=Command+ '}'	
 ;
 
@@ -114,7 +114,7 @@ Value:
 	| {Trigger} component=[Name] value=TriggerType
 	| {Range} component=[Name] value=AxisType
 	| {Vector} component=[Name] value=VectorType
-	| {Sensor} component=[Name] SENSOR '['values+=[Name]+']' (RAY rayX=Number rayY=Number )?
+	| {Sensor} component=[Name] SENSOR '['values+=[Name]+']'
 ;
 
 BooleanExpression:
@@ -180,7 +180,6 @@ terminal ELSEIF: 'else if';
 terminal ELSE: 'else';
 terminal WHILE: 'while';
 terminal SECONDS: 's';
-terminal RAY: 'ray';
 
 enum EventType: tag|timeout='timed out'|trigger='triggered'|enter='enter'|stay='stay'|exit='exit';
 enum AxisType: 
@@ -206,7 +205,8 @@ enum UnityComponentType returns EngineComponentType:
 ;
 enum EngineComponentType: 
 	ears|perspective|trigger|mass|position|rotation|scale
-	|radius|velocity|acceleration|emission
+	|radius|ray|physical
+	|velocity|acceleration|emission
 	|intensity|range|spotAngle|viewAngle|viewDistance
 	|extent|force|restitution|friction
 	|volume|pitch|dopplerEffect
