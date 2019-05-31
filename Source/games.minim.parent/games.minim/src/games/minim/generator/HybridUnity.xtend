@@ -1055,6 +1055,7 @@ class HybridUnity implements Framework
 			}
 			if (!transformValues.exists[it.component.property == 'localEulerAnglesHint'])
 			{
+				yamlComponents.get(rigidbody).add(real1Value(EngineComponentType.SERIALIZED_VERSION, 4))
 				yamlComponents.get(rigidbody).add(real1Value(EngineComponentType.RIGIDBODY_CONSTRAINTS, 4))
 			}
 		}
@@ -1972,7 +1973,8 @@ class HybridUnity implements Framework
 		}
 		else
 		{
-			value()
+			// TODO: Expand the rest of the options
+			1
 		}
 	}
 	
@@ -2378,12 +2380,25 @@ class HybridUnity implements Framework
 		else if (command instanceof ComponentAssignment)
 		{
 			var operator = command.assignment.r
-			var component = command.component
+			val component = command.component
 			var group = command.group.name
+			var componentName = component.unityComponent.toString
+			if (game.referenceComponents.exists[it.name==component.name]
+				|| game.spriteComponents.exists[it.name==component.name]
+				|| game.audioComponents.exists[it.name==component.name]
+				|| game.timerComponents.exists[it.name==component.name]
+				|| game.sensorComponents.exists[it.name==component.name]
+				|| game.triggerComponents.exists[it.name==component.name]
+				|| game.rangeComponents.exists[it.name==component.name]
+				|| game.vectorComponents.exists[it.name==component.name]
+			)
+			{
+				componentName = component.name
+			}
 			var property = component.property.replace(' ','')
 			'''
 			«IF component.isReferenceType»
-			var «property»_«group» «operator» «component.unityComponent.toString»_«group».«property»;
+			var «property»_«group» «operator» «componentName»_«group».«property»;
 			«IF component.dimensions == 1»
 			«property»_«group» «operator» «command.expression.toCode(FieldType.VALUE)»;
 			«ELSEIF component.dimensions == 2»
@@ -2404,7 +2419,7 @@ class HybridUnity implements Framework
 			«property»_«group» «operator» («command.expression.toCode(FieldType.VALUE)»).ToString();
 			«ENDIF»
 			
-			«component.unityComponent.toString»_«group».«property» = «property»_«group»;
+			«componentName»_«group».«property» = «property»_«group»;
 			«ELSE»
 			«component.name»_«group».«value» «operator» «command.expression.toCode(FieldType.VALUE)»;
 			«component.name»_array_«group»[i_«group»] = «component.name»_«group»;
@@ -2528,11 +2543,16 @@ class HybridUnity implements Framework
 					{
 						var type = command.parameters.get(0) as Pop
 						var group = command.parameters.get(1) as Pop
+						var referenceComponent = type.variable.isReferenceType
 						return 
 						'''
 						if (!EntityManager.HasComponent<«type.variable.name»>(entity_«group.variable.name»))
 						{
-							PostUpdateCommands.AddComponent(entity_«group.variable.name», new «type.variable.name»());
+							«IF referenceComponent»
+							EntityManager.AddComponentObject(entity_«group.variable.name», new «type.variable.name»());
+							«ELSE»
+							EntityManager.AddComponentData(entity_«group.variable.name», new «type.variable.name»());
+							«ENDIF»
 						}
 						'''
 					}

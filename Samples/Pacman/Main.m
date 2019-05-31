@@ -12,30 +12,64 @@ wall has
 scale 5 5 appearance sprite.wall physical category [wall] extent 1 1.
 
 food has
-scale 2 2 appearance sprite.food radius 1 category [food] worth 1 deathSensor detect [character].
+scale 1 1 appearance sprite.food radius 1 winRequirement worth 10 deathSensor detect [character].
+
+fruit has
+scale 3 3 appearance sprite.fruit radius 1 worth 100 deathSensor detect [character] lifeTimer 7s.
+
+rules has
+invincibility
+spawnTimer 20s
+creation entity.fruit
+spawnPosition 0 0
+winCondition 0
+scene entity.menu.
+
+powerup has
+scale 4 4
+appearance sprite.powerup
+radius 1
+winRequirement
+worth 50
+deathSensor detect [character]
+invincibilityFormula
+invincibilityTimer 10s.
 
 character has 
 category [character]
+personality
 wish
 mass 1
 physical
 scale 5 5 
 appearance sprite.pacman
+invincibleAppearance sprite.invincible
+normalAppearance sprite.pacman
 parent 0
 velocity 0 0
 stopVelocity 0 0
 extent 1 1
-speed 2
+speed 5
 stopSensor detect [wall]
+teleportFactor -1
+teleportSensor detect [portal]
 .
 
+portal has 
+appearance sprite.portal
+scale 5 20
+extent 1 1 
+category [portal].
+
 label has number 0 scale 10 5.
+
+
 
 audioEffect has
 audiosource audio.wakawaka, lifetime 1s.
 
 player has rotation 0 0 10,
-viewDistance 1000, viewAngle 50, position 0 0, clearColor 0.5 0.5 0.5 1.
+viewDistance 1000, viewAngle 50, position 0 0, clearColor 0.2 0.2 0.2 1.
 
 
 hud has 
@@ -43,7 +77,18 @@ canvas 100 100 contains
 	score_board based on label has position -40 40.
 .
 
+menu contains
+	hud has canvas 100 100 contains
+		title has position 0 10, scale 100 10, text 'Pacman'.
+		subtitle has position 0 -20, scale 100 5, text 'Press start'.
+	.
+	trigger has detector gamepad.start, scene entity.playground.
+	player based on player.
+.
+
 playground contains
+	ruleSet based on rules.
+	
 	pacman based on character has position 0 -25.
 	caster based on raycaster.
 	user based on player.
@@ -60,6 +105,28 @@ playground contains
 	leftTopWall based on wall has position -50 30 scale 5 40. 
 	rightBottomWall based on wall has position 50 -30 scale 5 40.
 	rightTopWall based on wall has position 50 30 scale 5 40. 
+	leftPortal based on portal has position -50 0.
+	rightPortal based on portal has position 50 0.
+	
+	a11 based on food has position -45 45.
+	a12 based on food has position -40 45.
+	a13 based on food has position -35 45.
+	a14 based on food has position -30 45.
+	a15 based on food has position -25 45.
+	a16 based on food has position -20 45.
+	a17 based on food has position -15 45.
+	a18 based on food has position -10 45.
+	a19 based on food has position -5 45.
+	a110 based on food has position 0 45.
+	a111 based on food has position 5 45.
+	a112 based on food has position 10 45.
+	a113 based on food has position 15 45.
+	a114 based on food has position 20 45.
+	a115 based on food has position 25 45.
+	a116 based on food has position 30 45.
+	a117 based on food has position 35 45.
+	a118 based on food has position 40 45.
+	a119 based on food has position 45 45.
 	
 	wall1 based on wall has position 0 -30 scale 15 5.
 	wall2 based on wall has position 0 -35.
@@ -70,8 +137,68 @@ playground contains
 	foo4 based on food has position -10 -35.
 	foo5 based on food has position -5 -35.
 	foo6 based on food has position -5 -40.
+	
+	power1 based on powerup has position 45 40.
+	power2 based on powerup has position 45 -40.
+	power3 based on powerup has position -45 -40.
+	power4 based on powerup has position -45 40.
 .
 
+becomeInvincible:
+for all entity a with invincibilityFormula enter deathSensor
+{
+	for all entity b with personality
+	{
+		add(invincibility, b)
+		add(invincibilityTimer, b)
+		b.invincibilityTimer = a.invincibilityTimer
+		b.appearance = b.invincibleAppearance
+	}
+}
+
+becomeVincible:
+for all entity a with timed out invencibilityTimer
+{
+	remove (invincibilityTimer, a)
+	remove (invincibility, a)
+	a.appearance = a.normalAppearance
+}
+
+win:
+for all entity a
+{
+	initialize amount
+	for all entity b with winRequirement
+	{
+		amount = amount++
+	}
+	if amount = a.winCondition
+	{
+		for all entity c
+		{
+			destroy (c)
+		}
+		create (a.scene)
+	}
+}
+spawn:
+for all entity a with timed out spawnTimer
+{
+	spawn = create(a.creation)
+	spawn.position = a.spawnPosition
+}
+
+dieByTime:
+for all entity a with timed out lifeTimer
+{
+	destroy (a)
+}
+
+teleport:
+for all entity a with enter teleportSensor
+{
+	a.position = join(x(a.position) * a.teleportFactor,y(a.position))
+}
 die:
 for all entity a with enter deathSensor
 {
@@ -120,6 +247,16 @@ for all entity a
 			a.position = b.position + a.offset
 		}
 	}
+}
+
+start:
+for all entity a with triggered detector
+{
+	for all entity b
+	{
+		destroy (b)
+	}
+	create (a.scene)
 }
 
 main world contains playground.
