@@ -200,7 +200,7 @@ enum AssignmentType: set='='|increase='+='|decrease='-='|multiply='*='|divide='/
 enum UnityComponentType returns EngineComponentType:
 	canvas='nonono'|bodyType|serializedVersion
 	|orthographic|orthographicSize|nearClip|clearFlags
-	|lightType|screenExpand|screenSize|screenPosition
+	|lightType|screenExpand|screenSize|screenPosition|rigidbodyConstraints
 	|inputModule|graphicRaycaster|eventSystem|uiScaleMode|font|canvasRenderer
 ;
 enum EngineComponentType: 

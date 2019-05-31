@@ -544,7 +544,46 @@ class HybridUnity implements Framework
 			            if ((other_category.Value.value & «value()») != 0)
 			            {
 			                var goe = gameObject.GetComponent<GameObjectEntity>();
-			                goe.EntityManager.AddComponentData(goe.Entity, new «name»_enter { });
+			                if (!goe.EntityManager.HasComponent<«name»_enter>(goe.Entity))
+			                {
+			                	goe.EntityManager.AddComponentData(goe.Entity, new «name»_enter { });
+							}
+						}
+					}
+				}
+				
+				public void OnTriggerStay2D(Collider2D other)
+				{
+					var other_category = other.gameObject.GetComponent<_category>();
+					if (other_category != null)
+					{
+			            if ((other_category.Value.value & «value()») != 0)
+			            {
+			                var goe = gameObject.GetComponent<GameObjectEntity>();
+			                if (!goe.EntityManager.HasComponent<«name»_stay>(goe.Entity))
+			                {
+			                	goe.EntityManager.AddComponentData(goe.Entity, new «name»_stay { });
+							}
+						}
+					}
+				}
+				
+				public void OnTriggerExit2D(Collider2D other)
+				{
+					var other_category = other.gameObject.GetComponent<_category>();
+					if (other_category != null)
+					{
+			            if ((other_category.Value.value & «value()») != 0)
+			            {
+			                var goe = gameObject.GetComponent<GameObjectEntity>();
+			                if (!goe.EntityManager.HasComponent<«name»_exit>(goe.Entity))
+			                {
+			                	goe.EntityManager.AddComponentData(goe.Entity, new «name»_exit { });
+							}
+							if (goe.EntityManager.HasComponent<«name»_stay>(goe.Entity))
+			                {
+			                	goe.EntityManager.RemoveComponent<«name»_stay>(goe.Entity);
+							}
 						}
 					}
 				}
@@ -563,6 +602,10 @@ class HybridUnity implements Framework
 			                now = false;
 			                goe.EntityManager.RemoveComponent<«name»_enter>(goe.Entity);
 			            }
+			        }
+			        if (goe.EntityManager.HasComponent<«name»_exit>(goe.Entity))
+			        {
+			        	goe.EntityManager.RemoveComponent<«name»_exit>(goe.Entity);
 			        }
 				}
 			}
@@ -1009,6 +1052,10 @@ class HybridUnity implements Framework
 			{
 				yamlComponents.get(rigidbody).add(real1Value(EngineComponentType.BODY_TYPE, 1))
 				yamlComponents.get(rigidbody).add(real1Value(EngineComponentType.SERIALIZED_VERSION, 4))
+			}
+			if (!transformValues.exists[it.component.property == 'localEulerAnglesHint'])
+			{
+				yamlComponents.get(rigidbody).add(real1Value(EngineComponentType.RIGIDBODY_CONSTRAINTS, 4))
 			}
 		}
 		var canvasScaler = yamlComponents.keySet.filter(EngineComponent).findFirst[it.type == EngineComponentType.CANVAS_SCALER]
@@ -1854,7 +1901,8 @@ class HybridUnity implements Framework
 				case VOLUME: 'volume'
 				case TRIGGER: 'isTrigger'
 				case RAY: '''«value()» '''.toString
-				case PHYSICAL: {}
+				case PHYSICAL: ''
+				case RIGIDBODY_CONSTRAINTS: 'constraints'
 			}
 		}
 		else
@@ -1919,6 +1967,7 @@ class HybridUnity implements Framework
 				case TRIGGER: 1
 				case PHYSICAL: 0
 				case RAY: 2
+				case RIGIDBODY_CONSTRAINTS: 1
 			}
 		}
 		else
@@ -1983,6 +2032,7 @@ class HybridUnity implements Framework
 				case TRIGGER: BoxCollider2D
 				case PHYSICAL: Collider
 				case RAY: ray
+				case RIGIDBODY_CONSTRAINTS: Rigidbody2D
 			}
 		}
 		else
