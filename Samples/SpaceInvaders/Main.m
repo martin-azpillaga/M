@@ -126,9 +126,9 @@ playground contains
 .
 
 start:
-for each entity a with triggered detector
+for all entity a with triggered detector
 {
-	for each entity b 
+	for all entity b 
 	{
 		destroy (b)
 	}
@@ -136,13 +136,13 @@ for each entity a with triggered detector
 }
 
 control:
-for each entity a
+for all entity a
 {
 	a.velocity = a.motorSpeed * a.motorAxis tilt
 }
 
 shoot:
-for each entity a with triggered shootButton
+for all entity a with triggered shootButton
 {
 	creation = create(a.gunCreation)
 	creation.position = a.position + a.gunOffset
@@ -150,28 +150,28 @@ for each entity a with triggered shootButton
 }
 
 score:
-for each entity a with enter deathSensor
+for all entity a with enter deathSensor
 {
-	for each entity b
+	for all entity b
 	{
 		b.number = b.number + a.worth
 	}
 }
 
 die:
-for each entity a with enter deathSensor
+for all entity a with enter deathSensor
 {
 	destroy(a)
 }
-for each entity b with enter scapeSensor
+for all entity b with enter scapeSensor
 {
 	destroy (b)
 }
 
 relegate:
-for each entity a with gun enter deathSensor
+for all entity a with gun enter deathSensor
 {
-	for each entity b
+	for all entity b
 	{
 		if a.relegation = b.promotion
 		{
@@ -181,9 +181,9 @@ for each entity a with gun enter deathSensor
 }
 
 move:
-for each entity a
+for all entity a
 {
-	for each entity b with hive
+	for all entity b with hive
 	{
 		b.velocity = a.autoSpeed
 	}
@@ -191,9 +191,9 @@ for each entity a
 
 
 flip:
-for each entity a with enter flipSensor
+for all entity a with enter flipSensor
 {
-	for each entity b
+	for all entity b
 	{
 		b.autoSpeed *= b.flipFactor
 	}
@@ -201,9 +201,9 @@ for each entity a with enter flipSensor
 }
 
 approach:
-for each entity a with enter hiveSensor
+for all entity a with enter hiveSensor
 {
-	for each entity b with hive
+	for all entity b with hive
 	{
 		b.position = join(x(b.position),y(b.position)-y(b.scale))
 	}
@@ -211,9 +211,9 @@ for each entity a with enter hiveSensor
 }
 
 rage:
-for each entity a with evilness enter deathSensor
+for all entity a with evilness enter deathSensor
 {
-	for each entity b
+	for all entity b
 	{
 		b.autoSpeed *= b.autoSpeedRatio
 	}
@@ -221,7 +221,7 @@ for each entity a with evilness enter deathSensor
 }
 
 spawnBonus:
-for each entity a with timed out ufoTimer
+for all entity a with timed out ufoTimer
 {
 	bonus = create(a.bonus)
 	bonus.position = a.bonusSpawnPoint
@@ -229,9 +229,9 @@ for each entity a with timed out ufoTimer
 }
 
 evilShoot:
-for each entity a with timed out gunTimer
+for all entity a with timed out gunTimer
 {
-	for each entity b with gun
+	for all entity b with gun
 	{
 		if random(a.probabilityRange) < a.probability
 		{
@@ -244,16 +244,16 @@ for each entity a with timed out gunTimer
 
 
 win:
-for each entity a
+for all entity a
 {
 	initialize evils
-	for each entity b with evilness
+	for all entity b with evilness
 	{
 		evils = evils++
 	}
 	if evils < a.requiredEntities
 	{
-		for each entity c
+		for all entity c
 		{
 			destroy (c)
 		}
@@ -262,16 +262,16 @@ for each entity a
 }
 
 lose:
-for each entity a
+for all entity a
 {
 	initialize goodness
-	for each entity b with goodness
+	for all entity b with goodness
 	{
 		goodness = goodness++
 	}
 	if goodness < a.requiredGoodness
 	{
-		for each entity c
+		for all entity c
 		{
 			destroy (c)
 		}

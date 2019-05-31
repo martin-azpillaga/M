@@ -5,7 +5,7 @@ speed_up_sensor detect [paddles], respawn_sensor detect [goals],
 servable_tag, respawn_point 0 0, angle -1 1, length 10 20.
 
 paddle has
-position 0 0, scale 4 10, appearance sprite.paddle, category paddles,
+position 0 0, scale 4 10, appearance sprite.paddle, category [paddles],
 extent 1 1, restitution 1, velocity 0 0,
 motion gamepad.leftY, direction 0 10.
 
@@ -64,9 +64,9 @@ menu contains
 .
 
 start:
-for each entity a with triggered detector
+for all entity a with triggered detector
 {
-	for each entity b
+	for all entity b
 	{
 		destroy(b)
 	}
@@ -74,20 +74,20 @@ for each entity a with triggered detector
 }
 
 move:
-for each entity a
+for all entity a
 {
 	a.velocity = a.direction * a.motion tilt
 }
 
 respawn:
-for each entity a with enter respawn_sensor
+for all entity a with enter respawn_sensor
 {
 	a.position = a.respawn_point
 	add(servable_tag, a)
 }
 
 serve:
-for each entity a with servable_tag
+for all entity a with servable_tag
 {
 	angle = random(a.angle)
 	a.velocity = join(cos(angle),sin(angle)) * random(a.length)
@@ -95,9 +95,9 @@ for each entity a with servable_tag
 }
 
 score:
-for each entity a with enter score_sensor
+for all entity a with enter score_sensor
 {
-	for each entity b
+	for all entity b
 	{
 		if a.team = b.team
 		{
@@ -107,11 +107,11 @@ for each entity a with enter score_sensor
 }
 
 restart:
-for each entity a
+for all entity a
 {
 	if a.number > a.maximum
 	{
-		for each entity b
+		for all entity b
 		{
 			destroy(b)
 		}
@@ -121,13 +121,13 @@ for each entity a
 }
 
 sound:
-for each entity a with enter score_sensor
+for all entity a with enter score_sensor
 {
 	create(a.effect)
 }
 
 destroyLifetime:
-for each entity a with timed out lifetime
+for all entity a with timed out lifetime
 {
 	destroy(a)
 }
