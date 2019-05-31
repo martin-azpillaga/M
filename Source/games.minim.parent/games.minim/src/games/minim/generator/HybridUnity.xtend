@@ -2539,6 +2539,7 @@ class HybridUnity implements Framework
 			{
 				switch name.type
 				{
+					// TODO make added components visible in editor.
 					case ADD: 
 					{
 						var type = command.parameters.get(0) as Pop
@@ -2549,7 +2550,8 @@ class HybridUnity implements Framework
 						if (!EntityManager.HasComponent<«type.variable.name»>(entity_«group.variable.name»))
 						{
 							«IF referenceComponent»
-							EntityManager.AddComponentObject(entity_«group.variable.name», new «type.variable.name»());
+							var go = EntityManager.GetComponentObject<Transform>(entity_«group.variable.name»).gameObject;
+							EntityManager.AddComponentObject(entity_b, go.AddComponent<«type.variable.name»>());
 							«ELSE»
 							EntityManager.AddComponentData(entity_«group.variable.name», new «type.variable.name»());
 							«ENDIF»

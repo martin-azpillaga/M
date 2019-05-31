@@ -12,10 +12,10 @@ wall has
 scale 5 5 appearance sprite.wall physical category [wall] extent 1 1.
 
 food has
-scale 1 1 appearance sprite.food radius 1 winRequirement worth 10 deathSensor detect [character].
+scale 1 1 appearance sprite.food radius 0.5 winRequirement worth 10 deathSensor detect [character].
 
 fruit has
-scale 3 3 appearance sprite.fruit radius 1 worth 100 deathSensor detect [character] lifeTimer 7s.
+scale 3 3 appearance sprite.fruit radius 0.5 worth 100 deathSensor detect [character] lifeTimer 7s.
 
 rules has
 invincibility
@@ -23,12 +23,13 @@ spawnTimer 20s
 creation entity.fruit
 spawnPosition 0 0
 winCondition 0
+loseCondition 0
 scene entity.menu.
 
 powerup has
 scale 4 4
 appearance sprite.powerup
-radius 1
+radius 0.5
 winRequirement
 worth 50
 deathSensor detect [character]
@@ -44,6 +45,7 @@ physical
 scale 5 5 
 appearance sprite.pacman
 invincibleAppearance sprite.invincible
+invincibilityFrames 5
 normalAppearance sprite.pacman
 parent 0
 velocity 0 0
@@ -53,6 +55,8 @@ speed 5
 stopSensor detect [wall]
 teleportFactor -1
 teleportSensor detect [portal]
+clashSensor detect [evil]
+loseRequirement
 .
 
 portal has 
@@ -63,10 +67,21 @@ category [portal].
 
 label has number 0 scale 10 5.
 
-
+ghost has
+appearance sprite.ghost
+scale 5 5
+extent 1 1
+category [evil]
+clashSensor detect [character]
+autoMove
+autoSpeed 4 0
+autoSpeedFactor -1
+reboundSensor detect [wall]
+respawnPoint 0 0
+velocity 0 0.
 
 audioEffect has
-audiosource audio.wakawaka, lifetime 1s.
+audiosource audio.wakawaka, lifeTimer 1s.
 
 player has rotation 0 0 10,
 viewDistance 1000, viewAngle 50, position 0 0, clearColor 0.2 0.2 0.2 1.
@@ -93,6 +108,9 @@ playground contains
 	caster based on raycaster.
 	user based on player.
 	canvas based on hud.
+	
+	pinky based on ghost has position -25 25.
+	bluey based on ghost has position 25 25.
 	
 	leftWish based on directionChange has button gamepad.left direction -2 0.
 	rightWish based on directionChange has button gamepad.right direction 2 0.
@@ -144,6 +162,34 @@ playground contains
 	power4 based on powerup has position -45 40.
 .
 
+move:
+for all entity a with autoMove
+{
+	a.velocity = a.autoSpeed
+}
+
+rebound:
+for all entity a with enter reboundSensor
+{
+	a.autoSpeed *= a.autoSpeedFactor
+}
+
+haunt:
+for all entity a with personality no invincibility enter clashSensor
+{
+	destroy (a)
+}
+
+defeat:
+for all entity a with no personality enter clashSensor
+{
+	for all entity b with personality invincibility
+	{
+		a.position = a.respawnPoint
+		break
+	}
+}
+
 becomeInvincible:
 for all entity a with invincibilityFormula enter deathSensor
 {
@@ -151,19 +197,41 @@ for all entity a with invincibilityFormula enter deathSensor
 	{
 		add(invincibility, b)
 		add(invincibilityTimer, b)
-		b.invincibilityTimer = a.invincibilityTimer
 		b.appearance = b.invincibleAppearance
 	}
 }
 
+adjustInvincible:
+for all entity a
+{
+	a.invincibilityTimer = a.invincibilityFrames
+}
+
 becomeVincible:
-for all entity a with timed out invencibilityTimer
+for all entity a with timed out invincibilityTimer
 {
 	remove (invincibilityTimer, a)
 	remove (invincibility, a)
 	a.appearance = a.normalAppearance
 }
 
+lose:
+for all entity a
+{
+	initialize amount
+	for all entity b with loseRequirement
+	{
+		amount = amount++
+	}
+	if amount = a.loseCondition
+	{
+		for all entity c
+		{
+			destroy (c)
+		}
+		create (a.scene)
+	}
+}
 win:
 for all entity a
 {
