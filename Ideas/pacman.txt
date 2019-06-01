@@ -1,0 +1,7 @@
+cowardry to add fear to ghosts, then ghosts change sprite to scaredAppearance
+ghost house, no one can enter or leave, random timer teleports ghosts out 
+layer order component for rendering in order
+dont remove generated files by default
+delete and regenerate the components systems enums prefabs folders every time
+but no art  
+finish level design
