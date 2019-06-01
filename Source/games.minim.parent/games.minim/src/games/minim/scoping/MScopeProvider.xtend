@@ -226,6 +226,10 @@ class StandardLibrary extends LazyLinker
 				case TRIGGER: game.real1Components.add(component)
 				case RAY: game.real2Components.add(component)
 				case PHYSICAL: game.tagComponents.add(component)
+				case RIGIDBODY_CONSTRAINTS: {
+					
+				}
+				case ZORDER: game.real1Components.add(component)
 	  		}
 	  	}
 	  	

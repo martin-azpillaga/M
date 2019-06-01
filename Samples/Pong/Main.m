@@ -2,12 +2,12 @@ ball has
 position 0 0, scale 2 2, appearance sprite.ball,
 mass 1, radius 0.5, restitution 1, category [balls],
 speed_up_sensor detect [paddles], respawn_sensor detect [goals],
-servable_tag, respawn_point 0 0, angle -1 1, length 10 20.
+servable_tag, respawn_point 0 0, angle -1 1, length 10 20, physical.
 
 paddle has
 position 0 0, scale 4 10, appearance sprite.paddle, category [paddles],
 extent 1 1, restitution 1, velocity 0 0,
-motion gamepad.leftY, direction 0 10.
+motion gamepad.leftY, direction 0 15, physical.
 
 goal has
 position 0 0, scale 2 100, appearance sprite.goal,
@@ -16,9 +16,9 @@ score_sensor detect [balls], team [red], worth 1, effect entity.audioEffect.
 
 wall has
 position 0 0, scale 100 2, appearance sprite.wall,
-extent 1 1, restitution 1.
+extent 1 1, restitution 1, physical sortingorder 40.
 
-board has maximum 1, position 0 0, scale 5 10,
+board has maximum 10, position 0 0, scale 5 10,
 team [red], scene entity.menu, number 0.
 
 audioEffect has
@@ -59,7 +59,7 @@ menu contains
 		title has position 0 35, scale 40 10, text 'Pong'.
 		subtitle has position 0 10, scale 40 10, text 'Press start'.
 	.
-	trigger has detector gamepad.south, scene entity.playground.
+	trigger has detector gamepad.start, scene entity.playground.
 	player based on player.
 .
 

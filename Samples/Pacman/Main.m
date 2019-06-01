@@ -146,6 +146,66 @@ playground contains
 	a118 based on food has position 40 45.
 	a119 based on food has position 45 45.
 	
+	a21 based on food has position -45 40.
+	a22 based on food has position -40 40.
+	a23 based on food has position -35 40.
+	a24 based on food has position -30 40.
+	a25 based on food has position -25 40.
+	a26 based on food has position -20 40.
+	a27 based on food has position -15 40.
+	a28 based on food has position -10 40.
+	a29 based on food has position -5 40.
+	a210 based on food has position 0 40.
+	a211 based on food has position 5 40.
+	a212 based on food has position 10 40.
+	a213 based on food has position 15 40.
+	a214 based on food has position 20 40.
+	a215 based on food has position 25 40.
+	a216 based on food has position 30 40.
+	a217 based on food has position 35 40.
+	a218 based on food has position 40 40.
+	a219 based on food has position 45 40.
+	
+	a31 based on food has position -45 35.
+	a32 based on food has position -40 35.
+	a33 based on food has position -35 35.
+	a34 based on food has position -30 35.
+	a35 based on food has position -25 35.
+	a36 based on food has position -20 35.
+	a37 based on food has position -15 35.
+	a38 based on food has position -10 35.
+	a39 based on food has position -5 35.
+	a310 based on food has position 0 35.
+	a311 based on food has position 5 35.
+	a312 based on food has position 10 35.
+	a313 based on food has position 15 35.
+	a314 based on food has position 20 35.
+	a315 based on food has position 25 35.
+	a316 based on food has position 30 35.
+	a317 based on food has position 35 35.
+	a318 based on food has position 40 35.
+	a319 based on food has position 45 35.
+
+	a41 based on food has position -45 30.
+	a42 based on food has position -40 30.
+	a43 based on food has position -35 30.
+	a44 based on food has position -30 30.
+	a45 based on food has position -25 30.
+	a46 based on food has position -20 30.
+	a47 based on food has position -15 30.
+	a48 based on food has position -10 30.
+	a49 based on food has position -5 30.
+	a410 based on food has position 0 30.
+	a411 based on food has position 5 30.
+	a412 based on food has position 10 30.
+	a413 based on food has position 15 30.
+	a414 based on food has position 20 30.
+	a415 based on food has position 25 30.
+	a416 based on food has position 30 30.
+	a417 based on food has position 35 30.
+	a418 based on food has position 40 30.
+	a419 based on food has position 45 30.
+	
 	wall1 based on wall has position 0 -30 scale 15 5.
 	wall2 based on wall has position 0 -35.
 	

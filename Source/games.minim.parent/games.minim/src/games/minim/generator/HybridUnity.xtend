@@ -474,41 +474,41 @@ class HybridUnity implements Framework
 	
 	def components()
 	{
-		if (true)//game.entities.exists[it.values.map[component].filter(EngineComponent).exists[it.type == EngineComponentType.RAY]])
+		//if (true)//game.entities.exists[it.values.map[component].filter(EngineComponent).exists[it.type == EngineComponentType.RAY]])
+		
+		fileSystem.generateFile('''«Components.folder»/ray.cs''',
+		'''
+		using UnityEngine;
+		
+		public class ray : MonoBehaviour
 		{
-			fileSystem.generateFile('''«Components.folder»/ray.cs''',
-			'''
-			using UnityEngine;
+			public Vector2 «value»;
 			
-			public class ray : MonoBehaviour
-			{
-				public Vector2 «value»;
-				
-			    private void Update()
-			    {
-			    	Debug.DrawRay(transform.position, transform.position + new Vector3(«value».x, «value».y, 0));
-			        var result = Physics2D.RaycastAll (new Vector2(transform.position.x, transform.position.y), «value», «value».magnitude);
-			        foreach (var hit in result)
-			        {
-			            if (hit.transform.gameObject != gameObject)
-			            {
-			                foreach (var c in GetComponents<Interface>())
-			                {
-			                    c.OnTriggerEnter2D(hit.collider);
-			                }
-			            }
-			        }
-			    }
-			}
-			
-			public interface Interface
-			{
-			    void OnTriggerEnter2D(Collider2D other);
-			}
-			'''
-			)
-			generateMetaFile(Components.folder, 'ray.cs', 'ray')
+		    private void Update()
+		    {
+		    	Debug.DrawRay(transform.position, transform.position + new Vector3(«value».x, «value».y, 0));
+		        var result = Physics2D.RaycastAll (new Vector2(transform.position.x, transform.position.y), «value», «value».magnitude);
+		        foreach (var hit in result)
+		        {
+		            if (hit.transform.gameObject != gameObject)
+		            {
+		                foreach (var c in GetComponents<Interface>())
+		                {
+		                    c.OnTriggerEnter2D(hit.collider);
+		                }
+		            }
+		        }
+		    }
 		}
+		
+		public interface Interface
+		{
+		    void OnTriggerEnter2D(Collider2D other);
+		}
+		'''
+		)
+		generateMetaFile(Components.folder, 'ray.cs', 'ray')
+		
 		for (component : game.sensorComponents)
 		{
 			var name = component.name
@@ -1904,6 +1904,7 @@ class HybridUnity implements Framework
 				case RAY: '''«value()» '''.toString
 				case PHYSICAL: ''
 				case RIGIDBODY_CONSTRAINTS: 'constraints'
+				case ZORDER: 'sortingOrder'
 			}
 		}
 		else
@@ -1969,6 +1970,7 @@ class HybridUnity implements Framework
 				case PHYSICAL: 0
 				case RAY: 2
 				case RIGIDBODY_CONSTRAINTS: 1
+				case ZORDER: 1
 			}
 		}
 		else
@@ -2035,6 +2037,7 @@ class HybridUnity implements Framework
 				case PHYSICAL: Collider
 				case RAY: ray
 				case RIGIDBODY_CONSTRAINTS: Rigidbody2D
+				case ZORDER: SpriteRenderer
 			}
 		}
 		else
