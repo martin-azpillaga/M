@@ -2554,7 +2554,7 @@ class HybridUnity implements Framework
 						{
 							«IF referenceComponent»
 							var go = EntityManager.GetComponentObject<Transform>(entity_«group.variable.name»).gameObject;
-							EntityManager.AddComponentObject(entity_b, go.AddComponent<«type.variable.name»>());
+							EntityManager.AddComponentObject(entity_«group.variable.name», go.AddComponent<«type.variable.name»>());
 							«ELSE»
 							EntityManager.AddComponentData(entity_«group.variable.name», new «type.variable.name»());
 							«ENDIF»
