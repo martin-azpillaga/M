@@ -509,6 +509,85 @@ class HybridUnity implements Framework
 		)
 		generateMetaFile(Components.folder, 'ray.cs', 'ray')
 		
+		fileSystem.generateFile('''«Systems.folder»/Extensions.cs''',
+		'''
+		using System;
+		using Unity.Entities;
+		using UnityEngine;
+		
+		
+		public static class GameObjectEntityExtensions
+		{
+		    private static Action<Entity, ComponentType, object> setComponentObjectDelegate;
+		
+		    public static T Synchronize<T>(this GameObjectEntity gameObjectEntity, T t)
+		       where T : Component
+		    {
+		        EntityManager entityManager = World.Active.GetExistingManager<EntityManager>();
+		        Entity entity = gameObjectEntity.Entity;
+		        entityManager.AddComponent(entity, typeof(T));
+		        entityManager.SetComponentObject(entity, ComponentType.Create<T>(), t);
+		
+		        return t;
+		    }
+		
+		    public static void Synchronize<T,W>(this EntityManager manager, Entity entity, T t)
+		        where T : struct, IComponentData 
+		        where W : ComponentDataProxy<T>
+		    {
+		        var go = manager.GetComponentObject<Transform>(entity).gameObject;
+		        var wrapper = go.AddComponent<W>();
+		        wrapper.Value = t;
+		    }
+		
+		    public static void Synchronize<T>(this EntityManager manager, Entity entity, T t)
+		    {
+		        manager.AddComponent(entity, typeof(T));
+		        manager.SetComponentObject(entity, ComponentType.Create<T>(), t);
+		    }
+		
+		    public static void Remove<T,W>(this EntityManager manager, Entity entity)
+		        where T : struct, IComponentData
+		        where W : ComponentDataProxy<T>
+		    {
+		        var go = manager.GetComponentObject<Transform>(entity).gameObject;
+		        manager.RemoveComponent(entity, typeof(T));
+		        GameObject.Destroy(go.GetComponent<W>());
+		    }
+		
+		
+		    /// <summary>
+		    /// Cached reflection for the internal method SetComponentObject within the EntityManager.
+		    /// </summary>
+		    /// <param name="entityManager"><see cref="EntityManager"/>.</param>
+		    /// <param name="entity">The <see cref="Entity"/> to set the object to.</param>
+		    /// <param name="componentType">The <see cref="ComponentType"/> of the object to set.</param>
+		    /// <param name="componentObject">The object to set.</param>
+		    public static void SetComponentObject(
+		       this EntityManager entityManager,
+		       Entity entity,
+		       ComponentType componentType,
+		       object componentObject)
+		    {
+		        if (setComponentObjectDelegate == null)
+		        {
+		            setComponentObjectDelegate = Delegate.CreateDelegate(
+		                  type: typeof(Action<Entity, ComponentType, object>),
+		                  target: entityManager,
+		                  method: "SetComponentObject",
+		                  ignoreCase: false)
+		               as Action<Entity, ComponentType, object>;
+		        }
+		
+		        if (setComponentObjectDelegate != null)
+		            setComponentObjectDelegate(entity, componentType, componentObject);
+		        else
+		            throw new NullReferenceException("SetComponentObject method signature changed");
+		    }
+		}
+		'''
+		)
+		
 		for (component : game.sensorComponents)
 		{
 			var name = component.name
@@ -2203,6 +2282,10 @@ class HybridUnity implements Framework
 			{
 				«FOR group : groups»
 				ComponentGroup «group.group.name»;
+				«ENDFOR»
+				
+				«FOR addition : system.commands.allContents.filter(SubrutineCall).filter[it.subrutine instanceof EngineVoid && (it.subrutine as EngineVoid).type == EngineVoidType.ADD].toIterable»
+				Dictionary<Entity, «(addition.parameters.get(0) as Pop).variable.name»> «(addition.parameters.get(0) as Pop).variable.name»s = new Dictionary<Entity, «(addition.parameters.get(0) as Pop).variable.name»>();
 				«ENDFOR»
 			    
 			    protected override void OnCreateManager()
