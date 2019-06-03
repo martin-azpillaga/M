@@ -1,3 +1,5 @@
+main world contains menu.
+
 directionChange has 
 button gamepad.left 
 direction 0 0.
@@ -18,7 +20,6 @@ fruit has
 scale 3 3 appearance sprite.fruit radius 0.5 worth 100 deathSensor detect [character] lifeTimer 7s.
 
 rules has
-fear
 spawnTimer 20s
 creation entity.fruit
 spawnPosition 0 -15
@@ -103,6 +104,7 @@ menu contains
 	hud has canvas 100 100 contains
 		title has position 0 10, scale 100 10, text 'Pacman'.
 		subtitle has position 0 -20, scale 100 5, text 'Press start'.
+		options has position 0 -40 scale 100 4 text 'Options <select>'.
 	.
 	trigger has detector gamepad.start, scene entity.playground.
 	player based on player.
@@ -516,15 +518,6 @@ playground contains
 	b819 based on food has position 45 -10.
 .
 
-hardTest:
-for all entity a with home
-{
-	point = add (independencePoint, a)
-	time = add (independenceTime, a)
-	add (autoSpeed, a)
-	
-	point := a.independencePoint
-}
 goIndependent:
 for all entity a with home timed out independenceTime
 {
@@ -573,15 +566,10 @@ for all entity a with invincibilityFormula enter deathSensor
 	for all entity b with cowardry
 	{
 		add(fear, b)
-		add(fearTimer, b)
+		fearTimer = add(fearTimer, b)
 		b.appearance = b.fearAppearance
+		fearTimer := b.fearFrames
 	}
-}
-
-adjustInvincible:
-for all entity a
-{
-	a.fearTimer = a.fearFrames
 }
 
 becomeVincible:
@@ -703,5 +691,3 @@ for all entity a with triggered detector
 	}
 	create (a.scene)
 }
-
-main world contains playground.

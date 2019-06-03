@@ -2631,8 +2631,12 @@ class HybridUnity implements Framework
 						return
 						'''
 						«IF type.isReferenceType»
-						var «variable» = EntityManager.GetComponentObject<«type.name»>(entity_«group»);
-						if («variable» == null)
+						«type.name» «variable»;
+						if (EntityManager.HasComponent<«type.name»>(entity_«group»))
+						{
+							«variable» = EntityManager.GetComponentObject<«type.name»>(entity_«group»);
+						}
+						else
 						{
 							var go = EntityManager.GetComponentObject<Transform>(entity_«group»).gameObject;
 							«variable» = go.AddComponent<«type.name»>();

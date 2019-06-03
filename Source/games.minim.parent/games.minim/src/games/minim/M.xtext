@@ -3,10 +3,13 @@ grammar games.minim.M with org.eclipse.xtext.common.Terminals
 generate m "http://www.minim.games/M"
 
 Game:
-	(entities+=Entity|systems+=System)*
-	(MAIN_ENTITIES mainEntities+=[Entity]+ '.')?
-	functions+=Function*
-	subrutines+=Subrutine*
+	(
+		entities+=Entity
+		|systems+=System
+		|functions+=Function
+		|subrutines+=Subrutine
+		|MAIN_ENTITIES mainEntities+=[Entity]'.'
+	)*
 	(AND
 		title = ID '.'
 	tagComponents+=Name+ '.'
