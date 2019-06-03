@@ -24,6 +24,7 @@ Game:
 	rangeComponents+=Name '.'
 	vectorComponents+=Name '.'
 	sensorComponents+=Name '.'
+	clickComponents+=Name '.'
 	textComponents+=Name '.'
 	entityComponents+=Name '.'
 	spriteComponents+=Name '.'
@@ -119,6 +120,7 @@ Value:
 	| {Range} component=[Name] value=AxisType
 	| {Vector} component=[Name] value=VectorType
 	| {Sensor} component=[Name] SENSOR '['values+=[Name]+']'
+	| {Click} component=[Name] CLICK
 ;
 
 BooleanExpression:
@@ -158,6 +160,7 @@ terminal REFERENCE: 'entity.';
 terminal SPRITE: 'sprite.';
 terminal AUDIO: 'audio.';
 terminal SENSOR: 'detect';
+terminal CLICK: 'click';
 terminal MESH: 'mesh.';
 terminal MATERIAL: 'material.';
 terminal FONT: 'font.';
@@ -185,7 +188,7 @@ terminal ELSE: 'else';
 terminal WHILE: 'while';
 terminal SECONDS: 's';
 
-enum EventType: tag|timeout='timed out'|trigger='triggered'|enter='enter'|stay='stay'|exit='exit';
+enum EventType: tag|timeout='timed out'|trigger='triggered'|enter='enter'|stay='stay'|exit='exit'|mouseDown='mouseDown'|mouseUp='mouseUp';
 enum AxisType: 
 	LeftX='gamepad.leftX'|LeftY='gamepad.leftY'|RightX='gamepad.rightX'|RightY='gamepad.rightY'
 	|LeftShoulder='gamepad.leftShoulder'|RightShoulder='gamepad.rightShoulder'
@@ -209,7 +212,7 @@ enum UnityComponentType returns EngineComponentType:
 	|targetGraphic
 ;
 enum EngineComponentType: 
-	ears|perspective|trigger|mass|position|rotation|scale
+	ears|perspective|mass|position|rotation|scale|trigger
 	|radius|ray|physical
 	|velocity|acceleration|emission
 	|intensity|range|spotAngle|viewAngle|viewDistance

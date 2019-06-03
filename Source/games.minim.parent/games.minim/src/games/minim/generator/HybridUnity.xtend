@@ -476,6 +476,101 @@ class HybridUnity implements Framework
 	
 	def components()
 	{
+		for (component : game.clickComponents)
+		{
+			var name = component.name
+			fileSystem.generateFile('''«Components.folder»/«name».cs''',
+			'''
+			using Unity.Entities;
+			using UnityEngine;
+			using UnityEngine.EventSystems;
+			
+			public class «name» : MonoBehaviour, IPointerDownHandler, IPointerClickHandler
+			{
+			    bool downFrame;
+			    bool upFrame;
+			    
+			    void OnMouseDown()
+				{
+				    AddDown();
+				}
+				
+				void OnMouseUpAsButton()
+				{
+				    AddUp();
+				}
+				
+				public void OnPointerClick(PointerEventData eventData)
+				{
+				    AddDown();
+				}
+				
+				void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
+				{
+				    AddUp();
+				}
+			
+			    void AddDown()
+			    {
+			        var goe = GetComponent<GameObjectEntity>();
+			        var entity = goe.Entity;
+			        var manager = goe.EntityManager;
+			        if (!manager.HasComponent<«name»Down>(entity))
+			        {
+			            manager.AddComponentData(entity, new «name»Down { });
+			        }
+			    }
+			
+			    void AddUp()
+			    {
+			        var goe = GetComponent<GameObjectEntity>();
+			        var entity = goe.Entity;
+			        var manager = goe.EntityManager;
+			        if (!manager.HasComponent<«name»Up>(entity))
+			        {
+			            manager.AddComponentData(entity, new «name»Up { });
+			        }
+			    }
+			
+			    void Update()
+			    {
+			        var goe = GetComponent<GameObjectEntity>();
+			        var entity = goe.Entity;
+			        var manager = goe.EntityManager;
+			        if (manager.HasComponent<«name»Down>(entity))
+			        {
+			            if (downFrame)
+			            {
+			                manager.RemoveComponent<«name»Down>(entity);
+			                downFrame = false;
+			            }
+			            else
+			            {
+			                downFrame = true;
+			            }
+			        }
+			        if (manager.HasComponent<«name»Up>(entity))
+			        {
+			            if (upFrame)
+			            {
+			                manager.RemoveComponent<«name»Up>(entity);
+			                upFrame = false;
+			            }
+			            else
+			            {
+			                upFrame = true;
+			            }
+			        }
+			    }
+			}
+			
+			public struct «name»Down : IComponentData { }
+			public struct «name»Up : IComponentData { }
+			'''
+			)
+			
+			generateMetaFile(Components.folder, name+'.cs', name)
+		}
 		//if (true)//game.entities.exists[it.values.map[component].filter(EngineComponent).exists[it.type == EngineComponentType.RAY]])
 		
 		fileSystem.generateFile('''«Components.folder»/ray.cs''',
@@ -2199,6 +2294,16 @@ class HybridUnity implements Framework
 		return new EventComponent(component.name + '_triggered')
 	}
 	
+	def mouseDownEvent (Name component)
+	{
+		return new EventComponent(component.name+'Down')
+	}
+	
+	def mouseUpEvent (Name component)
+	{
+		return new EventComponent(component.name+'Up')
+	}
+	
 	def groups(Control system)
 	{
 		var loops = EcoreUtil2.getAllContentsOfType(system, Loop)
@@ -2339,6 +2444,8 @@ class HybridUnity implements Framework
 					+group.constraints.filter[it.event==EventType.EXIT && !it.negated].map['''ComponentType.Create<«exitEvent(it.component).name»>()''']
 					+group.constraints.filter[it.event==EventType.TIMEOUT && !it.negated].map['''ComponentType.Create<«timerEvent(it.component).name»>()''']
 					+group.constraints.filter[it.event==EventType.TRIGGER && !it.negated].map['''ComponentType.Create<«triggerEvent(it.component).name»>()''']
+					+group.constraints.filter[it.event==EventType.MOUSE_DOWN && !it.negated].map['''ComponentType.Create<«mouseDownEvent(it.component).name»>()''']
+					+group.constraints.filter[it.event==EventType.MOUSE_UP && !it.negated].map['''ComponentType.Create<«mouseUpEvent(it.component).name»>()''']
 					+group.datas.map['''ComponentType.Create<«it.name»>()''']
 					+group.constraints.filter[it.event==EventType.TAG && it.negated].map['''ComponentType.Subtractive<«it.component.name»>()''']
 					+group.constraints.filter[it.event==EventType.ENTER && it.negated].map['''ComponentType.Subtractive<«enterEvent(it.component).name»>()''']
@@ -2346,6 +2453,8 @@ class HybridUnity implements Framework
 					+group.constraints.filter[it.event==EventType.EXIT && it.negated].map['''ComponentType.Subtractive<«exitEvent(it.component).name»>()''']
 					+group.constraints.filter[it.event==EventType.TIMEOUT && it.negated].map['''ComponentType.Subtractive<«timerEvent(it.component).name»>()''']
 					+group.constraints.filter[it.event==EventType.TRIGGER && it.negated].map['''ComponentType.Subtractive<«triggerEvent(it.component).name»>()''']
+					+group.constraints.filter[it.event==EventType.MOUSE_DOWN && it.negated].map['''ComponentType.Subtractive<«mouseDownEvent(it.component).name»>()''']
+					+group.constraints.filter[it.event==EventType.MOUSE_UP && it.negated].map['''ComponentType.Subtractive<«mouseUpEvent(it.component).name»>()''']
 					).join(', ')»});
 					«ENDFOR»
 			    }

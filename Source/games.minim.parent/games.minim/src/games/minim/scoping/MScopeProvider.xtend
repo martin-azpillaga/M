@@ -48,6 +48,7 @@ import org.eclipse.xtext.scoping.IScope
 import org.eclipse.xtext.scoping.Scopes
 
 import static games.minim.m.MPackage.Literals.*
+import games.minim.m.Click
 
 class EngineComponent extends NameImpl
 {
@@ -165,6 +166,7 @@ class StandardLibrary extends LazyLinker
 		game.meshComponents.clear
 		game.materialComponents.clear
 		game.textComponents.clear
+		game.clickComponents.clear
 	}
 	
 	def reset(Game game)
@@ -477,6 +479,12 @@ class TypeInference extends DefaultLinkingService
 				component.name = text
 				deduction.sensorComponents.add(component)
 			}
+			else if (context instanceof Click)
+			{
+				var component = MFactory.eINSTANCE.createName
+				component.name = text
+				deduction.clickComponents.add(component)
+			}
 			else if (context instanceof Sprite)
 			{
 				var component = MFactory.eINSTANCE.createName
@@ -618,6 +626,18 @@ class TypeInference extends DefaultLinkingService
 					component.name = text
 					deduction.triggerComponents.add(component)
 				}
+				case MOUSE_DOWN: 
+				{
+					var component = MFactory.eINSTANCE.createName
+					component.name = text
+					deduction.clickComponents.add(component)
+				}
+				case MOUSE_UP: 
+				{
+					var component = MFactory.eINSTANCE.createName
+					component.name = text
+					deduction.clickComponents.add(component)
+				}
 				
 			}
 		}
@@ -729,6 +749,8 @@ class MScopeProvider extends AbstractMScopeProvider
 					case TAG: deduction.tagComponents + engine.tagComponents
 					case TIMEOUT: deduction.timerComponents + engine.timerComponents
 					case TRIGGER: deduction.triggerComponents + engine.triggerComponents
+					case MOUSE_DOWN: deduction.clickComponents + engine.clickComponents
+					case MOUSE_UP: deduction.clickComponents + engine.clickComponents
 				}
 			}
 			case ACCESS__COMPONENT: 
@@ -771,6 +793,7 @@ class MScopeProvider extends AbstractMScopeProvider
 		+deduction.spriteComponents
 		+deduction.audioComponents
 		+deduction.textComponents
+		+deduction.clickComponents
 		+engine.tagComponents
 		+engine.real1Components
 		+engine.real2Components
@@ -786,6 +809,7 @@ class MScopeProvider extends AbstractMScopeProvider
 		+engine.spriteComponents
 		+engine.audioComponents
 		+engine.textComponents
+		+engine.clickComponents
 	}
 	
 	def recursiveGroups(EObject object)
