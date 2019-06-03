@@ -97,7 +97,8 @@ enum UnityComponentType
 	AudioListener, Light,
 	Text, ray, RectTransform, MonoBehaviour,
 	MeshFilter, MeshRenderer, AudioSource,
-	SpriteRenderer, Canvas, CanvasRenderer
+	SpriteRenderer, Canvas, CanvasRenderer,
+	Button, Image
 }
 	
 class HybridUnity implements Framework
@@ -1169,11 +1170,17 @@ class HybridUnity implements Framework
 		var text = yamlComponents.keySet.filter(EngineComponent).findFirst[it.type == EngineComponentType.TEXT || it.type == EngineComponentType.NUMBER]
 		if (text !== null)
 		{
+			yamlComponents.get(text).add(real1Value(EngineComponentType.FONT, 0))
+		}
+		
+		var image = yamlComponents.keySet.filter(EngineComponent).findFirst[it.type == EngineComponentType.IMAGE]
+		var button = yamlComponents.keySet.filter(EngineComponent).findFirst[it.type == EngineComponentType.BUTTON]
+		if (text !== null || image !== null || button !== null)
+		{
 			var renderer = new EngineComponent
 			renderer.name = 'CanvasRenderer'
 			renderer.type = EngineComponentType.CANVAS_RENDERER
 			yamlComponents.put(renderer, #[])
-			yamlComponents.get(text).add(real1Value(EngineComponentType.FONT, 0))
 			var position = transformValues.findFirst[(it.component instanceof EngineComponent) && (it.component as EngineComponent).type == EngineComponentType.POSITION] as Real2
 			var scale = transformValues.findFirst[(it.component instanceof EngineComponent) && (it.component as EngineComponent).type == EngineComponentType.SCALE] as Real2
 			transformValues.clear
@@ -1186,7 +1193,10 @@ class HybridUnity implements Framework
 				transformValues.add(real2Value(EngineComponentType.SCREEN_SIZE, scale.x, scale.y))
 			}
 		}
-		else
+		
+		
+		
+		if (text === null && image === null && button === null)
 		{
 			var base = entity.base
 			var ui = false
@@ -1210,6 +1220,7 @@ class HybridUnity implements Framework
 				}
 			}
 		}
+		
 		var camera = yamlComponents.keySet.filter(EngineComponent).findFirst[it.unityComponent == Camera]
 		if (camera !== null)
 		{
@@ -1408,7 +1419,7 @@ class HybridUnity implements Framework
 	
 	def ui(Entity entity)
 	{
-		if (entity.values.exists[it.component instanceof EngineComponent && #[EngineComponentType.CANVAS_SCALER,EngineComponentType.TEXT,EngineComponentType.NUMBER].contains((it.component as EngineComponent).type)])
+		if (entity.values.exists[it.component instanceof EngineComponent && #[EngineComponentType.CANVAS_SCALER,EngineComponentType.TEXT,EngineComponentType.NUMBER,EngineComponentType.IMAGE, EngineComponentType.BUTTON].contains((it.component as EngineComponent).type)])
 		{
 			return true
 		}
@@ -1442,6 +1453,14 @@ class HybridUnity implements Framework
 			else if (component.type == EngineComponentType.NUMBER)
 			{
 				return 708705254
+			}
+			else if (component.type == EngineComponentType.IMAGE)
+			{
+				return -765806418
+			}
+			else if (component.type == EngineComponentType.BUTTON)
+			{
+				return 1392445389
 			}
 			else if (component.type == EngineComponentType.RAY)
 			{
@@ -1902,6 +1921,8 @@ class HybridUnity implements Framework
 			case CanvasRenderer: 222
 			case MonoBehaviour: 114
 			case Collider: 0
+			case Button: 114
+			case Image: 114
 		}
 	}
 	
@@ -1927,6 +1948,8 @@ class HybridUnity implements Framework
 			case CanvasRenderer: 'CanvasRenderer'
 			case MonoBehaviour: 'MonoBehaviour'
 			case Collider: 'Collider'
+			case Button: 'MonoBehaviour'
+			case Image: 'MonoBehaviour'
 		}
 	}
 	
@@ -1988,6 +2011,10 @@ class HybridUnity implements Framework
 				case PHYSICAL: ''
 				case RIGIDBODY_CONSTRAINTS: 'constraints'
 				case ZORDER: 'sortingOrder'
+				case BUTTON: ''
+				case IMAGE: 'sprite'
+				case FILL_AMOUNT: 'fillAmount'
+				case TARGET_GRAPHIC: 'targetGraphic'
 			}
 		}
 		else
@@ -2054,6 +2081,10 @@ class HybridUnity implements Framework
 				case RAY: 2
 				case RIGIDBODY_CONSTRAINTS: 1
 				case ZORDER: 1
+				case BUTTON: 0
+				case IMAGE: 1
+				case FILL_AMOUNT: 1
+				case TARGET_GRAPHIC: 1
 			}
 		}
 		else
@@ -2121,6 +2152,10 @@ class HybridUnity implements Framework
 				case RAY: ray
 				case RIGIDBODY_CONSTRAINTS: Rigidbody2D
 				case ZORDER: SpriteRenderer
+				case BUTTON: Button
+				case IMAGE: Image
+				case FILL_AMOUNT: Image
+				case TARGET_GRAPHIC: Button
 			}
 		}
 		else

@@ -4,6 +4,8 @@ mass 1, radius 0.5, restitution 1, category [balls],
 speed_up_sensor detect [paddles], respawn_sensor detect [goals],
 servable_tag, respawn_point 0 0, angle -1 1, length 10 20, physical.
 
+logo has image sprite.logo button position -35 35 scale 10 10.
+
 paddle has
 position 0 0, scale 4 10, appearance sprite.paddle, category [paddles],
 extent 1 1, restitution 1, velocity 0 0,
@@ -56,6 +58,7 @@ playground contains
 
 menu contains
 	hud has canvas 100 100 contains
+		logo based on logo.
 		title has position 0 35, scale 40 10, text 'Pong'.
 		subtitle has position 0 10, scale 40 10, text 'Press start'.
 	.

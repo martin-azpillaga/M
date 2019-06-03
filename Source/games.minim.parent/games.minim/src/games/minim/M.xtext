@@ -206,6 +206,7 @@ enum UnityComponentType returns EngineComponentType:
 	|orthographic|orthographicSize|nearClip|clearFlags
 	|lightType|screenExpand|screenSize|screenPosition|rigidbodyConstraints
 	|inputModule|graphicRaycaster|eventSystem|uiScaleMode|font|canvasRenderer
+	|targetGraphic
 ;
 enum EngineComponentType: 
 	ears|perspective|trigger|mass|position|rotation|scale
@@ -216,7 +217,7 @@ enum EngineComponentType:
 	|volume|pitch|dopplerEffect
 	|zOrder='sortingorder'
 	|clearColor|canvasScaler='canvas'
-	|sprite='appearance'|mesh|material|audio='audiosource'|text|number;
+	|sprite='appearance'|mesh|material|audio='audiosource'|text|number|image|button|fillAmount;
 enum EngineTransformationType: abs|sqrt|cos|sin|tan|exp|log|random|create|add|x|y|z|w|join;
 enum EngineVoidType: create|destroy|add|remove;
 enum FieldType: value|x|y|z|w;
