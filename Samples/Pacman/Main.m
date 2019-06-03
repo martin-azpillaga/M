@@ -516,6 +516,15 @@ playground contains
 	b819 based on food has position 45 -10.
 .
 
+hardTest:
+for all entity a with home
+{
+	point = add (independencePoint, a)
+	time = add (independenceTime, a)
+	add (autoSpeed, a)
+	
+	point := a.independencePoint
+}
 goIndependent:
 for all entity a with home timed out independenceTime
 {

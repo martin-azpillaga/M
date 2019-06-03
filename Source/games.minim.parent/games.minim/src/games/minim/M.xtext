@@ -71,6 +71,7 @@ Condition returns Control:
 Assignment:
 	  {ComponentAssignment} group=[Name] '.' component=[Name] assignment=AssignmentType expression=ArithmeticExpression
 	| {VariableAssignment} variable=Name assignment=AssignmentType expression=ArithmeticExpression
+	| {CreatedAssignment} variable=Name START_SYSTEM assignment=AssignmentType expression=ArithmeticExpression
 ;
 
 SubrutineCall:
@@ -213,6 +214,6 @@ enum EngineComponentType:
 	|zOrder='sortingorder'
 	|clearColor|canvasScaler='canvas'
 	|sprite='appearance'|mesh|material|audio='audiosource'|text|number;
-enum EngineTransformationType: abs|sqrt|cos|sin|tan|exp|log|random|create|x|y|z|w|join;
+enum EngineTransformationType: abs|sqrt|cos|sin|tan|exp|log|random|create|add|x|y|z|w|join;
 enum EngineVoidType: create|destroy|add|remove;
 enum FieldType: value|x|y|z|w;

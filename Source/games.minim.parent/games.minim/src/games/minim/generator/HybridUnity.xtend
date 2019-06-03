@@ -85,6 +85,7 @@ import static games.minim.generator.HybridUnity.AssetType.*
 import static games.minim.generator.UnityComponentType.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
+import games.minim.m.CreatedAssignment
 
 enum Folder {Assets,Code,Tests,Packages,Settings,
 		Clips,Meshes,Materials,Sprites,Audios,PhysicsMaterials,
@@ -535,9 +536,12 @@ class HybridUnity implements Framework
 		        where T : struct, IComponentData 
 		        where W : ComponentDataProxy<T>
 		    {
-		        var go = manager.GetComponentObject<Transform>(entity).gameObject;
-		        var wrapper = go.AddComponent<W>();
-		        wrapper.Value = t;
+		    	if (!manager.HasComponent<T>(entity))
+		    	{
+		    		var go = manager.GetComponentObject<Transform>(entity).gameObject;
+		        	var wrapper = go.AddComponent<W>();
+		        	wrapper.Value = t;
+		        }
 		    }
 		
 		    public static void Synchronize<T>(this EntityManager manager, Entity entity, T t)
@@ -2283,8 +2287,10 @@ class HybridUnity implements Framework
 				«FOR group : groups»
 				ComponentGroup «group.group.name»;
 				«ENDFOR»
-				
 				«FOR addition : system.commands.allContents.filter(SubrutineCall).filter[it.subrutine instanceof EngineVoid && (it.subrutine as EngineVoid).type == EngineVoidType.ADD].toIterable»
+				Dictionary<Entity, «(addition.parameters.get(0) as Pop).variable.name»> «(addition.parameters.get(0) as Pop).variable.name»s = new Dictionary<Entity, «(addition.parameters.get(0) as Pop).variable.name»>();
+				«ENDFOR»
+				«FOR addition : system.commands.allContents.filter(VariableAssignment).map[expression].filter(Call).filter[it.function instanceof EngineTransformation && (it.function as EngineTransformation).type == EngineTransformationType.ADD].toIterable»
 				Dictionary<Entity, «(addition.parameters.get(0) as Pop).variable.name»> «(addition.parameters.get(0) as Pop).variable.name»s = new Dictionary<Entity, «(addition.parameters.get(0) as Pop).variable.name»>();
 				«ENDFOR»
 			    
@@ -2313,6 +2319,36 @@ class HybridUnity implements Framework
 			    {
 					«FOR command : system.commands»
 					«run(command)»
+					«ENDFOR»
+					«FOR addition : system.commands.allContents.filter(SubrutineCall).filter[it.subrutine instanceof EngineVoid && (it.subrutine as EngineVoid).type == EngineVoidType.ADD].toIterable»
+					«IF (addition.parameters.get(0) as Pop).variable.isReferenceType»
+					foreach (var kv in «(addition.parameters.get(0) as Pop).variable.name»s)
+					{
+					    EntityManager.Synchronize(kv.Key, kv.Value);
+					}
+					«(addition.parameters.get(0) as Pop).variable.name»s.Clear();
+					«ELSE»
+					foreach (var kv in «(addition.parameters.get(0) as Pop).variable.name»s)
+					{
+						EntityManager.Synchronize<«(addition.parameters.get(0) as Pop).variable.name»,_«(addition.parameters.get(0) as Pop).variable.name»> (kv.Key, kv.Value);
+					}
+					«(addition.parameters.get(0) as Pop).variable.name»s.Clear();
+					«ENDIF»
+					«ENDFOR»
+					«FOR addition : system.commands.allContents.filter(VariableAssignment).map[expression].filter(Call).filter[it.function instanceof EngineTransformation && (it.function as EngineTransformation).type == EngineTransformationType.ADD].toIterable»
+					«IF (addition.parameters.get(0) as Pop).variable.isReferenceType»
+					foreach (var kv in «(addition.parameters.get(0) as Pop).variable.name»s)
+					{
+					    EntityManager.Synchronize(kv.Key, kv.Value);
+					}
+					«(addition.parameters.get(0) as Pop).variable.name»s.Clear();
+					«ELSE»
+					foreach (var kv in «(addition.parameters.get(0) as Pop).variable.name»s)
+					{
+						EntityManager.Synchronize<«(addition.parameters.get(0) as Pop).variable.name»,_«(addition.parameters.get(0) as Pop).variable.name»> (kv.Key, kv.Value);
+					}
+					«(addition.parameters.get(0) as Pop).variable.name»s.Clear();
+					«ENDIF»
 					«ENDFOR»
 			    }
 			}'''
@@ -2587,6 +2623,27 @@ class HybridUnity implements Framework
 						«ENDFOR»
 						'''
 					}
+					if (function.type == EngineTransformationType.ADD)
+					{
+						var type = (expression.parameters.get(0) as Pop).variable
+						var group = (expression.parameters.get(1) as Pop).variable.name
+						var variable = command.variable.name
+						return
+						'''
+						«IF type.isReferenceType»
+						var «variable» = EntityManager.GetComponentObject<«type.name»>(entity_«group»);
+						if («variable» == null)
+						{
+							var go = EntityManager.GetComponentObject<Transform>(entity_«group»).gameObject;
+							«variable» = go.AddComponent<«type.name»>();
+							«type.name»s.Add (entity_«group», «variable»);
+						}
+						«ELSE»
+						var «variable» = new «type.name»();
+						«type.name»s.Add (entity_«group», «variable»);
+						«ENDIF»
+						'''
+					}
 				}
 			}
 			if (declared.contains(command.variable.name))
@@ -2608,6 +2665,13 @@ class HybridUnity implements Framework
 				'''
 			}
 		}
+		else if (command instanceof CreatedAssignment)
+		{
+			return
+			'''
+			«command.variable.name».value = «command.expression.toCode(FieldType.VALUE)»;
+			'''
+		}
 		else if (command instanceof Break)
 		{
 			'''
@@ -2628,20 +2692,27 @@ class HybridUnity implements Framework
 					// TODO make added components visible in editor.
 					case ADD: 
 					{
-						var type = command.parameters.get(0) as Pop
-						var group = command.parameters.get(1) as Pop
-						var referenceComponent = type.variable.isReferenceType
+						var type = (command.parameters.get(0) as Pop).variable
+						var group = (command.parameters.get(1) as Pop).variable
+						var referenceComponent = type.isReferenceType
 						return 
 						'''
-						if (!EntityManager.HasComponent<«type.variable.name»>(entity_«group.variable.name»))
+						«IF referenceComponent»
+						«type.name» «type.name»Proxy;
+						if (EntityManager.HasComponent<«type.name»>(entity_«group.name»))
 						{
-							«IF referenceComponent»
-							var go = EntityManager.GetComponentObject<Transform>(entity_«group.variable.name»).gameObject;
-							EntityManager.AddComponentObject(entity_«group.variable.name», go.AddComponent<«type.variable.name»>());
-							«ELSE»
-							EntityManager.AddComponentData(entity_«group.variable.name», new «type.variable.name»());
-							«ENDIF»
+							«type.name»Proxy = EntityManager.GetComponentObject<«type.name»>(entity_«group.name»);
 						}
+						else
+						{
+							var go = EntityManager.GetComponentObject<Transform>(entity_«group.name»).gameObject;
+							«type.name»Proxy = go.AddComponent<«type.name»>();
+							«type.name»s.Add(entity_«group.name»,«type.name»Proxy);
+						}
+						«ELSE»
+						var «type.name»Proxy = new «type.name»();
+						«type.name»s.Add(entity_«group.name»,«type.name»Proxy);
+						«ENDIF»
 						'''
 					}
 					case CREATE: 
@@ -2870,6 +2941,10 @@ class HybridUnity implements Framework
 					case W: 
 					{
 						return '''«expression.parameters.get(0).toCode(fieldType)».w'''
+					}
+					case ADD: 
+					{
+						return ''''''
 					}
 				}
 			}
