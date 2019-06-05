@@ -64,7 +64,7 @@ extent 1 1
 category [portal]
 physical.
 
-label has number 0 scale 10 5.
+label has number 0 scale 10 5 combo 0 initialCombo 0.
 
 lifeImage has image sprite.life scale 5 5 life.
 
@@ -90,6 +90,7 @@ home
 cowardry
 fearAppearance sprite.scared
 fearFrames 7
+worth 200
 normalAppearance sprite.ghost
 .
 
@@ -671,6 +672,25 @@ for all entity a with enter deathSensor
 	for all entity b
 	{
 		b.number = b.number + a.worth
+	}
+}
+
+performCombo:
+for all entity a with fear enter clashSensor
+{
+	for all entity b
+	{
+		b.combo = b.combo++
+		b.number = b.number + a.worth * b.combo
+	}
+}
+
+resetCombo:
+for all entity a with timed out fearTimer
+{
+	for all entity b
+	{
+		b.combo = b.initialCombo
 	}
 }
 
