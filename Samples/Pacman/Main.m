@@ -38,6 +38,9 @@ invincibilityFormula
 fearTimer 10s.
 
 character has 
+demoMode
+demoPowerlessVelocity -5 0
+demoPowerVelocity 10 0
 category [character]
 personality
 fearAmount 0
@@ -64,11 +67,13 @@ extent 1 1
 category [portal]
 physical.
 
-label has number 0 scale 10 5 combo 0 initialCombo 0.
+label has number 0 scale 10 5 combo 0 initialCombo 0 scoreboard.
 
 lifeImage has image sprite.life scale 5 5 life.
 
 ghost has
+demoMode
+demoFearVelocity 5 0
 appearance sprite.ghost
 scale 5 5
 sortingorder 1
@@ -76,7 +81,7 @@ extent 0.99 0.99
 category [evil]
 clashSensor detect [character]
 autoMove
-autoSpeed 4 0
+autoSpeed -5 0
 autoSpeedFactor -1
 reboundSensor detect [wall]
 respawnPoint 0 0
@@ -97,8 +102,8 @@ normalAppearance sprite.ghost
 audioEffect has
 audiosource audio.wakawaka, lifeTimer 1s.
 
-player has rotation 0 0 10,
-viewDistance 1000, viewAngle 50, position 0 0, clearColor 0.2 0.2 0.2 1.
+player has
+viewDistance 10, viewAngle 50, clearColor 0.2 0.2 0.2 1.
 
 
 hud has 
@@ -116,21 +121,56 @@ menu contains
 		options has position 0 -40 scale 100 4 text 'Options <select>'.
 	.
 	trigger has detector gamepad.start, scene entity.playground.
+	rulesPage has detector gamepad.select, scene entity.rulesPage.
+	player based on player.
+.
+
+rulesPage contains
+	hud has canvas 100 100 contains
+		blinkyText has position 10 45 scale 40 5 text 'Blinky'.
+		pinkyText has position 10 35 scale 40 5 text 'Pinky'.
+		inkyText has position 10 25 scale 40 5 text 'Inky'.
+		clydeText has position 10 15 scale 40 5 text 'Clyde'.
+		
+		foodText has position 10 -15 scale 40 5 text '10 pts'.
+		powerupText has position 10 -25 scale 40 5 text '50 pts'.
+		fruitText has position 10 -35 scale 40 5 text '100 pts'.
+		copyrightText has position 0 -45 scale 40 5 text 'c 1980 MIDWAY MFG. CO.'.
+	.
+	
+	blinky has position -30 45 scale 5 5 appearance sprite.blinky.
+	pinky has position -30 35 scale 5 5 appearance sprite.pinky.
+	inky has position -30 25 scale 5 5 appearance sprite.inky.
+	clyde has position -30 15 scale 5 5 appearance sprite.clyde.
+	
+	realPowerup based on powerup has position -40 0.
+	realPacman based on character has position 5 0.
+	caster based on raycaster.
+	realBlinky based on ghost without independenceTime has position 15 0 appearance sprite.blinky.
+	realPinky based on ghost without independenceTime has position 20 0 appearance sprite.pinky.
+	realInky based on ghost without independenceTime has position 25 0 appearance sprite.inky.
+	realClyde based on ghost without independenceTime has position 30 0 appearance sprite.clyde.
+	
+	food has position -15 -15 scale 1 1 appearance sprite.food.
+	powerup has position -15 -25 scale 4 4 appearance sprite.powerup.
+	fruit has position -15 -35 scale 3 3 appearance sprite.fruit.
+	
+	titlePage has detector gamepad.south, scene entity.menu.
 	player based on player.
 .
 
 playground contains
 	ruleSet based on rules.
 	
-	pacman based on character has position 0 -25.
+	pacman based on character without demoMode has position 0 -25.
 	caster based on raycaster.
 	user based on player.
 	canvas based on hud.
 	
-	pinky based on ghost has position 0 0 appearance sprite.pinky normalAppearance sprite.pinky independenceTime 2s.
-	blinky based on ghost has position 5 0 appearance sprite.blinky normalAppearance sprite.blinky independenceTime 4s.
-	inky based on ghost has position -5 0 appearance sprite.inky normalAppearance sprite.inky independenceTime 6s.
-	clyde based on ghost has position 0 5 appearance sprite.clyde normalAppearance sprite.clyde independenceTime 8s.
+	pinky based on ghost without demoMode has position 0 0 appearance sprite.pinky normalAppearance sprite.pinky independenceTime 2s.
+	blinky based on ghost without demoMode has position 5 0 appearance sprite.blinky normalAppearance sprite.blinky independenceTime 4s.
+	inky based on ghost without demoMode has position -5 0 appearance sprite.inky normalAppearance sprite.inky independenceTime 6s.
+	clyde based on ghost without demoMode has position 0 5 appearance sprite.clyde normalAppearance sprite.clyde independenceTime 8s.
 	
 	leftWish based on directionChange has button gamepad.left direction -2 0.
 	rightWish based on directionChange has button gamepad.right direction 2 0.
@@ -527,6 +567,31 @@ playground contains
 	b819 based on food has position 45 -10.
 .
 
+demo:
+for all entity a with demoMode
+{
+	initialize amount
+	for all entity b with fear
+	{
+		amount = amount++
+	}
+	
+	if amount = a.fearAmount
+	{
+		a.velocity = a.demoPowerlessVelocity
+	}
+	else
+	{
+		a.velocity = a.demoPowerVelocity
+	}
+}
+
+demoFear:
+for all entity c with fear demoMode
+{
+	c.autoSpeed = c.demoFearVelocity
+}
+
 goIndependent:
 for all entity a with home timed out independenceTime
 {
@@ -581,11 +646,17 @@ for all entity a with personality enter clashSensor
 }
 
 defeat:
-for all entity a with fear enter clashSensor
+for all entity a with fear no demoMode enter clashSensor
 {
 	a.position = a.respawnPoint
 	add (home, a)
 	a.independenceTime = random(a.independenceTimeRange)
+}
+
+demoDefeat:
+for all entity b with fear demoMode enter clashSensor
+{
+	destroy (b)
 }
 
 becomeInvincible:
@@ -669,7 +740,7 @@ for all entity a with enter deathSensor
 score:
 for all entity a with enter deathSensor
 {
-	for all entity b
+	for all entity b with scoreboard
 	{
 		b.number = b.number + a.worth
 	}
