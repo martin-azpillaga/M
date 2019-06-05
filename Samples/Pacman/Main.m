@@ -41,6 +41,8 @@ character has
 category [character]
 personality
 fearAmount 0
+respawnPoint 0 -25
+sortingorder 2
 wish
 mass 1
 physical
@@ -64,9 +66,12 @@ physical.
 
 label has number 0 scale 10 5.
 
+lifeImage has image sprite.life scale 5 5 life.
+
 ghost has
 appearance sprite.ghost
 scale 5 5
+sortingorder 1
 extent 0.99 0.99
 category [evil]
 clashSensor detect [character]
@@ -98,6 +103,9 @@ viewDistance 1000, viewAngle 50, position 0 0, clearColor 0.2 0.2 0.2 1.
 hud has 
 canvas 100 100 contains
 	score_board based on label has position -40 40.
+	life_image_1 based on lifeImage has position 35 45.
+	life_image_2 based on lifeImage has position 40 45.
+	life_image_3 based on lifeImage has position 45 45.
 .
 
 menu contains
@@ -548,7 +556,26 @@ for all entity a with personality enter clashSensor
 	
 	if amount = a.fearAmount
 	{
-		destroy (a)
+		a.position = a.respawnPoint
+	}
+}
+
+loseLife:
+for all entity a with personality enter clashSensor
+{
+	initialize amount
+	for all entity b with fear
+	{
+		amount = amount++
+	}
+	
+	if amount = a.fearAmount
+	{
+		for all entity c with life
+		{
+			destroy (c)
+			break
+		}
 	}
 }
 
@@ -584,7 +611,7 @@ lose:
 for all entity a
 {
 	initialize amount
-	for all entity b with loseRequirement
+	for all entity b with life
 	{
 		amount = amount++
 	}

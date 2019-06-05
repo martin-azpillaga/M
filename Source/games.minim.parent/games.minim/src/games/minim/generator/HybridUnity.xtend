@@ -1297,7 +1297,7 @@ class HybridUnity implements Framework
 			var ui = false
 			while (!ui && base !== null)
 			{
-				ui = base.values.exists[(it.component instanceof EngineComponent) && (it.component as EngineComponent).type == EngineComponentType.NUMBER]
+				ui = base.ui
 				base = base.base
 			}
 			if (ui)

@@ -47,7 +47,6 @@ playground contains
 
 menu contains
 	hud has canvas 100 100 contains
-		logo based on logo.
 		title has position 0 35, scale 40 10, text 'Pong'.
 		subtitle has position 0 10, scale 40 10, text 'Press start'.
 	.
