@@ -26,6 +26,7 @@ Workflow {
 		{
 			name = "games.minim.M"
 			fileExtensions = "m"
+			referencedResource = "platform:/resource/games.minim/model/M.genmodel"
 			
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {}

@@ -1,6 +1,6 @@
 grammar games.minim.M with org.eclipse.xtext.common.Terminals
 
-generate m "http://www.minim.games/M"
+import "http://www.minim.games/M"
 
 Game:
 	(
@@ -10,41 +10,7 @@ Game:
 		|subrutines+=Subrutine
 		|MAIN_ENTITIES mainEntities+=[Entity]'.'
 	)*
-	(AND
-		title = ID '.'
-	tagComponents+=Name+ '.'
-	real1Components+=Name+ '.'
-	real2Components+=Name+ '.'
-	real3Components+=Name+ '.'
-	real4Components+=Name+ '.'
-	enumerationComponents+=Name '.'
-	referenceComponents+=Name '.'
-	timerComponents+=Name '.'
-	triggerComponents+=Name '.'
-	rangeComponents+=Name '.'
-	vectorComponents+=Name '.'
-	sensorComponents+=Name '.'
-	clickComponents+=Name '.'
-	textComponents+=Name '.'
-	entityComponents+=Name '.'
-	spriteComponents+=Name '.'
-	audioComponents+=Name '.'
-	meshComponents+=Name '.'
-	materialComponents+=Name '.'
-	fontComponents+=Name '.'
-	
-	sprites+=Name '.'
-	audios+=Name '.'
-	meshes+=Name '.'
-	materials+=Name '.'
-	texts+=Name '.'
-	fonts+=Name '.'
-	enumerations+=Enum '.'
-	
-	transformations+=Name '.'
-	voids+=Name '.')?
 ;
-Expression: ArithmeticExpression | BooleanExpression;
 System returns Control:	{System} name=ID START_SYSTEM commands+=Command+;
 
 Command: Control|Assignment|SubrutineCall|Break|Initialization;
@@ -59,8 +25,6 @@ Constraint:
 
 Control:
 	  {Loop} FOR (all?=ALL|number=ArithmeticExpression) ENTITIES group=Name (CONSTRAINTS constraints+=Constraint+)?
-	  		entities?='entities'?
-	  		('data' datas+=[Name]+)?
 	  		'{' commands+=Command+ '}'
 	| {Check} IF condition=Condition
 			( ELSEIF conditions+=Condition )*
@@ -89,10 +53,10 @@ Atomic returns ArithmeticExpression:
 ;
 
 Function:
-	'function' name=ID '(' parameters+=Name (',' parameters+=Name)* ')' '{' commands+=Command+ 'return' '}'
+	DECLARE_FUNCTION name=ID '(' parameters+=Name (',' parameters+=Name)* ')' '{' commands+=Command+ 'return' '}'
 ;
 Subrutine:
-	'subrutine' name=ID '(' parameters+=Name (',' parameters+=Name)* ')' '{' commands+=Command+ '}'
+	DECLARE_SUBRUTINE name=ID '(' parameters+=Name (',' parameters+=Name)* ')' '{' commands+=Command+ '}'
 ;
 
 Entity:
@@ -152,10 +116,11 @@ Primary returns ArithmeticExpression:
 
 
 
-Enum: name=ID values+=Name+;
 Name: name=ID;
 Number:	{Decimal} negative?='-'? wholePart=INT ('.' decimalPart=INT)?;
 
+terminal DECLARE_FUNCTION: 'function';
+terminal DECLARE_SUBRUTINE: 'subrutine';
 terminal REFERENCE: 'entity.';
 terminal SPRITE: 'sprite.';
 terminal AUDIO: 'audio.';
@@ -206,23 +171,3 @@ enum TriggerType:
 enum VectorType: mouse='mouse.position'|dpad='gamepad.dpad'|leftStick='gamepad.leftStick'|rightStick='gamepad.rightStick';
 enum RelationType: over='>'|under='<'|equal='='|notequal='!='|overorequal='>='|underorequal='<=';
 enum AssignmentType: set='='|increase='+='|decrease='-='|multiply='*='|divide='/='|modulus='%='|and='&='|or='|=';
-enum UnityComponentType returns EngineComponentType:
-	canvas='nonono'|bodyType|serializedVersion
-	|orthographic|orthographicSize|nearClip|clearFlags
-	|lightType|screenExpand|screenSize|screenPosition|rigidbodyConstraints
-	|inputModule|graphicRaycaster|eventSystem|uiScaleMode|font|canvasRenderer
-	|targetGraphic
-;
-enum EngineComponentType: 
-	ears|perspective|mass|position|rotation|scale|trigger
-	|radius|ray|physical
-	|velocity|acceleration|emission
-	|intensity|range|spotAngle|viewAngle|viewDistance
-	|extent|force|restitution|friction
-	|volume|pitch|dopplerEffect
-	|zOrder='sortingorder'
-	|clearColor|canvasScaler='canvas'
-	|sprite='appearance'|mesh|material|audio='audiosource'|text|number|image|button='interaction'|fillAmount;
-enum EngineTransformationType: abs|sqrt|cos|sin|tan|exp|log|random|create|add|x|y|z|w|join;
-enum EngineVoidType: create|destroy|add|remove;
-enum FieldType: value|x|y|z|w;

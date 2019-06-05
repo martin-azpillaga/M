@@ -13,37 +13,75 @@
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EventType/enter"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EventType/stay"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EventType/exit"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//EventType/mouseDown"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//EventType/mouseUp"/>
     </genEnums>
-    <genEnums typeSafeEnumCompatible="false" ecoreEnum="M.ecore#//Axis">
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Axis/LeftX"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Axis/LeftY"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Axis/RightX"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Axis/RightY"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Axis/LeftShoulder"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Axis/RightShoulder"/>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="M.ecore#//AxisType">
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//AxisType/LeftX"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//AxisType/LeftY"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//AxisType/RightX"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//AxisType/RightY"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//AxisType/LeftShoulder"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//AxisType/RightShoulder"/>
     </genEnums>
-    <genEnums typeSafeEnumCompatible="false" ecoreEnum="M.ecore#//Button">
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/South"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/West"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/East"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/North"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/LeftTrigger"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/RightTrigger"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/Down"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/Left"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/Right"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/Up"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/Start"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/Select"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/LeftStick"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/RightStick"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Button/Optional"/>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="M.ecore#//TriggerType">
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/South"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/West"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/East"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/North"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/LeftTrigger"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/RightTrigger"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Down"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Left"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Right"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Up"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Start"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Select"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/LeftStick"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/RightStick"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Optional"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Zero"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/One"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Two"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Three"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Four"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Five"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Six"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Seven"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Eight"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Nine"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/A"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/B"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/C"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/D"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/E"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/F"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/G"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/H"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/I"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/J"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/K"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/L"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/M"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/N"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/O"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/P"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Q"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/R"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/S"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/T"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/U"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/V"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/W"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/X"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Y"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//TriggerType/Z"/>
     </genEnums>
-    <genEnums typeSafeEnumCompatible="false" ecoreEnum="M.ecore#//Input2">
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Input2/mouse"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Input2/dpad"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Input2/leftStick"/>
-      <genEnumLiterals ecoreEnumLiteral="M.ecore#//Input2/rightStick"/>
+    <genEnums typeSafeEnumCompatible="false" ecoreEnum="M.ecore#//VectorType">
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//VectorType/mouse"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//VectorType/dpad"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//VectorType/leftStick"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//VectorType/rightStick"/>
     </genEnums>
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="M.ecore#//RelationType">
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//RelationType/over"/>
@@ -75,19 +113,24 @@
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/screenExpand"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/screenSize"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/screenPosition"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/rigidbodyConstraints"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/inputModule"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/graphicRaycaster"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/eventSystem"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/uiScaleMode"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/font"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/canvasRenderer"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/targetGraphic"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/ears"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/perspective"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/mass"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/position"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/rotation"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/scale"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/trigger"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/radius"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/ray"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/physical"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/velocity"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/acceleration"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/emission"/>
@@ -103,6 +146,7 @@
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/volume"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/pitch"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/dopplerEffect"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/zOrder"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/clearColor"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/canvasScaler"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/sprite"/>
@@ -111,6 +155,9 @@
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/audio"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/text"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/number"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/image"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/button"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineComponentType/fillAmount"/>
     </genEnums>
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="M.ecore#//EngineTransformationType">
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineTransformationType/abs"/>
@@ -122,6 +169,7 @@
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineTransformationType/log"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineTransformationType/random"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineTransformationType/create"/>
+      <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineTransformationType/add"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineTransformationType/x"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineTransformationType/y"/>
       <genEnumLiterals ecoreEnumLiteral="M.ecore#//EngineTransformationType/z"/>
@@ -144,12 +192,9 @@
     <genClasses ecoreClass="M.ecore#//Game">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/entities"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/systems"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference M.ecore#//Game/mainEntities"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/functions"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/subrutines"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/gravityX"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/gravityY"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/gravityZ"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference M.ecore#//Game/mainEntities"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//Game/title"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/tagComponents"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/real1Components"/>
@@ -161,8 +206,9 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/timerComponents"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/triggerComponents"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/rangeComponents"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/input2DComponents"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/vectorComponents"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/sensorComponents"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/clickComponents"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/textComponents"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/entityComponents"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Game/spriteComponents"/>
@@ -182,7 +228,6 @@
     </genClasses>
     <genClasses ecoreClass="M.ecore#//Expression"/>
     <genClasses ecoreClass="M.ecore#//Control">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//Control/name"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Control/commands"/>
     </genClasses>
     <genClasses ecoreClass="M.ecore#//Command"/>
@@ -233,32 +278,23 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//Name/name"/>
     </genClasses>
     <genClasses ecoreClass="M.ecore#//Number"/>
+    <genClasses ecoreClass="M.ecore#//System">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//System/name"/>
+    </genClasses>
     <genClasses ecoreClass="M.ecore#//Loop">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//Loop/all"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Loop/number"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Loop/group"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Loop/constraints"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference M.ecore#//Loop/exclusions"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//Loop/entities"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference M.ecore#//Loop/datas"/>
-    </genClasses>
-    <genClasses ecoreClass="M.ecore#//Choose">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Choose/group"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Choose/number"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Choose/constraints"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference M.ecore#//Choose/exclusions"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//Choose/entities"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference M.ecore#//Choose/datas"/>
     </genClasses>
     <genClasses ecoreClass="M.ecore#//Check">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Check/condition"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Check/conditions"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Check/elseCommands"/>
     </genClasses>
     <genClasses ecoreClass="M.ecore#//While">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//While/condition"/>
-    </genClasses>
-    <genClasses ecoreClass="M.ecore#//LoopEnum">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//LoopEnum/variable"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference M.ecore#//LoopEnum/component"/>
     </genClasses>
     <genClasses ecoreClass="M.ecore#//Condition">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Condition/condition"/>
@@ -270,10 +306,14 @@
     <genClasses ecoreClass="M.ecore#//VariableAssignment">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//VariableAssignment/variable"/>
     </genClasses>
+    <genClasses ecoreClass="M.ecore#//CreatedAssignment">
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//CreatedAssignment/variable"/>
+    </genClasses>
     <genClasses ecoreClass="M.ecore#//Access">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference M.ecore#//Access/group"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference M.ecore#//Access/component"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//Access/range"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//Access/vector"/>
     </genClasses>
     <genClasses ecoreClass="M.ecore#//Call">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference M.ecore#//Call/function"/>
@@ -326,22 +366,21 @@
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference M.ecore#//Font/value"/>
     </genClasses>
     <genClasses ecoreClass="M.ecore#//Timer">
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Timer/seconds"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Timer/value"/>
     </genClasses>
     <genClasses ecoreClass="M.ecore#//Trigger">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//Trigger/button"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//Trigger/value"/>
     </genClasses>
     <genClasses ecoreClass="M.ecore#//Range">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//Range/axis"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//Range/value"/>
     </genClasses>
-    <genClasses ecoreClass="M.ecore#//Input2D">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//Input2D/value"/>
+    <genClasses ecoreClass="M.ecore#//Vector">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute M.ecore#//Vector/value"/>
     </genClasses>
     <genClasses ecoreClass="M.ecore#//Sensor">
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference M.ecore#//Sensor/values"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Sensor/rayX"/>
-      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Sensor/rayY"/>
     </genClasses>
+    <genClasses ecoreClass="M.ecore#//Click"/>
     <genClasses ecoreClass="M.ecore#//Or">
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Or/left"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference M.ecore#//Or/right"/>
