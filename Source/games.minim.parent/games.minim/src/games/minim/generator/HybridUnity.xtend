@@ -710,7 +710,10 @@ class HybridUnity implements Framework
 			            if ((other_category.Value.value & «value()») != 0)
 			            {
 			                var goe = gameObject.GetComponent<GameObjectEntity>();
-			                goe.EntityManager.AddComponentData(goe.Entity, new «name»_enter { });
+			                if (!goe.EntityManager.HasComponent<«name»_enter> (goe.Entity))
+			                {
+			                	goe.EntityManager.AddComponentData(goe.Entity, new «name»_enter { });
+							}
 						}
 					}
 				}
@@ -828,6 +831,14 @@ class HybridUnity implements Framework
 			    {
 			        entity = GetComponent<GameObjectEntity>().Entity;
 			        manager = World.Active.GetExistingManager<EntityManager>();
+			    }
+			    
+			    void OnDestroy()
+			    {
+			    	if (manager.HasComponent<«name»_timeout>(entity))
+			        {
+			            manager.RemoveComponent<«name»_timeout>(entity);
+			        }
 			    }
 			    
 			    void Update()
@@ -2428,6 +2439,25 @@ class HybridUnity implements Framework
 				}
 			}
 		}
+		for (routine : EcoreUtil2.getAllContentsOfType(system, Call))
+		{
+			var name = routine.function
+			if (name instanceof EngineTransformation)
+			{
+				if (name.type == EngineTransformationType.ADD)
+				{
+					var container = routine.eContainer
+					while (container !== system)
+					{
+						if (container instanceof Loop)
+						{
+							container.entities = true
+						}
+						container = container.eContainer
+					}
+				}
+			}
+		}
 		
 		EcoreUtil2.getAllContentsOfType(system, Loop)
 	}
@@ -2468,6 +2498,9 @@ class HybridUnity implements Framework
 				«ENDFOR»
 				«FOR addition : system.commands.allContents.filter(VariableAssignment).map[expression].filter(Call).filter[it.function instanceof EngineTransformation && (it.function as EngineTransformation).type == EngineTransformationType.ADD].toIterable»
 				Dictionary<Entity, «(addition.parameters.get(0) as Pop).variable.name»> «(addition.parameters.get(0) as Pop).variable.name»s = new Dictionary<Entity, «(addition.parameters.get(0) as Pop).variable.name»>();
+				«ENDFOR»
+				«FOR addition : system.commands.allContents.filter(SubrutineCall).filter[it.subrutine instanceof EngineVoid && (it.subrutine as EngineVoid).type == EngineVoidType.REMOVE].toIterable»
+				List<Entity> removed_«(addition.parameters.get(0) as Pop).variable.name»s = new List<Entity>();
 				«ENDFOR»
 			    
 			    protected override void OnCreateManager()
@@ -2528,6 +2561,23 @@ class HybridUnity implements Framework
 						EntityManager.Synchronize<«(addition.parameters.get(0) as Pop).variable.name»,_«(addition.parameters.get(0) as Pop).variable.name»> (kv.Key, kv.Value);
 					}
 					«(addition.parameters.get(0) as Pop).variable.name»s.Clear();
+					«ENDIF»
+					«ENDFOR»
+					«FOR addition : system.commands.allContents.filter(SubrutineCall).filter[it.subrutine instanceof EngineVoid && (it.subrutine as EngineVoid).type == EngineVoidType.REMOVE].toIterable»
+					«IF (addition.parameters.get(0) as Pop).variable.isReferenceType»
+					foreach (var kv in removed_«(addition.parameters.get(0) as Pop).variable.name»s)
+					{
+						EntityManager.RemoveComponent<«(addition.parameters.get(0) as Pop).variable.name»>(kv);
+					    GameObject.Destroy(EntityManager.GetComponentObject<Transform>(kv).gameObject.GetComponent<«(addition.parameters.get(0) as Pop).variable.name»>());
+					}
+					removed_«(addition.parameters.get(0) as Pop).variable.name»s.Clear();
+					«ELSE»
+					foreach (var kv in removed_«(addition.parameters.get(0) as Pop).variable.name»s)
+					{
+						EntityManager.RemoveComponent<«(addition.parameters.get(0) as Pop).variable.name»>(kv);
+						GameObject.Destroy(EntityManager.GetComponentObject<Transform>(kv).gameObject.GetComponent<_«(addition.parameters.get(0) as Pop).variable.name»>());
+					}
+					removed_«(addition.parameters.get(0) as Pop).variable.name»s.Clear();
 					«ENDIF»
 					«ENDFOR»
 			    }
@@ -2933,7 +2983,7 @@ class HybridUnity implements Framework
 						'''
 						if (EntityManager.HasComponent<«type.variable.name»>(entity_«group.variable.name»))
 						{
-							PostUpdateCommands.RemoveComponent<«type.variable.name»>(entity_«group.variable.name»);
+							removed_«type.variable.name»s.Add(entity_«group.variable.name»);
 						}
 						'''
 					}
