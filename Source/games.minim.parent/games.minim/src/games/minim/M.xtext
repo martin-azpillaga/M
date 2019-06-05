@@ -200,6 +200,8 @@ enum TriggerType:
 	|Start='gamepad.start'|Select='gamepad.select'
 	|LeftStick='gamepad.leftStickPress'|RightStick='gamepad.rightStickPress'
 	|Optional='gamepad.optional'
+	|Zero='key.0'|One='key.1'|Two='key.2'|Three='key.3'|Four='key.4'|Five='key.5'|Six='key.6'|Seven='key.7'|Eight='key.8'|Nine='key.9'
+	|A='key.A'|B='key.B'|C='key.C'|D='key.D'|E='key.E'|F='key.F'|G='key.G'|H='key.H'|I='key.I'|J='key.J'|K='key.K'|L='key.L'|M='key.M'|N='key.N'|O='key.O'|P='key.P'|Q='key.Q'|R='key.R'|S='key.S'|T='key.T'|U='key.U'|V='key.V'|W='key.W'|X='key.X'|Y='key.Y'|Z='key.Z'
 ;
 enum VectorType: mouse='mouse.position'|dpad='gamepad.dpad'|leftStick='gamepad.leftStick'|rightStick='gamepad.rightStick';
 enum RelationType: over='>'|under='<'|equal='='|notequal='!='|overorequal='>='|underorequal='<=';
@@ -220,7 +222,7 @@ enum EngineComponentType:
 	|volume|pitch|dopplerEffect
 	|zOrder='sortingorder'
 	|clearColor|canvasScaler='canvas'
-	|sprite='appearance'|mesh|material|audio='audiosource'|text|number|image|button|fillAmount;
+	|sprite='appearance'|mesh|material|audio='audiosource'|text|number|image|button='interaction'|fillAmount;
 enum EngineTransformationType: abs|sqrt|cos|sin|tan|exp|log|random|create|add|x|y|z|w|join;
 enum EngineVoidType: create|destroy|add|remove;
 enum FieldType: value|x|y|z|w;
