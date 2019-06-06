@@ -4,16 +4,16 @@ var toolbox = document.getElementById("toolbox");
 var options = { 
 	toolbox : toolbox, 
 	collapse : true, 
-	comments : false, 
-	disable : false, 
+	comments : true, 
+	disable : true, 
 	maxBlocks : Infinity, 
-	trashcan : false, 
+	trashcan : true, 
 	horizontalLayout : false, 
 	toolboxPosition : 'start', 
 	css : true, 
 	media : 'https://blockly-demo.appspot.com/static/media/', 
 	rtl : false, 
-	scrollbars : false, 
+	scrollbars : true, 
 	sounds : true, 
 	oneBasedIndex : true
 };
