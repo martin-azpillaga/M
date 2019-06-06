@@ -52,12 +52,16 @@ English | Spanish
 --- | ---
 ![English code][textualEntityEnglish] | ![Spanish code][textualEntitySpanish]
 
+___
+
 * Editor agnostic
 
 Programs in the M language can be develop in any editor that supports the LSP protocol.
 
 Eclipse | Visual studio code
 --- | ---
+
+___
 
 * Game engine agnostic
 
@@ -67,9 +71,15 @@ Unity | Unreal | Godot
 --- | --- | ---
 
 ### Collaboration
+___
 Collaboration is highly appreciated.
 ##### This project is in active development
 Visit the [projects page](https://github.com/martin-azpillaga/M/projects) for updated information on current progress.
 ##### Common extension points
 
-If you are willing to add support for a new natural language, help in the integration of the LSP server into your editor of choice or writing the code generation process for a new engine, don't hesitate to contact me.
+If you are willing to 
+* add support for a new natural language
+* help in the integration of the LSP server into your editor of choice or 
+* write the code generation process for a new engine
+
+Don't hesitate to contact me.
