@@ -40,6 +40,7 @@ This repository includes three sample games made exclusively with the M language
 Pong | SpaceInvaders | Pacman
 --- | --- | ---
 ![Pong][pong] | ![Space Invaders][spaceInvaders] | ![Pacman][pacman]
+&copy; Atari Inc. | &copy; Taito corporation | &copy; Namco Limited
 [Link to the code](https://github.com/martin-azpillaga/M/blob/master/Samples/Pong/Main.m) | [Link to the code](https://github.com/martin-azpillaga/M/blob/master/Samples/SpaceInvaders/Main.m) | [Link to the code](https://github.com/martin-azpillaga/M/blob/master/Samples/Pacman/Main.m)
 ### Features
 ___
