@@ -21,8 +21,8 @@ M is a programming language built specifically for game development. It embraces
 
 >-[Unknown](https://quoteinvestigator.com/2011/05/13/einstein-simple/)
 
-### M is for everyone
-M tries to involve all the technical roles in development: Artists - drawers, modelers, , programmers, designers
+### Involve all the team
+M tries to involve all the technical roles in development: Artists, programmers and designers in the development of the game under an ubiquitous language.
 
 Textual programming | Visual programming
 --- | ---
@@ -72,7 +72,7 @@ Unity | Unreal | Godot
 
 ### Collaboration
 ___
-Collaboration is highly appreciated.
+This project tries to follow clean code standards so that other developers can understand and modify the code quickly. Collaboration is highly appreciated.
 ##### This project is in active development
 Visit the [projects page](https://github.com/martin-azpillaga/M/projects) for updated information on current progress.
 ##### Common extension points
