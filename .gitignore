@@ -17,3 +17,5 @@ bin/
 generated/
 # Git
 .gitattributes
+# Blockly
+blockly-master/
