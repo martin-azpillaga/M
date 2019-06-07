@@ -10,16 +10,14 @@
 [spaceInvaders]: https://github.com/martin-azpillaga/M/blob/master/Documentation/SpaceInvaders.PNG
 [eclipseLogo]: https://www.macupdate.com/images/icons256/11662.png
 [vscodeLogo]: https://cf.mastohost.com/v1/AUTH_91eb37814936490c95da7b85993cc2ff/fosstodon/custom_emojis/images/000/046/192/static/33ed6562f1f97c3a.png
-
+[unityProject]:https://github.com/martin-azpillaga/M/blob/master/Documentation/UnityProject.PNG
 ![M logo][logo]
 # The language of video games
 M is a programming language built specifically for game development. It embraces the Entity Component System paradigm to facilitate the creation of flexible yet performant projects. It is built to make game development more enjoyable, by making the developers more productive and simplifying the process following the philosophy
 
-
-
 > Everything should be as simple as it can be, but not simpler.
 
->-[Unknown](https://quoteinvestigator.com/2011/05/13/einstein-simple/)
+>-Albert Einstein[?](https://quoteinvestigator.com/2011/05/13/einstein-simple/)
 
 ### Involve all the team
 M tries to involve all the technical roles in development: Artists, programmers and designers in the development of the game under an ubiquitous language.
@@ -33,16 +31,7 @@ Faster to develop with | Easier to learn and use
 
 Both approaches have the same expressive power, meaning that any program made using an approach can b emade using the other. Moreover, programs can be automatically translated from an interface to the other to approach every problem in the desired form.
 
-### Samples
-
-This repository includes three sample games made exclusively with the M language. They are well known arcade games, used to demonstrate the methodology behind M.
-
-Pong | SpaceInvaders | Pacman
---- | --- | ---
-![Pong][pong] | ![Space Invaders][spaceInvaders] | ![Pacman][pacman]
-&copy; Atari Inc. | &copy; Taito corporation | &copy; Namco Limited
-[Link to the code](https://github.com/martin-azpillaga/M/blob/master/Samples/Pong/Main.m) | [Link to the code](https://github.com/martin-azpillaga/M/blob/master/Samples/SpaceInvaders/Main.m) | [Link to the code](https://github.com/martin-azpillaga/M/blob/master/Samples/Pacman/Main.m)
-### Features
+### Personalize the development process
 ___
 * Natural language agnostic
 
@@ -69,6 +58,25 @@ Similarly, the code generation process is completely orthogonal from the languag
 
 Unity | Unreal | Godot
 --- | --- | ---
+
+### Enjoy the results
+
+The output of a program written in M is not an executable game, but a game project for a game engine. It includes all the assets and scripts to realize the provided game description. 
+
+![Unity project][unityProject]
+
+You can inspect how all the project is built and modify it to your own will just the same as you would with a regular project. You can enjoy the productivity and consistency of generated assets without sacrificing the ability of using the game engine of your choice.
+
+### Samples
+
+This repository includes three sample games made exclusively with the M language. They are well known arcade games, used to demonstrate the methodology behind M.
+
+Pong | SpaceInvaders | Pacman
+--- | --- | ---
+![Pong][pong] | ![Space Invaders][spaceInvaders] | ![Pacman][pacman]
+&copy; Atari Inc. | &copy; Taito corporation | &copy; Namco Limited
+[Link to the code](https://github.com/martin-azpillaga/M/blob/master/Samples/Pong/Main.m) | [Link to the code](https://github.com/martin-azpillaga/M/blob/master/Samples/SpaceInvaders/Main.m) | [Link to the code](https://github.com/martin-azpillaga/M/blob/master/Samples/Pacman/Main.m)
+
 
 ### Collaboration
 ___
