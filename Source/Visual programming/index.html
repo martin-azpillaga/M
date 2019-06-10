@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <title>M blocks</title>
+
+  <script src="blockly_compressed.js"></script>
+  <script src="blocks_compressed.js"></script>
+  <script src="en.js"></script>
+
+</head>
+
+<body>
+
+  <div id="blocklyDiv" style="height: 720px; width: 1080px;"></div>
+  
+  <xml id="toolbox" style="display: none">
+      <block type="controls_if"></block>
+      <block type="controls_repeat_ext"></block>
+      <block type="logic_compare"></block>
+      <block type="math_number"></block>
+      <block type="math_arithmetic"></block>
+      <block type="text"></block>
+      <block type="text_print"></block>
+  </xml>
+
+  <script>
+      var workspace = Blockly.inject('blocklyDiv', {toolbox: document.getElementById('toolbox')});
+  </script>
+
+</body>
+</html>
