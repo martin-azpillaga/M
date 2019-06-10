@@ -201,7 +201,8 @@ Blockly.Blocks['triggered'] = {
 Blockly.Blocks['detection'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown([["detecting an entry","ENTER"], ["detecting an stay","STAY"], ["detecting an exit","EXIT"]]), "NAME");
+        .appendField(new Blockly.FieldTextInput("default"), "NAME")
+        .appendField(new Blockly.FieldDropdown([["detecting an entry","ENTER"], ["detecting an stay","STAY"], ["detecting an exit","EXIT"]]), "TYPE");
     this.setPreviousStatement(true, "constraint");
     this.setNextStatement(true, "constraint");
     this.setColour(330);
