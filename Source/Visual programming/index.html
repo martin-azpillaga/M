@@ -87,6 +87,10 @@
         <field name="NAME">component</field>
         <field name="MESH">name</field>
       </block>
+      <block type="textcomponent">
+        <field name="NAME">component</field>
+        <field name="VALUE">text</field>
+      </block>
       <block type="trigger">
         <field name="NAME">component</field>
         <field name="VALUE">START</field>
@@ -99,8 +103,15 @@
         <field name="NAME">component</field>
         <field name="ENTITY">name</field>
       </block>
+      <block type="timer">
+        <field name="NAME">component</field>
+        <field name="SECONDS">0</field>
+      </block>
       <block type="enumeration">
         <field name="NAME">component</field>
+      </block>
+      <block type="enumeration_value">
+        <field name="NAME">name</field>
       </block>
       <block type="sensor">
         <field name="NAME">component</field>
@@ -180,14 +191,14 @@
       <block type="math_arithmetic">
         <field name="OP">ADD</field>
         <value name="A">
-          <shadow type="math_number">
+          <block type="math_number">
             <field name="NUM">1</field>
-          </shadow>
+          </block>
         </value>
         <value name="B">
-          <shadow type="math_number">
+          <block type="math_number">
             <field name="NUM">1</field>
-          </shadow>
+          </block>
         </value>
       </block>
       <block type="math_trig">

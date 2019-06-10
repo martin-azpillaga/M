@@ -558,21 +558,6 @@ Blockly.Blocks['tag'] = {
   }
 };
 
-Blockly.Blocks['multiplication'] = {
-  init: function() {
-    this.appendValueInput("a")
-        .setCheck("Number");
-    this.appendValueInput("b")
-        .setCheck("Number")
-        .appendField("x");
-    this.setInputsInline(true);
-    this.setOutput(true, "Number");
-    this.setColour(230);
- this.setTooltip("multiplication");
- this.setHelpUrl("");
-  }
-};
-
 Blockly.Blocks['textcomponent'] = {
   init: function() {
     this.appendDummyInput()
