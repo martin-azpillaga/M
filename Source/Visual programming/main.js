@@ -79,7 +79,7 @@ document.getElementById("save-button").addEventListener("click", function()
 
 document.getElementById("download-button").addEventListener("click", function()
 { 
-    textPanel.value;
+    var text = textPanel.value;
 
     download(text, "text.m", "text/text");
 });
@@ -195,4 +195,28 @@ function EntityToCode(block, isSubEntity)
     result += '.';
 
     return result;
+}
+
+function EntityToBlock()
+{
+    var b = workspace.newBlock("entity");
+    b.initSvg();
+    b.render();
+
+    var child = workspace.newBlock("entity");
+    child.setFieldValue('Child', 'NAME');
+    child.initSvg();
+    child.render();
+
+    var parentConnection = b.getInput('subEntities').connection;
+    var childConnection = child.previousConnection;
+    parentConnection.connect(childConnection);
+
+    var base = workspace.newBlock("base");
+    base.initSvg();
+    base.render();
+
+    var baseParentConnection = b.getInput('base').connection;
+    var baseChildConnection = base.outputConnection;
+    baseParentConnection.connect(baseChildConnection);
 }
