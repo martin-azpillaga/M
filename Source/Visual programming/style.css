@@ -34,6 +34,8 @@ header
     height: 100%;
     font-family: sans-serif;
     text-align: center;
+    position: relative;
+    top: 40%;
 }
 
 #save-button
@@ -60,9 +62,9 @@ section
 
 footer
 {
+    width: 100%;
     height: 5%;
     margin: 0;
-    text-align: center;
 }
 
 #uploaded-input
@@ -92,4 +94,29 @@ footer
 #toolbox
 {
     display: none;
+}
+
+#credits
+{
+    align-self: flex-start;
+    position: relative;
+    top: 40%;
+    float: left;
+}
+
+#download-button
+{
+    align-self: flex-start;
+    position: relative;
+    text-align: center;
+    top: 40%;
+    left: 40%;
+}
+
+#author
+{
+    align-self: flex-end;
+    position: relative;
+    top: 40%;
+    float: right;
 }
