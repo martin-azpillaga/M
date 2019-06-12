@@ -1,0 +1,46 @@
+html, body
+{
+    height: 100%;
+    margin: 0;
+}
+
+header
+{
+    height: 5%;
+    margin: 0;
+}
+
+section
+{
+    height: 90%;
+    margin: 0;
+}
+
+footer
+{
+    height: 5%;
+    margin: 0;
+}
+
+#uploaded-input
+{
+    display: none;
+}
+
+#blocklyDiv
+{
+    height: 100%;
+    width: 100%;
+}
+
+#textArea
+{
+    height: 100%;
+    width: 100%;
+    display: none;
+}
+
+#toolbox
+{
+    display: none;
+}
