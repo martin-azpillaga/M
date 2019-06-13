@@ -122,18 +122,11 @@ function blocksToText(event)
     textPanel.value = result;
 }
 
-function EntityToCode(block, isSubEntity)
+function EntityToCode(block)
 {
     var result = "";
     var name = block.getFieldValue('NAME');
-    if (isSubEntity)
-    {
-        result += " " + name
-    }
-    else
-    {
-        result += "entity " + name
-    }
+    result += " " + name
     var base = block.getInputTargetBlock('base');
     if (base != null)
     {
@@ -178,6 +171,26 @@ function EntityToCode(block, isSubEntity)
             var y = component.getFieldValue('Y');
             result += " " + componentName + " " + x + " " + y;
         }
+        else if (component.type == "real3")
+        {
+            var x = component.getFieldValue('X');
+            var y = component.getFieldValue('Y');
+            var y = component.getFieldValue('Z');
+            result += " " + componentName + " " + x + " " + y + " " + z;
+        }
+        else if (component.type == "real4")
+        {
+            var x = component.getFieldValue('X');
+            var y = component.getFieldValue('Y');
+            var y = component.getFieldValue('Z');
+            var y = component.getFieldValue('W');
+            result += " " + componentName + " " + x + " " + y + " " + z + " " + w;
+        }
+        else if (component.type == "timer")
+        {
+            var seconds = component.getFieldValue('SECONDS');
+            result += " " + componentName + " " + seconds + "s";
+        }
         component = component.getNextBlock();
     }
 
@@ -189,7 +202,7 @@ function EntityToCode(block, isSubEntity)
     }
     while (subEntity != null)
     {
-        result += EntityToCode(subEntity, true);
+        result += EntityToCode(subEntity);
         subEntity = subEntity.getNextBlock();
     }
     result += '.';

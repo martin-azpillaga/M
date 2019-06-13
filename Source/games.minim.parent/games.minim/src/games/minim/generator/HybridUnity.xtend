@@ -86,6 +86,9 @@ import static games.minim.generator.UnityComponentType.*
 
 import static extension org.eclipse.xtext.EcoreUtil2.*
 import games.minim.m.CreatedAssignment
+import com.google.inject.Guice
+import games.minim.MRuntimeModule
+import org.eclipse.xtext.serializer.impl.Serializer
 
 enum Folder {Assets,Code,Tests,Packages,Settings,
 		Clips,Meshes,Materials,Sprites,Audios,PhysicsMaterials,
@@ -110,6 +113,8 @@ class HybridUnity implements Framework
 	{
 		this.game = game
 		this.fileSystem = fileSystem
+		
+		
 		
 		assetsFolder
 		version

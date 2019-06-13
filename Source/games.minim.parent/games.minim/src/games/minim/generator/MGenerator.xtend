@@ -10,11 +10,19 @@ import org.eclipse.core.resources.ResourcesPlugin
 import org.eclipse.core.resources.IFolder
 import org.eclipse.core.resources.IFile
 import org.eclipse.emf.common.util.URI
+import com.google.inject.Guice
+import games.minim.MRuntimeModule
+import org.eclipse.xtext.serializer.impl.Serializer
 
 class MGenerator extends AbstractGenerator 
 {
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) 
 	{
+		var injector = Guice.createInjector(new  MRuntimeModule());  
+		var serializer = injector.getInstance(Serializer);  
+		var s = serializer.serialize(resource.contents.get(0) as Game);  
+		println(s);
+		
 		var file = resource.URI.path
 		var projectPath = file.substring(9)
 		var projectName = projectPath.substring(1,projectPath.substring(1).indexOf('/')+1)
