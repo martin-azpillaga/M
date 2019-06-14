@@ -72,7 +72,7 @@ document.getElementById("uploaded-input").addEventListener("change", function()
 document.getElementById("save-button").addEventListener("click", function()
 { 
     var xml = Blockly.Xml.workspaceToDom(workspace);
-    var xml_text = Blockly.Xml.domToText(xml);
+    var xml_text = Blockly.Xml.domToPrettyText (xml);
 
     download(xml_text, "blocks", "text/xml");
 });
@@ -80,8 +80,12 @@ document.getElementById("save-button").addEventListener("click", function()
 document.getElementById("download-button").addEventListener("click", function()
 { 
     var text = textPanel.value;
-
-    download(text, "text.m", "text/text");
+    //EntityToBlock();
+    var request = new XMLHttpRequest();
+    request.open("GET", "127.0.0.1");
+    request.send();
+    alert("Sent");
+    //download(text, "text.m", "text/text");
 });
 
 function download(text, name, type)
@@ -186,10 +190,63 @@ function EntityToCode(block)
             var y = component.getFieldValue('W');
             result += " " + componentName + " " + x + " " + y + " " + z + " " + w;
         }
+        else if (component.type == "enumeration")
+        {
+
+        }
+        else if (component.type == "reference")
+        {
+
+        }
+        else if (component.type == "trigger")
+        {
+
+        }
+        else if (component.type == "range")
+        {
+
+        }
+        else if (component.type == "vector")
+        {
+
+        }
+        else if (component.type == "sensor")
+        {
+
+        }
+        else if (component.type == "sprite")
+        {
+            var sprite = component.getFieldValue('sprite');
+            result += " " + component + " sprite." + sprite;
+        }
+        else if (component.type == "audio")
+        {
+
+        }
+        else if (component.type == "text")
+        {
+
+        }
+        else if (component.type == "material")
+        {
+
+        }
+        else if (component.type == "mesh")
+        {
+
+        }
+        else if (component.type == "font")
+        {
+
+        }
         else if (component.type == "timer")
         {
             var seconds = component.getFieldValue('SECONDS');
             result += " " + componentName + " " + seconds + "s";
+        }
+        else if (component.type == "click")
+        {
+            
         }
         component = component.getNextBlock();
     }

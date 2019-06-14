@@ -4,48 +4,48 @@
 	<extension
 		point="org.eclipse.ui.editors">
 		<editor
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
 			contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
 			default="true"
-			extensions="m"
-			id="games.minim.M"
-			name="M Editor">
+			extensions="xm"
+			id="games.minim.XM"
+			name="XM Editor">
 		</editor>
 	</extension>
 	<extension
 		point="org.eclipse.ui.handlers">
 		<handler
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclarationHandler"
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclarationHandler"
 			commandId="org.eclipse.xtext.ui.editor.hyperlinking.OpenDeclaration">
 			<activeWhen>
 				<reference
-					definitionId="games.minim.M.Editor.opened">
+					definitionId="games.minim.XM.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
 		<handler
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.ui.editor.handler.ValidateActionHandler"
-			commandId="games.minim.M.validate">
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.editor.handler.ValidateActionHandler"
+			commandId="games.minim.XM.validate">
 		<activeWhen>
 			<reference
-					definitionId="games.minim.M.Editor.opened">
+					definitionId="games.minim.XM.Editor.opened">
 			</reference>
 		</activeWhen>
 		</handler>
 		<!-- copy qualified name -->
 		<handler
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedNameHandler"
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedNameHandler"
 			commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName">
 			<activeWhen>
-				<reference definitionId="games.minim.M.Editor.opened" />
+				<reference definitionId="games.minim.XM.Editor.opened" />
 			</activeWhen>
 		</handler>
 		<handler
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedNameHandler"
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedNameHandler"
 			commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.OutlineCopyQualifiedName">
 			<activeWhen>
 				<and>
-					<reference definitionId="games.minim.M.XtextEditor.opened" />
+					<reference definitionId="games.minim.XM.XtextEditor.opened" />
 					<iterate>
 						<adapt type="org.eclipse.xtext.ui.editor.outline.IOutlineNode" />
 					</iterate>
@@ -54,22 +54,22 @@
 		</handler>
 	</extension>
 	<extension point="org.eclipse.core.expressions.definitions">
-		<definition id="games.minim.M.Editor.opened">
+		<definition id="games.minim.XM.Editor.opened">
 			<and>
 				<reference definitionId="isActiveEditorAnInstanceOfXtextEditor"/>
 				<with variable="activeEditor">
 					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
-						value="games.minim.M"
+						value="games.minim.XM"
 						forcePluginActivation="true"/>
 				</with>
 			</and>
 		</definition>
-		<definition id="games.minim.M.XtextEditor.opened">
+		<definition id="games.minim.XM.XtextEditor.opened">
 			<and>
 				<reference definitionId="isXtextEditorActive"/>
 				<with variable="activeEditor">
 					<test property="org.eclipse.xtext.ui.editor.XtextEditor.languageName"
-						value="games.minim.M"
+						value="games.minim.XM"
 						forcePluginActivation="true"/>
 				</with>
 			</and>
@@ -78,33 +78,33 @@
 	<extension
 			point="org.eclipse.ui.preferencePages">
 		<page
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
-			id="games.minim.M"
-			name="M">
-			<keywordReference id="games.minim.ui.keyword_M"/>
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
+			id="games.minim.XM"
+			name="XM">
+			<keywordReference id="games.minim.ui.keyword_XM"/>
 		</page>
 		<page
-			category="games.minim.M"
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.ui.editor.syntaxcoloring.SyntaxColoringPreferencePage"
-			id="games.minim.M.coloring"
+			category="games.minim.XM"
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.editor.syntaxcoloring.SyntaxColoringPreferencePage"
+			id="games.minim.XM.coloring"
 			name="Syntax Coloring">
-			<keywordReference id="games.minim.ui.keyword_M"/>
+			<keywordReference id="games.minim.ui.keyword_XM"/>
 		</page>
 		<page
-			category="games.minim.M"
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.ui.editor.templates.XtextTemplatePreferencePage"
-			id="games.minim.M.templates"
+			category="games.minim.XM"
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.editor.templates.XtextTemplatePreferencePage"
+			id="games.minim.XM.templates"
 			name="Templates">
-			<keywordReference id="games.minim.ui.keyword_M"/>
+			<keywordReference id="games.minim.ui.keyword_XM"/>
 		</page>
 	</extension>
 	<extension
 			point="org.eclipse.ui.propertyPages">
 		<page
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
-			id="games.minim.M"
-			name="M">
-			<keywordReference id="games.minim.ui.keyword_M"/>
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.editor.preferences.LanguageRootPreferencePage"
+			id="games.minim.XM"
+			name="XM">
+			<keywordReference id="games.minim.ui.keyword_XM"/>
 			<enabledWhen>
 				<adapt type="org.eclipse.core.resources.IProject"/>
 			</enabledWhen>
@@ -114,14 +114,14 @@
 	<extension
 		point="org.eclipse.ui.keywords">
 		<keyword
-			id="games.minim.ui.keyword_M"
-			label="M"/>
+			id="games.minim.ui.keyword_XM"
+			label="XM"/>
 	</extension>
 	<extension
 		point="org.eclipse.ui.commands">
 	<command
 			description="Trigger expensive validation"
-			id="games.minim.M.validate"
+			id="games.minim.XM.validate"
 			name="Validate">
 	</command>
 	<!-- copy qualified name -->
@@ -142,12 +142,12 @@
 		<menuContribution
 			locationURI="popup:#TextEditorContext?after=group.edit">
 			 <command
-				 commandId="games.minim.M.validate"
+				 commandId="games.minim.XM.validate"
 				 style="push"
 				 tooltip="Trigger expensive validation">
 			<visibleWhen checkEnabled="false">
 				<reference
-					definitionId="games.minim.M.Editor.opened">
+					definitionId="games.minim.XM.Editor.opened">
 				</reference>
 			</visibleWhen>
 		</command>
@@ -157,7 +157,7 @@
 			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
 				style="push" tooltip="Copy Qualified Name">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="games.minim.M.Editor.opened" />
+					<reference definitionId="games.minim.XM.Editor.opened" />
 				</visibleWhen>
 			</command>
 		</menuContribution>
@@ -165,7 +165,7 @@
 			<command commandId="org.eclipse.xtext.ui.editor.copyqualifiedname.EditorCopyQualifiedName"
 				style="push" tooltip="Copy Qualified Name">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="games.minim.M.Editor.opened" />
+					<reference definitionId="games.minim.XM.Editor.opened" />
 				</visibleWhen>
 			</command>
 		</menuContribution>
@@ -174,7 +174,7 @@
 				style="push" tooltip="Copy Qualified Name">
 				<visibleWhen checkEnabled="false">
 					<and>
-						<reference definitionId="games.minim.M.XtextEditor.opened" />
+						<reference definitionId="games.minim.XM.XtextEditor.opened" />
 						<iterate>
 							<adapt type="org.eclipse.xtext.ui.editor.outline.IOutlineNode" />
 						</iterate>
@@ -187,7 +187,7 @@
 		<menuContribution locationURI="popup:#TextEditorContext?endof=group.find">
 			<command commandId="org.eclipse.xtext.ui.editor.FindReferences">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="games.minim.M.Editor.opened">
+					<reference definitionId="games.minim.XM.Editor.opened">
 					</reference>
 				</visibleWhen>
 			</command>
@@ -195,11 +195,11 @@
 	</extension>
 	<extension point="org.eclipse.ui.handlers">
 		<handler
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.ui.editor.findrefs.FindReferencesHandler"
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.editor.findrefs.FindReferencesHandler"
 			commandId="org.eclipse.xtext.ui.editor.FindReferences">
 			<activeWhen>
 				<reference
-					definitionId="games.minim.M.Editor.opened">
+					definitionId="games.minim.XM.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
@@ -207,9 +207,9 @@
 	<extension point="org.eclipse.core.contenttype.contentTypes">
 		<content-type
 			base-type="org.eclipse.core.runtime.text"
-			file-extensions="m"
-			id="games.minim.M.contenttype"
-			name="M File"
+			file-extensions="xm"
+			id="games.minim.XM.contenttype"
+			name="XM File"
 			priority="normal">
 		</content-type>
 	</extension>
@@ -217,37 +217,59 @@
 	<extension
 		point="org.eclipse.emf.ecore.extension_parser">
 		<parser
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
-			type="m">
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
+			type="xm">
 		</parser>
 	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
 		<resourceServiceProvider
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
-			uriExtension="m">
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
+			uriExtension="xm">
 		</resourceServiceProvider>
+	</extension>
+	<!-- marker definitions for games.minim.XM -->
+	<extension
+			id="xm.check.fast"
+			name="XM Problem"
+			point="org.eclipse.core.resources.markers">
+		<super type="org.eclipse.xtext.ui.check.fast"/>
+		<persistent value="true"/>
+	</extension>
+	<extension
+			id="xm.check.normal"
+			name="XM Problem"
+			point="org.eclipse.core.resources.markers">
+		<super type="org.eclipse.xtext.ui.check.normal"/>
+		<persistent value="true"/>
+	</extension>
+	<extension
+			id="xm.check.expensive"
+			name="XM Problem"
+			point="org.eclipse.core.resources.markers">
+		<super type="org.eclipse.xtext.ui.check.expensive"/>
+		<persistent value="true"/>
 	</extension>
 	<extension point="org.eclipse.xtext.builder.participant">
 		<participant
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.builder.IXtextBuilderParticipant"
-			fileExtensions="m"/>
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.builder.IXtextBuilderParticipant"
+			fileExtensions="xm"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page
-			category="games.minim.M"
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
-			id="games.minim.M.compiler.preferencePage"
+			category="games.minim.XM"
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
+			id="games.minim.XM.compiler.preferencePage"
 			name="Compiler">
-			<keywordReference id="games.minim.ui.keyword_M"/>
+			<keywordReference id="games.minim.ui.keyword_XM"/>
 		</page>
 	</extension>
 	<extension point="org.eclipse.ui.propertyPages">
 		<page
-			category="games.minim.M"
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
-			id="games.minim.M.compiler.propertyPage"
+			category="games.minim.XM"
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.builder.preferences.BuilderPreferencePage"
+			id="games.minim.XM.compiler.propertyPage"
 			name="Compiler">
-			<keywordReference id="games.minim.ui.keyword_M"/>
+			<keywordReference id="games.minim.ui.keyword_XM"/>
 			<enabledWhen>
 				<adapt type="org.eclipse.core.resources.IProject"/>
 			</enabledWhen>
@@ -258,20 +280,20 @@
 		<menuContribution locationURI="popup:#TextEditorContext?after=xtext.ui.openDeclaration">
 			<command
 				commandId="org.eclipse.xtext.ui.OpenGeneratedFileCommand"
-				id="games.minim.M.OpenGeneratedCode"
+				id="games.minim.XM.OpenGeneratedCode"
 				style="push">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="games.minim.M.Editor.opened" />
+					<reference definitionId="games.minim.XM.Editor.opened" />
 				</visibleWhen>
 			</command>
 		</menuContribution>
 	</extension>
 	<extension point="org.eclipse.ui.handlers">
 		<handler
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.ui.generator.trace.OpenGeneratedFileHandler"
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.generator.trace.OpenGeneratedFileHandler"
 			commandId="org.eclipse.xtext.ui.OpenGeneratedFileCommand">
 			<activeWhen>
-				<reference definitionId="games.minim.M.Editor.opened" />
+				<reference definitionId="games.minim.XM.Editor.opened" />
 			</activeWhen>
 		</handler>
 	</extension>
@@ -279,11 +301,11 @@
 	<extension
 		point="org.eclipse.ui.handlers">
 		<handler 
-			class="games.minim.ui.MExecutableExtensionFactory:org.eclipse.xtext.ui.editor.outline.quickoutline.ShowQuickOutlineActionHandler"
+			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.editor.outline.quickoutline.ShowQuickOutlineActionHandler"
 			commandId="org.eclipse.xtext.ui.editor.outline.QuickOutline">
 			<activeWhen>
 				<reference
-					definitionId="games.minim.M.Editor.opened">
+					definitionId="games.minim.XM.Editor.opened">
 				</reference>
 			</activeWhen>
 		</handler>
@@ -303,7 +325,7 @@
 				style="push"
 				tooltip="Open Quick Outline">
 				<visibleWhen checkEnabled="false">
-					<reference definitionId="games.minim.M.Editor.opened"/>
+					<reference definitionId="games.minim.XM.Editor.opened"/>
 				</visibleWhen>
 			</command>
 		</menuContribution>

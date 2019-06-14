@@ -1,0 +1,111 @@
+grammar games.minim.XM with org.eclipse.xtext.common.Terminals
+
+import "http://www.minim.games/M"
+
+
+Game:
+	OPENXML
+	(
+		entities+=Entity
+	)*
+	CLOSEXML
+;
+terminal SUPERID: !('"')+;
+terminal OPENXML: '<xml xmlns="http://www.w3.org/1999/xhtml">';
+terminal CLOSEXML: '</xml>';
+terminal OPENENTITY: '<block type="entity" id="' SUPERID '"' (' x="' INT '" y="' INT '"')?'>';
+terminal CLOSEBLOCK: '</block>';
+terminal OPENNAME: '<field name="NAME">';
+terminal CLOSEFIELD: '</field>';
+terminal OPENCOMPONENTS: '<statement name="components">';
+terminal CLOSESTATEMENT: '</statement>';
+terminal OPENTAG: '<block type="tag" id="' SUPERID '">';
+terminal OPENBASE: '<value name="base">';
+terminal OPENBASE2: '<block type="base" id="' SUPERID '">';
+terminal CLOSEVALUE: '</value>';
+terminal OPENREMOVED: '<statement name="removed">';
+terminal OPENCOMPONENTNAME: '<block type="componentname" id="' SUPERID '">';
+terminal OPENSUBENTITIES: '<statement name="subEntities">';
+Entity:
+	OPENENTITY
+	OPENNAME
+	name=ID 
+	CLOSEFIELD
+	(OPENBASE OPENBASE2 OPENNAME base=[Entity] CLOSEFIELD (OPENREMOVED (OPENCOMPONENTNAME OPENNAME removed+=[Name] CLOSEFIELD CLOSEBLOCK)* CLOSESTATEMENT)? CLOSEBLOCK CLOSEVALUE)?
+	(OPENCOMPONENTS	values+=Value (values+=Value)* CLOSESTATEMENT)? 
+	(OPENSUBENTITIES children+=Entity+ CLOSESTATEMENT)?
+	CLOSEBLOCK
+;
+Value:
+	  {Tag}   OPENTAG OPENNAME component=[Name] CLOSEFIELD CLOSEBLOCK
+	/*| {Real1} component=[Name] x=Number
+	| {Real2} component=[Name] x=Number y=Number
+	| {Real3} component=[Name] x=Number y=Number z=Number
+	| {Real4} component=[Name] x=Number y=Number z=Number w=Number
+	| {Enumeration} component=[Name] '['values+=[Name]+']'
+	| {Reference} component=[Name] REFERENCE entity=[Entity]
+	| {Sprite} component=[Name] SPRITE value=[Name]
+	| {Audio} component=[Name] AUDIO value=[Name]
+	| {Text} component=[Name] value=STRING
+	| {Material} component=[Name] MATERIAL value=[Name]
+	| {Mesh} component=[Name] MESH value=[Name]
+	| {Font} component=[Name] FONT value=[Name]
+	| {Timer} component=[Name] value=Number SECONDS
+	| {Trigger} component=[Name] value=TriggerType
+	| {Range} component=[Name] value=AxisType
+	| {Vector} component=[Name] value=VectorType
+	| {Sensor} component=[Name] SENSOR '['values+=[Name]+']'
+	| {Click} component=[Name] CLICK*/
+;
+
+Number:	{Decimal} negative?='-'? wholePart=INT ('.' decimalPart=INT)?;
+
+terminal REFERENCE: 'entity.';
+terminal SPRITE: 'sprite.';
+terminal AUDIO: 'audio.';
+terminal SENSOR: 'detect';
+terminal CLICK: 'click';
+terminal MESH: 'mesh.';
+terminal MATERIAL: 'material.';
+terminal FONT: 'font.';
+terminal TILT: 'tilt';
+terminal VECTOR: 'vector';
+terminal OR: 'or';
+terminal AND: 'and';
+terminal NOT: '!';
+terminal STOP_ITERATION: 'break';
+terminal DECLARE_VARIABLE: 'initialize';
+terminal BASE_ENTITY: 'based on';
+terminal REMOVED_COMPONENTS: 'without';
+terminal ENTITY_CHILDREN: 'contains';
+terminal MAIN_ENTITIES: 'main world contains';
+terminal START_SYSTEM: ':';
+terminal FOR: 'for';
+terminal ALL: 'all';
+terminal ENTITIES: 'entity';
+terminal CONSTRAINTS: 'with';
+terminal NEGATE_CONSTRAINT: 'no';
+terminal IF: 'if';
+terminal ELSEIF: 'else if';
+terminal ELSE: 'else';
+terminal WHILE: 'while';
+terminal SECONDS: 's';
+
+enum EventType: tag|timeout='timed out'|trigger='triggered'|enter='enter'|stay='stay'|exit='exit'|mouseDown='mouseDown'|mouseUp='mouseUp';
+enum AxisType: 
+	LeftX='gamepad.leftX'|LeftY='gamepad.leftY'|RightX='gamepad.rightX'|RightY='gamepad.rightY'
+	|LeftShoulder='gamepad.leftShoulder'|RightShoulder='gamepad.rightShoulder'
+;
+enum TriggerType: 
+	South='gamepad.south'|West='gamepad.west'|East='gamepad.east'|North='gamepad.north'
+	|LeftTrigger='gamepad.leftTrigger'|RightTrigger='gamepad.rightTrigger'
+	|Down='gamepad.down'|Left='gamepad.left'|Right='gamepad.right'|Up='gamepad.up'
+	|Start='gamepad.start'|Select='gamepad.select'
+	|LeftStick='gamepad.leftStickPress'|RightStick='gamepad.rightStickPress'
+	|Optional='gamepad.optional'
+	|Zero='key.0'|One='key.1'|Two='key.2'|Three='key.3'|Four='key.4'|Five='key.5'|Six='key.6'|Seven='key.7'|Eight='key.8'|Nine='key.9'
+	|A='key.A'|B='key.B'|C='key.C'|D='key.D'|E='key.E'|F='key.F'|G='key.G'|H='key.H'|I='key.I'|J='key.J'|K='key.K'|L='key.L'|M='key.M'|N='key.N'|O='key.O'|P='key.P'|Q='key.Q'|R='key.R'|S='key.S'|T='key.T'|U='key.U'|V='key.V'|W='key.W'|X='key.X'|Y='key.Y'|Z='key.Z'
+;
+enum VectorType: mouse='mouse.position'|dpad='gamepad.dpad'|leftStick='gamepad.leftStick'|rightStick='gamepad.rightStick';
+enum RelationType: over='>'|under='<'|equal='='|notequal='!='|overorequal='>='|underorequal='<=';
+enum AssignmentType: set='='|increase='+='|decrease='-='|multiply='*='|divide='/='|modulus='%='|and='&='|or='|=';

@@ -44,5 +44,27 @@ Workflow {
 		    fragment = ui.quickfix.QuickfixProviderFragment2 { generateStub = false}
 		    fragment = ui.contentAssist.ContentAssistFragment2 { generateStub = false }
 		}
+		language = XtextGeneratorLanguage 
+		{
+			name = "games.minim.XM"
+			fileExtensions = "xm"
+			referencedResource = "platform:/resource/games.minim/model/M.genmodel"
+			
+			fragment = grammarAccess.GrammarAccessFragment2 {}
+		    fragment = ecore.EMFGeneratorFragment2 {}
+		    fragment = serializer.SerializerFragment2 { generateStub = false }
+		    fragment = resourceFactory.ResourceFactoryFragment2 {}
+		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
+		    fragment = validation.ValidatorFragment2 { generateStub = false }
+		    fragment = scoping.ImportNamespacesScopingFragment2 {}
+		    fragment = builder.BuilderIntegrationFragment2 {}
+		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=true }
+		    fragment = formatting.Formatter2Fragment2 { generateStub = false }
+		    fragment = ui.labeling.LabelProviderFragment2 { generateStub = false }
+		    fragment = ui.outline.QuickOutlineFragment2 {}
+		    fragment = ui.outline.OutlineTreeProviderFragment2 { generateStub = false }
+		    fragment = ui.quickfix.QuickfixProviderFragment2 { generateStub = false}
+		    fragment = ui.contentAssist.ContentAssistFragment2 { generateStub = false }
+		}
 	}
 }
