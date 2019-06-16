@@ -67,8 +67,15 @@
     <block type="enumeration">
       <field name="NAME">component</field>
     </block>
+    <block type="enumeration_value">
+      <field name="NAME">name</field>
+    </block>
     <block type="sensor">
       <field name="NAME">component</field>
+    </block>
+    <block type="timer">
+      <field name="NAME">component</field>
+      <field name="SECONDS">0</field>
     </block>
   </category>
   <sep></sep>
@@ -106,19 +113,39 @@
       <field name="NAME">name</field>
     </block>
     <block type="timeout">
+      <field name="negated">TRUE</field>
       <field name="NAME">name</field>
     </block>
     <block type="triggered">
+      <field name="negated">TRUE</field>
       <field name="NAME">name</field>
     </block>
     <block type="detection">
+      <field name="negated">TRUE</field>
       <field name="NAME">ENTER</field>
     </block>
     <block type="mouse">
+      <field name="negated">TRUE</field>
       <field name="NAME">DOWN</field>
     </block>
   </category>
   <sep></sep>
+  <category name="Structural">
+    <block type="create"></block>
+    <block type="create_and_save"></block>
+    <block type="destroy">
+      <field name="ENTITY">entity</field>
+    </block>
+    <block type="add">
+      <field name="COMPONENT">component</field>
+    </block>
+    <block type="add_and_save">
+      <field name="COMPONENT">component</field>
+    </block>
+    <block type="remove">
+      <field name="COMPONENT">component</field>
+    </block>
+  </category>
   <category name="Access" colour="#a5a55b">
     <block type="pop">
       <field name="VARIABLE">variable</field>
@@ -142,53 +169,21 @@
     </block>
   </category>
   <category name="Transformation" colour="#a5805b">
-    <block type="math_arithmetic">
-      <field name="OP">ADD</field>
-      <value name="A">
-        <shadow type="math_number">
-          <field name="NUM">1</field>
-        </shadow>
-      </value>
-      <value name="B">
-        <shadow type="math_number">
-          <field name="NUM">1</field>
-        </shadow>
-      </value>
+    <block type="binary_arithmetic">
+      <field name="OPERATION">ADD</field>
     </block>
-    <block type="math_trig">
-      <field name="OP">SIN</field>
-      <value name="NUM">
-        <shadow type="math_number">
-          <field name="NUM">45</field>
-        </shadow>
-      </value>
+    <block type="unary_arithmetic">
+      <field name="OPERATION">INCREMENT</field>
     </block>
-    <block type="math_single">
-      <field name="OP">ROOT</field>
-      <value name="NUM">
-        <shadow type="math_number">
-          <field name="NUM">9</field>
-        </shadow>
-      </value>
+    <block type="binary_boolean">
+      <field name="OPERATION">AND</field>
     </block>
-    <block type="math_random_int">
-      <value name="FROM">
-        <shadow type="math_number">
-          <field name="NUM">1</field>
-        </shadow>
-      </value>
-      <value name="TO">
-        <shadow type="math_number">
-          <field name="NUM">100</field>
-        </shadow>
-      </value>
+    <block type="unary_boolean"></block>
+    <block type="binary_arithmetic_boolean">
+      <field name="OPERATION">LOWER</field>
     </block>
-    <block type="logic_compare">
-      <field name="OP">EQ</field>
+    <block type="transformation">
+      <field name="OPERATION">SIN</field>
     </block>
-    <block type="logic_operation">
-      <field name="OP">AND</field>
-    </block>
-    <block type="logic_negate"></block>
   </category>
 </xml>

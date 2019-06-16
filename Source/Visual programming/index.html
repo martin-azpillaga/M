@@ -32,210 +32,194 @@
     <span id="author">Created by Martin Azpillaga.</span>
   </footer>
 
-  <xml id="toolbox">
-  <category name="Entities" colour="#5ba5a5">
+  <xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">
+    <category name="Entities" colour="#5ba5a5">
       <block type="entity">
-      <field name="NAME">name</field>
+        <field name="NAME">name</field>
       </block>
       <block type="base">
-      <field name="NAME">entity</field>
+        <field name="NAME">entity</field>
       </block>
       <block type="componentname">
-      <field name="NAME">component name</field>
+        <field name="NAME">component name</field>
       </block>
-  </category>
-  <category name="Components" colour="#5b5ba5">
+    </category>
+    <category name="Components" colour="#5b5ba5">
       <block type="tag">
-      <field name="NAME">component</field>
+        <field name="NAME">component</field>
       </block>
       <block type="real1">
-      <field name="NAME">component</field>
-      <field name="X">0</field>
+        <field name="NAME">component</field>
+        <field name="X">0</field>
       </block>
       <block type="real2">
-      <field name="NAME">component</field>
-      <field name="X">0</field>
-      <field name="Y">0</field>
+        <field name="NAME">component</field>
+        <field name="X">0</field>
+        <field name="Y">0</field>
       </block>
       <block type="real3">
-      <field name="NAME">component</field>
-      <field name="X">0</field>
-      <field name="Y">0</field>
-      <field name="Z">0</field>
+        <field name="NAME">component</field>
+        <field name="X">0</field>
+        <field name="Y">0</field>
+        <field name="Z">0</field>
       </block>
       <block type="real4">
-      <field name="NAME">component</field>
-      <field name="X">0</field>
-      <field name="Y">0</field>
-      <field name="Z">0</field>
-      <field name="W">0</field>
+        <field name="NAME">component</field>
+        <field name="X">0</field>
+        <field name="Y">0</field>
+        <field name="Z">0</field>
+        <field name="W">0</field>
       </block>
       <block type="textcomponent">
-      <field name="NAME">component</field>
-      <field name="VALUE">text</field>
+        <field name="NAME">component</field>
+        <field name="VALUE">text</field>
       </block>
       <block type="sprite">
-      <field name="NAME">component</field>
-      <field name="SPRITE">name</field>
+        <field name="NAME">component</field>
+        <field name="SPRITE">name</field>
       </block>
       <block type="audio">
-      <field name="NAME">component</field>
-      <field name="AUDIO">name</field>
+        <field name="NAME">component</field>
+        <field name="AUDIO">name</field>
       </block>
       <block type="mesh">
-      <field name="NAME">component</field>
-      <field name="MESH">name</field>
-      </block>
-      <block type="textcomponent">
-      <field name="NAME">component</field>
-      <field name="VALUE">text</field>
+        <field name="NAME">component</field>
+        <field name="MESH">name</field>
       </block>
       <block type="trigger">
-      <field name="NAME">component</field>
-      <field name="VALUE">START</field>
+        <field name="NAME">component</field>
+        <field name="VALUE">START</field>
       </block>
       <block type="range">
-      <field name="NAME">component</field>
-      <field name="VALUE">LEFTX</field>
+        <field name="NAME">component</field>
+        <field name="VALUE">LEFTX</field>
       </block>
       <block type="reference">
-      <field name="NAME">component</field>
-      <field name="ENTITY">name</field>
-      </block>
-      <block type="timer">
-      <field name="NAME">component</field>
-      <field name="SECONDS">0</field>
+        <field name="NAME">component</field>
+        <field name="ENTITY">name</field>
       </block>
       <block type="enumeration">
-      <field name="NAME">component</field>
+        <field name="NAME">component</field>
       </block>
       <block type="enumeration_value">
-      <field name="NAME">name</field>
+        <field name="NAME">name</field>
       </block>
       <block type="sensor">
-      <field name="NAME">component</field>
+        <field name="NAME">component</field>
       </block>
-  </category>
-  <sep></sep>
-  <category name="Flow" colour="#5ba55b">
+      <block type="timer">
+        <field name="NAME">component</field>
+        <field name="SECONDS">0</field>
+      </block>
+    </category>
+    <sep></sep>
+    <category name="Flow" colour="#5ba55b">
       <block type="system">
-      <field name="NAME">name</field>
+        <field name="NAME">name</field>
       </block>
       <block type="loop">
-      <field name="GROUP">name</field>
+        <field name="GROUP">name</field>
       </block>
       <block type="if"></block>
       <block type="while"></block>
-  </category>
-  <category name="Commands" colour="#5b5ba5">
+    </category>
+    <category name="Commands" colour="#5b5ba5">
       <block type="declaration">
-      <field name="NAME">name</field>
+        <field name="NAME">name</field>
       </block>
       <block type="variable_assignment">
-      <field name="assignmentType">SET</field>
-      <field name="NAME">variable</field>
+        <field name="assignmentType">SET</field>
+        <field name="NAME">variable</field>
       </block>
       <block type="component_assignment">
-      <field name="assignmentType">SET</field>
-      <field name="COMPONENT">component</field>
-      <field name="ENTITY">entity</field>
+        <field name="assignmentType">SET</field>
+        <field name="COMPONENT">component</field>
+        <field name="ENTITY">entity</field>
       </block>
       <block type="subrutine_call">
-      <field name="SUBRUTINE">subrutine</field>
+        <field name="SUBRUTINE">subrutine</field>
       </block>
       <block type="break"></block>
-  </category>
-  <category name="Constraints" colour="#a55b93">
+    </category>
+    <category name="Constraints" colour="#a55b93">
       <block type="tagged">
-      <field name="negated">TRUE</field>
-      <field name="NAME">name</field>
+        <field name="negated">TRUE</field>
+        <field name="NAME">name</field>
       </block>
       <block type="timeout">
-      <field name="NAME">name</field>
+        <field name="negated">TRUE</field>
+        <field name="NAME">name</field>
       </block>
       <block type="triggered">
-      <field name="NAME">name</field>
+        <field name="negated">TRUE</field>
+        <field name="NAME">name</field>
       </block>
       <block type="detection">
-      <field name="NAME">ENTER</field>
+        <field name="negated">TRUE</field>
+        <field name="NAME">ENTER</field>
       </block>
       <block type="mouse">
-      <field name="NAME">DOWN</field>
+        <field name="negated">TRUE</field>
+        <field name="NAME">DOWN</field>
       </block>
-  </category>
-  <sep></sep>
-  <category name="Access" colour="#a5a55b">
+    </category>
+    <sep></sep>
+    <category name="Structural">
+      <block type="create"></block>
+      <block type="create_and_save"></block>
+      <block type="destroy">
+        <field name="ENTITY">entity</field>
+      </block>
+      <block type="add">
+        <field name="COMPONENT">component</field>
+      </block>
+      <block type="add_and_save">
+        <field name="COMPONENT">component</field>
+      </block>
+      <block type="remove">
+        <field name="COMPONENT">component</field>
+      </block>
+    </category>
+    <category name="Access" colour="#a5a55b">
       <block type="pop">
-      <field name="VARIABLE">variable</field>
+        <field name="VARIABLE">variable</field>
       </block>
       <block type="vertical_pop">
-      <field name="VARIABLE">variable</field>
+        <field name="VARIABLE">variable</field>
       </block>
       <block type="access">
-      <field name="COMPONENT">component</field>
-      <field name="ENTITY">entity</field>
+        <field name="COMPONENT">component</field>
+        <field name="ENTITY">entity</field>
       </block>
       <block type="vertical_access">
-      <field name="COMPONENT">component</field>
-      <field name="ENTITY">entity</field>
+        <field name="COMPONENT">component</field>
+        <field name="ENTITY">entity</field>
       </block>
       <block type="call">
-      <field name="FUNCTION">function</field>
+        <field name="FUNCTION">function</field>
       </block>
       <block type="vertical_call">
-      <field name="FUNCTION">function</field>
+        <field name="FUNCTION">function</field>
       </block>
-  </category>
-  <category name="Transformation" colour="#a5805b">
-      <block type="math_arithmetic">
-      <field name="OP">ADD</field>
-      <value name="A">
-          <block type="math_number">
-          <field name="NUM">1</field>
-          </block>
-      </value>
-      <value name="B">
-          <block type="math_number">
-          <field name="NUM">1</field>
-          </block>
-      </value>
+    </category>
+    <category name="Transformation" colour="#a5805b">
+      <block type="binary_arithmetic">
+        <field name="OPERATION">ADD</field>
       </block>
-      <block type="math_trig">
-      <field name="OP">SIN</field>
-      <value name="NUM">
-          <shadow type="math_number">
-          <field name="NUM">45</field>
-          </shadow>
-      </value>
+      <block type="unary_arithmetic">
+        <field name="OPERATION">INCREMENT</field>
       </block>
-      <block type="math_single">
-      <field name="OP">ROOT</field>
-      <value name="NUM">
-          <shadow type="math_number">
-          <field name="NUM">9</field>
-          </shadow>
-      </value>
+      <block type="binary_boolean">
+        <field name="OPERATION">AND</field>
       </block>
-      <block type="math_random_int">
-      <value name="FROM">
-          <shadow type="math_number">
-          <field name="NUM">1</field>
-          </shadow>
-      </value>
-      <value name="TO">
-          <shadow type="math_number">
-          <field name="NUM">100</field>
-          </shadow>
-      </value>
+      <block type="unary_boolean"></block>
+      <block type="binary_arithmetic_boolean">
+        <field name="OPERATION">LOWER</field>
       </block>
-      <block type="logic_compare">
-      <field name="OP">EQ</field>
+      <block type="transformation">
+        <field name="OPERATION">SIN</field>
       </block>
-      <block type="logic_operation">
-      <field name="OP">AND</field>
-      </block>
-      <block type="logic_negate"></block>
-  </category>
+    </category>
   </xml>
 
   <input id="uploaded-input" type="file"/>

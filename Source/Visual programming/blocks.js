@@ -175,6 +175,7 @@ Blockly.Blocks['tagged'] = {
 Blockly.Blocks['timeout'] = {
   init: function() {
     this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
         .appendField("timed out")
         .appendField(new Blockly.FieldTextInput("name"), "NAME");
     this.setPreviousStatement(true, "constraint");
@@ -188,6 +189,7 @@ Blockly.Blocks['timeout'] = {
 Blockly.Blocks['triggered'] = {
   init: function() {
     this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
         .appendField("triggered")
         .appendField(new Blockly.FieldTextInput("name"), "NAME");
     this.setPreviousStatement(true, "constraint");
@@ -201,8 +203,8 @@ Blockly.Blocks['triggered'] = {
 Blockly.Blocks['detection'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("default"), "NAME")
-        .appendField(new Blockly.FieldDropdown([["detecting an entry","ENTER"], ["detecting an stay","STAY"], ["detecting an exit","EXIT"]]), "TYPE");
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
+        .appendField(new Blockly.FieldDropdown([["detecting an entry","ENTER"], ["detecting an stay","STAY"], ["detecting an exit","EXIT"]]), "NAME");
     this.setPreviousStatement(true, "constraint");
     this.setNextStatement(true, "constraint");
     this.setColour(330);
@@ -214,6 +216,7 @@ Blockly.Blocks['detection'] = {
 Blockly.Blocks['mouse'] = {
   init: function() {
     this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
         .appendField(new Blockly.FieldDropdown([["mouse down","DOWN"], ["mouse click","UP"], ["mouse enter","ENTER"], ["mouse exit","EXIT"]]), "NAME");
     this.setPreviousStatement(true, "constraint");
     this.setNextStatement(true, "constraint");
@@ -569,6 +572,174 @@ Blockly.Blocks['textcomponent'] = {
     this.setNextStatement(true, "component");
     this.setColour(230);
  this.setTooltip("text");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['destroy'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("destroy")
+        .appendField(new Blockly.FieldTextInput("entity"), "ENTITY");
+    this.setPreviousStatement(true, "command");
+    this.setNextStatement(true, "command");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['create'] = {
+  init: function() {
+    this.appendValueInput("NAME")
+        .setCheck(null)
+        .appendField("create");
+    this.setPreviousStatement(true, "command");
+    this.setNextStatement(true, "command");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['add'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("add")
+        .appendField(new Blockly.FieldTextInput("component"), "COMPONENT")
+        .appendField("to");
+    this.appendValueInput("ENTITY")
+        .setCheck(null);
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, "command");
+    this.setNextStatement(true, "command");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['remove'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("remove")
+        .appendField(new Blockly.FieldTextInput("component"), "COMPONENT")
+        .appendField("from");
+    this.appendValueInput("ENTITY")
+        .setCheck(null);
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, "component");
+    this.setNextStatement(true, "component");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['create_and_save'] = {
+  init: function() {
+    this.appendValueInput("NAME")
+        .setCheck(null)
+        .appendField("create");
+    this.setOutput(true, "entity");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['add_and_save'] = {
+  init: function() {
+    this.appendValueInput("ENTITY")
+        .setCheck(null)
+        .appendField("add")
+        .appendField(new Blockly.FieldTextInput("component"), "COMPONENT")
+        .appendField("to");
+    this.setOutput(true, "componentValue");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['binary_arithmetic'] = {
+  init: function() {
+    this.appendValueInput("left")
+        .setCheck("Number");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([["+","ADD"], ["-","SUBTRACT"], ["*","MULTIPLY"], ["/","DIVIDE"], ["%","MODULUS"], ["&","AND"], ["|","OR"]]), "OPERATION");
+    this.appendValueInput("right")
+        .setCheck("Number");
+    this.setOutput(true, "Number");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['unary_arithmetic'] = {
+  init: function() {
+    this.appendValueInput("value")
+        .setCheck("Number");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([["++","INCREMENT"], ["--","DECREMENT"]]), "OPERATION");
+    this.setOutput(true, "Number");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['binary_boolean'] = {
+  init: function() {
+    this.appendValueInput("left")
+        .setCheck(null);
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([["and","AND"], ["or","OR"]]), "OPERATION");
+    this.appendValueInput("right")
+        .setCheck(null);
+    this.setOutput(true, "Boolean");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['unary_boolean'] = {
+  init: function() {
+    this.appendValueInput("NAME")
+        .setCheck("Boolean")
+        .appendField("not");
+    this.setOutput(true, "Boolean");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['binary_arithmetic_boolean'] = {
+  init: function() {
+    this.appendValueInput("left")
+        .setCheck("Number");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([["<","LOWER"], ["<=","LOWEROREQUAL"], ["=","EQUAL"], ["!=","NOTEQUAL"], [">=","GREATEROREQUAL"], [">","GREATER"], ["includes","INCLUDES"]]), "OPERATION");
+    this.appendValueInput("right")
+        .setCheck("Number");
+    this.setOutput(true, "Boolean");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['transformation'] = {
+  init: function() {
+    this.appendValueInput("NAME")
+        .setCheck("Number")
+        .appendField(new Blockly.FieldDropdown([["sin","SIN"], ["cos","COS"], ["tan","TAN"], ["exp","EXP"], ["log","LOG"], ["sqrt","SQRT"], ["random","RANDOM"]]), "OPERATION");
+    this.setOutput(true, "Number");
+    this.setColour(230);
+ this.setTooltip("");
  this.setHelpUrl("");
   }
 };
