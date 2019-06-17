@@ -6,7 +6,8 @@ import "http://www.minim.games/M"
 Game:
 	OPENXML
 	(
-		entities+=Entity
+		entities+=Entity|
+		systems+=System
 	)*
 	CLOSEXML
 ;
@@ -60,6 +61,92 @@ Value:
 
 Number:	{Decimal} negative?='-'? wholePart=INT ('.' decimalPart=INT)?;
 
+terminal OPENSYSTEM: '<block type="system" id="' SUPERID '"' (' x="'INT'" y="'INT'"')?'>';
+terminal OPENCOMMANDS: '<statement name="commands">';
+System:
+	OPENSYSTEM
+	OPENNAME
+	name=ID
+	CLOSEFIELD
+	
+	(OPENCOMMANDS commands+=Command+ CLOSESTATEMENT)?
+	
+	CLOSEBLOCK
+;
+terminal OPENLOOP: '<block type="loop" id="' SUPERID '">';
+terminal OPENGROUP: '<field name="GROUP">';
+terminal OPENCONSTRAINTS: '<statement name="constraints">';
+Command:
+	Loop|While|Check
+;
+Loop:
+	OPENLOOP
+	
+	OPENGROUP
+	group=Name 
+	CLOSEFIELD
+	
+	(OPENCONSTRAINTS 
+		constraints+=Constraint
+		(
+			OPENNEXT
+			constraints+=Constraint
+			CLOSENEXT
+		)*
+	CLOSESTATEMENT
+	)?
+	
+	(
+	OPENCOMMANDS
+		commands+=Command
+		(
+			OPENNEXT
+			commands+=Command
+			CLOSENEXT
+		)*
+	CLOSESTATEMENT
+	)?
+	
+	
+	
+	CLOSEBLOCK
+;
+While:
+	OPENWHILE
+	
+	(
+	OPENCOMMANDS
+		commands+=Command
+		(
+			OPENNEXT
+			commands+=Command
+			CLOSENEXT
+		)*
+	CLOSESTATEMENT
+	)?
+	
+	
+	
+	CLOSEBLOCK
+;
+Check:
+	OPENIF
+	CLOSEBLOCK
+;
+terminal OPENIF: '<block type="if" id="'SUPERID'">';
+terminal OPENWHILE: '<block type="while" id="'SUPERID'">';
+terminal OPENNEXT: '<next>';
+terminal CLOSENEXT: '</next>';
+terminal OPENCONSTRAINT: '<block type="';
+terminal OPENCONSTRAINT2: '" id="'SUPERID'">';
+terminal OPENNEGATED: '<field name="negated">';
+Constraint:
+	OPENCONSTRAINT event=EventType OPENCONSTRAINT2
+	OPENNEGATED (negated?='TRUE' | 'FALSE') CLOSEFIELD
+	OPENNAME component=[Name] CLOSEFIELD
+;
+Name: name=ID;
+
 terminal REFERENCE: 'entity.';
 terminal SPRITE: 'sprite.';
 terminal AUDIO: 'audio.';
@@ -85,10 +172,8 @@ terminal ALL: 'all';
 terminal ENTITIES: 'entity';
 terminal CONSTRAINTS: 'with';
 terminal NEGATE_CONSTRAINT: 'no';
-terminal IF: 'if';
 terminal ELSEIF: 'else if';
 terminal ELSE: 'else';
-terminal WHILE: 'while';
 terminal SECONDS: 's';
 
 enum EventType: tag|timeout='timed out'|trigger='triggered'|enter='enter'|stay='stay'|exit='exit'|mouseDown='mouseDown'|mouseUp='mouseUp';
