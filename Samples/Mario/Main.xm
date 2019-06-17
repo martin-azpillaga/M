@@ -117,7 +117,6 @@
                                                                     <field name="NAME">vector</field>
                                                                     <field name="VALUE">MOUSEPOSITION</field>
                                                                     <next>
-                                                                    
                                                                       <block type="font" id="}Q]u!:sv`?=2FVJeF}qP">
                                                                         <field name="NAME">font</field>
                                                                         <field name="VALUE">font</field>
@@ -169,6 +168,219 @@
             <next>
               <block type="tag" id="c}[Pu$J)sn;*^q;6Mt@*">
                 <field name="NAME">somethingelse</field>
+              </block>
+            </next>
+          </block>
+        </statement>
+      </block>
+    </statement>
+  </block>
+  <block type="system" id="RW|6_`8,V!z+1Sb06.%|" x="308" y="1295">
+    <field name="NAME">test</field>
+    <statement name="commands">
+      <block type="loop" id="QCc#6CLFG^m1T*D3Pai8">
+        <field name="GROUP">a</field>
+        <statement name="constraints">
+          <block type="tagged" id="2z{;RufL$P;8sITd0mH4">
+            <field name="negated">TRUE</field>
+            <field name="NAME">name</field>
+            <next>
+              <block type="timeout" id=";nBcNha3D(oH|y@5=xc3">
+                <field name="negated">FALSE</field>
+                <field name="NAME">name</field>
+                <next>
+                  <block type="detection" id="q(?VQ6YfmA4K]2Ee@oO=">
+                    <field name="negated">TRUE</field>
+                    <field name="NAME">ENTER</field>
+                    <next>
+                      <block type="triggered" id="~Jh|r?!N9F*klia)I3`K">
+                        <field name="negated">FALSE</field>
+                        <field name="NAME">name</field>
+                        <next>
+                          <block type="mouse" id="bNr#:0!@$Fv%2k2X,@)3">
+                            <field name="negated">TRUE</field>
+                            <field name="NAME">DOWN</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </statement>
+        <statement name="commands">
+          <block type="declaration" id="BIhxx/5$2U3Ms7MSO|av">
+            <field name="NAME">counter</field>
+            <next>
+              <block type="if" id="d=(Qf}x}l:a)CWQ:n4I_">
+                <value name="condition">
+                  <block type="unary_boolean" id="3H{M`ZuZgnAZ5DpG}DKo">
+                    <value name="NAME">
+                      <block type="binary_arithmetic_boolean" id="QKMe=hfqSx=-4BL%~:Mx">
+                        <field name="OPERATION">NOTEQUAL</field>
+                        <value name="left">
+                          <block type="access" id="o|#J+ut0-}hF9p+n7O#1">
+                            <field name="COMPONENT">real1</field>
+                            <field name="ENTITY">a</field>
+                          </block>
+                        </value>
+                        <value name="right">
+                          <block type="access" id="/lkhCG9!AO)Gd^jOr9)o">
+                            <field name="COMPONENT">real1</field>
+                            <field name="ENTITY">a</field>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <statement name="ifCommands">
+                  <block type="while" id=":[1E$PHD|7d-Lgiiy2.{">
+                    <value name="condition">
+                      <block type="binary_boolean" id="%KkM{sj8kH?A*#IDCyRW">
+                        <field name="OPERATION">OR</field>
+                        <value name="left">
+                          <block type="binary_arithmetic_boolean" id="H.ujKjbxNmu24T(f*$,d">
+                            <field name="OPERATION">LOWER</field>
+                            <value name="left">
+                              <block type="pop" id="EeI^!hU,Lq2]X0kY*Li4">
+                                <field name="VARIABLE">counter</field>
+                              </block>
+                            </value>
+                            <value name="right">
+                              <block type="access" id="?/QcC.;z2rKETfP=Mt8r">
+                                <field name="COMPONENT">real1</field>
+                                <field name="ENTITY">a</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="right">
+                          <block type="binary_arithmetic_boolean" id="K`eT|;zy4jS^P8;1P_Xv">
+                            <field name="OPERATION">LOWER</field>
+                            <value name="left">
+                              <block type="pop" id="fHn?oIjYds9y/dcZ+Kh=">
+                                <field name="VARIABLE">counter</field>
+                              </block>
+                            </value>
+                            <value name="right">
+                              <block type="access" id="DkRMdjx2=95*r}cB,vb~">
+                                <field name="COMPONENT">real1</field>
+                                <field name="ENTITY">a</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                    <statement name="commands">
+                      <block type="create" id="1nZF)zrib$wV`DAo*#p]">
+                        <value name="NAME">
+                          <block type="access" id="AR1:G[Eu}`@[#^@2EbQs">
+                            <field name="COMPONENT">reference</field>
+                            <field name="ENTITY">a</field>
+                          </block>
+                        </value>
+                        <next>
+                          <block type="variable_assignment" id="}%00Ls~0Lq][4{$hD`@h">
+                            <field name="assignmentType">SET</field>
+                            <field name="NAME">created</field>
+                            <value name="NAME">
+                              <block type="create_and_save" id="81b^+Li(`m+1Na@kC~ZZ">
+                                <value name="NAME">
+                                  <block type="access" id="~H`G.o%9L}zpi-`U01Wo">
+                                    <field name="COMPONENT">reference</field>
+                                    <field name="ENTITY">a</field>
+                                  </block>
+                                </value>
+                              </block>
+                            </value>
+                            <next>
+                              <block type="destroy" id="DoXNGkP)enfO:w]#8CYt">
+                                <field name="ENTITY">a</field>
+                                <next>
+                                  <block type="add" id="yl-D3S_MEWhtuz}uPLV~">
+                                    <field name="COMPONENT">tag</field>
+                                    <value name="ENTITY">
+                                      <block type="pop" id="*2CHRokV+tItr;kNJ8h`">
+                                        <field name="VARIABLE">created</field>
+                                      </block>
+                                    </value>
+                                    <next>
+                                      <block type="variable_assignment" id="n#1o6Gl7XY|=k~.CW(BH">
+                                        <field name="assignmentType">SET</field>
+                                        <field name="NAME">added</field>
+                                        <value name="NAME">
+                                          <block type="add_and_save" id="xxFB!0U[S^vL4DDz4q?V">
+                                            <field name="COMPONENT">real2</field>
+                                            <value name="ENTITY">
+                                              <block type="pop" id="zlG/vv1(/}gX!P}/(Pl+">
+                                                <field name="VARIABLE">a</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </value>
+                                        <next>
+                                          <block type="remove" id="{q|-%YBUODQl100JzZwM">
+                                            <field name="COMPONENT">tag</field>
+                                            <value name="ENTITY">
+                                              <block type="pop" id="3hY:9%tZ;GoTcz30U{9r">
+                                                <field name="VARIABLE">a</field>
+                                              </block>
+                                            </value>
+                                          </block>
+                                        </next>
+                                      </block>
+                                    </next>
+                                  </block>
+                                </next>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </statement>
+                  </block>
+                </statement>
+                <statement name="elseCommands">
+                  <block type="component_assignment" id=".nxH9NO0}:{`:#dd{,Cv">
+                    <field name="assignmentType">SET</field>
+                    <field name="COMPONENT">real1</field>
+                    <field name="ENTITY">a</field>
+                    <value name="expression">
+                      <block type="binary_arithmetic" id="@wE8Cblw|7Oc2hVd0QUy">
+                        <field name="OPERATION">ADD</field>
+                        <value name="left">
+                          <block type="unary_arithmetic" id="2k}{,jFL/kDRKuQ#,V4;">
+                            <field name="OPERATION">INCREMENT</field>
+                            <value name="value">
+                              <block type="access" id="b?/_ztJDy*!cl[|=5Qd~">
+                                <field name="COMPONENT">real1</field>
+                                <field name="ENTITY">a</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                        <value name="right">
+                          <block type="transformation" id="Gi8NT?MtM^gmzz8j~*bO">
+                            <field name="OPERATION">SIN</field>
+                            <value name="NAME">
+                              <block type="access" id="IsVE/Xbb%^8)4udrJcr?">
+                                <field name="COMPONENT">real1</field>
+                                <field name="ENTITY">a</field>
+                              </block>
+                            </value>
+                          </block>
+                        </value>
+                      </block>
+                    </value>
+                  </block>
+                </statement>
+                <next>
+                  <block type="break" id="UH:nLSH0``8X$[rg%Y2H"></block>
+                </next>
               </block>
             </next>
           </block>

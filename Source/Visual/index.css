@@ -11,17 +11,9 @@ header
     margin: 0;
 }
 
-#blocks-button
-{
-    width: 9%;
-    height: 100%;
-    float: left;
-    cursor: pointer;
-}
-
 #load-button
 {
-    width: 9%;
+    width: 10%;
     height: 100%;
     float: left;
     cursor: pointer;
@@ -30,7 +22,7 @@ header
 #title
 {
     display: inline-block;
-    width: 62%;
+    width: 80%;
     height: 100%;
     font-family: sans-serif;
     text-align: center;
@@ -40,14 +32,7 @@ header
 
 #save-button
 {
-    width: 9%;
-    height: 100%;
-    float: right;
-    cursor: pointer;
-}
-#text-button
-{
-    width: 9%;
+    width: 10%;
     height: 100%;
     float: right;
     cursor: pointer;
@@ -56,16 +41,10 @@ header
 section
 {
     width: 100%;
-    height: 90%;
+    height: 94%;
     margin: 0;
 }
 
-footer
-{
-    width: 100%;
-    height: 5%;
-    margin: 0;
-}
 
 #uploaded-input
 {
@@ -75,48 +54,14 @@ footer
 #blocklyDiv
 {
     height: 100%;
-    width: 50%;
+    width: 100%;
     display: inline-block;
     padding: 0;
     margin: 0;
     border: none;
 }
 
-#textPanel
-{
-    height: 100%;
-    width: 49%;
-    display: inline-block;
-    padding: 0;
-    margin: 0;
-}
-
 #toolbox
 {
     display: none;
-}
-
-#credits
-{
-    align-self: flex-start;
-    position: relative;
-    top: 40%;
-    float: left;
-}
-
-#download-button
-{
-    align-self: flex-start;
-    position: relative;
-    text-align: center;
-    top: 40%;
-    left: 40%;
-}
-
-#author
-{
-    align-self: flex-end;
-    position: relative;
-    top: 40%;
-    float: right;
 }

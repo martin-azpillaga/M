@@ -1,8 +1,9 @@
+
+var workspace = Blockly.inject('blocklyDiv', {toolbox: document.getElementById('toolbox'), zoom: {controls: true, wheel: true}});
+/*
+workspace.addChangeListener(blocksToText);
 var blocksPanel = document.getElementById("blocklyDiv");
 var textPanel = document.getElementById("textPanel");
-var workspace = Blockly.inject('blocklyDiv', {toolbox: document.getElementById('toolbox'), zoom: {controls: true, wheel: true}});
-workspace.addChangeListener(blocksToText);
-
 document.getElementById("blocks-button").addEventListener("click", function()
 {
     if (blocksPanel.style.display === "inline-block" || blocksPanel.style.display === "")
@@ -51,7 +52,7 @@ document.getElementById("text-button").addEventListener("click", function()
         Blockly.svgResize(workspace);
     }
 });
-
+*/
 document.getElementById("load-button").addEventListener("click", function()
 {
     document.getElementById("uploaded-input").click();
@@ -77,6 +78,7 @@ document.getElementById("save-button").addEventListener("click", function()
     download(xml_text, "blocks", "text/xml");
 });
 
+/*
 document.getElementById("download-button").addEventListener("click", function()
 { 
     var text = textPanel.value;
@@ -87,6 +89,7 @@ document.getElementById("download-button").addEventListener("click", function()
     alert("Sent");
     //download(text, "text.m", "text/text");
 });
+*/
 
 function download(text, name, type)
 {
@@ -107,6 +110,7 @@ function download(text, name, type)
     document.body.removeChild(div);
 }
 
+/*
 function blocksToText(event) 
 {
     var result = "";
@@ -289,4 +293,4 @@ function EntityToBlock()
     var baseParentConnection = b.getInput('base').connection;
     var baseChildConnection = base.outputConnection;
     baseParentConnection.connect(baseChildConnection);
-}
+}*/

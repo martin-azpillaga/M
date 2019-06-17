@@ -265,7 +265,7 @@ Blockly.Blocks['while'] = {
 Blockly.Blocks['variable_assignment'] = {
   init: function() {
     this.appendValueInput("NAME")
-        .setCheck("Number")
+        .setCheck(null)
         .appendField(new Blockly.FieldDropdown([["set","SET"], ["intialize","INITIALIZE"], ["increase","INCREASE"], ["decrease","DECREASE"], ["multiply","MULTIPLY"], ["divide","DIVIDE"], ["modulus","MODULUS"]]), "assignmentType")
         .appendField(new Blockly.FieldTextInput("variable"), "NAME");
     this.setPreviousStatement(true, "command");
@@ -630,8 +630,8 @@ Blockly.Blocks['remove'] = {
     this.appendValueInput("ENTITY")
         .setCheck(null);
     this.setInputsInline(true);
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
+    this.setPreviousStatement(true, "command");
+    this.setNextStatement(true, "command");
     this.setColour(230);
  this.setTooltip("");
  this.setHelpUrl("");
