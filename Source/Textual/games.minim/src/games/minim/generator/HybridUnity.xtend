@@ -2785,6 +2785,7 @@ class HybridUnity implements Framework
 		}
 		else if (command instanceof VariableAssignment)
 		{
+			var operator = command.assignment.r
 			var container = command.getContainerOfType(Control)
 			var declared = new HashSet<String>
 			declared.addAll(container.commands.subList(0, container.commands.indexOf(command)).filter(VariableAssignment).map[variable.name])
@@ -2888,7 +2889,7 @@ class HybridUnity implements Framework
 			if (declared.contains(command.variable.name))
 			{
 				'''
-				«command.variable.name» = «command.expression.toCode(FieldType.VALUE)»;
+				«command.variable.name» «operator» «command.expression.toCode(FieldType.VALUE)»;
 				«IF extra != ''»
 				«extra»
 				«ENDIF»
@@ -2897,7 +2898,7 @@ class HybridUnity implements Framework
 			else
 			{
 				'''
-				var «command.variable.name» = «command.expression.toCode(FieldType.VALUE)»;
+				var «command.variable.name» «operator» «command.expression.toCode(FieldType.VALUE)»;
 				«IF extra != ''»
 				«extra»
 				«ENDIF»

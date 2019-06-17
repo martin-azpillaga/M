@@ -152,7 +152,7 @@ Blockly.Blocks['loop'] = {
         .appendField("do");
     this.setPreviousStatement(true, "command");
     this.setNextStatement(true, "command");
-    this.setColour(230);
+    this.setColour(165);
  this.setTooltip("loop");
  this.setHelpUrl("");
   }
@@ -172,7 +172,7 @@ Blockly.Blocks['if'] = {
         .appendField("else");
     this.setPreviousStatement(true, "command");
     this.setNextStatement(true, "command");
-    this.setColour(230);
+    this.setColour(165);
  this.setTooltip("");
  this.setHelpUrl("");
   }
@@ -188,7 +188,7 @@ Blockly.Blocks['while'] = {
         .appendField("do");
     this.setPreviousStatement(true, "command");
     this.setNextStatement(true, "command");
-    this.setColour(230);
+    this.setColour(165);
  this.setTooltip("while");
  this.setHelpUrl("");
   }
@@ -224,22 +224,6 @@ Blockly.Blocks['component_assignment'] = {
   }
 };
 
-Blockly.Blocks['subrutine_call'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField("call")
-        .appendField(new Blockly.FieldTextInput("subrutine"), "SUBRUTINE");
-    this.appendStatementInput("PARAMETERS")
-        .setCheck(null)
-        .appendField("with");
-    this.setPreviousStatement(true, "command");
-    this.setNextStatement(true, "command");
-    this.setColour(230);
- this.setTooltip("subrutine call");
- this.setHelpUrl("");
-  }
-};
-
 Blockly.Blocks['access'] = {
   init: function() {
     this.appendDummyInput()
@@ -261,21 +245,6 @@ Blockly.Blocks['pop'] = {
     this.setOutput(true, "Number");
     this.setColour(230);
  this.setTooltip("pop");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['call'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField("process")
-        .appendField(new Blockly.FieldTextInput("function"), "FUNCTION");
-    this.appendStatementInput("NAME")
-        .setCheck(null)
-        .appendField("with");
-    this.setOutput(true, "Number");
-    this.setColour(230);
- this.setTooltip("call");
  this.setHelpUrl("");
   }
 };
@@ -436,49 +405,6 @@ Blockly.Blocks['range'] = {
     this.setNextStatement(true, "component");
     this.setColour(230);
  this.setTooltip("range");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['vertical_access'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "COMPONENT")
-        .appendField("of")
-        .appendField(new Blockly.FieldTextInput("entity"), "ENTITY");
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(230);
- this.setTooltip("vertical access");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['vertical_pop'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField("value of")
-        .appendField(new Blockly.FieldTextInput("variable"), "VARIABLE");
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(230);
- this.setTooltip("vertical pop");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['vertical_call'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField("process")
-        .appendField(new Blockly.FieldTextInput("function"), "FUNCTION");
-    this.appendStatementInput("NAME")
-        .setCheck(null)
-        .appendField("with");
-    this.setPreviousStatement(true, null);
-    this.setNextStatement(true, null);
-    this.setColour(230);
- this.setTooltip("vertical call");
  this.setHelpUrl("");
   }
 };
@@ -670,7 +596,7 @@ Blockly.Blocks['transformation'] = {
   init: function() {
     this.appendValueInput("NAME")
         .setCheck("Number")
-        .appendField(new Blockly.FieldDropdown([["sin","SIN"], ["cos","COS"], ["tan","TAN"], ["exp","EXP"], ["log","LOG"], ["sqrt","SQRT"], ["random","RANDOM"]]), "OPERATION");
+        .appendField(new Blockly.FieldDropdown([["sin","sin"], ["cos","cos"], ["tan","tan"], ["exp","exp"], ["log","log"], ["sqrt","sqrt"], ["random","random"]]), "OPERATION");
     this.setOutput(true, "Number");
     this.setColour(230);
  this.setTooltip("");

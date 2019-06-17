@@ -1,80 +1,66 @@
 <xml xmlns="http://www.w3.org/1999/xhtml">
-  <block type="system" id="Y{s-X-?gG:L8E%CDwJq+" x="335" y="158">
-    <field name="NAME">test</field>
+  <block type="entity" id="*GngT.o{Ij}$lUo@e7iA" x="426" y="213">
+    <field name="NAME">name</field>
+    <statement name="components">
+      <block type="real1" id="Unf*x-^mn)tMd!|V_,k%">
+        <field name="NAME">component</field>
+        <field name="X">0</field>
+      </block>
+    </statement>
+  </block>
+  <block type="system" id="DeN/qb,8E9WnT*%^D#ir" x="430" y="421">
+    <field name="NAME">name</field>
     <statement name="commands">
-      <block type="declaration" id="nq|-h9f{5R.|*XB^H)Tp">
-        <field name="NAME">a</field>
-        <next>
-          <block type="if" id="U%6.Sd+TPXREGSt-kCxy">
-            <value name="condition">
-              <block type="binary_boolean" id="Tr)mK5?FFD^-8EE*)Ba+">
-                <field name="OPERATION">OR</field>
-                <value name="left">
-                  <block type="binary_arithmetic_boolean" id="mQj;=[-Cdk/G$eB#y9#5">
-                    <field name="OPERATION">LOWER</field>
-                    <value name="left">
-                      <block type="pop" id="0uNw0j7ev8}Fr]S#-g3,">
-                        <field name="VARIABLE">a</field>
-                      </block>
-                    </value>
-                    <value name="right">
-                      <block type="pop" id="Bh.9d~r?-Wc)%3gKRcMp">
-                        <field name="VARIABLE">a</field>
-                      </block>
-                    </value>
-                  </block>
-                </value>
-                <value name="right">
-                  <block type="binary_arithmetic_boolean" id="c][[v!hos`vcGX`=BjU;">
-                    <field name="OPERATION">LOWER</field>
-                    <value name="left">
-                      <block type="pop" id="QE*rd$Ts*Y=Ysz[O/z7@">
-                        <field name="VARIABLE">a</field>
-                      </block>
-                    </value>
-                    <value name="right">
-                      <block type="pop" id="iuX#WoB^MnY;(X;m~31E">
-                        <field name="VARIABLE">a</field>
-                      </block>
-                    </value>
-                  </block>
-                </value>
-              </block>
-            </value>
-            <statement name="ifCommands">
-              <block type="break" id="q1jz![$h9fFQLp~-bse_"></block>
-            </statement>
-            <statement name="elseCommands">
-              <block type="break" id="SbkVdryO!#SQ+}~vztsK"></block>
-            </statement>
+      <block type="loop" id="bZG0Nk7wy2lVXtFQm+$=">
+        <field name="GROUP">a</field>
+        <statement name="commands">
+          <block type="declaration" id="u$OuSb5@rIJz}1cs,P~i">
+            <field name="NAME">x</field>
             <next>
-              <block type="while" id="7b4bHP/6;/12%i*l^npW">
-                <value name="condition">
-                  <block type="unary_boolean" id="*l1H~0U3f}FJ`Ra,?ZGQ">
+              <block type="component_assignment" id="D/qx6s9{v2kX!bIUvZ2:">
+                <field name="assignmentType">INCREASE</field>
+                <field name="COMPONENT">component</field>
+                <field name="ENTITY">a</field>
+                <value name="expression">
+                  <block type="transformation" id="IGX+tFxaI!+7s,{dqh}E">
+                    <field name="OPERATION">sin</field>
                     <value name="NAME">
-                      <block type="binary_arithmetic_boolean" id="usZ0U2vV+R+J(N9ac8PE">
-                        <field name="OPERATION">EQUAL</field>
+                      <block type="pop" id="t[)?zR62Qa$T9rn)$XUF">
+                        <field name="VARIABLE">x</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <next>
+                  <block type="variable_assignment" id="#=X+Ax%t=wO|lOWrYWf.">
+                    <field name="assignmentType">MULTIPLY</field>
+                    <field name="NAME">x</field>
+                    <value name="NAME">
+                      <block type="binary_arithmetic" id="Bxw*895H^!3!(ENsS8H8">
+                        <field name="OPERATION">MODULUS</field>
                         <value name="left">
-                          <block type="pop" id="4b4Ha@r?:Kcig3_HXXK]">
-                            <field name="VARIABLE">a</field>
+                          <block type="unary_arithmetic" id="LYKu,B*BP(qnjQE$5AV(">
+                            <field name="OPERATION">INCREMENT</field>
+                            <value name="value">
+                              <block type="pop" id="VDL3f|KxGMR3(gF(*YI`">
+                                <field name="VARIABLE">x</field>
+                              </block>
+                            </value>
                           </block>
                         </value>
                         <value name="right">
-                          <block type="pop" id="xEB[2su1Amb1R+8^K1un">
-                            <field name="VARIABLE">a</field>
+                          <block type="pop" id="W{Z:^`+OUz$3l59hpSx,">
+                            <field name="VARIABLE">x</field>
                           </block>
                         </value>
                       </block>
                     </value>
                   </block>
-                </value>
-                <statement name="commands">
-                  <block type="break" id="RqqeKEE#)Jh=RN|GSn4M"></block>
-                </statement>
+                </next>
               </block>
             </next>
           </block>
-        </next>
+        </statement>
       </block>
     </statement>
   </block>
