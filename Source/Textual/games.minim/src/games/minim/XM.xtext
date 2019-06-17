@@ -233,21 +233,105 @@ Loop:
 ;
 While: {While}
 	OPENWHILE
+	OPENCONDITION
+	condition=BooleanExpression
+	CLOSEVALUE
 	
 	(
-	OPENCOMMANDS
+		OPENCOMMANDS
 		commands+=Command
 		(
 			OPENNEXT
 			commands+=Command
 			CLOSENEXT
 		)*
-	CLOSESTATEMENT
+		CLOSEBLOCK
+		CLOSESTATEMENT
 	)?
 ;
 Check: {Check}
 	OPENIF
+	condition=Condition
+	( 
+		OPENELSE
+		
+		commands+=Command
+		(
+			OPENNEXT
+			commands+=Command
+		)*
+		(
+			CLOSEBLOCK
+			CLOSENEXT
+		)*
+		CLOSEBLOCK
+		
+		CLOSESTATEMENT
+	)?
 ;
+terminal OPENELSE: '<statement name="elseCommands">';
+terminal OPENIFCOMMANDS: '<statement name="ifCommands">';
+terminal OPENCONDITION: '<value name="condition">';
+Condition returns Control:
+	{Condition} 
+	OPENCONDITION
+	condition=BooleanExpression
+	CLOSEVALUE
+	OPENIFCOMMANDS 
+	commands+=Command
+	(
+		OPENNEXT
+		commands+=Command
+	)*
+	(
+		CLOSEBLOCK
+		CLOSENEXT
+	)*
+	CLOSEBLOCK
+	CLOSESTATEMENT
+;
+
+
+
+
+
+
+terminal OPENBINARYBOOLEAN: '<block type="binary_boolean" id="'SUPERID'">';
+terminal OPENLEFT:'<value name="left">';
+terminal OPENRIGHT:'<value name="right">';
+terminal OPENUNARYBOOLEAN: '<block type="unary_boolean" id="'SUPERID'">';
+terminal OPENARITHEMTICBOOLEAN: '<block type="binary_arithmetic_boolean" id="'SUPERID'">';
+terminal OPENBINARYARITHMETIC: '<block type="binary_arithmetic" id="'SUPERID'">';
+terminal OPENUNARYARITHMETIC: '<block type="unary_arithmetic" id="'SUPERID'">';
+terminal OPENOPERATION: '<field name="OPERATION">';
+terminal OPENPOP: '<block type="pop" id="'SUPERID'">';
+terminal OPENVALUENAME: '<value name="NAME">';
+
+BooleanExpression returns BooleanExpression:
+	{Or} OPENBINARYBOOLEAN OR OPENLEFT left=BooleanExpression CLOSEVALUE OPENRIGHT right=BooleanExpression CLOSEVALUE CLOSEBLOCK
+	| {And} OPENBINARYBOOLEAN AND OPENLEFT left=BooleanExpression CLOSEVALUE OPENRIGHT right=BooleanExpression CLOSEVALUE CLOSEBLOCK
+	| {Not} OPENUNARYBOOLEAN OPENVALUENAME expression=BooleanExpression CLOSEVALUE CLOSEBLOCK
+	| {Comparison} OPENARITHEMTICBOOLEAN OPENOPERATION type=RelationType CLOSEFIELD OPENLEFT left=ArithmeticExpression CLOSEVALUE OPENRIGHT right=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
+	| {BooleanVariable} OPENPOP OPENVARIABLE variable=[Name] CLOSEFIELD CLOSEBLOCK
+;
+ArithmeticExpression: 
+	{Plus} OPENBINARYARITHMETIC 'one' '+' 'two'
+	| {Minus} 'minus'
+	| {Times} 'times'
+	| {Divide} 'divide'
+	| {Modulus} 'modulus'
+	| {Bitwise} 'bitwise'
+	| {Increment} 'increment'
+	| {Decrement} 'decrement'
+	| Atomic
+;
+Atomic returns ArithmeticExpression: 
+	   {Access} group=[Name] '.' component=[Name]
+	|  {Call} function=[Name] '(' parameters+=ArithmeticExpression (',' parameters+=ArithmeticExpression)* ')'
+	|  {Pop} OPENPOP OPENVARIABLE variable=[Name] CLOSEFIELD CLOSEBLOCK 
+;
+
+terminal OPENVARIABLE: '<field name="VARIABLE">';
 terminal OPENIF: '<block type="if" id="'SUPERID'">';
 terminal OPENWHILE: '<block type="while" id="'SUPERID'">';
 terminal OPENNEXT: '<next>';
@@ -286,8 +370,8 @@ terminal MESH: 'mesh.';
 terminal MATERIAL: 'material.';
 terminal FONT: 'font.';
 terminal TILT: 'tilt';
-terminal OR: 'or';
-terminal AND: 'and';
+terminal OR: '<field name="OPERATION">OR</field>';
+terminal AND: '<field name="OPERATION">AND</field>';
 terminal NOT: '!';
 terminal STOP_ITERATION: 'break';
 terminal DECLARE_VARIABLE: 'initialize';
@@ -321,5 +405,5 @@ enum TriggerType:
 	|A='key.A'|B='key.B'|C='key.C'|D='key.D'|E='key.E'|F='key.F'|G='key.G'|H='key.H'|I='key.I'|J='key.J'|K='key.K'|L='key.L'|M='key.M'|N='key.N'|O='key.O'|P='key.P'|Q='key.Q'|R='key.R'|S='key.S'|T='key.T'|U='key.U'|V='key.V'|W='key.W'|X='key.X'|Y='key.Y'|Z='key.Z'
 ;
 enum VectorType: mouse='MOUSEPOSITION'|dpad='DPAD'|leftStick='LEFTSTICK'|rightStick='RIGHTSTICK';
-enum RelationType: over='>'|under='<'|equal='='|notequal='!='|overorequal='>='|underorequal='<=';
+enum RelationType: over='GREATER'|under='LOWER'|equal='EQUAL'|notequal='NOTEQUAL'|overorequal='GREATEROREQUAL'|underorequal='UNDEROREQUAL';
 enum AssignmentType: set='='|increase='+='|decrease='-='|multiply='*='|divide='/='|modulus='%='|and='&='|or='|=';
