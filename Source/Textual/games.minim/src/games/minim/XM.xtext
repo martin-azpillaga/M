@@ -27,38 +27,130 @@ terminal CLOSEVALUE: '</value>';
 terminal OPENREMOVED: '<statement name="removed">';
 terminal OPENCOMPONENTNAME: '<block type="componentname" id="' SUPERID '">';
 terminal OPENSUBENTITIES: '<statement name="subEntities">';
+
 Entity:
 	OPENENTITY
 	OPENNAME
 	name=ID 
 	CLOSEFIELD
-	(OPENBASE OPENBASE2 OPENNAME base=[Entity] CLOSEFIELD (OPENREMOVED (OPENCOMPONENTNAME OPENNAME removed+=[Name] CLOSEFIELD CLOSEBLOCK)* CLOSESTATEMENT)? CLOSEBLOCK CLOSEVALUE)?
-	(OPENCOMPONENTS	values+=Value (values+=Value)* CLOSESTATEMENT)? 
+	(
+		OPENBASE OPENBASE2 
+		OPENNAME base=[Entity] CLOSEFIELD 
+		(
+			OPENREMOVED 
+			(
+				OPENCOMPONENTNAME 
+				OPENNAME removed+=[Name] CLOSEFIELD
+				(
+					OPENNEXT
+					OPENCOMPONENTNAME
+					OPENNAME removed+=[Name] CLOSEFIELD
+				)*
+				(
+					CLOSEBLOCK
+					CLOSENEXT
+				)*
+				CLOSEBLOCK
+			) 
+			CLOSESTATEMENT
+		)? 
+		CLOSEBLOCK CLOSEVALUE
+	)?
+	(
+		OPENCOMPONENTS	
+		values+=Value 
+		(
+			OPENNEXT
+			values+=Value 
+		)*
+		(
+			CLOSEBLOCK
+			CLOSENEXT
+		)*
+		CLOSEBLOCK
+		CLOSESTATEMENT
+	)? 
 	(OPENSUBENTITIES children+=Entity+ CLOSESTATEMENT)?
 	CLOSEBLOCK
 ;
 Value:
-	  {Tag}   OPENTAG OPENNAME component=[Name] CLOSEFIELD CLOSEBLOCK
-	/*| {Real1} component=[Name] x=Number
-	| {Real2} component=[Name] x=Number y=Number
-	| {Real3} component=[Name] x=Number y=Number z=Number
-	| {Real4} component=[Name] x=Number y=Number z=Number w=Number
-	| {Enumeration} component=[Name] '['values+=[Name]+']'
-	| {Reference} component=[Name] REFERENCE entity=[Entity]
-	| {Sprite} component=[Name] SPRITE value=[Name]
-	| {Audio} component=[Name] AUDIO value=[Name]
-	| {Text} component=[Name] value=STRING
-	| {Material} component=[Name] MATERIAL value=[Name]
-	| {Mesh} component=[Name] MESH value=[Name]
-	| {Font} component=[Name] FONT value=[Name]
-	| {Timer} component=[Name] value=Number SECONDS
-	| {Trigger} component=[Name] value=TriggerType
-	| {Range} component=[Name] value=AxisType
-	| {Vector} component=[Name] value=VectorType
-	| {Sensor} component=[Name] SENSOR '['values+=[Name]+']'
-	| {Click} component=[Name] CLICK*/
+	  {Tag}   OPENTAG OPENNAME component=[Name] CLOSEFIELD
+	| {Real1} OPENREAL1 OPENNAME component=[Name] CLOSEFIELD OPENX x=Number CLOSEFIELD
+	| {Real2} OPENREAL2 OPENNAME component=[Name] CLOSEFIELD OPENX x=Number CLOSEFIELD OPENY y=Number CLOSEFIELD
+	| {Real3} OPENREAL3 OPENNAME component=[Name] CLOSEFIELD OPENX x=Number CLOSEFIELD OPENY y=Number CLOSEFIELD OPENZ z=Number CLOSEFIELD
+	| {Real4} OPENREAL4 OPENNAME component=[Name] CLOSEFIELD OPENX x=Number CLOSEFIELD OPENY y=Number CLOSEFIELD OPENZ z=Number CLOSEFIELD OPENW w=Number CLOSEFIELD
+	| {Enumeration} OPENENUMERATION OPENNAME component=[Name] CLOSEFIELD 
+		(
+			OPENVALUES 
+			OPENENUMERATIONVALUE
+			OPENNAME values+=[Name] CLOSEFIELD
+			(
+				OPENNEXT
+				OPENENUMERATIONVALUE
+				OPENNAME values+=[Name] CLOSEFIELD
+			)*
+			(
+				CLOSEBLOCK
+				CLOSENEXT
+			)*
+			CLOSEBLOCK 
+			CLOSESTATEMENT
+		)?
+	| {Reference} OPENREFERENCE OPENNAME component=[Name] CLOSEFIELD OPENVALUE entity=[Entity] CLOSEFIELD
+	| {Sprite} OPENSPRITE OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=[Name] CLOSEFIELD
+	| {Audio} OPENAUDIO OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=[Name] CLOSEFIELD
+	| {Text} OPENTEXT OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=ID CLOSEFIELD
+	| {Material} OPENMATERIAL OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=[Name] CLOSEFIELD
+	| {Mesh} OPENMESH OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=[Name] CLOSEFIELD
+	| {Font} OPENFONT OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=[Name] CLOSEFIELD
+	| {Timer} OPENTIMER OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=Number CLOSEFIELD
+	| {Trigger} OPENTRIGGER OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=TriggerType CLOSEFIELD
+	| {Range} OPENRANGE OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=AxisType CLOSEFIELD
+	| {Vector} OPENVECTOR OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=VectorType CLOSEFIELD
+	| {Sensor} OPENSENSOR OPENNAME component=[Name] CLOSEFIELD 
+		(
+			OPENVALUES 
+			OPENENUMERATIONVALUE
+			OPENNAME values+=[Name] CLOSEFIELD
+			(
+				OPENNEXT
+				OPENENUMERATIONVALUE
+				OPENNAME values+=[Name] CLOSEFIELD
+			)*
+			(
+				CLOSEBLOCK
+				CLOSENEXT
+			)*
+			CLOSEBLOCK 
+			CLOSESTATEMENT
+		)?
+	| {Click} OPENCLICK OPENNAME component=[Name] CLOSEFIELD
 ;
-
+terminal OPENREAL1: '<block type="real1" id="'SUPERID'">';
+terminal OPENREAL2: '<block type="real2" id="'SUPERID'">';
+terminal OPENREAL3: '<block type="real3" id="'SUPERID'">';
+terminal OPENREAL4: '<block type="real4" id="'SUPERID'">';
+terminal OPENENUMERATION: '<block type="enumeration" id="'SUPERID'">';
+terminal OPENREFERENCE: '<block type="reference" id="'SUPERID'">';
+terminal OPENSPRITE: '<block type="sprite" id="'SUPERID'">';
+terminal OPENAUDIO: '<block type="audio" id="'SUPERID'">';
+terminal OPENTEXT: '<block type="textcomponent" id="'SUPERID'">';
+terminal OPENMESH: '<block type="mesh" id="'SUPERID'">';
+terminal OPENMATERIAL: '<block type="material" id="'SUPERID'">';
+terminal OPENFONT: '<block type="font" id="'SUPERID'">';
+terminal OPENTIMER: '<block type="timer" id="'SUPERID'">';
+terminal OPENTRIGGER: '<block type="trigger" id="'SUPERID'">';
+terminal OPENRANGE: '<block type="range" id="'SUPERID'">';
+terminal OPENVECTOR: '<block type="vector" id="'SUPERID'">';
+terminal OPENSENSOR: '<block type="sensor" id="'SUPERID'">';
+terminal OPENCLICK: '<block type="click" id="'SUPERID'">';
+terminal OPENX: '<field name="X">';
+terminal OPENY: '<field name="Y">';
+terminal OPENZ: '<field name="Z">';
+terminal OPENW: '<field name="W">';
+terminal OPENVALUE: '<field name="VALUE">';
+terminal OPENVALUES: '<statement name="VALUES">';
+terminal OPENENUMERATIONVALUE: '<block type="enumeration_value" id="'SUPERID'">';
 Number:	{Decimal} negative?='-'? wholePart=INT ('.' decimalPart=INT)?;
 
 terminal OPENSYSTEM: '<block type="system" id="' SUPERID '"' (' x="'INT'" y="'INT'"')?'>';
@@ -156,7 +248,6 @@ terminal MESH: 'mesh.';
 terminal MATERIAL: 'material.';
 terminal FONT: 'font.';
 terminal TILT: 'tilt';
-terminal VECTOR: 'vector';
 terminal OR: 'or';
 terminal AND: 'and';
 terminal NOT: '!';
@@ -176,21 +267,21 @@ terminal ELSEIF: 'else if';
 terminal ELSE: 'else';
 terminal SECONDS: 's';
 
-enum EventType: tag|timeout='timed out'|trigger='triggered'|enter='enter'|stay='stay'|exit='exit'|mouseDown='mouseDown'|mouseUp='mouseUp';
+enum EventType: tag='tagged'|timeout='timed out'|trigger='triggered'|enter='enter'|stay='stay'|exit='exit'|mouseDown='mouseDown'|mouseUp='mouseUp';
 enum AxisType: 
-	LeftX='gamepad.leftX'|LeftY='gamepad.leftY'|RightX='gamepad.rightX'|RightY='gamepad.rightY'
-	|LeftShoulder='gamepad.leftShoulder'|RightShoulder='gamepad.rightShoulder'
+	LeftX='LEFTX'|LeftY='LEFTY'|RightX='RIGHTX'|RightY='RIGHTY'
+	|LeftShoulder='LEFTSHOULDER'|RightShoulder='RIGHTSHOULDER'
 ;
 enum TriggerType: 
-	South='gamepad.south'|West='gamepad.west'|East='gamepad.east'|North='gamepad.north'
-	|LeftTrigger='gamepad.leftTrigger'|RightTrigger='gamepad.rightTrigger'
-	|Down='gamepad.down'|Left='gamepad.left'|Right='gamepad.right'|Up='gamepad.up'
-	|Start='gamepad.start'|Select='gamepad.select'
-	|LeftStick='gamepad.leftStickPress'|RightStick='gamepad.rightStickPress'
-	|Optional='gamepad.optional'
+	South='SOUTH'|West='WEST'|East='EAST'|North='NORTH'
+	|LeftTrigger='LEFTTRIGGER'|RightTrigger='RIGHTTRIGGER'
+	|Down='DOWN'|Left='LEFT'|Right='RIGHT'|Up='UP'
+	|Start='START'|Select='SELECT'
+	|LeftStick='LEFTPRESS'|RightStick='RIGHTPRESS'
+	|Optional='OPTIONAL'
 	|Zero='key.0'|One='key.1'|Two='key.2'|Three='key.3'|Four='key.4'|Five='key.5'|Six='key.6'|Seven='key.7'|Eight='key.8'|Nine='key.9'
 	|A='key.A'|B='key.B'|C='key.C'|D='key.D'|E='key.E'|F='key.F'|G='key.G'|H='key.H'|I='key.I'|J='key.J'|K='key.K'|L='key.L'|M='key.M'|N='key.N'|O='key.O'|P='key.P'|Q='key.Q'|R='key.R'|S='key.S'|T='key.T'|U='key.U'|V='key.V'|W='key.W'|X='key.X'|Y='key.Y'|Z='key.Z'
 ;
-enum VectorType: mouse='mouse.position'|dpad='gamepad.dpad'|leftStick='gamepad.leftStick'|rightStick='gamepad.rightStick';
+enum VectorType: mouse='MOUSEPOSITION'|dpad='DPAD'|leftStick='LEFTSTICK'|rightStick='RIGHTSTICK';
 enum RelationType: over='>'|under='<'|equal='='|notequal='!='|overorequal='>='|underorequal='<=';
 enum AssignmentType: set='='|increase='+='|decrease='-='|multiply='*='|divide='/='|modulus='%='|and='&='|or='|=';

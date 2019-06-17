@@ -49,6 +49,9 @@ import org.eclipse.xtext.scoping.Scopes
 
 import static games.minim.m.MPackage.Literals.*
 import games.minim.m.Click
+import games.minim.m.Mesh
+import games.minim.m.Font
+import games.minim.m.Material
 
 class EngineComponent extends NameImpl
 {
@@ -155,6 +158,7 @@ class StandardLibrary extends LazyLinker
 		game.real3Components.clear
 		game.real4Components.clear
 		game.enumerationComponents.clear
+		game.enumerations.clear
 		game.entityComponents.clear
 		game.rangeComponents.clear
 		game.triggerComponents.clear
@@ -497,6 +501,24 @@ class TypeInference extends DefaultLinkingService
 				component.name = text
 				deduction.audioComponents.add(component)
 			}
+			else if (context instanceof Mesh)
+			{
+				var component = MFactory.eINSTANCE.createName
+				component.name = text
+				deduction.meshComponents.add(component)
+			}
+			else if (context instanceof Font)
+			{
+				var component = MFactory.eINSTANCE.createName
+				component.name = text
+				deduction.fontComponents.add(component)
+			}
+			else if (context instanceof Material)
+			{
+				var component = MFactory.eINSTANCE.createName
+				component.name = text
+				deduction.materialComponents.add(component)
+			}
 		}
 		else if (reference == ENUMERATION__VALUES) 
 		{
@@ -792,6 +814,9 @@ class MScopeProvider extends AbstractMScopeProvider
 		+deduction.vectorComponents
 		+deduction.spriteComponents
 		+deduction.audioComponents
+		+deduction.meshComponents
+		+deduction.fontComponents
+		+deduction.materialComponents
 		+deduction.textComponents
 		+deduction.clickComponents
 		+engine.tagComponents
@@ -810,6 +835,9 @@ class MScopeProvider extends AbstractMScopeProvider
 		+engine.audioComponents
 		+engine.textComponents
 		+engine.clickComponents
+		+engine.meshComponents
+		+engine.fontComponents
+		+engine.materialComponents
 	}
 	
 	def recursiveGroups(EObject object)

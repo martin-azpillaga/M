@@ -153,7 +153,7 @@ terminal ELSE: 'else';
 terminal WHILE: 'while';
 terminal SECONDS: 's';
 
-enum EventType: tag|timeout='timed out'|trigger='triggered'|enter='enter'|stay='stay'|exit='exit'|mouseDown='mouseDown'|mouseUp='mouseUp';
+enum EventType: tag='tagged'|timeout='timed out'|trigger='triggered'|enter='enter'|stay='stay'|exit='exit'|mouseDown='mouseDown'|mouseUp='mouseUp';
 enum AxisType: 
 	LeftX='gamepad.leftX'|LeftY='gamepad.leftY'|RightX='gamepad.rightX'|RightY='gamepad.rightY'
 	|LeftShoulder='gamepad.leftShoulder'|RightShoulder='gamepad.rightShoulder'
