@@ -158,74 +158,6 @@ Blockly.Blocks['loop'] = {
   }
 };
 
-Blockly.Blocks['tagged'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
-        .appendField("tag")
-        .appendField(new Blockly.FieldTextInput("name"), "NAME");
-    this.setPreviousStatement(true, "constraint");
-    this.setNextStatement(true, "constraint");
-    this.setColour(315);
- this.setTooltip("constraint");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['timeout'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
-        .appendField("timed out")
-        .appendField(new Blockly.FieldTextInput("name"), "NAME");
-    this.setPreviousStatement(true, "constraint");
-    this.setNextStatement(true, "constraint");
-    this.setColour(330);
- this.setTooltip("timeout");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['triggered'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
-        .appendField("triggered")
-        .appendField(new Blockly.FieldTextInput("name"), "NAME");
-    this.setPreviousStatement(true, "constraint");
-    this.setNextStatement(true, "constraint");
-    this.setColour(330);
- this.setTooltip("triggered");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['detection'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
-        .appendField(new Blockly.FieldDropdown([["detecting an entry","ENTER"], ["detecting an stay","STAY"], ["detecting an exit","EXIT"]]), "NAME");
-    this.setPreviousStatement(true, "constraint");
-    this.setNextStatement(true, "constraint");
-    this.setColour(330);
- this.setTooltip("enter");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['mouse'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
-        .appendField(new Blockly.FieldDropdown([["mouse down","DOWN"], ["mouse click","UP"], ["mouse enter","ENTER"], ["mouse exit","EXIT"]]), "NAME");
-    this.setPreviousStatement(true, "constraint");
-    this.setNextStatement(true, "constraint");
-    this.setColour(330);
- this.setTooltip("mouse");
- this.setHelpUrl("");
-  }
-};
-
 Blockly.Blocks['if'] = {
   init: function() {
     this.appendValueInput("condition")
@@ -783,6 +715,76 @@ Blockly.Blocks['click'] = {
     this.setNextStatement(true, "component");
     this.setColour(230);
  this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['constraint_tagged'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
+        .appendField("tag")
+        .appendField(new Blockly.FieldTextInput("name"), "NAME");
+    this.setPreviousStatement(true, "constraint");
+    this.setNextStatement(true, "constraint");
+    this.setColour(315);
+ this.setTooltip("constraint");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['constraint_timeout'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
+        .appendField("timed out")
+        .appendField(new Blockly.FieldTextInput("name"), "NAME");
+    this.setPreviousStatement(true, "constraint");
+    this.setNextStatement(true, "constraint");
+    this.setColour(330);
+ this.setTooltip("timeout");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['constraint_triggered'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
+        .appendField("triggered")
+        .appendField(new Blockly.FieldTextInput("name"), "NAME");
+    this.setPreviousStatement(true, "constraint");
+    this.setNextStatement(true, "constraint");
+    this.setColour(330);
+ this.setTooltip("triggered");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['constraint_detection'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
+        .appendField(new Blockly.FieldTextInput("component"), "NAME")
+        .appendField(new Blockly.FieldDropdown([["detecting an entry","ENTER"], ["detecting an stay","STAY"], ["detecting an exit","EXIT"]]), "TYPE");
+    this.setPreviousStatement(true, "constraint");
+    this.setNextStatement(true, "constraint");
+    this.setColour(330);
+ this.setTooltip("enter");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['constraint_mouse'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
+        .appendField(new Blockly.FieldTextInput("component"), "NAME")
+        .appendField(new Blockly.FieldDropdown([["mouse down","DOWN"], ["mouse click","UP"], ["mouse enter","ENTER"], ["mouse exit","EXIT"]]), "TYPE");
+    this.setPreviousStatement(true, "constraint");
+    this.setNextStatement(true, "constraint");
+    this.setColour(330);
+ this.setTooltip("mouse");
  this.setHelpUrl("");
   }
 };

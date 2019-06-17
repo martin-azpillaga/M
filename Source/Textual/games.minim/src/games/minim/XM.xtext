@@ -11,6 +11,7 @@ Game:
 	)*
 	CLOSEXML
 ;
+@Override terminal STRING: 'STRINGGGG';
 terminal SUPERID: !('"')+;
 terminal OPENXML: '<xml xmlns="http://www.w3.org/1999/xhtml">';
 terminal CLOSEXML: '</xml>';
@@ -161,15 +162,37 @@ System:
 	name=ID
 	CLOSEFIELD
 	
-	(OPENCOMMANDS commands+=Command+ CLOSESTATEMENT)?
+	(
+		OPENCOMMANDS 
+		commands+=Command 
+		(
+			OPENNEXT
+			commands+=Command
+		)*
+		(
+			CLOSEBLOCK
+			CLOSENEXT
+		)*
+		CLOSEBLOCK
+		CLOSESTATEMENT
+	)?
 	
 	CLOSEBLOCK
 ;
 terminal OPENLOOP: '<block type="loop" id="' SUPERID '">';
 terminal OPENGROUP: '<field name="GROUP">';
 terminal OPENCONSTRAINTS: '<statement name="constraints">';
+terminal OPENBREAK: '<block type="break" id="'SUPERID'">';
+terminal OPENINITIALIZATION: '<block type="declaration" id="'SUPERID'">';
 Command:
-	Loop|While|Check
+	Loop|While|Check|Break|Initialization
+;
+Break: {Break}
+	OPENBREAK
+;
+Initialization:
+	OPENINITIALIZATION
+	OPENNAME variable=Name CLOSEFIELD
 ;
 Loop:
 	OPENLOOP
@@ -178,32 +201,37 @@ Loop:
 	group=Name 
 	CLOSEFIELD
 	
-	(OPENCONSTRAINTS 
+	(
+		OPENCONSTRAINTS 
 		constraints+=Constraint
 		(
 			OPENNEXT
 			constraints+=Constraint
+		)*
+		(
+			CLOSEBLOCK
 			CLOSENEXT
 		)*
-	CLOSESTATEMENT
+		CLOSEBLOCK
+		CLOSESTATEMENT
 	)?
 	
 	(
-	OPENCOMMANDS
+		OPENCOMMANDS
 		commands+=Command
 		(
 			OPENNEXT
 			commands+=Command
+		)*
+		(
+			CLOSEBLOCK
 			CLOSENEXT
 		)*
-	CLOSESTATEMENT
+		CLOSEBLOCK
+		CLOSESTATEMENT
 	)?
-	
-	
-	
-	CLOSEBLOCK
 ;
-While:
+While: {While}
 	OPENWHILE
 	
 	(
@@ -216,26 +244,36 @@ While:
 		)*
 	CLOSESTATEMENT
 	)?
-	
-	
-	
-	CLOSEBLOCK
 ;
-Check:
+Check: {Check}
 	OPENIF
-	CLOSEBLOCK
 ;
 terminal OPENIF: '<block type="if" id="'SUPERID'">';
 terminal OPENWHILE: '<block type="while" id="'SUPERID'">';
 terminal OPENNEXT: '<next>';
 terminal CLOSENEXT: '</next>';
-terminal OPENCONSTRAINT: '<block type="';
+terminal OPENCONSTRAINT: '<block type="constraint_';
 terminal OPENCONSTRAINT2: '" id="'SUPERID'">';
 terminal OPENNEGATED: '<field name="negated">';
+terminal OPENDETECTION: '<block type="constraint_detection" id="'SUPERID'">';
+terminal OPENMOUSE: '<block type="constraint_mouse" id="'SUPERID'">';
+terminal OPENTYPE: '<field name="TYPE">';
 Constraint:
-	OPENCONSTRAINT event=EventType OPENCONSTRAINT2
-	OPENNEGATED (negated?='TRUE' | 'FALSE') CLOSEFIELD
-	OPENNAME component=[Name] CLOSEFIELD
+	(
+		OPENCONSTRAINT event=EventType OPENCONSTRAINT2
+		OPENNEGATED (negated?='FALSE' | 'TRUE') CLOSEFIELD
+		OPENNAME component=[Name] CLOSEFIELD
+	|
+		OPENDETECTION
+		OPENNEGATED (negated?='FALSE' | 'TRUE') CLOSEFIELD
+		OPENNAME component=[Name] CLOSEFIELD
+		OPENTYPE event=EventType CLOSEFIELD
+	|
+		OPENMOUSE
+		OPENNEGATED (negated?='FALSE' | 'TRUE') CLOSEFIELD
+		OPENNAME component=[Name] CLOSEFIELD
+		OPENTYPE event=EventType CLOSEFIELD
+	)
 ;
 Name: name=ID;
 
@@ -267,7 +305,7 @@ terminal ELSEIF: 'else if';
 terminal ELSE: 'else';
 terminal SECONDS: 's';
 
-enum EventType: tag='tagged'|timeout='timed out'|trigger='triggered'|enter='enter'|stay='stay'|exit='exit'|mouseDown='mouseDown'|mouseUp='mouseUp';
+enum EventType: tag='tagged'|timeout='timeout'|trigger='triggered'|enter='ENTER'|stay='STAY'|exit='EXIT'|mouseDown='DOWN'|mouseUp='UP';
 enum AxisType: 
 	LeftX='LEFTX'|LeftY='LEFTY'|RightX='RIGHTX'|RightY='RIGHTY'
 	|LeftShoulder='LEFTSHOULDER'|RightShoulder='RIGHTSHOULDER'

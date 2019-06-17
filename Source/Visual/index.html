@@ -67,15 +67,15 @@
       </block>
       <block type="sprite">
         <field name="NAME">component</field>
-        <field name="SPRITE">name</field>
+        <field name="VALUE">name</field>
       </block>
       <block type="audio">
         <field name="NAME">component</field>
-        <field name="AUDIO">name</field>
+        <field name="VALUE">name</field>
       </block>
       <block type="mesh">
         <field name="NAME">component</field>
-        <field name="MESH">name</field>
+        <field name="VALUE">name</field>
       </block>
       <block type="trigger">
         <field name="NAME">component</field>
@@ -87,7 +87,7 @@
       </block>
       <block type="reference">
         <field name="NAME">component</field>
-        <field name="ENTITY">name</field>
+        <field name="VALUE">name</field>
       </block>
       <block type="enumeration">
         <field name="NAME">component</field>
@@ -100,7 +100,7 @@
       </block>
       <block type="timer">
         <field name="NAME">component</field>
-        <field name="SECONDS">0</field>
+        <field name="VALUE">0</field>
       </block>
       <block type="vector">
         <field name="NAME">component</field>
@@ -108,7 +108,7 @@
       </block>
       <block type="font">
         <field name="NAME">component</field>
-        <field name="FONT">font</field>
+        <field name="VALUE">font</field>
       </block>
       <block type="click">
         <field name="NAME">component</field>
@@ -144,25 +144,27 @@
       <block type="break"></block>
     </category>
     <category name="Constraints" colour="#a55b93">
-      <block type="tagged">
+      <block type="constraint_tagged">
         <field name="negated">TRUE</field>
         <field name="NAME">name</field>
       </block>
-      <block type="timeout">
+      <block type="constraint_timeout">
         <field name="negated">TRUE</field>
         <field name="NAME">name</field>
       </block>
-      <block type="triggered">
+      <block type="constraint_triggered">
         <field name="negated">TRUE</field>
         <field name="NAME">name</field>
       </block>
-      <block type="detection">
+      <block type="constraint_detection">
         <field name="negated">TRUE</field>
-        <field name="NAME">ENTER</field>
+        <field name="NAME">component</field>
+        <field name="TYPE">ENTER</field>
       </block>
-      <block type="mouse">
+      <block type="constraint_mouse">
         <field name="negated">TRUE</field>
-        <field name="NAME">DOWN</field>
+        <field name="NAME">component</field>
+        <field name="TYPE">DOWN</field>
       </block>
     </category>
     <sep></sep>
