@@ -17,11 +17,9 @@ import org.eclipse.xtext.serializer.impl.Serializer
 class MGenerator extends AbstractGenerator 
 {
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) 
-	{
-		var injector = Guice.createInjector(new  MRuntimeModule());  
-		var serializer = injector.getInstance(Serializer);  
-		var s = serializer.serialize(resource.contents.get(0) as Game);  
-		println(s);
+	{	
+		if (resource.contents.size == 0) return;
+		(new BlockSerializer).represent(resource.contents.get(0) as Game, fsa)
 		
 		var file = resource.URI.path
 		var projectPath = file.substring(9)
@@ -45,7 +43,7 @@ class MGenerator extends AbstractGenerator
 			}
 			else if (member instanceof IFile)
 			{
-				if(member.name.endsWith('.m'))
+				if(member.name.endsWith('.m') || member.name.endsWith('.xm'))
 				{
 					val memberUri = URI.createURI('platform:/resource'+member.fullPath)
 					

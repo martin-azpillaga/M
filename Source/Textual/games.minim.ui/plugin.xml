@@ -336,7 +336,7 @@
 			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.editor.XtextEditor"
 			contributorClass="org.eclipse.ui.editors.text.TextEditorActionContributor"
 			default="true"
-			extensions="xm"
+			extensions="xml"
 			id="games.minim.XM"
 			name="XM Editor">
 		</editor>
@@ -536,7 +536,7 @@
 	<extension point="org.eclipse.core.contenttype.contentTypes">
 		<content-type
 			base-type="org.eclipse.core.runtime.text"
-			file-extensions="xm"
+			file-extensions="xml"
 			id="games.minim.XM.contenttype"
 			name="XM File"
 			priority="normal">
@@ -547,13 +547,13 @@
 		point="org.eclipse.emf.ecore.extension_parser">
 		<parser
 			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.resource.IResourceFactory"
-			type="xm">
+			type="xml">
 		</parser>
 	</extension>
 	<extension point="org.eclipse.xtext.extension_resourceServiceProvider">
 		<resourceServiceProvider
 			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.ui.resource.IResourceUIServiceProvider"
-			uriExtension="xm">
+			uriExtension="xml">
 		</resourceServiceProvider>
 	</extension>
 	<!-- marker definitions for games.minim.XM -->
@@ -581,7 +581,7 @@
 	<extension point="org.eclipse.xtext.builder.participant">
 		<participant
 			class="games.minim.ui.XMExecutableExtensionFactory:org.eclipse.xtext.builder.IXtextBuilderParticipant"
-			fileExtensions="xm"/>
+			fileExtensions="xml"/>
 	</extension>
 	<extension point="org.eclipse.ui.preferencePages">
 		<page

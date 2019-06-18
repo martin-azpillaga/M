@@ -22,9 +22,8 @@ Constraint:
 	negated?=NEGATE_CONSTRAINT? event=EventType? component=[Name]
 ;
 
-
 Control:
-	  {Loop} FOR (all?=ALL|number=ArithmeticExpression) ENTITIES group=Name (CONSTRAINTS constraints+=Constraint+)?
+	  {Loop} FOR ALL ENTITIES group=Name (CONSTRAINTS constraints+=Constraint+)?
 	  		'{' commands+=Command+ '}'
 	| {Check} IF condition=Condition
 			( ELSEIF conditions+=Condition )*

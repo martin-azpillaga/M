@@ -47,7 +47,7 @@ Workflow {
 		language = XtextGeneratorLanguage 
 		{
 			name = "games.minim.XM"
-			fileExtensions = "xm"
+			fileExtensions = "xml"
 			referencedResource = "platform:/resource/games.minim/model/M.genmodel"
 			
 			fragment = grammarAccess.GrammarAccessFragment2 {}
@@ -58,7 +58,7 @@ Workflow {
 		    fragment = validation.ValidatorFragment2 { generateStub = false }
 		    fragment = scoping.ImportNamespacesScopingFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
-		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=true }
+		    fragment = generator.GeneratorFragment2 { generateStub = false }
 		    fragment = formatting.Formatter2Fragment2 { generateStub = false }
 		    fragment = ui.labeling.LabelProviderFragment2 { generateStub = false }
 		    fragment = ui.outline.QuickOutlineFragment2 {}

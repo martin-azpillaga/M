@@ -1,129 +1,140 @@
 package games.minim.generator
 
-import games.minim.m.Game
-import org.eclipse.xtext.generator.IFileSystemAccess2
 import com.google.inject.Guice
 import games.minim.XMRuntimeModule
+import games.minim.m.Game
+import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.serializer.impl.Serializer
-import games.minim.m.MPackage.Literals
-import com.google.inject.Inject
-import games.minim.services.XMGrammarAccess
-import org.eclipse.xtext.service.AbstractElementFinder.AbstractGrammarElementFinder
+import org.eclipse.xtext.xbase.lib.Functions.Function0
+import java.util.Stack
 
 class BlockSerializer implements Framework
 {
-	override represent(Game game, IFileSystemAccess2 fileSystem) 
-	{
+	int x = -100
+	int id = 0
+	Stack<Integer> stack
+	
+	def void doGenerate(Game game, IFileSystemAccess2 fsa, String name)
+	{	
+		x = -400
+		id = 0
 		var injector = Guice.createInjector(new  XMRuntimeModule());  
-		var grammar = injector.getInstance(AbstractGrammarElementFinder) as XMGrammarAccess;  
-		
-		fileSystem.generateFile(game.title+'.xml',
-		'''
-		«OPENXML»
-		«FOR entity : game.entities»
-		«OPENENTITY»
-		«OPENNAME»«entity.name»«CLOSEFIELD»
-		«IF entity.base !== null»
-		«OPENBASE»
-		«OPENBASE2»
-		«OPENNAME»«entity.base.name»«CLOSEFIELD»
-		«ENDIF»
-		«CLOSEBLOCK»
-		«ENDFOR»
-		«CLOSEXML»
-		'''
-		)
-		var n = grammar.OPENNAMERule.toString
-		n = n
+		var serializer = injector.getInstance(Serializer);  
+		var s = serializer.serialize(game);  
+		println(s)
+		s = s.replaceNext()
+		s = s.replaceOld('xhtml"> <block type="entity" id=""', ['''xhtml"> <block type="entity" id="" x="«x()»" y="0"'''])
+		s = s.replaceOld('</block> <block type="entity" id=""', ['''</block> <block type="entity" id="" x="«x()»" y="0"'''])
+		x=-400
+		s = s.replaceOld('type="system" id=""', ['''type="system" id="" x="«x()»" y="500"'''])
+		s = s.replaceOld('id=""',['''id="«id()»"'''])
+		s = s.replace('\t', '')
+		s = s.replace('\n', '')
+		s = s.replace('\r', '')
+		s = s.replace(' . ', '.')
+		s = s.replace('>  ', '>')
+		s = s.replace('> ', '>')
+		s = s.replace('  <', '<')
+		s = s.replace(' <', '<')
+		fsa.generateFile('Blocks/'+name+'.xml',s)
+		println("Generated")
 	}
 	
-	public String OPENVALUEVALUE= '<value name="value">';
-public String OPENTRANSFORMATION= '<block type="transformation" id="%s">';
-
-public String OPENXML= '<xml xmlns="http=//www.w3.org/1999/xhtml">';
-public String CLOSEXML= '</xml>';
-public String OPENENTITY= '<block type="entity" id="%s" x="%d" y="%d">';
-public String CLOSEBLOCK= '</block>';
-public String OPENNAME= '<field name="NAME">';
-public String CLOSEFIELD= '</field>';
-public String OPENCOMPONENTS= '<statement name="components">';
-public String CLOSESTATEMENT= '</statement>';
-public String OPENTAG= '<block type="tag" id="%s">';
-public String OPENBASE= '<value name="base">';
-public String OPENBASE2= '<block type="base" id="%s">';
-public String CLOSEVALUE= '</value>';
-public String OPENREMOVED= '<statement name="removed">';
-public String OPENCOMPONENTNAME= '<block type="componentname" id="%s">';
-public String OPENSUBENTITIES= '<statement name="subEntities">';
-public String OPENREAL1= '<block type="real1" id="%s">';
-public String OPENREAL2= '<block type="real2" id="%s">';
-public String OPENREAL3= '<block type="real3" id="%s">';
-public String OPENREAL4= '<block type="real4" id="%s">';
-public String OPENENUMERATION= '<block type="enumeration" id="%s">';
-public String OPENREFERENCE= '<block type="reference" id="%s">';
-public String OPENSPRITE= '<block type="sprite" id="%s">';
-public String OPENAUDIO= '<block type="audio" id="%s">';
-public String OPENTEXT= '<block type="textcomponent" id="%s">';
-public String OPENMESH= '<block type="mesh" id="%s">';
-public String OPENMATERIAL= '<block type="material" id="%s">';
-public String OPENFONT= '<block type="font" id="%s">';
-public String OPENTIMER= '<block type="timer" id="%s">';
-public String OPENTRIGGER= '<block type="trigger" id="%s">';
-public String OPENRANGE= '<block type="range" id="%s">';
-public String OPENVECTOR= '<block type="vector" id="%s">';
-public String OPENSENSOR= '<block type="sensor" id="%s">';
-public String OPENCLICK= '<block type="click" id="%s">';
-public String OPENX= '<field name="X">';
-public String OPENY= '<field name="Y">';
-public String OPENZ= '<field name="Z">';
-public String OPENW= '<field name="W">';
-public String OPENVALUE= '<field name="VALUE">';
-public String OPENVALUES= '<statement name="VALUES">';
-public String OPENENUMERATIONVALUE= '<block type="enumeration_value" id="%s">';
-
-public String OPENSYSTEM= '<block type="system" id="%s" x="%d" y="%d">';
-public String OPENCOMMANDS= '<statement name="commands">';
-
-public String OPENLOOP= '<block type="loop" id="%s">';
-public String OPENGROUP= '<field name="GROUP">';
-public String OPENCONSTRAINTS= '<statement name="constraints">';
-public String OPENBREAK= '<block type="break" id="%s">';
-public String OPENINITIALIZATION= '<block type="declaration" id="%s">';
-public String OPENCOMPONENTASSIGNMENT= '<block type="component_assignment" id="%s">';
-public String OPENASSIGNMENTTYPE= '<field name="assignmentType">';
-public String OPENVARIABLEASSIGNMENT= '<block type="variable_assignment" id="%s">';
-public String OPENCOMPONENT= '<field name="COMPONENT">';
-public String OPENEXPRESSION= '<value name="expression">';
-public String OPENENTITYFIELD= '<field name="ENTITY">';
-public String INITIALIZE= 'INITIALIZE';
-public String OPENELSE= '<statement name="elseCommands">';
-public String OPENIFCOMMANDS= '<statement name="ifCommands">';
-public String OPENCONDITION= '<value name="condition">';
-public String OPENBINARYBOOLEAN= '<block type="binary_boolean" id="%s">';
-public String OPENLEFT='<value name="left">';
-public String OPENRIGHT='<value name="right">';
-public String OPENUNARYBOOLEAN= '<block type="unary_boolean" id="%s">';
-public String OPENARITHEMTICBOOLEAN= '<block type="binary_arithmetic_boolean" id="%s">';
-public String OPENBINARYARITHMETIC= '<block type="binary_arithmetic" id="%s">';
-public String OPENUNARYARITHMETIC= '<block type="unary_arithmetic" id="%s">';
-public String OPENOPERATION= '<field name="OPERATION">';
-public String OPENPOP= '<block type="pop" id="%s">';
-public String OPENVALUENAME= '<value name="NAME">';
-public String ADD= 'ADD';
-public String SUBTRACT= 'SUBTRACT';
-public String INCREMENT= 'INCREMENT';
-public String DECREMENT= 'DECREMENT';
-public String OPENVARIABLE= '<field name="VARIABLE">';
-public String OPENIF= '<block type="if" id="%s">';
-public String OPENWHILE= '<block type="while" id="%s">';
-public String OPENNEXT= '<next>';
-public String CLOSENEXT= '</next>';
-public String OPENCONSTRAINT= '<block type="constraint_';
-public String OPENCONSTRAINT2= '" id="%s">';
-public String OPENNEGATED= '<field name="negated">';
-public String OPENDETECTION= '<block type="constraint_detection" id="%s">';
-public String OPENMOUSE= '<block type="constraint_mouse" id="%s">';
-public String OPENTYPE= '<field name="TYPE">';
-public String OR= '<field name="OPERATION">OR</field>';
-public String AND= '<field name="OPERATION">AND</field>';
+	def id()
+	{
+		id++
+		return id
+	}
+	
+	def x()
+	{
+		x+= 400
+		return x
+	}
+	
+	def replaceOld(String input, String oldPattern, Function0<String> f)
+	{
+	    var result = new StringBuffer();
+	    //startIdx and idxOld delimit various chunks of aInput; these
+	    //chunks always end where aOldPattern begins
+	    var startIdx = 0;
+	    var idxOld = 0;
+	    while ((idxOld = input.indexOf(oldPattern, startIdx)) >= 0) 
+	    {
+	        //grab a part of aInput which does not include aOldPattern
+	        result.append( input.substring(startIdx, idxOld) );
+	        //add aNewPattern to take place of aOldPattern
+	        result.append( f.apply );
+	
+	        //reset the startIdx to just after the current match, to see
+	        //if there are any further matches
+	        startIdx = idxOld + oldPattern.length();
+     	}
+	     //the final chunk will go to the end of aInput
+	     result.append( input.substring(startIdx) );
+	     return result.toString();
+  	}
+  	
+  	def replaceNext(String input)
+	{
+		stack = new Stack<Integer>
+	    var result = new StringBuffer();
+	    //startIdx and idxOld delimit various chunks of aInput; these
+	    //chunks always end where aOldPattern begins
+	    var startIdx = 0
+	    var openIndex = 0
+	    var closeIndex = 0
+	    var nextIndex = 0
+	    var openStatement = "<statement"
+	    var closeStatement = "</statement>";
+	    var openNext = "<next>"
+	    while ((closeIndex = input.indexOf(closeStatement, startIdx)) >= 0) 
+	    {
+	    	openIndex = input.indexOf(openStatement, startIdx)
+	    	nextIndex = input.indexOf(openNext, startIdx)
+	    	var min = min(openIndex,closeIndex,nextIndex)
+	    	if (min === openIndex)
+	    	{
+	    		result.append(input.substring(startIdx, openIndex+openStatement.length))
+	    		stack.push(0)
+	    		startIdx = openIndex+openStatement.length
+	    	}
+	    	else if (min === closeIndex)
+	    	{
+	    		result.append( input.substring(startIdx, closeIndex) )
+	    		var times = stack.pop()
+	    		for (var i = 0; i < times; i++)
+		        {
+		        	result.append('</next></block>')
+		        }
+		        result.append( closeStatement )
+		        startIdx = closeIndex+closeStatement.length;
+	    	}
+	    	else if (min === nextIndex)
+	    	{
+	    		result.append(input.substring(startIdx, nextIndex + openNext.length))
+	    		startIdx = nextIndex + openNext.length
+	    		var current = stack.pop()
+	    		current++
+	    		stack.push(current)
+	    	}	        
+     	}
+	     //the final chunk will go to the end of aInput
+	     result.append( input.substring(startIdx) );
+	     return result.toString();
+  	}
+  	
+	override represent(Game game, IFileSystemAccess2 fileSystem) 
+	{
+		var file = game.eResource.URI.path
+		var projectPath = file.substring(9)
+		var name = projectPath.substring(projectPath.indexOf('/')+1, projectPath.indexOf('.'))
+		
+		doGenerate(game, fileSystem, name)
+	}
+	
+	def min(int a, int b, int c)
+	{
+		#[a,b,c].filter[it >= 0].reduce[p1, p2|Math.min(p1,p2)]
+	}
 }

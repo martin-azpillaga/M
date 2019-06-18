@@ -6,8 +6,9 @@ import "http://www.minim.games/M"
 Game: {Game}
 	OPENXML
 	(
-		entities+=Entity|
-		systems+=System
+		entities+=Entity CLOSEBLOCK|
+		systems+=System |
+		mainEntities+=[Entity]
 	)*
 	CLOSEXML
 ;
@@ -56,8 +57,20 @@ Entity:
 		CLOSEBLOCK
 		CLOSESTATEMENT
 	)? 
-	(OPENSUBENTITIES children+=Entity+ CLOSESTATEMENT)?
-	CLOSEBLOCK
+	(
+		OPENSUBENTITIES 
+		children+=Entity
+		(
+			OPENNEXT
+			children+=Entity
+		)*
+		(
+			CLOSEBLOCK
+			CLOSENEXT
+		)*
+		CLOSEBLOCK
+		CLOSESTATEMENT
+	)?
 ;
 Value:
 	  {Tag}   OPENTAG OPENNAME component=[Name] CLOSEFIELD

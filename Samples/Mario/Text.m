@@ -1,6 +1,4 @@
-ball has
-position 0 0, scale 2 2, appearance sprite.ball,
-mass 1, radius 0.5, restitution 1, category [balls],
+ball has position 0 0, scale 2 2, appearance sprite.ball, mass 1, radius 0.5, restitution 1, category [balls],
 speed_up_sensor detect [paddles], respawn_sensor detect [goals],
 servable_tag, respawn_point 0 0, angle -1 1, length 10 20, physical.
 
@@ -53,7 +51,6 @@ menu contains
 	trigger has detector gamepad.start, scene entity.playground.
 	player based on player.
 .
-
 
 start:
 for all entity a with triggered detector
