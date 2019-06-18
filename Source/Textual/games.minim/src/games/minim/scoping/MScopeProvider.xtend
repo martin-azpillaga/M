@@ -704,8 +704,16 @@ class MScopeProvider extends AbstractMScopeProvider
 		if (deduction === null)
 		{
 			var file = context.eResource.URI.path
-			var projectPath = file.substring(9)
-			var projectName = projectPath.substring(1,projectPath.substring(1).indexOf('/')+1)
+			var projectName = ""
+			if (file.contains('/'))
+			{
+				var projectPath = file.substring(9)
+				projectName = projectPath.substring(1,projectPath.substring(1).indexOf('/')+1)
+			}
+			else
+			{
+				projectName = file
+			}
 			deduction = StandardLibrary.deductionOf.get(projectName).contents.get(0) as Game
 			engine = StandardLibrary.libraryResource.contents.get(0) as Game
 		}

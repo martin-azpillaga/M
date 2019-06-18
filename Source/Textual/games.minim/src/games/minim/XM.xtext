@@ -12,22 +12,7 @@ Game: {Game}
 	CLOSEXML
 ;
 @Override terminal STRING: 'STRINGGGG';
-terminal SUPERID: !('"')+;
-terminal OPENXML: '<xml xmlns="http://www.w3.org/1999/xhtml">';
-terminal CLOSEXML: '</xml>';
-terminal OPENENTITY: '<block type="entity" id="' SUPERID '"' (' x="' INT '" y="' INT '"')?'>';
-terminal CLOSEBLOCK: '</block>';
-terminal OPENNAME: '<field name="NAME">';
-terminal CLOSEFIELD: '</field>';
-terminal OPENCOMPONENTS: '<statement name="components">';
-terminal CLOSESTATEMENT: '</statement>';
-terminal OPENTAG: '<block type="tag" id="' SUPERID '">';
-terminal OPENBASE: '<value name="base">';
-terminal OPENBASE2: '<block type="base" id="' SUPERID '">';
-terminal CLOSEVALUE: '</value>';
-terminal OPENREMOVED: '<statement name="removed">';
-terminal OPENCOMPONENTNAME: '<block type="componentname" id="' SUPERID '">';
-terminal OPENSUBENTITIES: '<statement name="subEntities">';
+
 
 Entity:
 	OPENENTITY
@@ -127,35 +112,8 @@ Value:
 		)?
 	| {Click} OPENCLICK OPENNAME component=[Name] CLOSEFIELD
 ;
-terminal OPENREAL1: '<block type="real1" id="'SUPERID'">';
-terminal OPENREAL2: '<block type="real2" id="'SUPERID'">';
-terminal OPENREAL3: '<block type="real3" id="'SUPERID'">';
-terminal OPENREAL4: '<block type="real4" id="'SUPERID'">';
-terminal OPENENUMERATION: '<block type="enumeration" id="'SUPERID'">';
-terminal OPENREFERENCE: '<block type="reference" id="'SUPERID'">';
-terminal OPENSPRITE: '<block type="sprite" id="'SUPERID'">';
-terminal OPENAUDIO: '<block type="audio" id="'SUPERID'">';
-terminal OPENTEXT: '<block type="textcomponent" id="'SUPERID'">';
-terminal OPENMESH: '<block type="mesh" id="'SUPERID'">';
-terminal OPENMATERIAL: '<block type="material" id="'SUPERID'">';
-terminal OPENFONT: '<block type="font" id="'SUPERID'">';
-terminal OPENTIMER: '<block type="timer" id="'SUPERID'">';
-terminal OPENTRIGGER: '<block type="trigger" id="'SUPERID'">';
-terminal OPENRANGE: '<block type="range" id="'SUPERID'">';
-terminal OPENVECTOR: '<block type="vector" id="'SUPERID'">';
-terminal OPENSENSOR: '<block type="sensor" id="'SUPERID'">';
-terminal OPENCLICK: '<block type="click" id="'SUPERID'">';
-terminal OPENX: '<field name="X">';
-terminal OPENY: '<field name="Y">';
-terminal OPENZ: '<field name="Z">';
-terminal OPENW: '<field name="W">';
-terminal OPENVALUE: '<field name="VALUE">';
-terminal OPENVALUES: '<statement name="VALUES">';
-terminal OPENENUMERATIONVALUE: '<block type="enumeration_value" id="'SUPERID'">';
-Number:	{Decimal} negative?='-'? wholePart=INT ('.' decimalPart=INT)?;
 
-terminal OPENSYSTEM: '<block type="system" id="' SUPERID '"' (' x="'INT'" y="'INT'"')?'>';
-terminal OPENCOMMANDS: '<statement name="commands">';
+Number:	{Decimal} negative?='-'? wholePart=INT ('.' decimalPart=INT)?;
 System:
 	OPENSYSTEM
 	OPENNAME
@@ -179,18 +137,8 @@ System:
 	
 	CLOSEBLOCK
 ;
-terminal OPENLOOP: '<block type="loop" id="' SUPERID '">';
-terminal OPENGROUP: '<field name="GROUP">';
-terminal OPENCONSTRAINTS: '<statement name="constraints">';
-terminal OPENBREAK: '<block type="break" id="'SUPERID'">';
-terminal OPENINITIALIZATION: '<block type="declaration" id="'SUPERID'">';
-terminal OPENCOMPONENTASSIGNMENT: '<block type="component_assignment" id="'SUPERID'">';
-terminal OPENASSIGNMENTTYPE: '<field name="assignmentType">';
-terminal OPENVARIABLEASSIGNMENT: '<block type="variable_assignment" id="'SUPERID'">';
-terminal OPENCOMPONENT: '<field name="COMPONENT">';
-terminal OPENEXPRESSION: '<value name="expression">';
-terminal OPENENTITYFIELD: '<field name="ENTITY">';
-terminal INITIALIZE: 'INITIALIZE';
+
+
 Command:
 	Loop|While|Check|Break|Initialization|ComponentAssignment|VariableAssignment|CreatedAssignment
 ;
@@ -295,9 +243,7 @@ Check: {Check}
 		CLOSESTATEMENT
 	)?
 ;
-terminal OPENELSE: '<statement name="elseCommands">';
-terminal OPENIFCOMMANDS: '<statement name="ifCommands">';
-terminal OPENCONDITION: '<value name="condition">';
+
 Condition returns Control:
 	{Condition} 
 	OPENCONDITION
@@ -322,16 +268,6 @@ Condition returns Control:
 
 
 
-terminal OPENBINARYBOOLEAN: '<block type="binary_boolean" id="'SUPERID'">';
-terminal OPENLEFT:'<value name="left">';
-terminal OPENRIGHT:'<value name="right">';
-terminal OPENUNARYBOOLEAN: '<block type="unary_boolean" id="'SUPERID'">';
-terminal OPENARITHEMTICBOOLEAN: '<block type="binary_arithmetic_boolean" id="'SUPERID'">';
-terminal OPENBINARYARITHMETIC: '<block type="binary_arithmetic" id="'SUPERID'">';
-terminal OPENUNARYARITHMETIC: '<block type="unary_arithmetic" id="'SUPERID'">';
-terminal OPENOPERATION: '<field name="OPERATION">';
-terminal OPENPOP: '<block type="pop" id="'SUPERID'">';
-terminal OPENVALUENAME: '<value name="NAME">';
 
 BooleanExpression returns BooleanExpression:
 	{Or} OPENBINARYBOOLEAN OR OPENLEFT left=BooleanExpression CLOSEVALUE OPENRIGHT right=BooleanExpression CLOSEVALUE CLOSEBLOCK
@@ -340,10 +276,7 @@ BooleanExpression returns BooleanExpression:
 	| {Comparison} OPENARITHEMTICBOOLEAN OPENOPERATION type=RelationType CLOSEFIELD OPENLEFT left=ArithmeticExpression CLOSEVALUE OPENRIGHT right=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
 	| {BooleanVariable} OPENPOP OPENVARIABLE variable=[Name] CLOSEFIELD CLOSEBLOCK
 ;
-terminal ADD: 'ADD';
-terminal SUBTRACT: 'SUBTRACT';
-terminal INCREMENT: 'INCREMENT';
-terminal DECREMENT: 'DECREMENT';
+
 ArithmeticExpression: 
 	{Plus} OPENBINARYARITHMETIC OPENOPERATION ADD CLOSEFIELD OPENLEFT left=ArithmeticExpression CLOSEVALUE OPENRIGHT right=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
 	| {Minus} OPENBINARYARITHMETIC OPENOPERATION SUBTRACT CLOSEFIELD OPENLEFT left=ArithmeticExpression CLOSEVALUE OPENRIGHT right=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
@@ -355,8 +288,6 @@ ArithmeticExpression:
 	| {Decrement} OPENUNARYARITHMETIC OPENOPERATION DECREMENT CLOSEFIELD OPENVALUEVALUE left=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
 	| Atomic
 ;
-terminal OPENVALUEVALUE: '<value name="value">';
-terminal OPENTRANSFORMATION: '<block type="transformation" id="'SUPERID'">';
 
 Atomic returns ArithmeticExpression: 
 	   {Access} group=[Name] '.' component=[Name]
@@ -364,17 +295,6 @@ Atomic returns ArithmeticExpression:
 	|  {Pop} OPENPOP OPENVARIABLE variable=[Name] CLOSEFIELD CLOSEBLOCK 
 ;
 
-terminal OPENVARIABLE: '<field name="VARIABLE">';
-terminal OPENIF: '<block type="if" id="'SUPERID'">';
-terminal OPENWHILE: '<block type="while" id="'SUPERID'">';
-terminal OPENNEXT: '<next>';
-terminal CLOSENEXT: '</next>';
-terminal OPENCONSTRAINT: '<block type="constraint_';
-terminal OPENCONSTRAINT2: '" id="'SUPERID'">';
-terminal OPENNEGATED: '<field name="negated">';
-terminal OPENDETECTION: '<block type="constraint_detection" id="'SUPERID'">';
-terminal OPENMOUSE: '<block type="constraint_mouse" id="'SUPERID'">';
-terminal OPENTYPE: '<field name="TYPE">';
 Constraint:
 	(
 		OPENCONSTRAINT event=EventType OPENCONSTRAINT2
@@ -394,33 +314,96 @@ Constraint:
 ;
 Name: name=ID;
 
-terminal REFERENCE: 'entity.';
-terminal SPRITE: 'sprite.';
-terminal AUDIO: 'audio.';
-terminal SENSOR: 'detect';
-terminal CLICK: 'click';
-terminal MESH: 'mesh.';
-terminal MATERIAL: 'material.';
-terminal FONT: 'font.';
-terminal TILT: 'tilt';
+terminal OPENVALUEVALUE: '<value name="value">';
+terminal OPENTRANSFORMATION: '<block type="transformation" id="'SUPERID'">';
+
+terminal SUPERID: !('"')+;
+terminal OPENXML: '<xml xmlns="http://www.w3.org/1999/xhtml">';
+terminal CLOSEXML: '</xml>';
+terminal OPENENTITY: '<block type="entity" id="' SUPERID '"' (' x="' INT '" y="' INT '"')?'>';
+terminal CLOSEBLOCK: '</block>';
+terminal OPENNAME: '<field name="NAME">';
+terminal CLOSEFIELD: '</field>';
+terminal OPENCOMPONENTS: '<statement name="components">';
+terminal CLOSESTATEMENT: '</statement>';
+terminal OPENTAG: '<block type="tag" id="' SUPERID '">';
+terminal OPENBASE: '<value name="base">';
+terminal OPENBASE2: '<block type="base" id="' SUPERID '">';
+terminal CLOSEVALUE: '</value>';
+terminal OPENREMOVED: '<statement name="removed">';
+terminal OPENCOMPONENTNAME: '<block type="componentname" id="' SUPERID '">';
+terminal OPENSUBENTITIES: '<statement name="subEntities">';
+terminal OPENREAL1: '<block type="real1" id="'SUPERID'">';
+terminal OPENREAL2: '<block type="real2" id="'SUPERID'">';
+terminal OPENREAL3: '<block type="real3" id="'SUPERID'">';
+terminal OPENREAL4: '<block type="real4" id="'SUPERID'">';
+terminal OPENENUMERATION: '<block type="enumeration" id="'SUPERID'">';
+terminal OPENREFERENCE: '<block type="reference" id="'SUPERID'">';
+terminal OPENSPRITE: '<block type="sprite" id="'SUPERID'">';
+terminal OPENAUDIO: '<block type="audio" id="'SUPERID'">';
+terminal OPENTEXT: '<block type="textcomponent" id="'SUPERID'">';
+terminal OPENMESH: '<block type="mesh" id="'SUPERID'">';
+terminal OPENMATERIAL: '<block type="material" id="'SUPERID'">';
+terminal OPENFONT: '<block type="font" id="'SUPERID'">';
+terminal OPENTIMER: '<block type="timer" id="'SUPERID'">';
+terminal OPENTRIGGER: '<block type="trigger" id="'SUPERID'">';
+terminal OPENRANGE: '<block type="range" id="'SUPERID'">';
+terminal OPENVECTOR: '<block type="vector" id="'SUPERID'">';
+terminal OPENSENSOR: '<block type="sensor" id="'SUPERID'">';
+terminal OPENCLICK: '<block type="click" id="'SUPERID'">';
+terminal OPENX: '<field name="X">';
+terminal OPENY: '<field name="Y">';
+terminal OPENZ: '<field name="Z">';
+terminal OPENW: '<field name="W">';
+terminal OPENVALUE: '<field name="VALUE">';
+terminal OPENVALUES: '<statement name="VALUES">';
+terminal OPENENUMERATIONVALUE: '<block type="enumeration_value" id="'SUPERID'">';
+
+terminal OPENSYSTEM: '<block type="system" id="' SUPERID '"' (' x="'INT'" y="'INT'"')?'>';
+terminal OPENCOMMANDS: '<statement name="commands">';
+
+terminal OPENLOOP: '<block type="loop" id="' SUPERID '">';
+terminal OPENGROUP: '<field name="GROUP">';
+terminal OPENCONSTRAINTS: '<statement name="constraints">';
+terminal OPENBREAK: '<block type="break" id="'SUPERID'">';
+terminal OPENINITIALIZATION: '<block type="declaration" id="'SUPERID'">';
+terminal OPENCOMPONENTASSIGNMENT: '<block type="component_assignment" id="'SUPERID'">';
+terminal OPENASSIGNMENTTYPE: '<field name="assignmentType">';
+terminal OPENVARIABLEASSIGNMENT: '<block type="variable_assignment" id="'SUPERID'">';
+terminal OPENCOMPONENT: '<field name="COMPONENT">';
+terminal OPENEXPRESSION: '<value name="expression">';
+terminal OPENENTITYFIELD: '<field name="ENTITY">';
+terminal INITIALIZE: 'INITIALIZE';
+terminal OPENELSE: '<statement name="elseCommands">';
+terminal OPENIFCOMMANDS: '<statement name="ifCommands">';
+terminal OPENCONDITION: '<value name="condition">';
+terminal OPENBINARYBOOLEAN: '<block type="binary_boolean" id="'SUPERID'">';
+terminal OPENLEFT:'<value name="left">';
+terminal OPENRIGHT:'<value name="right">';
+terminal OPENUNARYBOOLEAN: '<block type="unary_boolean" id="'SUPERID'">';
+terminal OPENARITHEMTICBOOLEAN: '<block type="binary_arithmetic_boolean" id="'SUPERID'">';
+terminal OPENBINARYARITHMETIC: '<block type="binary_arithmetic" id="'SUPERID'">';
+terminal OPENUNARYARITHMETIC: '<block type="unary_arithmetic" id="'SUPERID'">';
+terminal OPENOPERATION: '<field name="OPERATION">';
+terminal OPENPOP: '<block type="pop" id="'SUPERID'">';
+terminal OPENVALUENAME: '<value name="NAME">';
+terminal ADD: 'ADD';
+terminal SUBTRACT: 'SUBTRACT';
+terminal INCREMENT: 'INCREMENT';
+terminal DECREMENT: 'DECREMENT';
+terminal OPENVARIABLE: '<field name="VARIABLE">';
+terminal OPENIF: '<block type="if" id="'SUPERID'">';
+terminal OPENWHILE: '<block type="while" id="'SUPERID'">';
+terminal OPENNEXT: '<next>';
+terminal CLOSENEXT: '</next>';
+terminal OPENCONSTRAINT: '<block type="constraint_';
+terminal OPENCONSTRAINT2: '" id="'SUPERID'">';
+terminal OPENNEGATED: '<field name="negated">';
+terminal OPENDETECTION: '<block type="constraint_detection" id="'SUPERID'">';
+terminal OPENMOUSE: '<block type="constraint_mouse" id="'SUPERID'">';
+terminal OPENTYPE: '<field name="TYPE">';
 terminal OR: '<field name="OPERATION">OR</field>';
 terminal AND: '<field name="OPERATION">AND</field>';
-terminal NOT: '!';
-terminal STOP_ITERATION: 'break';
-terminal DECLARE_VARIABLE: 'initialize';
-terminal BASE_ENTITY: 'based on';
-terminal REMOVED_COMPONENTS: 'without';
-terminal ENTITY_CHILDREN: 'contains';
-terminal MAIN_ENTITIES: 'main world contains';
-terminal START_SYSTEM: ':';
-terminal FOR: 'for';
-terminal ALL: 'all';
-terminal ENTITIES: 'entity';
-terminal CONSTRAINTS: 'with';
-terminal NEGATE_CONSTRAINT: 'no';
-terminal ELSEIF: 'else if';
-terminal ELSE: 'else';
-terminal SECONDS: 's';
 
 enum EventType: tag='tagged'|timeout='timeout'|trigger='triggered'|enter='ENTER'|stay='STAY'|exit='EXIT'|mouseDown='DOWN'|mouseUp='UP';
 enum AxisType: 
