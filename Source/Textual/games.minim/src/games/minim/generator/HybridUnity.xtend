@@ -2957,7 +2957,7 @@ class HybridUnity implements Framework
 					}
 					case CREATE: 
 					{
-						var access = command.parameters.get(0) as Access
+						var access = command.parameters.get(0)
 						return
 						'''
 						Object.Instantiate(«access.toCode(FieldType.VALUE)»);

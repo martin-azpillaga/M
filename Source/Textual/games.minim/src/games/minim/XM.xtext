@@ -434,5 +434,5 @@ enum TriggerType:
 	|A='key.A'|B='key.B'|C='key.C'|D='key.D'|E='key.E'|F='key.F'|G='key.G'|H='key.H'|I='key.I'|J='key.J'|K='key.K'|L='key.L'|M='key.M'|N='key.N'|O='key.O'|P='key.P'|Q='key.Q'|R='key.R'|S='key.S'|T='key.T'|U='key.U'|V='key.V'|W='key.W'|X='key.X'|Y='key.Y'|Z='key.Z'
 ;
 enum VectorType: mouse='MOUSEPOSITION'|dpad='DPAD'|leftStick='LEFTSTICK'|rightStick='RIGHTSTICK';
-enum RelationType: over='GREATER'|under='LOWER'|equal='EQUAL'|notequal='NOTEQUAL'|overorequal='GREATEROREQUAL'|underorequal='UNDEROREQUAL';
+enum RelationType: over='GREATER'|under='LOWER'|equal='EQUAL'|notequal='NOTEQUAL'|overorequal='GREATEROREQUAL'|underorequal='LOWEROREQUAL';
 enum AssignmentType: set='SET'|increase='INCREASE'|decrease='DECREASE'|multiply='MULTIPLY'|divide='DIVIDE'|modulus='MODULUS'|and='AND'|or='OR';

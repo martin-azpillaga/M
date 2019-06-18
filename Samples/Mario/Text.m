@@ -53,72 +53,28 @@ menu contains
 .
 
 start:
-for all entity a with triggered detector
+for all entity a
 {
 	for all entity b
 	{
-		destroy(b)
-	}
-	create(a.scene)
-}
-
-move:
-for all entity a
-{
-	a.velocity = a.direction * a.motion tilt
-}
-
-respawn:
-for all entity a with enter respawn_sensor
-{
-	a.position = a.respawn_point
-	add(servable_tag, a)
-}
-
-serve:
-for all entity a with servable_tag
-{
-	angle = random(a.angle)
-	a.velocity = join(cos(angle),sin(angle)) * random(a.length)
-	remove(servable_tag, a)
-}
-
-score:
-for all entity a with enter score_sensor
-{
-	for all entity b
-	{
-		if a.team = b.team
-		{
-			b.number = b.number + a.worth
-		}
+		create(a)
 	}
 }
-
-restart:
+simple: 
+initialize v
 for all entity a
 {
-	if a.number > a.maximum
+	break
+}
+if v < v
+{
+	break
+}
+else
+{
+	while v <= v
 	{
-		for all entity b
-		{
-			destroy(b)
-		}
-		create(a.scene)
 		break
 	}
 }
-
-sound:
-for all entity a with enter score_sensor
-{
-	create(a.effect)
-}
-
-destroyLifetime:
-for all entity a with timed out lifetime
-{
-	destroy(a)
-}
-
-main world contains menu.
+break

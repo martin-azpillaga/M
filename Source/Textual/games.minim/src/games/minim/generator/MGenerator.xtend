@@ -19,7 +19,8 @@ class MGenerator extends AbstractGenerator
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) 
 	{	
 		if (resource.contents.size == 0) return;
-		(new BlockSerializer).represent(resource.contents.get(0) as Game, fsa)
+		//(new BlockSerializer).represent(resource.contents.get(0) as Game, fsa)
+		(new EnglishSerializer).represent(resource.contents.get(0) as Game, fsa)
 		
 		var file = resource.URI.path
 		var projectPath = file.substring(9)

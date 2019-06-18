@@ -21,12 +21,12 @@ class BlockSerializer implements Framework
 		var injector = Guice.createInjector(new  XMRuntimeModule());  
 		var serializer = injector.getInstance(Serializer);  
 		var s = serializer.serialize(game);  
-		println(s)
+
 		s = s.replaceNext()
 		s = s.replaceOld('xhtml"> <block type="entity" id=""', ['''xhtml"> <block type="entity" id="" x="«x()»" y="0"'''])
 		s = s.replaceOld('</block> <block type="entity" id=""', ['''</block> <block type="entity" id="" x="«x()»" y="0"'''])
 		x=-400
-		s = s.replaceOld('type="system" id=""', ['''type="system" id="" x="«x()»" y="500"'''])
+		s = s.replaceOld('type="system" id=""', ['''type="system" id="" x="«x()»" y="1000"'''])
 		s = s.replaceOld('id=""',['''id="«id()»"'''])
 		s = s.replace('\t', '')
 		s = s.replace('\n', '')
