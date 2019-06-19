@@ -80,8 +80,8 @@ canvas 100 100 contains
 
 menu contains
 	hud has canvas 100 100 contains
-		title has position 0 10, scale 100 10, text 'Space invaders'.
-		subtitle has position 0 -20, scale 100 5, text 'Press start'.
+		title has position 0 10, scale 100 10, text 'Space_Invaders'.
+		subtitle has position 0 -20, scale 100 5, text 'Press_Start'.
 	.
 	trigger has detector gamepad.start, scene entity.playground.
 	player based on player.

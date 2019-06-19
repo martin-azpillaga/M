@@ -224,6 +224,22 @@ Blockly.Blocks['component_assignment'] = {
   }
 };
 
+Blockly.Blocks['subrutine_call'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("call")
+        .appendField(new Blockly.FieldTextInput("subrutine"), "SUBRUTINE");
+    this.appendStatementInput("PARAMETERS")
+        .setCheck(null)
+        .appendField("with");
+    this.setPreviousStatement(true, "command");
+    this.setNextStatement(true, "command");
+    this.setColour(230);
+ this.setTooltip("subrutine call");
+ this.setHelpUrl("");
+  }
+};
+
 Blockly.Blocks['access'] = {
   init: function() {
     this.appendDummyInput()
@@ -245,6 +261,21 @@ Blockly.Blocks['pop'] = {
     this.setOutput(true, "Number");
     this.setColour(230);
  this.setTooltip("pop");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['call'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("process")
+        .appendField(new Blockly.FieldTextInput("function"), "FUNCTION");
+    this.appendStatementInput("NAME")
+        .setCheck(null)
+        .appendField("with");
+    this.setOutput(true, "Number");
+    this.setColour(230);
+ this.setTooltip("call");
  this.setHelpUrl("");
   }
 };
@@ -409,6 +440,49 @@ Blockly.Blocks['range'] = {
   }
 };
 
+Blockly.Blocks['vertical_access'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldTextInput("component"), "COMPONENT")
+        .appendField("of")
+        .appendField(new Blockly.FieldTextInput("entity"), "ENTITY");
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(230);
+ this.setTooltip("vertical access");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['vertical_pop'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("value of")
+        .appendField(new Blockly.FieldTextInput("variable"), "VARIABLE");
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(230);
+ this.setTooltip("vertical pop");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['vertical_call'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("process")
+        .appendField(new Blockly.FieldTextInput("function"), "FUNCTION");
+    this.appendStatementInput("NAME")
+        .setCheck(null)
+        .appendField("with");
+    this.setPreviousStatement(true, null);
+    this.setNextStatement(true, null);
+    this.setColour(230);
+ this.setTooltip("vertical call");
+ this.setHelpUrl("");
+  }
+};
+
 Blockly.Blocks['tag'] = {
   init: function() {
     this.appendDummyInput()
@@ -432,92 +506,6 @@ Blockly.Blocks['textcomponent'] = {
     this.setNextStatement(true, "component");
     this.setColour(230);
  this.setTooltip("text");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['destroy'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField("destroy")
-        .appendField(new Blockly.FieldTextInput("entity"), "ENTITY");
-    this.setPreviousStatement(true, "command");
-    this.setNextStatement(true, "command");
-    this.setColour(230);
- this.setTooltip("");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['create'] = {
-  init: function() {
-    this.appendValueInput("NAME")
-        .setCheck(null)
-        .appendField("create");
-    this.setPreviousStatement(true, "command");
-    this.setNextStatement(true, "command");
-    this.setColour(230);
- this.setTooltip("");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['add'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField("add")
-        .appendField(new Blockly.FieldTextInput("component"), "COMPONENT")
-        .appendField("to");
-    this.appendValueInput("ENTITY")
-        .setCheck(null);
-    this.setInputsInline(true);
-    this.setPreviousStatement(true, "command");
-    this.setNextStatement(true, "command");
-    this.setColour(230);
- this.setTooltip("");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['remove'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField("remove")
-        .appendField(new Blockly.FieldTextInput("component"), "COMPONENT")
-        .appendField("from");
-    this.appendValueInput("ENTITY")
-        .setCheck(null);
-    this.setInputsInline(true);
-    this.setPreviousStatement(true, "command");
-    this.setNextStatement(true, "command");
-    this.setColour(230);
- this.setTooltip("");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['create_and_save'] = {
-  init: function() {
-    this.appendValueInput("NAME")
-        .setCheck(null)
-        .appendField("create");
-    this.setOutput(true, "entity");
-    this.setColour(230);
- this.setTooltip("");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['add_and_save'] = {
-  init: function() {
-    this.appendValueInput("ENTITY")
-        .setCheck(null)
-        .appendField("add")
-        .appendField(new Blockly.FieldTextInput("component"), "COMPONENT")
-        .appendField("to");
-    this.setOutput(true, "componentValue");
-    this.setColour(230);
- this.setTooltip("");
  this.setHelpUrl("");
   }
 };
@@ -687,20 +675,6 @@ Blockly.Blocks['constraint_triggered'] = {
   }
 };
 
-Blockly.Blocks['constraint_detection'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField(new Blockly.FieldDropdown([["detecting an entry","ENTER"], ["detecting an stay","STAY"], ["detecting an exit","EXIT"]]), "TYPE");
-    this.setPreviousStatement(true, "constraint");
-    this.setNextStatement(true, "constraint");
-    this.setColour(330);
- this.setTooltip("enter");
- this.setHelpUrl("");
-  }
-};
-
 Blockly.Blocks['constraint_mouse'] = {
   init: function() {
     this.appendDummyInput()
@@ -711,6 +685,136 @@ Blockly.Blocks['constraint_mouse'] = {
     this.setNextStatement(true, "constraint");
     this.setColour(330);
  this.setTooltip("mouse");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['structural_remove'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("remove")
+        .appendField(new Blockly.FieldTextInput("component"), "COMPONENT")
+        .appendField("from");
+    this.appendValueInput("ENTITY")
+        .setCheck(null);
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, "command");
+    this.setNextStatement(true, "command");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['structural_create'] = {
+  init: function() {
+    this.appendValueInput("ENTITY")
+        .setCheck(null)
+        .appendField("create");
+    this.setPreviousStatement(true, "command");
+    this.setNextStatement(true, "command");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['structural_destroy'] = {
+  init: function() {
+    this.appendValueInput("ENTITY")
+        .setCheck(null)
+        .appendField("destroy");
+    this.setPreviousStatement(true, "command");
+    this.setNextStatement(true, "command");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['structural_add'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("add")
+        .appendField(new Blockly.FieldTextInput("component"), "COMPONENT")
+        .appendField("to");
+    this.appendValueInput("ENTITY")
+        .setCheck(null);
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, "command");
+    this.setNextStatement(true, "command");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['save_create'] = {
+  init: function() {
+    this.appendValueInput("ENTITY")
+        .setCheck(null)
+        .appendField("create");
+    this.setOutput(true, "entity");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['save_add'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("add")
+        .appendField(new Blockly.FieldTextInput("component"), "COMPONENT");
+    this.appendValueInput("ENTITY")
+        .setCheck(null)
+        .appendField("to");
+    this.setInputsInline(true);
+    this.setOutput(true, "componentValue");
+    this.setColour(230);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['constraint_enter'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
+        .appendField(new Blockly.FieldTextInput("component"), "NAME")
+        .appendField("detecting an entry");
+    this.setPreviousStatement(true, "constraint");
+    this.setNextStatement(true, "constraint");
+    this.setColour(315);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['constraint_stay'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
+        .appendField(new Blockly.FieldTextInput("component"), "NAME")
+        .appendField("detecting an stay");
+    this.setPreviousStatement(true, "constraint");
+    this.setNextStatement(true, "constraint");
+    this.setColour(315);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['constraint_exit'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("TRUE"), "negated")
+        .appendField(new Blockly.FieldTextInput("component"), "NAME")
+        .appendField("detecting an exit");
+    this.setPreviousStatement(true, "constraint");
+    this.setNextStatement(true, "constraint");
+    this.setColour(315);
+ this.setTooltip("");
  this.setHelpUrl("");
   }
 };

@@ -153,44 +153,44 @@
         <field name="negated">TRUE</field>
         <field name="NAME">name</field>
       </block>
-      <block type="constraint_detection">
+      <block type="constraint_enter">
         <field name="negated">TRUE</field>
         <field name="NAME">component</field>
-        <field name="TYPE">ENTER</field>
       </block>
-      <block type="constraint_mouse">
+      <block type="constraint_stay">
         <field name="negated">TRUE</field>
         <field name="NAME">component</field>
-        <field name="TYPE">DOWN</field>
+      </block>
+      <block type="constraint_exit">
+        <field name="negated">TRUE</field>
+        <field name="NAME">component</field>
       </block>
     </category>
     <sep></sep>
-    <category name="Structural">
-      <block type="create"></block>
-      <block type="create_and_save"></block>
-      <block type="destroy">
-        <field name="ENTITY">entity</field>
-      </block>
-      <block type="add">
+    <category name="Structural" colour="#935ba5">
+      <block type="structural_create"></block>
+      <block type="save_create"></block>
+      <block type="structural_add">
         <field name="COMPONENT">component</field>
       </block>
-      <block type="add_and_save">
+      <block type="save_add">
         <field name="COMPONENT">component</field>
       </block>
-      <block type="remove">
+      <block type="structural_remove">
         <field name="COMPONENT">component</field>
       </block>
+      <block type="structural_destroy"></block>
     </category>
-    <category name="Access" colour="#a5a55b">
-      <block type="pop">
-        <field name="VARIABLE">variable</field>
-      </block>
+    <category name="Data" colour="#a5a55b">
       <block type="access">
         <field name="COMPONENT">component</field>
         <field name="ENTITY">entity</field>
       </block>
+      <block type="pop">
+        <field name="VARIABLE">variable</field>
+      </block>
     </category>
-    <category name="Transformation" colour="#a5805b">
+    <category name="Transformations" colour="#a5935b">
       <block type="binary_arithmetic">
         <field name="OPERATION">ADD</field>
       </block>
@@ -205,7 +205,7 @@
         <field name="OPERATION">LOWER</field>
       </block>
       <block type="transformation">
-        <field name="OPERATION">SIN</field>
+        <field name="OPERATION">sin</field>
       </block>
     </category>
   </xml>

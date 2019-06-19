@@ -153,7 +153,17 @@ System:
 
 
 Command:
-	Loop|While|Check|Break|Initialization|ComponentAssignment|VariableAssignment|CreatedAssignment
+	Loop|While|Check|Break|Initialization|ComponentAssignment|VariableAssignment|CreatedAssignment|SubrutineCall
+;
+terminal OPENSUBRUTINE: '<block type="structural_';
+SubrutineCall:
+	OPENSUBRUTINE subrutine=[Name] OPENCONSTRAINT2
+	(
+		parameters+=ArithmeticExpression
+	)?
+	OPENENTITYVALUE
+	parameters+=ArithmeticExpression
+	CLOSEVALUE
 ;
 ComponentAssignment:
 	OPENCOMPONENTASSIGNMENT
@@ -301,35 +311,27 @@ ArithmeticExpression:
 	| {Decrement} OPENUNARYARITHMETIC OPENOPERATION DECREMENT CLOSEFIELD OPENVALUEVALUE left=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
 	| Atomic
 ;
+terminal OPENACCESS: '<block type="access" id="'SUPERID'">';
 
 Atomic returns ArithmeticExpression: 
-	   {Access} group=[Name] '.' component=[Name]
+	   {Access} OPENACCESS OPENCOMPONENT component=[Name] CLOSEFIELD OPENENTITYFIELD group=[Name] CLOSEFIELD CLOSEBLOCK
 	|  {Call} OPENTRANSFORMATION OPENOPERATION function=[Name] CLOSEFIELD OPENVALUENAME parameters+=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
-	|  {Pop} OPENPOP OPENVARIABLE variable=[Name] CLOSEFIELD CLOSEBLOCK 
+	|  {Pop} OPENPOP OPENVARIABLE variable=[Name] CLOSEFIELD CLOSEBLOCK
+	|  {Call} OPENSAVE function=[Name] OPENCONSTRAINT2 parameters+=ArithmeticExpression? OPENENTITYVALUE parameters+=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
+	|  {Pop} OPENCOMPONENT variable=[Name] CLOSEFIELD
 ;
 
 Constraint:
-	(
-		OPENCONSTRAINT event=EventType OPENCONSTRAINT2
-		OPENNEGATED (negated?='FALSE' | 'TRUE') CLOSEFIELD
-		OPENNAME component=[Name] CLOSEFIELD
-	|
-		OPENDETECTION
-		OPENNEGATED (negated?='FALSE' | 'TRUE') CLOSEFIELD
-		OPENNAME component=[Name] CLOSEFIELD
-		OPENTYPE event=EventType CLOSEFIELD
-	|
-		OPENMOUSE
-		OPENNEGATED (negated?='FALSE' | 'TRUE') CLOSEFIELD
-		OPENNAME component=[Name] CLOSEFIELD
-		OPENTYPE event=EventType CLOSEFIELD
-	)
+	OPENCONSTRAINT event=EventType OPENCONSTRAINT2
+	OPENNEGATED (negated?='FALSE' | 'TRUE') CLOSEFIELD
+	OPENNAME component=[Name] CLOSEFIELD
 ;
 Name: name=ID;
 
 terminal OPENVALUEVALUE: '<value name="value">';
 terminal OPENTRANSFORMATION: '<block type="transformation" id="'SUPERID'">';
-
+terminal OPENENTITYVALUE: '<value name="ENTITY">';
+terminal OPENSAVE: '<block type="save_';
 terminal SUPERID: !('"')+;
 terminal OPENXML: '<xml xmlns="http://www.w3.org/1999/xhtml">';
 terminal CLOSEXML: '</xml>';
@@ -411,6 +413,7 @@ terminal OPENNEXT: '<next>';
 terminal CLOSENEXT: '</next>';
 terminal OPENCONSTRAINT: '<block type="constraint_';
 terminal OPENCONSTRAINT2: '" id="'SUPERID'">';
+terminal OPENCONSTRAINT3: '_save' OPENCONSTRAINT2;
 terminal OPENNEGATED: '<field name="negated">';
 terminal OPENDETECTION: '<block type="constraint_detection" id="'SUPERID'">';
 terminal OPENMOUSE: '<block type="constraint_mouse" id="'SUPERID'">';
@@ -418,7 +421,7 @@ terminal OPENTYPE: '<field name="TYPE">';
 terminal OR: '<field name="OPERATION">OR</field>';
 terminal AND: '<field name="OPERATION">AND</field>';
 
-enum EventType: tag='tagged'|timeout='timeout'|trigger='triggered'|enter='ENTER'|stay='STAY'|exit='EXIT'|mouseDown='DOWN'|mouseUp='UP';
+enum EventType: tag='tagged'|timeout='timeout'|trigger='triggered'|enter='enter'|stay='stay'|exit='exit'|mouseDown='mouse_down'|mouseUp='mouse_up';
 enum AxisType: 
 	LeftX='LEFTX'|LeftY='LEFTY'|RightX='RIGHTX'|RightY='RIGHTY'
 	|LeftShoulder='LEFTSHOULDER'|RightShoulder='RIGHTSHOULDER'

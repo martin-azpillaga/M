@@ -116,8 +116,8 @@ canvas 100 100 contains
 menu contains
 	hud has canvas 100 100 contains
 		title has position 0 10, scale 100 10, text 'Pacman'.
-		subtitle has position 0 -20, scale 100 5, text 'Play <start>'.
-		options has position 0 -40 scale 100 4 text 'Options <select>'.
+		subtitle has position 0 -20, scale 100 5, text 'Play_start'.
+		options has position 0 -40 scale 100 4 text 'Options_select'.
 	.
 	trigger has detector gamepad.start, scene entity.playground.
 	rulesPage has detector gamepad.select, scene entity.rulesPage.
@@ -134,10 +134,10 @@ rulesPage contains
 		demoScore has position 30 0 scale 10 5 number 0 combo 0.
 		demoText has position 40 0 scale 10 5 text 'pts'.
 		
-		foodText has position 10 -15 scale 40 5 text '10 pts'.
-		powerupText has position 10 -25 scale 40 5 text '50 pts'.
-		fruitText has position 10 -35 scale 40 5 text '100 pts'.
-		copyrightText has position 0 -45 scale 40 5 text 'c 1980 MIDWAY MFG. CO.'.
+		foodText has position 10 -15 scale 40 5 text '_10_pts'.
+		powerupText has position 10 -25 scale 40 5 text '_50_pts'.
+		fruitText has position 10 -35 scale 40 5 text '_100_pts'.
+		copyrightText has position 0 -45 scale 40 5 text 'c_1980_MIDWAY_MFG_CO'.
 	.
 	
 	blinky has position -30 45 scale 5 5 appearance sprite.blinky.

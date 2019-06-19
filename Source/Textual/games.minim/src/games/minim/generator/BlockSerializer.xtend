@@ -36,6 +36,12 @@ class BlockSerializer implements Framework
 		s = s.replace('> ', '>')
 		s = s.replace('  <', '<')
 		s = s.replace(' <', '<')
+		s = s.replace('_   ','_')
+		s = s.replace('_  ','_')
+		s = s.replace('_ ','_')
+		s = s.replace('   "', '"')
+		s = s.replace('  "', '"')
+		s = s.replace(' "', '"')
 		fsa.generateFile('Blocks/'+name+'.xml',s)
 		println("Generated")
 	}
@@ -80,7 +86,7 @@ class BlockSerializer implements Framework
 		stack = new Stack<Integer>
 	    var result = new StringBuffer();
 	    //startIdx and idxOld delimit various chunks of aInput; these
-	    //chunks always end where aOldPattern begins
+	    //chuendIdx end where aOldPattern begins
 	    var startIdx = 0
 	    var openIndex = 0
 	    var closeIndex = 0

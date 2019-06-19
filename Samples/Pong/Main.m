@@ -71,21 +71,6 @@ for all entity a
 	a.velocity = a.direction * a.motion tilt
 }
 
-respawn:
-for all entity a with enter respawn_sensor
-{
-	a.position = a.respawn_point
-	add(servable_tag, a)
-}
-
-serve:
-for all entity a with servable_tag
-{
-	angle = random(a.angle)
-	a.velocity = join(cos(angle),sin(angle)) * random(a.length)
-	remove(servable_tag, a)
-}
-
 score:
 for all entity a with enter score_sensor
 {
@@ -123,5 +108,26 @@ for all entity a with timed out lifetime
 {
 	destroy(a)
 }
+
+serve:
+for all entity a with servable_tag
+{
+	angle = random(a.angle)
+	a.velocity = cos(angle) * random(a.length)
+	remove(servable_tag, a)
+}
+
+respawn:
+for all entity a with enter respawn_sensor
+{
+	a.position = a.respawn_point
+	add(servable_tag, a)
+}
+
+
+
+
+
+
 
 main world contains menu.
