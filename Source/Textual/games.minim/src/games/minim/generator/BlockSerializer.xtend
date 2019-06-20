@@ -23,9 +23,11 @@ class BlockSerializer implements Framework
 		var s = serializer.serialize(game);  
 
 		s = s.replaceNext()
+		x = -400
 		s = s.replaceOld('xhtml"> <block type="entity" id=""', ['''xhtml"> <block type="entity" id="" x="«x()»" y="0"'''])
 		s = s.replaceOld('</block> <block type="entity" id=""', ['''</block> <block type="entity" id="" x="«x()»" y="0"'''])
 		x=-400
+		s = s.replaceOld('type="main" id=""', ['''type="main" id="" x="«x()»" y="2000"'''])
 		s = s.replaceOld('type="system" id=""', ['''type="system" id="" x="«x()»" y="1000"'''])
 		s = s.replaceOld('id=""',['''id="«id()»"'''])
 		s = s.replace('\t', '')
@@ -39,6 +41,7 @@ class BlockSerializer implements Framework
 		s = s.replace('_   ','_')
 		s = s.replace('_  ','_')
 		s = s.replace('_ ','_')
+		s = s.replace(' >', '>')
 		s = s.replace('   "', '"')
 		s = s.replace('  "', '"')
 		s = s.replace(' "', '"')

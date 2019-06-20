@@ -112,8 +112,6 @@ playground contains
 	alienDGrandpa based on alien without gun has position 20 20 relegation 13 promotion 8.
 	alienEGrandpa based on alien without gun has position 40 20 relegation 14 promotion 9.
 	
-	
-	
 	hiveMind based on hiveMind.
 	
 	defenseA based on defense has position -33 -20.
