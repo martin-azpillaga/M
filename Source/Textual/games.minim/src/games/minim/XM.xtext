@@ -8,13 +8,30 @@ Game: {Game}
 	(
 		entities+=Entity CLOSEBLOCK|
 		systems+=System |
-		mainEntities+=[Entity]
+		OPENMAIN
+		OPENENTITIES
+		OPENENTITYREFERENCE
+		OPENNAME mainEntities+=[Entity] CLOSEFIELD
+		(
+			OPENNEXT
+			OPENENTITYREFERENCE
+			OPENNAME mainEntities+=[Entity] CLOSEFIELD
+		)*
+		(
+			CLOSEBLOCK
+			CLOSENEXT
+		)*
+		CLOSEBLOCK
+		CLOSESTATEMENT
+		CLOSEBLOCK
 	)*
+	
 	CLOSEXML
 ;
 @Override terminal STRING: 'STRINGGGG';
-
-
+terminal OPENMAIN: '<block type="main" id="'SUPERID'" x="'INT'" y="'INT'">';
+terminal OPENENTITIES: '<statement name="ENTITIES">';
+terminal OPENENTITYREFERENCE: '<block type="entityreference" id="'SUPERID'">';
 Entity:
 	OPENENTITY
 	OPENNAME
@@ -156,14 +173,27 @@ Command:
 	Loop|While|Check|Break|Initialization|ComponentAssignment|VariableAssignment|CreatedAssignment|SubrutineCall
 ;
 terminal OPENSUBRUTINE: '<block type="structural_';
+terminal OPENCALL: '<block type="call" id="'SUPERID'">';
+terminal OPENFUNCTION: '<value name="FUNCTION">';
+terminal OPENFUNCTION2: '<block type="function2" id="'SUPERID'">';
+terminal OPENFUNCTION1: '<block type="function1" id="'SUPERID'">';
 SubrutineCall:
-	OPENSUBRUTINE subrutine=[Name] OPENCONSTRAINT2
+	OPENCALL
+	OPENFUNCTION
 	(
-		parameters+=ArithmeticExpression
-	)?
-	OPENENTITYVALUE
-	parameters+=ArithmeticExpression
-	CLOSEVALUE
+		OPENFUNCTION2
+		OPENNAME subrutine=[Name] CLOSEFIELD
+		OPENVALUEX parameters+=ArithmeticExpression CLOSEVALUE 
+		OPENVALUEY parameters+=ArithmeticExpression CLOSEVALUE
+		CLOSEBLOCK
+		CLOSEVALUE
+	|
+		OPENFUNCTION1
+		OPENNAME subrutine=[Name] CLOSEFIELD
+		OPENVALUEX parameters+=ArithmeticExpression CLOSEVALUE
+		CLOSEBLOCK
+		CLOSEVALUE
+	)
 ;
 ComponentAssignment:
 	OPENCOMPONENTASSIGNMENT
@@ -315,10 +345,17 @@ terminal OPENACCESS: '<block type="access" id="'SUPERID'">';
 
 Atomic returns ArithmeticExpression: 
 	   {Access} OPENACCESS OPENCOMPONENT component=[Name] CLOSEFIELD OPENENTITYFIELD group=[Name] CLOSEFIELD CLOSEBLOCK
-	|  {Call} OPENTRANSFORMATION OPENOPERATION function=[Name] CLOSEFIELD OPENVALUENAME parameters+=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
+	|  {Call}
+		OPENFUNCTION2
+		OPENNAME function=[Name] CLOSEFIELD
+		OPENVALUEX parameters+=ArithmeticExpression CLOSEVALUE 
+		OPENVALUEY parameters+=ArithmeticExpression CLOSEVALUE
+		CLOSEBLOCK
 	|  {Pop} OPENPOP OPENVARIABLE variable=[Name] CLOSEFIELD CLOSEBLOCK
-	|  {Call} OPENSAVE function=[Name] OPENCONSTRAINT2 parameters+=ArithmeticExpression? OPENENTITYVALUE parameters+=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
-	|  {Pop} OPENCOMPONENT variable=[Name] CLOSEFIELD
+	|  {Call} OPENFUNCTION1
+		OPENNAME function=[Name] CLOSEFIELD
+		OPENVALUEX parameters+=ArithmeticExpression CLOSEVALUE
+		CLOSEBLOCK
 ;
 
 Constraint:
@@ -367,6 +404,8 @@ terminal OPENVECTOR: '<block type="vector" id="'SUPERID'">';
 terminal OPENSENSOR: '<block type="sensor" id="'SUPERID'">';
 terminal OPENCLICK: '<block type="click" id="'SUPERID'">';
 terminal OPENX: '<field name="X">';
+terminal OPENVALUEX: '<value name="X">';
+terminal OPENVALUEY: '<value name="Y">';
 terminal OPENY: '<field name="Y">';
 terminal OPENZ: '<field name="Z">';
 terminal OPENW: '<field name="W">';

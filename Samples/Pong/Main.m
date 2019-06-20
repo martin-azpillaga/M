@@ -125,9 +125,4 @@ for all entity a with enter respawn_sensor
 }
 
 
-
-
-
-
-
 main world contains menu.

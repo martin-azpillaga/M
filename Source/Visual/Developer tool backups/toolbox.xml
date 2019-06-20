@@ -90,7 +90,7 @@
     </block>
   </category>
   <sep></sep>
-  <category name="Flow" colour="#5ba55b">
+  <category name="Systems" colour="#5ba55b">
     <block type="system">
       <field name="NAME">name</field>
     </block>
@@ -114,6 +114,7 @@
       <field name="ENTITY">entity</field>
     </block>
     <block type="break"></block>
+    <block type="call"></block>
   </category>
   <category name="Constraints" colour="#a55b93">
     <block type="constraint_tagged">
@@ -142,20 +143,6 @@
     </block>
   </category>
   <sep></sep>
-  <category name="Structural" colour="#935ba5">
-    <block type="structural_create"></block>
-    <block type="save_create"></block>
-    <block type="structural_add">
-      <field name="COMPONENT">component</field>
-    </block>
-    <block type="save_add">
-      <field name="COMPONENT">component</field>
-    </block>
-    <block type="structural_remove">
-      <field name="COMPONENT">component</field>
-    </block>
-    <block type="structural_destroy"></block>
-  </category>
   <category name="Data" colour="#a5a55b">
     <block type="access">
       <field name="COMPONENT">component</field>
@@ -179,8 +166,18 @@
     <block type="binary_arithmetic_boolean">
       <field name="OPERATION">LOWER</field>
     </block>
-    <block type="transformation">
-      <field name="OPERATION">sin</field>
+    <block type="function1">
+      <field name="NAME">function</field>
+    </block>
+    <block type="function2">
+      <field name="NAME">function</field>
+    </block>
+  </category>
+  <sep></sep>
+  <category name="Main" colour="#80a55b">
+    <block type="main"></block>
+    <block type="entityreference">
+      <field name="NAME">entity</field>
     </block>
   </category>
 </xml>
