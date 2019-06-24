@@ -1,0 +1,7 @@
+Copyright 2017-2019 Martin Azpillaga Aldalur martin@minim.games
+
+This project includes several Eclipse projects in their unmodified object code form. 
+These projects are licensed under the Eclipse Public License and their source code can be found at https://git.eclipse.org/c/
+
+This project includes a version of Blockly in its unmodified source code form.
+Blockly in licensed under the Apace 2.0 license.
