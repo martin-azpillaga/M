@@ -1,78 +1,3 @@
-Blockly.Blocks['entity'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField("entity")
-        .appendField(new Blockly.FieldTextInput("name"), "NAME");
-    this.appendValueInput("base")
-        .setCheck("base");
-    this.appendStatementInput("components")
-        .setCheck("component")
-        .appendField("has");
-    this.appendStatementInput("subEntities")
-        .setCheck("entity")
-        .appendField("contains");
-    this.setInputsInline(false);
-    this.setPreviousStatement(true, "entity");
-    this.setNextStatement(true, "entity");
-    this.setColour(210);
- this.setTooltip("entity");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['real2'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField(": (")
-        .appendField(new Blockly.FieldNumber(0), "X")
-        .appendField(",")
-        .appendField(new Blockly.FieldNumber(0), "Y")
-        .appendField(")");
-    this.setInputsInline(true);
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("real2");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['real1'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField(":")
-        .appendField(new Blockly.FieldNumber(0), "X");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("real1");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['real4'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField(": (")
-        .appendField(new Blockly.FieldNumber(0), "X")
-        .appendField(",")
-        .appendField(new Blockly.FieldNumber(0), "Y")
-        .appendField(",")
-        .appendField(new Blockly.FieldNumber(0), "Z")
-        .appendField(",")
-        .appendField(new Blockly.FieldNumber(0), "W")
-        .appendField(")");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("real4");
- this.setHelpUrl("");
-  }
-};
-
 Blockly.Blocks['base'] = {
   init: function() {
     this.appendDummyInput()
@@ -262,193 +187,6 @@ Blockly.Blocks['call'] = {
   }
 };
 
-Blockly.Blocks['real3'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField(":")
-        .appendField("(")
-        .appendField(new Blockly.FieldNumber(0), "X")
-        .appendField(",")
-        .appendField(new Blockly.FieldNumber(0), "Y")
-        .appendField(",")
-        .appendField(new Blockly.FieldNumber(0), "Z")
-        .appendField(")");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['timer'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField(new Blockly.FieldNumber(0), "VALUE")
-        .appendField("seconds");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("timer");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['reference'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField("entity")
-        .appendField(new Blockly.FieldTextInput("name"), "VALUE");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("reference");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['enumeration'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME");
-    this.appendStatementInput("VALUES")
-        .setCheck("String")
-        .appendField("includes");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("enumeration");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['enumeration_value'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("name"), "NAME");
-    this.setPreviousStatement(true, "String");
-    this.setNextStatement(true, "String");
-    this.setColour(230);
- this.setTooltip("enumeration value");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['trigger'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField(new Blockly.FieldDropdown([["gamepad start","START"], ["gamepad select","SELECT"], ["gamepad south","SOUTH"], ["gamepad west","WEST"], ["gamepad east","EAST"], ["gamepad north","NORTH"], ["gamepad dpad left","LEFT"], ["gamepad dpad right","RIGHT"], ["gamepad dpad up","UP"], ["gamepad dpad down","DOWN"], ["gamepad left trigger","LEFTTRIGGER"], ["gamepad right trigger","RIGHTTRIGGER"], ["gamepad left stick press","LEFTPRESS"], ["gamepad right stick press","RIGHTPRESS"], ["gamepad optional button","OPTIONAL"]]), "VALUE");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("trigger");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['sensor'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField("detects");
-    this.appendStatementInput("VALUES")
-        .setCheck(null)
-        .appendField("categories");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("sensor");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['sprite'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField("sprite")
-        .appendField(new Blockly.FieldTextInput("name"), "VALUE");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("sprite");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['audio'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField("audio clip")
-        .appendField(new Blockly.FieldTextInput("name"), "VALUE");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("sprite");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['mesh'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField("mesh")
-        .appendField(new Blockly.FieldTextInput("name"), "VALUE");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("sprite");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['range'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField("gamepad tilt")
-        .appendField(new Blockly.FieldDropdown([["left X","LEFTX"], ["left Y","LEFTY"], ["right X","RIGHTX"], ["right Y","RIGHTY"], ["left shoulder","LEFTSHOULDER"], ["right shoulder","RIGHTSHOULDER"]]), "VALUE");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("range");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['tag'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField("tag")
-        .appendField(new Blockly.FieldTextInput("component"), "NAME");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("tag");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['textcomponent'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField("text")
-        .appendField(new Blockly.FieldTextInput("text"), "VALUE");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("text");
- this.setHelpUrl("");
-  }
-};
-
 Blockly.Blocks['binary_arithmetic'] = {
   init: function() {
     this.appendValueInput("left")
@@ -457,19 +195,6 @@ Blockly.Blocks['binary_arithmetic'] = {
         .appendField(new Blockly.FieldDropdown([["+","ADD"], ["-","SUBTRACT"], ["*","MULTIPLY"], ["/","DIVIDE"], ["%","MODULUS"], ["&","AND"], ["|","OR"]]), "OPERATION");
     this.appendValueInput("right")
         .setCheck("Number");
-    this.setOutput(true, "Number");
-    this.setColour(230);
- this.setTooltip("");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['unary_arithmetic'] = {
-  init: function() {
-    this.appendValueInput("value")
-        .setCheck("Number");
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldDropdown([["++","INCREMENT"], ["--","DECREMENT"]]), "OPERATION");
     this.setOutput(true, "Number");
     this.setColour(230);
  this.setTooltip("");
@@ -513,34 +238,6 @@ Blockly.Blocks['binary_arithmetic_boolean'] = {
     this.appendValueInput("right")
         .setCheck("Number");
     this.setOutput(true, "Boolean");
-    this.setColour(230);
- this.setTooltip("");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['vector'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField("tracks")
-        .appendField(new Blockly.FieldDropdown([["mouse position","MOUSEPOSITION"], ["gamepad dpad","DPAD"], ["gamepad left stick","LEFTSTICK"], ["gamepad right stick","RIGHTSTICK"]]), "VALUE");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['font'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField("font")
-        .appendField(new Blockly.FieldTextInput("font"), "VALUE");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
     this.setColour(230);
  this.setTooltip("");
  this.setHelpUrl("");
@@ -667,269 +364,337 @@ Blockly.Blocks['relation'] = {
         .appendField("relation")
         .appendField(new Blockly.FieldTextInput("name"), "NAME");
     this.appendStatementInput("members")
-        .setCheck("member");
+        .setCheck(["binary_relation", "ternary_relation", "quaternary_relation"]);
     this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['relate'] = {
+Blockly.Blocks['entity_plus'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
-        .appendField("relate");
-    this.setPreviousStatement(true, "member");
-    this.setNextStatement(true, "member");
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldCheckbox("FALSE"), "MAIN")
+        .appendField("entity")
+        .appendField(new Blockly.FieldTextInput("name"), "NAME");
+    this.appendValueInput("base")
+        .setCheck("base");
+    this.appendStatementInput("components")
+        .setCheck("component")
+        .appendField("has");
+    this.appendStatementInput("subEntities")
+        .setCheck("entity")
+        .appendField("contains");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, "entity");
+    this.setNextStatement(true, "entity");
+    this.setColour(210);
+ this.setTooltip("entity");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['component'] = {
+  init: function() {
+    this.appendValueInput("VALUE")
+        .setCheck("value")
+        .appendField(new Blockly.FieldTextInput("component"), "NAME");
+    this.setPreviousStatement(true, "component");
+    this.setNextStatement(true, "component");
     this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_id'] = {
+Blockly.Blocks['binary_relation'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
+    this.appendValueInput("X")
+        .setCheck("value");
+    this.appendValueInput("Y")
+        .setCheck("value")
+        .appendField("-");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, "binary_relation");
+    this.setNextStatement(true, "binary_relation");
+    this.setColour(240);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['ternary_relation'] = {
+  init: function() {
+    this.appendValueInput("X")
+        .setCheck("value");
+    this.appendValueInput("Y")
+        .setCheck("value")
+        .appendField("-");
+    this.appendValueInput("Z")
+        .setCheck("value")
+        .appendField("-");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, "ternary_relation");
+    this.setNextStatement(true, "ternary_relation");
+    this.setColour(240);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['quaternary_relation'] = {
+  init: function() {
+    this.appendValueInput("X")
+        .setCheck("value");
+    this.appendValueInput("Y")
+        .setCheck("value")
+        .appendField("-");
+    this.appendValueInput("Z")
+        .setCheck("value")
+        .appendField("-");
+    this.appendValueInput("W")
+        .setCheck("value")
+        .appendField("-");
+    this.setInputsInline(true);
+    this.setPreviousStatement(true, "quaternary_relation");
+    this.setNextStatement(true, "quaternary_relation");
+    this.setColour(240);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['value_id'] = {
+  init: function() {
+    this.appendDummyInput()
         .appendField("id")
         .appendField(new Blockly.FieldTextInput("name"), "NAME");
-    this.setOutput(true, "memberElement");
+    this.setOutput(true, "value");
     this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_real1'] = {
+Blockly.Blocks['value_tag'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
-        .appendField(new Blockly.FieldTextInput("0"), "X");
-    this.setOutput(true, "memberElement");
+    this.appendDummyInput()
+        .appendField("tag");
+    this.setOutput(true, "value");
     this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_real2'] = {
+Blockly.Blocks['value_real1'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
-        .appendField("(")
-        .appendField(new Blockly.FieldNumber(0), "X")
-        .appendField(",")
-        .appendField(new Blockly.FieldNumber(0), "Y")
-        .appendField(")");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldNumber(0), "X");
+    this.setOutput(true, "value");
+    this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_real3'] = {
+Blockly.Blocks['value_real2'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
-        .appendField("(")
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldNumber(0), "X")
+        .appendField(",")
+        .appendField(new Blockly.FieldNumber(0), "Y");
+    this.setOutput(true, "value");
+    this.setColour(285);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['value_real3'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldNumber(0), "X")
+        .appendField(",")
+        .appendField(new Blockly.FieldNumber(0), "Y")
+        .appendField(",")
+        .appendField(new Blockly.FieldNumber(0), "Z");
+    this.setOutput(true, "value");
+    this.setColour(285);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['value_real4'] = {
+  init: function() {
+    this.appendDummyInput()
         .appendField(new Blockly.FieldNumber(0), "X")
         .appendField(",")
         .appendField(new Blockly.FieldNumber(0), "Y")
         .appendField(",")
         .appendField(new Blockly.FieldNumber(0), "Z")
-        .appendField(")");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
+        .appendField(",")
+        .appendField(new Blockly.FieldNumber(0), "W");
+    this.setOutput(true, "value");
+    this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_real4'] = {
+Blockly.Blocks['value_sprite'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
-        .appendField("(")
-        .appendField(new Blockly.FieldNumber(0), "X")
-        .appendField(",")
-        .appendField(new Blockly.FieldNumber(0), "Y")
-        .appendField(",")
-        .appendField(new Blockly.FieldNumber(0), "Z")
-        .appendField(",")
-        .appendField(new Blockly.FieldNumber(0), "W")
-        .appendField(")");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
- this.setTooltip("");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['member_text'] = {
-  init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
-        .appendField("text")
-        .appendField(new Blockly.FieldTextInput("text"), "VALUE");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
- this.setTooltip("");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['member_sprite'] = {
-  init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
+    this.appendDummyInput()
         .appendField("sprite")
-        .appendField(new Blockly.FieldTextInput("name"), "VALUE");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
+        .appendField(new Blockly.FieldTextInput("name"), "NAME");
+    this.setOutput(true, "value");
+    this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_audio'] = {
+Blockly.Blocks['value_mesh'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
-        .appendField("audio")
-        .appendField(new Blockly.FieldTextInput("audio"), "VALUE");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
- this.setTooltip("");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['member_mesh'] = {
-  init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
+    this.appendDummyInput()
         .appendField("mesh")
-        .appendField(new Blockly.FieldTextInput("mesh"), "VALUE");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
+        .appendField(new Blockly.FieldTextInput("name"), "NAME");
+    this.setOutput(true, "value");
+    this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_material'] = {
+Blockly.Blocks['value_material'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
+    this.appendDummyInput()
         .appendField("material")
-        .appendField(new Blockly.FieldTextInput("material"), "VALUE");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
+        .appendField(new Blockly.FieldTextInput("name"), "NAME");
+    this.setOutput(true, "value");
+    this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_font'] = {
+Blockly.Blocks['value_audio'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
+    this.appendDummyInput()
+        .appendField("audio")
+        .appendField(new Blockly.FieldTextInput("name"), "NAME");
+    this.setOutput(true, "value");
+    this.setColour(285);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['value_text'] = {
+  init: function() {
+    this.appendDummyInput()
+        .appendField("text")
+        .appendField(new Blockly.FieldTextInput("name"), "NAME");
+    this.setOutput(true, "value");
+    this.setColour(285);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['value_font'] = {
+  init: function() {
+    this.appendDummyInput()
         .appendField("font")
-        .appendField(new Blockly.FieldTextInput("font"), "VALUE");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
+        .appendField(new Blockly.FieldTextInput("name"), "NAME");
+    this.setOutput(true, "value");
+    this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_trigger'] = {
+Blockly.Blocks['value_entity'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
-        .appendField(new Blockly.FieldDropdown([["gamepad south","SOUTH"], ["gamepad west","WEST"], ["gamepad east","EAST"], ["gamepad north","NORTH"], ["gamepad down","DOWN"], ["gamepad left","LEFT"], ["gamepad right","RIGHT"], ["gamepad up","UP"], ["gamepad left trigger","LEFTTRIGGER"], ["gamepad right trigger","RIGHTTRIGGER"], ["gamepad left stick","LEFTPRESS"], ["gamepad right stick","RIGHTPRESS"], ["gamepad start","START"], ["gamepad select","SELECT"], ["gamepad optional","OPTIONAL"]]), "VALUE");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
+    this.appendDummyInput()
+        .appendField("entity")
+        .appendField(new Blockly.FieldTextInput("name"), "NAME");
+    this.setOutput(true, "value");
+    this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_range'] = {
+Blockly.Blocks['value_enumeration'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
-        .appendField(new Blockly.FieldDropdown([["gamepad left x","LEFTX"], ["gamepad left y","LEFTY"], ["gamepad right x","RIGHTX"], ["gamepad right y","RIGHTY"], ["gamepad left shoulder","LEFTSHOULDER"], ["gamepad right shoulder","RIGHTSHOULDER"]]), "VALUE");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
+    this.appendDummyInput()
+        .appendField("enumeration");
+    this.appendStatementInput("VALUES")
+        .setCheck("enumerationValue")
+        .appendField(new Blockly.FieldTextInput("name"), "NAME");
+    this.setOutput(true, "value");
+    this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_vector'] = {
+Blockly.Blocks['value_sensor'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
-        .appendField(new Blockly.FieldDropdown([["gamepad left stick","LEFTSTICK"], ["gamepad right stick","RIGHTSTICK"], ["gamepad dpad","DPAD"], ["mouse position","MOUSEPOSITION"]]), "VALUE");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
+    this.appendDummyInput()
+        .appendField("detect");
+    this.appendStatementInput("VALUES")
+        .setCheck("enumerationValue")
+        .appendField("category");
+    this.setOutput(true, "value");
+    this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_timer'] = {
+Blockly.Blocks['value_timer'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
+    this.appendDummyInput()
         .appendField(new Blockly.FieldNumber(0), "VALUE")
         .appendField("seconds");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
+    this.setOutput(true, "value");
+    this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_reference'] = {
+Blockly.Blocks['value_trigger'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
-        .appendField("entity")
-        .appendField(new Blockly.FieldTextInput("entity"), "VALUE");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([["gamepad south","SOUTH"], ["gamepad west","WEST"], ["gamepad east","EAST"], ["gamepad north","NORTH"], ["gamepad down","DOWN"], ["gamepad left","LEFT"], ["gamepad right","RIGHT"], ["gamepad up","UP"], ["gamepad left trigger","LEFTTRIGGER"], ["gamepad right trigger","RIGHTTRIGGER"], ["gamepad left stick","LEFTPRESS"], ["gamepad right stick","RIGHTPRESS"], ["gamepad start","START"], ["gamepad select","SELECT"], ["gamepad optional","OPTIONAL"]]), "VALUE");
+    this.setOutput(true, "value");
+    this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_sensor'] = {
+Blockly.Blocks['value_range'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement");
-    this.appendStatementInput("VALUES")
-        .setCheck("enumerationValue")
-        .appendField("detects");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([["gamepad left x","LEFTX"], ["gamepad left y","LEFTY"], ["gamepad right x","RIGHTX"], ["gamepad right y","RIGHTY"], ["gamepad left shoulder","LEFTSHOULDER"], ["gamepad right shoulder","RIGHTSHOULDER"]]), "VALUE");
+    this.setOutput(true, "value");
+    this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['member_enumeration'] = {
+Blockly.Blocks['value_vector'] = {
   init: function() {
-    this.appendValueInput("NEXT")
-        .setCheck("memberElement")
-        .appendField(new Blockly.FieldTextInput("enumeration"), "NAME");
-    this.appendStatementInput("VALUES")
-        .setCheck("enumerationValue")
-        .appendField("includes");
-    this.setOutput(true, "memberElement");
-    this.setColour(260);
+    this.appendDummyInput()
+        .appendField(new Blockly.FieldDropdown([["gamepad left stick","LEFTSTICK"], ["gamepad right stick","RIGHTSTICK"], ["gamepad dpad","DPAD"], ["mouse position","MOUSEPOSITION"]]), "VALUE");
+    this.setOutput(true, "value");
+    this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
