@@ -44,7 +44,7 @@ class MGenerator extends AbstractGenerator
 			}
 			else if (member instanceof IFile)
 			{
-				if(member.name.endsWith('.m') || member.name.endsWith('.xm'))
+				if(member.name.endsWith('.game') || member.name.endsWith('.xm'))
 				{
 					val memberUri = URI.createURI('platform:/resource'+member.fullPath)
 					
