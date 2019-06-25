@@ -356,7 +356,7 @@ Blockly.Blocks['sensor'] = {
         .appendField(new Blockly.FieldTextInput("component"), "NAME")
         .appendField("detects");
     this.appendStatementInput("VALUES")
-        .setCheck("String")
+        .setCheck(null)
         .appendField("categories");
     this.setPreviousStatement(true, "component");
     this.setNextStatement(true, "component");
@@ -439,7 +439,7 @@ Blockly.Blocks['textcomponent'] = {
   init: function() {
     this.appendDummyInput()
         .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField(":")
+        .appendField("text")
         .appendField(new Blockly.FieldTextInput("text"), "VALUE");
     this.setPreviousStatement(true, "component");
     this.setNextStatement(true, "component");
@@ -539,19 +539,6 @@ Blockly.Blocks['font'] = {
         .appendField(new Blockly.FieldTextInput("component"), "NAME")
         .appendField("font")
         .appendField(new Blockly.FieldTextInput("font"), "VALUE");
-    this.setPreviousStatement(true, "component");
-    this.setNextStatement(true, "component");
-    this.setColour(230);
- this.setTooltip("");
- this.setHelpUrl("");
-  }
-};
-
-Blockly.Blocks['click'] = {
-  init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("component"), "NAME")
-        .appendField("detects clicks");
     this.setPreviousStatement(true, "component");
     this.setNextStatement(true, "component");
     this.setColour(230);
@@ -674,26 +661,275 @@ Blockly.Blocks['function2'] = {
   }
 };
 
-Blockly.Blocks['main'] = {
+Blockly.Blocks['relation'] = {
   init: function() {
     this.appendDummyInput()
-        .appendField("main scene");
-    this.appendStatementInput("ENTITIES")
-        .setCheck("entityReference")
-        .appendField("includes");
-    this.setColour(220);
+        .appendField("relation")
+        .appendField(new Blockly.FieldTextInput("name"), "NAME");
+    this.appendStatementInput("members")
+        .setCheck("member");
+    this.setColour(285);
  this.setTooltip("");
  this.setHelpUrl("");
   }
 };
 
-Blockly.Blocks['entityreference'] = {
+Blockly.Blocks['relate'] = {
   init: function() {
-    this.appendDummyInput()
-        .appendField(new Blockly.FieldTextInput("entity"), "NAME");
-    this.setPreviousStatement(true, "entityReference");
-    this.setNextStatement(true, "entityReference");
-    this.setColour(230);
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField("relate");
+    this.setPreviousStatement(true, "member");
+    this.setNextStatement(true, "member");
+    this.setColour(285);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_id'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField("id")
+        .appendField(new Blockly.FieldTextInput("name"), "NAME");
+    this.setOutput(true, "memberElement");
+    this.setColour(285);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_real1'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField(new Blockly.FieldTextInput("0"), "X");
+    this.setOutput(true, "memberElement");
+    this.setColour(285);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_real2'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField("(")
+        .appendField(new Blockly.FieldNumber(0), "X")
+        .appendField(",")
+        .appendField(new Blockly.FieldNumber(0), "Y")
+        .appendField(")");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_real3'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField("(")
+        .appendField(new Blockly.FieldNumber(0), "X")
+        .appendField(",")
+        .appendField(new Blockly.FieldNumber(0), "Y")
+        .appendField(",")
+        .appendField(new Blockly.FieldNumber(0), "Z")
+        .appendField(")");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_real4'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField("(")
+        .appendField(new Blockly.FieldNumber(0), "X")
+        .appendField(",")
+        .appendField(new Blockly.FieldNumber(0), "Y")
+        .appendField(",")
+        .appendField(new Blockly.FieldNumber(0), "Z")
+        .appendField(",")
+        .appendField(new Blockly.FieldNumber(0), "W")
+        .appendField(")");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_text'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField("text")
+        .appendField(new Blockly.FieldTextInput("text"), "VALUE");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_sprite'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField("sprite")
+        .appendField(new Blockly.FieldTextInput("name"), "VALUE");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_audio'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField("audio")
+        .appendField(new Blockly.FieldTextInput("audio"), "VALUE");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_mesh'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField("mesh")
+        .appendField(new Blockly.FieldTextInput("mesh"), "VALUE");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_material'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField("material")
+        .appendField(new Blockly.FieldTextInput("material"), "VALUE");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_font'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField("font")
+        .appendField(new Blockly.FieldTextInput("font"), "VALUE");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_trigger'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField(new Blockly.FieldDropdown([["gamepad south","SOUTH"], ["gamepad west","WEST"], ["gamepad east","EAST"], ["gamepad north","NORTH"], ["gamepad down","DOWN"], ["gamepad left","LEFT"], ["gamepad right","RIGHT"], ["gamepad up","UP"], ["gamepad left trigger","LEFTTRIGGER"], ["gamepad right trigger","RIGHTTRIGGER"], ["gamepad left stick","LEFTPRESS"], ["gamepad right stick","RIGHTPRESS"], ["gamepad start","START"], ["gamepad select","SELECT"], ["gamepad optional","OPTIONAL"]]), "VALUE");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_range'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField(new Blockly.FieldDropdown([["gamepad left x","LEFTX"], ["gamepad left y","LEFTY"], ["gamepad right x","RIGHTX"], ["gamepad right y","RIGHTY"], ["gamepad left shoulder","LEFTSHOULDER"], ["gamepad right shoulder","RIGHTSHOULDER"]]), "VALUE");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_vector'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField(new Blockly.FieldDropdown([["gamepad left stick","LEFTSTICK"], ["gamepad right stick","RIGHTSTICK"], ["gamepad dpad","DPAD"], ["mouse position","MOUSEPOSITION"]]), "VALUE");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_timer'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField(new Blockly.FieldNumber(0), "VALUE")
+        .appendField("seconds");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_reference'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField("entity")
+        .appendField(new Blockly.FieldTextInput("entity"), "VALUE");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_sensor'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement");
+    this.appendStatementInput("VALUES")
+        .setCheck("enumerationValue")
+        .appendField("detects");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
+ this.setTooltip("");
+ this.setHelpUrl("");
+  }
+};
+
+Blockly.Blocks['member_enumeration'] = {
+  init: function() {
+    this.appendValueInput("NEXT")
+        .setCheck("memberElement")
+        .appendField(new Blockly.FieldTextInput("enumeration"), "NAME");
+    this.appendStatementInput("VALUES")
+        .setCheck("enumerationValue")
+        .appendField("includes");
+    this.setOutput(true, "memberElement");
+    this.setColour(260);
  this.setTooltip("");
  this.setHelpUrl("");
   }

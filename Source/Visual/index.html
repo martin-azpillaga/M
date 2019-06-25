@@ -35,10 +35,7 @@
         <field name="NAME">component name</field>
       </block>
     </category>
-    <category name="Components" colour="#5b5ba5">
-      <block type="tag">
-        <field name="NAME">component</field>
-      </block>
+    <category name="Numeric components" colour="#5b80a5">
       <block type="real1">
         <field name="NAME">component</field>
         <field name="X">0</field>
@@ -61,9 +58,11 @@
         <field name="Z">0</field>
         <field name="W">0</field>
       </block>
-      <block type="textcomponent">
+    </category>
+    <category name="Asset components" colour="#5b6da5">
+      <block type="reference">
         <field name="NAME">component</field>
-        <field name="VALUE">text</field>
+        <field name="VALUE">name</field>
       </block>
       <block type="sprite">
         <field name="NAME">component</field>
@@ -77,6 +76,19 @@
         <field name="NAME">component</field>
         <field name="VALUE">name</field>
       </block>
+      <block type="textcomponent">
+        <field name="NAME">component</field>
+        <field name="VALUE">text</field>
+      </block>
+      <block type="font">
+        <field name="NAME">component</field>
+        <field name="VALUE">font</field>
+      </block>
+    </category>
+    <category name="Interaction components" colour="#5b5ba5">
+      <block type="tag">
+        <field name="NAME">component</field>
+      </block>
       <block type="trigger">
         <field name="NAME">component</field>
         <field name="VALUE">START</field>
@@ -85,9 +97,16 @@
         <field name="NAME">component</field>
         <field name="VALUE">LEFTX</field>
       </block>
-      <block type="reference">
+      <block type="vector">
         <field name="NAME">component</field>
-        <field name="VALUE">name</field>
+        <field name="VALUE">MOUSEPOSITION</field>
+      </block>
+      <block type="timer">
+        <field name="NAME">component</field>
+        <field name="VALUE">0</field>
+      </block>
+      <block type="sensor">
+        <field name="NAME">component</field>
       </block>
       <block type="enumeration">
         <field name="NAME">component</field>
@@ -95,23 +114,72 @@
       <block type="enumeration_value">
         <field name="NAME">name</field>
       </block>
-      <block type="sensor">
-        <field name="NAME">component</field>
+    </category>
+    <category name="Relations" colour="#6d5ba5">
+      <block type="relation">
+        <field name="NAME">name</field>
       </block>
-      <block type="timer">
-        <field name="NAME">component</field>
-        <field name="VALUE">0</field>
+      <block type="relate"></block>
+      <block type="member_id">
+        <field name="NAME">name</field>
       </block>
-      <block type="vector">
-        <field name="NAME">component</field>
-        <field name="VALUE">MOUSEPOSITION</field>
+      <block type="member_real1">
+        <field name="X">0</field>
       </block>
-      <block type="font">
-        <field name="NAME">component</field>
+      <block type="member_real2">
+        <field name="X">0</field>
+        <field name="Y">0</field>
+      </block>
+      <block type="member_real3">
+        <field name="X">0</field>
+        <field name="Y">0</field>
+        <field name="Z">0</field>
+      </block>
+      <block type="member_real4">
+        <field name="X">0</field>
+        <field name="Y">0</field>
+        <field name="Z">0</field>
+        <field name="W">0</field>
+      </block>
+      <block type="member_text">
+        <field name="VALUE">text</field>
+      </block>
+      <block type="member_sprite">
+        <field name="VALUE">name</field>
+      </block>
+      <block type="member_audio">
+        <field name="VALUE">audio</field>
+      </block>
+      <block type="member_mesh">
+        <field name="VALUE">mesh</field>
+      </block>
+      <block type="member_material">
+        <field name="VALUE">material</field>
+      </block>
+      <block type="member_font">
         <field name="VALUE">font</field>
       </block>
-      <block type="click">
-        <field name="NAME">component</field>
+      <block type="member_trigger">
+        <field name="VALUE">SOUTH</field>
+      </block>
+      <block type="member_range">
+        <field name="VALUE">LEFTX</field>
+      </block>
+      <block type="member_vector">
+        <field name="VALUE">LEFTSTICK</field>
+      </block>
+      <block type="member_timer">
+        <field name="VALUE">0</field>
+      </block>
+      <block type="member_reference">
+        <field name="VALUE">entity</field>
+      </block>
+      <block type="member_sensor"></block>
+      <block type="member_enumeration">
+        <field name="NAME">enumeration</field>
+      </block>
+      <block type="enumeration_value">
+        <field name="NAME">name</field>
       </block>
     </category>
     <sep></sep>
@@ -125,7 +193,7 @@
       <block type="if"></block>
       <block type="while"></block>
     </category>
-    <category name="Commands" colour="#5b5ba5">
+    <category name="Commands" colour="#6da55b">
       <block type="declaration">
         <field name="NAME">name</field>
       </block>
@@ -141,7 +209,7 @@
       <block type="break"></block>
       <block type="call"></block>
     </category>
-    <category name="Constraints" colour="#a55b93">
+    <category name="Constraints" colour="#80a55b">
       <block type="constraint_tagged">
         <field name="negated">TRUE</field>
         <field name="NAME">name</field>
@@ -167,8 +235,7 @@
         <field name="NAME">component</field>
       </block>
     </category>
-    <sep></sep>
-    <category name="Data" colour="#a5a55b">
+    <category name="Data" colour="#93a55b">
       <block type="access">
         <field name="COMPONENT">component</field>
         <field name="ENTITY">entity</field>
@@ -177,7 +244,7 @@
         <field name="VARIABLE">variable</field>
       </block>
     </category>
-    <category name="Transformations" colour="#a5935b">
+    <category name="Transformations" colour="#a5a55b">
       <block type="binary_arithmetic">
         <field name="OPERATION">ADD</field>
       </block>
@@ -199,12 +266,6 @@
       </block>
     </category>
     <sep></sep>
-    <category name="Main" colour="#80a55b">
-      <block type="main"></block>
-      <block type="entityreference">
-        <field name="NAME">entity</field>
-      </block>
-    </category>
   </xml>
 
   <input id="uploaded-input" type="file"/>
