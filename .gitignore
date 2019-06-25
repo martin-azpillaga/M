@@ -1,7 +1,5 @@
 # Eclipse runtime metadata
 .metadata/
-# Eclipse runtime project
-*.project
 # Eclipse generated code
 src-gen/
 xtend-gen/
@@ -21,3 +19,8 @@ generated/
 blockly-master/
 Product/
 m/
+.gitignore
+# Unity project
+Assets/
+ProjectSettings/
+Packages/

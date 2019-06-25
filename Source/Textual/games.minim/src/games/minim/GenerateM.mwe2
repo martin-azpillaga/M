@@ -3,8 +3,8 @@ module games.minim.GenerateM
 import org.eclipse.xtext.xtext.generator.*
 import org.eclipse.xtext.xtext.generator.model.project.*
 
-Workflow {
-	
+Workflow 
+{	
 	component = XtextGenerator 
 	{
 		configuration = 
@@ -25,7 +25,7 @@ Workflow {
 		language = XtextGeneratorLanguage 
 		{
 			name = "games.minim.M"
-			fileExtensions = "m"
+			fileExtensions = "game"
 			referencedResource = "platform:/resource/games.minim/model/M.genmodel"
 			
 			fragment = grammarAccess.GrammarAccessFragment2 {}
