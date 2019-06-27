@@ -17,7 +17,7 @@ class HybridUnitySerializer implements Framework
 		
 		for (component : game.real1Components)
 		{
-			var g = GenFactory.eINSTANCE.createFullName
+			var g = GenFactory.eINSTANCE.createFullName1
 			g.name = component.name
 			g.wrapper = component.name
 			g.menu = component.name
