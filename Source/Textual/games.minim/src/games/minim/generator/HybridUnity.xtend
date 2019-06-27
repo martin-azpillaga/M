@@ -132,7 +132,7 @@ class HybridUnity implements Framework
 	
 	def assetsFolder()
 	{
-		var path = '''Hybrid «game.title»/Assets/toDelete.del'''
+		var path = '''Project/Hybrid Unity/«game.title»/Assets/toDelete.del'''
 		fileSystem.generateFile(path, '')
 		fileSystem.deleteFile(path)
 	}
@@ -391,7 +391,7 @@ class HybridUnity implements Framework
 	
 	def folder(Folder folder)
 	{
-		var title = '''Hybrid «game.title»'''
+		var title = '''Project/Hybrid Unity/«game.title»'''
 		var assets = '''«title»/Assets'''
 		var code = '''«assets»/Code'''
 		var design = '''«assets»/Design'''

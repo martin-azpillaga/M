@@ -45,7 +45,7 @@ class BlockSerializer implements Framework
 		s = s.replace('   "', '"')
 		s = s.replace('  "', '"')
 		s = s.replace(' "', '"')
-		fsa.generateFile('Blocks/'+name+'.xml',s)
+		fsa.generateFile('Blocks/English/'+name+'.xml',s)
 		println("Generated")
 	}
 	
@@ -137,7 +137,7 @@ class BlockSerializer implements Framework
 	{
 		var file = game.eResource.URI.path
 		var projectPath = file.substring(9)
-		var name = projectPath.substring(projectPath.indexOf('/')+1, projectPath.indexOf('.'))
+		var name = projectPath.substring(projectPath.lastIndexOf('/')+1, projectPath.indexOf('.'))
 		
 		doGenerate(game, fileSystem, name)
 	}

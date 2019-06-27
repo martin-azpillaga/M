@@ -28,5 +28,8 @@ Export-Package: games.minim.m,
  games.minim.scoping,
  games.minim.parser.antlr,
  games.minim.m.util,
- games.minim.validation
+ games.minim.validation,
+ games.minim.gen.util,
+ games.minim.gen,
+ games.minim.gen.impl
 Import-Package: org.apache.log4j

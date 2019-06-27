@@ -13,13 +13,21 @@ import org.eclipse.emf.common.util.URI
 import com.google.inject.Guice
 import games.minim.MRuntimeModule
 import org.eclipse.xtext.serializer.impl.Serializer
+import games.minim.XMRuntimeModule
 
 class MGenerator extends AbstractGenerator 
 {
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) 
 	{	
 		if (resource.contents.size == 0) return;
-		(new BlockSerializer).represent(resource.contents.get(0) as Game, fsa)
+		var g = resource.contents.get(0) as Game;
+		/*
+		for (e : g.entities)
+		{
+			var injector = Guice.createInjector(new  XMRuntimeModule());  
+			var serializer = injector.getInstance(Serializer);  
+			var s = serializer.serialize(e);
+		}*/
 		//(new EnglishSerializer).represent(resource.contents.get(0) as Game, fsa)
 		
 		var file = resource.URI.path
@@ -44,7 +52,7 @@ class MGenerator extends AbstractGenerator
 			}
 			else if (member instanceof IFile)
 			{
-				if(member.name.endsWith('.m') || member.name.endsWith('.xm'))
+				if(member.name.endsWith('.game') || member.name.endsWith('.xm'))
 				{
 					val memberUri = URI.createURI('platform:/resource'+member.fullPath)
 					
@@ -59,7 +67,9 @@ class MGenerator extends AbstractGenerator
 				}
 			}
 		}
-		(new HybridUnity).represent(game, fsa)
+		(new HybridUnitySerializer).represent(game, fsa)
+		
+		//(new HybridUnity).represent(game, fsa)
 		println("Generated")
 	}	
 }
