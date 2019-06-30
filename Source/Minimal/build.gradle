@@ -1,0 +1,123 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'org.xtext:xtext-gradle-plugin:2.0.4'
+	}
+}
+plugins {
+	id 'com.github.johnrengelman.shadow' version '4.0.1'
+}
+
+
+repositories {
+	mavenCentral()
+}
+
+apply plugin: 'java'
+apply plugin: 'org.xtext.xtend'
+apply plugin: 'eclipse'
+
+dependencies {
+	compile platform("org.eclipse.xtext:xtext-dev-bom:2.18.0.M3")
+}
+
+sourceSets {
+	main {
+		java.srcDirs = ['src/main/java', 'src/main/xtext-gen']
+		resources.srcDirs = ['src/main/resources', 'src/main/xtext-gen']
+		xtendOutputDir = 'src/main/xtend-gen'
+	}
+	test {
+		java.srcDirs = ['src/test/java', 'src/test/xtext-gen']
+		resources.srcDirs = ['src/test/resources', 'src/test/xtext-gen']
+		xtendOutputDir = 'src/test/xtend-gen'
+	}
+}
+
+jar {
+	from('model') {
+		into('model')
+	}
+	from(sourceSets.main.allSource) {
+		include '**/*.xtext'
+	}
+	manifest {
+		attributes 'Bundle-SymbolicName': project.name
+	}
+}
+
+plugins.withId('war') {
+	webAppDirName = "src/main/webapp"
+}
+
+
+group = 'org.xtext.example.mydsl'
+version = '1.0.0-SNAPSHOT'
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+configurations.all {
+	exclude group: 'asm'
+}
+
+dependencies {
+	compile "org.eclipse.xtext:org.eclipse.xtext:2.18.0.M3"
+	compile "org.eclipse.xtext:org.eclipse.xtext.xbase:2.18.0.M3"
+}
+configurations {
+	mwe2 {
+		extendsFrom compile
+	}
+}
+
+dependencies {
+	mwe2 'org.eclipse.emf:org.eclipse.emf.mwe2.launch'
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.common.types:2.18.0.M3"
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:2.18.0.M3"
+	mwe2 'org.eclipse.xtext:xtext-antlr-generator'
+}
+
+task generateXtextLanguage(type: JavaExec) {
+	main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
+	classpath = configurations.mwe2
+	inputs.file "org.xtext.example.mydsl/src/main/java/org/xtext/example/mydsl/GenerateMyDsl.mwe2"
+	inputs.file "org.xtext.example.mydsl/src/main/java/org/xtext/example/mydsl/MyDsl.xtext"
+	outputs.dir "org.xtext.example.mydsl/src/main/xtext-gen"
+	args += "org.xtext.example.mydsl/src/main/java/org/xtext/example/mydsl/GenerateMyDsl.mwe2"
+	args += "-p"
+	args += "rootPath=/${projectDir}/org.xtext.example.mydsl/.."
+}
+
+generateXtext.dependsOn(generateXtextLanguage)
+clean.dependsOn(cleanGenerateXtextLanguage)
+eclipse.classpath.plusConfigurations += [configurations.mwe2]
+
+
+
+
+
+
+
+
+dependencies {
+	//compile project(':org.xtext.example.mydsl')
+	compile "org.eclipse.xtext:org.eclipse.xtext.ide:2.18.0.M3"
+	compile "org.eclipse.xtext:org.eclipse.xtext.xbase.ide:2.18.0.M3"
+}
+
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+mainClassName = "org.eclipse.xtext.ide.server.ServerLauncher"
+
+shadowJar {
+	from(project.convention.getPlugin(JavaPluginConvention).sourceSets.main.output)
+	configurations = [project.configurations.runtime]
+	exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA','schema/*',
+		'.options', '.api_description', '*.profile', '*.html', 'about.*', 'about_files/*',
+		'plugin.xml', 'modeling32.png', 'systembundle.properties', 'profile.list')
+	classifier = 'ls'
+	append('plugin.properties')
+}
