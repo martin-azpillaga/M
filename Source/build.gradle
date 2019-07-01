@@ -19,7 +19,7 @@ subprojects {
 	}
 
 	apply plugin: 'org.xtext.xtend'
-	apply from: "${rootDir}/gradle/source-layout.gradle"
+	apply from: "${rootDir}/source-layout.gradle"
 	apply plugin: 'eclipse'
 	
 	group = 'm'
