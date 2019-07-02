@@ -1,6 +1,6 @@
-grammar m.M with org.eclipse.xtext.common.Terminals
+grammar m.Symbolic with org.eclipse.xtext.common.Terminals
 
-import "http://www.minim.games/M"
+generate m "http://www.minim.games/M"
 
 Game:
 	(
