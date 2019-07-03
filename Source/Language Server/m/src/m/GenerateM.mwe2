@@ -13,8 +13,7 @@ Workflow
 			{
 				baseName = "m"
 				rootPath = ".."
-				eclipsePlugin = { enabled = true }
-				createEclipseMetaData = true
+				genericIde = { enabled = true }
 			}
 		}
 		language = StandardLanguage 
