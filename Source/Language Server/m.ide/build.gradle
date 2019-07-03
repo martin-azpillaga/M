@@ -21,7 +21,3 @@ shadowJar {
 	classifier = 'ls'
 	append('plugin.properties')
 }
-
-apply plugin: 'application'
-mainClassName = 'org.eclipse.xtext.ide.server.ServerLauncher'
-applicationName = 'xtext-server'
