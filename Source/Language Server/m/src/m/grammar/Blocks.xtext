@@ -1,0 +1,464 @@
+grammar m.Blocks with org.eclipse.xtext.common.Terminals
+
+import "http://www.minim.games/M"
+
+
+Game: {Game}
+	OPENXML
+	(
+		entities+=Entity CLOSEBLOCK|
+		systems+=System
+	)*
+	
+	CLOSEXML
+;
+@Override terminal STRING: 'STRINGGGG';
+terminal OPENMAIN: '<block type="main" id="'SUPERID'" '('x="'INT'" y="'INT'"')?'>';
+terminal OPENENTITIES: '<statement name="ENTITIES">';
+terminal OPENENTITYREFERENCE: '<block type="entityreference" id="'SUPERID'">';
+Entity:
+	OPENENTITY
+	OPENNAME
+	name=ID 
+	CLOSEFIELD
+	(
+		OPENBASE OPENBASE2 
+		OPENNAME base=[Entity] CLOSEFIELD 
+		(
+			OPENREMOVED 
+			(
+				OPENCOMPONENTNAME 
+				OPENNAME removed+=[Name] CLOSEFIELD
+				(
+					OPENNEXT
+					OPENCOMPONENTNAME
+					OPENNAME removed+=[Name] CLOSEFIELD
+				)*
+				(
+					CLOSEBLOCK
+					CLOSENEXT
+				)*
+				CLOSEBLOCK
+			) 
+			CLOSESTATEMENT
+		)? 
+		CLOSEBLOCK CLOSEVALUE
+	)?
+	(
+		OPENCOMPONENTS	
+		values+=Value 
+		(
+			OPENNEXT
+			values+=Value 
+		)*
+		(
+			CLOSEBLOCK
+			CLOSENEXT
+		)*
+		CLOSEBLOCK
+		CLOSESTATEMENT
+	)? 
+	(
+		OPENSUBENTITIES 
+		children+=Entity
+		(
+			OPENNEXT
+			children+=Entity
+		)*
+		(
+			CLOSEBLOCK
+			CLOSENEXT
+		)*
+		CLOSEBLOCK
+		CLOSESTATEMENT
+	)?
+;
+Value:
+	  {Tag}   OPENTAG OPENNAME component=[Name] CLOSEFIELD
+	| {Real1} OPENREAL1 OPENNAME component=[Name] CLOSEFIELD OPENX x=Number CLOSEFIELD
+	| {Real2} OPENREAL2 OPENNAME component=[Name] CLOSEFIELD OPENX x=Number CLOSEFIELD OPENY y=Number CLOSEFIELD
+	| {Real3} OPENREAL3 OPENNAME component=[Name] CLOSEFIELD OPENX x=Number CLOSEFIELD OPENY y=Number CLOSEFIELD OPENZ z=Number CLOSEFIELD
+	| {Real4} OPENREAL4 OPENNAME component=[Name] CLOSEFIELD OPENX x=Number CLOSEFIELD OPENY y=Number CLOSEFIELD OPENZ z=Number CLOSEFIELD OPENW w=Number CLOSEFIELD
+	| {Enumeration} OPENENUMERATION OPENNAME component=[Name] CLOSEFIELD 
+		(
+			OPENVALUES 
+			OPENENUMERATIONVALUE
+			OPENNAME values+=[Name] CLOSEFIELD
+			(
+				OPENNEXT
+				OPENENUMERATIONVALUE
+				OPENNAME values+=[Name] CLOSEFIELD
+			)*
+			(
+				CLOSEBLOCK
+				CLOSENEXT
+			)*
+			CLOSEBLOCK 
+			CLOSESTATEMENT
+		)?
+	| {Reference} OPENREFERENCE OPENNAME component=[Name] CLOSEFIELD OPENVALUE entity=[Entity] CLOSEFIELD
+	| {Sprite} OPENSPRITE OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=[Name] CLOSEFIELD
+	| {Audio} OPENAUDIO OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=[Name] CLOSEFIELD
+	| {Text} OPENTEXT OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=ID CLOSEFIELD
+	| {Material} OPENMATERIAL OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=[Name] CLOSEFIELD
+	| {Mesh} OPENMESH OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=[Name] CLOSEFIELD
+	| {Font} OPENFONT OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=[Name] CLOSEFIELD
+	| {Timer} OPENTIMER OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=Number CLOSEFIELD
+	| {Trigger} OPENTRIGGER OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=TriggerType CLOSEFIELD
+	| {Range} OPENRANGE OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=AxisType CLOSEFIELD
+	| {Vector} OPENVECTOR OPENNAME component=[Name] CLOSEFIELD OPENVALUE value=VectorType CLOSEFIELD
+	| {Sensor} OPENSENSOR OPENNAME component=[Name] CLOSEFIELD 
+		(
+			OPENVALUES 
+			OPENENUMERATIONVALUE
+			OPENNAME values+=[Name] CLOSEFIELD
+			(
+				OPENNEXT
+				OPENENUMERATIONVALUE
+				OPENNAME values+=[Name] CLOSEFIELD
+			)*
+			(
+				CLOSEBLOCK
+				CLOSENEXT
+			)*
+			CLOSEBLOCK 
+			CLOSESTATEMENT
+		)?
+	| {Click} OPENCLICK OPENNAME component=[Name] CLOSEFIELD
+;
+
+Number:	{Decimal} negative?='-'? wholePart=INT ('.' decimalPart=INT)?;
+System:
+	OPENSYSTEM
+	OPENNAME
+	name=ID
+	CLOSEFIELD
+	
+	(
+		OPENCOMMANDS 
+		commands+=Command 
+		(
+			OPENNEXT
+			commands+=Command
+		)*
+		(
+			CLOSEBLOCK
+			CLOSENEXT
+		)*
+		CLOSEBLOCK
+		CLOSESTATEMENT
+	)?
+	
+	CLOSEBLOCK
+;
+
+
+Command:
+	Loop|While|Check|Break|Initialization|ComponentAssignment|VariableAssignment|CreatedAssignment|SubrutineCall
+;
+terminal OPENSUBRUTINE: '<block type="structural_';
+terminal OPENCALL: '<block type="call" id="'SUPERID'">';
+terminal OPENFUNCTION: '<value name="FUNCTION">';
+terminal OPENFUNCTION2: '<block type="function2" id="'SUPERID'">';
+terminal OPENFUNCTION1: '<block type="function1" id="'SUPERID'">';
+SubrutineCall:
+	OPENCALL
+	OPENFUNCTION
+	(
+		OPENFUNCTION2
+		OPENNAME subrutine=[Name] CLOSEFIELD
+		OPENVALUEX parameters+=ArithmeticExpression CLOSEVALUE 
+		OPENVALUEY parameters+=ArithmeticExpression CLOSEVALUE
+		CLOSEBLOCK
+		CLOSEVALUE
+	|
+		OPENFUNCTION1
+		OPENNAME subrutine=[Name] CLOSEFIELD
+		OPENVALUEX parameters+=ArithmeticExpression CLOSEVALUE
+		CLOSEBLOCK
+		CLOSEVALUE
+	)
+;
+ComponentAssignment:
+	OPENCOMPONENTASSIGNMENT
+	OPENASSIGNMENTTYPE assignment=AssignmentType CLOSEFIELD
+	OPENCOMPONENT component=[Name] CLOSEFIELD
+	OPENENTITYFIELD group=[Name] CLOSEFIELD
+	OPENEXPRESSION expression=ArithmeticExpression CLOSEVALUE
+;
+VariableAssignment:
+	OPENVARIABLEASSIGNMENT
+	OPENASSIGNMENTTYPE assignment=AssignmentType CLOSEFIELD
+	OPENNAME variable=Name CLOSEFIELD
+	OPENVALUENAME expression=ArithmeticExpression CLOSEVALUE
+;
+CreatedAssignment:
+	OPENVARIABLEASSIGNMENT
+	OPENASSIGNMENTTYPE INITIALIZE CLOSEFIELD
+	OPENNAME variable=Name CLOSEFIELD
+	OPENVALUENAME expression=ArithmeticExpression CLOSEVALUE
+;
+Break: {Break}
+	OPENBREAK
+;
+Initialization:
+	OPENINITIALIZATION
+	OPENNAME variable=Name CLOSEFIELD
+;
+Loop:
+	OPENLOOP
+	
+	OPENGROUP
+	group=Name 
+	CLOSEFIELD
+	
+	(
+		OPENCONSTRAINTS 
+		constraints+=Constraint
+		(
+			OPENNEXT
+			constraints+=Constraint
+		)*
+		(
+			CLOSEBLOCK
+			CLOSENEXT
+		)*
+		CLOSEBLOCK
+		CLOSESTATEMENT
+	)?
+	
+	(
+		OPENCOMMANDS
+		commands+=Command
+		(
+			OPENNEXT
+			commands+=Command
+		)*
+		(
+			CLOSEBLOCK
+			CLOSENEXT
+		)*
+		CLOSEBLOCK
+		CLOSESTATEMENT
+	)?
+;
+While: {While}
+	OPENWHILE
+	OPENCONDITION
+	condition=BooleanExpression
+	CLOSEVALUE
+	
+	(
+		OPENCOMMANDS
+		commands+=Command
+		(
+			OPENNEXT
+			commands+=Command
+			CLOSENEXT
+		)*
+		CLOSEBLOCK
+		CLOSESTATEMENT
+	)?
+;
+Check: {Check}
+	OPENIF
+	condition=Condition
+	( 
+		OPENELSE
+		
+		commands+=Command
+		(
+			OPENNEXT
+			commands+=Command
+		)*
+		(
+			CLOSEBLOCK
+			CLOSENEXT
+		)*
+		CLOSEBLOCK
+		
+		CLOSESTATEMENT
+	)?
+;
+
+Condition returns Control:
+	{Condition} 
+	OPENCONDITION
+	condition=BooleanExpression
+	CLOSEVALUE
+	OPENIFCOMMANDS 
+	commands+=Command
+	(
+		OPENNEXT
+		commands+=Command
+	)*
+	(
+		CLOSEBLOCK
+		CLOSENEXT
+	)*
+	CLOSEBLOCK
+	CLOSESTATEMENT
+;
+
+
+
+
+
+
+
+BooleanExpression returns BooleanExpression:
+	{Or} OPENBINARYBOOLEAN OR OPENLEFT left=BooleanExpression CLOSEVALUE OPENRIGHT right=BooleanExpression CLOSEVALUE CLOSEBLOCK
+	| {And} OPENBINARYBOOLEAN AND OPENLEFT left=BooleanExpression CLOSEVALUE OPENRIGHT right=BooleanExpression CLOSEVALUE CLOSEBLOCK
+	| {Not} OPENUNARYBOOLEAN OPENVALUENAME expression=BooleanExpression CLOSEVALUE CLOSEBLOCK
+	| {Comparison} OPENARITHEMTICBOOLEAN OPENOPERATION type=RelationType CLOSEFIELD OPENLEFT left=ArithmeticExpression CLOSEVALUE OPENRIGHT right=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
+	| {BooleanVariable} OPENPOP OPENVARIABLE variable=[Name] CLOSEFIELD CLOSEBLOCK
+;
+
+ArithmeticExpression: 
+	{Plus} OPENBINARYARITHMETIC OPENOPERATION ADD CLOSEFIELD OPENLEFT left=ArithmeticExpression CLOSEVALUE OPENRIGHT right=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
+	| {Minus} OPENBINARYARITHMETIC OPENOPERATION SUBTRACT CLOSEFIELD OPENLEFT left=ArithmeticExpression CLOSEVALUE OPENRIGHT right=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
+	| {Times} OPENBINARYARITHMETIC OPENOPERATION 'MULTIPLY' CLOSEFIELD OPENLEFT left=ArithmeticExpression CLOSEVALUE OPENRIGHT right=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
+	| {Divide} OPENBINARYARITHMETIC OPENOPERATION 'DIVIDE' CLOSEFIELD OPENLEFT left=ArithmeticExpression CLOSEVALUE OPENRIGHT right=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
+	| {Modulus} OPENBINARYARITHMETIC OPENOPERATION 'MODULUS' CLOSEFIELD OPENLEFT left=ArithmeticExpression CLOSEVALUE OPENRIGHT right=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
+	| {Bitwise} OPENBINARYARITHMETIC OPENOPERATION op=('AND'|'OR') CLOSEFIELD OPENLEFT left=ArithmeticExpression CLOSEVALUE OPENRIGHT right=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
+	| {Increment} OPENUNARYARITHMETIC OPENOPERATION INCREMENT CLOSEFIELD OPENVALUEVALUE left=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
+	| {Decrement} OPENUNARYARITHMETIC OPENOPERATION DECREMENT CLOSEFIELD OPENVALUEVALUE left=ArithmeticExpression CLOSEVALUE CLOSEBLOCK
+	| Atomic
+;
+terminal OPENACCESS: '<block type="access" id="'SUPERID'">';
+
+Atomic returns ArithmeticExpression: 
+	   {Access} OPENACCESS OPENCOMPONENT component=[Name] CLOSEFIELD OPENENTITYFIELD group=[Name] CLOSEFIELD CLOSEBLOCK
+	|  {Call}
+		OPENFUNCTION2
+		OPENNAME function=[Name] CLOSEFIELD
+		OPENVALUEX parameters+=ArithmeticExpression CLOSEVALUE 
+		OPENVALUEY parameters+=ArithmeticExpression CLOSEVALUE
+		CLOSEBLOCK
+	|  {Pop} OPENPOP OPENVARIABLE variable=[Name] CLOSEFIELD CLOSEBLOCK
+	|  {Call} OPENFUNCTION1
+		OPENNAME function=[Name] CLOSEFIELD
+		OPENVALUEX parameters+=ArithmeticExpression CLOSEVALUE
+		CLOSEBLOCK
+;
+
+Constraint:
+	OPENCONSTRAINT event=EventType OPENCONSTRAINT2
+	OPENNEGATED (negated?='FALSE' | 'TRUE') CLOSEFIELD
+	OPENNAME component=[Name] CLOSEFIELD
+;
+Name: name=ID;
+
+terminal OPENVALUEVALUE: '<value name="value">';
+terminal OPENTRANSFORMATION: '<block type="transformation" id="'SUPERID'">';
+terminal OPENENTITYVALUE: '<value name="ENTITY">';
+terminal OPENSAVE: '<block type="save_';
+terminal SUPERID: !('"')+;
+terminal OPENXML: '<xml xmlns="http://www.w3.org/1999/xhtml">';
+terminal CLOSEXML: '</xml>';
+terminal OPENENTITY: '<block type="entity" id="' SUPERID '"' (' x="' INT '" y="' INT '"')?'>';
+terminal CLOSEBLOCK: '</block>';
+terminal OPENNAME: '<field name="NAME">';
+terminal CLOSEFIELD: '</field>';
+terminal OPENCOMPONENTS: '<statement name="components">';
+terminal CLOSESTATEMENT: '</statement>';
+terminal OPENTAG: '<block type="tag" id="' SUPERID '">';
+terminal OPENBASE: '<value name="base">';
+terminal OPENBASE2: '<block type="base" id="' SUPERID '">';
+terminal CLOSEVALUE: '</value>';
+terminal OPENREMOVED: '<statement name="removed">';
+terminal OPENCOMPONENTNAME: '<block type="componentname" id="' SUPERID '">';
+terminal OPENSUBENTITIES: '<statement name="subEntities">';
+terminal OPENREAL1: '<block type="real1" id="'SUPERID'">';
+terminal OPENREAL2: '<block type="real2" id="'SUPERID'">';
+terminal OPENREAL3: '<block type="real3" id="'SUPERID'">';
+terminal OPENREAL4: '<block type="real4" id="'SUPERID'">';
+terminal OPENENUMERATION: '<block type="enumeration" id="'SUPERID'">';
+terminal OPENREFERENCE: '<block type="reference" id="'SUPERID'">';
+terminal OPENSPRITE: '<block type="sprite" id="'SUPERID'">';
+terminal OPENAUDIO: '<block type="audio" id="'SUPERID'">';
+terminal OPENTEXT: '<block type="textcomponent" id="'SUPERID'">';
+terminal OPENMESH: '<block type="mesh" id="'SUPERID'">';
+terminal OPENMATERIAL: '<block type="material" id="'SUPERID'">';
+terminal OPENFONT: '<block type="font" id="'SUPERID'">';
+terminal OPENTIMER: '<block type="timer" id="'SUPERID'">';
+terminal OPENTRIGGER: '<block type="trigger" id="'SUPERID'">';
+terminal OPENRANGE: '<block type="range" id="'SUPERID'">';
+terminal OPENVECTOR: '<block type="vector" id="'SUPERID'">';
+terminal OPENSENSOR: '<block type="sensor" id="'SUPERID'">';
+terminal OPENCLICK: '<block type="click" id="'SUPERID'">';
+terminal OPENX: '<field name="X">';
+terminal OPENVALUEX: '<value name="X">';
+terminal OPENVALUEY: '<value name="Y">';
+terminal OPENY: '<field name="Y">';
+terminal OPENZ: '<field name="Z">';
+terminal OPENW: '<field name="W">';
+terminal OPENVALUE: '<field name="VALUE">';
+terminal OPENVALUES: '<statement name="VALUES">';
+terminal OPENENUMERATIONVALUE: '<block type="enumeration_value" id="'SUPERID'">';
+
+terminal OPENSYSTEM: '<block type="system" id="' SUPERID '"' (' x="'INT'" y="'INT'"')?'>';
+terminal OPENCOMMANDS: '<statement name="commands">';
+
+terminal OPENLOOP: '<block type="loop" id="' SUPERID '">';
+terminal OPENGROUP: '<field name="GROUP">';
+terminal OPENCONSTRAINTS: '<statement name="constraints">';
+terminal OPENBREAK: '<block type="break" id="'SUPERID'">';
+terminal OPENINITIALIZATION: '<block type="declaration" id="'SUPERID'">';
+terminal OPENCOMPONENTASSIGNMENT: '<block type="component_assignment" id="'SUPERID'">';
+terminal OPENASSIGNMENTTYPE: '<field name="assignmentType">';
+terminal OPENVARIABLEASSIGNMENT: '<block type="variable_assignment" id="'SUPERID'">';
+terminal OPENCOMPONENT: '<field name="COMPONENT">';
+terminal OPENEXPRESSION: '<value name="expression">';
+terminal OPENENTITYFIELD: '<field name="ENTITY">';
+terminal INITIALIZE: 'INITIALIZE';
+terminal OPENELSE: '<statement name="elseCommands">';
+terminal OPENIFCOMMANDS: '<statement name="ifCommands">';
+terminal OPENCONDITION: '<value name="condition">';
+terminal OPENBINARYBOOLEAN: '<block type="binary_boolean" id="'SUPERID'">';
+terminal OPENLEFT:'<value name="left">';
+terminal OPENRIGHT:'<value name="right">';
+terminal OPENUNARYBOOLEAN: '<block type="unary_boolean" id="'SUPERID'">';
+terminal OPENARITHEMTICBOOLEAN: '<block type="binary_arithmetic_boolean" id="'SUPERID'">';
+terminal OPENBINARYARITHMETIC: '<block type="binary_arithmetic" id="'SUPERID'">';
+terminal OPENUNARYARITHMETIC: '<block type="unary_arithmetic" id="'SUPERID'">';
+terminal OPENOPERATION: '<field name="OPERATION">';
+terminal OPENPOP: '<block type="pop" id="'SUPERID'">';
+terminal OPENVALUENAME: '<value name="NAME">';
+terminal ADD: 'ADD';
+terminal SUBTRACT: 'SUBTRACT';
+terminal INCREMENT: 'INCREMENT';
+terminal DECREMENT: 'DECREMENT';
+terminal OPENVARIABLE: '<field name="VARIABLE">';
+terminal OPENIF: '<block type="if" id="'SUPERID'">';
+terminal OPENWHILE: '<block type="while" id="'SUPERID'">';
+terminal OPENNEXT: '<next>';
+terminal CLOSENEXT: '</next>';
+terminal OPENCONSTRAINT: '<block type="constraint_';
+terminal OPENCONSTRAINT2: '" id="'SUPERID'">';
+terminal OPENCONSTRAINT3: '_save' OPENCONSTRAINT2;
+terminal OPENNEGATED: '<field name="negated">';
+terminal OPENDETECTION: '<block type="constraint_detection" id="'SUPERID'">';
+terminal OPENMOUSE: '<block type="constraint_mouse" id="'SUPERID'">';
+terminal OPENTYPE: '<field name="TYPE">';
+terminal OR: '<field name="OPERATION">OR</field>';
+terminal AND: '<field name="OPERATION">AND</field>';
+
+enum EventType: tag='tagged'|timeout='timeout'|trigger='triggered'|enter='enter'|stay='stay'|exit='exit'|mouseDown='mouse_down'|mouseUp='mouse_up';
+enum AxisType: 
+	LeftX='LEFTX'|LeftY='LEFTY'|RightX='RIGHTX'|RightY='RIGHTY'
+	|LeftShoulder='LEFTSHOULDER'|RightShoulder='RIGHTSHOULDER'
+;
+enum TriggerType: 
+	South='SOUTH'|West='WEST'|East='EAST'|North='NORTH'
+	|LeftTrigger='LEFTTRIGGER'|RightTrigger='RIGHTTRIGGER'
+	|Down='DOWN'|Left='LEFT'|Right='RIGHT'|Up='UP'
+	|Start='START'|Select='SELECT'
+	|LeftStick='LEFTPRESS'|RightStick='RIGHTPRESS'
+	|Optional='OPTIONAL'
+	|Zero='key.0'|One='key.1'|Two='key.2'|Three='key.3'|Four='key.4'|Five='key.5'|Six='key.6'|Seven='key.7'|Eight='key.8'|Nine='key.9'
+	|A='key.A'|B='key.B'|C='key.C'|D='key.D'|E='key.E'|F='key.F'|G='key.G'|H='key.H'|I='key.I'|J='key.J'|K='key.K'|L='key.L'|M='key.M'|N='key.N'|O='key.O'|P='key.P'|Q='key.Q'|R='key.R'|S='key.S'|T='key.T'|U='key.U'|V='key.V'|W='key.W'|X='key.X'|Y='key.Y'|Z='key.Z'
+;
+enum VectorType: mouse='MOUSEPOSITION'|dpad='DPAD'|leftStick='LEFTSTICK'|rightStick='RIGHTSTICK';
+enum RelationType: over='GREATER'|under='LOWER'|equal='EQUAL'|notequal='NOTEQUAL'|overorequal='GREATEROREQUAL'|underorequal='LOWEROREQUAL';
+enum AssignmentType: set='SET'|increase='INCREASE'|decrease='DECREASE'|multiply='MULTIPLY'|divide='DIVIDE'|modulus='MODULUS'|and='AND'|or='OR';

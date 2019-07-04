@@ -1,6 +1,6 @@
-grammar m.M with org.eclipse.xtext.common.Terminals
+grammar m.Text with org.eclipse.xtext.common.Terminals
 
-generate m "http://www.minim.games/M"
+import "http://www.minim.games/M"
 
 Game: {Game}
 	(
@@ -9,43 +9,6 @@ Game: {Game}
 		|functions+=Function
 		|subrutines+=Subrutine
 	)*
-	(
-		title = ID ','
-		tagComponents+=Name* ','
-		real1Components+=Name* ','
-		real2Components+=Name* ','
-		real3Components+=Name* ','
-		real4Components+=Name* ','
-		enumerationComponents+=Name* ','
-		entityComponents+=Name* ','
-		rangeComponents+=Name* ','
-		triggerComponents+=Name* ','
-		sensorComponents+=Name* ','
-		timerComponents+=Name* ','
-		vectorComponents+=Name* ','
-		spriteComponents+=Name* ','
-		audioComponents+=Name* ','
-		meshComponents+=Name* ','
-		materialComponents+=Name* ','
-		textComponents+=Name* ','
-		clickComponents+=Name* ','
-		fontComponents+=Name* ','
-		referenceComponents+=Name* ','
-		
-		transformations+=Name* ','
-		voids+=Name* ','
-		enumerations+=Enum* ','
-		
-		sprites+=Name* ','
-		meshes+=Name* ','
-		materials+=Name* ','
-		texts+=Name* ','
-		fonts+=Name* ','
-		audios+=Name* ','
-	)?
-;
-Enum:
-	name=ID 'values' values+=[Name]*
 ;
 System returns Control:	{System} name=ID START_SYSTEM commands+=Command+;
 
@@ -206,19 +169,3 @@ enum TriggerType:
 enum VectorType: mouse='mouse.position'|dpad='gamepad.dpad'|leftStick='gamepad.leftStick'|rightStick='gamepad.rightStick';
 enum RelationType: over='>'|under='<'|equal='='|notequal='!='|overorequal='>='|underorequal='<=';
 enum AssignmentType: set='='|increase='+='|decrease='-='|multiply='*='|divide='/='|modulus='%='|and='&='|or='|=';
-
-enum EngineComponentType:
-	  acceleration|audio|bodyType|canvas|canvasRenderer|canvasScaler|clearColor|clearFlags
-	| ears|emission|eventSystem|extent|font|force|friction|graphicRaycaster|inputModule
-	| intensity|lightType|mass|material|mesh|nearClip|number|orthographic|orthographicSize
-	| perspective|position|radius|range|restitution|rotation|scale|screenExpand
-	| screenPosition|screenSize|serializedVersion|spotAngle|sprite|text|uiScaleMode
-	| velocity|viewAngle|viewDistance|dopplerEffect|pitch|volume|trigger|ray
-	| physical|rigidbodyConstraints|zorder|button|image|fillAmount|targetGraphic
-;
-enum EngineTransformationType:
-	add|create
-;
-enum EngineVoidType:
-	add|remove
-;
