@@ -19,7 +19,10 @@ task generateXtextLanguage(type: JavaExec) {
 	main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
 	classpath = configurations.mwe2
 	inputs.file "src/m/GenerateM.mwe2"
-	inputs.file "src/m/M.xtext"
+	inputs.file "src/m/grammar/M.xtext"
+	inputs.file "src/m/grammar/Text.xtext"
+	inputs.file "src/m/grammar/Blocks.xtext"
+	inputs.file "src/m/grammar/HybridUnity.xtext"
 	outputs.dir "src-gen"
 	args += "src/m/GenerateM.mwe2"
 	args += "-p"

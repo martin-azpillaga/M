@@ -13,7 +13,8 @@ Workflow
 			{
 				baseName = "m"
 				rootPath = ".."
-				genericIde = { enabled = true }
+				eclipsePlugin = { enabled = true }
+				createEclipseMetaData = true
 			}
 		}
 		language = XtextGeneratorLanguage 
