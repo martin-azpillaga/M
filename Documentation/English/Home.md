@@ -1,12 +1,8 @@
 # M
 
-[English version](/Documentation/English/Home.md) |
-[Versión en castellano](/Documentation/Castellano/Inicio.md) |
-[Euskarazko bertsioa](/Documentation/Euskara/Hasiera.md)
-
 M is a data oriented programming language for game developers.
 
-It increases the productivity of professionals by reducing both the development and maintenance time of projects, while making the overall process more enjoyable.
+It increases the productivity of professionals by reducing both the development and maintenance time of projects, while making the overall process more enjoyable!
 
 M is built following the philosophy of the excellent quote:
 
