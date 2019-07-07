@@ -1,67 +1,64 @@
-[logo]: https://github.com/martin-azpillaga/M/blob/master/Source/games.minim.parent/games.minim.product/icons/app128.png "Logo"
-[visualEntityEnglish]: https://github.com/martin-azpillaga/M/blob/master/Documentation/Visual_English.PNG
-[visualSystemEnglish]: https://github.com/martin-azpillaga/M/blob/master/Documentation/Visual_System.PNG
-[textualEntityEnglish]: https://github.com/martin-azpillaga/M/blob/master/Documentation/Textual_English.PNG
-[textualSystemEnglish]: https://github.com/martin-azpillaga/M/blob/master/Documentation/TextualSystem_English.PNG
-[textualEntitySpanish]: https://github.com/martin-azpillaga/M/blob/master/Documentation/Textual_Spanish.PNG
-[visualEntitySpanish]: https://github.com/martin-azpillaga/M/blob/master/Documentation/Visual_Spanish.PNG
-[pacman]: https://github.com/martin-azpillaga/M/blob/master/Documentation/Pacman.PNG
-[pong]: https://github.com/martin-azpillaga/M/blob/master/Documentation/Pong.PNG
-[spaceInvaders]: https://github.com/martin-azpillaga/M/blob/master/Documentation/SpaceInvaders.PNG
-[eclipseLogo]: https://www.macupdate.com/images/icons256/11662.png
-[vscodeLogo]: https://cf.mastohost.com/v1/AUTH_91eb37814936490c95da7b85993cc2ff/fosstodon/custom_emojis/images/000/046/192/static/33ed6562f1f97c3a.png
-[unityProject]:https://github.com/martin-azpillaga/M/blob/master/Documentation/UnityProject.PNG
-![M logo][logo]
 # The language of video games
+
 M is a programming language built specifically for game development. It embraces the Entity Component System paradigm to facilitate the creation of flexible yet performant projects. It is built to make game development more enjoyable, by making the developers more productive and simplifying the process following the philosophy
 
-> Everything should be as simple as it can be, but not simpler.
-
+> Everything should be as simple as it can be, but not simpler.  
+>
 >-Albert Einstein[?](https://quoteinvestigator.com/2011/05/13/einstein-simple/)
 
-### Involve all the team
+## Involve all the teamso
+
 M tries to involve all the technical roles in development: Artists, programmers and designers in the development of the game under an ubiquitous language.
 
 Textual programming | Visual programming
 --- | ---
 ![Textual programming][textualEntityEnglish] | ![VisualProgramming][visualEntityEnglish]
 ![Textual system][textualSystemEnglish] | ![VisualSystem][visualSystemEnglish]
+
+    ball has mass 10 appearance sprite.cute position 10 25.
+
 Programmers will feel at home with the C-like syntax | Artists and designers can also contribute by expressing their ideas using Scratch-like blocks
 Faster to develop with | Easier to learn and use
 
 Both approaches have the same expressive power, meaning that any program made using an approach can b emade using the other. Moreover, programs can be automatically translated from an interface to the other to approach every problem in the desired form.
 
-### Personalize the development process
+Links [Name](documentation/en/tutorial)
+
+[Name]: /en/tutorial
+
+## Personalize the development process
+
 ___
+
 * Natural language agnostic
 
-The compilation process of M is independent of the natural language vocabulary which allows to easily support additional natural languages.
+    The compilation process of M is independent of the natural language vocabulary which allows to easily support additional natural languages.
 
-English | Spanish
---- | ---
-![English code][textualEntityEnglish] | ![Spanish code][textualEntitySpanish]
+    English | Spanish
+    --- | ---
+    ![English code][textualEntityEnglish] | ![Spanish code][textualEntitySpanish]
 
 ___
 
 * Editor agnostic
 
-Programs in the M language can be develop in any editor that supports the LSP protocol.
+    Programs in the M language can be develop in any editor that supports the LSP protocol.
 
-Eclipse | Visual studio code
---- | ---
+    Eclipse | Visual studio code
+    --- | ---
 
 ___
 
 * Game engine agnostic
 
-Similarly, the code generation process is completely orthogonal from the language parsing and processing, so new target game engines can be added like
+    Similarly, the code generation process is completely orthogonal from the language parsing and processing, so new target game engines can be added like
 
-Unity | Unreal | Godot
---- | --- | ---
+    Unity | Unreal | Godot
+    --- | --- | ---
 
 ### Enjoy the results
 
-The output of a program written in M is not an executable game, but a game project for a game engine. It includes all the assets and scripts to realize the provided game description. 
+The output of a program written in M is not an executable game, but a game project for a game engine. It includes all the assets and scripts to realize the provided game description.
 
 ![Unity project][unityProject]
 
@@ -77,17 +74,36 @@ Pong | SpaceInvaders | Pacman
 &copy; Atari Inc. | &copy; Taito corporation | &copy; Namco Limited
 [Link to the code](https://github.com/martin-azpillaga/M/blob/master/Samples/Pong/Main.m) | [Link to the code](https://github.com/martin-azpillaga/M/blob/master/Samples/SpaceInvaders/Main.m) | [Link to the code](https://github.com/martin-azpillaga/M/blob/master/Samples/Pacman/Main.m)
 
-
 ### Collaboration
+
 ___
 This project tries to follow clean code standards so that other developers can understand and modify the code quickly. Collaboration is highly appreciated.
-##### This project is in active development
-Visit the [projects page](https://github.com/martin-azpillaga/M/projects) for updated information on current progress.
-##### Common extension points
 
-If you are willing to 
+#### This project is in active development
+
+Visit the [projects page](https://github.com/martin-azpillaga/M/projects) for updated information on current progress.
+
+#### Common extension points
+
+If you are willing to
+
 * add support for a new natural language
-* help in the integration of the LSP server into your editor of choice or 
+* help in the integration of the LSP server into your editor of choice or
 * write the code generation process for a new engine
 
 Don't hesitate to contact me.
+
+[logo]: https://github.com/martin-azpillaga/M/blob/master/Source/games.minim.parent/games.minim.product/icons/app128.png "Logo"
+[visualEntityEnglish]: https://github.com/martin-azpillaga/M/blob/master/Documentation/Visual_English.PNG
+[visualSystemEnglish]: https://github.com/martin-azpillaga/M/blob/master/Documentation/Visual_System.PNG
+[textualEntityEnglish]: https://github.com/martin-azpillaga/M/blob/master/Documentation/Textual_English.PNG
+[textualSystemEnglish]: https://github.com/martin-azpillaga/M/blob/master/Documentation/TextualSystem_English.PNG
+[textualEntitySpanish]: https://github.com/martin-azpillaga/M/blob/master/Documentation/Textual_Spanish.PNG
+[visualEntitySpanish]: https://github.com/martin-azpillaga/M/blob/master/Documentation/Visual_Spanish.PNG
+[pacman]: https://github.com/martin-azpillaga/M/blob/master/Documentation/Pacman.PNG
+[pong]: https://github.com/martin-azpillaga/M/blob/master/Documentation/Pong.PNG
+[spaceInvaders]: https://github.com/martin-azpillaga/M/blob/master/Documentation/SpaceInvaders.PNG
+[eclipseLogo]: https://www.macupdate.com/images/icons256/11662.png
+[vscodeLogo]: https://cf.mastohost.com/v1/AUTH_91eb37814936490c95da7b85993cc2ff/fosstodon/custom_emojis/images/000/046/192/static/33ed6562f1f97c3a.png
+[unityProject]:https://github.com/martin-azpillaga/M/blob/master/Documentation/UnityProject.PNG
+![M logo][logo]
