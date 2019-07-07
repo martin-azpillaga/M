@@ -26,8 +26,8 @@ M is built following the philosophy of the excellent quote:
 
     M is not only for programmers. If you are an artist, a designer or a project manager, you can leverage M to better communicate your ideas across your team.
 
-    Thanks to its visual workflow no previous experience in programming is required. You can try the [block editor online](/editor/).
-    Programmers can use whatever text editor they like that supports the [language server protocol](/Language-server-protocol.md)
+    Thanks to its visual workflow no previous experience in programming is required. You can try the [block editor online](/Visual-editor/).
+    Programmers can use whatever text editor they like that supports the [language server protocol](Language-server-protocol.md).
 
 * M is extensible.
 
