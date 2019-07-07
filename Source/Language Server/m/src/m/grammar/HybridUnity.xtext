@@ -1,0 +1,63 @@
+grammar m.HybridUnity with org.eclipse.xtext.common.Terminals
+
+import "http://www.minim.games/M"
+generate gen "http://www.minim.games/HybridUnity"
+
+Game:
+	real1Components+=Name
+;
+
+Name:
+	USINGS
+	
+	SERIALIZABLE
+	PUBLIC STRUCT name=ID COLON COMPONENTINTERFACE
+	OPENBRACE
+	PUBLIC
+	(
+		  {FullName1} FLOAT 
+		| {FullName2} FLOAT2
+		| {FullName3} FLOAT3
+		| {FullName4} FLOAT4
+	)
+	VALUE
+	CLOSEBRACE
+	
+	OPENBRACKET	COMPONENTMENUATTRIBUTE OPENPARENTHESIS DOUBLEQUOTE menu = ID DOUBLEQUOTE CLOSEPARENTHESIS CLOSEBRACKET
+	
+	PUBLIC CLASS wrapper=ID COLON WRAPPER OPENTRIANGLE base=ID CLOSETRIANGLE OPENBRACE CLOSEBRACE
+;
+
+terminal USING: 'using';
+terminal SYSTEMLIBRARY: USING 'System' SEMICOLON;
+terminal ENTITIESLIBRARY: USING 'Unity.Entities' SEMICOLON;
+terminal MATHEMATICSLIBRARY: USING 'Unity.Mathematics' SEMICOLON;
+terminal UNITYLIBRARY: USING 'UnityEngine' SEMICOLON;
+
+terminal SEMICOLON: ';';
+terminal COLON: ':';
+terminal OPENBRACE: '{';
+terminal CLOSEBRACE: '}';
+terminal OPENPARENTHESIS: '(';
+terminal CLOSEPARENTHESIS: ')';
+terminal OPENBRACKET: '[';
+terminal CLOSEBRACKET: ']';
+terminal DOUBLEQUOTE: '"';
+terminal OPENTRIANGLE: '<';
+terminal CLOSETRIANGLE: '>';
+terminal SERIALIZABLE: '[Serializable]';
+terminal PUBLIC: 'public';
+terminal STRUCT: 'struct';
+terminal CLASS: 'class';
+
+terminal COMPONENTINTERFACE: 'IComponentData';
+terminal COMPONENTMENUATTRIBUTE: 'AddComponentMenu';
+terminal WRAPPER: 'ComponentDataProxy';
+
+terminal FLOAT: 'float';
+terminal FLOAT2: 'float2';
+terminal FLOAT3: 'float3';
+terminal FLOAT4: 'float4';
+terminal VALUE: 'value';
+
+USINGS: SYSTEMLIBRARY? & ENTITIESLIBRARY? & UNITYLIBRARY? & MATHEMATICSLIBRARY?;

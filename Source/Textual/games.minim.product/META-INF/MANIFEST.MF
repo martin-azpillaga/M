@@ -1,9 +1,0 @@
-Manifest-Version: 1.0
-Automatic-Module-Name: games.minim.product
-Bundle-ManifestVersion: 2
-Bundle-Name: Minim product configuration
-Bundle-SymbolicName: games.minim.product;singleton:=true
-Bundle-Version: 1.0.0.qualifier
-Bundle-Vendor: minim.games
-Bundle-RequiredExecutionEnvironment: JavaSE-1.8
-Require-Bundle: org.eclipse.equinox.app
