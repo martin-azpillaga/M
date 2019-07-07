@@ -1,0 +1,7 @@
+The /editor/scripts/blockly.js file is the unmodified source code of the Blockly framework.
+The Blockly framework is distributed under the Apache 2.0 license by Google at https://github.com/google/blockly.
+
+The rest of the files found in this repository have been developed by Martin Azpillaga Aldalur <martin@minim.games>.
+
+In order to run the release code, the project depends on the unmodified object form code of the Xtext framework.
+The Xtext framework is distributed under the Eclipse Public License by the Eclipse Foundation at https://github.com/eclipse/xtext.
