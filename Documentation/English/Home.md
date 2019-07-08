@@ -25,7 +25,7 @@ M is built following the philosophy of the excellent quote:
     Thanks to its visual workflow no previous experience in programming is required. You can try the [block editor online](/editor/).
     Programmers can use whatever text editor they like that supports the [language server protocol](/Language-server-protocol.md)
 
-* M is extensible.
+* M is an extension.
 
     The outcome of a game described using M is not a executable game but rather a game project in a game engine.
     integrates with existing tools. Link to Unity.
