@@ -1,88 +1,121 @@
 # M
 
+[English version](/Documentation/English/Home.md) --
+[Versión en castellano](/Documentation/Castellano/Inicio.md) --
+[Euskarazko bertsioa](/Documentation/Euskara/Hasiera.md) 
+
 M is a data oriented programming language for game developers.
 
-It increases the productivity of professionals by reducing both the development and maintenance time of projects, while making the overall process more enjoyable!
+It increases productivity by reducing the development *and* maintenance time of projects while making the overall process more enjoyable.
 
-M is built following the philosophy of the excellent quote:
+The philosophy behind the project can be summarized by the excellent quote:
 
->Everything should be as simple as it can be, but no simpler.
->
->Albert Einstain [?](https://quoteinvestigator.com/2011/05/13/einstein-simple/)
+>Everything should be as simple as it can be, but no simpler
 
 ## Key features
 
-* M is data oriented.
+* **M is data oriented**
 
-    M encourages data oriented design natively. A programming paradigm that has proven to be specially well suited for developing games.
+    M encourages data oriented design by default, a programming paradigm proven to be specially well suited for game development.
 
-    This improves the overall performance by and flexibility of the project. Learn more about data oriented design in the [Link to data oriented design summary](gitlink).
+    This improves the overall performance and flexibility of the project.  [Learn why](/Documentation/English/Data-oriented-design.md).
 
-* M involves the entire team.
+* **M is not just for programmers**
 
-    M is not only for programmers. If you are an artist, a designer or a project manager, you can leverage M to better communicate your ideas across your team.
+     Programmers will feel at home with a C-like syntax that can be edited using any editor that implements the [language server protocol](/Documentation/English/Language-server-protocol.md).
 
-    Thanks to its visual workflow no previous experience in programming is required. You can try the [block editor online](/editor/).
-    Programmers can use whatever text editor they like that supports the [language server protocol](/Language-server-protocol.md)
+    Artists, designers and project managers might prefer the block based [online visual editor](/Visual-editor/).
 
-* M is an extension.
+    Moreover, all these interfaces can be seamlessly [combined](/Documentation/English/Combining-interfaces.md) allowing everyone to communicate their ideas better, across the entire team.
 
-    The outcome of a game described using M is not a executable game but rather a game project in a game engine.
-    integrates with existing tools. Link to Unity.
+* **M integrates in your workflow**
 
-    If there is something you would like to modify or add just modify the resulting project. For example, M includes the integration with the Unity game engine.
+    M does *not* compile the code down to an executable game. Instead, it generates a high quality project using the [game engine of your choice](/Documentation/English/Game-engine-support.md).
+
+    Everyone can inspect the generated code, tweak values and import custom art pieces made in their favorite digital content creation suites.
+
+    M does not compete with the tools you know and love. It provides you with an additional one that will, most likely, improve your development journey.
+
+---
 
 ## Get started
 
-You can interact with M using its visual or textual editor.
+The fastest way to start is by using the custom  standalone editor.
 
-* Textual editor workflow: Head to the releases and download the [latest standalone editor](gitlink). It requires no installation, extract it and you can start playing with it.
+1. Download the [latest standalone editor](https://github.com/martin-azpillaga/M/releases). It requires no installation, just extract the folder and run the executable.
 
-```m
-    ball has mass 10 position 1 2.
-```
+2. Click on new project, name it HelloM and select the Text, Blocks and Hybrid Unity interfaces.
 
-* Visual Editor workflow: You can try a Scratch-like block editor online for free at [the editor's page](/editor/) and play around with blocks. For example, you could try recreating the following entity using the blocks under the Entities and Components menu:
+3. Open the `HelloM/Text/main.text` file and create an entity like so:
 
-```m
-    ball has mass 10 position 1 2.
-```
+    ```m
+        ball has mass 10, position 1 2 and appearance sprite.ball.
+    ```
+
+4. Save the file. Congratulations, you can find the generated project inside the Hybrid Unity folder -might require a refresh-.
+
+Optionally, you might want to try the block based
+[online editor](/Visual-editor/).
+
+1. Hit the load button and open the generated `HelloM/Blocks/main.blocks` file.  
+
+2. Try adding a component named friction with value 10 using the Numeric menu.
+
+3. Hit the save button and override the `HelloM/Blocks/main.blocks` with the downloaded file.
+
+4. Save the file. Both the Text and Hybrid Unity interfaces will synchronize to the new changes.
 
 ## Become an expert
 
-You can become an export in M within a week thanks to its documentation. Just head to [online documentation page](/documentation/en/home.md) and discover all its benefits with your own hands.
+You can become an expert in M within a week by reading its thorough  
+[documentation](/Documentation/English/Index.md).
 
-Alternatively, you can [download the pdf version](pdflink) for offline reading.
+If you are new to data oriented design, it is recommended that first you go through the 
+[key concepts](/Documentation/English/Data-oriented-design.md) 
+and then continue with the specific 
+[implementation of M](/Documentation/English/Api.md).
 
-You can also get inspiration by inspecting the [example projects](examplesgitlink) hosted in this repository.
+Additionally, you can get inspiration from the
+[example projects](https://github.com/martin-azpillaga/M/tree/gh-pages/Examples)
+hosted in this repository.
+
+---
 
 ## Project status
 
-The project M has been in active development for two years with over 3000 hours of research and development time.
+The project M has been in active development since mid 2017 with over 4000 hours of research and development as of mid 2019.
 
- and will continue being developed.
+The project has gone through [several versions](https://github.com/martin-azpillaga/M/releases) and is slowly but steadily reaching a mature state of stability and feature completeness.
 
-and has over 3000 hours of research and development invested in it. although it has oly become part of github since mid 2019.
+There are still some [hard challenges](https://github.com/martin-azpillaga/M/issues) to overcome and generally a lot of polishing to do before considering the project production ready.
 
-The project is still in continuous developmnet. Stay tuned about the next planned features by checking the public [kanban project](gitlink).
+The project started to be hosted in Github since mid 2019, so previous history is not present online. Since then, anyone can stay tuned about the next planned features by checking the
+[kanban project](https://github.com/martin-azpillaga/M/projects/1).
 
 ## Help make M even better
 
-If you enjoy the project you can help its development in many ways.
+If you enjoy the project you can help its development by contributing, sharing and donating.
 
-The easiest way to contribute is by creating an issue, whether its a bug report or a feature request in this same repository. You can inspect current issues and create a new one [in the issues tab](gitlink).
+The easiest way to contribute is by 
+[creating an issue](https://github.com/martin-azpillaga/M/issues), both bug reports and feature requests are welcome.
 
-If you are a developer and want to help extending M, request access to the private repository where the source code is hosted by contacting [Martin](gitlink) and follow the standard pull request workflow.
-For full documentation of the language and workflow API please visit [the wiki](gitlink).
+If you are a developer and want to help extending M, you can request access to the private repository where the source code is hosted by contacting the author <martin@minim.games>.
+The full documentation of the internal language and workflow API will be available in [the wiki](https://github.com/martin-azpillaga/MSource/wiki).
 
 Finally, you can help this project succeed by donating any amount using GitHub's built-in sponsorship feature. Just click the sponsor heart button above. All the recaudation will be used exclusively in the development costs of the project.
 
+---
+
 ## Authors and licensing
 
-This project has been developed with love by Martin Azpillaga Aldalur, a software tool developer and mathematician. You can find his Github profile can be found at [his homepage](gitlink).
+This project has been developed with love by [Martin Azpillaga Aldalur](https://martin-azpillaga.github.io/), a software tool developer and mathematician.
 
-The language implementation would be impossible without the Xtext framework developed by the Eclipse foundation at [github repository](gitlink).
-The Xtext framework is distributed under the Eclipse public license.
+The language implementation would be impossible without the [Xtext framework](https://github.com/eclipse/xtext) developed by the Eclipse foundation.
+The Xtext framework is distributed under the [Eclipse Public License 1.0](https://www.eclipse.org/legal/epl-v10.html).
 
-The visual editor uses the Blockly framework developed by Google at [github repository](gitlink).
-The Blockly framework is distributed under the Apache 2.0 license.
+The online and standalone editors are powered by the 
+[Theia framework](https://www.theia-ide.org)
+developed by TypeFox. Theia is licensed under the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
+
+The visual editor uses the [Blockly framework](https://github.com/google/blockly) developed by Google.
+The Blockly framework is distributed under the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
