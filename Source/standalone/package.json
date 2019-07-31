@@ -1,0 +1,60 @@
+{
+  "private": true,
+  "name": "standalone-app",
+  "version": "0.1.0",
+  "dependencies": {
+    "@theia/callhierarchy": "next",
+    "@theia/core": "next",
+    "@theia/cpp": "next",
+    "@theia/editor": "next",
+    "@theia/file-search": "next",
+    "@theia/filesystem": "next",
+    "@theia/git": "next",
+    "@theia/java": "next",
+    "@theia/keymaps": "next",
+    "@theia/languages": "next",
+    "@theia/markers": "next",
+    "@theia/merge-conflicts": "next",
+    "@theia/messages": "next",
+    "@theia/metrics": "next",
+    "@theia/monaco": "next",
+    "@theia/navigator": "next",
+    "@theia/outline-view": "next",
+    "@theia/output": "next",
+    "@theia/preferences": "next",
+    "@theia/preview": "next",
+    "@theia/process": "next",
+    "@theia/python": "next",
+    "@theia/search-in-workspace": "next",
+    "@theia/task": "next",
+    "@theia/terminal": "next",
+    "@theia/typescript": "next",
+    "@theia/userstorage": "next",
+    "@theia/workspace": "next",
+    "@theia/xtext-dsl-extension": "file:../xtext-dsl-extension",
+    "@theia/electron": "next",
+    "yargs": "^9.0.1",
+    "xterm": "^2.9.2"
+  },
+  "devDependencies": {
+    "@theia/cli": "next",
+    "electron-builder": "^19.30.2"
+  },
+  "scripts": {
+    "prepare": "theia build",    
+    "start": "theia start ./../example-workspace",
+    "watch": "theia build --watch",
+    "build": "theia build",
+    "package": "yarn run build && electron-builder",
+    "package:all": "yarn run build && electron-builder -lmw"
+  },
+  "theia": {
+    "target": "electron"
+  },
+  "main": "src-gen/frontend/electron-main.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theia-ide/yangster-electron.git"
+  },
+  "author": "martin <martin@minim.games>"
+}
