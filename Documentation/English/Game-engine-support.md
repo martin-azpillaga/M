@@ -11,36 +11,52 @@ The following properties of built-in components are supported:
     * Position
     * Rotation
     * Scale
-    * ScreenPosition
   
 * Rendering
     * 2D
         * Sprite
         * Material
+        * Sorting order
 
     * 3D
         * Mesh
         * Material
 
     * Camera
-        * Field of view
+        * View angle
+        * View distance
         * Orthographic
         * Near and far planes
+        * Clear color
+        * Perspective
 
     * UI
         * Text
         * Font
+        * Image
+        * Button
+        * Canvas
+        * Canvas scaler
+    * Lighting
+        * Emission
+        * Intensity
+        * Range
+        * Angle
 
 * Physics
     * Colliders
         * Extents
         * Radius
+        * Ray
+    * Kinematics
+        * Velocity
+        * Acceleration
+        * Force
   
     * Rigidbodies
         * Mass
         * Friction
         * Restitution
-        * Kinematic 
         * Body
 
 * Time
@@ -55,7 +71,7 @@ The following properties of built-in components are supported:
     * Gamepad
 
 * Audio
-    * Audio Listener
+    * Ears
     * Audio Source
         * Clip
         * Volume
