@@ -1,7 +1,21 @@
-The /editor/scripts/blockly.js file is the unmodified source code of the Blockly framework.
-The Blockly framework is distributed under the Apache 2.0 license by Google at https://github.com/google/blockly.
 
-The rest of the files found in this repository have been developed by Martin Azpillaga Aldalur <martin@minim.games>.
+This project has been developed with love by 
+[Martin Azpillaga Aldalur](https://martin-azpillaga.github.io/).
 
-In order to run the release code, the project depends on the unmodified object form code of the Xtext framework.
-The Xtext framework is distributed under the Eclipse Public License by the Eclipse Foundation at https://github.com/eclipse/xtext.
+The language implementation would be impossible without the 
+[Xtext framework](https://github.com/eclipse/xtext) 
+developed by the Eclipse foundation.
+The Xtext framework is distributed under the 
+[Eclipse Public License 1.0](https://www.eclipse.org/legal/epl-v10.html).
+
+The online and standalone editors are powered by the 
+[Theia framework](https://www.theia-ide.org)
+developed by TypeFox. 
+Theia is licensed under the 
+[Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).
+
+The visual editor utilizes the 
+[Blockly framework](https://github.com/google/blockly) 
+developed by Google.
+The Blockly framework is distributed under the 
+[Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0).

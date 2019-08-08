@@ -1,37 +1,86 @@
-ball has
-position 0 0, scale 2 2, appearance sprite.ball,
-mass 1, radius 0.5, restitution 1, category [balls],
-speed_up_sensor detect [paddles], respawn_sensor detect [goals],
-servable_tag, respawn_point 0 0, angle -1 1, length 10 20, physical.
+ball inside playground
+{
+	position 0 0, scale 2 2, appearance sprite.ball,
+	mass 1, radius 0.5, restitution 1, body, category ball,
+	servable_tag, respawn_point 0 0, angle -1 1, length 10 20
+}
 
-paddle has
-position 0 0, scale 4 10, appearance sprite.paddle, category [paddles],
-extent 1 1, restitution 1, velocity 0 0,
-motion gamepad.leftY, direction 0 15, physical.
+paddle
+{
+	position 0 0, scale 4 10, appearance sprite.paddle, 
+	category paddle, body, extent 1 1, restitution 1,
+	motion gamepad.leftY, direction 0 15
+}
 
-goal has
-position 0 0, scale 2 100, appearance sprite.goal,
-extent 1 1, restitution 1, category [goals],
-score_sensor detect [balls], team [red], worth 1, effect entity.audioEffect.
+speedUp in playground
+{
+	ball - paddle
+}
 
-wall has
-position 0 0, scale 100 2, appearance sprite.wall,
-extent 1 1, restitution 1, physical sortingorder 40.
+respawn in playground
+{
+	ball - goal
+}
 
-board has maximum 10, position 0 0, scale 5 10,
-team [red], scene entity.menu, number 0.
+score in playground
+{
+	goal - ball
+}
 
-audioEffect has
-audiosource audio.yay, lifetime 5s.
+count
+{
+	redGoal - redScore,
+	blueGoal - blueScore
+}
 
-player has rotation 0 0 10,
-viewDistance 1000, viewAngle 50, position 0 0, clearColor 0.5 0.5 0.5 1.
 
-hud has 
-canvas 100 100 contains
-	left_board based on board has team [blue], position -25 40.
-	right_board based on board has team [red], position 25 40.
-.
+
+goal
+{
+	position 0 0, scale 2 100, appearance sprite.goal,
+	extent 1 1, restitution 1, category goal,
+	worth 1, effect entity.audioEffect
+}
+
+wall
+{
+	position 0 0, scale 100 2, appearance sprite.wall, sortingorder 40,
+	body, extent 1 1, restitution 1
+}
+
+board 
+{
+	position 0 0, scale 5 10, number 0
+	maximum 10, scene entity.menu.
+}
+
+audioEffect
+{
+	audiosource audio.yay, 
+	lifetime 5s
+}
+
+
+player
+{
+	position 0 0, viewDistance 1000, viewAngle 50, clearColor 0.5 0.5 0.5 1
+}
+
+
+hud
+{
+	canvas 100 100
+}
+
+left_board in canvas based on board
+{
+	category redBoard, position -25 40
+}
+right_board in canvas based on board
+{
+	category blueBoard, position 25 40
+}
+
 
 playground contains
 	ball based on ball.
@@ -54,15 +103,14 @@ menu contains
 	player based on player.
 .
 
-
 start:
-for all entity a with triggered detector
+for all a,b related by transition satisfying a triggered detector
 {
-	for all entity b
+	for all entity c
 	{
-		destroy(b)
+		destroy(c)
 	}
-	create(a.scene)
+	create(b)
 }
 
 move:
