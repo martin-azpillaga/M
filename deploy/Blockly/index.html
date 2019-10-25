@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <title>M editor</title>
+
+  <link rel="stylesheet" href="styles/index.css">
+
+  <script src="scripts/blockly.js"></script>
+  <script src="scripts/blocks.js"></script>
+  
+</head>
+
+<body>
+
+  <header>
+    <button id="load-button">Load</button>
+    <span id="title">Hosted at <a href="https://github.com/martin-azpillaga/M" target="_blank">Github</a> by Martin Azpillaga</span>
+    <button id="save-button">Save</button>
+  </header>
+
+  <section>  
+    <div id="blocklyDiv"></div>
+  </section>
+
+  <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
+    <category name="Entities" colour="#5b67a5">
+      <block type="entity">
+        <field name="name">name</field>
+      </block>
+      <block type="tagcomponent">
+        <field name="name">name</field>
+      </block>
+      <block type="valuedcomponent">
+        <field name="name">name</field>
+      </block>
+      <block type="real1value">
+        <field name="x">0</field>
+      </block>
+      <block type="real2value">
+        <field name="x">0</field>
+        <field name="y">0</field>
+      </block>
+      <block type="real3value">
+        <field name="x">0</field>
+        <field name="y">0</field>
+        <field name="z">0</field>
+      </block>
+      <block type="real4value">
+        <field name="x">0</field>
+        <field name="y">0</field>
+        <field name="z">0</field>
+        <field name="w">0</field>
+      </block>
+      <block type="wordvalue">
+        <field name="name">asset name</field>
+      </block>
+    </category>
+    <category name="Systems" colour="#5ba55b">
+      <block type="system">
+        <field name="name">name</field>
+      </block>
+      <block type="loop">
+        <field name="entity">entity</field>
+      </block>
+      <block type="branch"></block>
+      <block type="assignment">
+        <field name="type">set</field>
+      </block>
+      <block type="converttocommand"></block>
+    </category>
+    <category name="Expressions" colour="#5ba58c">
+      <block type="access1">
+        <field name="a">a</field>
+      </block>
+      <block type="access2">
+        <field name="a">a</field>
+        <field name="b">b</field>
+      </block>
+      <block type="access3">
+        <field name="a">a</field>
+        <field name="b">b</field>
+        <field name="c">c</field>
+      </block>
+      <block type="binaryexpression">
+        <field name="operation">plus</field>
+      </block>
+      <block type="unaryexpression">
+        <field name="operation">not</field>
+      </block>
+      <block type="brackets"/>
+    </category>
+    <category name="Calls" colour="#745ba5">
+      <block type="add"></block>
+      <block type="remove"></block>
+      <block type="join2"></block>
+      <block type="join3"></block>
+      <block type="join4"></block>
+      <block type="random"></block>
+      <block type="create"></block>
+      <block type="destroy"></block>
+      <block type="mathfunction">
+        <field name="name">sin</field>
+      </block>
+      <block type="has"></block>
+    </category>
+  </xml>
+  
+  <input id="uploaded-input" type="file"/>
+  <script src="scripts/index.js"></script>
+
+</body>
+</html>

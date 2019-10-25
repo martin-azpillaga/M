@@ -1,0 +1,27 @@
+grammar m.Json hidden(WHITE_SPACE)
+
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+
+generate json "http://www.Json.m"
+
+Object: {Object}
+	'{' (fields+=Field (',' fields+=Field)*)? '}'
+;
+
+Field: name=STRING ':' value=Value;
+
+Value: Object|Array|StringValue|FloatValue|LongValue|BooleanValue;
+
+Array: {Array} '[' (elements+=Value (',' elements+=Value)*)? ']';
+
+StringValue: value=STRING;
+FloatValue: value=FLOAT;
+LongValue: value=LONG;
+BooleanValue: value=Boolean;
+
+enum Boolean: TRUE='true'|FALSE='false';
+terminal LONG returns ecore::ELong: '-'? '0'..'9'+;
+terminal FLOAT returns ecore::EFloat: '-'? ('0'..'9')* '.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?;
+terminal STRING: '"' ( !('"') )* '"';
+terminal WHITE_SPACE: (' '|'\t'|'\r'|'\n')+;
+terminal ID: ('0'..'9'|'a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'.'|'-')*;

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+	<extension point="org.eclipse.emf.ecore.generated_package">
+		<package 
+			uri = "http://www.minim.games/M"
+			class = "m.m.MPackage"
+			genModel = "model/generated/M.genmodel" />
+	</extension>
+	<extension point="org.eclipse.emf.ecore.generated_package">
+		<package 
+			uri = "http://www.minim.games/CBlocks"
+			class = "m.cBlocks.CBlocksPackage"
+			genModel = "model/generated/Blocks.genmodel" />
+	</extension>
+	<extension point="org.eclipse.emf.ecore.generated_package">
+		<package 
+			uri = "http://www.YAML.m"
+			class = "m.yaml.YamlPackage"
+			genModel = "model/generated/YAML.genmodel" />
+	</extension>
+	<extension point="org.eclipse.emf.ecore.generated_package">
+		<package 
+			uri = "http://www.CS.m"
+			class = "m.cs.CsPackage"
+			genModel = "model/generated/CS.genmodel" />
+	</extension>
+	<extension point="org.eclipse.emf.ecore.generated_package">
+		<package 
+			uri = "http://www.Json.m"
+			class = "m.json.JsonPackage"
+			genModel = "model/generated/Json.genmodel" />
+	</extension>
+</plugin>

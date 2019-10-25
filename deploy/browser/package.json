@@ -1,0 +1,38 @@
+{
+    "engines": 
+    {
+      "node": "10.x",
+      "yarn": "1.x"
+    },
+    "dependencies": 
+    {
+      "typescript": "latest",
+      "@theia/typescript": "next",
+      "@theia/navigator": "next",
+      "@theia/terminal": "next",
+      "@theia/outline-view": "next",
+      "@theia/preferences": "next",
+      "@theia/messages": "next",
+      "@theia/git": "next",
+      "@theia/file-search": "next",
+      "@theia/markers": "next",
+      "@theia/preview": "next",
+      "@theia/callhierarchy": "next",
+      "@theia/merge-conflicts": "next",
+      "@theia/search-in-workspace": "next",
+      "@theia/json": "next",
+      "@theia/textmate-grammars": "next",
+      "@theia/mini-browser": "next",
+      "@theia/xtext-dsl-extension": "git+https://github.com/martin-azpillaga/Cflat-extension.git#19f72013af3bea3c120bf965142ac69bcb8f61ae"
+    },
+    "devDependencies":
+    {
+      "@theia/cli": "next"
+      
+    },
+    "scripts": 
+    {
+      "prepare": "theia build",
+      "start": "theia start ./workspace"
+    }
+  }
