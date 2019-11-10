@@ -1,4 +1,11 @@
-.gradle/
-.metadata/
-build/
-Documentation/
+.*
+m.ui
+bin
+META-INF
+model
+build.properties
+plugin.xml
+plugin.xml_gen
+src-gen
+xtend-gen
+*Setup.xtend
