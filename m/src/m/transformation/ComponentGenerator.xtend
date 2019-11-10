@@ -29,8 +29,7 @@ class ComponentGenerator
 	
 	def extensions(Game game, IFileSystemAccess2 fsa)
 	{
-		//extendedText(fsa)
-		//extendedNumber: its value is a float and updates the text when it gets modified
+
 	}
 	
 	def extendedText(IFileSystemAccess2 fsa)
@@ -179,8 +178,6 @@ class ComponentGenerator
 	def convert(String name, Type type)
 	{
 		var file = createFile
-		
-		//file.addUsings(type)
 		
 		usings = new HashSet<QualifiedName>
 		

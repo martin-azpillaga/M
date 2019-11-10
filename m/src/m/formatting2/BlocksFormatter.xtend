@@ -44,6 +44,4 @@ class BlocksFormatter extends AbstractFormatter2
 	{
 		attribute.regionFor.keyword('=').surround[noSpace]
 	}
-	
-	// TODO: implement for Component, System, Loop, Branch, Condition, Assignment, Call, Or, And, Not, Comparison, Bitwise, BitwiseNegate, ArithmeticBrackets, Plus, Minus, Times, Divide, Modulus, Increment, Decrement
 }

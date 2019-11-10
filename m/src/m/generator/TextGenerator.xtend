@@ -36,7 +36,7 @@ class TextGenerator extends AbstractGenerator
 		types = typeInference.infer(game)
 		
 		fsa.generateFile('src-gen/'+game.entities.size+ ' entities.done','')
-		/*
+		
 		var game = MFactory.eINSTANCE.createGame
 		
 		for (r : resource.resourceSet.resources)
@@ -91,14 +91,13 @@ class TextGenerator extends AbstractGenerator
 		var stopTime = System.currentTimeMillis();
 		var runTime = stopTime - startTime;
 		System.out.println("Prepare time: " + runTime);
-		*/
+		
 		if (types.keySet.size > 0)
 		{
 			
 			var componentGenerator = new ComponentGenerator
 			componentGenerator.generate(types, fsa)
 			componentGenerator.metaFiles(types, fsa)
-			//componentGenerator.extensions(game, fsa)
 			
 			var jsonGenerator = new PackageGenerator
 			jsonGenerator.generate(game, fsa)
@@ -127,9 +126,8 @@ class TextGenerator extends AbstractGenerator
 						
 			generate(game, new TextRuntimeModule, fsa, 'Text/'+resource.URI.lastSegment)
 		}
-		/*
 		stopTime = System.currentTimeMillis();
 		runTime = stopTime - startTime;
-		System.out.println("Run time: " + runTime);*/
+		System.out.println("Run time: " + runTime);
 	}
 }

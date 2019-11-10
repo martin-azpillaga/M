@@ -37,7 +37,7 @@ class BlocksToText
 			}
 			else if (type == 'system')
 			{
-				//game.systems.add(element.compileSystem)
+				
 			}
 		}
 		

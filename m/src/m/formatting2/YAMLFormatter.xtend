@@ -56,9 +56,6 @@ class YAMLFormatter extends AbstractFormatter2
 	
 	def dispatch format(Map map, extension IFormattableDocument e)
 	{
-		//var open = map.regionFor.ruleCall(mapAccess.BEGINTerminalRuleCall_3)
-		//var close = map.regionFor.ruleCall(mapAccess.ENDTerminalRuleCall_7)
-		//interior(open, close)[indent]
 		map.prepend[noSpace]
 		map.regionFor.keyword(':').surround[noSpace]
 		
@@ -90,59 +87,4 @@ class YAMLFormatter extends AbstractFormatter2
 		keyValueList.regionFor.ruleCall(keyValueListAccess.SPACETerminalRuleCall_4).surround[noSpace]
 		keyValueList.regionFor.ruleCalls(keyValueListAccess.SPACETerminalRuleCall_6_2).forEach[surround[noSpace]]
 	}
-	/*
-	def dispatch format(Version version, extension IFormattableDocument document)
-	{
-		version.regionFor.keyword('.').surround[noSpace]
-	}
-	
-	def dispatch format(Document document, extension IFormattableDocument e)
-	{
-		document.regionFor.assignment(documentAccess.tagAssignment_2_1).prepend[noSpace]
-		document.id.prepend[noSpace]
-		document.value.prepend[newLine]
-		document.value.format
-	}
-	
-	def dispatch format(Map map, extension IFormattableDocument e)
-	{
-		map.regionFor.keyword(':').prepend[noSpace]
-		indent+='  '
-		for (value : map.body)
-		{
-			value.prepend[space='\n'+indent]
-			value.format
-		}
-		indent = indent.substring(0, indent.length - 2)
-	}
-	
-	def dispatch format(List list, extension IFormattableDocument e)
-	{
-		list.regionFor.keyword(':').prepend[noSpace]
-		list.regionFor.keywords('-').forEach[prepend[space='\n'+indent]]
-		for (value : list.values)
-		{
-			value.format
-		}
-	}
-	
-	def dispatch format(KeyValue kv, extension IFormattableDocument e)
-	{
-		kv.regionFor.keyword(': ').surround[noSpace]
-		kv.value.format
-	}
-	
-	def dispatch format(Guid guid, extension IFormattableDocument e)
-	{
-		guid.regionFor.assignment(guidAccess.NAssignment_1).append[noSpace]
-	}
-	
-	def dispatch format(InlineMap map, extension IFormattableDocument e)
-	{
-		map.regionFor.keywords(',').forEach[prepend[noSpace]]
-		for (value : map.values)
-		{
-			value.format
-		}
-	}*/
 }

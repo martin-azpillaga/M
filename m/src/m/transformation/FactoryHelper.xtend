@@ -23,7 +23,6 @@ class FactoryHelper
 	extension YamlFactory yaml = YamlFactory.eINSTANCE
 	extension CsFactory csharp = CsFactory.eINSTANCE
 	extension JsonFactory json = JsonFactory.eINSTANCE
-	//extension TextFactory text = TextFactory.eINSTANCE
 	
 	static FactoryHelper instance
 	

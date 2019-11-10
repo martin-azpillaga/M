@@ -78,8 +78,6 @@ class SystemGenerator
 		meta.nodes.add('guid', ('Contacts'+'system').uuid)
 		
 		generate(meta, yamlModule, fsa, 'Pure Unity/Assets/Code/Systems/Contacts.cs.meta')
-		//var entryPoint = entryPoint(game.systems)
-		//generate(entryPoint, csharp, fsa, 'Hybrid Unity/Assets/Code/Systems/Main.cs')
 	}
 	
 	def entryPoint(List<System> systems)
