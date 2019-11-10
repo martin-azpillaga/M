@@ -90,7 +90,7 @@ task generateXtextLanguage(type: JavaExec) {
 generateXtext.dependsOn(generateXtextLanguage)
 clean.dependsOn(cleanGenerateXtextLanguage)
 eclipse.classpath.plusConfigurations += [configurations.mwe2]
-//this is an eclipse plugin project
+
 eclipseClasspath.enabled=false
 cleanEclipseClasspath.enabled=false
 
@@ -116,6 +116,6 @@ shadowJar {
 	classifier = 'ls'
 	append('plugin.properties')
 }
-//this is an eclipse plugin project
+
 eclipseClasspath.enabled=false
 cleanEclipseClasspath.enabled=false

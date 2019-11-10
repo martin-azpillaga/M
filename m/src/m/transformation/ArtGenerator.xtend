@@ -30,8 +30,8 @@ class ArtGenerator
 		var sprites = new HashSet<String>
 		var audioClips = new HashSet<String>
 		var meshes = new HashSet<String>
-		//var materials = new HashSet<String>
-		//var fonts = new HashSet<String>
+		var materials = new HashSet<String>
+		var fonts = new HashSet<String>
 		var texts = new HashSet<String>
 		
 		for (entity : game.entities)
@@ -140,7 +140,7 @@ class ArtGenerator
 		{
 			var hz = 44100;
 			var bps = 16;
-			var rescaleFactor = 0x7FFF; //to convert float to Int16
+			var rescaleFactor = 0x7FFF;
 			var header = 36;
 			var channels = 1;
 			var format = 1;

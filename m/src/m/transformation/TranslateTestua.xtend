@@ -70,7 +70,7 @@ class TranslateTestua
 		{
 			for (c : s.commands)
 			{
-				//c.translate
+				c.translate
 			}
 		}
 		generate(translation, new TestuaRuntimeModule, fsa, 'Testua/'+name)

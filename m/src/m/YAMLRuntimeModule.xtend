@@ -40,7 +40,7 @@ class MyFormatterPreferences extends FormatterPreferenceValuesProvider
 	override getPreferenceValues(Resource resource) 
 	{
 		val preferenceValues = internalGetRawPreferenceValues(resource);
-		val indent = " "//whitespaceInfo.getIndentationInformation(resource.getURI()).getIndentString();
+		val indent = " "
 		val lineSep = whitespaceInfo.getLineSeparatorInformation(resource.getURI()).getLineSeparator();
 
 		return new IPreferenceValues() {

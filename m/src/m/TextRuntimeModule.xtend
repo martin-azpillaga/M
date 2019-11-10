@@ -21,8 +21,8 @@ class TextRuntimeModule extends AbstractTextRuntimeModule
 
 class OutputFolder extends OutputConfigurationProvider
 {
-	override Set<OutputConfiguration> getOutputConfigurations() {
-		// This IS called! But I don't want or need this one! I need getOutputConfigurations(Resource context) to be called
+	override Set<OutputConfiguration> getOutputConfigurations() 
+	{
 		val OutputConfiguration defaultOutput = new OutputConfiguration(IFileSystemAccess.DEFAULT_OUTPUT);
 		defaultOutput.setDescription("Default Output - Overwrite");
 		defaultOutput.setOutputDirectory(".");
