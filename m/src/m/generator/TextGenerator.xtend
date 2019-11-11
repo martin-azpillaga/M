@@ -20,8 +20,6 @@ import java.util.ArrayList
 import m.m.Component
 import m.TextRuntimeModule
 import static extension m.transformation.GenericSerializer.*
-import m.transformation.BuiltInLibrary
-import org.eclipse.emf.common.util.URI
 import m.transformation.BlockGenerator
 
 class TextGenerator extends AbstractGenerator 
@@ -32,10 +30,7 @@ class TextGenerator extends AbstractGenerator
 		
 		var typeInference = new TypeInference
 		var types = new HashMap<String,Type>
-		var game = resource.contents.head as Game
-		types = typeInference.infer(game)
 		
-		fsa.generateFile('src-gen/'+game.entities.size+ ' entities.done','')
 		
 		var game = MFactory.eINSTANCE.createGame
 		
@@ -52,9 +47,6 @@ class TextGenerator extends AbstractGenerator
 		
 					for (entity : g.entities)
 					{
-						var euskal = #[BuiltInLibrary.position, BuiltInLibrary.rotation].map[euskara]
-						var euska = BuiltInLibrary.renderers.map[euskara]
-						
 						var rendering = new ArrayList<Component>
 						var physics = new ArrayList<Component>
 						var tags = new ArrayList<Component>

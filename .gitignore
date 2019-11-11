@@ -9,3 +9,4 @@ plugin.xml_gen
 src-gen
 xtend-gen
 *Setup.xtend
+*.java
