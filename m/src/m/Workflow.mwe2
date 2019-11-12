@@ -13,9 +13,7 @@ Workflow {
 				baseName = "m"
 				rootPath = rootPath
 				genericIde = {enabled = true}
-				eclipsePlugin = {
-					enabled = false
-				}
+				eclipsePlugin = {enabled = true}
 				createEclipseMetaData = true
 			}
 			code = 
@@ -34,15 +32,9 @@ Workflow {
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
 		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
 		    fragment = validation.ValidatorFragment2 { generateStub = false }
-		    fragment = scoping.ImportNamespacesScopingFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
 		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
-		    fragment = ui.labeling.LabelProviderFragment2 { generateStub = false }
-		    fragment = ui.outline.QuickOutlineFragment2 {}
-		    fragment = ui.outline.OutlineTreeProviderFragment2 { generateStub = false }
-		    fragment = ui.quickfix.QuickfixProviderFragment2 { generateStub = true}
-		    fragment = ui.contentAssist.ContentAssistFragment2 { generateStub = true }
 		}
 		language = XtextGeneratorLanguage 
 		{
@@ -50,20 +42,13 @@ Workflow {
 			fileExtensions = "text"
 			referencedResource = "platform:/resource/m/model/generated/M.genmodel"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
-		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
 		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
 		    fragment = validation.ValidatorFragment2 { generateStub = true }
-		    fragment = scoping.ImportNamespacesScopingFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
-		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=true }
+		    fragment = generator.GeneratorFragment2 { generateStub = true }
 		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
-		    fragment = ui.labeling.LabelProviderFragment2 { generateStub = true }
-		    fragment = ui.outline.QuickOutlineFragment2 {}
-		    fragment = ui.outline.OutlineTreeProviderFragment2 { generateStub = true }
-		    fragment = ui.quickfix.QuickfixProviderFragment2 { generateStub = true}
-		    fragment = ui.contentAssist.ContentAssistFragment2 { generateStub = true }
 		}
 		language = XtextGeneratorLanguage 
 		{
@@ -71,28 +56,21 @@ Workflow {
 			fileExtensions = "testua"
 			referencedResource = "platform:/resource/m/model/generated/M.genmodel"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
-		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
 		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
 		    fragment = validation.ValidatorFragment2 { generateStub = false }
-		    fragment = scoping.ImportNamespacesScopingFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
 		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
 		    fragment = ui.labeling.LabelProviderFragment2 { generateStub = false }
-		    fragment = ui.outline.QuickOutlineFragment2 {}
-		    fragment = ui.outline.OutlineTreeProviderFragment2 { generateStub = false }
-		    fragment = ui.quickfix.QuickfixProviderFragment2 { generateStub = true}
-		    fragment = ui.contentAssist.ContentAssistFragment2 { generateStub = true }
 		}
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.Blocks"
 			fileExtensions = "blocks"
-			referencedResource = "platform:/resource/m/model/generated/M.genmodel"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
-		    fragment = ecore.EMFGeneratorFragment2 {}
+			fragment = ecore.EMFGeneratorFragment2{}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
 		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
@@ -100,12 +78,6 @@ Workflow {
 		    fragment = scoping.ImportNamespacesScopingFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
-		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
-		    fragment = ui.labeling.LabelProviderFragment2 { generateStub = false }
-		    fragment = ui.outline.QuickOutlineFragment2 {}
-		    fragment = ui.outline.OutlineTreeProviderFragment2 { generateStub = false }
-		    fragment = ui.quickfix.QuickfixProviderFragment2 { generateStub = true}
-		    fragment = ui.contentAssist.ContentAssistFragment2 { generateStub = true }
 		}
 		language = XtextGeneratorLanguage 
 		{
@@ -122,10 +94,6 @@ Workflow {
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
 		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
 		    fragment = ui.labeling.LabelProviderFragment2 { generateStub = false }
-		    fragment = ui.outline.QuickOutlineFragment2 {}
-		    fragment = ui.outline.OutlineTreeProviderFragment2 { generateStub = false }
-		    fragment = ui.quickfix.QuickfixProviderFragment2 { generateStub = true}
-		    fragment = ui.contentAssist.ContentAssistFragment2 { generateStub = true }
 		}
 		language = XtextGeneratorLanguage 
 		{
@@ -141,11 +109,6 @@ Workflow {
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
 		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
-		    fragment = ui.labeling.LabelProviderFragment2 { generateStub = false }
-		    fragment = ui.outline.QuickOutlineFragment2 {}
-		    fragment = ui.outline.OutlineTreeProviderFragment2 { generateStub = false }
-		    fragment = ui.quickfix.QuickfixProviderFragment2 { generateStub = true}
-		    fragment = ui.contentAssist.ContentAssistFragment2 { generateStub = true }
 		}
 		language = XtextGeneratorLanguage 
 		{
@@ -161,11 +124,6 @@ Workflow {
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
 		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
-		    fragment = ui.labeling.LabelProviderFragment2 { generateStub = false }
-		    fragment = ui.outline.QuickOutlineFragment2 {}
-		    fragment = ui.outline.OutlineTreeProviderFragment2 { generateStub = false }
-		    fragment = ui.quickfix.QuickfixProviderFragment2 { generateStub = true}
-		    fragment = ui.contentAssist.ContentAssistFragment2 { generateStub = true }
 		}
 	}
 }
