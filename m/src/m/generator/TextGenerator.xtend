@@ -1,26 +1,26 @@
 package m.generator
 
 import m.m.Game
-import m.transformation.ComponentGenerator
-import m.transformation.PackageGenerator
-import m.transformation.SystemGenerator
+import m.instancer.ComponentGenerator
+import m.instancer.PackageGenerator
+import m.instancer.SystemGenerator
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
-import m.transformation.ArtGenerator
-import m.transformation.EntityGenerator
-import m.transformation.SettingsGenerator
-import m.transformation.TypeInference
+import m.instancer.ArtGenerator
+import m.instancer.EntityGenerator
 import java.util.HashMap
-import m.transformation.Type
 import m.m.MFactory
-import m.transformation.TranslateTestua
+import m.instancer.TranslateTestua
 import java.util.ArrayList
 import m.m.Component
 import m.TextRuntimeModule
-import static extension m.transformation.GenericSerializer.*
-import m.transformation.BlockGenerator
+import static extension m.modeler.GenericSerializer.*
+import m.instancer.BlockGenerator
+import m.validation.TypeInference
+import m.validation.Type
+import m.instancer.SettingsGenerator
 
 class TextGenerator extends AbstractGenerator 
 {

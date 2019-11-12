@@ -1,4 +1,4 @@
-package m.transformation
+package m.modeler
 
 import org.eclipse.emf.ecore.EObject
 import com.google.inject.Module
