@@ -1,4 +1,4 @@
-package m.transformation
+package m.validation
 
 import java.util.HashMap
 import java.util.HashSet
@@ -23,7 +23,7 @@ import m.m.And
 import m.m.Not
 import m.m.Comparison
 import m.m.System
-import static m.transformation.Type.*
+import static m.validation.Type.*
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.emf.ecore.EObject
 import m.m.Word
