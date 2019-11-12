@@ -110,13 +110,9 @@ class TextGenerator extends AbstractGenerator
 			var systemGenerator = new SystemGenerator
 			systemGenerator.generate(game, types, fsa)
 			
-			var translateTestua = new TranslateTestua
-			translateTestua.translate(game, fsa, resource.URI.lastSegment.replace('.text','.testua'))
-			
 			var blockGenerator = new BlockGenerator
 			blockGenerator.generate(game, fsa, 'Blocks/')
 						
-			generate(game, new TextRuntimeModule, fsa, 'Text/'+resource.URI.lastSegment)
 		}
 		stopTime = System.currentTimeMillis();
 		runTime = stopTime - startTime;

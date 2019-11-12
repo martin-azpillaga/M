@@ -1,94 +1,19 @@
-grammar m.Text hidden(WHITE_SPACE)
+grammar m.Text with m.M
 
 import "http://www.eclipse.org/emf/2002/Ecore" as ecore
-
 import "http://www.minim.games/M"
 
-
+@Override
 Game:
-	( entities += Entity| systems += System )*
-;
+	(entities+=Entity | systems+=System)*;
 
-Entity:
-	name+=ID+ ( ':' base+=ID+ )?
-	'{' (components+=Component (',' components+=Component)*)? '}' 
-	( '[' (entities+=Entity)* ']')?
-;
+@Override
+Loop:
+	'for' 'all' 'entity' entity=ID ('with' constraints+=ID+)?
+	'{' commands+=Command+ '}';
 
-Component:
-	name=ID	value=Value?
-;
-
-Value: Vector|Word;
-
-Vector: numbers+=REAL+;
-Word: values+=ID+;
-
-
-
-System: name=ID ':' commands+=Command+;
-
-Command: Loop|Branch|Assignment|Call;
-
-Loop: 'for' 'all' 'entity' entity=ID ('with' constraints+=ID+)?
-	  		'{' commands+=Command+ '}';
+@Override
 Branch:
 	'if' if=Condition
-	( 'else' 'if' elseIfs+=Condition )*
-	( 'else' '{' commands+=Command+ '}' )?
-;
-
-Condition:
-	condition=Expression '{' commands+=Command* '}'
-;
-
-Assignment:
-	access=Access type=AssignmentType expression=Expression
-;
-
-Call:
-	name=ID '('  parameters+=Expression (',' parameters+=Expression)* ')'
-;
-
-Access:
-	names+=ID ('.' names+=ID)*
-;
-
-
-Expression:
-  And ({Or.left=current} '||' right=And)*
-;
-And returns Expression:
-  PrimaryB ({And.left=current} '&&' right=PrimaryB)*
-;
-PrimaryB returns Expression:
-   AtomicB | {Not} '!' expression=AtomicB
-;
-AtomicB returns Expression:
-	Addition ({Comparison.left=current} type=RelationType right=Addition)?
-;
-Addition returns Expression:
-  Multiplication (({Plus.left=current} '+'|{Minus.left=current} '-') right=Multiplication)*
-;
-Multiplication returns Expression:
-  Bitwise (({Times.left=current} '*'|{Divide.left=current}'/'|{Modulus.left=current}'%') right=Bitwise)*
-;
-Bitwise returns Expression:
-	Unary ({Bitwise.left=current} op=('&'|'|'|'^'|'<<'|'>>') right=Unary)*
-;
-Unary returns Expression:
-	{BitwiseNegate} '~' expression=Primary 
-	| Primary ({Increment.expression=current} '++'|{Decrement.expression=current}'--')?
-;
-Primary returns Expression:
-  Access | Call | {Brackets}'(' expression=Expression ')'
-;
-
-
-
-enum RelationType: over='>'|under='<'|equal='='|notequal='!='|overorequal='>='|underorequal='<=';
-enum AssignmentType: set='='|increase='+='|decrease='-='|multiply='*='|divide='/='|modulus='%='|and='&='|or='|='|xor='^='|shiftLeft='<<='|shiftRight='>>=';
-
-terminal WHITE_SPACE: (' '|'\t'|'\r'|'\n')+;
-terminal ID: ('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
-terminal REAL returns ecore::EFloat: '-'? ('0'..'9')* ('.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?)?;
+	('else' 'if' elseIfs+=Condition)*
+	('else' '{' commands+=Command+ '}')?;
