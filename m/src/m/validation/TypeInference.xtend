@@ -30,6 +30,7 @@ import m.m.Word
 import m.m.Assignment
 import m.m.Brackets
 import m.m.Expression
+import org.eclipse.emf.common.util.EList
 
 enum Type
 {

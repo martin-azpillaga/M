@@ -150,8 +150,8 @@ enum RelationType: over='>'|under='<'|equal='=='|notequal='!='|overorequal='>='|
 enum AssignmentType: set='='|increase='+='|decrease='-='|multiply='*='|divide='/='|modulus='%='|and='&='|or='|=';
 
 terminal ID: '^'?('a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
-terminal LONG returns ecore::ELong: '-'? '0'..'9'+;
-terminal FLOAT returns ecore::EFloat: '-'? ('0'..'9')* '.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?;
+terminal LONG: '-'? '0'..'9'+;
+terminal FLOAT: '-'? ('0'..'9')* '.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?;
 
 terminal STRING:
 			'"' ( '\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\'|'"') )* '"' |

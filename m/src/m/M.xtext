@@ -18,7 +18,7 @@ Value:
 	Vector | Word;
 
 Vector:
-	numbers+=REAL+;
+	numbers+=NUMBER+;
 
 Word:
 	values+=ID+;
@@ -91,5 +91,5 @@ terminal WHITE_SPACE:
 terminal ID:
 	('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*;
 
-terminal REAL returns ecore::EFloat:
+terminal NUMBER:
 	'-'? ('0'..'9')* ('.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?)?;

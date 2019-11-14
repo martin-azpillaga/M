@@ -1,37 +1,36 @@
 package m.instancer
 
-
-import static extension m.modeler.GenericSerializer.*
-import m.TestuaRuntimeModule
-import m.m.Loop
-import m.m.Branch
-import m.m.Assignment
-import m.m.Call
 import java.util.ArrayList
-import m.m.Command
-import m.m.Expression
+import m.TestuaRuntimeModule
+import m.m.Access
 import m.m.And
-import m.m.Or
-import m.m.Not
-import m.m.Comparison
-import m.m.Plus
-import m.m.Minus
-import m.m.Times
-import m.m.Divide
+import m.m.Assignment
 import m.m.Bitwise
 import m.m.BitwiseNegate
-import m.m.Increment
-import m.m.Decrement
 import m.m.Brackets
-import m.m.Access
+import m.m.Branch
+import m.m.Call
+import m.m.Command
+import m.m.Comparison
+import m.m.Decrement
+import m.m.Divide
+import m.m.Expression
 import m.m.Game
-import org.eclipse.xtext.generator.IFileSystemAccess2
+import m.m.Increment
+import m.m.Loop
 import m.m.MFactory
-import m.m.Component
+import m.m.Minus
+import m.m.Not
+import m.m.Or
+import m.m.Plus
+import m.m.Times
 import m.m.Vector
 import m.m.Word
+import org.eclipse.xtext.generator.IFileSystemAccess2
 
-class TranslateTestua 
+import static m.modeler.GenericSerializer.*
+
+class TestuaInstancer 
 {
 	extension MFactory factory = MFactory.eINSTANCE
 	

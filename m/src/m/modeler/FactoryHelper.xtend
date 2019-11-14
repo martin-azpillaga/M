@@ -9,7 +9,6 @@ import m.cs.File
 import m.cs.Access
 import m.cs.TypeName
 import m.cs.Expression
-import m.cs.Initialization
 import m.cs.QualifiedName
 import m.m.AssignmentType
 import static m.cs.AssignmentType.*
@@ -43,7 +42,7 @@ class FactoryHelper
 		var keyValue = createKeyValue
 		keyValue.key = key
 		var floatValue = yaml.createFloat
-		floatValue.value = value
+		floatValue.value = value.toString
 		keyValue.value = floatValue
 		list.add(keyValue)
 	}
@@ -87,7 +86,7 @@ class FactoryHelper
 			var entry = createKeyValue
 			entry.key = k
 			var entryValue = yaml.createFloat
-			entryValue.value = map.get(k)
+			entryValue.value = map.get(k).toString
 			entry.value = entryValue
 			value.values.add(entry)
 		}
@@ -157,7 +156,7 @@ class FactoryHelper
 	def yaml(float n)
 	{
 		var number = yaml.createFloat
-		number.value = n
+		number.value = n.toString
 		return number
 	}
 	
@@ -471,14 +470,14 @@ class FactoryHelper
 	def number(float number)
 	{
 		var literal = csharp.createFloat
-		literal.value = number
+		literal.value = number.toString
 		return literal
 	}
 	
 	def number(long number)
 	{
 		var literal = csharp.createLong
-		literal.value = number
+		literal.value = number.toString
 		return literal
 	}
 	
