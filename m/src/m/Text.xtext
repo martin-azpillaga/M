@@ -9,7 +9,7 @@ Game:
 
 @Override
 Loop:
-	'for' 'all' 'entity' entity=ID ('with' constraints+=ID+)?
+	'foreach' entity=ID ('with' constraints+=ID+)?
 	'{' commands+=Command+ '}';
 
 @Override

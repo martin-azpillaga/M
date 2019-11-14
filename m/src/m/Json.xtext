@@ -20,8 +20,8 @@ LongValue: value=LONG;
 BooleanValue: value=Boolean;
 
 enum Boolean: TRUE='true'|FALSE='false';
-terminal LONG returns ecore::ELong: '-'? '0'..'9'+;
-terminal FLOAT returns ecore::EFloat: '-'? ('0'..'9')* '.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?;
+terminal LONG: '-'? '0'..'9'+;
+terminal FLOAT: '-'? ('0'..'9')* '.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?;
 terminal STRING: '"' ( !('"') )* '"';
 terminal WHITE_SPACE: (' '|'\t'|'\r'|'\n')+;
 terminal ID: ('0'..'9'|'a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'.'|'-')*;

@@ -1,6 +1,5 @@
 package m
 
-import m.converter.MyTerminalConverter
 import org.eclipse.xtext.generator.OutputConfigurationProvider
 import org.eclipse.xtext.formatting2.FormatterPreferenceValuesProvider
 import com.google.inject.Inject
@@ -19,13 +18,9 @@ class YAMLRuntimeModule extends AbstractYAMLRuntimeModule
 	{
 		OutputFolder
 	}
-	
-	override bindIValueConverterService() 
-	{
-        return MyTerminalConverter
-    }
     
-    override void configureFormatterPreferences(Binder binder) {
+    override void configureFormatterPreferences(Binder binder) 
+    {
 		binder.bind(IPreferenceValuesProvider).annotatedWith(FormatterPreferences).to(MyFormatterPreferences);
 	}
 }

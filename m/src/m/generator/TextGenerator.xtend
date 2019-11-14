@@ -12,8 +12,7 @@ import m.instancer.ArtGenerator
 import m.instancer.EntityGenerator
 import java.util.HashMap
 import m.m.MFactory
-import m.instancer.TranslateTestua
-import java.util.ArrayList
+import m.instancer.TestuaInstancer
 import m.m.Component
 import m.TextRuntimeModule
 import static extension m.modeler.GenericSerializer.*
@@ -21,6 +20,7 @@ import m.instancer.BlockGenerator
 import m.validation.TypeInference
 import m.validation.Type
 import m.instancer.SettingsGenerator
+import java.util.ArrayList
 
 class TextGenerator extends AbstractGenerator 
 {
@@ -104,8 +104,6 @@ class TextGenerator extends AbstractGenerator
 			
 			var settingsGenerator = new SettingsGenerator
 			settingsGenerator.generate(game, fsa)
-			
-			
 			
 			var systemGenerator = new SystemGenerator
 			systemGenerator.generate(game, types, fsa)

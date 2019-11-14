@@ -9,7 +9,7 @@ import m.cBlocks.Element
 import java.util.List
 import m.m.Component
 
-class BlocksToText 
+class BlocksModeler 
 {
 	extension MFactory factory = MFactory.eINSTANCE
 	
@@ -73,31 +73,31 @@ class BlocksToText
 			if (valueType == 'real1value')
 			{
 				var vector = createVector
-				vector.numbers.add(Float.parseFloat(value.elements.head.text))
+				vector.numbers.add(value.elements.head.text)
 				component.value = vector
 			}
 			else if (valueType == 'real2value')
 			{
 				var vector = createVector
-				vector.numbers.add(Float.parseFloat(value.elements.head.text))
-				vector.numbers.add(Float.parseFloat(value.elements.get(1).text))
+				vector.numbers.add(value.elements.head.text)
+				vector.numbers.add(value.elements.get(1).text)
 				component.value = vector
 			}
 			else if (valueType == 'real3value')
 			{
 				var vector = createVector
-				vector.numbers.add(Float.parseFloat(value.elements.head.text))
-				vector.numbers.add(Float.parseFloat(value.elements.get(1).text))
-				vector.numbers.add(Float.parseFloat(value.elements.get(2).text))
+				vector.numbers.add(value.elements.head.text)
+				vector.numbers.add(value.elements.get(1).text)
+				vector.numbers.add(value.elements.get(2).text)
 				component.value = vector
 			}
 			else if (valueType == 'real4value')
 			{
 				var vector = createVector
-				vector.numbers.add(Float.parseFloat(value.elements.head.text))
-				vector.numbers.add(Float.parseFloat(value.elements.get(1).text))
-				vector.numbers.add(Float.parseFloat(value.elements.get(2).text))
-				vector.numbers.add(Float.parseFloat(value.elements.get(3).text))
+				vector.numbers.add(value.elements.head.text)
+				vector.numbers.add(value.elements.get(1).text)
+				vector.numbers.add(value.elements.get(2).text)
+				vector.numbers.add(value.elements.get(3).text)
 				component.value = vector
 			}
 			else if (valueType == 'wordvalue')

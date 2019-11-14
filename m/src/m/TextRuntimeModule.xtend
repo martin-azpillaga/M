@@ -4,24 +4,25 @@ import org.eclipse.xtext.generator.OutputConfigurationProvider
 import org.eclipse.xtext.generator.OutputConfiguration
 import java.util.Set
 import org.eclipse.xtext.generator.IFileSystemAccess
-import m.converter.MyTerminalConverter
+import org.eclipse.xtext.parser.antlr.ISyntaxErrorMessageProvider
+import m.errorHandling.TextSyntaxErrorMessageProvider
 
-class TextRuntimeModule extends AbstractTextRuntimeModule 
+class TextRuntimeModule extends AbstractTextRuntimeModule
 {
 	def Class<? extends OutputConfigurationProvider> bindIOutputConfigurationProvider()
 	{
 		OutputFolder
 	}
-	
-	override bindIValueConverterService() 
+
+	def Class<? extends ISyntaxErrorMessageProvider> bindISyntaxErrorMessageProvider()
 	{
-        return MyTerminalConverter
-    }
+		return TextSyntaxErrorMessageProvider;
+	}
 }
 
 class OutputFolder extends OutputConfigurationProvider
 {
-	override Set<OutputConfiguration> getOutputConfigurations() 
+	override Set<OutputConfiguration> getOutputConfigurations()
 	{
 		val OutputConfiguration defaultOutput = new OutputConfiguration(IFileSystemAccess.DEFAULT_OUTPUT);
 		defaultOutput.setDescription("Default Output - Overwrite");
@@ -31,7 +32,6 @@ class OutputFolder extends OutputConfigurationProvider
 		defaultOutput.setCleanUpDerivedResources(true);
 		defaultOutput.setSetDerivedProperty(true);
 		defaultOutput.useOutputPerSourceFolder = true;
-
 		return newHashSet(defaultOutput);
 	}
 }

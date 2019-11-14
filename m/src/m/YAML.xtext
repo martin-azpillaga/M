@@ -36,7 +36,7 @@ enum Tag: unity='%TAG !u! tag:unity3d.com,2011:';
 terminal WORD: ('a'..'z'|'A'..'Z'|'_') (' '|'.'|'/'|'a'..'z'|'A'..'Z'|'_'|'0'..'9')*;
 
 terminal L: '-'? '0'..'9' ('0'..'9')*;
-terminal FLOAT returns ecore::EFloat: '-'? ('0'..'9')* '.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?;
+terminal FLOAT: '-'? ('0'..'9')* '.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?;
 terminal GUID: '0'..'9'* 'a'..'z' ('a'..'z'|'0'..'9')*;
 terminal SPACE: ' ';
 terminal WS: NEWLINE SPACE*;
