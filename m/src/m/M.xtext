@@ -7,31 +7,22 @@ Game:
 	(entities+=Entity | systems+=System)*;
 
 Entity:
-	name+=ID+ (':' base+=ID+)?
+	name=IDENTIFIER (':' base=IDENTIFIER)?
 	'{' (components+=Component (',' components+=Component)*)? '}'
 	('[' (entities+=Entity)* ']')?;
 
 Component:
-	name=ID value=Value?;
-
-Value:
-	Vector | Word;
-
-Vector:
-	numbers+=NUMBER+;
-
-Word:
-	values+=ID+;
-
+	name=IDENTIFIER (values+=NUMBER+|values+=IDENTIFIER+);
+	
 System:
-	name=ID '{' commands+=Command+ '}';
+	name=IDENTIFIER '{' commands+=Command+ '}';
 
 Command:
 	Loop | Branch | Assignment | Call;
 
 Loop:
-	entity=ID (':' constraints+=ID+)?
-	'{' commands+=Command+ '}';
+	entity=IDENTIFIER (':' constraints+=IDENTIFIER+)?
+	'{' commands+=Command* '}';
 
 Branch:
 	'?' if=Condition
@@ -45,10 +36,10 @@ Assignment:
 	access=Access type=AssignmentType expression=Expression;
 
 Call:
-	name=ID '(' parameters+=Expression (',' parameters+=Expression)* ')';
+	name=IDENTIFIER '(' parameters+=Expression (',' parameters+=Expression)* ')';
 
 Access:
-	names+=ID ('.' names+=ID)*;
+	names+=IDENTIFIER ('.' names+=IDENTIFIER)*;
 
 Expression returns Expression:
 	Expression1 ({Or.left=current} '||' right=Expression1)*;
@@ -88,8 +79,12 @@ enum AssignmentType:
 terminal WHITE_SPACE:
 	(' ' | '\t' | '\r' | '\n')+;
 
-terminal ID:
+terminal IDENTIFIER:
 	('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*;
 
 terminal NUMBER:
 	'-'? ('0'..'9')* ('.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?)?;
+	
+terminal SPECIAL:
+	!(' ' | '\t' | '\r' | '\n' | '{' | '}' )+
+;

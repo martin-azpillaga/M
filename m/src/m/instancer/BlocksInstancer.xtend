@@ -74,7 +74,7 @@ class BlockGenerator
 	def compile(Entity entity)
 	{
 		var block = block('entity', entity.hashCode.toString, x.toString, "0")
-		block.elements.add(field('name', entity.name.join(' ')))
+		block.elements.add(field('name', entity.name))
 		var components = statement('components')
 		block.elements.add(components)
 		components.elements.add(entity.components.compile(0))

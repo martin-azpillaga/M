@@ -44,7 +44,7 @@ Workflow {
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
-		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
+		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {debugGrammar = true}
 		    fragment = validation.ValidatorFragment2 { generateStub = true }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true }

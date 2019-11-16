@@ -749,10 +749,10 @@ class EntityGenerator
 		for (entity : game.entities)
 		{
 			var file = entity.generate
-			generate(file, yamlRuntime, fsa, 'Pure Unity/Assets/Design/Entities/'+entity.name.join(' ')+'.prefab')
+			generate(file, yamlRuntime, fsa, 'Pure Unity/Assets/Design/Entities/'+entity.name+'.prefab')
 			
 			var meta = entity.metaFile
-			generate(meta, yamlRuntime, fsa, 'Pure Unity/Assets/Design/Entities/'+entity.name.join(' ')+'.prefab.meta')
+			generate(meta, yamlRuntime, fsa, 'Pure Unity/Assets/Design/Entities/'+entity.name+'.prefab.meta')
 		}
 	}
 	
@@ -794,7 +794,7 @@ class EntityGenerator
 		go.value = gameObject
 		gameObject.key = 'GameObject'
 		gameObject.body.add(kv('serializedVersion', 6.yaml))
-		gameObject.body.add(kv('m_Name', entity.name.join(' ')))
+		gameObject.body.add(kv('m_Name', entity.name))
 		gameObject.body.add(kv('m_IsActive', 1.yaml))
 		var componentList = createKeyValueList
 		gameObject.body.add(componentList)
