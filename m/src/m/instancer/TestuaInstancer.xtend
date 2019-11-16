@@ -24,8 +24,6 @@ import m.m.Not
 import m.m.Or
 import m.m.Plus
 import m.m.Times
-import m.m.Vector
-import m.m.Word
 import org.eclipse.xtext.generator.IFileSystemAccess2
 
 import static m.modeler.GenericSerializer.*
@@ -49,19 +47,7 @@ class TestuaInstancer
 				translatedComponent.name = component.name.translate
 				translatedEntity.components.add(translatedComponent)
 				
-				var value = component.value
-				if (value instanceof Vector)
-				{
-					var translatedVector = createVector
-					translatedVector.numbers.addAll(value.numbers)
-					translatedComponent.value = translatedVector
-				}
-				else if (value instanceof Word)
-				{
-					var translatedWord = createWord
-					translatedWord.values.addAll(value.values)
-					translatedComponent.value = translatedWord
-				}
+				translatedComponent.values.addAll(component.values)
 			}
 			translation.entities.add(translatedEntity)
 		}

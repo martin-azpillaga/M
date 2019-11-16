@@ -4,10 +4,8 @@ import m.m.Entity
 import m.m.Game
 import org.eclipse.xtext.formatting2.AbstractFormatter2
 import org.eclipse.xtext.formatting2.IFormattableDocument
-import m.m.Vector
 import m.m.Component
 import com.google.inject.Inject
-import m.m.Word
 import m.m.Loop
 import m.m.Branch
 import m.m.Condition
@@ -16,6 +14,18 @@ import m.m.Call
 import m.m.Access
 import m.m.Comparison
 import m.services.MGrammarAccess
+import m.m.And
+import m.m.Or
+import m.m.Not
+import m.m.Plus
+import m.m.Minus
+import m.m.Times
+import m.m.Divide
+import m.m.Bitwise
+import m.m.BitwiseNegate
+import m.m.Increment
+import m.m.Decrement
+import m.m.Brackets
 
 class MFormatter extends AbstractFormatter2 
 {
@@ -56,17 +66,8 @@ class MFormatter extends AbstractFormatter2
 	
 	def dispatch void format(Component component, extension IFormattableDocument document)
 	{
-		component.value?.format
-	}
-	
-	def dispatch format(Vector vector, extension IFormattableDocument document)
-	{
-		vector.regionFor.assignments(vectorAccess.numbersAssignment).forEach[prepend[oneSpace]]
-	}
-	
-	def dispatch format(Word word, extension IFormattableDocument document)
-	{
-		word.regionFor.assignments(wordAccess.valuesAssignment).forEach[prepend[oneSpace]]
+		component.regionFor.assignments(componentAccess.valuesAssignment_1_0).forEach[prepend[oneSpace]]
+		component.regionFor.assignments(componentAccess.valuesAssignment_1_1).forEach[prepend[oneSpace]]
 	}
 	
 	def dispatch format(m.m.System system, extension IFormattableDocument document)
@@ -159,5 +160,96 @@ class MFormatter extends AbstractFormatter2
 	def dispatch format(Access access, extension IFormattableDocument document)
 	{
 		access.regionFor.keywords('.').forEach[surround[noSpace]]
+	}
+	
+	def dispatch format(And and, extension IFormattableDocument document)
+	{
+		and.regionFor.keyword('&&').surround[oneSpace]
+		and.left.format
+		and.right.format
+	}
+	
+	def dispatch format(Or or, extension IFormattableDocument document)
+	{
+		or.regionFor.keyword('||').surround[oneSpace]
+		or.left.format
+		or.right.format
+	}
+	
+	def dispatch format(Not not, extension IFormattableDocument document)
+	{
+		not.regionFor.keyword('!').append[oneSpace]
+		not.expression.format
+	}
+	
+	def dispatch format(Comparison comparison, extension IFormattableDocument document)
+	{
+		comparison.regionFor.assignment(atomicBAccess.typeAssignment_1_1).surround[oneSpace]
+		comparison.left.format
+		comparison.right.format
+	}
+	
+	def dispatch format(Plus plus, extension IFormattableDocument document)
+	{
+		plus.regionFor.keyword('+').surround[oneSpace]
+		plus.left.format
+		plus.right.format
+	}
+	
+	def dispatch format(Minus plus, extension IFormattableDocument document)
+	{
+		plus.regionFor.keyword('-').surround[oneSpace]
+		plus.left.format
+		plus.right.format
+	}
+	
+	def dispatch format(Times plus, extension IFormattableDocument document)
+	{
+		plus.regionFor.keyword('*').surround[oneSpace]
+		plus.left.format
+		plus.right.format
+	}
+	
+	def dispatch format(Divide plus, extension IFormattableDocument document)
+	{
+		plus.regionFor.keyword('/').surround[oneSpace]
+		plus.left.format
+		plus.right.format
+	}
+	
+	def dispatch format(Bitwise plus, extension IFormattableDocument document)
+	{
+		plus.regionFor.keyword('&').surround[oneSpace]
+		plus.regionFor.keyword('|').surround[oneSpace]
+		plus.regionFor.keyword('^').surround[oneSpace]
+		plus.regionFor.keyword('<<').surround[oneSpace]
+		plus.regionFor.keyword('>>').surround[oneSpace]
+		plus.left.format
+		plus.right.format
+	}
+	
+	def dispatch format(BitwiseNegate plus, extension IFormattableDocument document)
+	{
+		plus.regionFor.keyword('~').append[oneSpace]
+		plus.expression.format
+	}
+	
+	def dispatch format(Increment plus, extension IFormattableDocument document)
+	{
+		plus.regionFor.keyword('++').prepend[noSpace]
+		plus.expression.format
+	}
+	
+	def dispatch format(Decrement plus, extension IFormattableDocument document)
+	{
+		plus.regionFor.keyword('~').prepend[noSpace]
+		plus.expression.format
+	}
+	
+	def dispatch format(Brackets plus, extension IFormattableDocument document)
+	{
+		plus.regionFor.keyword('(').append[noSpace]
+		plus.regionFor.keyword(')').prepend[noSpace]
+		plus.expression.format
 	}
 }

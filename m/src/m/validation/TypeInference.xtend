@@ -15,7 +15,6 @@ import m.m.Modulus
 import m.m.Plus
 import m.m.Times
 import m.m.Component
-import m.m.Vector
 import m.m.Branch
 import m.m.Condition
 import m.m.Or
@@ -26,7 +25,6 @@ import m.m.System
 import static m.validation.Type.*
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.emf.ecore.EObject
-import m.m.Word
 import m.m.Assignment
 import m.m.Brackets
 import m.m.Expression
@@ -66,32 +64,31 @@ class TypeInference
 	def void infer(Component component)
 	{
 		var name = component.name
-		var value = component.value
-		if (value === null)
+		var value = component.values
+		if (value.empty)
 		{
 			name.set(tag)
 		}
-		else if (value instanceof Vector)
+		else if (Character.isDigit(value.head.charAt(0)))
 		{
-			var numbers = value.numbers
-			if (numbers.size == 1)
+			if (value.size == 1)
 			{
 				name.set(float1)
 			}
-			else if (numbers.size == 2)
+			else if (value.size == 2)
 			{
 				name.set(float2)
 			}
-			else if (numbers.size == 3)
+			else if (value.size == 3)
 			{
 				name.set(float3)
 			}
-			else if (numbers.size == 4)
+			else if (value.size == 4)
 			{
 				name.set(float4)
 			}
 		}
-		else if (value instanceof Word)
+		else
 		{
 			if (name == 'mesh')
 			{
@@ -107,7 +104,7 @@ class TypeInference
 			}
 			else
 			{
-				if (inputNames.contains(value.values.join(' ')))
+				if (inputNames.contains(value.join(' ')))
 				{
 					name.set(input)
 				}

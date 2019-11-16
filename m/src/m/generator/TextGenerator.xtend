@@ -62,7 +62,7 @@ class TextGenerator extends AbstractGenerator
 							{
 								physics.add(component)
 							}
-							else if (component.value === null)
+							else if (component.values.empty)
 							{
 								tags.add(component)
 							}
