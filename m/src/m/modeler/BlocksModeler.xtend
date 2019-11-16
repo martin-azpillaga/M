@@ -72,39 +72,29 @@ class BlocksModeler
 			var valueType = value.attributes.head.value
 			if (valueType == 'real1value')
 			{
-				var vector = createVector
-				vector.numbers.add(value.elements.head.text)
-				component.value = vector
+				component.values.add(value.elements.head.text)
 			}
 			else if (valueType == 'real2value')
 			{
-				var vector = createVector
-				vector.numbers.add(value.elements.head.text)
-				vector.numbers.add(value.elements.get(1).text)
-				component.value = vector
+				component.values.add(value.elements.head.text)
+				component.values.add(value.elements.get(1).text)
 			}
 			else if (valueType == 'real3value')
 			{
-				var vector = createVector
-				vector.numbers.add(value.elements.head.text)
-				vector.numbers.add(value.elements.get(1).text)
-				vector.numbers.add(value.elements.get(2).text)
-				component.value = vector
+				component.values.add(value.elements.head.text)
+				component.values.add(value.elements.get(1).text)
+				component.values.add(value.elements.get(2).text)
 			}
 			else if (valueType == 'real4value')
 			{
-				var vector = createVector
-				vector.numbers.add(value.elements.head.text)
-				vector.numbers.add(value.elements.get(1).text)
-				vector.numbers.add(value.elements.get(2).text)
-				vector.numbers.add(value.elements.get(3).text)
-				component.value = vector
+				component.values.add(value.elements.head.text)
+				component.values.add(value.elements.get(1).text)
+				component.values.add(value.elements.get(2).text)
+				component.values.add(value.elements.get(3).text)
 			}
 			else if (valueType == 'wordvalue')
 			{
-				var word = createWord
-				word.values.addAll(value.elements.head.text.split(' '))
-				component.value = word
+				component.values.addAll(value.elements.head.text.split(' '))
 			}
 		}
 		if (first.elements.size > 2)

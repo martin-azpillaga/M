@@ -47,8 +47,6 @@ import m.m.Or
 import m.m.Plus
 import m.m.System
 import m.m.Times
-import m.m.Vector
-import m.m.Word
 import m.modeler.FactoryHelper
 import m.validation.Type
 import m.yaml.Document
@@ -88,7 +86,7 @@ class ArtGenerator
 			{
 				if (meshComponents.contains(component.name))
 				{
-					meshes.add((component.value as Word).values.join(' '))
+					meshes.add(component.values.join(' '))
 				}
 			}
 		}
@@ -939,10 +937,9 @@ class EntityGenerator
 		document.value = map
 		map.key = unityComponent.unityId
 		
-		var value = component.value
-		if (value instanceof Vector)
+		var values = component.values
+		if (Character.isDigit(values.head.charAt(0)))
 		{
-			var values = value.numbers
 			if (values.size == 1)
 			{
 				map.body.add(kv(component.name.field, values.get(0).yaml))
@@ -975,10 +972,8 @@ class EntityGenerator
 				map.body.add(inner)
 			}
 		}
-		else if (value instanceof Word)
-		{
-			var values = value.values
-			
+		else
+		{			
 			var type = types.get(component.name)
 			
 			if (type == Type.mesh)
@@ -1070,27 +1065,27 @@ class EntityGenerator
 		{
 			case 'position': 
 			{
-				var value = (component.value as Vector).numbers
+				var value = component.values
 				result.add(kv('m_LocalPosition',#{'x'->value.get(0).yaml, 'y'->value.get(1).yaml, 'z'->value.get(2).yaml}))
 			}
 			case 'scale': 
 			{
-				var value = (component.value as Vector).numbers
+				var value = component.values
 				result.add(kv('m_LocalScale',#{'x'->value.get(0).yaml, 'y'->value.get(1).yaml, 'z'->value.get(2).yaml}))
 			}
 			case 'audioClip': 
 			{
-				var value = component.value as Word
-				result.add(kv('m_audioClip',#{'fileID'->8300000.yaml, 'guid'->(value.values.join(' ')+'audioClip').guid, 'type'->3.yaml}))
+				var value = component.values
+				result.add(kv('m_audioClip',#{'fileID'->8300000.yaml, 'guid'->(value.join(' ')+'audioClip').guid, 'type'->3.yaml}))
 			}
 			case 'mesh':
 			{
-				var value = component.value as Word
+				var value = component.values
 				result.add(kv('m_Mesh', #{'fileID'->10202l.yaml, 'guid'->"0000000000000000e000000000000000".yaml, 'type'->0.yaml}))
 			}
 			case 'material':
 			{
-				var value = component.value as Word
+				var value = component.values
 				var kvList = createKeyValueList
 				kvList.name = 'm_Materials'
 				result.add(kvList)

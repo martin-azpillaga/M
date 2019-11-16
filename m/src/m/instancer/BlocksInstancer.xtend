@@ -87,11 +87,11 @@ class BlockGenerator
 		var block = block(current.type, current.hashCode.toString)
 		block.elements.add(field('name', current.name))
 		
-		var value = current.value
+		var value = current.values
 		var names = #['x','y','z','w']
 		var valueValue = value('value')
 		block.elements.add(valueValue)
-		if (value instanceof Vector)
+		if (Character.isDigit(value.head.charAt(0)))
 		{
 			var valueBlock = block(value.componentType, value.hashCode.toString)
 			valueValue.elements.add(valueBlock)

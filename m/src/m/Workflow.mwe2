@@ -30,7 +30,7 @@ Workflow {
 		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
-		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
+		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {debugGrammar = true}
 		    fragment = validation.ValidatorFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
@@ -63,7 +63,6 @@ Workflow {
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
 		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
-		    fragment = ui.labeling.LabelProviderFragment2 { generateStub = false }
 		}
 		language = XtextGeneratorLanguage 
 		{
