@@ -9,7 +9,7 @@ Game:
 
 @Override
 Loop:
-	'entitate' entity=ID 'bakoitzarengatik' ('hurrengo' 'etiketekin' ':' constraints+=ID+)?
+	'entitate' entity=IDENTIFIER 'bakoitzarengatik' ('hurrengo' 'etiketekin' ':' constraints+=IDENTIFIER+)?
 	'{' commands+=Command+ '}';
 
 @Override

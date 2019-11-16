@@ -55,7 +55,7 @@ class BlocksModeler
 			entity.components.addComponent(components.elements.head)
 		}
 		
-		entity.name.addAll(name.text.split(' '))
+		entity.name = name.text
 		
 		return entity
 	}

@@ -41,7 +41,7 @@ class TestuaInstancer
 		for (entity : game.entities)
 		{
 			var translatedEntity = createEntity
-			translatedEntity.name.addAll(entity.name)
+			translatedEntity.name = entity.name
 			
 			for (component : entity.components)
 			{

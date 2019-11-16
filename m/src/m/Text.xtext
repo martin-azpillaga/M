@@ -5,15 +5,24 @@ import "http://www.minim.games/M"
 
 @Override
 Game:
-	(entities+=Entity | systems+=System)*;
+	entities+=Entity;
+
+@Override
+System:
+	name=W 'system' '{' commands+=Command* '}';
 
 @Override
 Loop:
-	'foreach' entity=ID ('with' constraints+=ID+)?
-	'{' commands+=Command+ '}';
+	FOREACH entity=IDENTIFIER (WITH constraints+=IDENTIFIER+)?
+	'{' commands+=Command* '}';
 
 @Override
 Branch:
 	'if' if=Condition
 	('else' 'if' elseIfs+=Condition)*
-	('else' '{' commands+=Command+ '}')?;
+	('else' '{' commands+=Command* '}')?;
+
+terminal FOREACH: 'foreach';
+terminal WITH: 'with';
+
+W: IDENTIFIER | FOREACH | 'if' | 'else' | WITH | 'system';
