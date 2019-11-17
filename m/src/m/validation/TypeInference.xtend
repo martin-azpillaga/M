@@ -2,33 +2,33 @@ package m.validation
 
 import java.util.HashMap
 import java.util.HashSet
-import m.m.Access
-import m.m.Call
-import m.m.Command
-import m.m.Decrement
-import m.m.Divide
-import m.m.Game
-import m.m.Increment
-import m.m.Loop
-import m.m.Minus
-import m.m.Modulus
-import m.m.Plus
-import m.m.Times
+import m.structured.Access
+import m.structured.And
+import m.structured.Assignment
+import m.structured.Brackets
+import m.structured.Selection
+import m.structured.Call
+import m.structured.Comparison
+import m.structured.Condition
+import m.structured.Decrement
+import m.structured.Divide
+import m.structured.Expression
+import m.structured.Increment
+import m.structured.Minus
+import m.structured.Modulus
+import m.structured.Not
+import m.structured.Or
+import m.structured.Plus
+import m.structured.Times
 import m.m.Component
-import m.m.Branch
-import m.m.Condition
-import m.m.Or
-import m.m.And
-import m.m.Not
-import m.m.Comparison
+import m.m.Game
+import m.m.Loop
 import m.m.System
-import static m.validation.Type.*
-import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.emf.ecore.EObject
-import m.m.Assignment
-import m.m.Brackets
-import m.m.Expression
-import org.eclipse.emf.common.util.EList
+import org.eclipse.xtext.EcoreUtil2
+
+import static m.validation.Type.*
+import m.structured.Statement
 
 enum Type
 {
@@ -53,9 +53,9 @@ class TypeInference
 		}
 		for (system : game.systems)
 		{
-			for (command : system.commands)
+			for (statement : system.statements)
 			{
-				infer(command)
+				infer(statement)
 			}
 		}
 		return solved
@@ -121,76 +121,76 @@ class TypeInference
 		return #['gamepad left Y', 'gamepad left X']
 	}
 	
-	def void infer(Command command)
+	def void infer(Statement statement)
 	{
-		if (command instanceof Call)
+		if (statement instanceof Call)
 		{
-			if (#['sin','cos','tan','exp','log'].contains(command.name))
+			if (#['sin','cos','tan','exp','log'].contains(statement.name))
 			{
-				set(command.parameters.get(0), float1)				
+				set(statement.parameters.get(0), float1)				
 			}
-			else if (#['random'].contains(command.name))
+			else if (#['random'].contains(statement.name))
 			{
-				set(command.parameters.get(0), float2)
+				set(statement.parameters.get(0), float2)
 			}
-			else if (#['create'].contains(command.name))
+			else if (#['create'].contains(statement.name))
 			{
-				set(command.parameters.get(0), gameObject)
+				set(statement.parameters.get(0), gameObject)
 			}
-			else if (#['destroy'].contains(command.name))
+			else if (#['destroy'].contains(statement.name))
 			{
-				set(command.parameters.get(0), entity)
+				set(statement.parameters.get(0), entity)
 			}
-			else if (#['add','remove'].contains(command.name))
+			else if (#['add','remove'].contains(statement.name))
 			{
-				set(command.parameters.get(1), entity)
+				set(statement.parameters.get(1), entity)
 			}
 		}
-		else if (command instanceof Assignment)
+		else if (statement instanceof Assignment)
 		{
-			var name = command.access.names.last
-			if (command.access.names.size == 1)
+			var name = statement.access.names.last
+			if (statement.access.names.size == 1)
 			{
-				var EObject container = command
+				var EObject container = statement
 				while (!(container instanceof Loop || container instanceof System))
 				{
 					container = EcoreUtil2.getContainerOfType(container, Loop)
 				}
-				name = command.access.names.head + "@" + container.hashCode
+				name = statement.access.names.head + "@" + container.hashCode
 			}
-			switch(command.type)
+			switch(statement.type)
 			{
 				case AND: 
 				{
-					command.expression.set(float1)
+					statement.expression.set(float1)
 				}
 				case DECREASE: 
 				{
-					group(name, command.expression)
+					group(name, statement.expression)
 				}
 				case DIVIDE: 
 				{
-					command.expression.set(float1)
+					statement.expression.set(float1)
 				}
 				case INCREASE: 
 				{
-					group(name, command.expression)
+					group(name, statement.expression)
 				}
 				case MODULUS: 
 				{
-					command.expression.set(float1)
+					statement.expression.set(float1)
 				}
 				case MULTIPLY: 
 				{
-					command.expression.set(float1)
+					statement.expression.set(float1)
 				}
 				case OR: 
 				{
-					command.expression.set(float1)
+					statement.expression.set(float1)
 				}
 				case SET: 
 				{
-					group(name, command.expression)
+					group(name, statement.expression)
 				}
 				case SHIFT_LEFT: 
 				{
@@ -206,35 +206,35 @@ class TypeInference
 				}
 			}
 		}
-		else if (command instanceof Loop)
+		else if (statement instanceof Loop)
 		{
-			for (constraint : command.constraints)
+			for (constraint : statement.constraints)
 			{
 				constraint.set(tag)
 			}
-			for (c : command.commands)
+			for (c : statement.statements)
 			{
 				infer(c)
 			}
 		}
-		else if (command instanceof Branch)
+		else if (statement instanceof Selection)
 		{
-			var i = command.^if
+			var i = statement.^if
 			i.condition.infer
-			i.commands.forEach[infer]
+			i.statements.forEach[infer]
 			
-			for (condition : command.elseIfs)
+			for (condition : statement.elseIfs)
 			{
 				var c = condition as Condition
 				c.condition.infer
-				for (comm : c.commands)
+				for (command : c.statements)
 				{
-					comm.infer
+					command.infer
 				}
 			}
-			for (comm : command.commands)
+			for (command : statement.statements)
 			{
-				comm.infer
+				command.infer
 			}
 		}
 	}

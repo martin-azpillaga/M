@@ -1,0 +1,167 @@
+grammar m.CSharp with m.Structured hidden(MULTIPLE_LINES_COMMENT, SINGLE_LINE_COMMENT)
+
+import "http://www.eclipse.org/emf/2002/Ecore"
+import "http://www.minim.games/structured"
+
+generate csharp "http://www.minim.games/csharp"
+
+File:
+	usings+=Using*
+	types+=Member*;
+
+Using:
+	'using' name=QualifiedName ';';
+
+QualifiedName:
+	names+=IDENTIFIER ('.' names+=IDENTIFIER)*;
+
+Type:
+	sealed?='sealed'?
+	type=TypeEnum name=TypeName (':' superTypes+=TypeName (',' superTypes+=TypeName)*)?
+	BEGIN
+	members+=Member*
+	END;
+
+Member:
+	annotations+=Annotation*
+	visibility=Visibility static?='static'?
+	value=(Type | Method | Field);
+
+Annotation:
+	'[' function=TypeName ('(' parameters+=Expression (',' parameters+=Expression)* ')')? ']';
+
+TypeName:
+	name=QualifiedName ('<' generics+=QualifiedName (',' generics+=QualifiedName)* '>')?;
+
+Field:
+	type=TypeName name=IDENTIFIER ';';
+
+Argument:
+	annotations+=Annotation* ref?='ref'? type=TypeName name=IDENTIFIER;
+
+Method:
+	override?='override'? (type=TypeName | implicit?='implicit' operator?='operator') name=IDENTIFIER ('<'
+	generics+=TypeName (',' generics+=TypeName)* '>')?
+	'(' (arguments+=Argument (',' arguments+=Argument)*)? ')'
+	BEGIN
+	statements+=Statement*
+	END;
+
+@Override
+Statement:
+	For | If | While | CAssignment ';' | Return ';';
+
+CAssignment:
+	(var?='var' | type=TypeName)? access=CAccess (assignmentType=AssignmentType expression=Expression | increment?='++' |
+	decrement?='--')?;
+
+Return:
+	'return' expression=Expression;
+
+@Override
+Primary returns Expression:
+	Access | Call | {Brackets} '(' expression=Expression ')';
+
+CAccess:
+	new?='new'? ref?='ref'? portions+=Portion ('.' portions+=Portion)*;
+
+Portion:
+	{Label} name=IDENTIFIER
+	| {MethodCall} name=IDENTIFIER ('<' generics+=TypeName '>')? '(' (expressions+=Expression (','
+	expressions+=Expression)*)? ')'
+	| {Initialization} name=IDENTIFIER BEGIN (initializations+=InitializeVariable (','
+	initializations+=InitializeVariable)*)? END
+	| {Indexing} name=IDENTIFIER '[' index=Expression ']';
+
+For returns Block:
+	{For}
+	'for' '(' initialization=Assignment ';' condition=Expression ';' increment=Assignment ')'
+	BEGIN
+	statements+=Statement*
+	END;
+
+If returns Block:
+	{If}
+	'if' '(' expression=Expression ')'
+	BEGIN
+	statements+=Statement*
+	END
+	elseIfs+=ElseIf*
+	else=Else?;
+
+ElseIf returns Block:
+	{ElseIf}
+	'else' 'if' '(' expression=Expression ')'
+	BEGIN
+	statements+=Statement*
+	END;
+
+Else returns Block:
+	{Else}
+	'else'
+	BEGIN
+	statements+=Statement*
+	END;
+
+While returns Block:
+	'while' '(' expression=Expression ')'
+	BEGIN
+	statements+=Statement*
+	END;
+
+Atomic returns Expression:
+	Access
+	| {Long} value=LONG
+	| {Float} value=FLOAT
+	| {String} value=STRING;
+
+InitializeVariable:
+	name=IDENTIFIER '=' expression=Expression;
+
+Lambda returns Block:
+	{Lambda} '(' arguments+=Argument (',' arguments+=Argument)* ')' '=>' BEGIN statements+=Statement* END;
+
+@Override
+Expression:
+	=> ({Cast} '(' type=TypeName ')' expression=Boolean0)
+	| Lambda
+	| Boolean0;
+
+Boolean0 returns Expression:
+	Boolean1 ({Or.left=current} '||' right=Boolean1)*;
+
+Boolean1 returns Expression:
+	Boolean2 ({And.left=current} '&&' right=Boolean2)*;
+
+Boolean2 returns Expression:
+	Boolean3
+	| {Not} '!' expression=Boolean3;
+
+Boolean3 returns Expression:
+	Boolean4;
+
+Boolean4 returns Expression:
+	Addition ({Comparison.left=current} type=RelationType right=Addition)?;
+
+enum TypeEnum:
+	class | struct;
+
+enum Visibility:
+	public | private | protected | internal;
+
+terminal LONG:
+	'-'? '0'..'9'+;
+
+terminal FLOAT:
+	'-'? ('0'..'9')* '.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?;
+
+terminal STRING:
+	'"' ('\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\' | '"'))* '"' |
+	"'" ('\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\' | "'"))* "'";
+
+terminal MULTIPLE_LINES_COMMENT:
+	'/*'->'*/';
+
+terminal SINGLE_LINE_COMMENT:
+	'//' !('\n' | '\r')* ('\r'? '\n')?;
+ 

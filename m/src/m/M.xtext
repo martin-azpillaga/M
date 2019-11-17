@@ -1,6 +1,7 @@
-grammar m.M hidden(WHITE_SPACE)
+grammar m.M with m.Structured
 
-import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+import "http://www.minim.games/structured"
+import "http://www.eclipse.org/emf/2002/Ecore"
 generate m "http://www.minim.games/M"
 
 Game:
@@ -8,83 +9,22 @@ Game:
 
 Entity:
 	name=IDENTIFIER (':' base=IDENTIFIER)?
-	'{' (components+=Component (',' components+=Component)*)? '}'
+	BEGIN (components+=Component (',' components+=Component)*)? END
 	('[' (entities+=Entity)* ']')?;
 
 Component:
 	name=IDENTIFIER (values+=NUMBER+|values+=IDENTIFIER+);
 	
 System:
-	name=IDENTIFIER '{' commands+=Command+ '}';
+	name=IDENTIFIER BEGIN statements+=Statement+ END;
 
-Command:
-	Loop | Branch | Assignment | Call;
+@Override
+Statement:
+	Iteration|Loop|Selection|Assignment|Call;
 
 Loop:
 	entity=IDENTIFIER (':' constraints+=IDENTIFIER+)?
-	'{' commands+=Command* '}';
-
-Branch:
-	'?' if=Condition
-	('??' elseIfs+=Condition)*
-	('{' commands+=Command* '}')?;
-
-Condition:
-	condition=Expression '{' commands+=Command* '}';
-
-Assignment:
-	access=Access type=AssignmentType expression=Expression;
-
-Call:
-	name=IDENTIFIER '(' parameters+=Expression (',' parameters+=Expression)* ')';
-
-Access:
-	names+=IDENTIFIER ('.' names+=IDENTIFIER)*;
-
-Expression returns Expression:
-	Expression1 ({Or.left=current} '||' right=Expression1)*;
-
-Expression1 returns Expression:
-	PrimaryB ({And.left=current} '&&' right=PrimaryB)*;
-
-PrimaryB returns Expression:
-	AtomicB | {Not} '!' expression=AtomicB;
-
-AtomicB returns Expression:
-	Addition ({Comparison.left=current} type=RelationType right=Addition)?;
-
-Addition returns Expression:
-	Multiplication (({Plus.left=current} '+' | {Minus.left=current} '-') right=Multiplication)*;
-
-Multiplication returns Expression:
-	Bitwise (({Times.left=current} '*' | {Divide.left=current} '/' | {Modulus.left=current} '%') right=Bitwise)*;
-
-Bitwise returns Expression:
-	Unary ({Bitwise.left=current} op=('&' | '|' | '^' | '<<' | '>>') right=Unary)*;
-
-Unary returns Expression:
-	{BitwiseNegate} '~' expression=Primary
-	| Primary ({Increment.expression=current} '++' | {Decrement.expression=current} '--')?;
-
-Primary returns Expression:
-	Access | Call | {Brackets} '(' expression=Expression ')';
-
-enum RelationType:
-	over='>' | under='<' | equal='=' | notequal='!=' | overorequal='>=' | underorequal='<=';
-
-enum AssignmentType:
-	set='=' | increase='+=' | decrease='-=' | multiply='*=' | divide='/=' | modulus='%=' | and='&=' | or='|=' | xor='^='
-	| shiftLeft='<<=' | shiftRight='>>=';
-
-terminal WHITE_SPACE:
-	(' ' | '\t' | '\r' | '\n')+;
-
-terminal IDENTIFIER:
-	('a'..'z' | 'A'..'Z' | '_') ('a'..'z' | 'A'..'Z' | '_' | '0'..'9')*;
+	BEGIN statements+=Statement* END;
 
 terminal NUMBER:
 	'-'? ('0'..'9')* ('.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?)?;
-	
-terminal SPECIAL:
-	!(' ' | '\t' | '\r' | '\n' | '{' | '}' )+
-;

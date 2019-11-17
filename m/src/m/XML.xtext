@@ -1,8 +1,8 @@
-grammar m.Blocks hidden(WHITE_SPACE)
+grammar m.XML hidden(WHITE_SPACE)
 
-import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+import "http://www.eclipse.org/emf/2002/Ecore"
 
-generate cBlocks "http://www.minim.games/CBlocks"
+generate mxml "http://www.minim.games/xml"
 
 File: elements+=Element;
 
@@ -11,9 +11,9 @@ Element:
 ;
 Attribute: name=ID '=' value=STRING;
 
+Text: (N|WHITE_SPACE|ID)+;
 
 terminal N: '-'? '0'..'9'+ ('.' '0'..'9'*)?;
 terminal ID: ('_'|'a'..'z'|'A'..'Z') ('_'|'a'..'z'|'A'..'Z'|'0'..'9'|'.'|'-')* ;
 terminal WHITE_SPACE: ' '|'\t'|'\r'|'\n';
 terminal STRING: '"' -> '"'|"'" -> "'";
-Text: (N|WHITE_SPACE|ID)+;

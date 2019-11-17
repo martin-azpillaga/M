@@ -8,7 +8,7 @@ import com.google.inject.Guice
 import org.eclipse.xtext.resource.SaveOptions
 import org.eclipse.xtext.serializer.impl.Serializer
 import m.YAMLRuntimeModule
-import m.BlocksRuntimeModule
+import m.XMLRuntimeModule
 
 class GenericSerializer 
 {
@@ -27,7 +27,7 @@ class GenericSerializer
 		{
 			serialized = serialized.replace('\t','  ')
 		}
-		if (module.class == BlocksRuntimeModule)
+		if (module.class == XMLRuntimeModule)
 		{
 			serialized = serialized.replace('\t','  ')
 		}

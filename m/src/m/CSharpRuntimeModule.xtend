@@ -1,6 +1,6 @@
 package m
 
-class CSRuntimeModule extends AbstractCSRuntimeModule 
+class CSharpRuntimeModule extends AbstractCSharpRuntimeModule 
 {
 	def bindIOutputConfigurationProvider()
 	{

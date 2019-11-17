@@ -12,41 +12,37 @@ import java.util.List
 import java.util.Map
 import java.util.Random
 import javax.imageio.ImageIO
-import m.CSRuntimeModule
-import m.JsonRuntimeModule
 import m.YAMLRuntimeModule
-import m.cs.Block
-import m.cs.Command
-import m.cs.CsFactory
-import m.cs.File
-import m.cs.InitializeVariable
-import m.cs.Member
-import m.cs.QualifiedName
-import m.cs.RelationType
+import m.csharp.Block
+import m.csharp.File
+import m.csharp.InitializeVariable
+import m.csharp.Member
+import m.csharp.QualifiedName
+import m.structured.Access
+import m.structured.And
+import m.structured.Assignment
+import m.structured.Brackets
+import m.structured.Selection
+import m.structured.Call
+import m.structured.Comparison
+import m.structured.Condition
+import m.structured.Decrement
+import m.structured.Divide
+import m.structured.Expression
+import m.structured.Increment
+import m.structured.Minus
+import m.structured.Modulus
+import m.structured.Not
+import m.structured.Or
+import m.structured.Plus
+import m.structured.RelationType
+import m.structured.Times
 import m.json.JsonFactory
-import m.m.Access
-import m.m.And
-import m.m.Assignment
-import m.m.Brackets
-import m.m.Branch
-import m.m.Call
-import m.m.Comparison
 import m.m.Component
-import m.m.Condition
-import m.m.Decrement
-import m.m.Divide
 import m.m.Entity
-import m.m.Expression
 import m.m.Game
-import m.m.Increment
 import m.m.Loop
-import m.m.Minus
-import m.m.Modulus
-import m.m.Not
-import m.m.Or
-import m.m.Plus
 import m.m.System
-import m.m.Times
 import m.modeler.FactoryHelper
 import m.validation.Type
 import m.yaml.Document
@@ -54,14 +50,18 @@ import m.yaml.Node
 import m.yaml.Tag
 import m.yaml.Version
 import m.yaml.YamlFactory
+import org.eclipse.emf.common.command.Command
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.generator.IFileSystemAccess2
 
-import static m.cs.AssignmentType.*
-import static m.cs.TypeEnum.*
-import static m.cs.Visibility.*
 import static m.modeler.GenericSerializer.*
 import static m.validation.Type.*
+import static m.csharp.Visibility.*
+import static m.structured.AssignmentType.*
+import static m.csharp.TypeEnum.*
+import m.csharp.CsharpFactory
+import m.CSharpRuntimeModule
+import m.structured.StructuredFactory
 
 class ArtGenerator 
 {
@@ -254,7 +254,8 @@ class ArtGenerator
 class ComponentGenerator 
 {
 	extension FactoryHelper helper = FactoryHelper.eINSTANCE
-	extension CsFactory factory = CsFactory.eINSTANCE
+	extension CsharpFactory factory = CsharpFactory.eINSTANCE
+	extension StructuredFactory structured = StructuredFactory.eINSTANCE
 	
 	YamlFactory yaml = YamlFactory.eINSTANCE
 	var usings = new HashSet<QualifiedName>
@@ -301,7 +302,7 @@ class ComponentGenerator
 		editor.value = textEditor
 		file.types.add(editor)
 		
-		generate(file, new CSRuntimeModule, fsa, 'Pure Unity/Assets/Code/Components/ExtendedText.cs')
+		generate(file, new CSharpRuntimeModule, fsa, 'Pure Unity/Assets/Code/Components/ExtendedText.cs')
 	}
 	
 	def inspectorGUI()
@@ -317,22 +318,22 @@ class ComponentGenerator
 		cast.type = 'MyText'.type
 		cast.expression = a.label('target')
 		
-		var castTarget = createAssignment
+		var castTarget = createCAssignment
 		castTarget.setVar = true
 		castTarget.access = a.label('text')
 		castTarget.assignmentType = SET
 		castTarget.expression = cast
-		method.commands.add(castTarget)
+		method.statements.add(castTarget)
 		
 		var cast2 = createCast
 		cast2.type = 'MyText'.type
 		cast2.expression = a.label('EditorGUILayout').call('ObjectField',string('Asset'), a.label('text').label('asset'), a.call('typeof',a.label('ExtendedText')), a.label('false'))
 		
-		var castInput = createAssignment
+		var castInput = createCAssignment
 		castInput.access = a.label('text').label('asset')
 		castInput.assignmentType = SET
 		castInput.expression = cast2
-		method.commands.add(castInput)
+		method.statements.add(castInput)
 		
 		member.value = method
 		return member
@@ -360,12 +361,12 @@ class ComponentGenerator
 		method.type = 'void'.type
 		method.name = 'Update'
 		
-		var command = createAssignment
+		var command = createCAssignment
 		command.access = a.label('text')
 		command.assignmentType = SET
 		command.expression = a.label('asset').label('text')
 		
-		method.commands.add(command)
+		method.statements.add(command)
 		
 		member.value = method
 		return member
@@ -397,7 +398,7 @@ class ComponentGenerator
 	
 	def generate(Map<String,Type> components, IFileSystemAccess2 fsa)
 	{
-		var csharp = new CSRuntimeModule
+		var csharp = new CSharpRuntimeModule
 		
 		
 		for (component : components.keySet.filter[valid])
@@ -505,7 +506,7 @@ class ComponentGenerator
 		comparison.type = RelationType.EQUAL
 		var returns = createReturn
 		returns.expression = comparison
-		method.commands.add(returns)
+		method.statements.add(returns)
 		
 		member.value = method
 		return member
@@ -522,7 +523,7 @@ class ComponentGenerator
 		method.override = true
 		var returns = createReturn
 		returns.expression = a.label('Value').call('GetHashCode')
-		method.commands.add(returns)
+		method.statements.add(returns)
 		
 		member.value = method
 		return member
@@ -587,11 +588,11 @@ class ComponentGenerator
 		
 		if (type == gameObject)
 		{
-			method.commands.add(convertAndAdd(name))
+			method.statements.add(convertAndAdd(name))
 		}
 		else
 		{
-			method.commands.add(addComponentData(name,type))
+			method.statements.add(addComponentData(name,type))
 		}
 		
 		member.value = method
@@ -600,7 +601,7 @@ class ComponentGenerator
 	
 	def addComponentData(String name, Type type)
 	{
-		var newComponent = createAccess
+		var newComponent = createCAccess
 		newComponent.setNew = true
 		
 		if (type != tag)
@@ -694,7 +695,7 @@ class ComponentGenerator
 		
 		var returnValue = createReturn
 		returnValue.expression = a.label('data').label('Value')
-		toValue.commands.add(returnValue)
+		toValue.statements.add(returnValue)
 		
 		member.value = toValue
 		return member
@@ -721,7 +722,7 @@ class ComponentGenerator
 		accessData.setNew = true
 		accessData.initialize(name, initialization('Value', a.label('Value')))
 		returnData.expression = accessData
-		toData.commands.add(returnData)
+		toData.statements.add(returnData)
 		
 		member.value = toData
 		return member
@@ -1080,12 +1081,10 @@ class EntityGenerator
 			}
 			case 'mesh':
 			{
-				var value = component.values
 				result.add(kv('m_Mesh', #{'fileID'->10202l.yaml, 'guid'->"0000000000000000e000000000000000".yaml, 'type'->0.yaml}))
 			}
 			case 'material':
 			{
-				var value = component.values
 				var kvList = createKeyValueList
 				kvList.name = 'm_Materials'
 				result.add(kvList)
@@ -1234,7 +1233,7 @@ class SettingsGenerator
 
 class SystemGenerator 
 {
-	extension CsFactory factory = CsFactory.eINSTANCE
+	extension CsharpFactory factory = CsharpFactory.eINSTANCE
 	extension FactoryHelper helper = FactoryHelper.eINSTANCE
 	YamlFactory yaml = YamlFactory.eINSTANCE
 	
@@ -1245,7 +1244,7 @@ class SystemGenerator
 	{
 		this.types = types
 		
-		var csharp = new CSRuntimeModule
+		var csharp = new CSharpRuntimeModule
 		var yamlModule = new YAMLRuntimeModule
 		
 		for (system : game.systems)
@@ -1316,7 +1315,7 @@ class SystemGenerator
 		call.setNew = true
 		worldAssignment.expression = call
 		
-		run.commands.add(worldAssignment)
+		run.statements.add(worldAssignment)
 		
 		for (system : systems)
 		{
@@ -1325,7 +1324,7 @@ class SystemGenerator
 			newSystem.setNew = true
 			create.access = a.label('world').call('AddSystem', newSystem)
 			
-			run.commands.add(create)
+			run.statements.add(create)
 		}
 
 		var setWorld = createAssignment
@@ -1333,7 +1332,7 @@ class SystemGenerator
 		setWorld.assignmentType = SET
 		setWorld.expression = a.label('world')
 				
-		run.commands.add(setWorld)
+		run.statements.add(setWorld)
 		
 		return member
 	}
@@ -1405,7 +1404,7 @@ class SystemGenerator
 		var loops = EcoreUtil2.getAllContentsOfType(system,Loop)
 		for (loop : loops)
 		{
-			method.commands.add(getQuery(system, loop))
+			method.statements.add(getQuery(system, loop))
 		}
 		
 		member.value = method
@@ -1420,7 +1419,7 @@ class SystemGenerator
 		
 		var expression = createAccess
 		
-		var components = new ArrayList<m.cs.Expression>
+		var components = new ArrayList<Expression>
 		
 		val writes = EcoreUtil2.getAllContentsOfType(loop, Assignment).filter[it.access.names.size > 1 && it.access.names.head == loop.entity].map[it.access.names.get(1)]
 		var reads = EcoreUtil2.getAllContentsOfType(loop, Access).filter[it.names.size > 1 && it.names.head == loop.entity].filter[!writes.toList.contains(it.names.get(1))].map[it.names.get(1)]
@@ -1457,7 +1456,7 @@ class SystemGenerator
 		dependencies.name = 'dependencies'
 		method.arguments.add(dependencies)
 		
-		method.commands.add(scheduleJob(system))
+		method.statements.add(scheduleJob(system))
 		
 		member.value = method
 		return member
@@ -1473,9 +1472,9 @@ class SystemGenerator
 		method.type = 'void'.type
 		method.name = 'OnUpdate'
 		
-		for (command : system.commands)
+		for (command : system.statements)
 		{
-			method.commands.addAll(commands(system).commands)
+			method.statements.addAll(statements(system).statements)
 		}
 		
 		member.value = method
@@ -1680,17 +1679,17 @@ class SystemGenerator
 		method.type = 'void'.type
 		method.name = 'Execute'
 		
-		method.commands.addAll(commands(system).commands)
+		method.statements.addAll(statements(system).statements)
 		
 		member.value = method
 		return member
 	}
 	
-	def commands(System system)
+	def statements(System system)
 	{
 		var result = createBlock
 		
-		for (command : system.commands)
+		for (command : system.statements)
 		{
 			result.addCommand(command)
 		}
@@ -1705,32 +1704,32 @@ class SystemGenerator
 			if (function == 'remove')
 			{
 				var call = createAssignment
-				var access = a.label('PostUpdateCommands')
+				var access = a.label('PostUpdatestatements')
 				var methodCall = createMethodCall
 				methodCall.name = 'RemoveComponent'
 				methodCall.generics.add((command.parameters.get(0) as Access).names.head.type)
 				methodCall.expressions.add(command.parameters.get(1).toCS)
 				access.portions.add(methodCall)
 				call.access = access
-				list.commands.add(call)
+				list.statements.add(call)
 			}
 			else if (function == 'add')
 			{
 				var call = createAssignment
-				call.access = a.label('PostUpdateCommands').call('AddComponent', (command.parameters.get(0) as Access).names.head.type, command.parameters.get(1).toCS)
-				list.commands.add(call)
+				call.access = a.label('PostUpdatestatements').call('AddComponent', (command.parameters.get(0) as Access).names.head.type, command.parameters.get(1).toCS)
+				list.statements.add(call)
 			}
 			else if (function == 'destroy')
 			{
 				var call = createAssignment
-				call.access = a.label('PostUpdateCommands').call('DestroyEntity', command.parameters.get(0).toCS)
-				list.commands.add(call)
+				call.access = a.label('PostUpdatestatements').call('DestroyEntity', command.parameters.get(0).toCS)
+				list.statements.add(call)
 			}
 			else if (function == 'create')
 			{
 				var call = createAssignment
-				call.access = a.label('PostUpdateCommands').call('Instantiate', command.parameters.get(0).toCS)
-				list.commands.add(call)
+				call.access = a.label('PostUpdatestatements').call('Instantiate', command.parameters.get(0).toCS)
+				list.statements.add(call)
 			}
 		}
 		else if (command instanceof Assignment)
@@ -1741,7 +1740,7 @@ class SystemGenerator
 				created.access = a.label(command.access.names.head+'_'+command.access.names.get(1)).label(field(command.access.names.get(1)))
 				created.assignmentType = command.type.toCS
 				created.expression = command.expression.toCS
-				list.commands.add(created)
+				list.statements.add(created)
 			}
 			else if (command.access.names.size == 1)
 			{
@@ -1760,14 +1759,14 @@ class SystemGenerator
 				
 				var assignment = EcoreUtil2.getContainerOfType(list, m.cs.Assignment)
 				var system = assignment.eContainer as Block
-				system.commands.add(0,declaration)
+				system.statements.add(0,declaration)
 				
 				
 				var created = createAssignment
 				created.access = a.label(command.access.names.head)
 				created.assignmentType = command.type.toCS
 				created.expression = command.expression.toCS
-				list.commands.add(created)
+				list.statements.add(created)
 			}
 			else
 			{
@@ -1776,7 +1775,7 @@ class SystemGenerator
 				newComponent.initialize(command.access.names.last.componentName, initialization(command.access.names.last.field, command.expression.toCS))
 				var created = createAssignment
 				created.access = a.label('EntityManager').call('SetComponentData', a.label('my_'+command.access.names.head+'_'+command.access.names.get(1)).label('Value'), newComponent)
-				list.commands.add(created)
+				list.statements.add(created)
 			}
 		}
 		else if (command instanceof Loop)
@@ -1798,7 +1797,7 @@ class SystemGenerator
 					my.setVar = true
 					my.access = a.label('my_'+entity+'_'+w)
 					my.expression = a.label(entity+'_'+w)
-					lambda.commands.add(my)
+					lambda.statements.add(my)
 				}
 				else
 				{
@@ -1807,7 +1806,7 @@ class SystemGenerator
 					my.setVar = true
 					my.access = a.label('my_'+entity+'_'+w)
 					my.expression = a.label(entity+'_'+w)
-					lambda.commands.add(my)
+					lambda.statements.add(my)
 				}
 			}
 			for (r : reads.toSet)
@@ -1819,7 +1818,7 @@ class SystemGenerator
 					my.setVar = true
 					my.access = a.label('my_'+entity+'_'+r)
 					my.expression = a.label(entity+'_'+r)
-					lambda.commands.add(my)
+					lambda.statements.add(my)
 				}
 				else
 				{
@@ -1828,7 +1827,7 @@ class SystemGenerator
 					my.setVar = true
 					my.access = a.label('my_'+entity+'_'+r)
 					my.expression = a.label(entity+'_'+r)
-					lambda.commands.add(my)
+					lambda.statements.add(my)
 				}
 			}
 			var foreach = createAssignment
@@ -1842,22 +1841,22 @@ class SystemGenerator
 				access.portions.add(methodCall)
 			}
 			foreach.access = access.call('ForEach',lambda)
-			list.commands.add(foreach)
+			list.statements.add(foreach)
 			
-			for (c : command.commands)
+			for (c : command.statements)
 			{
 				lambda.addCommand(c)
 			}
 			
 		}
-		else if (command instanceof Branch)
+		else if (command instanceof Selection)
 		{
-			val branch = createIf
+			val Selection = createIf
 			var ifCondition = command.^if
-			list.commands.add(branch)
+			list.statements.add(Selection)
 			
-			branch.expression = ifCondition.condition.toCS
-			ifCondition.commands.forEach[branch.addCommand(it)]
+			Selection.expression = ifCondition.condition.toCS
+			ifCondition.statements.forEach[Selection.addCommand(it)]
 			
 			
 			for (elseIf : command.elseIfs)
@@ -1865,13 +1864,13 @@ class SystemGenerator
 				val csharpElseIf = createElseIf
 				var elseIfCondition = elseIf as Condition
 				csharpElseIf.expression = elseIfCondition.condition.toCS
-				elseIfCondition.commands.forEach[csharpElseIf.addCommand(it)]
+				elseIfCondition.statements.forEach[csharpElseIf.addCommand(it)]
 			}
 			
-			if (command.commands.size > 0)
+			if (command.statements.size > 0)
 			{
 				val csharpElse = createElse
-				command.commands.forEach[csharpElse.addCommand(it)]
+				command.statements.forEach[csharpElse.addCommand(it)]
 			}
 		}
 	}
@@ -1963,8 +1962,8 @@ class SystemGenerator
 			increment.increment = true
 			outer.increment = increment
 			
-			outer.commands.add(getChunk(command.entity))
-			outer.commands.addAll(getArrays(command))
+			outer.statements.add(getChunk(command.entity))
+			outer.statements.addAll(getArrays(command))
 			
 			var inner = createFor
 			var initialize_inner = createAssignment
@@ -1985,16 +1984,16 @@ class SystemGenerator
 			inner.increment = increment_inner
 			
 			
-			outer.commands.add(inner)
-			inner.commands.addAll(getDatas(command))
-			for (c : command.commands)
+			outer.statements.add(inner)
+			inner.statements.addAll(getDatas(command))
+			for (c : command.statements)
 			{
 				inner.addCommand(c)
 			}
 			
 			list.add(outer)
 		}
-		else if (command instanceof Branch)
+		else if (command instanceof Selection)
 		{
 			
 		}
@@ -2059,7 +2058,7 @@ class SystemGenerator
 		return result
 	}
 	
-	def m.cs.Expression toCS(Expression expression)
+	def Expression toCS(Expression expression)
 	{
 		if (expression instanceof Or)
 		{
@@ -2276,13 +2275,13 @@ class SystemGenerator
 		lambda.arguments.add(argument('Entity'.type, 'a'))
 		lambda.arguments.add(refArgument('a'.type, 'something'))
 		var destroy = createAssignment
-		destroy.access = a.label('PostUpdateCommands').call('DestroyEntity',a.label('a'))
-		lambda.commands.add(destroy)
+		destroy.access = a.label('PostUpdatestatements').call('DestroyEntity',a.label('a'))
+		lambda.statements.add(destroy)
 		
 		var foreach = createAssignment
 		foreach.access = a.label('Entities').call('ForEach', lambda)
 		
-		method.commands.add(foreach)
+		method.statements.add(foreach)
 		
 		
 		var step = createAssignment
@@ -2294,8 +2293,8 @@ class SystemGenerator
 		var enqueue = createAssignment
 		enqueue.access = a.label('step').call('EnqueueCallback', a.label('SimulationCallbacks').label('Phase').label('PostCreateContacts'), a.label('callback'))
 		
-		method.commands.add(step)
-		method.commands.add(enqueue)
+		method.statements.add(step)
+		method.statements.add(enqueue)
 		
 		member.value = method
 		return member
@@ -2327,17 +2326,17 @@ class SystemGenerator
 		expression.initialize('Job', initialization('buffer', a.label('World').label('Active').call('GetExistingSystem', 'EndSimulationEntityCommandBufferSystem'.type).call('CreateCommandBuffer').call('ToConcurrent'))).call('Schedule', a.label('simulation'), refWorld, a.label('dependencies'))
 		getHandle.expression = expression
 		
-		method.commands.add(getHandle)
+		method.statements.add(getHandle)
 		
 		var complete = createAssignment
 		complete.access = a.label('handle').call('Complete')
 		
-		method.commands.add(complete)
+		method.statements.add(complete)
 		
 		var returns = createReturn
 		returns.expression = a.label('handle')
 		
-		method.commands.add(returns)
+		method.statements.add(returns)
 		
 		member.value = method
 		return member
@@ -2400,9 +2399,9 @@ class SystemGenerator
 		var createB = createAssignment
 		createB.access = a.label('buffer').call('AddComponent', number(0), a.label('entity'), newB)
 		
-		method.commands.add(getEntity)
-		method.commands.add(createA)
-		method.commands.add(createB)
+		method.statements.add(getEntity)
+		method.statements.add(createA)
+		method.statements.add(createB)
 		
 		member.value = method
 		return member

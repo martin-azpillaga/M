@@ -1,6 +1,6 @@
 package m
 
-class JsonRuntimeModule extends AbstractJsonRuntimeModule 
+class JSONRuntimeModule extends AbstractJSONRuntimeModule 
 {
 	def bindIOutputConfigurationProvider()
 	{

@@ -1,45 +1,43 @@
 package m.instancer
 
-import m.m.Game
-import org.eclipse.xtext.generator.IFileSystemAccess2
-import m.cBlocks.CBlocksFactory
-import m.m.Entity
-import m.m.System
-import m.BlocksRuntimeModule
-import static extension m.modeler.GenericSerializer.*
 import java.util.List
 import m.m.Component
-import m.m.Vector
-import m.m.Word
-import m.cBlocks.Element
-import m.m.Command
+import m.m.Entity
+import m.m.Game
 import m.m.Loop
-import m.m.Branch
-import m.m.Expression
-import m.m.Assignment
-import m.m.Call
-import m.m.Plus
-import m.m.Minus
-import m.m.Times
-import m.m.Divide
-import m.m.And
-import m.m.Or
-import m.m.Comparison
-import m.m.RelationType
-import m.m.Not
-import m.m.Bitwise
-import m.m.BitwiseNegate
-import m.m.Brackets
-import m.m.Access
-import m.m.Increment
-import m.m.Decrement
-import m.m.AssignmentType
-import m.modeler.FactoryHelper
+import m.m.System
+import m.mxml.Element
+import m.mxml.MxmlFactory
+import m.structured.Access
+import m.structured.And
+import m.structured.Assignment
+import m.structured.AssignmentType
+import m.structured.BitwiseNegate
+import m.structured.Brackets
+import m.structured.Call
+import m.structured.Comparison
+import m.structured.Decrement
+import m.structured.Divide
+import m.structured.Expression
+import m.structured.Increment
+import m.structured.Minus
+import m.structured.Not
+import m.structured.Or
+import m.structured.Plus
+import m.structured.RelationType
+import m.structured.Times
+import m.yaml.Word
+import org.eclipse.xtext.generator.IFileSystemAccess2
 
-class BlockGenerator 
+import static m.modeler.GenericSerializer.*
+import m.XMLRuntimeModule
+import m.structured.Statement
+import m.structured.Selection
+
+class BlocksInstancer
 {
-	extension CBlocksFactory factory = CBlocksFactory.eINSTANCE
-	extension FactoryHelper helper = FactoryHelper.eINSTANCE
+	extension MxmlFactory factory = MxmlFactory.eINSTANCE
+
 	var x = -150
 	
 	def generate(Game game, IFileSystemAccess2 fsa, String... folders)
@@ -67,7 +65,7 @@ class BlockGenerator
 		
 		for (folder : folders)
 		{
-			generate(file, new BlocksRuntimeModule, fsa, folder+'main-gen.blocks')
+			generate(file, new XMLRuntimeModule, fsa, folder+'main-gen.blocks')
 		}
 	}
 	
@@ -96,9 +94,9 @@ class BlockGenerator
 			var valueBlock = block(value.componentType, value.hashCode.toString)
 			valueValue.elements.add(valueBlock)
 			
-			for (var n = 0; n < value.numbers.size; n++)
+			for (var n = 0; n < value.size; n++)
 			{
-				var number = value.numbers.get(n)
+				var number = value.get(n)
 				valueBlock.elements.add(field(names.get(n), number.toString))
 			}
 		}
@@ -106,7 +104,7 @@ class BlockGenerator
 		{
 			var valueBlock = block('wordvalue', value.hashCode.toString)
 			valueValue.elements.add(valueBlock)
-			valueBlock.elements.add(field('name', value.values.join(' ')))
+			valueBlock.elements.add(field('name', value.join(' ')))
 		}
 		if (components.size > index+1)
 		{
@@ -117,18 +115,18 @@ class BlockGenerator
 		return block
 	}
 	
-	def componentType(Vector v)
+	def componentType(List<String> value)
 	{
-		if (v.numbers.size == 1) 'real1value'
-		else if (v.numbers.size == 2) 'real2value'
-		else if (v.numbers.size == 3) 'real3value'
-		else if (v.numbers.size == 4) 'real4value'
+		if (value.size == 1) 'real1value'
+		else if (value.size == 2) 'real2value'
+		else if (value.size == 3) 'real3value'
+		else if (value.size == 4) 'real4value'
 		else 'error'
 	}
 	
 	def type(Component component)
 	{
-		var value = component.value
+		var value = component.values
 		if (value === null)
 		{
 			return 'tagcomponent'
@@ -195,11 +193,11 @@ class BlockGenerator
 		block.elements.add(field('name', system.name))
 		var commands = statement('commands')
 		block.elements.add(commands)
-		commands.elements.add(system.commands.compileCommands(0))
+		commands.elements.add(system.statements.compileCommands(0))
 		return block
 	}
 	
-	def Element compileCommands(List<Command> commands, int index)
+	def Element compileCommands(List<Statement> commands, int index)
 	{
 		val current = commands.get(index)
 		var Element block
@@ -208,17 +206,17 @@ class BlockGenerator
 			block = block('loop', current.hashCode.toString)
 			block.elements.add(field('entity', current.entity))
 			var comm = value('commands')
-			comm.elements.add(current.commands.compileCommands(0))
+			comm.elements.add(current.statements.compileCommands(0))
 			block.elements.add(comm)
 		}
-		else if (current instanceof Branch)
+		else if (current instanceof Selection)
 		{
 			block = block('branch', current.hashCode.toString)
 			var expression = value('expression')
 			expression.elements.add(current.^if.condition.toElement)
 			block.elements.add(expression)
 			var comm = value('commands')
-			comm.elements.add(current.^if.commands.compileCommands(0))
+			comm.elements.add(current.^if.statements.compileCommands(0))
 			block.elements.add(comm)
 		}
 		else if (current instanceof Assignment)
