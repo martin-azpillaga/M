@@ -1,6 +1,6 @@
 package m
 
-class BlocksRuntimeModule extends AbstractBlocksRuntimeModule 
+class XMLRuntimeModule extends AbstractXMLRuntimeModule 
 {
 	def bindIOutputConfigurationProvider()
 	{

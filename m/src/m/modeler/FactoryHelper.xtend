@@ -1,28 +1,31 @@
 package m.modeler
 
 import m.yaml.YamlFactory
-import m.cs.CsFactory
 import m.yaml.Element
 import java.util.UUID
 import m.json.JsonFactory
-import m.cs.File
-import m.cs.Access
-import m.cs.TypeName
-import m.cs.Expression
-import m.cs.QualifiedName
-import m.m.AssignmentType
-import static m.cs.AssignmentType.*
+import m.csharp.File
+import m.structured.Access
+import m.csharp.TypeName
+import m.structured.Expression
+import m.csharp.QualifiedName
+import m.structured.AssignmentType
+import static m.structured.AssignmentType.*
 import java.util.Map
 import java.util.List
 import m.yaml.Node
-import m.cs.InitializeVariable
+import m.csharp.InitializeVariable
 import m.validation.Type
+import m.csharp.CsharpFactory
+import m.structured.StructuredFactory
+import m.csharp.CAccess
 
 class FactoryHelper 
 {
 	extension YamlFactory yaml = YamlFactory.eINSTANCE
-	extension CsFactory csharp = CsFactory.eINSTANCE
+	extension CsharpFactory csharp = CsharpFactory.eINSTANCE
 	extension JsonFactory json = JsonFactory.eINSTANCE
+	extension StructuredFactory structured = StructuredFactory.eINSTANCE
 	
 	static FactoryHelper instance
 	
@@ -303,10 +306,10 @@ class FactoryHelper
 	
 	def a()
 	{
-		return csharp.createAccess
+		return createCAccess
 	}
 	
-	def label(Access access, String name)
+	def label(CAccess access, String name)
 	{
 		var portion = createLabel
 		portion.name = name
@@ -314,7 +317,7 @@ class FactoryHelper
 		return access
 	}
 	
-	def call(Access access, String name, TypeName generic)
+	def call(CAccess access, String name, TypeName generic)
 	{
 		var call = createMethodCall
 		call.name = name
@@ -323,7 +326,7 @@ class FactoryHelper
 		return access
 	}
 	
-	def call(Access access, String name, Expression... expressions)
+	def call(CAccess access, String name, Expression... expressions)
 	{
 		var call = createMethodCall
 		call.name = name
@@ -332,7 +335,7 @@ class FactoryHelper
 		return access
 	}
 	
-	def call(Access access, String name, TypeName generic, Expression... expressions)
+	def call(CAccess access, String name, TypeName generic, Expression... expressions)
 	{
 		var call = createMethodCall
 		call.name = name
@@ -358,7 +361,7 @@ class FactoryHelper
 		return portion
 	}
 	
-	def methodPortion(Access access, String name, TypeName generic, Expression... parameters)
+	def methodPortion(CAccess access, String name, TypeName generic, Expression... parameters)
 	{
 		var portion = createMethodCall
 		portion.name = name
@@ -371,7 +374,7 @@ class FactoryHelper
 		return access
 	}
 	
-	def initialize(Access access, String name, InitializeVariable... initializations)
+	def initialize(CAccess access, String name, InitializeVariable... initializations)
 	{
 		var portion = csharp.createInitialization
 		portion.name = name
@@ -496,7 +499,7 @@ class FactoryHelper
 		return initialization
 	}
 	
-	def index(m.cs.Access access, String name, Expression index)
+	def index(CAccess access, String name, Expression index)
 	{
 		var indexing = createIndexing
 		indexing.name = name

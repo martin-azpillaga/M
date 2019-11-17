@@ -1,13 +1,14 @@
 package m.modeler
 
-import m.cBlocks.File
+import m.mxml.File
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import m.TextRuntimeModule
 import static extension m.modeler.GenericSerializer.*
 import m.m.MFactory
-import m.cBlocks.Element
+import m.mxml.Element
 import java.util.List
 import m.m.Component
+import m.mxml.File
 
 class BlocksModeler 
 {

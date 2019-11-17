@@ -1,17 +1,17 @@
 package m.formatting2
 
 import com.google.inject.Inject
-import m.services.BlocksGrammarAccess
+import m.mxml.Element
+import m.mxml.File
+import m.services.XMLGrammarAccess
 import org.eclipse.xtext.formatting2.AbstractFormatter2
 import org.eclipse.xtext.formatting2.IFormattableDocument
-import m.cBlocks.Element
-import m.cBlocks.Attribute
-import m.cBlocks.File
+import m.mxml.Attribute
 
-class BlocksFormatter extends AbstractFormatter2 
+class XMLFormatter extends AbstractFormatter2 
 {
 	
-	@Inject extension BlocksGrammarAccess
+	@Inject extension XMLGrammarAccess
 
 	def dispatch format(File file, extension IFormattableDocument document)
 	{

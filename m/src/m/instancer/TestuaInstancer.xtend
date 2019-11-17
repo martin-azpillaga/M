@@ -2,31 +2,31 @@ package m.instancer
 
 import java.util.ArrayList
 import m.TestuaRuntimeModule
-import m.m.Access
-import m.m.And
-import m.m.Assignment
-import m.m.Bitwise
-import m.m.BitwiseNegate
-import m.m.Brackets
-import m.m.Branch
-import m.m.Call
-import m.m.Command
-import m.m.Comparison
-import m.m.Decrement
-import m.m.Divide
-import m.m.Expression
+import m.structured.Access
+import m.structured.And
+import m.structured.Assignment
+import m.structured.Bitwise
+import m.structured.BitwiseNegate
+import m.structured.Brackets
+import m.structured.Selection
+import m.structured.Call
+import m.structured.Comparison
+import m.structured.Decrement
+import m.structured.Divide
+import m.structured.Expression
+import m.structured.Increment
+import m.structured.Minus
+import m.structured.Not
+import m.structured.Or
+import m.structured.Plus
+import m.structured.Times
 import m.m.Game
-import m.m.Increment
 import m.m.Loop
 import m.m.MFactory
-import m.m.Minus
-import m.m.Not
-import m.m.Or
-import m.m.Plus
-import m.m.Times
 import org.eclipse.xtext.generator.IFileSystemAccess2
 
 import static m.modeler.GenericSerializer.*
+import m.structured.Statement
 
 class TestuaInstancer 
 {
@@ -53,7 +53,7 @@ class TestuaInstancer
 		}
 		for (s : game.systems)
 		{
-			for (c : s.commands)
+			for (c : s.statements)
 			{
 				c.translate
 			}
@@ -88,7 +88,7 @@ class TestuaInstancer
 		}
 	}
 	
-	def void translate(Command c)
+	def void translate(Statement c)
 	{
 		if (c instanceof Loop)
 		{
@@ -99,17 +99,17 @@ class TestuaInstancer
 			}
 			c.constraints.clear
 			c.constraints.addAll(result)
-			for (comm : c.commands)
+			for (comm : c.statements)
 			{
 				comm.translate
 			}
 		}
-		else if (c instanceof Branch)
+		else if (c instanceof Selection)
 		{
 			c.^if.condition.translate
-			c.^if.commands.forEach[translate]
-			c.elseIfs.forEach[it.condition.translate; it.commands.forEach[translate]]
-			c.commands.forEach[translate]
+			c.^if.statements.forEach[translate]
+			c.elseIfs.forEach[it.condition.translate; it.statements.forEach[translate]]
+			c.statements.forEach[translate]
 		}
 		else if (c instanceof Assignment)
 		{

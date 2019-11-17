@@ -16,7 +16,7 @@ import m.instancer.TestuaInstancer
 import m.m.Component
 import m.TextRuntimeModule
 import static extension m.modeler.GenericSerializer.*
-import m.instancer.BlockGenerator
+import m.instancer.BlocksInstancer
 import m.validation.TypeInference
 import m.validation.Type
 import m.instancer.SettingsGenerator
@@ -108,8 +108,8 @@ class TextGenerator extends AbstractGenerator
 			var systemGenerator = new SystemGenerator
 			systemGenerator.generate(game, types, fsa)
 			
-			var blockGenerator = new BlockGenerator
-			blockGenerator.generate(game, fsa, 'Blocks/')
+			var BlocksInstancer = new BlocksInstancer
+			BlocksInstancer.generate(game, fsa, 'Blocks/')
 						
 		}
 		stopTime = System.currentTimeMillis();

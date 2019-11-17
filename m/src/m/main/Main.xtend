@@ -1,4 +1,4 @@
-package m.generator;
+package m.main;
 
 import com.google.inject.Inject
 import com.google.inject.Provider
