@@ -1,27 +1,27 @@
-grammar m.JSON hidden(WHITE_SPACE)
+grammar m.JSON with m.ASCII hidden(WS) 
 
 import "http://www.eclipse.org/emf/2002/Ecore"
 
 generate json "http://www.minim.games/json"
 
-Object: {Object}
-	'{' (fields+=Field (',' fields+=Field)*)? '}'
+Value:
+	Object|Array|Str|Boolean|Integer32|Null|Float32
 ;
 
-Field: name=STRING ':' value=Value;
+Object: {Object}
+	'{' (members+=Member (',' members+=Member)*)? '}';
 
-Value: Object|Array|StringValue|FloatValue|LongValue|BooleanValue;
+Member: name=STRING_DOUBLE ':' value=Value;
 
-Array: {Array} '[' (elements+=Value (',' elements+=Value)*)? ']';
+Array: {Array} 
+	'[' (elements+=Value (',' elements+=Value)*)? ']';
 
-StringValue: value=STRING;
-FloatValue: value=FLOAT;
-LongValue: value=LONG;
-BooleanValue: value=Boolean;
+Str: value=STRING_DOUBLE;
+Boolean: value=BOOL;
+Integer32: value=INTEGER;
+Null: {Null} 'null';
+Float32: value=FLOAT;
 
-enum Boolean: TRUE='true'|FALSE='false';
-terminal LONG: '-'? '0'..'9'+;
-terminal FLOAT: '-'? ('0'..'9')* '.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?;
-terminal STRING: '"' ( !('"') )* '"';
-terminal WHITE_SPACE: (' '|'\t'|'\r'|'\n')+;
-terminal ID: ('0'..'9'|'a'..'z'|'A'..'Z'|'_') ('a'..'z'|'A'..'Z'|'_'|'0'..'9'|'.'|'-')*;
+BOOL returns EBoolean: 'true' | 'false';
+
+STRING_DOUBLE: '"' (LETTER|DIGIT)* '"';

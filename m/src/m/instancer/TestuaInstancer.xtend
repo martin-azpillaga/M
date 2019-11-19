@@ -20,23 +20,23 @@ import m.structured.Not
 import m.structured.Or
 import m.structured.Plus
 import m.structured.Times
-import m.m.Game
 import m.m.Loop
 import m.m.MFactory
 import org.eclipse.xtext.generator.IFileSystemAccess2
 
 import static m.modeler.GenericSerializer.*
 import m.structured.Statement
+import m.m.Model
 
 class TestuaInstancer 
 {
 	extension MFactory factory = MFactory.eINSTANCE
 	
-	def translate(Game game, IFileSystemAccess2 fsa, String name)
+	def translate(Model model, IFileSystemAccess2 fsa, String name)
 	{
-		var translation = createGame
+		var translation = createModel
 		
-		for (entity : game.entities)
+		for (entity : model.entities)
 		{
 			var translatedEntity = createEntity
 			translatedEntity.name = entity.name
@@ -51,7 +51,7 @@ class TestuaInstancer
 			}
 			translation.entities.add(translatedEntity)
 		}
-		for (s : game.systems)
+		for (s : model.systems)
 		{
 			for (c : s.statements)
 			{

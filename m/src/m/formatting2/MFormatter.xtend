@@ -1,27 +1,27 @@
 package m.formatting2
 
 import m.m.Entity
-import m.m.Game
 import org.eclipse.xtext.formatting2.AbstractFormatter2
 import org.eclipse.xtext.formatting2.IFormattableDocument
 import m.m.Component
 import com.google.inject.Inject
 import m.m.Loop
 import m.services.MGrammarAccess
+import m.m.Model
 
 class MFormatter extends StructuredFormatter 
 {
 	@Inject
 	extension MGrammarAccess access
 	
-	def dispatch void format(Game game, extension IFormattableDocument document) 
+	def dispatch void format(Model model, extension IFormattableDocument document) 
 	{
-		for (entity : game.entities) 
+		for (entity : model.entities) 
 		{
 			entity.append[newLines = 2]
 			entity.format
 		}
-		for (system : game.systems) 
+		for (system : model.systems) 
 		{
 			system.append[newLines = 2]
 			system.format

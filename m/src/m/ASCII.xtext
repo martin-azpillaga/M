@@ -1,0 +1,31 @@
+grammar m.ASCII with org.eclipse.xtext.common.Terminals
+
+import "http://www.eclipse.org/emf/2002/Ecore"
+
+terminal LETTER: 'a'..'z'|'A'..'Z';
+terminal DIGIT: '0'..'9';
+terminal INTEGER: '-'? INT;
+terminal FLOAT: INTEGER '.' INT ('e' INT)?;
+/*
+terminal fragment PREDIGIT: '!'..'/';
+terminal fragment PRE_UPPER: ':'..'@';
+terminal fragment PRE_LOWER: '['..'`';
+terminal fragment POST_LOWER: '{'..'~';
+terminal fragment SPECIAL: PREDIGIT|PRE_UPPER|PRE_LOWER|POST_LOWER;
+
+terminal fragment L_LETTER: 'a'..'z';
+terminal fragment U_LETTER: 'A'..'Z';
+terminal LETTER: L_LETTER | U_LETTER;
+
+terminal DIGIT: '0'..'9';
+terminal fragment NATURAL: '0' | '1'..'9' DIGIT*;
+
+terminal fragment STRINGABLE: ' '..'!'|'#'..']'|']'..'~';
+terminal fragment SCAPED: '\\' ('"'|'\\'|'/'|'b'|'f'|'n'|'r'|'t'|'u' HEX HEX HEX HEX);
+terminal fragment HEX: DIGIT | 'a'..'f' | 'A'..'F';
+
+terminal WHITE_SPACE: (' '|'\t'|'\n'|'\r')+;
+terminal STRING_DOUBLE: '"' (LETTER|DIGIT|SCAPED)* '"';
+terminal INTEGER_32 returns EInt: '-'? NATURAL;
+terminal FLOAT_32 returns EFloat: INTEGER_32 ('.' NATURAL ('e'|'E' INTEGER_32)?)?;
+//terminal PRINTABLE: LETTER|DIGIT|SPECIAL;*/

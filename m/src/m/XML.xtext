@@ -1,19 +1,42 @@
-grammar m.XML hidden(WHITE_SPACE)
-
+grammar m.XML
 import "http://www.eclipse.org/emf/2002/Ecore"
-
 generate mxml "http://www.minim.games/xml"
 
-File: elements+=Element;
-
-Element:
-	'<' open=ID attributes+=Attribute* ('/>'|'>' (elements+=Element+|text=Text)?'</' close=ID '>')
+Model:
+	prolog=Prolog?
+	root=Element
 ;
-Attribute: name=ID '=' value=STRING;
+Prolog: {Prolog} 
+	'<''?' WS* format=ID (WS+ attributes+=Attribute)* WS* '?' '>' WS*;
 
-Text: (N|WHITE_SPACE|ID)+;
+Element: EmptyElement|ClosedElement;
 
-terminal N: '-'? '0'..'9'+ ('.' '0'..'9'*)?;
-terminal ID: ('_'|'a'..'z'|'A'..'Z') ('_'|'a'..'z'|'A'..'Z'|'0'..'9'|'.'|'-')* ;
-terminal WHITE_SPACE: ' '|'\t'|'\r'|'\n';
-terminal STRING: '"' -> '"'|"'" -> "'";
+EmptyElement returns Element:
+	'<' WS* open=ID ( WS+ attributes+=Attribute)* WS* '/' '>'
+;
+
+ClosedElement:
+	'<' WS* open=ID ( WS+ attributes+=Attribute)* WS* '>' 
+	content=Content? 
+	'<' '/' WS* close=ID WS* '>'
+;
+
+Attribute: name=ID WS* '=' WS* '"' WS* content=INSIDE_STRING WS* '"';
+
+Content: Children|Text;
+
+Children: (WS* elements+=Element)+;
+Text: value=PRINT;
+
+// Keywords: < ? > / " = _ - .
+ID: ('_'|LETTER) ('_'|LETTER|DIGIT|'-'|'.')*;
+PRINT: (DIGIT|LETTER|UNICODE|WS|'='|'_'|'-'|'.'|'>'|'/'|'"'|'?')+;
+INSIDE_STRING: ('_'|'-'|'.'|'='|'>'|'/'|'<'|'?'|DIGIT|LETTER|UNICODE)+;
+
+
+terminal DIGIT: '\u0030'..'\u0039';
+terminal LETTER: '\u0041'..'\u005A'|'\u0061'..'\u007A';
+terminal WS: '\u0020'|'\u0009'|'\u000A'|'\u000D';
+terminal UNICODE: '\u0021'..'\u0040'|'\u005B'..'\u0060'|'\u007B'..'\u007F'|'\u0100'..'\uFEFF';
+
+// First keywords then terminals then datatypes then parser rules

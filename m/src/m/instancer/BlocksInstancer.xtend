@@ -11,7 +11,7 @@ import m.mxml.MxmlFactory
 import m.structured.Access
 import m.structured.And
 import m.structured.Assignment
-import m.structured.AssignmentType
+import m.structured.AssignmentKind
 import m.structured.BitwiseNegate
 import m.structured.Brackets
 import m.structured.Call
@@ -24,7 +24,7 @@ import m.structured.Minus
 import m.structured.Not
 import m.structured.Or
 import m.structured.Plus
-import m.structured.RelationType
+import m.structured.RelationKind
 import m.structured.Times
 import m.yaml.Word
 import org.eclipse.xtext.generator.IFileSystemAccess2
@@ -527,26 +527,26 @@ class BlocksInstancer
 		}
 	}
 	
-	def toBlocks(RelationType type)
+	def toBlocks(RelationKind type)
 	{
 		switch type
 		{
-			case RelationType.UNDER: 'less'
-			case RelationType.UNDEROREQUAL: 'lessOrEqual'
-			case RelationType.EQUAL: 'equal'
-			case RelationType.NOTEQUAL: 'notEqual'
-			case RelationType.OVEROREQUAL: 'greaterOrEqual'
-			case RelationType.OVER: 'greater'
+			case RelationKind.UNDER: 'less'
+			case RelationKind.UNDEROREQUAL: 'lessOrEqual'
+			case RelationKind.EQUAL: 'equal'
+			case RelationKind.NOTEQUAL: 'notEqual'
+			case RelationKind.OVEROREQUAL: 'greaterOrEqual'
+			case RelationKind.OVER: 'greater'
 		}
 	}
 	
-	def toBlocks(AssignmentType type)
+	def toBlocks(AssignmentKind type)
 	{
 		switch type
 		{
-			case AssignmentType.SET: 'set'
-			case AssignmentType.INCREASE: 'increase'
-			case AssignmentType.DECREASE: 'decrease'
+			case SET: 'set'
+			case INCREASE: 'increase'
+			case DECREASE: 'decrease'
 			case AND: 'and'
 			case DIVIDE: 'divide'
 			case MODULUS: 'modulus'

@@ -1,10 +1,9 @@
 package m.formatting2
 
-import m.json.Field
 import m.json.Object
-import m.json.StringValue
 import org.eclipse.xtext.formatting2.AbstractFormatter2
 import org.eclipse.xtext.formatting2.IFormattableDocument
+import m.json.Member
 
 class JSONFormatter extends AbstractFormatter2 
 {	
@@ -19,18 +18,13 @@ class JSONFormatter extends AbstractFormatter2
 		close.prepend[newLine]
 		interior(open,close)[indent]
 		object.regionFor.keywords(',').forEach[prepend[noSpace]]
-		object.fields.forEach[format]
+		object.members.forEach[format]
 	}
 
-	def dispatch void format(Field field, extension IFormattableDocument document) 
+	def dispatch void format(Member member, extension IFormattableDocument document) 
 	{
-		field.prepend[newLine]
-		field.regionFor.keyword(':').surround[oneSpace]
-		field.value.format
-	}
-	
-	def dispatch void format(StringValue value, extension IFormattableDocument document)
-	{
-		
+		member.prepend[newLine]
+		member.regionFor.keyword(':').surround[oneSpace]
+		member.value.format
 	}
 }

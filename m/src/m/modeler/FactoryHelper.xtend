@@ -5,19 +5,16 @@ import m.yaml.Element
 import java.util.UUID
 import m.json.JsonFactory
 import m.csharp.File
-import m.structured.Access
 import m.csharp.TypeName
 import m.structured.Expression
-import m.csharp.QualifiedName
-import m.structured.AssignmentType
-import static m.structured.AssignmentType.*
+import m.structured.AssignmentKind
+import static m.structured.AssignmentKind.*
 import java.util.Map
 import java.util.List
 import m.yaml.Node
 import m.csharp.InitializeVariable
 import m.validation.Type
 import m.csharp.CsharpFactory
-import m.structured.StructuredFactory
 import m.csharp.CAccess
 
 class FactoryHelper 
@@ -25,7 +22,6 @@ class FactoryHelper
 	extension YamlFactory yaml = YamlFactory.eINSTANCE
 	extension CsharpFactory csharp = CsharpFactory.eINSTANCE
 	extension JsonFactory json = JsonFactory.eINSTANCE
-	extension StructuredFactory structured = StructuredFactory.eINSTANCE
 	
 	static FactoryHelper instance
 	
@@ -298,9 +294,7 @@ class FactoryHelper
 	def addUsing(File file, String... names)
 	{
 		var using = createUsing
-		var name = createQualifiedName
-		name.names.addAll(names)
-		using.name = name
+		using.name = names.join('.')
 		file.usings.add(using)
 	}
 	
@@ -383,14 +377,7 @@ class FactoryHelper
 		return access
 	}
 	
-	def name(String... names)
-	{
-		var name = createQualifiedName
-		name.names.addAll(names)
-		return name
-	}
-	
-	def type(QualifiedName... names)
+	def type(String... names)
 	{
 		var typeName = createTypeName
 		typeName.name = names.head
@@ -404,9 +391,7 @@ class FactoryHelper
 	def type(String name)
 	{
 		var type = createTypeName
-		var qualifiedName = createQualifiedName
-		qualifiedName.names.add(name)
-		type.name = qualifiedName
+		type.name = name
 		return type
 	}
 	
@@ -454,7 +439,7 @@ class FactoryHelper
 		o.fields.add(field)
 	}
 	
-	def toCS(AssignmentType type)
+	def toCS(AssignmentKind type)
 	{
 		switch (type)
 		{

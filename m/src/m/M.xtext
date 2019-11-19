@@ -4,7 +4,7 @@ import "http://www.minim.games/structured"
 import "http://www.eclipse.org/emf/2002/Ecore"
 generate m "http://www.minim.games/M"
 
-Game:
+Model:
 	(entities+=Entity | systems+=System)*;
 
 Entity:

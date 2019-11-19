@@ -5,7 +5,7 @@ import "http://www.minim.games/M"
 import "http://www.minim.games/structured"
 
 @Override
-Game:
+Model:
 	(entities+=Entity | systems+=System)*;
 
 @Override
