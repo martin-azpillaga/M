@@ -1708,7 +1708,7 @@ class SystemGenerator
 				var methodCall = createMethodCall
 				methodCall.name = 'RemoveComponent'
 				methodCall.generics.add((command.parameters.get(0) as Access).names.head.type)
-				methodCall.expressions.add(command.parameters.get(1).toCS)
+				methodCall.expressions.add(command.parameters.get(1))
 				access.portions.add(methodCall)
 				call.access = access
 				list.statements.add(call)
@@ -1716,19 +1716,19 @@ class SystemGenerator
 			else if (function == 'add')
 			{
 				var call = createAssignment
-				call.access = a.label('PostUpdatestatements').call('AddComponent', (command.parameters.get(0) as Access).names.head.type, command.parameters.get(1).toCS)
+				call.access = a.label('PostUpdatestatements').call('AddComponent', (command.parameters.get(0) as Access).names.head.type, command.parameters.get(1))
 				list.statements.add(call)
 			}
 			else if (function == 'destroy')
 			{
 				var call = createAssignment
-				call.access = a.label('PostUpdatestatements').call('DestroyEntity', command.parameters.get(0).toCS)
+				call.access = a.label('PostUpdatestatements').call('DestroyEntity', command.parameters.get(0))
 				list.statements.add(call)
 			}
 			else if (function == 'create')
 			{
 				var call = createAssignment
-				call.access = a.label('PostUpdatestatements').call('Instantiate', command.parameters.get(0).toCS)
+				call.access = a.label('PostUpdatestatements').call('Instantiate', command.parameters.get(0))
 				list.statements.add(call)
 			}
 		}
@@ -1738,8 +1738,8 @@ class SystemGenerator
 			{
 				var created = createAssignment
 				created.access = a.label(command.access.names.head+'_'+command.access.names.get(1)).label(field(command.access.names.get(1)))
-				created.assignmentType = command.type.toCS
-				created.expression = command.expression.toCS
+				created.assignmentType = command.type
+				created.expression = command.expression
 				list.statements.add(created)
 			}
 			else if (command.access.names.size == 1)
@@ -1764,15 +1764,15 @@ class SystemGenerator
 				
 				var created = createAssignment
 				created.access = a.label(command.access.names.head)
-				created.assignmentType = command.type.toCS
-				created.expression = command.expression.toCS
+				created.assignmentType = command.type
+				created.expression = command.expression
 				list.statements.add(created)
 			}
 			else
 			{
 				var newComponent = createAccess
 				newComponent.setNew = true
-				newComponent.initialize(command.access.names.last.componentName, initialization(command.access.names.last.field, command.expression.toCS))
+				newComponent.initialize(command.access.names.last.componentName, initialization(command.access.names.last.field, command.expression))
 				var created = createAssignment
 				created.access = a.label('EntityManager').call('SetComponentData', a.label('my_'+command.access.names.head+'_'+command.access.names.get(1)).label('Value'), newComponent)
 				list.statements.add(created)
@@ -1855,7 +1855,7 @@ class SystemGenerator
 			var ifCondition = command.^if
 			list.statements.add(Selection)
 			
-			Selection.expression = ifCondition.condition.toCS
+			Selection.expression = ifCondition.condition
 			ifCondition.statements.forEach[Selection.addCommand(it)]
 			
 			
@@ -1863,7 +1863,7 @@ class SystemGenerator
 			{
 				val csharpElseIf = createElseIf
 				var elseIfCondition = elseIf as Condition
-				csharpElseIf.expression = elseIfCondition.condition.toCS
+				csharpElseIf.expression = elseIfCondition.condition
 				elseIfCondition.statements.forEach[csharpElseIf.addCommand(it)]
 			}
 			
@@ -1938,8 +1938,8 @@ class SystemGenerator
 			{
 				created.access.label(command.access.names.get(i))
 			}
-			created.assignmentType = command.type.toCS
-			created.expression = command.expression.toCS
+			created.assignmentType = command.type
+			created.expression = command.expression
 			list.add(created)
 		}
 		else if (command instanceof Loop)
@@ -2056,174 +2056,6 @@ class SystemGenerator
 		}
 		
 		return result
-	}
-	
-	def Expression toCS(Expression expression)
-	{
-		if (expression instanceof Or)
-		{
-			var created = createOr
-			created.left = expression.left.toCS
-			created.right = expression.right.toCS
-			return created
-		}
-		else if (expression instanceof And)
-		{
-			var created = createAnd
-			created.left = expression.left.toCS
-			created.right = expression.right.toCS
-			return created
-		}
-		else if (expression instanceof Not)
-		{
-			var created = createAnd
-			created.left = expression.expression.toCS
-			return created
-		}
-		else if (expression instanceof Brackets)
-		{
-			var created = createBrackets
-			created.expression = expression.expression.toCS
-			return created
-		}
-		else if (expression instanceof Comparison)
-		{
-			var created = createComparison
-			created.left = expression.left.toCS
-			created.right = expression.right.toCS
-			created.type = expression.type.toCS
-			return created
-		}
-		else if (expression instanceof Plus)
-		{
-			var created = createPlus
-			created.left = expression.left.toCS
-			created.right = expression.right.toCS
-			return created
-		}
-		else if (expression instanceof Minus)
-		{
-			var created = createMinus
-			created.left = expression.left.toCS
-			created.right = expression.right.toCS
-			return created
-		}
-		else if (expression instanceof Times)
-		{
-			var created = createTimes
-			created.left = expression.left.toCS
-			created.right = expression.right.toCS
-			return created
-		}
-		else if (expression instanceof Divide)
-		{
-			var created = createDivide
-			created.left = expression.left.toCS
-			created.right = expression.right.toCS
-			return created
-		}
-		else if (expression instanceof Modulus)
-		{
-			var created = createModulus
-			created.left = expression.left.toCS
-			created.right = expression.right.toCS
-			return created
-		}
-		else if (expression instanceof Increment)
-		{
-			var created = createIncrement
-			created.left = expression.expression.toCS
-			return created
-		}
-		else if (expression instanceof Decrement)
-		{
-			var created = createDecrement
-			created.left = expression.expression.toCS
-			return created
-		}
-		else if (expression instanceof Access)
-		{
-			if (expression.names.size == 2)
-			{
-				var name = expression.names.get(1)
-				var access = a.label('my_'+expression.names.head+'_'+name)
-				
-				return access.label('Value')
-			}
-			else if (expression.names.size == 1)
-			{
-				return a.label(expression.names.head)
-			}
-			else
-			{
-				return a.label('EntityManager').call('GetComponentData', expression.names.last.type, a.label('my_'+expression.names.head+'_'+expression.names.get(1)).label('Value'))
-			}
-		}
-		else if (expression instanceof Call)
-		{
-			var function = expression.name
-			if (#['sin','cos','tan','log','sqrt'].contains(function))
-			{
-				return a.label('math').call(function, expression.parameters.map[toCS])
-			}
-			else if (function == 'join')
-			{
-				usings.add('Unity.Mathematics')
-				var newType = 'float'
-				if (expression.parameters.size == 2)
-				{
-					newType+='2'
-				}
-				else if (expression.parameters.size == 3)
-				{
-					newType+='3'
-				}
-				else
-				{
-					newType+='4'
-				}
-				
-				var call = a.call(newType, expression.parameters.map[toCS])
-				call.setNew = true
-				return call
-			}
-			else if (function == 'random')
-			{
-				usings.add('Unity.Mathematics')
-				var e = expression.parameters.get(0).toCS as m.cs.Access
-				return a.label('UnityEngine').label('Random').call('Range', #[(expression.parameters.get(0).toCS as m.cs.Access).label('x'), e.label('y')])
-			}
-			else if (function == 'has')
-			{
-				var call = a.label('EntityManager').call('HasComponent', (expression.parameters.get(1) as Access).names.head.type, expression.parameters.get(0).toCS)
-				return call
-			}
-			else
-			{
-				return a.call(expression.name, expression.parameters.map[toCS])
-			}
-		}
-	}
-	
-	def toCS(Access access)
-	{
-		var name = access.names.get(1)
-		var result = a.label(access.names.head+'_'+name)
-		
-		return result.label('Value')
-	}
-	
-	def toCS(m.m.RelationType type)
-	{
-		switch (type)
-		{
-			case EQUAL: RelationType.EQUAL
-			case NOTEQUAL: RelationType.NOTEQUAL
-			case OVER: RelationType.OVER
-			case OVEROREQUAL: RelationType.OVEROREQUAL
-			case UNDER: RelationType.UNDER
-			case UNDEROREQUAL: RelationType.UNDEROREQUAL
-		}
 	}
 	
 	def contactSystem()

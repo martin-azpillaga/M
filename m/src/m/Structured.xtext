@@ -24,7 +24,7 @@ Condition:
 	condition=Expression BEGIN statements+=Statement* END;
 
 Assignment:
-	access=Access type=AssignmentType expression=Expression;
+	access=Access type=AssignmentKind expression=Expression;
 
 Call:
 	name=IDENTIFIER '(' parameters+=Expression (',' parameters+=Expression)* ')';
@@ -39,7 +39,7 @@ PrimaryB returns Expression:
 	AtomicB | {Not} '!' expression=AtomicB;
 
 AtomicB returns Expression:
-	Addition ({Comparison.left=current} type=RelationType right=Addition)?;
+	Addition ({Comparison.left=current} type=RelationKind right=Addition)?;
 
 Addition returns Expression:
 	Multiplication (({Plus.left=current} '+' | {Minus.left=current} '-') right=Multiplication)*;
@@ -60,10 +60,10 @@ Primary returns Expression:
 Access:
 	names+=IDENTIFIER ('.' names+=IDENTIFIER)*;
 
-enum RelationType:
+enum RelationKind:
 	over='>' | under='<' | equal='=' | notequal='!=' | overorequal='>=' | underorequal='<=';
 
-enum AssignmentType:
+enum AssignmentKind:
 	set='=' | increase='+=' | decrease='-=' | multiply='*=' | divide='/=' | modulus='%=' | and='&=' | or='|=' | xor='^='
 	| shiftLeft='<<=' | shiftRight='>>=';
 

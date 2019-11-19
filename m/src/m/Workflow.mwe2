@@ -5,11 +5,14 @@ import org.eclipse.xtext.xtext.generator.model.project.*
 
 var rootPath = ".."
 
-Workflow {
-	
-	component = XtextGenerator {
-		configuration = {
-			project = StandardProjectConfig {
+Workflow 
+{	
+	component = XtextGenerator 
+	{
+		configuration = 
+		{
+			project = StandardProjectConfig 
+			{
 				baseName = "m"
 				rootPath = rootPath
 				genericIde = {enabled = true}
@@ -21,6 +24,33 @@ Workflow {
 				encoding = "UTF-8"
 				lineDelimiter = "\n"
 			}
+		}
+		language = XtextGeneratorLanguage
+		{
+			name = "m.ASCII"
+			fileExtensions = "ascii"
+			fragment = grammarAccess.GrammarAccessFragment2 {}
+			fragment = ecore.EMFGeneratorFragment2 {}
+		    fragment = serializer.SerializerFragment2 { generateStub = false }
+		    fragment = resourceFactory.ResourceFactoryFragment2 {}
+		    fragment = validation.ValidatorFragment2 { generateStub = false }
+		    fragment = builder.BuilderIntegrationFragment2 {}
+		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
+		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
+		}
+		language = XtextGeneratorLanguage 
+		{
+			name = "m.Procedural"
+			fileExtensions = "procedural"
+			fragment = grammarAccess.GrammarAccessFragment2 {}
+		    fragment = ecore.EMFGeneratorFragment2 {}
+		    fragment = serializer.SerializerFragment2 { generateStub = false }
+		    fragment = resourceFactory.ResourceFactoryFragment2 {}
+		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {debugGrammar = true}
+		    fragment = validation.ValidatorFragment2 { generateStub = false }
+		    fragment = builder.BuilderIntegrationFragment2 {}
+		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
+		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
 		}
 		language = XtextGeneratorLanguage 
 		{
@@ -40,7 +70,7 @@ Workflow {
 		{
 			name = "m.M"
 			fileExtensions = "m"
-			referencedResource = "platform:/resource/m/model/generated/Structured.genmodel"
+			referencedResource = "model/generated/Structured.genmodel"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
@@ -55,8 +85,8 @@ Workflow {
 		{
 			name = "m.Text"
 			fileExtensions = "text"
-			referencedResource = "platform:/resource/m/model/generated/M.genmodel"
-			referencedResource = "platform:/resource/m/model/generated/Structured.genmodel"			
+			referencedResource = "model/generated/M.genmodel"
+			referencedResource = "model/generated/Structured.genmodel"			
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
@@ -70,8 +100,8 @@ Workflow {
 		{
 			name = "m.Testua"
 			fileExtensions = "testua"
-			referencedResource = "platform:/resource/m/model/generated/M.genmodel"
-			referencedResource = "platform:/resource/m/model/generated/Structured.genmodel"			
+			referencedResource = "model/generated/M.genmodel"
+			referencedResource = "model/generated/Structured.genmodel"			
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
@@ -85,12 +115,12 @@ Workflow {
 		{
 			name = "m.CSharp"
 			fileExtensions = "cs"
-			referencedResource = "platform:/resource/m/model/generated/Structured.genmodel"
+			referencedResource = "model/generated/Structured.genmodel"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
-		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
+		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 { debugGrammar = true }
 		    fragment = validation.ValidatorFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
@@ -100,11 +130,12 @@ Workflow {
 		{
 			name = "m.XML"
 			fileExtensions = "blocks, xml"
+			referencedResource = "src/m/ASCII.xtext"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 			fragment = ecore.EMFGeneratorFragment2{}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
-		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
+		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 { debugGrammar = true }
 		    fragment = validation.ValidatorFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
@@ -128,6 +159,7 @@ Workflow {
 		{
 			name = "m.JSON"
 			fileExtensions = "json"
+			referencedResource = "src/m/ASCII.xtext"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }

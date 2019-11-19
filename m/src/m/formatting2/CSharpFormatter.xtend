@@ -4,38 +4,20 @@
 package m.formatting2
 
 import com.google.inject.Inject
-import m.csharp.Annotation
-import m.csharp.Argument
-import m.csharp.Cast
-import m.csharp.Field
-import m.csharp.File
-import m.csharp.If
-import m.csharp.Indexing
-import m.csharp.Initialization
-import m.csharp.InitializeVariable
-import m.csharp.Lambda
-import m.csharp.Member
-import m.csharp.Method
-import m.csharp.MethodCall
-import m.csharp.QualifiedName
-import m.csharp.Return
-import m.csharp.Type
-import m.csharp.TypeName
+import java.lang.reflect.Method
+import m.csharp.Model
 import m.csharp.Using
-import m.structured.Access
-import m.structured.Assignment
-import m.structured.Decrement
-import m.structured.Increment
 import m.services.CSharpGrammarAccess
+import m.validation.Type
 import org.eclipse.xtext.formatting2.IFormattableDocument
-import m.csharp.CAssignment
+import org.eclipse.xtext.xtext.generator.parser.antlr.splitting.simpleExpressions.MethodCall
 
 class CSharpFormatter extends StructuredFormatter 
 {
 	
 	@Inject extension CSharpGrammarAccess
 
-	def dispatch void format(File file, extension IFormattableDocument document) 
+	def dispatch void format(Model model, extension IFormattableDocument document) 
 	{
 		for (using : file.usings) 
 		{
@@ -131,7 +113,7 @@ class CSharpFormatter extends StructuredFormatter
 		interior(open,close)[indent]
 		open.prepend[newLine]
 		close.prepend[newLine]
-		method.commands.forEach[format]
+		method.statements.forEach[format]
 	}
 	
 	def dispatch void format(Argument argument, extension IFormattableDocument document)
@@ -148,7 +130,7 @@ class CSharpFormatter extends StructuredFormatter
 		interior(open,close)[indent]
 		open.prepend[newLine]
 		close.prepend[newLine]
-		branch.commands.forEach[format]
+		branch.statements.forEach[format]
 	}
 	
 	def dispatch void format(Return r, extension IFormattableDocument document)
@@ -190,7 +172,7 @@ class CSharpFormatter extends StructuredFormatter
 		interior(open,close)[indent]
 		open.prepend[newLine]
 		close.prepend[newLine]
-		lambda.commands.forEach[format]
+		lambda.statements.forEach[format]
 	}
 	
 	def dispatch void format(MethodCall methodCall, extension IFormattableDocument document)

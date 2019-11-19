@@ -5,27 +5,42 @@ import "http://www.minim.games/structured"
 
 generate csharp "http://www.minim.games/csharp"
 
-File:
-	usings+=Using*
-	types+=Member*;
+Model:
+	usings+=Using*;
+	//classifiers+=Classifier*;
 
 Using:
 	'using' name=QualifiedName ';';
+/*
+Classifier:
+	(Class | Structure | Enumeration);
 
-QualifiedName:
-	names+=IDENTIFIER ('.' names+=IDENTIFIER)*;
-
-Type:
-	sealed?='sealed'?
-	type=TypeEnum name=TypeName (':' superTypes+=TypeName (',' superTypes+=TypeName)*)?
+Class:
+	annotations+=Annotation*
+	visibility=Visibility?
+	sealed?='sealed'? static?='static' 'class' 
+	name=TypeName (':' superTypes+=TypeName (',' superTypes+=TypeName)*)?
 	BEGIN
-	members+=Member*
+	members+=(Classifier|Field)*
 	END;
 
-Member:
+Structure:
 	annotations+=Annotation*
-	visibility=Visibility static?='static'?
-	value=(Type | Method | Field);
+	visibility=Visibility?
+	'struct' name=TypeName (':' superTypes+=TypeName (',' superTypes+=TypeName)*)?
+	BEGIN
+	members+=(Classifier|Field)*
+	END
+;
+
+Enumeration:
+	annotations+=Annotation*
+	visibility=Visibility?
+	'enum' name=TypeName
+	BEGIN
+	members+=(Classifier|Field)*
+	END
+;
 
 Annotation:
 	'[' function=TypeName ('(' parameters+=Expression (',' parameters+=Expression)* ')')? ']';
@@ -52,7 +67,7 @@ Statement:
 	For | If | While | CAssignment ';' | Return ';';
 
 CAssignment:
-	(var?='var' | type=TypeName)? access=CAccess (assignmentType=AssignmentType expression=Expression | increment?='++' |
+	(var?='var' | type=TypeName)? access=CAccess (assignmentType=AssignmentKind expression=Expression | increment?='++' |
 	decrement?='--')?;
 
 Return:
@@ -141,14 +156,17 @@ Boolean3 returns Expression:
 	Boolean4;
 
 Boolean4 returns Expression:
-	Addition ({Comparison.left=current} type=RelationType right=Addition)?;
+	Addition ({Comparison.left=current} type=RelationKind right=Addition)?;
 
-enum TypeEnum:
+enum ClassifierKind:
 	class | struct;
 
 enum Visibility:
 	public | private | protected | internal;
-
+*/
+QualifiedName:
+	IDENTIFIER ('.' IDENTIFIER)*;
+	
 terminal LONG:
 	'-'? '0'..'9'+;
 
