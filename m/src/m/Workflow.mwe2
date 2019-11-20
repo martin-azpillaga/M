@@ -25,23 +25,10 @@ Workflow
 				lineDelimiter = "\n"
 			}
 		}
-		language = XtextGeneratorLanguage
-		{
-			name = "m.ASCII"
-			fileExtensions = "ascii"
-			fragment = grammarAccess.GrammarAccessFragment2 {}
-			fragment = ecore.EMFGeneratorFragment2 {}
-		    fragment = serializer.SerializerFragment2 { generateStub = false }
-		    fragment = resourceFactory.ResourceFactoryFragment2 {}
-		    fragment = validation.ValidatorFragment2 { generateStub = false }
-		    fragment = builder.BuilderIntegrationFragment2 {}
-		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
-		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
-		}
 		language = XtextGeneratorLanguage 
 		{
-			name = "m.Procedural"
-			fileExtensions = "procedural"
+			name = "m.Modular"
+			fileExtensions = "modular"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
@@ -52,10 +39,10 @@ Workflow
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
 		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
 		}
-		language = XtextGeneratorLanguage 
+		language = XtextGeneratorLanguage
 		{
-			name = "m.Structured"
-			fileExtensions = "structured"
+			name = "m.ModularExpressions"
+			fileExtensions = "modularExpressions"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
@@ -70,7 +57,7 @@ Workflow
 		{
 			name = "m.M"
 			fileExtensions = "m"
-			referencedResource = "model/generated/Structured.genmodel"
+			referencedResource = "model/generated/ModularExpressions.genmodel"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
@@ -86,7 +73,7 @@ Workflow
 			name = "m.Text"
 			fileExtensions = "text"
 			referencedResource = "model/generated/M.genmodel"
-			referencedResource = "model/generated/Structured.genmodel"			
+			referencedResource = "model/generated/Modular.genmodel"			
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
@@ -101,7 +88,7 @@ Workflow
 			name = "m.Testua"
 			fileExtensions = "testua"
 			referencedResource = "model/generated/M.genmodel"
-			referencedResource = "model/generated/Structured.genmodel"			
+			referencedResource = "model/generated/Modular.genmodel"			
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
@@ -115,7 +102,7 @@ Workflow
 		{
 			name = "m.CSharp"
 			fileExtensions = "cs"
-			referencedResource = "model/generated/Structured.genmodel"
+			referencedResource = "model/generated/Modular.genmodel"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
@@ -130,7 +117,6 @@ Workflow
 		{
 			name = "m.XML"
 			fileExtensions = "blocks, xml"
-			referencedResource = "src/m/ASCII.xtext"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 			fragment = ecore.EMFGeneratorFragment2{}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
@@ -159,7 +145,6 @@ Workflow
 		{
 			name = "m.JSON"
 			fileExtensions = "json"
-			referencedResource = "src/m/ASCII.xtext"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }

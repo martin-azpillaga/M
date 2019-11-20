@@ -1,27 +1,81 @@
-grammar m.JSON with m.ASCII hidden(WS) 
+grammar m.JSON hidden(WS)
 
 import "http://www.eclipse.org/emf/2002/Ecore"
-
 generate json "http://www.minim.games/json"
 
 Value:
-	Object|Array|Str|Boolean|Integer32|Null|Float32
-;
+	Object | Array | String | Boolean | Integer32 | Null | Float32;
 
-Object: {Object}
+Object:
+	{Object}
 	'{' (members+=Member (',' members+=Member)*)? '}';
 
-Member: name=STRING_DOUBLE ':' value=Value;
+Member:
+	'"' name=INSIDE_STRING '"' ':' value=Value;
 
-Array: {Array} 
+Array:
+	{Array}
 	'[' (elements+=Value (',' elements+=Value)*)? ']';
 
-Str: value=STRING_DOUBLE;
-Boolean: value=BOOL;
-Integer32: value=INTEGER;
-Null: {Null} 'null';
-Float32: value=FLOAT;
+String:
+	'"' value=INSIDE_STRING '"';
 
-BOOL returns EBoolean: 'true' | 'false';
+Boolean:
+	value=BOOL;
 
-STRING_DOUBLE: '"' (LETTER|DIGIT)* '"';
+Integer32:
+	value=INTEGER;
+
+Null:
+	{Null} 'null';
+
+Float32:
+	value=FLOAT;
+
+	//Keywords {} , : " [] true false null e E + -
+INTEGER returns EInt:
+	'-'? DIGIT+;
+
+FLOAT returns EFloat:
+	INTEGER '.' DIGIT+ (('e' | 'E') ('+' | '-')? DIGIT+)?;
+
+BOOL returns EBoolean:
+	'true' | 'false';
+
+SCAPED: '\\' ('n'|'t'|'b'|'f'|'\\'|'/'|'"'|'r'|'u' HEX HEX HEX HEX);
+
+HEX: DIGIT | A_F;
+
+INSIDE_STRING:
+	(
+		SCAPED|WS|
+		LETTER | HEX | SPECIAL |
+		'true' | 'false' | 'null' | 
+		'}' | '{' | '[' | ']' | ':' | ',' | '+' | '-' | 'e' | 'E' |
+		'n' |'t' |'b'|'f'|'/'|'r'|'u'
+	)*;
+
+terminal A_F: 'A'..'F'|'a'..'f';
+
+terminal fragment ZERO: '\u0030';
+terminal fragment ONE_NINE: '\u0031'..'\u0039';
+terminal fragment ZERO_NINE: '\u0030'..'\u0039';
+terminal fragment LOWER: '\u0061'..'\u007A';
+terminal fragment UPPER: '\u0041'..'\u005A';
+terminal fragment WHITE_SPACE: '\u0020'|'\u0009'|'\u000A'|'\u000D';
+terminal fragment PRE_UPPER: '\u0021'..'\u0040';
+terminal fragment POST_UPPER: '\u005B'..'\u0060';
+terminal fragment POST_LOWER: '\u007B'..'\u007F';
+terminal fragment UNICODE: '\u0100'..'\uFEFF';
+
+terminal LETTER:
+	UPPER | LOWER;
+
+terminal DIGIT:
+	ZERO_NINE;
+
+terminal SPECIAL: PRE_UPPER|POST_LOWER|POST_UPPER|
+	UNICODE;
+
+terminal WS:
+	WHITE_SPACE;

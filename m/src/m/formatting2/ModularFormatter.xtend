@@ -4,19 +4,18 @@
 package m.formatting2
 
 import com.google.inject.Inject
-import m.procedural.File
-import m.procedural.Procedure
-import m.services.ProceduralGrammarAccess
+import m.modular.Procedure
+import m.services.ModularGrammarAccess
 import org.eclipse.xtext.formatting2.AbstractFormatter2
 import org.eclipse.xtext.formatting2.IFormattableDocument
 
-class ProceduralFormatter extends AbstractFormatter2 {
+class ModularFormatter extends AbstractFormatter2 {
 	
-	@Inject extension ProceduralGrammarAccess
+	@Inject extension ModularGrammarAccess
 
-	def dispatch void format(File file, extension IFormattableDocument document) {
+	def dispatch void format(m.modular.Module module, extension IFormattableDocument document) {
 		// TODO: format HiddenRegions around keywords, attributes, cross references, etc. 
-		for (procedure : file.procedures) {
+		for (procedure : module.procedures) {
 			procedure.format
 		}
 	}
@@ -28,5 +27,5 @@ class ProceduralFormatter extends AbstractFormatter2 {
 		}
 	}
 	
-	// TODO: implement for Selection, Branch, Iteration
+	// TODO: implement for Selection, Branch, Iteration, Call
 }

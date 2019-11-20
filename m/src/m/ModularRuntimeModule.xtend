@@ -7,5 +7,5 @@ package m
 /**
  * Use this class to register components to be used at runtime / without the Equinox extension registry.
  */
-class ProceduralRuntimeModule extends AbstractProceduralRuntimeModule {
+class ModularRuntimeModule extends AbstractModularRuntimeModule {
 }
