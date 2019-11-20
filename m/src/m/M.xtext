@@ -1,30 +1,42 @@
-grammar m.M with m.Structured
+grammar m.M with m.ModularExpressions
 
-import "http://www.minim.games/structured"
+import "http://www.minim.games/modularExpressions"
 import "http://www.eclipse.org/emf/2002/Ecore"
 generate m "http://www.minim.games/M"
 
-Model:
-	(entities+=Entity | systems+=System)*;
+Module:
+	entities+=Entity*
+;
 
 Entity:
-	name=IDENTIFIER (':' base=IDENTIFIER)?
-	BEGIN (components+=Component (',' components+=Component)*)? END
-	('[' (entities+=Entity)* ']')?;
+	name=NAME (WS* ':' WS* base=NAME)?
+	WS* BEGIN (components+=Component (',' components+=Component)*)? WS* END;
 
 Component:
-	name=IDENTIFIER (values+=NUMBER+|values+=IDENTIFIER+);
+	WS* name=IDENTIFIER (WS+ value=(Vector|Asset))?;
 	
-System:
-	name=IDENTIFIER BEGIN statements+=Statement+ END;
+Vector:
+	values+=DIGIT (WS+ values+=DIGIT)*
+;
 
-@Override
-Statement:
-	Iteration|Loop|Selection|Assignment|Call;
+Asset:
+	value=NAME
+;
+NAME: LETTER (LETTER|DIGIT|WS+ LETTER|WS+ DIGIT)*
+	| DIGIT (DIGIT|WS+ DIGIT)* LETTER (LETTER|DIGIT|WS+ LETTER|WS+ DIGIT)*
+;
+/*
+P:
+	name=IDENTIFIER arguments+=IDENTIFIER+
+	BEGIN statements+=(Statement|Loop) END
+;
 
 Loop:
 	entity=IDENTIFIER (':' constraints+=IDENTIFIER+)?
 	BEGIN statements+=Statement* END;
 
-terminal NUMBER:
-	'-'? ('0'..'9')* ('.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?)?;
+
+terminal DIGIT: '0'..'9';
+
+NUMBER:
+	'-'? (DIGIT)* ('.' (DIGIT)+ ('e' '-'? DIGIT+)?)?;*/

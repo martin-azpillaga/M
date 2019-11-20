@@ -2,19 +2,9 @@ grammar m.Testua with m.M
 
 import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 import "http://www.minim.games/M"
-import "http://www.minim.games/structured"
+import "http://www.minim.games/modular" as m
 
 @Override
-Model:
-	(entities+=Entity | systems+=System)*;
-
-@Override
-Loop:
-	'entitate' entity=IDENTIFIER 'bakoitzarengatik' ('hurrengo' 'etiketekin' ':' constraints+=IDENTIFIER+)?
-	BEGIN statements+=Statement+ END;
-
-@Override
-Selection:
-	'baldin' 'eta' if=Condition
-	('edo' elseIfs+=Condition)*
-	('bestela' BEGIN statements+=Statement+ END)?;
+Module:
+	entities+=Entity
+;

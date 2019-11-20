@@ -2,28 +2,9 @@ grammar m.Text with m.M
 
 import "http://www.eclipse.org/emf/2002/Ecore" as ecore
 import "http://www.minim.games/M"
-import "http://www.minim.games/structured"
+import "http://www.minim.games/modular"
 
 @Override
-Model:
-	entities+=Entity;
-
-@Override
-System:
-	name=W 'system' BEGIN statements+=Statement* END;
-
-@Override
-Loop:
-	FOREACH entity=IDENTIFIER (WITH constraints+=IDENTIFIER+)?
-	BEGIN statements+=Statement* END;
-
-@Override
-Selection:
-	'if' if=Condition
-	('else' 'if' elseIfs+=Condition)*
-	('else' BEGIN statements+=Statement* END)?;
-
-terminal FOREACH: 'foreach';
-terminal WITH: 'with';
-
-W: IDENTIFIER | FOREACH | 'if' | 'else' | WITH | 'system';
+Module:
+	entities+=Entity
+;

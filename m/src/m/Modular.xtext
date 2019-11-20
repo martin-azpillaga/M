@@ -1,0 +1,52 @@
+grammar m.Modular
+
+import "http://www.eclipse.org/emf/2002/Ecore"
+generate modular "http://www.minim.games/modular"
+
+Procedure:
+	WS* name=IDENTIFIER (WS+ arguments+=IDENTIFIER)*
+	WS* BEGIN statements+=Statement* WS* END
+;
+
+Statement:
+	Selection | Iteration | Call
+;
+
+Selection:
+	WS* CHECK branches+=Branch
+	(WS* RECHECK branches+=Branch)*
+	(WS* BEGIN statements+=Statement* WS* END)?
+;
+
+Branch:
+	condition=Call
+	WS* BEGIN statements+=Statement* WS* END
+;
+
+Iteration:
+	WS* ITERATE condition=Call
+	WS* BEGIN statement+=Statement* WS* END
+;
+
+Call:
+	WS* name=IDENTIFIER WS* OPEN parameters+=Call* WS* CLOSE
+;
+
+IDENTIFIER:
+	LETTER+;
+	
+terminal fragment LOWER_LETTER: '\u0061'..'\u007A';
+terminal fragment UPPER_LETTER: '\u0041'..'\u005A';
+terminal fragment WHITE_SPACE: '\u0020'|'\u0009'|'\u000A'|'\u000D';
+
+terminal LETTER: LOWER_LETTER|UPPER_LETTER;
+terminal WS: WHITE_SPACE;
+
+terminal OPEN: '(';
+terminal CLOSE: ')';
+terminal ITERATE: '~';
+terminal RECHECK: '??';
+terminal CHECK: '?';
+terminal BEGIN: '{';
+terminal END: '}';
+

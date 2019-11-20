@@ -7,5 +7,5 @@ package m.ide
 /**
  * Use this class to register ide components.
  */
-class ProceduralIdeModule extends AbstractProceduralIdeModule {
+class ModularIdeModule extends AbstractModularIdeModule {
 }

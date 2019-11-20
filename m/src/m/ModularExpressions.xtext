@@ -1,0 +1,87 @@
+grammar m.ModularExpressions with m.Modular
+
+import "http://www.eclipse.org/emf/2002/Ecore"
+generate modularExpressions "http://www.minim.games/modularExpressions"
+
+LogicalOr returns Expression:
+  LogicalAnd ({LogicalOr.left=current} WS* '⋁' right=LogicalAnd)*;
+  
+LogicalAnd returns Expression:
+  BitwiseOr ({LogicalAnd.left=current} WS* '⋀' right=BitwiseOr)*;
+
+BitwiseOr returns Expression:
+	BitwiseXor ({BitwiseOr.left=current} WS* '|' right=BitwiseXor)*;
+
+BitwiseXor returns Expression:
+	BitwiseAnd ({BitwiseXor.left=current} WS* '^' right=BitwiseAnd)*;
+
+BitwiseAnd returns Expression:
+	Equality ({BitwiseAnd.left=current} WS* '&' right=Equality)*;
+
+Equality returns Expression:
+	NotEqual ({Equal.left=current} WS* '=' right=NotEqual)*;
+
+NotEqual returns Expression:
+	GreaterOrEqual ({NotEqual.left=current} WS* '≠' right=GreaterOrEqual)*;
+
+GreaterOrEqual returns Expression:
+	Greater ({GreaterOrEqual.left=current} WS* '≥' right=Greater)*;
+
+Greater returns Expression:
+	LowerOrEqual ({Greater.left=current} WS* '>' right=LowerOrEqual)*;
+
+LowerOrEqual returns Expression:
+	Lower ({LowerOrEqual.left=current} WS* '≤' right=Lower)*;
+
+Lower returns Expression:
+	RightShift ({Lower.left=current} WS* '<' right=RightShift)*;
+
+RightShift returns Expression:
+	LeftShift ({RightShift.left=current} WS* '≫' right=LeftShift)*;
+	
+LeftShift returns Expression:
+	Subtraction ({LeftShift.left=current} WS* '≪' right=Subtraction)*;
+
+Subtraction returns Expression:
+	Addition ({Subtraction.left=current} WS* '-' right=Addition)*;
+
+Addition returns Expression:
+	Modulo ({Addition.left=current} WS* '+' right=Modulo)*;
+
+Modulo returns Expression:
+	Division ({Modulo.left=current} WS* '%' right=Division)*;
+
+Division returns Expression:
+	Multiplication ({Division.left=current} WS* '/' right=Multiplication)*;
+
+Multiplication returns Expression:
+	BitwiseNot ({Multiplication.left=current} WS* '*' right=BitwiseNot)*;
+
+BitwiseNot returns Expression:
+	LogicalNot | {BitwiseNot} WS* ITERATE expression=LogicalNot;
+
+LogicalNot returns Expression:
+	UnaryMinus | {LogicalNot} WS* '!' expression=UnaryMinus;
+
+UnaryMinus returns Expression:
+	UnaryPlus | {UnaryMinus} WS* '-' expression=UnaryPlus
+;
+
+UnaryPlus returns Expression:
+	Decrement | {UnaryPlus} WS* '+' expression=Decrement
+;
+
+Decrement returns Expression:
+	Increment | {Decrement} WS* '--' expression=Increment;
+	
+Increment returns Expression:
+	Primary | {Increment} WS* '++' expression=Primary;
+	
+Primary returns Expression:
+  NumberLiteral |
+  WS* OPEN LogicalOr WS* CLOSE;
+
+NumberLiteral:
+  WS* value=DIGIT;
+
+terminal DIGIT returns EInt: '0'..'9'+;
