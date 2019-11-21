@@ -2,15 +2,37 @@ grammar m.CSharp with m.Modular hidden(MULTIPLE_LINES_COMMENT, SINGLE_LINE_COMME
 
 import "http://www.eclipse.org/emf/2002/Ecore"
 import "http://www.minim.games/modular"
+import "http://www.minim.games/expressions"
 
 generate csharp "http://www.minim.games/csharp"
 
 Model:
-	usings+=Using*;
-	//classifiers+=Classifier*;
-
+	usings+=Using*
+	procedures+=Procedure*;
 Using:
 	'using' name=QualifiedName ';';
+QualifiedName:
+	IDENTIFIER ('.' IDENTIFIER)*;
+	
+@Override
+Expression:
+	Ternary ({InlineAssignment.left=current}  kind=AssignmentKind right=Ternary)*;
+
+@Override
+UnaryMinus returns Expression:
+	UnaryPlus | {UnaryMinus}  '-' expression=UnaryPlus
+;
+
+UnaryPlus returns Expression:
+	PreDecrement | {UnaryPlus}  '+' expression=PreDecrement
+;
+
+PreDecrement returns Expression:
+	PreIncrement | {PreDecrement}  '--' expression=PreIncrement;
+	
+PreIncrement returns Expression:
+	Primary | {PreIncrement}  '++' expression=Primary;
+
 /*
 Classifier:
 	(Class | Structure | Enumeration);
@@ -164,18 +186,12 @@ enum ClassifierKind:
 enum Visibility:
 	public | private | protected | internal;
 */
-QualifiedName:
-	IDENTIFIER ('.' IDENTIFIER)*;
-	
-terminal LONG:
-	'-'? '0'..'9'+;
+Index: identifier=IDENTIFIER  '[' (parameters+=Expression ( SEPARATOR parameters+=Expression)*)?  ']';
 
-terminal FLOAT:
-	'-'? ('0'..'9')* '.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?;
+@Override
+Variable: IdentifierLiteral|Call|Index;
 
-terminal STRING:
-	'"' ('\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\' | '"'))* '"' |
-	"'" ('\\' . /* 'b'|'t'|'n'|'f'|'r'|'u'|'"'|"'"|'\\' */ | !('\\' | "'"))* "'";
+
 
 terminal MULTIPLE_LINES_COMMENT:
 	'/*'->'*/';

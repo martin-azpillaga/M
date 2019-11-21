@@ -7,5 +7,5 @@ package m.ide
 /**
  * Use this class to register ide components.
  */
-class ModularExpressionsIdeModule extends AbstractModularExpressionsIdeModule {
+class ExpressionsIdeModule extends AbstractExpressionsIdeModule {
 }
