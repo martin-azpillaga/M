@@ -1,65 +1,76 @@
-package m.main;
+
+package m.main
 
 import com.google.inject.Inject
 import com.google.inject.Provider
-import java.io.ByteArrayInputStream
-import java.io.IOException
 import m.TextStandaloneSetup
-import m.m.MPackage
 import org.eclipse.emf.common.util.URI
-import org.eclipse.emf.ecore.EPackage
 import org.eclipse.emf.ecore.resource.ResourceSet
+import org.eclipse.xtext.generator.GeneratorContext
+import org.eclipse.xtext.generator.GeneratorDelegate
+import org.eclipse.xtext.generator.JavaIoFileSystemAccess
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.IResourceValidator
-import org.eclipse.xtext.validation.Issue
+import org.eclipse.emf.ecore.EPackage
+import m.m.MPackage
+import m.expressions.ExpressionsPackage
+import m.modular.ModularPackage
 
-class Main 
-{
-	def static void main(String[] args) 
-	{
-		if (args.length == 0) 
-		{
-			System.err.println("Aborting: no path to EMF resource provided!");
-			return;
+class Main {
+
+	def static main(String[] args) {
+		if (args.empty) {
+			System::err.println('Aborting: no path to EMF resource provided!')
+			return
 		}
-		var injector = new TextStandaloneSetup().createInjectorAndDoEMFRegistration();
-		var main = injector.getInstance(Main);
+		val injector = new TextStandaloneSetup().createInjectorAndDoEMFRegistration
+		val main = injector.getInstance(Main)
+		if (!EPackage.Registry.INSTANCE.containsKey("http://www.minim.games/expressions")) 
+		{
+			EPackage.Registry.INSTANCE.put("http://www.minim.games/expressions", ExpressionsPackage.eINSTANCE);
+		}
+		if (!EPackage.Registry.INSTANCE.containsKey("http://www.minim.games/modular")) 
+		{
+			EPackage.Registry.INSTANCE.put("http://www.minim.games/modular", ModularPackage.eINSTANCE);
+		}
 		if (!EPackage.Registry.INSTANCE.containsKey("http://www.minim.games/M")) 
 		{
 			EPackage.Registry.INSTANCE.put("http://www.minim.games/M", MPackage.eINSTANCE);
 		}
-		main.runGenerator(args.get(0));
+		
+		main.runGenerator(args.get(0))
 	}
 
-	@Inject
-	Provider<ResourceSet> resourceSetProvider;
+	@Inject Provider<ResourceSet> resourceSetProvider
 
-	@Inject
-	IResourceValidator validator;
+	@Inject IResourceValidator validator
 
-	def protected void runGenerator(String string) 
+	@Inject GeneratorDelegate generator
+
+	@Inject JavaIoFileSystemAccess fileAccess
+
+	def protected runGenerator(String string) 
 	{
-		var set = resourceSetProvider.get();
-		var resource = set.createResource(URI.createURI("dummy:/example.text"));
-		var in = new ByteArrayInputStream(string.getBytes());
-		try 
-		{
-			resource.load(in, set.getLoadOptions());
-		} catch (IOException e) 
-		{
-			e.printStackTrace();
+		val set = resourceSetProvider.get
+		val resource = set.getResource(URI.createFileURI(string), true)
+		
+		val issues = validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl)
+		if (!issues.empty) {
+			issues.forEach[System.err.println(it)]
+			return
 		}
-
-		var list = validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl);
-		if (!list.isEmpty()) 
+		else
 		{
-			for (Issue issue : list) 
-			{
-				System.err.println(issue);
-			}
-			return;
+			System.out.println("Validation correct")
 		}
-		System.out.println("Code generation finished.");
+		// Configure and start the generator
+		/*
+		fileAccess.outputPath = 'src-gen/'
+		val context = new GeneratorContext => [
+			cancelIndicator = CancelIndicator.NullImpl
+		]
+		generator.generate(resource, fileAccess, context)
+		System.out.println('Code generation finished.')*/
 	}
 }

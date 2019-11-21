@@ -9,7 +9,7 @@ Procedure:
 	 (OPEN ( arguments+=IDENTIFIER (SEPARATOR arguments+=IDENTIFIER)*)? CLOSE)?
 	 BEGIN 
 	 	statements+=Statement*
-	 	('←' return=Expression)
+	 	('←' return=Expression)?
 	 END
 ;
 
