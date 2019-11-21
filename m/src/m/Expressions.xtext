@@ -75,8 +75,9 @@ Primary returns Expression:
   FloatLiteral |
   StringLiteral |
   BooleanLiteral |
-  IdentifierLiteral |
+  Variable |
   '(' Expression  ')';
+  
 Variable:
 	IdentifierLiteral
 ;
