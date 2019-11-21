@@ -25,7 +25,7 @@ Asset:
 ;
 
 @Override Statement:
-	Selection|Iteration|Action|Loop
+	Selection|Iteration|Call|Assignment|Loop
 ;
 
 Loop:
@@ -33,7 +33,17 @@ Loop:
 	BEGIN statements+=Statement* END
 ;
 
+Access: IDENTIFIER ('.' IDENTIFIER)*;
+
+@Override
+IdentifierLiteral:
+	value=Access;
+	
+@Override
+Assignment:
+	identifier=Access kind=AssignmentKind expression=Expression;
+
 @Override
 Primary returns Expression:
-  Access |
+  Variable |
   OPEN Expression CLOSE;

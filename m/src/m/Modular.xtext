@@ -7,51 +7,44 @@ generate modular "http://www.minim.games/modular"
 Procedure:
 	 name=IDENTIFIER 
 	 (OPEN ( arguments+=IDENTIFIER (SEPARATOR arguments+=IDENTIFIER)*)? CLOSE)?
-	 BEGIN statements+=Statement*  END
+	 BEGIN 
+	 	statements+=Statement*
+	 	('←' return=Expression)
+	 END
 ;
 
-Statement: Selection|Iteration|Action;
+Statement: Selection|Iteration|Call|Assignment;
 Selection:
 	 ('→'|'#') branches+=Branch
 	( ('⇉'|'##') branches+=Branch)*
-	( BEGIN (statements+=(Selection|Iteration|Call))*  END)?
+	( BEGIN statements+=Statement*  END)?
 ;
 
 Branch:
 	condition=Expression
-	 BEGIN (statements+=(Selection|Iteration|Action))*  END
+	 BEGIN statements+=Statement*  END
 ;
 
 Iteration:
 	 ('↺'|'@') condition=Expression
-	 BEGIN (statements+=(Selection|Iteration|Action))*  END
+	 BEGIN statements+=Statement*  END
 ;
 
-Action:
-	Access ({Assignment.access=current} kind=AssignmentKind expression=Expression)?;
-
-
+Assignment:
+	identifier=IDENTIFIER kind=AssignmentKind expression=Expression;
 
 
 Call: 
 	identifier=IDENTIFIER  
 	OPEN (parameters+=Ternary ( SEPARATOR parameters+=Ternary)*)?  CLOSE;
 
-@Override Variable:
-	Call|IdentifierLiteral;
-	
-Access: variables+=Variable ('.' variables+=Variable)*;
-
 @Override
-Primary returns Expression:
-  FloatLiteral |
-  StringLiteral |
-  BooleanLiteral |
-  Access |
-  OPEN Expression CLOSE;
-
-enum AssignmentKind: set='='|increase='+='|decrease='-='|multiply='*='|divide='/='
-					|or ='|='|and='&='|xor='^='|shiftLeft='<<='|shiftRight='>>='
+Variable:
+	IdentifierLiteral|Call;
+	
+enum AssignmentKind: 
+	set='='|increase='+='|decrease='-='|multiply='*='|divide='/='
+	|or ='|='|and='&='|xor='^='|shiftLeft='<<='|shiftRight='>>='
 ;
 
 terminal OPEN: '(';
