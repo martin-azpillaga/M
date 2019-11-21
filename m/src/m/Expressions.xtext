@@ -1,0 +1,95 @@
+grammar m.Expressions hidden(WS)
+
+import "http://www.eclipse.org/emf/2002/Ecore"
+generate expressions "http://www.minim.games/expressions"
+
+Expression: Ternary;
+
+Ternary returns Expression:
+  LogicalOr ({Ternary.check=current}  '?' yes=LogicalOr  ':' no=LogicalOr)*;
+  
+LogicalOr returns Expression:
+  LogicalAnd ({LogicalOr.left=current}  ('⋁'|'||') right=LogicalAnd)*;
+  
+LogicalAnd returns Expression:
+  BitwiseOr ({LogicalAnd.left=current}  ('⋀'|'&&') right=BitwiseOr)*;
+
+BitwiseOr returns Expression:
+	BitwiseXor ({BitwiseOr.left=current}  '|' right=BitwiseXor)*;
+
+BitwiseXor returns Expression:
+	BitwiseAnd ({BitwiseXor.left=current}  '^' right=BitwiseAnd)*;
+
+BitwiseAnd returns Expression:
+	Equality ({BitwiseAnd.left=current}  '&' right=Equality)*;
+
+Equality returns Expression:
+	NotEqual ({Equal.left=current}  '==' right=NotEqual)*;
+
+NotEqual returns Expression:
+	GreaterOrEqual ({NotEqual.left=current}  ('≠'|'!=') right=GreaterOrEqual)*;
+
+GreaterOrEqual returns Expression:
+	Greater ({GreaterOrEqual.left=current}  ('≥'|'>=') right=Greater)*;
+
+Greater returns Expression:
+	LowerOrEqual ({Greater.left=current}  '>' right=LowerOrEqual)*;
+
+LowerOrEqual returns Expression:
+	Lower ({LowerOrEqual.left=current}  ('≤'|'<=') right=Lower)*;
+
+Lower returns Expression:
+	RightShift ({Lower.left=current}  '<' right=RightShift)*;
+
+RightShift returns Expression:
+	LeftShift ({RightShift.left=current}  ('≫'|'>>') right=LeftShift)*;
+	
+LeftShift returns Expression:
+	Subtraction ({LeftShift.left=current}  ('≪'|'<<') right=Subtraction)*;
+
+Subtraction returns Expression:
+	Addition ({Subtraction.left=current}  '-' right=Addition)*;
+
+Addition returns Expression:
+	Modulo ({Addition.left=current}  '+' right=Modulo)*;
+
+Modulo returns Expression:
+	Division ({Modulo.left=current}  '%' right=Division)*;
+
+Division returns Expression:
+	Multiplication ({Division.left=current}  '/' right=Multiplication)*;
+
+Multiplication returns Expression:
+	BitwiseNot ({Multiplication.left=current}  ('×'|'*') right=BitwiseNot)*;
+
+BitwiseNot returns Expression:
+	LogicalNot | {BitwiseNot}  '~' expression=LogicalNot;
+
+LogicalNot returns Expression:
+	UnaryMinus | {LogicalNot}  '!' expression=UnaryMinus;
+
+UnaryMinus returns Expression:
+	Primary | {UnaryMinus}  '-' expression=Primary;
+
+Primary returns Expression:
+  FloatLiteral |
+  StringLiteral |
+  BooleanLiteral |
+  IdentifierLiteral |
+  '(' Expression  ')';
+Variable:
+	IdentifierLiteral
+;
+IdentifierLiteral: value=IDENTIFIER;
+FloatLiteral: value=FLOAT;
+StringLiteral: value=STRING;
+BooleanLiteral: value=BOOLEAN;
+
+terminal WS: '\u0020'|'\u0009'|'\u000A'|'\u000D';
+terminal BOOLEAN: '⊤'|'⊥';
+terminal STRING: '"' (!('/'|'\u0000'|'"')|'\\"')* '"';
+terminal IDENTIFIER: ('_'|LETTER) ('_'|LETTER|DIGIT)*;
+terminal FLOAT returns EFloat: '-'? DIGIT+ ('.' DIGIT+)? ('e' ('-'|'+')? DIGIT+)?;
+
+terminal fragment LETTER: '\u0061'..'\u007A'|'\u0041'..'\u005A'|'\u00A0'..'\uFFFF';
+terminal fragment DIGIT: '0'..'9';

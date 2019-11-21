@@ -1,42 +1,39 @@
-grammar m.M with m.ModularExpressions
+grammar m.M with m.Modular hidden(WS)
 
-import "http://www.minim.games/modularExpressions"
+import "http://www.minim.games/expressions"
+import "http://www.minim.games/modular"
 import "http://www.eclipse.org/emf/2002/Ecore"
 generate m "http://www.minim.games/M"
 
 Module:
-	entities+=Entity*
+	(entities+=Entity|procedures+=Procedure)*
 ;
 
 Entity:
-	name=NAME (WS* ':' WS* base=NAME)?
-	WS* BEGIN (components+=Component (',' components+=Component)*)? WS* END;
+	 name=STRING ( ':'  base=STRING)?
+	 BEGIN (components+=Component (SEPARATOR components+=Component)*)? END;
 
 Component:
-	WS* name=IDENTIFIER (WS+ value=(Vector|Asset))?;
+	 name=IDENTIFIER ( value=(Vector|Asset))?;
 	
 Vector:
-	values+=DIGIT (WS+ values+=DIGIT)*
+	values+=FLOAT ( values+=FLOAT)*
 ;
 
 Asset:
-	value=NAME
+	value=STRING
 ;
-NAME: LETTER (LETTER|DIGIT|WS+ LETTER|WS+ DIGIT)*
-	| DIGIT (DIGIT|WS+ DIGIT)* LETTER (LETTER|DIGIT|WS+ LETTER|WS+ DIGIT)*
-;
-/*
-P:
-	name=IDENTIFIER arguments+=IDENTIFIER+
-	BEGIN statements+=(Statement|Loop) END
+
+@Override Statement:
+	Selection|Iteration|Action|Loop
 ;
 
 Loop:
-	entity=IDENTIFIER (':' constraints+=IDENTIFIER+)?
-	BEGIN statements+=Statement* END;
+	'∀' identifier=IdentifierLiteral ('∈' tags+=IdentifierLiteral*)?
+	BEGIN statements+=Statement* END
+;
 
-
-terminal DIGIT: '0'..'9';
-
-NUMBER:
-	'-'? (DIGIT)* ('.' (DIGIT)+ ('e' '-'? DIGIT+)?)?;*/
+@Override
+Primary returns Expression:
+  Access |
+  OPEN Expression CLOSE;

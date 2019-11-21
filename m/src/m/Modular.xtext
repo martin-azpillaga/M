@@ -1,52 +1,61 @@
-grammar m.Modular
+grammar m.Modular with m.Expressions
 
 import "http://www.eclipse.org/emf/2002/Ecore"
+import "http://www.minim.games/expressions"
 generate modular "http://www.minim.games/modular"
 
 Procedure:
-	WS* name=IDENTIFIER (WS+ arguments+=IDENTIFIER)*
-	WS* BEGIN statements+=Statement* WS* END
+	 name=IDENTIFIER 
+	 (OPEN ( arguments+=IDENTIFIER (SEPARATOR arguments+=IDENTIFIER)*)? CLOSE)?
+	 BEGIN statements+=Statement*  END
 ;
 
-Statement:
-	Selection | Iteration | Call
-;
-
+Statement: Selection|Iteration|Action;
 Selection:
-	WS* CHECK branches+=Branch
-	(WS* RECHECK branches+=Branch)*
-	(WS* BEGIN statements+=Statement* WS* END)?
+	 ('→'|'#') branches+=Branch
+	( ('⇉'|'##') branches+=Branch)*
+	( BEGIN (statements+=(Selection|Iteration|Call))*  END)?
 ;
 
 Branch:
-	condition=Call
-	WS* BEGIN statements+=Statement* WS* END
+	condition=Expression
+	 BEGIN (statements+=(Selection|Iteration|Action))*  END
 ;
 
 Iteration:
-	WS* ITERATE condition=Call
-	WS* BEGIN statement+=Statement* WS* END
+	 ('↺'|'@') condition=Expression
+	 BEGIN (statements+=(Selection|Iteration|Action))*  END
 ;
 
-Call:
-	WS* name=IDENTIFIER WS* OPEN parameters+=Call* WS* CLOSE
-;
+Action:
+	Access ({Assignment.access=current} kind=AssignmentKind expression=Expression)?;
 
-IDENTIFIER:
-	LETTER+;
+
+
+
+Call: 
+	identifier=IDENTIFIER  
+	OPEN (parameters+=Ternary ( SEPARATOR parameters+=Ternary)*)?  CLOSE;
+
+@Override Variable:
+	Call|IdentifierLiteral;
 	
-terminal fragment LOWER_LETTER: '\u0061'..'\u007A';
-terminal fragment UPPER_LETTER: '\u0041'..'\u005A';
-terminal fragment WHITE_SPACE: '\u0020'|'\u0009'|'\u000A'|'\u000D';
+Access: variables+=Variable ('.' variables+=Variable)*;
 
-terminal LETTER: LOWER_LETTER|UPPER_LETTER;
-terminal WS: WHITE_SPACE;
+@Override
+Primary returns Expression:
+  FloatLiteral |
+  StringLiteral |
+  BooleanLiteral |
+  Access |
+  OPEN Expression CLOSE;
+
+enum AssignmentKind: set='='|increase='+='|decrease='-='|multiply='*='|divide='/='
+					|or ='|='|and='&='|xor='^='|shiftLeft='<<='|shiftRight='>>='
+;
 
 terminal OPEN: '(';
 terminal CLOSE: ')';
-terminal ITERATE: '~';
-terminal RECHECK: '??';
-terminal CHECK: '?';
+terminal SEPARATOR: ',';
 terminal BEGIN: '{';
 terminal END: '}';
-

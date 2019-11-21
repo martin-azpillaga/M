@@ -6,5 +6,10 @@ import "http://www.minim.games/modular" as m
 
 @Override
 Module:
-	entities+=Entity
+	(entities+=Entity|procedures+=Procedure)*
+;
+
+@Override
+Loop:
+	'bakoitza' identifier=IdentifierLiteral '!'
 ;
