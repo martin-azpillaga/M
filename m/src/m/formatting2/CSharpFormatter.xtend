@@ -9,22 +9,22 @@ import m.validation.Type
 import org.eclipse.xtext.formatting2.IFormattableDocument
 import org.eclipse.xtext.xtext.generator.parser.antlr.splitting.simpleExpressions.MethodCall
 
-class CSharpFormatter extends StructuredFormatter 
+class CSharpFormatter extends ModularFormatter 
 {
 	
 	@Inject extension CSharpGrammarAccess
 
 	def dispatch void format(Model model, extension IFormattableDocument document) 
 	{
-		for (using : file.usings) 
+		for (using : model.usings) 
 		{
-			if (using !== file.usings.head)
+			if (using !== model.usings.head)
 			{
 				using.prepend[newLine]
 			}
 			using.format
 		}
-		for (type : file.types) 
+		for (type : model.types) 
 		{
 			type.format
 		}
