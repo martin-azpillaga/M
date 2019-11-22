@@ -7,6 +7,14 @@ xtendBlanks = 1000
 xtendComments = 0
 
 def main():
+    gradle = run(['gradle', '-b', '../build.gradle', 'shadowJar'], stdout=PIPE, stderr=PIPE)
+    gradleOut = gradle.stdout.decode('utf-8')
+    gradleError = gradle.stderr.decode('utf-8')
+    
+    if gradleError != '':
+        print (gradleOut)
+        print (gradleError)
+
     result = run(['scc', '..'], stdout=PIPE, stderr=PIPE)
     stdout = result.stdout.decode('utf-8')
     stderr = result.stderr.decode('utf-8')
