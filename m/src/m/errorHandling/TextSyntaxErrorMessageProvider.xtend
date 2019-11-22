@@ -51,58 +51,6 @@ class TextSyntaxErrorMessageProvider extends SyntaxErrorMessageProvider
 			return super.getSyntaxErrorMessage(context)
 		}
 	}
-	/*
-		val unexpectedText = context?.recognitionException?.token?.text
-		var element = context.currentNode.semanticElement
-		if (context.currentNode.parent instanceof RootNode)
-		{
-			var error = unexpectedText.identifierError
-			
-			if (error != '')
-			{
-				return new SyntaxErrorMessage(
-				'''
-				«ENTITY_WRONG_NAME»
-				«ENTITY_WRONG_NAME.message»
-				«error»''', ENTITY_WRONG_NAME)
-			}
-			else
-			{
-				return new SyntaxErrorMessage(
-				'''
-				«unexpectedText» is an entity or system that hasn't been initialized. You can either 
-				1. Write : after «unexpectedText» to specify a base entity, 
-				2. Write { after «unexpectedText» to start the component list,
-				3. Write [ after «unexpectedText» to list subentities,
-				4. Write { after «unexpectedText» to describe the commands.
-				''', EXPECTING_OPEN_CURLY_BRACE)
-			}
-		}
-		else if ( element instanceof Entity)
-		{
-			if (element.name === null)
-			{
-				var fullname = context.currentNode.text
-				
-				return new SyntaxErrorMessage('''
-				«fullname» is an entity that hasn't been initialized.
-				1. Write : after «fullname» to specify a base entity, 
-				2. Write { after «fullname» to start the component list,
-				3. Write [ after «fullname» to list subentities,
-				''', EXPECTING_OPEN_CURLY_BRACE)
-			}
-			else if (element.components === null)
-			{
-				println("component")
-			}
-			else
-			{
-				println("second component")
-			}
-		}
-		return super.getSyntaxErrorMessage(context)
-	}
-	*/
 	def identifierError(String text)
 	{
 		var error = ''

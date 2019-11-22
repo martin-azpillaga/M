@@ -1,26 +1,22 @@
 package m.generator
 
-import m.m.Game
+import java.util.ArrayList
+import java.util.HashMap
+import m.instancer.ArtGenerator
+import m.instancer.BlocksInstancer
 import m.instancer.ComponentGenerator
+import m.instancer.EntityGenerator
 import m.instancer.PackageGenerator
+import m.instancer.SettingsGenerator
 import m.instancer.SystemGenerator
+import m.m.Component
+import m.m.MFactory
+import m.validation.Type
+import m.validation.TypeInference
 import org.eclipse.emf.ecore.resource.Resource
 import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
-import m.instancer.ArtGenerator
-import m.instancer.EntityGenerator
-import java.util.HashMap
-import m.m.MFactory
-import m.instancer.TestuaInstancer
-import m.m.Component
-import m.TextRuntimeModule
-import static extension m.modeler.GenericSerializer.*
-import m.instancer.BlocksInstancer
-import m.validation.TypeInference
-import m.validation.Type
-import m.instancer.SettingsGenerator
-import java.util.ArrayList
 
 class TextGenerator extends AbstractGenerator 
 {
@@ -32,13 +28,13 @@ class TextGenerator extends AbstractGenerator
 		var types = new HashMap<String,Type>
 		
 		
-		var game = MFactory.eINSTANCE.createGame
+		var game = MFactory.eINSTANCE.createModule
 		
 		for (r : resource.resourceSet.resources)
 		{
-			if (r.contents.head instanceof Game)
+			if (r.contents.head instanceof m.m.Module)
 			{
-				var g = r.contents.head as Game
+				var g = r.contents.head as m.m.Module
 				types = typeInference.infer(g)
 				if (r.contents.size > 1)
 				{
@@ -62,7 +58,7 @@ class TextGenerator extends AbstractGenerator
 							{
 								physics.add(component)
 							}
-							else if (component.values.empty)
+							else if (component.value === null)
 							{
 								tags.add(component)
 							}
@@ -76,7 +72,7 @@ class TextGenerator extends AbstractGenerator
 					}
 					
 					game.entities.addAll(g.entities)
-					game.systems.addAll(g.systems)
+					game.procedures.addAll(g.procedures)
 				}
 			}
 		}

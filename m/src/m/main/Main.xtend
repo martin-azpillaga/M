@@ -64,13 +64,5 @@ class Main {
 		{
 			System.out.println("Validation correct")
 		}
-		// Configure and start the generator
-		/*
-		fileAccess.outputPath = 'src-gen/'
-		val context = new GeneratorContext => [
-			cancelIndicator = CancelIndicator.NullImpl
-		]
-		generator.generate(resource, fileAccess, context)
-		System.out.println('Code generation finished.')*/
 	}
 }
