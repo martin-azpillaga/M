@@ -1,5 +1,3 @@
-#!/usr/bin/python3
-
 import glob
 from subprocess import *
 
@@ -15,6 +13,8 @@ def main():
     
     for line in stdout.split('\n'):
         if (line.startswith('Xtend')):
+            print (line)
+
             entries = []
             for entry in line.split(' '):
                 if (entry != ''):
