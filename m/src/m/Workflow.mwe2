@@ -39,6 +39,7 @@ Workflow
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
 		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
 		}
+		/*
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.Modular"
@@ -128,7 +129,7 @@ Workflow
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
 		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
-		}
+		}*/
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.XML"

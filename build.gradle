@@ -1,0 +1,54 @@
+repositories {
+	mavenCentral()
+}
+
+apply plugin:'java'
+
+ext.xtextVersion = '2.19.0'
+
+dependencies {
+	compile platform("org.eclipse.xtext:xtext-dev-bom:${xtextVersion}")
+	compile "org.eclipse.xtext:org.eclipse.xtext:${xtextVersion}"
+}
+
+configurations {
+	mwe2 {
+		extendsFrom compile
+	}
+}
+
+dependencies {
+	mwe2 'org.eclipse.emf:org.eclipse.emf.mwe2.launch'
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.common.types:${xtextVersion}"
+	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:${xtextVersion}"
+	mwe2 'org.eclipse.xtext:xtext-antlr-generator'
+}
+
+
+task m{
+    outputs.dir 'm.ide'
+    outputs.dir 'm.ui'
+    doLast { file('m.ide').mkdirs(); file('m.ui').mkdirs() }
+}
+
+clean.dependsOn(cleanM)
+
+task generateXtextLanguage(type: JavaExec, dependsOn: m) {
+	group "important"
+	description "run this first"
+	main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
+	classpath = configurations.mwe2
+	inputs.file "m/src/m/Workflow.mwe2"
+	inputs.file "m/src/m/Expressions.xtext"
+	inputs.file "m/src/m/Text.xtext"
+	outputs.dir "m/src-gen"
+    outputs.dir "m/model"
+    outputs.dir "m/META-INF"
+    outputs.files new FileNameFinder().getFileNames("$project.projectDir", '**/*.xml')
+	args += "m/src/m/Workflow.mwe2"
+	args += "-p"
+	args += "rootPath=/${projectDir}"
+    println project.projectDir
+}
+
+clean.dependsOn(cleanGenerateXtextLanguage)
