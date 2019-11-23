@@ -1,134 +1,147 @@
-grammar m.CSharp with m.Modular hidden(MULTIPLE_LINES_COMMENT, SINGLE_LINE_COMMENT)
+grammar m.CSharp with m.Modular hidden(WS, MULTIPLE_LINES_COMMENT, SINGLE_LINE_COMMENT)
 
 import "http://www.eclipse.org/emf/2002/Ecore"
 import "http://www.minim.games/modular"
 import "http://www.minim.games/expressions"
-
 generate csharp "http://www.minim.games/csharp"
 
 Model:
 	usings+=Using*
-	procedures+=Procedure*;
+	types+=Type*;
+
 Using:
 	'using' name=QualifiedName ';';
-QualifiedName:
-	IDENTIFIER ('.' IDENTIFIER)*;
 
-// Casts and lambdas
+Type:
+	{Type}
+	annotations+=Annotation*
+	visibility=Visibility?
+	(({Struct.info=current} 'struct' name=TYPENAME
+	|
+	{Class.info=current} sealed?='sealed'? static?='static'? 'class' name=TYPENAME)
+	(':' superTypes+=TYPENAME (SEPARATOR superTypes+=TYPENAME)*)?
+	BEGIN members+=Member* END
+	|
+	{Enum.info=current}
+	'enum' name=TYPENAME
+	BEGIN (values+=IDENTIFIER (SEPARATOR values+=IDENTIFIER)*)? END);
+
+Info:
+	Member | Type;
+
+Member:
+	{Member}
+	annotations+=Annotation*
+	visibility=Visibility?
+	(({Struct.info=current} 'struct' name=TYPENAME
+	|
+	{Class.info=current} static?='static'? 'class' name=TYPENAME)
+	(':' superTypes+=TYPENAME (SEPARATOR superTypes+=TYPENAME)*)?
+	BEGIN members+=Member* END
+	|
+	{Enum.info=current}
+	'enum' name=TYPENAME
+	BEGIN (value+=IDENTIFIER (SEPARATOR values+=IDENTIFIER)*)? END
+	|
+	(({Method.info=current} override?='override')?
+	({Method.info=current} static?='static')?
+	type=TYPENAME
+	({Field.info=current} name=IDENTIFIER ';'
+	|
+	{Method.info=current} name=TYPENAME OPEN (arguments+=Argument (SEPARATOR arguments+=Argument)*)? CLOSE
+	BEGIN
+	statements+=Statement*
+	END)));
+
+enum Visibility:
+	public | protected | private;
+
 @Override
 Expression:
-	Ternary ({InlineAssignment.left=current}  kind=AssignmentKind right=Ternary)*;
+	Ternary ({InlineAssignment.left=current} kind=AssignmentKind right=Ternary)*;
 
 @Override
 UnaryMinus returns Expression:
-	UnaryPlus | {UnaryMinus}  '-' expression=UnaryPlus
-;
+	UnaryPlus | {UnaryMinus} '-' expression=UnaryPlus;
 
 UnaryPlus returns Expression:
-	PreDecrement | {UnaryPlus}  '+' expression=PreDecrement
-;
+	PreDecrement | {UnaryPlus} '+' expression=PreDecrement;
 
 PreDecrement returns Expression:
-	PreIncrement | {PreDecrement}  '--' expression=PreIncrement;
-	
+	PreIncrement | {PreDecrement} '--' expression=PreIncrement;
+
 PreIncrement returns Expression:
-	Primary | {PreIncrement}  '++' expression=Primary;
-
-	
-Access: variables+=Variable ('.' variables+=Variable)*;
-
-/*
-Classifier:
-	(Class | Structure | Enumeration);
-
-Class:
-	annotations+=Annotation*
-	visibility=Visibility?
-	sealed?='sealed'? static?='static' 'class' 
-	name=TypeName (':' superTypes+=TypeName (SEPARATOR superTypes+=TypeName)*)?
-	BEGIN
-	members+=(Classifier|Field)*
-	END;
-
-Structure:
-	annotations+=Annotation*
-	visibility=Visibility?
-	'struct' name=TypeName (':' superTypes+=TypeName (SEPARATOR superTypes+=TypeName)*)?
-	BEGIN
-	members+=(Classifier|Field)*
-	END
-;
-
-Enumeration:
-	annotations+=Annotation*
-	visibility=Visibility?
-	'enum' name=TypeName
-	BEGIN
-	members+=(Classifier|Field)*
-	END
-;
-
-Annotation:
-	'[' function=TypeName (OPEN parameters+=Expression (SEPARATOR parameters+=Expression)* CLOSE)? ']';
-
-TypeName:
-	name=QualifiedName ('<' generics+=QualifiedName (SEPARATOR generics+=QualifiedName)* '>')?;
-
-Field:
-	type=TypeName name=IDENTIFIER ';';
-
-Argument:
-	annotations+=Annotation* ref?='ref'? type=TypeName name=IDENTIFIER;
-
-Method:
-	override?='override'? (type=TypeName | implicit?='implicit' operator?='operator') name=IDENTIFIER ('<'
-	generics+=TypeName (SEPARATOR generics+=TypeName)* '>')?
-	OPEN (arguments+=Argument (SEPARATOR arguments+=Argument)*)? CLOSE
-	BEGIN
-	statements+=Statement*
-	END;
+	Primary | {PreIncrement} '++' expression=Primary;
 
 @Override
 Statement:
-	For | Selection | Iteration | Call;
-
-CAssignment:
-	(var?='var' | type=TypeName)? access=CAccess (assignmentType=AssignmentKind expression=Expression | increment?='++' |
-	decrement?='--')?;
-
-Return:
-	'return' expression=Expression;
+	Selection | Iteration | Call | Assignment | For | Declaration | Return;
 
 @Override
-Primary returns Expression:
-	Access | Call | {Brackets} OPEN expression=Expression CLOSE;
+Iteration:
+	'while' OPEN condition=Expression CLOSE
+	BEGIN statements+=Statement* END;
 
-For returns Block:
-	{For}
+@Override
+Selection:
+	'if' branches+=Branch
+	('else' 'if' branches+=Branch)*
+	('else' BEGIN statements+=Statement* END)?;
+
+@Override
+Branch:
+	OPEN condition=Expression CLOSE
+	BEGIN statements+=Statement* END;
+
+For:
 	'for' OPEN initialization=Assignment ';' condition=Expression ';' increment=Assignment CLOSE
 	BEGIN
 	statements+=Statement*
 	END;
 
-InitializeVariable:
-	name=IDENTIFIER '=' expression=Expression;
+Return:
+	'return' expression=Expression ';';
 
-Lambda returns Block:
-	{Lambda} OPEN arguments+=Argument (SEPARATOR arguments+=Argument)* CLOSE '=>' BEGIN statements+=Statement* END;
+Declaration:
+	(var?='var' | type=TYPENAME) access=ACCESS 
+	(assignmentType=AssignmentKind expression=Expression)? ';';
+	
+@Override
+Assignment:
+	identifier=ACCESS kind=AssignmentKind expression=Expression ';'
+;
 
+@Override
+Call:
+	identifier=IDENTIFIER
+	OPEN (parameters+=Expression (SEPARATOR parameters+=Expression)*)? CLOSE ';';
 
-enum ClassifierKind:
-	class | struct;
+@Override
+IdentifierLiteral:
+	value=ACCESS;
 
-enum Visibility:
-	public | private | protected | internal;
+Annotation:
+	'[' call=Call ']';
+
+Argument:
+	annotations+=Annotation* ref?='ref'? type=TYPENAME name=IDENTIFIER;
+
+Lambda: {Lambda}
+	OPEN (arguments+=Argument (SEPARATOR arguments+=Argument)*)? CLOSE '=>' BEGIN statements+=Statement* END;
 
 Index: identifier=IDENTIFIER  '[' (parameters+=Expression ( SEPARATOR parameters+=Expression)*)?  ']';
 
 @Override
 Variable: IdentifierLiteral|Call|Index;
-*/
 
+ACCESS:
+	IDENTIFIER ('.' IDENTIFIER)*;
+
+QualifiedName:
+	IDENTIFIER ('.' IDENTIFIER)*;
+
+TYPENAME:
+	IDENTIFIER ('<' TYPENAME (SEPARATOR TYPENAME)* '>')?;
 
 terminal MULTIPLE_LINES_COMMENT:
 	'/*'->'*/';

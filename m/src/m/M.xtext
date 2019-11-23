@@ -10,7 +10,7 @@ Module:
 ;
 
 Entity:
-	 name=STRING ( ':'  base=STRING)?
+	 name=FILENAME ( ':'  base=FILENAME)?
 	 BEGIN (components+=Component (SEPARATOR components+=Component)*)? END;
 
 Component:
@@ -21,7 +21,7 @@ Vector:
 ;
 
 Asset:
-	value=STRING
+	value=FILENAME
 ;
 
 @Override Statement:
@@ -33,15 +33,15 @@ Loop:
 	BEGIN statements+=Statement* END
 ;
 
-Access: IDENTIFIER ('.' IDENTIFIER)*;
+ACCESS: IDENTIFIER ('.' IDENTIFIER)*;
 
 @Override
 IdentifierLiteral:
-	value=Access;
+	value=ACCESS;
 	
 @Override
 Assignment:
-	identifier=Access kind=AssignmentKind expression=Expression;
+	identifier=ACCESS kind=AssignmentKind expression=Expression;
 
 @Override
 Primary returns Expression:

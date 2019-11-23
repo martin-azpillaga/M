@@ -5,50 +5,55 @@ import "http://www.minim.games/expressions"
 generate modular "http://www.minim.games/modular"
 
 Procedure:
-	 name=IDENTIFIER 
-	 (OPEN ( arguments+=IDENTIFIER (SEPARATOR arguments+=IDENTIFIER)*)? CLOSE)?
-	 BEGIN 
-	 	statements+=Statement*
-	 	('←' return=Expression)?
-	 END
-;
+	name=IDENTIFIER
+	(OPEN (arguments+=IDENTIFIER (SEPARATOR arguments+=IDENTIFIER)*)? CLOSE)?
+	BEGIN
+	statements+=Statement*
+	('←' return=Expression)?
+	END;
 
-Statement: Selection|Iteration|Call|Assignment;
+Statement:
+	Selection | Iteration | Call | Assignment;
+
 Selection:
-	 ('→'|'#') branches+=Branch
-	( ('⇉'|'##') branches+=Branch)*
-	( BEGIN statements+=Statement*  END)?
-;
+	('→' | '#') branches+=Branch
+	(('⇉' | '##') branches+=Branch)*
+	(BEGIN statements+=Statement* END)?;
 
 Branch:
 	condition=Expression
-	 BEGIN statements+=Statement*  END
-;
+	BEGIN statements+=Statement* END;
 
 Iteration:
-	 ('↺'|'@') condition=Expression
-	 BEGIN statements+=Statement*  END
-;
+	('↺' | '@') condition=Expression
+	BEGIN statements+=Statement* END;
 
 Assignment:
 	identifier=IDENTIFIER kind=AssignmentKind expression=Expression;
 
-
-Call: 
-	identifier=IDENTIFIER  
-	OPEN (parameters+=Ternary ( SEPARATOR parameters+=Ternary)*)?  CLOSE;
+Call:
+	identifier=IDENTIFIER
+	OPEN (parameters+=Expression (SEPARATOR parameters+=Expression)*)? CLOSE;
 
 @Override
 Variable:
-	IdentifierLiteral|Call;
-	
-enum AssignmentKind: 
-	set='='|increase='+='|decrease='-='|multiply='*='|divide='/='
-	|or ='|='|and='&='|xor='^='|shiftLeft='<<='|shiftRight='>>='
-;
+	IdentifierLiteral | Call;
 
-terminal OPEN: '(';
-terminal CLOSE: ')';
-terminal SEPARATOR: ',';
-terminal BEGIN: '{';
-terminal END: '}';
+enum AssignmentKind:
+	set='=' | increase='+=' | decrease='-=' | multiply='*=' | divide='/='
+	| or='|=' | and='&=' | xor='^=' | shiftLeft='<<=' | shiftRight='>>=';
+
+terminal OPEN:
+	'(';
+
+terminal CLOSE:
+	')';
+
+terminal SEPARATOR:
+	',';
+
+terminal BEGIN:
+	'{';
+
+terminal END:
+	'}';
