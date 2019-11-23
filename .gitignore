@@ -21,5 +21,4 @@ xtend-gen
 *.text
 *.testua
 *.m
-*.gradle
 deploy
