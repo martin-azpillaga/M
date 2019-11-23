@@ -1,5 +1,12 @@
 .*
+errorHandling
+formatting2
+generator
+parser
+validation
+*RuntimeModule.xtend
 m.ui
+m.ide
 bin
 META-INF
 model
@@ -14,3 +21,5 @@ xtend-gen
 *.text
 *.testua
 *.m
+*.gradle
+deploy

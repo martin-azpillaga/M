@@ -62,7 +62,6 @@ Workflow
 			referencedResource = "platform:/resource/m/src/m/Expressions.xtext"
 			referencedResource = "platform:/resource/m/src/m/Modular.xtext"
 			referencedResource = "platform:/resource/m/model/generated/Expressions.genmodel"
-			referencedResource = "platform:/resource/m/model/generated/Expressions.genmodel"
 			referencedResource = "platform:/resource/m/model/generated/Modular.genmodel"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {emfRuntimeVersion="2.12"}
