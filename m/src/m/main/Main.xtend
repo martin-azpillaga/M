@@ -6,9 +6,6 @@ import com.google.inject.Provider
 import m.TextStandaloneSetup
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.xtext.generator.GeneratorContext
-import org.eclipse.xtext.generator.GeneratorDelegate
-import org.eclipse.xtext.generator.JavaIoFileSystemAccess
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.IResourceValidator
@@ -45,10 +42,6 @@ class Main {
 	@Inject Provider<ResourceSet> resourceSetProvider
 
 	@Inject IResourceValidator validator
-
-	@Inject GeneratorDelegate generator
-
-	@Inject JavaIoFileSystemAccess fileAccess
 
 	def protected runGenerator(String string) 
 	{
