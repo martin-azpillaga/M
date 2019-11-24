@@ -39,13 +39,11 @@ Workflow
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
 		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
 		}
-		/*
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.Modular"
 			fileExtensions = "modular"
 			referencedResource = "platform:/resource/m/src/m/Expressions.xtext"
-			referencedResource = "platform:/resource/m/model/generated/Expressions.genmodel"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {emfRuntimeVersion="2.12"}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
@@ -62,8 +60,6 @@ Workflow
 			fileExtensions = "m"
 			referencedResource = "platform:/resource/m/src/m/Expressions.xtext"
 			referencedResource = "platform:/resource/m/src/m/Modular.xtext"
-			referencedResource = "platform:/resource/m/model/generated/Expressions.genmodel"
-			referencedResource = "platform:/resource/m/model/generated/Modular.genmodel"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {emfRuntimeVersion="2.12"}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
@@ -81,9 +77,6 @@ Workflow
 			referencedResource = "platform:/resource/m/src/m/Expressions.xtext"
 			referencedResource = "platform:/resource/m/src/m/Modular.xtext"
 			referencedResource = "platform:/resource/m/src/m/M.xtext"
-			referencedResource = "platform:/resource/m/model/generated/Expressions.genmodel"
-			referencedResource = "platform:/resource/m/model/generated/Modular.genmodel"
-			referencedResource = "platform:/resource/m/model/generated/M.genmodel"		
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
@@ -99,10 +92,7 @@ Workflow
 			fileExtensions = "testua"
 			referencedResource = "platform:/resource/m/src/m/Expressions.xtext"
 			referencedResource = "platform:/resource/m/src/m/Modular.xtext"
-			referencedResource = "platform:/resource/m/src/m/M.xtext"
-			referencedResource = "platform:/resource/m/model/generated/Expressions.genmodel"
-			referencedResource = "platform:/resource/m/model/generated/Modular.genmodel"
-			referencedResource = "platform:/resource/m/model/generated/M.genmodel"				
+			referencedResource = "platform:/resource/m/src/m/M.xtext"				
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
@@ -118,8 +108,6 @@ Workflow
 			fileExtensions = "cs"
 			referencedResource = "platform:/resource/m/src/m/Expressions.xtext"
 			referencedResource = "platform:/resource/m/src/m/Modular.xtext"
-			referencedResource = "platform:/resource/m/model/generated/Expressions.genmodel"
-			referencedResource = "platform:/resource/m/model/generated/Modular.genmodel"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {emfRuntimeVersion="2.12"}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
@@ -129,7 +117,7 @@ Workflow
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
 		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
-		}*/
+		}
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.XML"
