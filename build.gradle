@@ -5,15 +5,17 @@ repositories {
 apply plugin:'java'
 
 ext.xtextVersion = '2.19.0'
+ext.base = 'm'
+ext.grammars = ['Expressions','Modular','M','Text','Testua','CSharp','XML','JSON','YAML']
 
 dependencies {
-	compile platform("org.eclipse.xtext:xtext-dev-bom:${xtextVersion}")
-	compile "org.eclipse.xtext:org.eclipse.xtext:${xtextVersion}"
+	implementation platform("org.eclipse.xtext:xtext-dev-bom:${xtextVersion}")
+	implementation "org.eclipse.xtext:org.eclipse.xtext:${xtextVersion}"
 }
 
 configurations {
 	mwe2 {
-		extendsFrom compile
+		extendsFrom implementation
 	}
 }
 
@@ -25,30 +27,35 @@ dependencies {
 }
 
 
-task m{
-    outputs.dir 'm.ide'
-    outputs.dir 'm.ui'
-    doLast { file('m.ide').mkdirs(); file('m.ui').mkdirs() }
+task generateProjectFolders{
+    outputs.dir "${base}.ide"
+    outputs.dir "${base}.ui"
+    doLast { file("${base}.ide").mkdirs(); file("${base}.ui").mkdirs() }
 }
 
-clean.dependsOn(cleanM)
-
-task generateXtextLanguage(type: JavaExec, dependsOn: m) {
-	group "important"
-	description "run this first"
+task generateXtextLanguage(type: JavaExec, dependsOn: generateProjectFolders) {
+	
 	main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
 	classpath = configurations.mwe2
-	inputs.file "m/src/m/Workflow.mwe2"
-	inputs.file "m/src/m/Expressions.xtext"
-	inputs.file "m/src/m/Text.xtext"
-	outputs.dir "m/src-gen"
-    outputs.dir "m/model"
-    outputs.dir "m/META-INF"
-    outputs.files new FileNameFinder().getFileNames("$project.projectDir", '**/*.xml')
 	args += "m/src/m/Workflow.mwe2"
 	args += "-p"
 	args += "rootPath=/${projectDir}"
-    println project.projectDir
-}
 
+	inputs.files grammars.collect {"m/src/m/"+it+".xtext"}
+	inputs.file "m/src/m/Workflow.mwe2"
+	
+	outputs.dir "m/src-gen"
+    outputs.dir "m/model"
+    outputs.dir "m/META-INF"
+	outputs.dir 'm/src/m/formatting2'
+	outputs.dir 'm/src/m/generator'
+	outputs.dir 'm/src/m/parser'
+	outputs.dir 'm/src/m/validation'
+	outputs.file 'm/plugin.xml'
+	outputs.file 'm/plugin.xml_gen'
+    outputs.files grammars.collect {'m/src/m/'+it+'RuntimeModule.xtend'}
+    outputs.files grammars.collect {'m/src/m/'+it+'StandaloneSetup.xtend'}
+	
+}
+cleanGenerateXtextLanguage.dependsOn(cleanGenerateProjectFolders)
 clean.dependsOn(cleanGenerateXtextLanguage)
