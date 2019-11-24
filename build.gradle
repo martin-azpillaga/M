@@ -7,9 +7,14 @@ buildscript {
 	}
 }
 
+plugins {
+	id 'com.github.johnrengelman.shadow' version '4.0.1'
+}
+
 repositories {
 	mavenCentral()
 }
+
 
 apply plugin: 'org.xtext.xtend'
 apply plugin:'java'
@@ -22,6 +27,7 @@ ext.grammars = ['Expressions','Modular','M','Text','Testua','CSharp','XML','JSON
 sourceSets {
 	main.java.srcDirs = ["m/src", "m/src-gen"]
 	main.resources.srcDirs = ["m/src", "m/src-gen"]
+	main.xtendOutputDir = 'm/xtend-gen'
 }
 
 configurations {
@@ -75,3 +81,6 @@ task generateXtextLanguage(type: JavaExec, dependsOn: generateProjectFolders) {
 }
 cleanGenerateXtextLanguage.dependsOn(cleanGenerateProjectFolders)
 clean.dependsOn(cleanGenerateXtextLanguage)
+
+generateXtext.dependsOn(generateXtextLanguage)
+clean.dependsOn(cleanGenerateXtext)
