@@ -18,7 +18,6 @@ repositories {
 
 apply plugin: 'org.xtext.xtend'
 apply plugin:'java'
-apply plugin: 'eclipse'
 
 ext.xtextVersion = '2.19.0'
 ext.base = 'm'
@@ -69,12 +68,11 @@ task generateXtextLanguage(type: JavaExec, dependsOn: generateProjectFolders) {
 	outputs.dir "m/src-gen"
     outputs.dir "m/model"
     outputs.dir "m/META-INF"
+	outputs.file 'm/plugin.xml'
 	outputs.dir 'm/src/m/formatting2'
 	outputs.dir 'm/src/m/generator'
 	outputs.dir 'm/src/m/parser'
 	outputs.dir 'm/src/m/validation'
-	outputs.file 'm/plugin.xml'
-	outputs.file 'm/plugin.xml_gen'
     outputs.files grammars.collect {'m/src/m/'+it+'RuntimeModule.xtend'}
     outputs.files grammars.collect {'m/src/m/'+it+'StandaloneSetup.xtend'}
 	
@@ -84,3 +82,19 @@ clean.dependsOn(cleanGenerateXtextLanguage)
 
 generateXtext.dependsOn(generateXtextLanguage)
 clean.dependsOn(cleanGenerateXtext)
+
+
+task fatJar(type: Jar) {
+	manifest {
+        attributes 'Main-Class': 'm.main.Main'
+    }
+    baseName = "${base}"
+    from { configurations.mwe2.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', 
+			'**/*.xtend', '**/*.mwe2', '**/*.g'
+}
+
+shadowJar {
+	baseName = "${base}-language-server"
+}

@@ -14,13 +14,10 @@ import m.m.MPackage
 import m.expressions.ExpressionsPackage
 import m.modular.ModularPackage
 
-class Main {
-
-	def static main(String[] args) {
-		if (args.empty) {
-			System::err.println('Aborting: no path to EMF resource provided!')
-			return
-		}
+class Main 
+{
+	def static main(String[] args) 
+	{
 		val injector = new TextStandaloneSetup().createInjectorAndDoEMFRegistration
 		val main = injector.getInstance(Main)
 		if (!EPackage.Registry.INSTANCE.containsKey("http://www.minim.games/expressions")) 
@@ -35,8 +32,10 @@ class Main {
 		{
 			EPackage.Registry.INSTANCE.put("http://www.minim.games/M", MPackage.eINSTANCE);
 		}
-		
-		main.runGenerator(args.get(0))
+		println ('Running')
+
+		return;
+		//main.runGenerator(args.get(0))
 	}
 
 	@Inject Provider<ResourceSet> resourceSetProvider
