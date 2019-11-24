@@ -43,7 +43,6 @@ Workflow
 		{
 			name = "m.Modular"
 			fileExtensions = "modular"
-			referencedResource = "platform:/resource/m/src/m/Expressions.xtext"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {emfRuntimeVersion="2.12"}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
@@ -58,8 +57,6 @@ Workflow
 		{
 			name = "m.M"
 			fileExtensions = "m"
-			referencedResource = "platform:/resource/m/src/m/Expressions.xtext"
-			referencedResource = "platform:/resource/m/src/m/Modular.xtext"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {emfRuntimeVersion="2.12"}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
@@ -74,9 +71,6 @@ Workflow
 		{
 			name = "m.Text"
 			fileExtensions = "text"
-			referencedResource = "platform:/resource/m/src/m/Expressions.xtext"
-			referencedResource = "platform:/resource/m/src/m/Modular.xtext"
-			referencedResource = "platform:/resource/m/src/m/M.xtext"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
@@ -89,10 +83,7 @@ Workflow
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.Testua"
-			fileExtensions = "testua"
-			referencedResource = "platform:/resource/m/src/m/Expressions.xtext"
-			referencedResource = "platform:/resource/m/src/m/Modular.xtext"
-			referencedResource = "platform:/resource/m/src/m/M.xtext"				
+			fileExtensions = "testua"				
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
@@ -106,8 +97,6 @@ Workflow
 		{
 			name = "m.CSharp"
 			fileExtensions = "cs"
-			referencedResource = "platform:/resource/m/src/m/Expressions.xtext"
-			referencedResource = "platform:/resource/m/src/m/Modular.xtext"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = ecore.EMFGeneratorFragment2 {emfRuntimeVersion="2.12"}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }

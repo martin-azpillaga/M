@@ -1,16 +1,27 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'org.xtext:xtext-gradle-plugin:2.0.4'
+	}
+}
+
 repositories {
 	mavenCentral()
 }
 
+apply plugin: 'org.xtext.xtend'
 apply plugin:'java'
+apply plugin: 'eclipse'
 
 ext.xtextVersion = '2.19.0'
 ext.base = 'm'
 ext.grammars = ['Expressions','Modular','M','Text','Testua','CSharp','XML','JSON','YAML']
 
-dependencies {
-	implementation platform("org.eclipse.xtext:xtext-dev-bom:${xtextVersion}")
-	implementation "org.eclipse.xtext:org.eclipse.xtext:${xtextVersion}"
+sourceSets {
+	main.java.srcDirs = ["m/src", "m/src-gen"]
+	main.resources.srcDirs = ["m/src", "m/src-gen"]
 }
 
 configurations {
@@ -20,11 +31,16 @@ configurations {
 }
 
 dependencies {
+	implementation platform("org.eclipse.xtext:xtext-dev-bom:${xtextVersion}")
+	implementation "org.eclipse.xtext:org.eclipse.xtext:${xtextVersion}"
 	mwe2 'org.eclipse.emf:org.eclipse.emf.mwe2.launch'
 	mwe2 "org.eclipse.xtext:org.eclipse.xtext.common.types:${xtextVersion}"
 	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:${xtextVersion}"
 	mwe2 'org.eclipse.xtext:xtext-antlr-generator'
+	mwe2 files("${projectDir}/m/src/")
 }
+
+
 
 
 task generateProjectFolders{
@@ -36,7 +52,7 @@ task generateProjectFolders{
 task generateXtextLanguage(type: JavaExec, dependsOn: generateProjectFolders) {
 	
 	main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
-	classpath = configurations.mwe2
+	classpath = configurations.mwe2 
 	args += "m/src/m/Workflow.mwe2"
 	args += "-p"
 	args += "rootPath=/${projectDir}"
