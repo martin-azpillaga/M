@@ -1,4 +1,4 @@
-grammar m.Modular with m.Expressions
+grammar m.Modular with m.Expressions 
 
 import "http://www.eclipse.org/emf/2002/Ecore"
 import "http://www.minim.games/expressions"

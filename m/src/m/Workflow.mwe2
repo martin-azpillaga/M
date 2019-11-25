@@ -30,28 +30,28 @@ Workflow
 			name = "m.Expressions"
 			fileExtensions = "expressions"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
-		    fragment = ecore.EMFGeneratorFragment2 {emfRuntimeVersion="2.12"}
+		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
 		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {debugGrammar = true}
 		    fragment = validation.ValidatorFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
-		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
+		    fragment = formatting.Formatter2Fragment2 { generateStub = false }
 		}
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.Modular"
 			fileExtensions = "modular"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
-		    fragment = ecore.EMFGeneratorFragment2 {emfRuntimeVersion="2.12"}
+		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
 		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {debugGrammar = true}
 		    fragment = validation.ValidatorFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
-		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
+		    fragment = formatting.Formatter2Fragment2 { generateStub = false }
 		}
 		language = XtextGeneratorLanguage 
 		{
@@ -59,19 +59,23 @@ Workflow
 			name = "m.M"
 			fileExtensions = "m"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
-		    fragment = ecore.EMFGeneratorFragment2 {emfRuntimeVersion="2.12"}
+		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
 		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {debugGrammar = true}
 		    fragment = validation.ValidatorFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
-		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
+		    fragment = formatting.Formatter2Fragment2 { generateStub = false }
 		}
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.Text"
+<<<<<<< HEAD
 			fileExtensions = "text"		
+=======
+			fileExtensions = "text"
+>>>>>>> e23e6dd29bd5f8f9d995c128e4d8cc2e23757244
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
@@ -79,12 +83,16 @@ Workflow
 		    fragment = validation.ValidatorFragment2 { generateStub = true }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true }
-		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
+		    fragment = formatting.Formatter2Fragment2 { generateStub = false }
 		}
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.Testua"
+<<<<<<< HEAD
 			fileExtensions = "testua"			
+=======
+			fileExtensions = "testua"				
+>>>>>>> e23e6dd29bd5f8f9d995c128e4d8cc2e23757244
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
@@ -92,63 +100,63 @@ Workflow
 		    fragment = validation.ValidatorFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
-		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
+		    fragment = formatting.Formatter2Fragment2 { generateStub = false }
 		}
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.CSharp"
 			fileExtensions = "cs"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
-		    fragment = ecore.EMFGeneratorFragment2 {emfRuntimeVersion="2.12"}
+		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
 		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 { debugGrammar = true }
 		    fragment = validation.ValidatorFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
-		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
+		    fragment = formatting.Formatter2Fragment2 { generateStub = false }
 		}
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.XML"
 			fileExtensions = "blocks, xml"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
-		    fragment = ecore.EMFGeneratorFragment2 {emfRuntimeVersion="2.12"}
+		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
 		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 { debugGrammar = true }
 		    fragment = validation.ValidatorFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
-		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
+		    fragment = formatting.Formatter2Fragment2 { generateStub = false }
 		}
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.YAML"
 			fileExtensions = "meta,prefab"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
-		    fragment = ecore.EMFGeneratorFragment2 {emfRuntimeVersion="2.12"}
+		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
 		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
 		    fragment = validation.ValidatorFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
-		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
+		    fragment = formatting.Formatter2Fragment2 { generateStub = false }
 		}
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.JSON"
 			fileExtensions = "json"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
-		    fragment = ecore.EMFGeneratorFragment2 {emfRuntimeVersion="2.12"}
+		    fragment = ecore.EMFGeneratorFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
 		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
 		    fragment = validation.ValidatorFragment2 { generateStub = false }
 		    fragment = builder.BuilderIntegrationFragment2 {}
 		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
-		    fragment = formatting.Formatter2Fragment2 { generateStub = true }
+		    fragment = formatting.Formatter2Fragment2 { generateStub = false }
 		}
 	}
 }
