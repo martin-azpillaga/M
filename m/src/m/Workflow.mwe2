@@ -71,11 +71,7 @@ Workflow
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.Text"
-<<<<<<< HEAD
-			fileExtensions = "text"		
-=======
-			fileExtensions = "text"
->>>>>>> e23e6dd29bd5f8f9d995c128e4d8cc2e23757244
+			fileExtensions = "text"	
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
@@ -88,11 +84,7 @@ Workflow
 		language = XtextGeneratorLanguage 
 		{
 			name = "m.Testua"
-<<<<<<< HEAD
 			fileExtensions = "testua"			
-=======
-			fileExtensions = "testua"				
->>>>>>> e23e6dd29bd5f8f9d995c128e4d8cc2e23757244
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 		    fragment = serializer.SerializerFragment2 { generateStub = false }
 		    fragment = resourceFactory.ResourceFactoryFragment2 {}
