@@ -92,7 +92,7 @@ shadowJar {
 }
 
 task installGitHooks (type: Exec){
-	commandLine 'git', 'config', 'core.hooksPath', 'hooks/'
+	commandLine 'git', 'config', 'core.hooksPath', 'Continuous deployment/hooks/'
 }
 
 generateXtextLanguage.dependsOn(installGitHooks)
