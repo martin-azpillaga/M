@@ -1,0 +1,3 @@
+[submodule "M"]
+	path = M
+	url = https://github.com/martin-azpillaga/M.git
