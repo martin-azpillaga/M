@@ -83,18 +83,10 @@ clean.dependsOn(cleanGenerateXtextLanguage)
 generateXtext.dependsOn(generateXtextLanguage)
 clean.dependsOn(cleanGenerateXtext)
 
-
-task fatJar(type: Jar) {
-	manifest {
-        attributes 'Main-Class': 'm.main.Main'
-    }
-    baseName = "${base}"
-    from { configurations.mwe2.collect { it.isDirectory() ? it : zipTree(it) } }
-    with jar
-	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', 
-			'**/*.xtend', '**/*.mwe2', '**/*.g'
-}
-
 shadowJar {
-	baseName = "${base}-language-server"
+	baseName = "${base}"
+	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', 
+			'**/*.xtend', '**/*.mwe2', '**/*.g', '**/*.xtext'
+
+	manifest.attributes 'Main-Class': 'm.main.Main'
 }
