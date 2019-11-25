@@ -16,7 +16,7 @@ import m.modular.ModularPackage
 
 class Main 
 {
-	def static main(String[] args) 
+	def static void main(String[] args) 
 	{
 		val injector = new TextStandaloneSetup().createInjectorAndDoEMFRegistration
 		val main = injector.getInstance(Main)
@@ -34,8 +34,7 @@ class Main
 		}
 		println ('Running')
 
-		return;
-		//main.runGenerator(args.get(0))
+		main.runGenerator(args.get(0))
 	}
 
 	@Inject Provider<ResourceSet> resourceSetProvider
@@ -47,14 +46,9 @@ class Main
 		val set = resourceSetProvider.get
 		val resource = set.getResource(URI.createFileURI(string), true)
 		
-		val issues = validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl)
-		if (!issues.empty) {
-			issues.forEach[System.err.println(it)]
-			return
-		}
-		else
+		if (resource.contents.head !== null)
 		{
-			System.out.println("Validation correct")
+			println("Parsing correct")
 		}
 	}
 }
