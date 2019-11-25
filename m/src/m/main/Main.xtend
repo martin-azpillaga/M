@@ -6,9 +6,6 @@ import com.google.inject.Provider
 import m.TextStandaloneSetup
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.xtext.generator.GeneratorContext
-import org.eclipse.xtext.generator.GeneratorDelegate
-import org.eclipse.xtext.generator.JavaIoFileSystemAccess
 import org.eclipse.xtext.util.CancelIndicator
 import org.eclipse.xtext.validation.CheckMode
 import org.eclipse.xtext.validation.IResourceValidator
@@ -17,13 +14,10 @@ import m.m.MPackage
 import m.expressions.ExpressionsPackage
 import m.modular.ModularPackage
 
-class Main {
-
-	def static main(String[] args) {
-		if (args.empty) {
-			System::err.println('Aborting: no path to EMF resource provided!')
-			return
-		}
+class Main 
+{
+	def static void main(String[] args) 
+	{
 		val injector = new TextStandaloneSetup().createInjectorAndDoEMFRegistration
 		val main = injector.getInstance(Main)
 		if (!EPackage.Registry.INSTANCE.containsKey("http://www.minim.games/expressions")) 
@@ -38,7 +32,8 @@ class Main {
 		{
 			EPackage.Registry.INSTANCE.put("http://www.minim.games/M", MPackage.eINSTANCE);
 		}
-		
+		println ('Running')
+
 		main.runGenerator(args.get(0))
 	}
 
@@ -46,23 +41,14 @@ class Main {
 
 	@Inject IResourceValidator validator
 
-	@Inject GeneratorDelegate generator
-
-	@Inject JavaIoFileSystemAccess fileAccess
-
 	def protected runGenerator(String string) 
 	{
 		val set = resourceSetProvider.get
 		val resource = set.getResource(URI.createFileURI(string), true)
 		
-		val issues = validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl)
-		if (!issues.empty) {
-			issues.forEach[System.err.println(it)]
-			return
-		}
-		else
+		if (resource.contents.head !== null)
 		{
-			System.out.println("Validation correct")
+			println("Parsing correct")
 		}
 	}
 }
