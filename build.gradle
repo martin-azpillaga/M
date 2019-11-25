@@ -84,9 +84,15 @@ generateXtext.dependsOn(generateXtextLanguage)
 clean.dependsOn(cleanGenerateXtext)
 
 shadowJar {
-	baseName = "${base}"
+	archiveBaseName = "${base}"
 	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', 
 			'**/*.xtend', '**/*.mwe2', '**/*.g', '**/*.xtext'
 
 	manifest.attributes 'Main-Class': 'm.main.Main'
 }
+
+task installGitHooks (type: Exec){
+	commandLine 'git', 'config', 'core.hooksPath', 'hooks/'
+}
+
+generateXtextLanguage.dependsOn(installGitHooks)
