@@ -17,11 +17,11 @@ repositories {
 
 
 apply plugin: 'org.xtext.xtend'
-apply plugin:'java'
+apply plugin: 'java'
 
 ext.xtextVersion = '2.19.0'
 ext.base = 'm'
-ext.grammars = ['Expressions','Modular','M','Text','Testua','CSharp','XML','JSON','YAML']
+ext.grammars = ['Expressions','Modular','M','Text','Testua','CSharp','Javascript','XML','JSON','YAML']
 
 sourceSets {
 	main.java.srcDirs = ["m/src", "m/src-gen"]
@@ -84,7 +84,7 @@ generateXtext.dependsOn(generateXtextLanguage)
 clean.dependsOn(cleanGenerateXtext)
 
 shadowJar {
-	archiveBaseName = "${base}"
+	baseName = "${base}"
 	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', 
 			'**/*.xtend', '**/*.mwe2', '**/*.g', '**/*.xtext'
 
@@ -96,3 +96,32 @@ task installGitHooks (type: Exec){
 }
 
 generateXtextLanguage.dependsOn(installGitHooks)
+
+
+
+task copyArtifacts (type: Copy){
+	from 'build/libs/m.jar'
+	into 'artifacts'
+}
+
+copyArtifacts.dependsOn(shadowJar)
+
+task copyClasses (type: Copy){
+	from 'build/classes/java/main/m'
+	into 'artifacts/m'
+}
+
+task gen (type: Exec){
+	workingDir 'artifacts'
+	commandLine 'java', '-cp', 'm.jar', 'm.main.GenerateHtml'
+}
+
+gen.dependsOn(copyArtifacts)
+gen.dependsOn(copyClasses)
+
+clean.dependsOn(cleanCopyArtifacts)
+
+build.dependsOn(gen)
+build.dependsOn(cleanCopyClasses)
+
+cleanCopyClasses.mustRunAfter gen

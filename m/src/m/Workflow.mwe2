@@ -110,6 +110,20 @@ Workflow
 		}
 		language = XtextGeneratorLanguage 
 		{
+			name = "m.Javascript"
+			fileExtensions = "js"
+			fragment = grammarAccess.GrammarAccessFragment2 {}
+		    fragment = ecore.EMFGeneratorFragment2 {}
+		    fragment = serializer.SerializerFragment2 { generateStub = false }
+		    fragment = resourceFactory.ResourceFactoryFragment2 {}
+		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 { debugGrammar = true }
+		    fragment = validation.ValidatorFragment2 { generateStub = false }
+		    fragment = builder.BuilderIntegrationFragment2 {}
+		    fragment = generator.GeneratorFragment2 { generateStub = true generateJavaMain=false }
+		    fragment = formatting.Formatter2Fragment2 { generateStub = false }
+		}
+		language = XtextGeneratorLanguage 
+		{
 			name = "m.XML"
 			fileExtensions = "blocks, xml"
 			fragment = grammarAccess.GrammarAccessFragment2 {}
