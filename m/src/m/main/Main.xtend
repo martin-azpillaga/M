@@ -6,9 +6,6 @@ import com.google.inject.Provider
 import m.TextStandaloneSetup
 import org.eclipse.emf.common.util.URI
 import org.eclipse.emf.ecore.resource.ResourceSet
-import org.eclipse.xtext.util.CancelIndicator
-import org.eclipse.xtext.validation.CheckMode
-import org.eclipse.xtext.validation.IResourceValidator
 import org.eclipse.emf.ecore.EPackage
 import m.m.MPackage
 import m.expressions.ExpressionsPackage
@@ -38,8 +35,6 @@ class Main
 	}
 
 	@Inject Provider<ResourceSet> resourceSetProvider
-
-	@Inject IResourceValidator validator
 
 	def protected runGenerator(String string) 
 	{
