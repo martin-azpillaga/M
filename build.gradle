@@ -18,6 +18,7 @@ repositories {
 
 apply plugin: 'org.xtext.xtend'
 apply plugin: 'java'
+apply plugin: 'jacoco'
 
 ext.xtextVersion = '2.19.0'
 ext.base = 'm'
@@ -101,6 +102,7 @@ generateXtextLanguage.dependsOn(installGitHooks)
 
 task copyArtifacts (type: Copy){
 	from 'build/libs/m.jar'
+	from 'build/libs/m-min.jar'
 	into 'artifacts'
 }
 
@@ -125,3 +127,17 @@ build.dependsOn(gen)
 build.dependsOn(cleanCopyClasses)
 
 cleanCopyClasses.mustRunAfter gen
+
+//jacoco
+// java -javaagent:jacocoagent.jar=destfile=other.exec -jar m.jar --> creates jacoco.exec
+// java -jar jacococli.jar merge first.exec second.exec --destfile=merged.exec
+// java -jar jacococli.jar report jacoco.exec --classfiles m.jar --html report
+
+jar {
+	archiveName "${base}-min.jar"
+	manifest {
+        attributes 'Main-Class': 'm.main.Main'
+    }
+	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', 
+			'**/*.xtend', '**/*.mwe2', '**/*.g', '**/*.xtext'
+}
