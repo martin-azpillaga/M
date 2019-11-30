@@ -1,0 +1,17 @@
+{
+  "name": "m-visual",
+  "version": "0.0.0",
+  "description": "Visual editor for the M programming language",
+  "main": "index.js",
+  "author": "Martin Azpillaga Aldalur",
+  "license": "AGPL-3.0",
+  "scripts": {
+    "install": "printf \"node_modules\npackage-lock.json\n.gitignore\ndist\nindex.html\" > .gitignore",
+    "start": "electron .",
+    "build": "electron-builder ."
+  },
+  "devDependencies": {
+    "electron": "^7.1.2",
+    "electron-builder": "^21.2.0"
+  }
+}
