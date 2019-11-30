@@ -133,6 +133,8 @@ cleanCopyClasses.mustRunAfter gen
 // java -jar jacococli.jar merge first.exec second.exec --destfile=merged.exec
 // java -jar jacococli.jar report jacoco.exec --classfiles m.jar --html report
 
+// strace
+// strace -s 10000 -f -q -e trace=write,open,creat,ftruncate,truncate,openat -e signal=sigkill -q java Main
 jar {
 	archiveName "${base}-min.jar"
 	manifest {
