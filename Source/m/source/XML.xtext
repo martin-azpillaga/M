@@ -1,4 +1,4 @@
-grammar m.XML
+grammar source.XML
 import "http://www.eclipse.org/emf/2002/Ecore"
 generate mxml "http://www.minim.games/xml"
 

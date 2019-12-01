@@ -1,4 +1,4 @@
-grammar m.YAML
+grammar source.YAML
 
 import "http://www.eclipse.org/emf/2002/Ecore"
 generate yaml "http://www.minim.games/yaml"
