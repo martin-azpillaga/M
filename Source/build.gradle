@@ -83,7 +83,14 @@ task installGitHooks (type: Exec){
 	commandLine 'git', 'config', 'core.hooksPath', 'Continuous deployment/hooks/'
 }
 
+task ignore (){
+	outputs.file '.gitignore'
+	doLast{
+		file('.gitignore').text = ".gradle\n.gitignore"
+	}
+}
 
+clean.dependsOn(cleanIgnore)
 
 task copyArtifacts (type: Copy){
 	from 'build/libs/m.jar'
