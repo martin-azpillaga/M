@@ -1,4 +1,4 @@
-grammar m.Expressions hidden(WS)
+grammar source.Expressions hidden(WS)
 
 import "http://www.eclipse.org/emf/2002/Ecore"
 generate expressions "http://www.minim.games/expressions"

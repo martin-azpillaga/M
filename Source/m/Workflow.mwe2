@@ -1,0 +1,43 @@
+module m.Workflow
+
+import org.eclipse.xtext.xtext.generator.*
+import org.eclipse.xtext.xtext.generator.model.project.*
+
+Workflow 
+{	
+	component = XtextGenerator 
+	{
+		configuration = DefaultGeneratorModule
+		{
+			project = XtextProjectConfig
+			{
+				runtime = RuntimeProjectConfig
+				{
+					root = "m"
+					name = "m"
+
+					src = "m"
+					srcGen = "m/generated"
+					ecoreModel = "m/generated/model"
+				}
+				genericIde = model.project.BundleProjectConfig
+				{
+					enabled = true
+
+					root = "m"
+					name = "m"
+
+					src = "m"
+					srcGen = "m/generated"
+				}
+			}
+		}
+		language = XtextGeneratorLanguage
+		{
+			name = "source.Expressions"
+			fileExtensions = "expressions"
+		    fragment = ecore.EMFGeneratorFragment2 {}
+		    fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
+		}
+	}
+}
