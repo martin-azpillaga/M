@@ -1,0 +1,35 @@
+{
+  "scripts": {
+    "buildBrowser": "theia rebuild:browser && theia build --app-target browser",
+    "buildElectron": "theia rebuild:electron && theia build --app-target electron",
+    "browser": "yarn buildBrowser && theia start --app-target browser",
+    "electron": "yarn buildElectron && theia start --app-target electron",
+    "ignore": "printf \"*\n!package.json\" > .gitignore"
+  },
+  "dependencies": {
+    "typescript": "latest",
+    "@theia/typescript": "next",
+    "@theia/navigator": "next",
+    "@theia/terminal": "next",
+    "@theia/outline-view": "next",
+    "@theia/preferences": "next",
+    "@theia/messages": "next",
+    "@theia/git": "next",
+    "@theia/file-search": "next",
+    "@theia/markers": "next",
+    "@theia/preview": "next",
+    "@theia/callhierarchy": "next",
+    "@theia/merge-conflicts": "next",
+    "@theia/search-in-workspace": "next",
+    "@theia/json": "next",
+    "@theia/textmate-grammars": "next",
+    "@theia/mini-browser": "next",
+    "@theia/node-pty": "0.7.8-theia004",
+    "@theia/electron": "latest",
+    "nsfw": "1.2.5",
+    "find-git-repositories": "0.1.1"
+  },
+  "devDependencies": {
+    "@theia/cli": "next"
+  }
+}
