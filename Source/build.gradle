@@ -27,7 +27,7 @@ ext.grammars = ['Expressions','Modular','M','Text','Testua','CSharp','Javascript
 sourceSets {
 	main.java.srcDirs = ["m/src", "m/src-gen"]
 	main.resources.srcDirs = ["m/src", "m/src-gen"]
-	main.xtendOutputDir = 'm/xtend-gen'
+	main.xtendOutputDir = 'm/generated'
 }
 
 configurations {
@@ -43,45 +43,32 @@ dependencies {
 	mwe2 "org.eclipse.xtext:org.eclipse.xtext.common.types:${xtextVersion}"
 	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:${xtextVersion}"
 	mwe2 'org.eclipse.xtext:xtext-antlr-generator'
-	mwe2 files("${projectDir}/m/src/")
+	mwe2 files("${projectDir}/m/")
 }
 
 
 
-
-task generateProjectFolders{
-    outputs.dir "${base}.ide"
-    outputs.dir "${base}.ui"
-    doLast { file("${base}.ide").mkdirs(); file("${base}.ui").mkdirs() }
-}
-
-task generateXtextLanguage(type: JavaExec, dependsOn: generateProjectFolders) {
-	
+task runWorkflow(type: JavaExec) {
 	main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
 	classpath = configurations.mwe2 
-	args += "m/src/m/Workflow.mwe2"
-	args += "-p"
-	args += "rootPath=/${projectDir}"
+	args += "m/Workflow.mwe2"
 
-	inputs.files grammars.collect {"m/src/m/"+it+".xtext"}
-	inputs.file "m/src/m/Workflow.mwe2"
-	
-	outputs.dir "m/src-gen"
-    outputs.dir "m/model"
-    outputs.dir "m/META-INF"
-	outputs.file 'm/plugin.xml'
-	outputs.dir 'm/src/m/formatting2'
-	outputs.dir 'm/src/m/generator'
-	outputs.dir 'm/src/m/parser'
-	outputs.dir 'm/src/m/validation'
-    outputs.files grammars.collect {'m/src/m/'+it+'RuntimeModule.xtend'}
-    outputs.files grammars.collect {'m/src/m/'+it+'StandaloneSetup.xtend'}
-	
+	inputs.files fileTree('m/source') { include "**/*.xtext" }
+	inputs.file 'm/Workflow.mwe2'
+
+	outputs.dir 'm/generated'
+	outputs.files fileTree('m/generated')
+
+	outputs.files grammars.collect {"m/source/${it}RuntimeModule.xtend"}
+	outputs.files grammars.collect {"m/source/${it}StandaloneSetup.xtend"}
+
+	outputs.dir 'm/source/ide'
+	outputs.files fileTree('m/source/ide')
 }
-cleanGenerateXtextLanguage.dependsOn(cleanGenerateProjectFolders)
-clean.dependsOn(cleanGenerateXtextLanguage)
 
-generateXtext.dependsOn(generateXtextLanguage)
+clean.dependsOn(cleanRunWorkflow)
+
+generateXtext.dependsOn(runWorkflow)
 clean.dependsOn(cleanGenerateXtext)
 
 shadowJar {
@@ -95,8 +82,6 @@ shadowJar {
 task installGitHooks (type: Exec){
 	commandLine 'git', 'config', 'core.hooksPath', 'Continuous deployment/hooks/'
 }
-
-generateXtextLanguage.dependsOn(installGitHooks)
 
 
 
