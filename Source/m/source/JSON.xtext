@@ -1,4 +1,4 @@
-grammar m.JSON hidden(WS)
+grammar source.JSON hidden(WS)
 
 import "http://www.eclipse.org/emf/2002/Ecore"
 generate json "http://www.minim.games/json"

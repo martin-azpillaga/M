@@ -64,6 +64,9 @@ task runWorkflow(type: JavaExec) {
 
 	outputs.dir 'm/source/ide'
 	outputs.files fileTree('m/source/ide')
+
+	outputs.dir 'm/source/parser'
+	outputs.files fileTree('m/source/parser')
 }
 
 clean.dependsOn(cleanRunWorkflow)
@@ -86,7 +89,7 @@ task installGitHooks (type: Exec){
 task ignore (){
 	outputs.file '.gitignore'
 	doLast{
-		file('.gitignore').text = ".gradle\n.gitignore"
+		file('.gitignore').text = ".gradle\n.gitignore\ngenerated\n*Module.xtend\n*Setup.xtend\n*TokenSource.java"
 	}
 }
 
