@@ -6,7 +6,7 @@
   "author": "Martin Azpillaga Aldalur",
   "license": "AGPL-3.0",
   "scripts": {
-    "install": "printf \"node_modules\npackage-lock.json\n.gitignore\ndist\nindex.html\" > .gitignore",
+    "ignore": "printf \"*\n!package.json\n!index.js\" > .gitignore",
     "start": "electron .",
     "build": "electron-builder ."
   },
