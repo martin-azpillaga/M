@@ -1,188 +1,111 @@
 # What is M
 
-What.
+M is a data oriented programming language for developing games and interactive
+experiences.
 
-M is a data oriented programming language for game developers.
-
-It increases productivity by reducing the development *and* maintenance time of
+M increases productivity by reducing the development *and* maintenance time of
 projects.
 
 The following quote represents the philosophy behind the project:
 
->Everything should be as simple as it can be, but no simpler
+> Everything should be as simple as it can be, but no simpler
 
-## Key features
-
-Why.
+## Why do I care
 
 * **M is data oriented**
 
   M encourages data oriented design by default, a programming paradigm proven to
   be specially well suited for game development.
 
-  This improves the performance and flexibility of the project. [Learn why].
+  This improves the performance and flexibility of the project.
 
 * **M involves all your team**
 
-  Programmers will feel at home with a C-like syntax that can be edited using
-  any editor that implements the [language server protocol].
+  Programmers will feel at home developing in a vs-code-based text editor.
 
-  Artists, designers and project managers might prefer the block based [online
-  visual editor].
+  Artists and designers might prefer the block based online visual editor.
 
-  Moreover, all these [interfaces can be combined] allowing everyone to
-  communicate their ideas better, across the entire team.
+  Tool developers can extend the headless program and develop their your own
+  tools.
+
+  The connection of these interfaces allows everyone to communicate their ideas
+  better, across the entire team.
 
 * **M integrates in your workflow**
 
-  M does *not* compile the code down to an executable game. Instead, it
-  generates a high quality project using the [game engine of your choice].
+  M doesn't generate executable games, but game projects that you can edit using
+  a game engine.
 
-  Everyone can inspect the generated code, tweak values and import custom art
-  pieces made in their favorite digital content creation suites.
+  You can inspect the generated code, tweak design values and customize the look
+  with art pieces made in your favorite content creation program.
 
   M does not compete with the tools you know and love. It provides you with a
   tool that will improve your development journey.
 
-More technical [language properties].
+## How can I get it
 
----
+M is an open source software licensed under the AGPL license.
 
-## Get started
+In non legal terms, it means that you have the freedom to use it, inspect it and
+make your own version, for free.
 
-How.
+You can also redistribute it, including commercially, as long as you keep the
+source code license.
 
-There are currently four ways you can create programs in M: theia, blockly,
-electron, headless.
+Go to the releases and download the latest version. No need for installation.
+You are ready to start.
 
-1. Open an editor
-2. Copy an example code file
-3. Open the results in a game engine
-4. That's the workflow
-5. If you want to learn step by step go to.
-6. Try it online, upload the blocks file
-7. You can also develop everything online.
+## Getting started
 
-* **Online text editor**
+You can get your first game project running in five steps:
 
-1. Download the [latest standalone editor]. It requires no installation, just
-   extract the folder and run the executable.
+1. Install the latest editor version
+2. Download the code for the example project
+3. Place the file in the workspace of the editor
+4. Save the file
+5. You can find your customizable project in the generated Unity folder
 
-2. Click on new project, name it HelloM and select the Text, Blocks and Hybrid
-   Unity interfaces.
+Optionally, in three more steps, you will be editing the code visually online:
 
-3. Open the `HelloM/Text/main.text` file and create an entity like so:
+1. Open the block based online editor
+2. Click upload and select the `example.blocks` found in the Blocks folder
+3. Try experimenting with different kinds of blocks.
 
-    ball has mass 10, position 1 2 and appearance sprite.ball.
+If you want to understand more about how this works and develop your own
+projects, check the begginer guide in the documentation.
 
-4. Save the file. Congratulations, you can find the generated project inside the
-   Hybrid Unity folder.
+It includes a step by step guide for creating your first project from scratch,
+how to guides for common use cases and guided examples.
 
-* **Visual online editor**
+## Getting deeper
 
-1. Hit the load button and open the generated `HelloM/Blocks/main.blocks` file.
+The documentation also contains guides for users and developers. You can become
+an expert in M within a week by reading its thorough documentation.
 
-2. Try adding a component named friction with value 10 using the Numeric menu.
+Learn about the syntax of M, the special semantics for interactive experiences
+and troubleshooting for common issues you might encounter, and more.
 
-3. Hit the save button and override the `HelloM/Blocks/main.blocks` with the
-   downloaded file.
+Make sure you fulfill the prerequisites before reading a guide and you will
+become an expert in no time.
 
-4. Save the file. Both the Text and Hybrid Unity interfaces will synchronize to
-   the new changes.
+Then you may become a contributor and shape the development of the M project.
 
-* **Standalone desktop application**
+## Can I help
 
-1. Download the [latest standalone editor] for Linux.
+Contributors from all around the world make mantaining this project possible.
+All kind actions are welcome in the project. Here are some ideas:
 
-2. Follow steps in A.
+* **Development**
 
-## Become an expert
+  The easiest way to contribute is by creating an issue, both
+  bug reports and feature requests are welcome. Be up to date with the
+  development by checking the kanban project.
 
-You can become an expert in M within a week by reading its thorough
-[documentation].
+* **Sponsor**
 
-If you are new to data oriented design, it is recommended that first you go
-through the [key concepts] and then continue with the specific [implementation
-of M].
+  You can help this project succeed by donating any amount using GitHub's
+  built-in sponsorship feature. Click the sponsor heart button and set an
+  amount that makes you feel comfortable.
 
-Then learn the [language syntax] and additionally, you can get inspiration from
-the [example projects] hosted in this repository.
-
-If you want to dig deeper, the source code is available in closed beta right
-now. Contact martin@minim.games to request access and a friendly onboarding
-experience.
-
----
-
-## Help make M even better
-
-If you enjoy the project you can help its development by contributing, sharing
-and donating.
-
-The easiest way to contribute is by [creating an issue], both bug reports and
-feature requests are welcome. Be up to date with the development by checking the
-[kanban project].
-
-If you are a developer and want to help extending M, you can request access to
-the private repository where the source code is hosted by contacting the author
-at martin@minim.games. The full documentation of the internal language and
-workflow API will be available in [the wiki].
-
-Finally, you can help this project succeed by donating any amount using GitHub's
-built-in sponsorship feature. Just click the sponsor heart button above. All the
-donations will be used exclusively in the development costs of the project.
-
-## Authors and licensing
-
-What can I do with it?
-
-This project has been developed with love by [Martin Azpillaga Aldalur], and is distributed under the [Affero GNU Public License].
-
-The language implementation would be impossible without the [Xtext framework]
-developed by the Eclipse foundation. The Xtext framework is distributed under
-the [Eclipse Public License 1.0].
-
-The online and standalone editors are powered by the [Theia framework] developed
-by TypeFox. Theia is licensed under the [Apache 2.0 license].
-
-The online editor server is hosted for free thanks to the [Glitch framework]
-developed by the company Glitch. Glitch is licensed under the [Apache 2.0
-license].
-
-The visual editor uses the [Blockly framework] developed by Google. The Blockly
-framework is distributed under the [Apache 2.0 license].
-
-[interfaces can be combined]: 1.%20User%20guide/0.%20Reference/4.%20Platforms.md
-[game engine of your choice]: 1.%20User%20guide/0.%20Reference/1.%20Domain.md
-[documentation]: 1.%20User%20guide/0.%20Reference/0.%20Grammar.md
-[key concepts]: https://en.wikipedia.org/wiki/Data-oriented_design
-[implementation of M]: 2.%20Developer%20guide/1.%20Implementation/README.md
-
-[example projects]: 0.%20Beginner%20guide/2.%20Guided%20examples/README.md
-[the wiki]: 2.%20Developer%20guide/0.%20Philosophy/README.md
-[language syntax]: 1.%20User%20guide/0.%20Reference/0.%20Grammar.md
-[language properties]: 2.%20Developer%20guide/0.%20Philosophy/2.%20Properties.md
-
-[Learn why]: https://en.wikipedia.org/wiki/Data-oriented_design
-[Mike Acton's talk]: https://www.youtube.com/watch?v=rX0ItVEVjHc
-
-[language server protocol]:
-https://en.wikipedia.org/wiki/Language_Server_Protocol
-[online visual editor]:
-https://martin-azpillaga.github.io/M/
-[online text editor]: https://cflat.glitch.me
-[latest standalone editor]:
-https://github.com/martin-azpillaga/M/releases/download/2019.1/M.AppImage
-
-[Hard challenges]: https://github.com/martin-azpillaga/M/issues
-[creating an issue]: https://github.com/martin-azpillaga/M/issues
-[Kanban project]: https://github.com/martin-azpillaga/M/projects/1
-
-[Martin Azpillaga Aldalur]: https://martin-azpillaga.github.io/
-[Xtext framework]: https://github.com/eclipse/xtext
-[Theia framework]: https://www.theia-ide.org
-[Glitch framework]: https://glitch.com/edit/#!/community
-[Blockly framework]: https://github.com/google/blockly
-[Apache 2.0 license]: https://www.apache.org/licenses/LICENSE-2.0
-[Eclipse Public License 1.0]: https://www.eclipse.org/legal/epl-v10.html
-[Affero GNU Public License]: https://www.gnu.org/licenses/agpl-3.0.en.html
+**Thank you** to everyone that helps and has helped making this project a
+reality.
