@@ -1,7 +1,5 @@
 # What is M
 
-What.
-
 M is a data oriented programming language for game developers.
 
 It increases productivity by reducing the development *and* maintenance time of
