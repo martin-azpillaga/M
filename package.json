@@ -1,0 +1,25 @@
+{
+  "name": "m",
+  "version": "0.0.0",
+  "description": "A data oriented programming language for developing games and interactive experiences",
+  "keywords": 
+  [
+    "data-oriented",
+    "programming-language",
+    "game-development",
+    "interactive-experiences"
+  ],
+  "author": "Martin Azpillaga Aldalur",
+  "license": "AGPL-3.0",
+
+  "repository":
+  {
+    "type": "git",
+    "url": "git+https://github.com/martin-azpillaga/M.git"
+  },
+  "bugs":
+  {
+    "url": "https://github.com/martin-azpillaga/M/issues"
+  },
+  "homepage": "https://minim-games.gitbook.io/m/"
+}
