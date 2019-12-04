@@ -2,8 +2,7 @@
   "name": "m",
   "version": "0.0.0",
   "description": "A data oriented programming language for developing games and interactive experiences",
-  "keywords": 
-  [
+  "keywords": [
     "data-oriented",
     "programming-language",
     "game-development",
@@ -11,15 +10,21 @@
   ],
   "author": "Martin Azpillaga Aldalur",
   "license": "AGPL-3.0",
-
-  "repository":
-  {
+  "repository": {
     "type": "git",
     "url": "git+https://github.com/martin-azpillaga/M.git"
   },
-  "bugs":
-  {
+  "bugs": {
     "url": "https://github.com/martin-azpillaga/M/issues"
   },
-  "homepage": "https://minim-games.gitbook.io/m/"
+  "homepage": "https://minim-games.gitbook.io/m/",
+  "devDependencies": {
+    "cspell": "latest",
+    "markdown-link-checker": "latest",
+    "markdownlint-cli": "latest",
+    "write-good": "latest"
+  },
+  "scripts": {
+    "install": "printf \"#!/bin/sh\nnpx cspell Documentation/**/*.md &&\nnpx markdownlint Documentation/**/*.md &&\nfind Documentation -exec npx write-good {} + &&\nfind Documentation -exec npx markdown-link-checker {} +\" > .git/hooks/pre-commit && printf \"package-lock.json\nnode_modules\n.gitignore\" > .gitignore"
+  }
 }

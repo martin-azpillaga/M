@@ -1,7 +1,7 @@
 # What is M
 
-M is a data oriented programming language for developing games and interactive
-experiences.
+**M** is a data oriented programming language for developing games and
+interactive experiences.
 
 M increases productivity by reducing the development *and* maintenance time of
 projects.
@@ -46,12 +46,13 @@ The following quote represents the philosophy behind the project:
 
 M is an open source software licensed under the AGPL license.
 
-In non legal terms, it means that you have the freedom to use it, inspect it and make your own version, **for free**.
+In non legal terms, it means that you have the freedom to use it, inspect it and
+make your own version, **for free**.
 
 You can also redistribute it, but make sure you do it under the same license.
 
-If you agree, you can download the latest version. No need for installation.
-You are ready to start.
+If you agree, you can download the latest version. No need for installation. You
+are ready to start.
 
 ## Getting started
 
@@ -70,40 +71,49 @@ Optionally, in three more steps, you will be editing the code visually online:
 3. Try experimenting with different kinds of blocks.
 
 If you want to understand more about how this works and develop your own
-projects, check the begginer guide in the documentation.
+projects, check the beginner guide in the documentation.
 
 It includes a step by step guide for creating your first project from scratch,
 how to guides for common use cases and guided examples.
 
 ## Getting deeper
 
-The documentation also contains guides for users and developers. You can become
-an expert in M within a week by reading its thorough documentation.
+The documentation also contains guides for users and developers.
 
 Learn about the syntax of M, the special semantics for interactive experiences
-and troubleshooting for common issues you might encounter, and more.
+and troubleshooting for common issues you might encounter to use it efficiently.
 
 Make sure you fulfill the prerequisites before reading a guide and you will
 become an expert in no time.
 
 Then you may become a contributor and shape the development of the M project.
 
-## Can I help
+The structure and design decisions behind the source code are also written in
+the documentation.
 
-Contributors from all around the world make mantaining this project possible.
-All kind actions are welcome in the project. Here are some ideas:
+## How can I help
 
-* **Development**
+Contributors from all around the world make maintaining this project possible.
+**You don't need to be an expert** to help this project succeed.
 
-  The easiest way to contribute is by creating an issue, both
-  bug reports and feature requests are welcome. Be up to date with the
-  development by checking the kanban project.
+All kind actions are welcome. Here are some ideas:
 
-* **Sponsor**
+* **Join the conversation**
 
-  You can help this project succeed by donating any amount using GitHub's
-  built-in sponsorship feature. Click the sponsor heart button and set an
-  amount that makes you feel comfortable.
+  * Got a question? Open an issue.
 
-**Thank you** to everyone that helps and has helped making this project a
-reality.
+  * Found a bug? Open an issue.
+
+  * Missing a feature? Open an issue.
+
+  We will reply to your suggestions.
+
+* **Become a sponsor**
+
+  You can donate using GitHub's built-in sponsorship feature. Click
+  the sponsor heart button and set the amount you feel comfortable with.
+
+  To represent our gratitude, you will receive everything from merchandising to
+  a special mention in the code.
+
+**Thank you**.
