@@ -46,20 +46,18 @@ The following quote represents the philosophy behind the project:
 
 M is an open source software licensed under the AGPL license.
 
-In non legal terms, it means that you have the freedom to use it, inspect it and
-make your own version, for free.
+In non legal terms, it means that you have the freedom to use it, inspect it and make your own version, **for free**.
 
-You can also redistribute it, including commercially, as long as you keep the
-source code license.
+You can also redistribute it, but make sure you do it under the same license.
 
-Go to the releases and download the latest version. No need for installation.
+If you agree, you can download the latest version. No need for installation.
 You are ready to start.
 
 ## Getting started
 
 You can get your first game project running in five steps:
 
-1. Install the latest editor version
+1. Download and run the editor
 2. Download the code for the example project
 3. Place the file in the workspace of the editor
 4. Save the file
