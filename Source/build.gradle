@@ -25,9 +25,9 @@ ext.base = 'm'
 ext.grammars = ['Expressions','Modular','M','Text','Testua','CSharp','Javascript','XML','JSON','YAML']
 
 sourceSets {
-	main.java.srcDirs = ["m/src", "m/src-gen"]
-	main.resources.srcDirs = ["m/src", "m/src-gen"]
-	main.xtendOutputDir = 'm/generated'
+	main.java.srcDirs = ["m/source", "m/source/ide", "m/xtend-gen"]
+	main.resources.srcDirs = ["m/source", "m/source/ide", "m/xtend-gen"]
+	main.xtendOutputDir = 'm/xtend-gen'
 }
 
 configurations {
@@ -71,8 +71,8 @@ task runWorkflow(type: JavaExec) {
 
 clean.dependsOn(cleanRunWorkflow)
 
-generateXtext.dependsOn(runWorkflow)
-clean.dependsOn(cleanGenerateXtext)
+//generateXtext.dependsOn(runWorkflow)
+//clean.dependsOn(cleanGenerateXtext)
 
 shadowJar {
 	baseName = "${base}"
