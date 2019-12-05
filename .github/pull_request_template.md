@@ -1,13 +1,9 @@
-# Default pull request
-
-Brief explanation
-
-## Related issues
+# Related issues
 
 - Closes #n
 - Closes #n
 
-## Review checklist
+## Checklist
 
 - [ ] Pass automatic tests
 - [ ] Check all commits
