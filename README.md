@@ -76,7 +76,7 @@ projects, check the beginner guide in the documentation.
 It includes a step by step guide for creating your first project from scratch,
 how to guides for common use cases and guided examples.
 
-## Getting deeper
+## Go deeper
 
 The documentation also contains guides for users and developers.
 
