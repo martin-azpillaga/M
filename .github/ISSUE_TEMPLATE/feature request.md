@@ -2,7 +2,7 @@
 name: Feature request
 about: What is the project missing?
 title: Specify a title here
-labels: enhancement
+labels: possibility
 assignees: martin-azpillaga
 ---
 
