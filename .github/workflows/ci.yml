@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository files
     - uses: actions/checkout@v1
     - name: Run pre-commit script
       run: |
