@@ -8,7 +8,11 @@
     "game-development",
     "interactive-experiences"
   ],
-  "author": "Martin Azpillaga Aldalur",
+  "author": {
+    "name": "Martin Azpillaga Aldalur",
+    "email": "martin@azpillaga.world",
+    "url": "https://martin.azpillaga.world"
+  },
   "license": "AGPL-3.0",
   "repository": {
     "type": "git",
