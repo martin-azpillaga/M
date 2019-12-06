@@ -1,9 +1,7 @@
 name: CI
 
 on:
-  pull_request:
-    branches: 
-      - master
+  [push, pull_request]
 
 jobs:
   lint:
@@ -11,8 +9,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Run pre-commit script
+    - name: Checkout repository files
+      uses: actions/checkout@v1
+    - name: Run linters
       run: |
         npm install &&
         npx cspell --config Tooling/quality/cspell.json Documentation/**/*.md &&
