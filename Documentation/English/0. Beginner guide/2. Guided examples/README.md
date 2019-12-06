@@ -17,16 +17,16 @@ you will learn the basics of entity and system creation and physics
 interactions.
 
 Next is the [Space Invaders] game, developed by Tomohiro Nishikado and
-distributed by Taito in 1978. You will be presented to the concepts of batch
-creation of entities, creation and destruction of entities in runtime.
+distributed by Taito in 1978. You will learn about batch creation of entities,
+creation and destruction of entities in runtime.
 
 For the 80's era we have chosen the well known [Pacman] and [Mario]. In Pacman
 you can learn how to use reinforcement learning AI techniques and in Mario how
-to design multiple levels.
+to design diverse levels.
 
-Finally for the 90's we enter the era of 3D graphics. To showcase this ability,
+For the 90's we enter the era of 3D graphics. To showcase this ability,
 we have created a demo of [Crash Bandicoot], developed by Naughty Dog, that
-combines all the aforementioned in a three dimensional game.
+combines all the concepts in a three dimensional game.
 
 [Pong]: 0.%20Pong.md [Space Invaders]: 1.%20Space%20invaders.md [Pacman]:
 2.%20Pacman.md [Mario]: 3.%20Mario.md [Crash Bandicoot]:
