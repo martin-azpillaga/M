@@ -2,4 +2,4 @@
 npx cspell --config Tooling/quality/cspell.json Documentation/**/*.md &&
 npx markdownlint "Documentation/**/*.md" &&
 find Documentation -exec npx write-good --no-illusion {} + &&
-find Documentation -type f -exec npx markdown-link-check {} +
+find Documentation -type f -exec npx markdown-link-check {} \;
