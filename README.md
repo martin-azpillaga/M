@@ -1,6 +1,6 @@
 # What is M
 
-**M** is a data oriented programming language for developing games and
+M is a data oriented programming language for developing games and
 interactive experiences.
 
 M increases productivity by reducing the development *and* maintenance time of

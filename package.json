@@ -30,6 +30,5 @@
   },
   "scripts": {
     "install": "printf \"#!/bin/sh\nnpx cspell Documentation/**/*.md &&\nnpx markdownlint Documentation/**/*.md &&\nfind Documentation -exec npx write-good {} + &&\nfind Documentation -exec npx markdown-link-checker {} +\" > .git/hooks/pre-commit && printf \"package-lock.json\nnode_modules\n.gitignore\" > .gitignore && chmod +x .git/hooks/pre-commit",
-      "summary": "find Documentation/English | sort | sed -E \"/\\.[^ m][^ d]*$/d;/^\\.$/d;/README/d;/SUMMARY/d;s/[^/]*\\//  /g;s/\\.md//g;s/[0-9]+\\. //g;s/(\\s*)(.*)/\\1* [\\2]/g;s/  //\" > names && find Documentation/English | sort | sed \"/\\.[^m ][^d ]*$/d;/^\\.$/d;/README/d;s/\\([^.][^m][^d]\\)$/\\1\\/README.md/g;/SUMMARY.md/d;s/ /%20/g;s/\\(\\s*\\)\\(.*\\)/\\1(\\2)/g\" > links && printf \"# Summary\n\n* [What is M](README.md)\n\n\" > SUMMARY.md && paste -d \"\" names links >> SUMMARY.md && rm names && rm links"
   }
 }
