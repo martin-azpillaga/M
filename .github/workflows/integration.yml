@@ -1,0 +1,23 @@
+name: Integration
+
+on:
+  [push, pull_request]
+
+jobs:
+  lint:
+    
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository files
+      uses: actions/checkout@v1
+    - name: Install npm
+      run: npm install
+    - name: Cspell spell checker
+      run: npx cspell --config Tooling/quality/cspell.json Documentation/**/*.md
+    - name: Markdownlint markdown structure
+      run: npx markdownlint "Documentation/**/*.md" &&
+    - name: Write-good english linter
+      run: find Documentation -exec npx write-good --no-illusion {} + &&
+    - name: Markdown link check
+      run: find Documentation -type f -exec npx markdown-link-check {} \;
