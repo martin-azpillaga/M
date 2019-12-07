@@ -23,10 +23,10 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
-    - name: Download and run Checkstyle linting for java
-      run: |
-        curl -L https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.27/checkstyle-8.27-all.jar -o check.jar &&
-        java -jar check.jar -c Language\ server/.github/workflows/checkstyle.xml Language\ server/src/ | grep WARN
+    - name: Download Checkstyle linting for java
+      run: curl -L https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.27/checkstyle-8.27-all.jar -o check.jar
+    - name: Run Checkstyle
+      run: java -jar check.jar -c .github/workflows/checkstyle.xml Language\ server/src/
     - name: Compile java
       run: |
         cd Language\ server
