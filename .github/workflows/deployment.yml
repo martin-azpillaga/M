@@ -1,5 +1,6 @@
 on:
-  [push]
+  pull_request:
+    types: [closed]
 
 name: Deployment
 
@@ -14,7 +15,7 @@ jobs:
           ref: master
       - name: Build project
         run: |
-          echo Hello world! > CREATED.md
+          echo Hello World! > CREATED.md
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.0.0
