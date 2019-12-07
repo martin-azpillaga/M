@@ -14,8 +14,7 @@ jobs:
           ref: master
       - name: Build project
         run: |
-          touch CREATED.md
-          ls -l
+          echo Hello world! > CREATED.md
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.0.0
