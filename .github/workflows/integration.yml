@@ -12,7 +12,7 @@ jobs:
     - name: Checkout repository files
       uses: actions/checkout@v1
     - name: Cspell spell checker
-      run: npx cspell --config Quality/cspell.json **/*.md
+      run: npx cspell --config .github/workflows/cspell.json **/*.md
     - name: Markdownlint-cli markdown structure
       run: npx markdownlint-cli -i LICENSE.md "**/*.md"
     - name: Write-good english linter
