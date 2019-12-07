@@ -13,8 +13,8 @@ jobs:
       uses: actions/checkout@v1
     - name: Cspell spell checker
       run: npx cspell --config Quality/cspell.json **/*.md
-    - name: Markdownlint markdown structure
-      run: npx markdownlint -i LICENSE.md "**/*.md"
+    - name: Markdownlint-cli markdown structure
+      run: npx markdownlint-cli -i LICENSE.md "**/*.md"
     - name: Write-good english linter
       run: |
         npx write-good --no-illusion README.md NOTICE.md
