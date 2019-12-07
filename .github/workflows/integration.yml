@@ -24,3 +24,11 @@ jobs:
         npx markdown-link-check README.md
         npx markdown-link-check NOTICE.md
         find Documentation -type f -exec npx markdown-link-check {} \;
+    - name: Download java 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Compile java
+      run: |
+        cd Language\ Server
+        ./script.sh
