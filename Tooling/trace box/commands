@@ -1,3 +1,0 @@
-strace -s 10000 -f -q -e
-trace=write,writev,pwritev,sendfile,open,creat,openat,open_by_handle_at,mknod,mknodat,rename,renameat,ftruncate,truncate,mkdir,mkdirat,rmdir,link,linkat,symlink,symlinkat,unlink,unlinkat,umask,chmod,fchmod,fchmodat,lchown,chown,fchown,fchownat,utime,utimes,futimesat,utimensat,setxattr,lsetxattr,fsetxattr,removexattr,lremovexattr,fremovexattr,ioctl,fcntl,dup,dup2,dup3,sendmsg,socket,sendto,sendmmsg,sethostname,setdomainname,io_submit,epoll_create,epoll_ctl,select,settimeofday,clock_settime,clock_adjtime,nanosleep,adjtimex,add_key,keyctl,create_module,init_module,finit_module,delete_module,acct,quotactl,clone,fork,vfork,execve,execveat,setuid,pipe,pipe2,tee,splice,vmsplice,msgsnd,msgctl,mq_timedsend
--c -e signal=kill -q java Main
