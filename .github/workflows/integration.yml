@@ -25,8 +25,8 @@ jobs:
         java-version: 11
     - name: Download and run Checkstyle linting for java
       run: |
-        curl https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.27/checkstyle-8.27-all.jar -o check.jar
-        java -jar check.jar -c Language\ server/.github/workflows/checkstyle.xml Language\ server/src/ | grep WARN && exit 1
+        curl -L https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.27/checkstyle-8.27-all.jar -o check.jar &&
+        java -jar check.jar -c Language\ server/.github/workflows/checkstyle.xml Language\ server/src/ | grep WARN
     - name: Compile java
       run: |
         cd Language\ server
