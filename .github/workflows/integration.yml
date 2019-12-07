@@ -11,21 +11,24 @@ jobs:
     steps:
     - name: Checkout repository files
       uses: actions/checkout@v1
-    - name: Install npm
-      run: npm install
     - name: Cspell spell checker
-      run: npx cspell --config Tooling/quality/cspell.json Documentation/**/*.md
-    - name: Markdownlint markdown structure
-      run: npx markdownlint "Documentation/**/*.md"
+      run: npx cspell --config .github/workflows/cspell.json **/*.md
+    - name: Markdownlint-cli markdown structure
+      run: npx markdownlint-cli -i LICENSE.md "**/*.md"
     - name: Write-good english linter
-      run: find Documentation -exec npx write-good --no-illusion {} +
+      run: |
+        npx write-good --no-illusion README.md NOTICE.md
+        find Documentation -exec npx write-good --no-illusion {} +
     - name: Markdown link check
-      run: find Documentation -type f -exec npx markdown-link-check {} \;
+      run: |
+        npx markdown-link-check README.md
+        npx markdown-link-check NOTICE.md
+        find Documentation -type f -exec npx markdown-link-check {} \;
     - name: Download java 11
       uses: actions/setup-java@v1
       with:
         java-version: 11
     - name: Compile java
       run: |
-        javac Core/m/source/main/Main.java &&
-        java -cp "Core/m/source/" main.Main 
+        cd Language\ Server
+        ./script.sh
