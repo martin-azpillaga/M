@@ -11,6 +11,8 @@ jobs:
     steps:
     - name: Checkout repository files
       uses: actions/checkout@v1
+    - name : Lint yaml files with yaml-lint
+      run: find . -name "*.yml" -exec npx yaml-lint {} +
     - name: Install xmllint
       run: sudo apt-get install libxml2-utils
     - name: Lint xml
