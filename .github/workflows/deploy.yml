@@ -11,9 +11,9 @@ jobs:
     - name: Checkout gh-pages branch
       run: git checkout -b gh-pages
     - name: Delete everything
-      run: rm -rf .
+      run: rm -rf .github Documentation Language\ server package.json SUMMARY.md
     - name: Create html file
-      run: echo "<html><body>Hello World!</body></html>" > index.html
+      run: echo "<html><body>Hello World</body></html>" > index.html
     - name: Commit changes
       run: |
         git config --local user.email "action@github.com"
@@ -23,3 +23,4 @@ jobs:
       uses: ad-m/github-push-action@master
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: gh-pages
