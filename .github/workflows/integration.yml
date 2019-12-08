@@ -27,7 +27,23 @@ jobs:
       run: curl -L https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.27/checkstyle-8.27-all.jar -o check.jar
     - name: Run Checkstyle
       run: java -jar check.jar -c .github/workflows/configuration/checkstyle.xml Language\ server/src/ | grep WARN && exit 1 || exit 0
-    - name: Compile java
+    - name: Download dependency jars
       run: |
         cd Language\ server
-        ./script.sh
+        [ ! -d lib ] && mkdir lib
+        [ ! -d lib/classes ] && mkdir lib/classes
+
+        [ ! -f lib/classes/xtext.ide.jar ] && curl https://search.maven.org/remotecontent?filepath=org/eclipse/xtext/org.eclipse.xtext.ide/2.20.0/org.eclipse.xtext.ide-2.20.0.jar -o lib/classes/xtext.ide.jar
+        [ ! -f lib/classes/guice.jar ] && curl https://search.maven.org/remotecontent?filepath=com/google/inject/guice/4.2.2/guice-4.2.2.jar -o lib/classes/guice.jar
+    - name: Compile java project
+      run: |
+        cd Language\ server
+        javac -d bin -cp src/:lib/classes/* src/m/main/*.java
+    - name: Create jar from compiled classes
+      run: |
+        cd Language\ server/bin
+        jar ecfv m.main.Main ../m.jar m/
+    - name: Run jar file
+      run: |
+        cd Language\ server
+        java -jar m.jar
