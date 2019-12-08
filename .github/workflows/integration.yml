@@ -11,6 +11,10 @@ jobs:
     steps:
     - name: Checkout repository files
       uses: actions/checkout@v1
+    - name: Json linter
+      run: find . -name "*.json" -exec npx jsonlint {} +
+    - name: Npm package.json static analysis
+      run: npx npm-package-json-lint -c .github/workflows/configuration/npm.json .
     - name: Cspell spell checker
       run: npx cspell --config .github/workflows/configuration/cspell.json **/*.md
     - name: Markdownlint-cli markdown structure
