@@ -7,13 +7,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - name: Checkout gh-pages branch
-      run: git checkout -b gh-pages
-    - name: Delete everything
-      run: rm -rf .github Documentation Language\ server package.json SUMMARY.md
+    - uses: actions/checkout@v2-beta
+      with:
+        ref: gh-pages
     - name: Create html file
-      run: echo "<html><body>Hello World</body></html>" > index.html
+      run: echo "<html><body>Hello Again</body></html>" > index.html
     - name: Commit changes
       run: |
         git config --local user.email "action@github.com"
