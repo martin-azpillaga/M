@@ -1,0 +1,25 @@
+on:
+  [push]
+
+name: Deployment
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Checkout gh-pages branch
+      run: git checkout -b gh-pages
+    - name: Delete everything
+      run: rm -rf .
+    - name: Create html file
+      run: echo "<html><body>Hello World!</body></html>" > index.html
+    - name: Commit changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git commit -m "Update html page" -a
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
