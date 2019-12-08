@@ -10,5 +10,8 @@
 
 [ ! -f lib/classes/guice.jar ] && curl https://search.maven.org/remotecontent?filepath=com/google/inject/guice/4.2.2/guice-4.2.2.jar -o lib/classes/guice.jar
 
-javac -d "bin" -cp "src/:lib/classes/*" src/m/*/*.java
+javac -d "bin" -cp "src/:lib/classes/*" src/m/main/*.java
 java -cp "bin/:lib/classes/*" m.main.Main
+cd bin
+jar ecfv m.main.Main ../m.jar m/
+java -jar ../m.jar
