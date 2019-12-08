@@ -11,6 +11,10 @@ jobs:
     steps:
     - name: Checkout repository files
       uses: actions/checkout@v1
+    - name: Install xmllint
+      run: sudo apt-get install libxml2-utils
+    - name: Lint xml
+      run: find . -name "*.xml" -exec xmllint {} +
     - name: Json linter
       run: find . -name "*.json" -exec npx jsonlint {} +
     - name: Npm package.json static analysis
