@@ -1,6 +1,6 @@
 package m.main;
 
-import org.eclipse.xtext.ide.server.*;
+import org.eclipse.xtext.ide.server.LaunchArgs;
 
 public class Main {
 
