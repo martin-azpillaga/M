@@ -55,3 +55,15 @@ jobs:
         asset_path: ./dist/M-1.0.0.AppImage
         asset_name: m.AppImage
         asset_content_type: text/text
+    - name: Setup node 10
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10'
+    - name: Create theia application (package.json)
+      run: |
+        mkdir Theia
+        cd Theia
+        npm init --yes
+        yarn add @theia/cli --dev
+        yarn add @theia/typescript @theia/git
+        cat package.json
