@@ -10,6 +10,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2-beta
+      with:
+        ref: master
     - name: Create html file
       run: echo "<html><body>Hello And bye</body></html>" > ../index.html
     - name: Checkout gh-pages branch
