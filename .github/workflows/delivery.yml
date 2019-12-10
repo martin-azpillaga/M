@@ -9,12 +9,6 @@ jobs:
     steps:
     - name: Checkout repository files
       uses: actions/checkout@v1
-      with:
-        ref: master
-    - name: Install pandoc
-      run: sudo apt-get install pandoc
-    - name: Install texlive
-      run: sudo apt-get install texlive
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1.0.0
@@ -25,6 +19,30 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: true
         prerelease: true
+    - name: Setup node 10
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10'
+    - name: Create theia application (package.json)
+      run: |
+        cd .github/workflows/configuration
+        ls -la
+        yarn
+        yarn buildStandalone
+    - name: Upload Textual AppImage to release
+      id: upload-textual-appImage
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./.github/workflows/configuration/dist/m-textual-0.0.0.AppImage
+        asset_name: m-textual.AppImage
+        asset_content_type: text/text
+    - name: Install pandoc
+      run: sudo apt-get install pandoc
+    - name: Install texlive
+      run: sudo apt-get install texlive
     - name: Create m.pdf
       run: pandoc README.md -o m.pdf
     - name: Upload m.pdf
@@ -55,15 +73,4 @@ jobs:
         asset_path: ./dist/M-1.0.0.AppImage
         asset_name: m.AppImage
         asset_content_type: text/text
-    - name: Setup node 10
-      uses: actions/setup-node@v1
-      with:
-        node-version: '10'
-    - name: Create theia application (package.json)
-      run: |
-        mkdir Theia
-        cd Theia
-        npm init --yes
-        yarn add @theia/cli --dev
-        yarn add @theia/typescript @theia/git
-        cat package.json
+    
