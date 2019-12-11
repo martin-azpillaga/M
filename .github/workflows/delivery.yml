@@ -6,43 +6,155 @@ name: Delivery
 
 jobs:
   build:
-    name: Upload Release Asset
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@master
-        with:
-          ref: master
-      - name: Build project
-        run: |
-          echo Hello World! > CREATED.md
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: Tag ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          draft: true
-          prerelease: false
-      - name: Upload README
-        id: upload-release-asset 
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./README.md
-          asset_name: README.md
-          asset_content_type: text/markdown
-      - name: Upload CREATED
-        id: upload-created
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./CREATED.md
-          asset_name: CREATED.md
-          asset_content_type: text/markdown
+    - name: Checkout repository files
+      uses: actions/checkout@v1
+      with:
+        ref: master
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: Tag ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        draft: true
+        prerelease: true
+    - name: Create m.html
+      run: |
+        mkdir Visual
+        cd Visual
+        echo "<html><body>Hello World</body></html>" > m.html
+        printf "const { app, BrowserWindow } = require('electron')\napp.on('ready', () => new BrowserWindow().loadFile('m.html'))" > index.js
+        npm init --yes
+        npx electron-builder -c.electronVersion 5.0.7 --linux AppImage
+    - name: Download java 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Download dependency jars
+      run: |
+        cd Language\ server
+        [ ! -d lib ] && mkdir lib
+        [ ! -d lib/classes ] && mkdir lib/classes
+
+        [ ! -f lib/classes/xtext.ide.jar ] && curl https://search.maven.org/remotecontent?filepath=org/eclipse/xtext/org.eclipse.xtext.ide/2.20.0/org.eclipse.xtext.ide-2.20.0.jar -o lib/classes/xtext.ide.jar
+        [ ! -f lib/classes/guice.jar ] && curl https://search.maven.org/remotecontent?filepath=com/google/inject/guice/4.2.2/guice-4.2.2.jar -o lib/classes/guice.jar
+    - name: Compile java project
+      run: |
+        cd Language\ server
+        javac -d bin -cp src/:lib/classes/* src/m/main/*.java
+    - name: Create jar from compiled classes
+      run: |
+        cd Language\ server/bin
+        jar ecfv m.main.Main ../../m.jar m/
+    - name: Upload m.jar to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./m.jar
+        asset_name: m.jar
+        asset_content_type: text/zip
+    - name: Install vsce for packaging vscode extension
+      run: sudo npm install -g vsce
+    - name: Run vsce package to create vsix file
+      run: |
+        cd .github/workflows/configuration/code
+        vsce package
+    - name: Upload m.vsix to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./.github/workflows/configuration/code/y-0.0.1.vsix
+        asset_name: m.vsix
+        asset_content_type: text/zip
+    - name: Install pandoc
+      run: sudo apt-get install pandoc
+    - name: Install texlive
+      run: sudo apt-get install texlive
+    - name: Convert markdown to html
+      run: find . -name "*.md" | xargs -I{} sh -c 'pandoc "{}" -o "{}.html"'
+    - name: Convert markdown links to html links
+      run: find . -name "*.html" | xargs -I{} sh -c 'sed -i s/.md/.md.html/g "{}"'
+    - name: Create zip folder with all documentation html files and the Readme
+      run: zip m.zip -R "*.md.html"
+    - name: Upload m.zip
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./m.zip
+        asset_name: m.zip
+        asset_content_type: text/zip
+    - name: Create m.pdf
+      run: pandoc README.md -o m.pdf
+    - name: Upload m.pdf
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./m.pdf
+        asset_name: m.pdf
+        asset_content_type: text/pdf
+    - name: Upload m.html to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./Visual/m.html
+        asset_name: m.html
+        asset_content_type: text/html
+    - name: Upload m-visual.AppImage to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./Visual/dist/Visual-1.0.0.AppImage
+        asset_name: m-visual.AppImage
+        asset_content_type: text/text
+    - name: Create index.html
+      run: pandoc README.md -o index.html
+    - name: Create index.js
+      run: printf "const { app, BrowserWindow } = require('electron')\napp.on('ready', () => new BrowserWindow().loadFile('index.html'))" > index.js
+    - name: Create package.json with defaults
+      run: npm init --yes
+    - name: Run electron builder
+      run: npx electron-builder -c.electronVersion 5.0.7 --linux AppImage
+    - name: Upload AppImage to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/M-1.0.0.AppImage
+        asset_name: m.AppImage
+        asset_content_type: text/text
+    - name: Setup node 10
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10'
+    - name: Create theia application (package.json)
+      run: |
+        cd .github/workflows/configuration
+        ls -la
+        yarn
+        yarn buildStandalone
+    - name: Upload Textual AppImage to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./.github/workflows/configuration/dist/m-textual-0.0.0.AppImage
+        asset_name: m-textual.AppImage
+        asset_content_type: text/text
