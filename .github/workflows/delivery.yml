@@ -41,7 +41,6 @@ jobs:
     - name: Create m.pdf
       run: pandoc README.md -o m.pdf
     - name: Upload m.pdf
-      id: upload-release-asset 
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -50,6 +49,32 @@ jobs:
         asset_path: ./m.pdf
         asset_name: m.pdf
         asset_content_type: text/pdf
+    - name: Create m.html
+      run: |
+        mkdir Visual
+        cd Visual
+        echo "<html><body>Hello World</body></html>" > m.html
+        printf "const { app, BrowserWindow } = require('electron')\napp.on('ready', () => new BrowserWindow().loadFile('m.html'))" > index.js
+        npm init --yes
+        npx electron-builder -c.electronVersion 5.0.7 --linux AppImage
+    - name: Upload m.html to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./Visual/m.html
+        asset_name: m.html
+        asset_content_type: text/html
+    - name: Upload m-visual.AppImage to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./Visual/dist/Visual-1.0.0.AppImage
+        asset_name: m-visual.AppImage
+        asset_content_type: text/text
     - name: Create index.html
       run: pandoc README.md -o index.html
     - name: Create index.js
@@ -59,7 +84,6 @@ jobs:
     - name: Run electron builder
       run: npx electron-builder -c.electronVersion 5.0.7 --linux AppImage
     - name: Upload AppImage to release
-      id: upload-appImage
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -79,7 +103,6 @@ jobs:
         yarn
         yarn buildStandalone
     - name: Upload Textual AppImage to release
-      id: upload-textual-appImage
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
