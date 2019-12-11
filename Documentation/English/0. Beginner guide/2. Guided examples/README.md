@@ -28,6 +28,8 @@ For the 90's we enter the era of 3D graphics. To showcase this ability,
 we have created a demo of [Crash Bandicoot], developed by Naughty Dog, that
 combines all the concepts in a three dimensional game.
 
-[Pong]: 0.%20Pong.md [Space Invaders]: 1.%20Space%20invaders.md [Pacman]:
-2.%20Pacman.md [Mario]: 3.%20Mario.md [Crash Bandicoot]:
-4.%20Crash%20Bandicoot.md
+[Pong]: 0.%20Pong.md
+[Space Invaders]: 1.%20Space%20invaders.md
+[Pacman]: 2.%20Pacman.md
+[Mario]: 3.%20Mario.md
+[Crash Bandicoot]: 4.%20Crash%20Bandicoot.md
