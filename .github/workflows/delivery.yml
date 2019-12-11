@@ -19,7 +19,44 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: true
         prerelease: true
-    - name: Install yo and generator-code and vsce
+    - name: Create m.html
+      run: |
+        mkdir Visual
+        cd Visual
+        echo "<html><body>Hello World</body></html>" > m.html
+        printf "const { app, BrowserWindow } = require('electron')\napp.on('ready', () => new BrowserWindow().loadFile('m.html'))" > index.js
+        npm init --yes
+        npx electron-builder -c.electronVersion 5.0.7 --linux AppImage
+    - name: Download java 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+    - name: Download dependency jars
+      run: |
+        cd Language\ server
+        [ ! -d lib ] && mkdir lib
+        [ ! -d lib/classes ] && mkdir lib/classes
+
+        [ ! -f lib/classes/xtext.ide.jar ] && curl https://search.maven.org/remotecontent?filepath=org/eclipse/xtext/org.eclipse.xtext.ide/2.20.0/org.eclipse.xtext.ide-2.20.0.jar -o lib/classes/xtext.ide.jar
+        [ ! -f lib/classes/guice.jar ] && curl https://search.maven.org/remotecontent?filepath=com/google/inject/guice/4.2.2/guice-4.2.2.jar -o lib/classes/guice.jar
+    - name: Compile java project
+      run: |
+        cd Language\ server
+        javac -d bin -cp src/:lib/classes/* src/m/main/*.java
+    - name: Create jar from compiled classes
+      run: |
+        cd Language\ server/bin
+        jar ecfv m.main.Main ../../m.jar m/
+    - name: Upload m.jar to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./m.jar
+        asset_name: m.jar
+        asset_content_type: text/zip
+    - name: Install vsce for packaging vscode extension
       run: sudo npm install -g vsce
     - name: Run vsce package to create vsix file
       run: |
@@ -64,14 +101,6 @@ jobs:
         asset_path: ./m.pdf
         asset_name: m.pdf
         asset_content_type: text/pdf
-    - name: Create m.html
-      run: |
-        mkdir Visual
-        cd Visual
-        echo "<html><body>Hello World</body></html>" > m.html
-        printf "const { app, BrowserWindow } = require('electron')\napp.on('ready', () => new BrowserWindow().loadFile('m.html'))" > index.js
-        npm init --yes
-        npx electron-builder -c.electronVersion 5.0.7 --linux AppImage
     - name: Upload m.html to release
       uses: actions/upload-release-asset@v1.0.1
       env:
