@@ -19,6 +19,21 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: true
         prerelease: true
+    - name: Install yo and generator-code and vsce
+      run: sudo npm install -g vsce
+    - name: Run vsce package to create vsix file
+      run: |
+        cd .github/workflows/configuration/code
+        vsce package
+    - name: Upload m.vsix to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./.github/workflows/configuration/code/y-0.0.1.vsix
+        asset_name: m.vsix
+        asset_content_type: text/zip
     - name: Install pandoc
       run: sudo apt-get install pandoc
     - name: Install texlive
