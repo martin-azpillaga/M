@@ -1,6 +1,4 @@
-on:
-  pull_request:
-    types: [closed]
+on: push
 
 name: Delivery
 
@@ -30,6 +28,50 @@ jobs:
         printf "const { app, BrowserWindow } = require('electron')\napp.on('ready', () => new BrowserWindow().loadFile('m.html'))" > index.js
         npm init --yes
         npx electron-builder -c.electronVersion 5.0.7 --linux AppImage
+    - name: Install google translate cli
+      run: sudo npm install -g google-translate-cli
+    - name: Translate all markdown files to spanish
+      run: find Documentation -name "*.md" | xargs -I {} sh -c 'sleep 1 && cat "{}" | translate > "{}.spanish" & echo "{}"' & exit 0
+    - name: Translate all markdown files to euskara
+      run: find Documentation -name "*.md" | xargs -I {} sh -c 'sleep 1 && cat "{}" | translate -t eu > "{}.eu" & echo "{}"' & exit 0  
+    - name: Translate all markdown files to chinese
+      run: find Documentation -name "*.md" | xargs -I {} sh -c 'sleep 1 && cat "{}" | translate -t zh-CN > "{}.zh" & echo "{}"' & exit 0
+
+    - name: Zip spanish
+      run: zip spanish.zip -R "*.spanish"
+    - name: Zip chinese
+      run: zip chinese.zip -R "*.zh"
+    - name: Zip chinese
+      run: zip euskara.zip -R "*.eu"
+
+    - name: Upload spanish.zip
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./spanish.zip
+        asset_name: spanish.zip
+        asset_content_type: text/zip
+    - name: Upload chinese.zip
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./chinese.zip
+        asset_name: chinese.zip
+        asset_content_type: text/zip
+    - name: Upload euskara.zip
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./euskara.zip
+        asset_name: euskara.zip
+        asset_content_type: text/zip
+        
     - name: Download java 11
       uses: actions/setup-java@v1
       with:
