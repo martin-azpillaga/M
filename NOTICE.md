@@ -2,23 +2,18 @@
 
 ## Source code
 
-[Martin Azpillaga Aldalur] is the copyright holder of all the files contained in
-this repository. Martin Azpillaga Aldalur distributes this repository under the
-[AGPL 3 license].
+[Martin Azpillaga Aldalur] is the copyright holder of all the files contained in this repository. Martin Azpillaga Aldalur distributes this repository under the [AGPL 3 license].
 
 ## Packages binaries
 
-The packaged binaries include the following frameworks with dependencies of
-their own:
+The packaged binaries include the following frameworks with dependencies of their own:
 
-* The [Xtext] framework is at the core of the language server. The Eclipse
-  foundation distributes Xtext under the [Eclipse Public License 1.0].
+* The [Xtext] framework is at the core of the language server. The Eclipse foundation distributes Xtext under the [Eclipse Public License 1.0].
 
 * The [Theia] framework powers the online and standalone textual editors.
   TypeFox licenses Theia under the [Apache 2.0 license].
 
-* [Glitch] provides the hosting of the online services. The Glitch company
-  delivers Glitch under the [Apache 2.0 license].
+* [Glitch] provides the hosting of the online services. The Glitch company delivers Glitch under the [Apache 2.0 license].
 
 [Martin Azpillaga Aldalur]: https://martin-azpillaga.github.io/
 [Xtext]: https://github.com/eclipse/xtext
