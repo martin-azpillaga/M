@@ -1,6 +1,8 @@
-on: push
-
 name: Delivery
+
+on:
+  pull_request:
+    types: [closed]
 
 jobs:
   build:
@@ -71,7 +73,7 @@ jobs:
         asset_path: ./euskara.zip
         asset_name: euskara.zip
         asset_content_type: text/zip
-        
+
     - name: Download java 11
       uses: actions/setup-java@v1
       with:
