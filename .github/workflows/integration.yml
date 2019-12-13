@@ -24,7 +24,7 @@ jobs:
     - name: Cspell spell checker
       run: npx cspell --config .github/workflows/configuration/cspell.json **/*.md
     - name: Markdownlint-cli markdown structure
-      run: npx markdownlint-cli -i LICENSE.md "**/*.md"
+      run: npx markdownlint-cli -c .github/workflows/configuration/markdownlint.json -i LICENSE.md "**/*.md"
     - name: Write-good english linter
       run: |
         npx write-good --no-illusion README.md NOTICE.md
