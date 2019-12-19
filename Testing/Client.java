@@ -1,52 +1,25 @@
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 
-import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
-import org.eclipse.lsp4j.ClientCapabilities;
-import org.eclipse.lsp4j.CompletionCapabilities;
-import org.eclipse.lsp4j.CompletionParams;
 import org.eclipse.lsp4j.DidChangeConfigurationCapabilities;
-import org.eclipse.lsp4j.DidChangeConfigurationParams;
-import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesCapabilities;
-import org.eclipse.lsp4j.DidOpenTextDocumentParams;
-import org.eclipse.lsp4j.DocumentFormattingParams;
-import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.ExecuteCommandCapabilities;
-import org.eclipse.lsp4j.FoldingRangeRequestParams;
-import org.eclipse.lsp4j.FormattingCapabilities;
-import org.eclipse.lsp4j.FormattingOptions;
-import org.eclipse.lsp4j.HoverCapabilities;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializedParams;
 import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.PublishDiagnosticsCapabilities;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
-import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
 import org.eclipse.lsp4j.SymbolCapabilities;
-import org.eclipse.lsp4j.SynchronizationCapabilities;
-import org.eclipse.lsp4j.TextDocumentClientCapabilities;
-import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
-import org.eclipse.lsp4j.TextDocumentItem;
-import org.eclipse.lsp4j.TextDocumentPositionParams;
-import org.eclipse.lsp4j.TextDocumentSaveReason;
-import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
-import org.eclipse.lsp4j.WillSaveTextDocumentParams;
 import org.eclipse.lsp4j.WorkspaceClientCapabilities;
 import org.eclipse.lsp4j.WorkspaceEditCapabilities;
 import org.eclipse.lsp4j.WorkspaceFolder;
@@ -59,10 +32,7 @@ import org.eclipse.xtext.ide.server.ServerModule;
 public class Client implements LanguageClient {
 
     @Inject
-    public LanguageServerImpl server;
-
-    ServerSocket serverSocket;
-    Socket socket;
+    LanguageServerImpl languageServer;
 
     public static void main(String[] args) 
     {
@@ -73,122 +43,62 @@ public class Client implements LanguageClient {
 
     public void start() 
     {
-        Future<Void> thread = null;
         try
         {
-            var writer = new PrintWriter(new File("communication"));
-            serverSocket = new ServerSocket(5555);
+            var serverSocket = new ServerSocket(5555);
+            var serverRunnable = new ServerRunnable();
+            serverRunnable.serverSocket = serverSocket;
+
             var threadPool = Executors.newCachedThreadPool();
-            threadPool.execute(() ->
-            {
-                Socket clientSocket = null;
-                try 
-                {
-                    clientSocket = serverSocket.accept();
-                    System.out.println("Client connected");
-
-                    Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(server, clientSocket.getInputStream(), clientSocket.getOutputStream(),true, writer);
-
-                    var client = launcher.getRemoteProxy();
-                    server.connect(client);
-
-                    launcher.startListening();
-
-                    System.out.println("Out");
-                } 
-                catch (IOException e) 
-                {
-					e.printStackTrace();
-                }
-            });
-
+            threadPool.execute(serverRunnable);
             threadPool.shutdown();
 
-            System.out.println("Out thread is here");
-
-            socket = new Socket("localhost", 5555);
-            var launcher = LSPLauncher.createClientLauncher(this, socket.getInputStream(), socket.getOutputStream(),true, writer);
+            var clientSocket = new Socket("localhost", 5555);
+            var launcher = LSPLauncher.createClientLauncher(this, clientSocket.getInputStream(), clientSocket.getOutputStream(), true, new PrintWriter(new File("client")));
         
-            var end = launcher.getRemoteProxy();
-            thread = launcher.startListening();
+            var server = launcher.getRemoteProxy();
+            launcher.startListening();
 
-            var versioned = new VersionedTextDocumentIdentifier();
-            versioned.setUri("file:///home/martin/Documents/java/m/hello.m");
-            versioned.setVersion(0);
-
-            var params = new InitializeParams();
-            params.setRootUri("file:///home/martin/Documents/java/m");
-            params.setProcessId((int)ProcessHandle.current().pid());
-            var capabilities = new ClientCapabilities();
-            var textCapabilities = new TextDocumentClientCapabilities();
-            textCapabilities.setPublishDiagnostics(new PublishDiagnosticsCapabilities(true));
-            textCapabilities.setSynchronization(new SynchronizationCapabilities(true,true,true,true));
-            textCapabilities.setCompletion(new CompletionCapabilities(true));
-            textCapabilities.setHover(new HoverCapabilities(true));
-            textCapabilities.setFormatting(new FormattingCapabilities(true));
-            var workCapabilities = new WorkspaceClientCapabilities();
-            workCapabilities.setApplyEdit(true);
-            capabilities.setTextDocument(textCapabilities);
-            params.setCapabilities(capabilities);
-            end.initialize(initializeParams());
+            server.initialize(initializeParams());
             Thread.sleep(1000);
-            end.initialized(new InitializedParams());
-            Thread.sleep(1000);
-            var openParams = new DidOpenTextDocumentParams();
-            var textDocument = new TextDocumentItem("file:///home/martin/Documents/java/m/hello.m", "m", 0, "entity{}another{}");
-            openParams.setTextDocument(textDocument);
-            end.getTextDocumentService().didOpen(openParams);
+            server.initialized(new InitializedParams());
             Thread.sleep(1000);
 
-            end.getTextDocumentService().documentSymbol(new DocumentSymbolParams(versioned));
-            /*
-            
-            var changeParams = new DidChangeTextDocumentParams();
-            changeParams.setTextDocument(versioned);
-            var change = new TextDocumentContentChangeEvent();
-            change.setRange(new Range(new Position(0,0), new Position(0,0)));
-            change.setText("Hello\n");
-            change.setRangeLength(6);
-            var list = new ArrayList<TextDocumentContentChangeEvent>();
-            list.add(change);
-            changeParams.setContentChanges(list);
-            end.getTextDocumentService().didChange(changeParams);
-            Thread.sleep(1000);*/
-            end.getTextDocumentService().hover(new TextDocumentPositionParams(versioned, new Position(0,2)));
-            end.getTextDocumentService().formatting(new DocumentFormattingParams(versioned, new FormattingOptions(4, true)));
+            serverSocket.close();
+            clientSocket.close();
+
+            languageServer.exit();
         }
         catch (Exception e) 
         {
             e.printStackTrace();
         }
-        var scanner = new Scanner(System.in);
-        System.out.println("Type a line to exit: ");
-        var line = scanner.nextLine();
-        scanner.close();
-        System.out.println(line);
-        try
-        {
+        
+    }
 
-            if (thread != null)
+    class ServerRunnable implements Runnable
+    {
+        public ServerSocket serverSocket;
+
+        @Override
+        public void run() {
+            try 
             {
-                thread.cancel(true);
-            }   
-            if (serverSocket != null)
-            {
-                System.out.println("Serversocket closed");
-                serverSocket.close();
+                var clientSocket = serverSocket.accept();
+
+                Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(languageServer, clientSocket.getInputStream(), clientSocket.getOutputStream(), true, new PrintWriter(new File("server")));
+
+                var client = launcher.getRemoteProxy();
+                languageServer.connect(client);
+
+                launcher.startListening();
             }
-            if (socket != null)
+            catch (Exception e) 
             {
-                System.out.println("Socket closed");
-                socket.close();
+                e.printStackTrace();
             }
-            server.exit();
         }
-        catch (Exception e)
-        {
-            System.err.println(e);
-        }
+        
     }
 
     @Override
@@ -200,11 +110,11 @@ public class Client implements LanguageClient {
     @Override
     public void publishDiagnostics(PublishDiagnosticsParams diagnostics) 
     {
-        System.out.println(diagnostics.getUri());
+        if (diagnostics.getDiagnostics().size() == 0) return;
+        System.out.print(diagnostics.getUri()+"\n");
         for (var d : diagnostics.getDiagnostics())
         {
-            System.out.println(d.getSeverity());
-            System.out.println(d.getMessage());
+            System.out.print(d.getSeverity()+": "+d.getMessage()+"\n"+d.getCode()+"\n"+d.getRange()+"\n");
         }
     }
 
