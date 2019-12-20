@@ -132,7 +132,7 @@ public class Client implements LanguageClient {
 
     @Override
     public void logMessage(MessageParams message) {
-        System.out.println("Logtging");
+        System.out.println("Logging");
 
     }
 
