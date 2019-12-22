@@ -5,6 +5,7 @@
 ## Checklist
 
 - [ ] Passes automatic checks
-- [ ] Check all commit names
-- [ ] Check all files
+- [ ] Check commit names
+- [ ] Check files
+- [ ] Check documentation
 - [ ] Review issue acceptance criteria
