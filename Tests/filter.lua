@@ -5,13 +5,13 @@ function CodeBlock(block)
     local action = block.classes[1]
     local workspace = block.classes[2]
     local file = block.classes[3]
-    local path = "Tests/" .. workspace .. "/" .. file
+    local path = "GeneratedTests/" .. workspace .. "/" .. file
 
-    if not Directory("Tests") then
-        os.execute("mkdir Tests")
+    if not Directory("GeneratedTests") then
+        os.execute("mkdir GeneratedTests")
     end
-    if not Directory("Tests/" .. workspace) then
-        os.execute("mkdir " .. "Tests/" .. workspace)
+    if not Directory("GeneratedTests/" .. workspace) then
+        os.execute("mkdir " .. "GeneratedTests/" .. workspace)
     end
 
     if action == "set" then

@@ -39,7 +39,7 @@ jobs:
       run: java -jar check.jar -c .github/workflows/configuration/checkstyle.xml Language\ server/src/ | grep WARN && exit 1 || exit 0
     - name: Download dependency jars
       run: |
-        cd Language\ server
+        cd Code
         [ ! -d lib ] && mkdir lib
         [ ! -d lib/classes ] && mkdir lib/classes
 
@@ -47,13 +47,13 @@ jobs:
         [ ! -f lib/classes/guice.jar ] && curl https://search.maven.org/remotecontent?filepath=com/google/inject/guice/4.2.2/guice-4.2.2.jar -o lib/classes/guice.jar
     - name: Compile java project
       run: |
-        cd Language\ server
-        javac -d bin -cp src/:lib/classes/* src/m/main/*.java
+        cd Code
+        javac -d bin -cp ".:lib/classes/*" *.java
     - name: Create jar from compiled classes
       run: |
-        cd Language\ server/bin
-        jar ecfv m.main.Main ../m.jar m/
+        cd Code/bin
+        jar ecfv Main ../m.jar .
     - name: Run jar file
       run: |
-        cd Language\ server
+        cd Code
         java -jar m.jar
