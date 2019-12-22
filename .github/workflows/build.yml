@@ -1,0 +1,93 @@
+name: Build
+
+on: push
+
+jobs:
+  lint:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout repository files
+      uses: actions/checkout@v1
+
+    - name: Install xmllint
+      run: sudo apt-get install libxml2-utils
+
+    - name: Install java 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+
+    - name: Install checkstyle
+      run: curl -L https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.27/checkstyle-8.27-all.jar -o check.jar
+
+    - name: Install lua-check
+      run: sudo apt install lua-check
+
+    - name : Lint yaml
+      run: find . -name "*.yml" -exec npx yaml-lint {} +    
+
+    - name: Lint xml
+      run: find . -name "*.xml" -exec xmllint {} +
+
+    - name: Lint json
+      run: find . -name "*.json" -exec npx jsonlint {} +
+
+    - name: Lint java
+      run: java -jar check.jar -c .github/workflows/configuration/checkstyle.xml Language\ server/src/ | grep WARN && exit 1 || exit 0
+
+    - name: Lint markdown
+      run: npx markdownlint-cli -c .github/workflows/configuration/markdownlint.json -i LICENSE.md "**/*.md"
+
+    - name: Lint lua
+      run: luacheck -g Tests
+
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout repository files
+      uses: actions/checkout@v1
+
+    - name: Download java 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+
+    - name: List files
+      run: ls
+
+    - name: Download dependency jars
+      run: |
+        cd Code
+        [ ! -d lib ] && mkdir lib
+        [ ! -d lib/classes ] && mkdir lib/classes
+
+        [ ! -f lib/classes/xtext.ide.jar ] && curl https://search.maven.org/remotecontent?filepath=org/eclipse/xtext/org.eclipse.xtext.ide/2.20.0/org.eclipse.xtext.ide-2.20.0.jar -o lib/classes/xtext.ide.jar
+        [ ! -f lib/classes/guice.jar ] && curl https://search.maven.org/remotecontent?filepath=com/google/inject/guice/4.2.2/guice-4.2.2.jar -o lib/classes/guice.jar
+
+    - name: Compile java
+      run: |
+        cd Code
+        javac -d bin -cp ".:lib/classes/*" *.java
+
+    - name: Create jar with compiled classes
+      run: |
+        cd Code/bin
+        jar ecfv Main ../m.jar .
+
+    - name: Analyze package.json
+      run: npx npm-package-json-lint -c .github/workflows/configuration/npm.json .
+
+    - name: Analyze markdown spelling
+      run: npx cspell --config .github/workflows/configuration/cspell.json **/*.md
+
+    - name: Analyze markdown grammar
+      run: |
+        npx write-good --no-illusion README.md NOTICE.md
+        find Documentation -exec npx write-good --no-illusion {} +
