@@ -37,8 +37,3 @@ jobs:
       run: |
         cd Code/bin
         jar ecfv Main ../../Tests/ls.jar .
-
-    - name: Run bats
-      run: |
-        cd Tests
-        bats test.bats
