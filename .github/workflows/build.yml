@@ -59,9 +59,6 @@ jobs:
       with:
         java-version: 11
 
-    - name: List files
-      run: ls
-
     - name: Download dependency jars
       run: |
         cd Code
