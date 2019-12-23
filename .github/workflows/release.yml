@@ -7,6 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+    - name: Checkout repository files
+      uses: actions/checkout@v1
+
+
     - name: Install google translate cli
       run: sudo npm install -g google-translate-cli
 
@@ -33,9 +37,6 @@ jobs:
     - name: Install texlive
       run: sudo apt-get install texlive
 
-
-    - name: Checkout repository files
-      uses: actions/checkout@v1
 
     - name: Create Release
       id: create_release
