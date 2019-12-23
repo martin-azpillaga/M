@@ -37,6 +37,11 @@ jobs:
     - name: Install texlive
       run: sudo apt-get install texlive
 
+    - name: Setup node 10
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10'
+
 
     - name: Create Release
       id: create_release
@@ -149,21 +154,25 @@ jobs:
         asset_content_type: text/pdf
 
     - name: Create index.html
-      run: pandoc README.md -o index.html
+      run: |
+        mkdir Docs
+        cd Docs
+        pandoc ../README.md -o index.html
 
     - name: Create index.js
-      run: printf "const { app, BrowserWindow } = require('electron')\napp.on('ready', () => new BrowserWindow().loadFile('index.html'))" > index.js
+      run: |
+        cd Docs
+        printf "const { app, BrowserWindow } = require('electron')\napp.on('ready', () => new BrowserWindow().loadFile('index.html'))" > index.js
 
     - name: Create package.json with defaults
-      run: npm init --yes
-
-    - name: Setup node 10
-      uses: actions/setup-node@v1
-      with:
-        node-version: '10'
+      run: |
+        cd Docs
+        npm init --yes
 
     - name: Run electron builder
-      run: npx electron-builder -c.electronVersion 5.0.7 --linux AppImage
+      run: |
+        cd Docs
+        npx electron-builder -c.electronVersion 5.0.7 --linux AppImage
 
     - name: Upload AppImage to release
       uses: actions/upload-release-asset@v1.0.1
@@ -171,15 +180,14 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./dist/M-1.0.0.AppImage
-        asset_name: m.AppImage
+        asset_path: ./Docs/dist/Docs-1.0.0.AppImage
+        asset_name: m-docs.AppImage
         asset_content_type: text/text
 
 
     - name: Create theia application (package.json)
       run: |
         cd .github/workflows/configuration
-        ls -la
         yarn
         yarn buildStandalone
 
