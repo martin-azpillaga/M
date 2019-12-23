@@ -50,16 +50,6 @@ jobs:
         prerelease: true
 
 
-    - name: Create m.html
-      run: |
-        mkdir Visual
-        cd Visual
-        echo "<html><body>Hello World</body></html>" > m.html
-        printf "const { app, BrowserWindow } = require('electron')\napp.on('ready', () => new BrowserWindow().loadFile('m.html'))" > index.js
-        npm init --yes
-        npx electron-builder -c.electronVersion 5.0.7 --linux AppImage
-
-
     - name: Translate all markdown files to spanish
       run: find Documentation -name "*.md" | xargs -I {} sh -c 'sleep 1 && cat "{}" | translate > "{}.spanish" & echo "{}"' & exit 0
     - name: Translate all markdown files to chinese
@@ -90,15 +80,15 @@ jobs:
         asset_name: chinese.zip
         asset_content_type: text/zip
 
-    - name: Compile java project
+    - name: Compile java
       run: |
         cd Code
-        javac -d bin -cp src/:lib/classes/* src/m/main/*.java
+        javac -d bin -cp ".:lib/classes/*" *.java
 
-    - name: Create jar from compiled classes
+    - name: Create jar with compiled classes
       run: |
         cd Code/bin
-        jar ecfv m.main.Main ../../m.jar m/
+        jar ecfv Main ../../m.jar .
 
     - name: Upload m.jar to release
       uses: actions/upload-release-asset@v1.0.1
@@ -158,7 +148,61 @@ jobs:
         asset_name: m.pdf
         asset_content_type: text/pdf
 
-    - name: Upload m.html to release
+    - name: Create index.html
+      run: pandoc README.md -o index.html
+
+    - name: Create index.js
+      run: printf "const { app, BrowserWindow } = require('electron')\napp.on('ready', () => new BrowserWindow().loadFile('index.html'))" > index.js
+
+    - name: Create package.json with defaults
+      run: npm init --yes
+
+    - name: Setup node 10
+      uses: actions/setup-node@v1
+      with:
+        node-version: '10'
+
+    - name: Run electron builder
+      run: npx electron-builder -c.electronVersion 5.0.7 --linux AppImage
+
+    - name: Upload AppImage to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./dist/M-1.0.0.AppImage
+        asset_name: m.AppImage
+        asset_content_type: text/text
+
+
+    - name: Create theia application (package.json)
+      run: |
+        cd .github/workflows/configuration
+        ls -la
+        yarn
+        yarn buildStandalone
+
+    - name: Upload Textual AppImage to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./.github/workflows/configuration/dist/m-textual-0.0.0.AppImage
+        asset_name: m-textual.AppImage
+        asset_content_type: text/text
+
+    - name: Create m.html
+      run: |
+        mkdir Visual
+        cd Visual
+        echo "<html><body>Hello World</body></html>" > m.html
+        printf "const { app, BrowserWindow } = require('electron')\napp.on('ready', () => new BrowserWindow().loadFile('m.html'))" > index.js
+        npm init --yes
+        npx electron-builder -c.electronVersion 5.0.7 --linux AppImage
+
+    - name: Upload m.html
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -176,48 +220,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./Visual/dist/Visual-1.0.0.AppImage
         asset_name: m-visual.AppImage
-        asset_content_type: text/text
-
-    - name: Create index.html
-      run: pandoc README.md -o index.html
-
-    - name: Create index.js
-      run: printf "const { app, BrowserWindow } = require('electron')\napp.on('ready', () => new BrowserWindow().loadFile('index.html'))" > index.js
-
-    - name: Create package.json with defaults
-      run: npm init --yes
-
-    - name: Run electron builder
-      run: npx electron-builder -c.electronVersion 5.0.7 --linux AppImage
-
-    - name: Upload AppImage to release
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./dist/M-1.0.0.AppImage
-        asset_name: m.AppImage
-        asset_content_type: text/text
-
-    - name: Setup node 10
-      uses: actions/setup-node@v1
-      with:
-        node-version: '10'
-
-    - name: Create theia application (package.json)
-      run: |
-        cd .github/workflows/configuration
-        ls -la
-        yarn
-        yarn buildStandalone
-
-    - name: Upload Textual AppImage to release
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./.github/workflows/configuration/dist/m-textual-0.0.0.AppImage
-        asset_name: m-textual.AppImage
         asset_content_type: text/text
