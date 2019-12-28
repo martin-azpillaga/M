@@ -35,8 +35,7 @@ jobs:
         [ ! -d lib ] && mkdir lib
         [ ! -d lib/classes ] && mkdir lib/classes
 
-        [ ! -f lib/classes/xtext.ide.jar ] && curl https://search.maven.org/remotecontent?filepath=org/eclipse/xtext/org.eclipse.xtext.ide/2.20.0/org.eclipse.xtext.ide-2.20.0.jar -o lib/classes/xtext.ide.jar
-        [ ! -f lib/classes/guice.jar ] && curl https://search.maven.org/remotecontent?filepath=com/google/inject/guice/4.2.2/guice-4.2.2.jar -o lib/classes/guice.jar
+        [ ! -f lib/classes/guice.jar ] && curl https://repo1.maven.org/maven2/com/google/inject/guice/4.2.2/guice-4.2.2.jar -o lib/classes/guice.jar
 
     - name: Install vsce for packaging vscode extension
       run: sudo npm install -g vsce
