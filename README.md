@@ -97,6 +97,4 @@ All kind actions are welcome. Here are some ideas:
 
   You can donate using GitHub's built-in sponsorship feature. Click the sponsor heart button and set the amount you feel comfortable with.
 
-  To represent our gratitude, you will receive everything from merchandising to a special mention in the code.
-
 Thank you.

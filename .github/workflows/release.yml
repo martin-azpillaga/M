@@ -1,0 +1,150 @@
+name: Release
+
+on: pull_request
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout repository files
+      uses: actions/checkout@v1
+
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+
+    - name: Install yarn with node 10
+      run: npm install -g yarn
+
+    - name: Install google translate cli
+      run: sudo npm install -g google-translate-cli
+
+    - name: Download java 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+
+    - name: Download java dependencies
+      run: |
+        cd Code
+        [ ! -d lib ] && mkdir lib
+        [ ! -d lib/classes ] && mkdir lib/classes
+
+        [ ! -f lib/classes/guice.jar ] && curl https://repo1.maven.org/maven2/com/google/inject/guice/4.2.2/guice-4.2.2.jar -o lib/classes/guice.jar
+
+    - name: Install vsce for packaging vscode extension
+      run: sudo npm install -g vsce
+
+    - name: Install pandoc
+      run: |
+        sudo apt remove pandoc
+        wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
+        sudo dpkg -i pandoc-2.9.1-1-amd64.deb
+
+    - name: Install texlive xetex
+      run: sudo apt-get install texlive-xetex 
+
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: Tag ${{ github.ref }}
+        release_name: Prerelease ${{ github.ref }}
+        draft: true
+        prerelease: true
+
+    - name: Create theia application (package.json)
+      run: |
+        cd .github/workflows/configuration
+        yarn
+        yarn buildStandalone
+
+    - name: Upload Textual AppImage to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./.github/workflows/configuration/dist/m-textual-0.0.0.AppImage
+        asset_name: m-textual.AppImage
+        asset_content_type: text/text
+
+    - name: Translate all markdown files to html
+      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | pandoc --lua-filter=Tests/links.lua -o "$(dirname "{}")/$(basename "{}" .md).html"' & exit 0
+    - name: Translate all markdown files to spanish
+      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | translate | pandoc --lua-filter=Tests/links-es.lua -o "$(dirname "{}")/$(basename "{}" .md)-es.html"' & exit 0
+    - name: Translate all markdown files to chinese
+      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | translate -t zh-CN | pandoc --lua-filter=Tests/links-zh.lua -o "$(dirname "{}")/$(basename "{}" .md)-zh.html"' & exit 0
+
+    - name: Zip all html files
+      run: zip -r m-html.zip Documentation README.html
+
+    - name: Upload m-html.zip
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./m-html.zip
+        asset_name: m-html.zip
+        asset_content_type: text/zip
+
+
+    - name: Compile java
+      run: |
+        cd Code
+        javac -d bin -cp ".:lib/classes/*" *.java
+
+    - name: Create jar with compiled classes
+      run: |
+        cd Code/bin
+        jar ecfv Main ../../m.jar .
+
+    - name: Upload m.jar to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./m.jar
+        asset_name: m.jar
+        asset_content_type: text/zip
+
+
+    - name: Run vsce package to create vsix file
+      run: |
+        cd .github/workflows/configuration/code
+        vsce package
+
+    - name: Upload m.vsix to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./.github/workflows/configuration/code/y-0.0.1.vsix
+        asset_name: m.vsix
+        asset_content_type: text/zip
+
+
+    - name: Create m.pdf
+      run: find Documentation -name "*.html" | xargs -I {} sh -c 'cat "{}" && printf "\n"' | pandoc --pdf-engine=xelatex -o m.pdf
+
+    - name: Upload m.pdf
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./m.pdf
+        asset_name: m.pdf
+        asset_content_type: text/pdf
+
+
+
+

@@ -1,0 +1,38 @@
+name: Test
+
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    
+    - name: Install bats
+      run: sudo apt install bats
+
+    - name: Checkout repository files
+      uses: actions/checkout@v1
+
+    - name: Download java 11
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11
+
+    - name: Download dependency jars
+      run: |
+        cd Code
+        [ ! -d lib ] && mkdir lib
+        [ ! -d lib/classes ] && mkdir lib/classes
+
+        [ ! -f lib/classes/guice.jar ] && curl https://repo1.maven.org/maven2/com/google/inject/guice/4.2.2/guice-4.2.2.jar -o lib/classes/guice.jar
+
+    - name: Compile java
+      run: |
+        cd Code
+        javac -d bin -cp ".:lib/classes/*" *.java
+
+    - name: Create jar with compiled classes
+      run: |
+        cd Code/bin
+        jar ecfv Main ../../Tests/ls.jar .
