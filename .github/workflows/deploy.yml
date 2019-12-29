@@ -1,30 +1,40 @@
+name: Deploy
+
 on:
   pull_request:
     types: [closed]
 
-name: Deployment
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
+
+    - name: Install pandoc
+      run: sudo apt-get install pandoc
+
     - name: Checkout repository
       uses: actions/checkout@v2-beta
       with:
         ref: master
+
     - name: Create html file
-      run: echo "<html><body>Hello And bye</body></html>" > ../index.html
+      run: pandoc README.md -o ../index.html
+
     - name: Checkout gh-pages branch
       uses: actions/checkout@v2-beta
       with:
         ref: gh-pages
+
     - name: Move the file in
       run: mv ../index.html index.html
+
     - name: Commit changes
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        git commit -m "Update html page" -a
+        git commit -m "Update html page" -a & exit 0
+
     - name: Push changes
       uses: ad-m/github-push-action@master
       with:
