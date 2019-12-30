@@ -1,5 +1,5 @@
 {
-  "engines": {"node": "10"},
+  "private": true,
   "name": "m-textual",
   "version": "0.0.0",
   "main": "src-gen/frontend/electron-main.js",
