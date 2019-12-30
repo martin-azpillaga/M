@@ -1,6 +1,8 @@
 name: Publish
 
-on: push
+on:
+  pull_request:
+    types: [closed]
 
 jobs:
   tweet:
@@ -14,7 +16,7 @@ jobs:
         run: sudo apt install ruby-dev
       - name: Install twurl
         run: sudo gem install twurl
-      - name: Copy twurlrc
+      - name: Create twurl configuration file
         env:
           consumer: ${{ secrets.TWITTER_CONSUMER_TOKEN }}
           consumer_secret: ${{ secrets.TWITTER_CONSUMER_SECRET }}
