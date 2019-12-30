@@ -36,6 +36,8 @@
     "voelter",
     "keating",
     "youtube",
-    "strace"
+    "strace",
+    "twurl",
+    "twurlrc"
   ]
 }
