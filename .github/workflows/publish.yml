@@ -8,10 +8,12 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Install ruby dev
+        run: sudo apt install ruby-dev
       - name: Install twurl
         run: sudo gem install twurl
       - name: Create twurlrc
-        run: printf "---\nprofiles:\n  AzpillagaWorld:\n    ***REMOVED***:\n      username:\ AzpillagaWorld\n      consumer_key:\ ***REMOVED***\n      consumer_secret:\ ***REMOVED***\n      token:\ ***REMOVED***-9sEwF06Q5vjQe2DbfSNPTV9hctKK3l\n      secret:\ ***REMOVED***\nconfiguration:\n  default_profile:\n  - AzpillagaWorld\n  - ***REMOVED***" > ~/.twurlrc
+        run: echo -e "---\nprofiles:\n  AzpillagaWorld:\n    ***REMOVED***:\n      username:\ AzpillagaWorld\n      consumer_key:\ ***REMOVED***\n      consumer_secret:\ ***REMOVED***\n      token:\ ***REMOVED***-9sEwF06Q5vjQe2DbfSNPTV9hctKK3l\n      secret:\ ***REMOVED***\nconfiguration:\n  default_profile:\n  - AzpillagaWorld\n  - ***REMOVED***" > ~/.twurlrc
       - name: cat file
         run: cat ~/.twurlrc
       - name: Create Tweet
