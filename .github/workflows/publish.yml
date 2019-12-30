@@ -16,10 +16,10 @@ jobs:
         run: sudo gem install twurl
       - name: Copy twurlrc
         env: # Or as an environment variable
-          super_secret: ${{ secrets.SuperSecret }}
+          super_secret: ${{ secrets.TWITTER_ACCESS_TOKEN_SECRET }}
         run: |
           echo $super_secret
-          printf "profiles:\n\ \ AzpillagaWorld:\n\ \ \ \ 55x0cxqpMCfgXHx4m9MjWraHq:\n\ \ \ \ \ \ username:\ AzpillagaWorld\n\ \ \ \ \ \ consumer_key:\ 55x0cxqpMCfgXHx4m9MjWraHq\n\ \ \ \ \ \ consumer_secret:\ qAo3PUm0At6aZC5qyURVgVdfAZQuqujBsKTZlGO0WKQkXDD1ia\n\ \ \ \ \ \ token:\ 1208841167124811778-9sEwF06Q5vjQe2DbfSNPTV9hctKK3l\n\ \ \ \ \ \ secret:\ tSyyI7klelLf2JhjK6ETUfMhAHmENWPwfu02Ekh4HhCkm\nconfiguration:\n\ \ default_profile:\n\ \ -\ AzpillagaWorld\n\ \ -\ 55x0cxqpMCfgXHx4m9MjWraHq" | sed "s/\\\/ /g" > ~/.twurlrc
+          printf "profiles:\n\ \ AzpillagaWorld:\n\ \ \ \ 55x0cxqpMCfgXHx4m9MjWraHq:\n\ \ \ \ \ \ username:\ AzpillagaWorld\n\ \ \ \ \ \ consumer_key:\ 55x0cxqpMCfgXHx4m9MjWraHq\n\ \ \ \ \ \ consumer_secret:\ qAo3PUm0At6aZC5qyURVgVdfAZQuqujBsKTZlGO0WKQkXDD1ia\n\ \ \ \ \ \ token:\ 1208841167124811778-9sEwF06Q5vjQe2DbfSNPTV9hctKK3l\n\ \ \ \ \ \ secret:\ $super_secret\nconfiguration:\n\ \ default_profile:\n\ \ -\ AzpillagaWorld\n\ \ -\ 55x0cxqpMCfgXHx4m9MjWraHq" | sed "s/\\\/ /g" > ~/.twurlrc
           cat ~/.twurlrc
       - name: Create Tweet
         run: twurl -d "status=$(git log -1 --pretty=format:"%s")" /1.1/statuses/update.json
