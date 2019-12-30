@@ -19,18 +19,10 @@ jobs:
       with:
         java-version: 11
 
-    - name: Download dependency jars
-      run: |
-        cd Code
-        [ ! -d lib ] && mkdir lib
-        [ ! -d lib/classes ] && mkdir lib/classes
-
-        [ ! -f lib/classes/guice.jar ] && curl https://repo1.maven.org/maven2/com/google/inject/guice/4.2.2/guice-4.2.2.jar -o lib/classes/guice.jar
-
     - name: Compile java
       run: |
         cd Code
-        javac -d bin -cp ".:lib/classes/*" *.java
+        javac -d bin -cp "." *.java
 
     - name: Create jar with compiled classes
       run: |
