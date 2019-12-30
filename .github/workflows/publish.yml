@@ -8,17 +8,14 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      - name: Checkout repository files
+        uses: actions/checkout@v1
       - name: Install ruby dev
         run: sudo apt install ruby-dev
       - name: Install twurl
         run: sudo gem install twurl
-      - name: Create twurlrc
-        run: echo -e '---\nprofiles:\n  AzpillagaWorld:\n    55x0cxqpMCfgXHx4m9MjWraHq:\n      username: >-
-          AzpillagaWorld\n      consumer_key: >-
-            55x0cxqpMCfgXHx4m9MjWraHq\n      consumer_secret: >-
-              qAo3PUm0At6aZC5qyURVgVdfAZQuqujBsKTZlGO0WKQkXDD1ia\n      token: >-
-              1208841167124811778-9sEwF06Q5vjQe2DbfSNPTV9hctKK3l\n      secret: >-
-              tSyyI7klelLf2JhjK6ETUfMhAHmENWPwfu02Ekh4HhCkm\nconfiguration:\n  default_profile:\n  - AzpillagaWorld\n  - 55x0cxqpMCfgXHx4m9MjWraHq' > ~/.twurlrc
+      - name: Copy twurlrc
+        run: cp .github/workflows/configuration/.twurlrc ~/.twurlrc
       - name: cat file
         run: cat ~/.twurlrc
       - name: Create Tweet
