@@ -19,19 +19,10 @@ jobs:
       with:
         java-version: 11
 
-    - name: Download dependency jars
-      run: |
-        cd Code
-        [ ! -d lib ] && mkdir lib
-        [ ! -d lib/classes ] && mkdir lib/classes
-
-        [ ! -f lib/classes/xtext.ide.jar ] && curl https://search.maven.org/remotecontent?filepath=org/eclipse/xtext/org.eclipse.xtext.ide/2.20.0/org.eclipse.xtext.ide-2.20.0.jar -o lib/classes/xtext.ide.jar
-        [ ! -f lib/classes/guice.jar ] && curl https://search.maven.org/remotecontent?filepath=com/google/inject/guice/4.2.2/guice-4.2.2.jar -o lib/classes/guice.jar
-
     - name: Compile java
       run: |
         cd Code
-        javac -d bin -cp ".:lib/classes/*" *.java
+        javac -d bin -cp "." *.java
 
     - name: Create jar with compiled classes
       run: |
