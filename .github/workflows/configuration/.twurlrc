@@ -1,0 +1,13 @@
+---
+profiles:
+  AzpillagaWorld:
+    ***REMOVED***:
+      username: AzpillagaWorld
+      consumer_key: ***REMOVED***
+      consumer_secret: ***REMOVED***
+      token: ***REMOVED***-9sEwF06Q5vjQe2DbfSNPTV9hctKK3l
+      secret: ***REMOVED***
+configuration:
+  default_profile:
+  - AzpillagaWorld
+  - ***REMOVED***
