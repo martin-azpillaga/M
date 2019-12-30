@@ -15,8 +15,11 @@ jobs:
       - name: Install twurl
         run: sudo gem install twurl
       - name: Copy twurlrc
-        run: cp .github/workflows/configuration/.twurlrc ~/.twurlrc
-      - name: cat file
-        run: cat ~/.twurlrc
+        env: # Or as an environment variable
+          super_secret: ${{ secrets.SuperSecret }}
+        run: |
+          echo $super_secret
+          printf "profiles:\n\ \ AzpillagaWorld:\n\ \ \ \ ***REMOVED***:\n\ \ \ \ \ \ username:\ AzpillagaWorld\n\ \ \ \ \ \ consumer_key:\ ***REMOVED***\n\ \ \ \ \ \ consumer_secret:\ ***REMOVED***\n\ \ \ \ \ \ token:\ ***REMOVED***-9sEwF06Q5vjQe2DbfSNPTV9hctKK3l\n\ \ \ \ \ \ secret:\ ***REMOVED***\nconfiguration:\n\ \ default_profile:\n\ \ -\ AzpillagaWorld\n\ \ -\ ***REMOVED***" | sed "s/\\\/ /g" > ~/.twurlrc
+          cat ~/.twurlrc
       - name: Create Tweet
-        run: twurl -d "status=New Build" /1.1/statuses/update.json
+        run: twurl -d "status=$(git log -1 --pretty=format:"%s")" /1.1/statuses/update.json
