@@ -9,7 +9,9 @@ jobs:
     
     steps:
       - name: Create Tweet
-        run: mkdir tweets
+        run: |
+          mkdir tweets
+          echo "New version" > tweets/main.tweet
       - uses: gr2m/twitter-together@v1.x
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
