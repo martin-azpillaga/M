@@ -1,0 +1,41 @@
+plugins { id 'java' }
+repositories { mavenCentral() }
+
+configurations.implementation.canBeResolved = true
+
+dependencies {
+	implementation platform("org.eclipse.xtext:xtext-dev-bom:2.20.0")
+	implementation "org.eclipse.xtext:org.eclipse.xtext:2.20.0"
+	implementation "org.eclipse.xtext:org.eclipse.xtext.ide:2.20.0"
+	implementation 'org.eclipse.emf:org.eclipse.emf.mwe2.launch'
+	implementation "org.eclipse.xtext:org.eclipse.xtext.common.types:2.20.0"
+	implementation "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:2.20.0"
+	implementation 'org.eclipse.xtext:xtext-antlr-generator'
+	implementation files("${projectDir}/m/src")
+}
+
+task runWorkflow(type: JavaExec) {
+	workingDir = "m"
+	main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
+	classpath = configurations.implementation
+	args += "src/m/Workflow.mwe2"
+}
+
+sourceSets {
+	main.java.srcDirs = ["m/src", "m.ide/src", "m.ide/src-gen", "m/src-gen"]
+}
+
+compileJava.dependsOn runWorkflow
+
+jar {
+	baseName = "m-ls"
+	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', '**/*.xtend', '**/*.mwe2', '**/*.g', '**/*.xtext'
+}
+
+task fatjar(type: Jar) {
+    manifest.attributes 'Main-Class': 'org.eclipse.xtext.ide.server.ServerLauncher'
+    baseName = 'm-fat-ls'
+    from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
+	exclude '**/*.java', 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', '**/*.xtend', '**/*.mwe2', '**/*.g', '**/*.xtext'
+    with jar
+}
