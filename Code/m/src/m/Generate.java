@@ -16,8 +16,11 @@ public class Generate
 		var configuration = new DefaultGeneratorModule();
 		var project = new StandardProjectConfig();
 		var eclipsePlugin = new BundleProjectConfig();
+		var ide = new BundleProjectConfig();
+		ide.setEnabled(true);
 		var code = new CodeConfig();
 		
+		project.setGenericIde(ide);
 		project.setEclipsePlugin(eclipsePlugin);
 		project.setCreateEclipseMetaData(true);
 		project.setBaseName("m");
