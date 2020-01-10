@@ -19,12 +19,13 @@ jobs:
       with:
         java-version: 11
 
-    - name: Compile java
+    - name: Create jar
       run: |
         cd Code
-        javac -d bin -cp "." *.java
+        mkdir m.ide m.ui
+        gradle jar
 
-    - name: Create jar with compiled classes
+    - name: Create fat jar
       run: |
-        cd Code/bin
-        jar ecfv Main ../../Tests/ls.jar .
+        cd Code
+        gradle fatjar
