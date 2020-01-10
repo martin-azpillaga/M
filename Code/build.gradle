@@ -27,13 +27,6 @@ task run(type: JavaExec) {
 	classpath = configurations.implementation
 }
 
-task runWorkflow(type: JavaExec) {
-	workingDir = "m"
-	main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
-	classpath = configurations.implementation
-	args += "src/m/Workflow.mwe2"
-}
-
 sourceSets {
 	main.java.srcDirs = ["m/src", "m.ide/src", "m.ide/src-gen", "m/src-gen"]
 }
