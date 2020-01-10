@@ -1,0 +1,48 @@
+grammar m.M with m.Modular
+
+import "http://www.minim.games/modular"
+import "http://www.eclipse.org/emf/2002/Ecore"
+generate m "http://www.minim.games/M"
+
+Modules:
+	(entities+=Entity|procedures+=Procedure)*
+;
+
+Entity:
+	 name=FILENAME ( ':'  base=FILENAME)?
+	 BEGIN (components+=Component (SEPARATOR components+=Component)*)? END;
+
+Component:
+	 name=IDENTIFIER ( value=(Vector|Asset))?;
+	
+Vector:
+	values+=FLOAT ( values+=FLOAT)*
+;
+
+Asset:
+	value=FILENAME
+;
+
+@Override Statement:
+	Selection|Iteration|Call|Assignment|Loop
+;
+
+Loop:
+	'∀' identifier=IdentifierLiteral ('∈' tags+=IdentifierLiteral*)?
+	BEGIN statements+=Statement* END
+;
+
+ACCESS: IDENTIFIER ('.' IDENTIFIER)*;
+
+@Override
+IdentifierLiteral:
+	value=ACCESS;
+	
+@Override
+Assignment:
+	identifier=ACCESS kind=AssignmentKind expression=Expression;
+
+@Override
+Primary returns Expression:
+  Variable |
+  OPEN Expression CLOSE;

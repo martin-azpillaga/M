@@ -1,0 +1,73 @@
+grammar m.YAML
+
+import "http://www.eclipse.org/emf/2002/Ecore"
+generate yaml "http://www.minim.games/yaml"
+
+File:
+	{File}
+	(version=Version WS tags+=Tag WS)?
+	(nodes+=Node WS?)*;
+
+Node:
+	Document | Value;
+
+Value returns Node:
+	Map | KeyValue | KeyValueList;
+
+Document:
+	{Document} '---' SPACE '!u!' tag=L SPACE '&' id=L WS value=Map;
+
+KeyValue:
+	key=WORD ':' SPACE value=Element?;
+
+Map:
+	key=WORD ':' WS BEGIN body+=Value (WS body+=Value)* WS? END;
+
+KeyValueList:
+	name=WORD ':' WS '-' SPACE values+=(KeyValue | Element) (WS '-' SPACE values+=(KeyValue | Element))*;
+
+Element:
+	InlineMap | InlineList | InlineSemicolonList | {Word} value=WORD | {Float} value=FLOAT | {Long} value=L | {Guid}
+	value=GUID;
+
+InlineList:
+	{InlineList} '[' (elements+=Element (',' SPACE elements+=Element)*)? ']';
+
+InlineMap:
+	{InlineMap} '{' (SPACE? values+=KeyValue (',' SPACE values+=KeyValue)* SPACE?)? '}';
+
+InlineSemicolonList:
+	{InlineSemicolonList} elements+=WORD ';' elements+=WORD (';' elements+=WORD)*;
+
+enum Version:
+	oneOne='%YAML 1.1';
+
+enum Tag:
+	unity='%TAG !u! tag:unity3d.com,2011:';
+
+terminal WORD:
+	('a'..'z' | 'A'..'Z' | '_') (' ' | '.' | '/' | 'a'..'z' | 'A'..'Z' | '_' | '0'..'9')*;
+
+terminal L:
+	'-'? '0'..'9' ('0'..'9')*;
+
+terminal FLOAT:
+	'-'? ('0'..'9')* '.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?;
+
+terminal GUID:
+	'0'..'9'* 'a'..'z' ('a'..'z' | '0'..'9')*;
+
+terminal SPACE:
+	' ';
+
+terminal WS:
+	NEWLINE SPACE*;
+
+terminal NEWLINE:
+	'\r'? '\n';
+
+terminal BEGIN:
+	'synthetic:BEGIN';
+
+terminal END:
+	'synthetic:END';
