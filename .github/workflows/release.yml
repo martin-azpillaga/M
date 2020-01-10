@@ -87,23 +87,34 @@ jobs:
         asset_content_type: text/zip
 
 
-    - name: Compile java
+    - name: Create jar
       run: |
         cd Code
-        javac -d bin -cp "." *.java
+        mkdir m.ide m.ui
+        gradle jar
 
-    - name: Create jar with compiled classes
+    - name: Create fat jar
       run: |
-        cd Code/bin
-        jar ecfv Main ../../m.jar .
+        cd Code
+        gradle fatjar
 
-    - name: Upload m.jar to release
+    - name: Upload m-ls.jar to release
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./m.jar
+        asset_path: ./Code/build/libs/m-ls.jar
+        asset_name: m.jar
+        asset_content_type: text/zip
+
+    - name: Upload m-fat-ls.jar to release
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./Code/build/libs/m-fat-ls.jar
         asset_name: m.jar
         asset_content_type: text/zip
 
