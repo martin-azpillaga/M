@@ -12,6 +12,19 @@ dependencies {
 	implementation "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:2.20.0"
 	implementation 'org.eclipse.xtext:xtext-antlr-generator'
 	implementation files("${projectDir}/m/src")
+	implementation files("${projectDir}/bin")
+}
+
+task javac(type: JavaCompile){
+	source = "m/src/m/Generate.java"
+	destinationDir = file("bin")
+	classpath = configurations.implementation
+}
+task run(type: JavaExec) {
+	dependsOn javac
+	workingDir = "bin"
+	main = "m.Generate"
+	classpath = configurations.implementation
 }
 
 task runWorkflow(type: JavaExec) {
@@ -25,7 +38,7 @@ sourceSets {
 	main.java.srcDirs = ["m/src", "m.ide/src", "m.ide/src-gen", "m/src-gen"]
 }
 
-compileJava.dependsOn runWorkflow
+compileJava.dependsOn run
 
 jar {
 	baseName = "m-ls"
