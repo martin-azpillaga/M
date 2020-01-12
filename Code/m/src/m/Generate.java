@@ -4,8 +4,10 @@ import org.eclipse.xtext.xtext.generator.CodeConfig;
 import org.eclipse.xtext.xtext.generator.DefaultGeneratorModule;
 import org.eclipse.xtext.xtext.generator.StandardLanguage;
 import org.eclipse.xtext.xtext.generator.XtextGenerator;
+import org.eclipse.xtext.xtext.generator.formatting.Formatter2Fragment2;
 import org.eclipse.xtext.xtext.generator.model.project.BundleProjectConfig;
 import org.eclipse.xtext.xtext.generator.model.project.StandardProjectConfig;
+import org.eclipse.xtext.xtext.generator.serializer.SerializerFragment2;
 
 public class Generate 
 {
@@ -40,6 +42,8 @@ public class Generate
 		generator.addLanguage(language("m.XML","xml"));
 		generator.addLanguage(language("m.JSON","json"));
 		generator.addLanguage(language("m.YAML","yml"));
+		generator.addLanguage(language("m.Text", "text"));
+		generator.addLanguage(language("m.Testua", "testua"));
 		
 		generator.invoke(null);
 	}
@@ -49,6 +53,10 @@ public class Generate
 		var language = new StandardLanguage();
 		language.setName(name);
 		language.setFileExtensions(extensions);
+		var serializer = new SerializerFragment2();
+		serializer.setGenerateStub(false);
+		language.addFragment(serializer);
+		
 		return language;
 	}
 }
