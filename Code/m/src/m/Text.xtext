@@ -5,7 +5,7 @@ import "http://www.minim.games/M"
 import "http://www.minim.games/modular"
 
 @Override
-Modules:
+Modul:
 	(entities+=Entity|procedures+=Procedure)*
 ;
 
@@ -13,7 +13,3 @@ Modules:
 Loop:
 	'bakoitza' identifier=IdentifierLiteral '!'
 ;
-
-@Override
-LogicalOr returns Expression:
-	LogicalAnd ({LogicalOr.left=current} ('or'|'||'|'⋁') right=LogicalAnd)*;

@@ -53,9 +53,6 @@ public class Generate
 		var language = new StandardLanguage();
 		language.setName(name);
 		language.setFileExtensions(extensions);
-		var serializer = new SerializerFragment2();
-		serializer.setGenerateStub(false);
-		language.addFragment(serializer);
 		
 		return language;
 	}
