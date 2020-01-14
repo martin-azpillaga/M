@@ -6,11 +6,11 @@ generate modular "http://www.minim.games/modular"
 
 Procedure:
 	name=IDENTIFIER
-	(OPEN (arguments+=IDENTIFIER (SEPARATOR arguments+=IDENTIFIER)*)? CLOSE)?
-	BEGIN
+	('(' (arguments+=IDENTIFIER (',' arguments+=IDENTIFIER)*)? ')')?
+	'{'
 	statements+=Statement*
 	('←' return=Expression)?
-	END;
+	'}';
 
 Statement:
 	Selection | Iteration | Call | Assignment;
@@ -18,22 +18,22 @@ Statement:
 Selection:
 	('→' | '#') branches+=Branch
 	(('⇉' | '##') branches+=Branch)*
-	(BEGIN statements+=Statement* END)?;
+	('{' statements+=Statement* '}')?;
 
 Branch:
 	condition=Expression
-	BEGIN statements+=Statement* END;
+	'{' statements+=Statement* '}';
 
 Iteration:
 	('↺' | '@') condition=Expression
-	BEGIN statements+=Statement* END;
+	'{' statements+=Statement* '}';
 
 Assignment:
 	identifier=IDENTIFIER kind=AssignmentKind expression=Expression;
 
 Call:
 	identifier=IDENTIFIER
-	OPEN (parameters+=Expression (SEPARATOR parameters+=Expression)*)? CLOSE;
+	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')';
 	
 
 Expression: Ternary;
@@ -109,13 +109,13 @@ Primary returns Expression:
   StringLiteral |
   BooleanLiteral |
   Variable |
-  OPEN Expression CLOSE;
+  '(' Expression ')';
   
 Variable:
 	IdentifierLiteral | Call;
 	
 IdentifierLiteral: value=IDENTIFIER;
-FloatLiteral: value=FLOAT;
+FloatLiteral: value=NUMBER;
 StringLiteral: value=FILENAME;
 BooleanLiteral: value=BOOLEAN;
 
@@ -124,26 +124,13 @@ terminal BOOLEAN: '⊤'|'⊥';
 terminal fragment FILE: ('\\"'|!('/'|'\u0000'|'"'))+;
 terminal FILENAME: '"' (FILE ('/' FILE)*)? '"';
 terminal IDENTIFIER: '^'? ('_'|LETTER) ('_'|LETTER|DIGIT)*;
-terminal FLOAT returns EFloat: '-'? DIGIT+ ('.' DIGIT+)? ('e' ('-'|'+')? DIGIT+)?;
+terminal NUMBER returns EFloat: '-'? DIGIT+ ('.' DIGIT+)? ('e' ('-'|'+')? DIGIT+)?;
 
 terminal fragment LETTER: '\u0061'..'\u007A'|'\u0041'..'\u005A'|'\u00A0'..'\uFFFF';
 terminal fragment DIGIT: '0'..'9';
 
+terminal ANY: .;
+
 enum AssignmentKind:
 	set='=' | increase='+=' | decrease='-=' | multiply='*=' | divide='/='
 	| or='|=' | and='&=' | xor='^=' | shiftLeft='<<=' | shiftRight='>>=';
-
-terminal OPEN:
-	'(';
-
-terminal CLOSE:
-	')';
-
-terminal SEPARATOR:
-	',';
-
-terminal BEGIN:
-	'{';
-
-terminal END:
-	'}';
