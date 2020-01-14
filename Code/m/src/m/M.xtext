@@ -5,17 +5,21 @@ import "http://www.eclipse.org/emf/2002/Ecore"
 generate m "http://www.minim.games/M"
 
 Modul:
-	(entities+=Entity | procedures+=Procedure)*;
+	entities+=Entity*;
 
 Entity:
-	name=FILENAME (WITH base=FILENAME)?
-	BEGIN (components+=Component (SEPARATOR components+=Component)*)? END;
+	name=FILENAME 
+	(':' base=FILENAME)?
+	'{'
+	components+=Component (',' components+=Component)*
+	'}';
 
 Component:
-	name=IDENTIFIER (value=(Vector | Asset))?;
+	name=IDENTIFIER
+	value=(Vector | Asset)?;
 
 Vector:
-	values+=FLOAT+;
+	values+=NUMBER+;
 
 Asset:
 	value=FILENAME;
@@ -23,11 +27,10 @@ Asset:
 @Override
 Procedure:
 	name=FILENAME
-	(OPEN (arguments+=IDENTIFIER (SEPARATOR arguments+=IDENTIFIER)*)? CLOSE)?
-	BEGIN
+	'{'
 	statements+=Statement+
 	('←' return=Expression)?
-	END;
+	'}';
 
 @Override
 Statement:
@@ -35,7 +38,7 @@ Statement:
 
 Loop:
 	'∀' identifier=IdentifierLiteral ('∈' tags+=IdentifierLiteral*)?
-	BEGIN statements+=Statement* END;
+	'{' statements+=Statement* '}';
 
 ACCESS:
 	IDENTIFIER ('.' IDENTIFIER)*;
@@ -51,6 +54,4 @@ Assignment:
 @Override
 Primary returns Expression:
 	Variable |
-	OPEN Expression CLOSE;
-
-WITH: ':';
+	'(' Expression ')';
