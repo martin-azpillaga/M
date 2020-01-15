@@ -8,8 +8,3 @@ import "http://www.minim.games/modular"
 Modul:
 	entities+=Entity*
 ;
-
-@Override
-Loop:
-	'bakoitza' identifier=IdentifierLiteral '!'
-;

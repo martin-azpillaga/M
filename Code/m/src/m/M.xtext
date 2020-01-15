@@ -5,7 +5,7 @@ import "http://www.eclipse.org/emf/2002/Ecore"
 generate m "http://www.minim.games/M"
 
 Modul:
-	entities+=Entity*;
+	(entities+=Entity|systems+=System)*;
 
 Entity:
 	name=FILENAME 
@@ -19,25 +19,25 @@ Component:
 	value=(Vector | Asset)?;
 
 Vector:
-	values+=NUMBER+;
+	entries+=NUMBER+;
 
 Asset:
-	value=FILENAME;
+	name=FILENAME;
 
-@Override
-Procedure:
+System returns Procedure:
 	name=FILENAME
 	'{'
 	statements+=Statement+
-	('←' return=Expression)?
+	('←' returnValue=Expression)?
 	'}';
 
 @Override
 Statement:
-	Selection | Iteration | Call | Assignment | Loop;
+	Selection | Iteration | FunctionCall | Assignment | Loop;
 
 Loop:
-	'∀' identifier=IdentifierLiteral ('∈' tags+=IdentifierLiteral*)?
+	'∀' entity=IDENTIFIER 
+	('∈' tags+=IDENTIFIER*)?
 	'{' statements+=Statement* '}';
 
 ACCESS:
@@ -49,9 +49,10 @@ IdentifierLiteral:
 
 @Override
 Assignment:
-	identifier=ACCESS kind=AssignmentKind expression=Expression;
+	variable=ACCESS
+	kind=AssignmentKind
+	expression=Expression;
 
 @Override
 Primary returns Expression:
-	Variable |
-	'(' Expression ')';
+	Variable | '(' Expression ')';

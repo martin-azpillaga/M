@@ -74,7 +74,7 @@ PreIncrement returns Expression:
 
 @Override
 Statement:
-	Selection | Iteration | Call | Assignment | For | Declaration | Return;
+	Selection | Iteration | FunctionCall | Assignment | For | Declaration | Return;
 
 @Override
 Iteration:
@@ -107,12 +107,12 @@ Declaration:
 	
 @Override
 Assignment:
-	identifier=ACCESS kind=AssignmentKind expression=Expression ';'
+	variable=ACCESS kind=AssignmentKind expression=Expression ';'
 ;
 
 @Override
-Call:
-	identifier=IDENTIFIER
+FunctionCall:
+	name=IDENTIFIER
 	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')' ';';
 
 @Override
@@ -120,7 +120,7 @@ IdentifierLiteral:
 	value=ACCESS;
 
 Annotation:
-	'[' call=Call ']';
+	'[' call=FunctionCall ']';
 
 Argument:
 	annotations+=Annotation* ref?='ref'? type=TYPENAME name=IDENTIFIER;
@@ -131,7 +131,7 @@ Lambda: {Lambda}
 Index: identifier=IDENTIFIER  '[' (parameters+=Expression ( ',' parameters+=Expression)*)?  ']';
 
 @Override
-Variable: IdentifierLiteral|Call|Index;
+Variable: IdentifierLiteral|FunctionCall|Index;
 
 ACCESS:
 	IDENTIFIER ('.' IDENTIFIER)*;
