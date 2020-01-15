@@ -22,7 +22,7 @@ Type:
 	|
 	{Enum.info=current}
 	'enum' name=TYPENAME
-	'{' (values+=IDENTIFIER (',' values+=IDENTIFIER)*)? '}');
+	'{' (values+=WORD (',' values+=WORD)*)? '}');
 
 Info:
 	Member | Type;
@@ -39,12 +39,12 @@ Member:
 	|
 	{Enum.info=current}
 	'enum' name=TYPENAME
-	'{' (value+=IDENTIFIER (',' values+=IDENTIFIER)*)? '}'
+	'{' (value+=WORD (',' values+=WORD)*)? '}'
 	|
 	(({Method.info=current} override?='override')?
 	({Method.info=current} static?='static')?
 	type=TYPENAME
-	({Field.info=current} name=IDENTIFIER ';'
+	({Field.info=current} name=WORD ';'
 	|
 	{Method.info=current} name=TYPENAME '(' (arguments+=Argument (',' arguments+=Argument)*)? ')'
 	'{'
@@ -111,7 +111,7 @@ Assignment:
 
 @Override
 FunctionCall:
-	name=IDENTIFIER
+	name=WORD
 	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')' ';';
 
 @Override
@@ -122,24 +122,24 @@ Annotation:
 	'[' call=FunctionCall ']';
 
 Argument:
-	annotations+=Annotation* ref?='ref'? type=TYPENAME name=IDENTIFIER;
+	annotations+=Annotation* ref?='ref'? type=TYPENAME name=WORD;
 
 Lambda: {Lambda}
 	'(' (arguments+=Argument (',' arguments+=Argument)*)? ')' '=>' '{' statements+=Statement* '}';
 
-Index: identifier=IDENTIFIER  '[' (parameters+=Expression ( ',' parameters+=Expression)*)?  ']';
+Index: identifier=WORD  '[' (parameters+=Expression ( ',' parameters+=Expression)*)?  ']';
 
 @Override
 Variable: IdentifierLiteral|FunctionCall|Index;
 
 ACCESS:
-	IDENTIFIER ('.' IDENTIFIER)*;
+	WORD ('.' WORD)*;
 
 QualifiedName:
-	IDENTIFIER ('.' IDENTIFIER)*;
+	WORD ('.' WORD)*;
 
 TYPENAME:
-	IDENTIFIER ('<' TYPENAME (',' TYPENAME)* '>')?;
+	WORD ('<' TYPENAME (',' TYPENAME)* '>')?;
 
 terminal MULTIPLE_LINES_COMMENT:
 	'/*'->'*/';
