@@ -56,7 +56,7 @@ class Path implements Cloneable
 			}
 			else
 			{
-				error = name + " to " + error;
+				error = name;// + " to " + error;
 			}
 
 			elements.set(elementIndex, alternatives);
@@ -73,6 +73,7 @@ class Path implements Cloneable
 			
 			if (tokenIndex < 0 || tokenIndex >= tokens.size())
 			{
+				report(elementIndex);
 				error = "Expected " + name + " to " + error;
 				return true;
 			}
@@ -87,6 +88,7 @@ class Path implements Cloneable
 			}
 			else
 			{
+				report(elementIndex);
 				error = "Expected " + name + " to " + error;
 				return true;
 			}
