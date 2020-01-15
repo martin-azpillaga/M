@@ -4,8 +4,8 @@ import "http://www.eclipse.org/emf/2002/Ecore"
 generate modular "azpillaga.world/modular"
 
 Procedure:
-	name=IDENTIFIER
-	('(' (arguments+=IDENTIFIER (',' arguments+=IDENTIFIER)*)? ')')?
+	name=WORD
+	('(' (arguments+=WORD (',' arguments+=WORD)*)? ')')?
 	'{'
 	statements+=Statement*
 	('←' returnValue=Expression)?
@@ -28,10 +28,10 @@ Iteration:
 	'{' statements+=Statement* '}';
 
 Assignment:
-	variable=IDENTIFIER kind=AssignmentKind expression=Expression;
+	variable=WORD kind=AssignmentKind expression=Expression;
 
 FunctionCall:
-	name=IDENTIFIER
+	name=WORD
 	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')';
 	
 
@@ -113,7 +113,7 @@ Primary returns Expression:
 Variable:
 	IdentifierLiteral | FunctionCall;
 	
-IdentifierLiteral: value=IDENTIFIER;
+IdentifierLiteral: value=WORD;
 FloatLiteral: value=NUMBER;
 StringLiteral: value=FILENAME;
 BooleanLiteral: value=BOOLEAN;
@@ -122,13 +122,13 @@ terminal WS: ('\u0020'|'\u0009'|'\u000A'|'\u000D')+;
 terminal BOOLEAN: '⊤'|'⊥';
 terminal fragment FILE: ('\\"'|!('/'|'\u0000'|'"'))+;
 terminal FILENAME: '"' (FILE ('/' FILE)*)? '"';
-terminal IDENTIFIER: '^'? ('_'|LETTER) ('_'|LETTER|DIGIT)*;
+terminal WORD: '^'? ('_'|LETTER) ('_'|LETTER|DIGIT)*;
 terminal NUMBER returns EFloat: '-'? DIGIT+ ('.' DIGIT+)? ('e' ('-'|'+')? DIGIT+)?;
 
 terminal fragment LETTER: '\u0061'..'\u007A'|'\u0041'..'\u005A'|'\u00A0'..'\uFFFF';
 terminal fragment DIGIT: '0'..'9';
 
-terminal ANY: .;
+terminal ANY: (!(' '))+;
 
 enum AssignmentKind:
 	set='=' | increase='+=' | decrease='-=' | multiply='*=' | divide='/='
