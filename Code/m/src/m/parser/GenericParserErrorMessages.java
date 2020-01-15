@@ -386,12 +386,12 @@ public class GenericParserErrorMessages extends SyntaxErrorMessageProvider
 				nonHidden.add(common);
 			}
 		}
-		if (errorIndex < 0)
-		{
-			errorIndex = 0;
-		}
-		var errorAt = nonHidden.get(errorIndex + maximumDepth-1);
-		error = "Error after " + errorAt.getText() + "\n";
+		var endOfFile = new CommonToken(-1);
+		endOfFile.setText("END OF FILE");
+		nonHidden.add(endOfFile);
+		errorIndex = 0;
+		var errorAt = nonHidden.get(errorIndex + maximumDepth);
+		error = "Error at " + errorAt.getText() + "\n";
 		for (var path : paths)
 		{
 			if (path.elementIndex == maximumDepth)

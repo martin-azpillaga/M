@@ -1,6 +1,7 @@
 grammar m.XML
+
 import "http://www.eclipse.org/emf/2002/Ecore"
-generate mxml "http://www.minim.games/xml"
+generate mxml "azpillaga.world/xml"
 
 Model:
 	prolog=Prolog?
