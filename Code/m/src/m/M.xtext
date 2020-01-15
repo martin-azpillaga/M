@@ -1,30 +1,33 @@
 grammar m.M with m.Modular
 
 import "azpillaga.world/modular"
-generate m "azpillaga.world/M"
+generate m "azpillaga.world/m"
 
 Modul:
 	(entities+=Entity|systems+=System)*;
 
 Entity:
-	name=FILENAME 
-	(':' base=FILENAME)?
+	 name = WORD 
+	(
+		':'
+		base=WORD
+	)?
 	'{'
 	components+=Component (',' components+=Component)*
 	'}';
 
 Component:
-	name=IDENTIFIER
-	value=(Vector | Asset)?;
+	name=WORD
+	value=(Vector|Asset)?;
 
 Vector:
 	entries+=NUMBER+;
 
 Asset:
-	name=FILENAME;
+	name=WORD;
 
 System returns Procedure:
-	name=FILENAME
+	name=WORD
 	'{'
 	statements+=Statement+
 	('←' returnValue=Expression)?
@@ -35,12 +38,12 @@ Statement:
 	Selection | Iteration | FunctionCall | Assignment | Loop;
 
 Loop:
-	'∀' entity=IDENTIFIER 
-	('∈' tags+=IDENTIFIER*)?
+	'∀' entity=WORD 
+	('∈' tags+=WORD*)?
 	'{' statements+=Statement* '}';
 
 ACCESS:
-	IDENTIFIER ('.' IDENTIFIER)*;
+	WORD ('.' WORD)*;
 
 @Override
 IdentifierLiteral:

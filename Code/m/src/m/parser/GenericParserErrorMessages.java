@@ -4,13 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.antlr.runtime.CommonToken;
+import org.antlr.runtime.MismatchedTokenException;
+import org.antlr.runtime.Token;
 import org.eclipse.emf.ecore.EObject;
-import org.eclipse.xtext.AbstractElement;
 import org.eclipse.xtext.Alternatives;
 import org.eclipse.xtext.Assignment;
-import org.eclipse.xtext.GrammarUtil;
 import org.eclipse.xtext.Group;
-import org.eclipse.xtext.IGrammarAccess;
 import org.eclipse.xtext.Keyword;
 import org.eclipse.xtext.ParserRule;
 import org.eclipse.xtext.RuleCall;
@@ -21,25 +20,96 @@ import org.eclipse.xtext.nodemodel.impl.RootNode;
 import org.eclipse.xtext.parser.antlr.SyntaxErrorMessageProvider;
 import org.eclipse.xtext.parser.antlr.XtextTokenStream;
 
-import com.google.inject.Inject;
-
-class Path implements Cloneable
+public class GenericParserErrorMessages extends SyntaxErrorMessageProvider
 {
-	public String error;
-	public ArrayList<Integer> tokens;
+	public static HashMap<String,Integer> typeOf;
+	public static ArrayList<Path> paths;
+	
+	@Override
+	public SyntaxErrorMessage getSyntaxErrorMessage(IParserErrorContext context)
+	{
+		paths = new ArrayList<Path>();
+		typeOf = new HashMap<String,Integer>();
+		
+		var names = context.getTokenNames();
+		var currentNode = context.getCurrentNode();
+		var input = (XtextTokenStream) context.getRecognitionException().input;
+		var errorIndex = context.getRecognitionException().index;
+		for (var i = 0; i < names.length; i++)
+		{
+			typeOf.put(names[i], i);
+		}
+		var lookAhead = input.getCurrentLookAhead();
+		System.out.println(lookAhead);
+		var inputtokens = input.getTokens();
+		var tokens = new ArrayList<CommonToken>();
+		for (var i = errorIndex; i < inputtokens.size(); i++)
+		{
+			var common = (CommonToken) inputtokens.get(i);
+			if (common.getChannel() != Token.HIDDEN_CHANNEL)
+			{
+				tokens.add(common);
+			}
+		}
+		var endOfFile = new CommonToken(-1);
+		endOfFile.setText("END OF FILE");
+		tokens.add(endOfFile);
+		
+
+		process(currentNode, tokens);
+
+		var maximumDepth = 0;
+		for (var path : paths)
+		{
+			if (path.elementIndex > maximumDepth)
+			{
+				maximumDepth = path.elementIndex;
+			}
+		}
+		var errorAt = tokens.get(maximumDepth);
+		var error = "Error at " + errorAt.getText() + ". You can try to:";
+		for (var path : paths)
+		{
+			if (path.elementIndex == maximumDepth)
+			{
+				error += "\n" + path.report();
+			}
+		}
+		
+		return new SyntaxErrorMessage(error, "syntax error");
+	}
+	
+	void process(INode node, ArrayList<CommonToken> tokens)
+	{
+		var grammarElement = node.getGrammarElement();
+		var path = new Path();
+		path.elements = new ArrayList<EObject>();
+		path.elements.add(grammarElement);
+		path.elementIndex = 0;
+		path.tokens = tokens;
+		path.tokenIndex = 0;
+		paths.add(path);
+		path.match();
+	}
+}
+
+class Path
+{
+	public ArrayList<CommonToken> tokens;
 	public int tokenIndex;
 	public ArrayList<EObject> elements;
 	public int elementIndex;
+	public EObject last;
 	
-	public boolean match()
+	public void match()
 	{
 		if (elementIndex >= elements.size())
 		{
 			if (tokenIndex < tokens.size())
 			{
-				error = "Unwanted extra tokens";
-				return true;
+				GenericParserErrorMessages.paths.remove(this);
 			}
+			return;
 		}
 		
 		var element = elements.get(elementIndex);
@@ -48,20 +118,10 @@ class Path implements Cloneable
 			var rule = (ParserRule) element;
 			
 			var alternatives = rule.getAlternatives();
-			var name = rule.getName();
-			
-			if (error == "")
-			{
-				error = name;
-			}
-			else
-			{
-				error = name;// + " to " + error;
-			}
 
 			elements.set(elementIndex, alternatives);
 			
-			return match();
+			match();
 		}
 		else if (element instanceof TerminalRule)
 		{
@@ -73,24 +133,20 @@ class Path implements Cloneable
 			
 			if (tokenIndex < 0 || tokenIndex >= tokens.size())
 			{
-				report(elementIndex);
-				error = "Expected " + name + " to " + error;
-				return true;
+				return;
 			}
 			
-			var realType = tokens.get(tokenIndex);
+			var realType = tokens.get(tokenIndex).getType();
 			
 			if (realType == expectedType)
 			{
 				elementIndex++;
 				tokenIndex++;
-				return match();
+				match();
 			}
 			else
 			{
-				report(elementIndex);
-				error = "Expected " + name + " to " + error;
-				return true;
+				return;
 			}
 		}
 		else if (element instanceof Keyword)
@@ -103,24 +159,21 @@ class Path implements Cloneable
 			
 			if (tokenIndex < 0 || tokenIndex >= tokens.size())
 			{
-				report(elementIndex+1);
-				error = "Expected " + value + " to " + error;
-				return true;
+				
+				return;
 			}
 			
-			var realType = tokens.get(tokenIndex);
+			var realType = tokens.get(tokenIndex).getType();
 			
 			if (realType == expectedType)
 			{
 				elementIndex++;
 				tokenIndex++;
-				return match();
+				match();
 			}
 			else
 			{
-				report(elementIndex+1);
-				error = "Expected " + value + " to " + error;
-				return true;
+				return;
 			}
 		}
 		else if (element instanceof RuleCall)
@@ -133,7 +186,7 @@ class Path implements Cloneable
 			if (cardinality == null || cardinality.equals("+"))
 			{
 				elements.set(elementIndex, rule);
-				return match();
+				match();
 			}
 			else if (cardinality.equals("*") || cardinality.equals("?"))
 			{
@@ -143,10 +196,10 @@ class Path implements Cloneable
 				path.match();
 				
 				elements.remove(elementIndex);
-				return match();
+				match();
 			}
 			
-			return false;
+			return;
 		}
 		else if (element instanceof Alternatives)
 		{
@@ -177,7 +230,7 @@ class Path implements Cloneable
 					path.match();
 				}
 				this.elements.remove(elementIndex);
-				return match();
+				match();
 			}
 		}
 		else if (element instanceof Group)
@@ -195,7 +248,7 @@ class Path implements Cloneable
 					var e = elements.get(i);
 					this.elements.add(elementIndex, e);
 				}
-				return match();
+				match();
 			}
 			else if (cardinality.equals("?") || cardinality.equals("*"))
 			{
@@ -210,34 +263,36 @@ class Path implements Cloneable
 				path.match();
 				
 				this.elements.remove(elementIndex);
-				return match();
+				match();
 			}
 		}
 		else if (element instanceof Assignment)
 		{
 			var assignment = (Assignment) element;
 			
-			var feature = assignment.getFeature();
-			var operator = assignment.getOperator();
+			var cardinality = assignment.getCardinality();
 			var terminal = assignment.getTerminal();
 			
-			if (operator.equals("="))
+			if (cardinality == null || cardinality.equals("+"))
 			{
-				error = "set the " + feature + " of " + error;
+				last = element;
+				elements.set(elementIndex, terminal);
+				match();
 			}
-			else if (operator.equals("+="))
+			else if (cardinality.equals("*") || cardinality.equals("?"))
 			{
-				error = "add to the list of " + feature + " of " + error;
-			}
-			else if (operator.equals("?="))
-			{
-				error = "activate the " + feature + " of " + error;
+				Path path = copy();
+				path.last = element;
+				path.elements.set(elementIndex, terminal);
+				GenericParserErrorMessages.paths.add(path);
+				path.match();
+				
+				elements.remove(elementIndex);
+				match();
 			}
 			
-			elements.set(elementIndex, terminal);
-			return match();
 		}
-		return false;
+		return;
 	}
 	
 	Path copy()
@@ -249,19 +304,19 @@ class Path implements Cloneable
 		{
 			n.elements.add(e);
 		}
-		n.tokens = new ArrayList<Integer>();
+		n.tokens = new ArrayList<CommonToken>();
 		for (var t : tokens)
 		{
 			n.tokens.add(t);
 		}
 		n.tokenIndex = tokenIndex;
-		n.error = error;
 		return n;
 	}
 	
-	void report(int index)
+	String report()
 	{
-		var element = elements.get(index);
+		var error = "";
+		var element = elements.get(elementIndex);
 		if (element instanceof Assignment)
 		{
 			var assignment = (Assignment) element;
@@ -291,7 +346,20 @@ class Path implements Cloneable
 			}
 			else if (operator == "?=")
 			{
-				
+				error = "activate the " + feature + " of " + containerName;
+			}
+			
+			if (operator.equals("="))
+			{
+				error = "set the " + feature + " of " + error;
+			}
+			else if (operator.equals("+="))
+			{
+				error = "add to the list of " + feature + " of " + error;
+			}
+			else if (operator.equals("?="))
+			{
+				error = "activate the " + feature + " of " + error;
 			}
 		}
 		else if (element instanceof Group)
@@ -300,106 +368,72 @@ class Path implements Cloneable
 			
 			var cardinality = group.getCardinality();
 			var first = group.getElements().get(0);
-			elements.set(index+1, first);
-			report(index+1);
+			elements.set(elementIndex+1, first);
+			//report(elementIndex+1);
 			if (cardinality.equals("?") || cardinality.equals("*"))
 			{
 				error = "optionally " + error;
 			}
 		}
+		else if (element instanceof TerminalRule)
+		{
+			var terminal = (TerminalRule) element;
+			var value = terminal.getName();
+			error = "Write a " + value + " to set " + report((Assignment) last);
+		}
+		else if (element instanceof Keyword)
+		{
+			var keyword = (Keyword) element;
+			var value = keyword.getValue();
+			error = "Write " + value + " to introduce " + report(elements.get(elementIndex+1));
+		}
+		return error;
+	}
+	
+	String report(EObject element)
+	{
+		if (element instanceof Assignment)
+		{
+			var assignment = (Assignment) element;
+			var error = "";
+			var feature = assignment.getFeature();
+			var operator = assignment.getOperator();
+			var container = assignment.eContainer();
+			var containerName = "";
+			
+			while (!(container instanceof ParserRule || container instanceof RootNode))
+			{
+				container = container.eContainer();
+			}
+			
+			if (container instanceof ParserRule)
+			{
+				containerName = ((ParserRule) container).getName();
+			}
+			
+			if (containerName.startsWith("A")||containerName.startsWith("E")||containerName.startsWith("I")||containerName.startsWith("O")||containerName.startsWith("U"))
+			{
+				containerName = "an " + containerName;
+			}
+			else
+			{
+				containerName = "a " + containerName;
+			}
+			if (operator.equals("="))
+			{
+				error = "the " + feature + " of " + containerName;
+			}
+			else if (operator.equals("+="))
+			{
+				error = "the list of " + feature + " of " + containerName;
+			}
+			else if (operator == "?=")
+			{
+				error = "the " + feature + " of " + containerName;
+			}
+			return error;
+		}
+		return "Unrecognized error";
 	}
 }
 
-public class GenericParserErrorMessages extends SyntaxErrorMessageProvider
-{
-	
-	String message;
-	String error;
-	boolean findFirst = true;
-	ArrayList<String> processed = new ArrayList<String>();
-	String alternativer = "";
-	ArrayList<Integer> tokens;
-	int errorIndex;
-	public static HashMap<String,Integer> typeOf;
-	
-	public static ArrayList<Path> paths;
-	
-	void process(INode node)
-	{
-		var grammarElement = node.getGrammarElement();
-		var path = new Path();
-		path.elements = new ArrayList<EObject>();
-		path.elements.add(grammarElement);
-		path.elementIndex = 0;
-		path.error = "";
-		path.tokens = tokens;
-		path.tokenIndex = 0;
-		paths.add(path);
-		path.match();
-	}
-
-	@Override
-	public SyntaxErrorMessage getSyntaxErrorMessage(IParserErrorContext context)
-	{
-		var names = context.getTokenNames();
-		paths = new ArrayList<Path>();
-		typeOf = new HashMap<String,Integer>();
-		for (var i = 0; i < names.length; i++)
-		{
-			typeOf.put(names[i], i);
-		}
-		processed = new ArrayList<String>();
-		error = "";
-		message = "";
-		var currentNode = context.getCurrentNode();
-		
-		var errorToken = context.getRecognitionException().token;
-		errorIndex = errorToken.getTokenIndex();
-		var input = (XtextTokenStream) context.getRecognitionException().input;
-		var inputtokens = input.getTokens();
-		tokens = new ArrayList<Integer>();
-		for (var x : inputtokens)
-		{
-			var common = (CommonToken) x;
-			if (common.getType() != 7)
-			{
-				tokens.add(common.getType());
-			}
-		}
-
-		process(currentNode);
-
-		var maximumDepth = 0;
-		for (var path : paths)
-		{
-			if (path.elementIndex > maximumDepth)
-			{
-				maximumDepth = path.elementIndex;
-			}
-		}
-		var nonHidden = new ArrayList<CommonToken>();
-		for (var t : inputtokens)
-		{
-			var common = (CommonToken) t;
-			if (common.getType() != 7)
-			{
-				nonHidden.add(common);
-			}
-		}
-		var endOfFile = new CommonToken(-1);
-		endOfFile.setText("END OF FILE");
-		nonHidden.add(endOfFile);
-		errorIndex = 0;
-		var errorAt = nonHidden.get(errorIndex + maximumDepth);
-		error = "Error at " + errorAt.getText() + "\n";
-		for (var path : paths)
-		{
-			if (path.elementIndex == maximumDepth)
-			{
-				error += path.error + "\n";
-			}
-		}
-		
-		return new SyntaxErrorMessage(error, "syntax error");
-	}
-}
