@@ -9,15 +9,15 @@ Procedure:
 	('(' (arguments+=IDENTIFIER (',' arguments+=IDENTIFIER)*)? ')')?
 	'{'
 	statements+=Statement*
-	('←' return=Expression)?
+	('←' returnValue=Expression)?
 	'}';
 
 Statement:
-	Selection | Iteration | Call | Assignment;
+	Selection | Iteration | FunctionCall | Assignment;
 
 Selection:
-	('→' | '#') branches+=Branch
-	(('⇉' | '##') branches+=Branch)*
+	'→' branches+=Branch
+	('⇉' branches+=Branch)*
 	('{' statements+=Statement* '}')?;
 
 Branch:
@@ -25,14 +25,14 @@ Branch:
 	'{' statements+=Statement* '}';
 
 Iteration:
-	('↺' | '@') condition=Expression
+	'↺' condition=Expression
 	'{' statements+=Statement* '}';
 
 Assignment:
-	identifier=IDENTIFIER kind=AssignmentKind expression=Expression;
+	variable=IDENTIFIER kind=AssignmentKind expression=Expression;
 
-Call:
-	identifier=IDENTIFIER
+FunctionCall:
+	name=IDENTIFIER
 	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')';
 	
 
@@ -112,14 +112,14 @@ Primary returns Expression:
   '(' Expression ')';
   
 Variable:
-	IdentifierLiteral | Call;
+	IdentifierLiteral | FunctionCall;
 	
 IdentifierLiteral: value=IDENTIFIER;
 FloatLiteral: value=NUMBER;
 StringLiteral: value=FILENAME;
 BooleanLiteral: value=BOOLEAN;
 
-terminal WS: '\u0020'|'\u0009'|'\u000A'|'\u000D';
+terminal WS: ('\u0020'|'\u0009'|'\u000A'|'\u000D')+;
 terminal BOOLEAN: '⊤'|'⊥';
 terminal fragment FILE: ('\\"'|!('/'|'\u0000'|'"'))+;
 terminal FILENAME: '"' (FILE ('/' FILE)*)? '"';

@@ -377,6 +377,21 @@ public class GenericParserErrorMessages extends SyntaxErrorMessageProvider
 				maximumDepth = path.elementIndex;
 			}
 		}
+		var nonHidden = new ArrayList<CommonToken>();
+		for (var t : inputtokens)
+		{
+			var common = (CommonToken) t;
+			if (common.getType() != 7)
+			{
+				nonHidden.add(common);
+			}
+		}
+		if (errorIndex < 0)
+		{
+			errorIndex = 0;
+		}
+		var errorAt = nonHidden.get(errorIndex + maximumDepth-1);
+		error = "Error after " + errorAt.getText() + "\n";
 		for (var path : paths)
 		{
 			if (path.elementIndex == maximumDepth)
