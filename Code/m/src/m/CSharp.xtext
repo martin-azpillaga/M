@@ -1,8 +1,7 @@
 grammar m.CSharp with m.Modular hidden(WS, MULTIPLE_LINES_COMMENT, SINGLE_LINE_COMMENT)
 
-import "http://www.eclipse.org/emf/2002/Ecore"
-import "http://www.minim.games/modular"
-generate csharp "http://www.minim.games/csharp"
+import "azpillaga.world/modular"
+generate csharp "azpillaga.world/csharp"
 
 Model:
 	usings+=Using*
@@ -18,12 +17,12 @@ Type:
 	(({Struct.info=current} 'struct' name=TYPENAME
 	|
 	{Class.info=current} sealed?='sealed'? static?='static'? 'class' name=TYPENAME)
-	(':' superTypes+=TYPENAME (SEPARATOR superTypes+=TYPENAME)*)?
-	BEGIN members+=Member* END
+	(':' superTypes+=TYPENAME (',' superTypes+=TYPENAME)*)?
+	'{' members+=Member* '}'
 	|
 	{Enum.info=current}
 	'enum' name=TYPENAME
-	BEGIN (values+=IDENTIFIER (SEPARATOR values+=IDENTIFIER)*)? END);
+	'{' (values+=WORD (',' values+=WORD)*)? '}');
 
 Info:
 	Member | Type;
@@ -35,22 +34,22 @@ Member:
 	(({Struct.info=current} 'struct' name=TYPENAME
 	|
 	{Class.info=current} static?='static'? 'class' name=TYPENAME)
-	(':' superTypes+=TYPENAME (SEPARATOR superTypes+=TYPENAME)*)?
-	BEGIN members+=Member* END
+	(':' superTypes+=TYPENAME (',' superTypes+=TYPENAME)*)?
+	'{' members+=Member* '}'
 	|
 	{Enum.info=current}
 	'enum' name=TYPENAME
-	BEGIN (value+=IDENTIFIER (SEPARATOR values+=IDENTIFIER)*)? END
+	'{' (value+=WORD (',' values+=WORD)*)? '}'
 	|
 	(({Method.info=current} override?='override')?
 	({Method.info=current} static?='static')?
 	type=TYPENAME
-	({Field.info=current} name=IDENTIFIER ';'
+	({Field.info=current} name=WORD ';'
 	|
-	{Method.info=current} name=TYPENAME OPEN (arguments+=Argument (SEPARATOR arguments+=Argument)*)? CLOSE
-	BEGIN
+	{Method.info=current} name=TYPENAME '(' (arguments+=Argument (',' arguments+=Argument)*)? ')'
+	'{'
 	statements+=Statement*
-	END)));
+	'}')));
 
 enum Visibility:
 	public | protected | private;
@@ -74,29 +73,29 @@ PreIncrement returns Expression:
 
 @Override
 Statement:
-	Selection | Iteration | Call | Assignment | For | Declaration | Return;
+	Selection | Iteration | FunctionCall | Assignment | For | Declaration | Return;
 
 @Override
 Iteration:
-	'while' OPEN condition=Expression CLOSE
-	BEGIN statements+=Statement* END;
+	'while' '(' condition=Expression ')'
+	'{' statements+=Statement* '}';
 
 @Override
 Selection:
 	'if' branches+=Branch
 	('else' 'if' branches+=Branch)*
-	('else' BEGIN statements+=Statement* END)?;
+	('else' '{' statements+=Statement* '}')?;
 
 @Override
 Branch:
-	OPEN condition=Expression CLOSE
-	BEGIN statements+=Statement* END;
+	'(' condition=Expression ')'
+	'{' statements+=Statement* '}';
 
 For:
-	'for' OPEN initialization=Assignment ';' condition=Expression ';' increment=Assignment CLOSE
-	BEGIN
+	'for' '(' initialization=Assignment ';' condition=Expression ';' increment=Assignment ')'
+	'{'
 	statements+=Statement*
-	END;
+	'}';
 
 Return:
 	'return' expression=Expression ';';
@@ -107,40 +106,40 @@ Declaration:
 	
 @Override
 Assignment:
-	identifier=ACCESS kind=AssignmentKind expression=Expression ';'
+	variable=ACCESS kind=AssignmentKind expression=Expression ';'
 ;
 
 @Override
-Call:
-	identifier=IDENTIFIER
-	OPEN (parameters+=Expression (SEPARATOR parameters+=Expression)*)? CLOSE ';';
+FunctionCall:
+	name=WORD
+	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')' ';';
 
 @Override
 IdentifierLiteral:
 	value=ACCESS;
 
 Annotation:
-	'[' call=Call ']';
+	'[' call=FunctionCall ']';
 
 Argument:
-	annotations+=Annotation* ref?='ref'? type=TYPENAME name=IDENTIFIER;
+	annotations+=Annotation* ref?='ref'? type=TYPENAME name=WORD;
 
 Lambda: {Lambda}
-	OPEN (arguments+=Argument (SEPARATOR arguments+=Argument)*)? CLOSE '=>' BEGIN statements+=Statement* END;
+	'(' (arguments+=Argument (',' arguments+=Argument)*)? ')' '=>' '{' statements+=Statement* '}';
 
-Index: identifier=IDENTIFIER  '[' (parameters+=Expression ( SEPARATOR parameters+=Expression)*)?  ']';
+Index: identifier=WORD  '[' (parameters+=Expression ( ',' parameters+=Expression)*)?  ']';
 
 @Override
-Variable: IdentifierLiteral|Call|Index;
+Variable: IdentifierLiteral|FunctionCall|Index;
 
 ACCESS:
-	IDENTIFIER ('.' IDENTIFIER)*;
+	WORD ('.' WORD)*;
 
 QualifiedName:
-	IDENTIFIER ('.' IDENTIFIER)*;
+	WORD ('.' WORD)*;
 
 TYPENAME:
-	IDENTIFIER ('<' TYPENAME (SEPARATOR TYPENAME)* '>')?;
+	WORD ('<' TYPENAME (',' TYPENAME)* '>')?;
 
 terminal MULTIPLE_LINES_COMMENT:
 	'/*'->'*/';

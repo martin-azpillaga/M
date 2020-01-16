@@ -1,7 +1,7 @@
 grammar m.YAML
 
 import "http://www.eclipse.org/emf/2002/Ecore"
-generate yaml "http://www.minim.games/yaml"
+generate yaml "azpillaga.world/yaml"
 
 File:
 	{File}
