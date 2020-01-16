@@ -63,11 +63,11 @@ jobs:
         asset_content_type: text/text
 
     - name: Translate all markdown files to html
-      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | pandoc --lua-filter=Tests/links.lua -o "$(dirname "{}")/$(basename "{}" .md).html"' & exit 0
+      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | pandoc --lua-filter=.github/workflows/configuration/links.lua -o "$(dirname "{}")/$(basename "{}" .md).html"' & exit 0
     - name: Translate all markdown files to spanish
-      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | translate | pandoc --lua-filter=Tests/links-es.lua -o "$(dirname "{}")/$(basename "{}" .md)-es.html"' & exit 0
+      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | translate | pandoc --lua-filter=.github/workflows/configuration/links-es.lua -o "$(dirname "{}")/$(basename "{}" .md)-es.html"' & exit 0
     - name: Translate all markdown files to chinese
-      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | translate -t zh-CN | pandoc --lua-filter=Tests/links-zh.lua -o "$(dirname "{}")/$(basename "{}" .md)-zh.html"' & exit 0
+      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | translate -t zh-CN | pandoc --lua-filter=.github/workflows/configuration/links-zh.lua -o "$(dirname "{}")/$(basename "{}" .md)-zh.html"' & exit 0
 
     - name: Zip all html files
       run: zip -r m-html.zip Documentation README.html

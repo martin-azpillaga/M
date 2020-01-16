@@ -42,4 +42,4 @@ jobs:
       run: npx markdownlint-cli -c .github/workflows/configuration/markdownlint.json -i LICENSE.md "**/*.md"
 
     - name: Lint lua
-      run: luacheck -g Tests
+      run: luacheck -g .github/workflows/configuration
