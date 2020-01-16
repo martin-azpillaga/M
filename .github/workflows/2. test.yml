@@ -1,6 +1,6 @@
 name: Test
 
-on: push
+on: pull_request
 
 jobs:
   test:
@@ -19,13 +19,7 @@ jobs:
       with:
         java-version: 11
 
-    - name: Create jar
+    - name: Create language server
       run: |
         cd Code
-        mkdir m.ide m.ui
-        gradle jar
-
-    - name: Create fat jar
-      run: |
-        cd Code
-        gradle fatjar
+        gradle generateLanguageServer

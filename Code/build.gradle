@@ -13,37 +13,28 @@ dependencies {
 	implementation 'org.eclipse.xtext:xtext-antlr-generator'
 	implementation files("${projectDir}/m/src")
 	implementation files("${projectDir}/m/src/m/fragments")
-	implementation files("${projectDir}/bin")
-}
-
-task javac(type: JavaCompile){
-	source "m/src/m/main/RunFragments.java"
-	source "m/src/m/fragments/ContextualParserMessagesFragment.java"
-	source "m/src/m/parser/ContextualParserMessages.java"
-	destinationDir = file("bin")
-	classpath = configurations.implementation
-}
-task run(type: JavaExec) {
-	dependsOn javac
-	workingDir = "bin"
-	main = "m.main.RunFragments"
-	classpath = configurations.implementation
+	implementation files("${projectDir}/build/classes/java/main")
 }
 
 sourceSets {
 	main.java.srcDirs = ["m/src", "m.ide/src", "m.ide/src-gen", "m/src-gen"]
 }
 
-compileJava.dependsOn run
-
-jar {
-	baseName = "m-ls"
-	exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', '**/*.xtend', '**/*.mwe2', '**/*.g', '**/*.xtext'
+task runFragments(type: JavaExec) {
+	doFirst{
+		mkdir "m.ide"
+		mkdir "m.ui"
+	}
+	dependsOn compileJava
+	main = "m.main.RunFragments"
+	args "."
+	classpath = configurations.implementation
 }
 
-task fatjar(type: Jar) {
+task generateLanguageServer(type: Jar) {
+	dependsOn runFragments
+	baseName = 'm-language-server'
     manifest.attributes 'Main-Class': 'org.eclipse.xtext.ide.server.ServerLauncher'
-    baseName = 'm-fat-ls'
     from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
 	exclude '**/*.java', 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', '**/*.xtend', '**/*.mwe2', '**/*.g', '**/*.xtext'
     with jar
