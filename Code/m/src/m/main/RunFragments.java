@@ -1,18 +1,15 @@
-package m;
+package m.main;
 
 import org.eclipse.xtext.xtext.generator.CodeConfig;
 import org.eclipse.xtext.xtext.generator.DefaultGeneratorModule;
 import org.eclipse.xtext.xtext.generator.StandardLanguage;
 import org.eclipse.xtext.xtext.generator.XtextGenerator;
-import org.eclipse.xtext.xtext.generator.formatting.Formatter2Fragment2;
-import org.eclipse.xtext.xtext.generator.generator.GeneratorFragment2;
 import org.eclipse.xtext.xtext.generator.model.project.BundleProjectConfig;
 import org.eclipse.xtext.xtext.generator.model.project.StandardProjectConfig;
-import org.eclipse.xtext.xtext.generator.serializer.SerializerFragment2;
 
-import m.fragments.ContextualParserMessages;
+import m.fragments.ContextualParserMessagesFragment;
 
-public class Generate 
+public class RunFragments 
 {
 	public static void main(String[] args)
 	{
@@ -56,7 +53,7 @@ public class Generate
 		var language = new StandardLanguage();
 		language.setName(name);
 		language.setFileExtensions(extensions);
-		language.addFragment(new ContextualParserMessages());
+		language.addFragment(new ContextualParserMessagesFragment());
 		return language;
 	}
 }
