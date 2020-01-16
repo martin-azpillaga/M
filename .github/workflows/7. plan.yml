@@ -1,0 +1,15 @@
+name: Publish
+
+on:
+  milestone:
+    types: [opened]
+
+jobs:
+  plan:
+    name: Plan
+
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Hello milestone
+        run: Hello milestone!

@@ -87,37 +87,20 @@ jobs:
         asset_content_type: text/zip
 
 
-    - name: Create jar
+    - name: Create language server
       run: |
         cd Code
-        mkdir m.ide m.ui
-        gradle jar
-
-    - name: Create fat jar
-      run: |
-        cd Code
-        gradle fatjar
-
-    - name: Upload m-ls.jar to release
+        gradle generateLanguageServer
+  
+    - name: Upload language server jar to release
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Code/build/libs/m-ls.jar
+        asset_path: ./Code/build/libs/m-language-server.jar
         asset_name: m-ls.jar
         asset_content_type: text/zip
-
-    - name: Upload m-fat-ls.jar to release
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Code/build/libs/m-fat-ls.jar
-        asset_name: m-fat-ls.jar
-        asset_content_type: text/zip
-
 
     - name: Run vsce package to create vsix file
       run: |
