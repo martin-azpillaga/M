@@ -1,8 +1,6 @@
 name: Plan
 
-on:
-  milestone:
-    types: [opened]
+on: milestone
 
 jobs:
   plan:
