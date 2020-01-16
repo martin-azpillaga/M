@@ -6,9 +6,9 @@ on:
 
 jobs:
   tweet:
-    name: Tweet
+
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository files
         uses: actions/checkout@v1

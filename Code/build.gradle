@@ -19,7 +19,7 @@ sourceSets {
 	main.java.srcDirs = ["m/src", "m.ide/src", "m.ide/src-gen", "m/src-gen"]
 }
 
-task run(type: JavaExec) {
+task runFragments(type: JavaExec) {
 	doFirst{
 		mkdir "m.ide"
 		mkdir "m.ui"
@@ -31,7 +31,7 @@ task run(type: JavaExec) {
 }
 
 task generateLanguageServer(type: Jar) {
-	dependsOn run
+	dependsOn runFragments
 	baseName = 'm-language-server'
     manifest.attributes 'Main-Class': 'org.eclipse.xtext.ide.server.ServerLauncher'
     from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
