@@ -14,18 +14,7 @@ public class ContextualParserMessagesFragment extends AbstractXtextGeneratorFrag
 	@Override
 	public void generate() 
 	{
-		System.out.println("Generating the parser messages...");
 		GuiceModuleAccess.BindingFactory bindingFactory = new GuiceModuleAccess.BindingFactory();
 		bindingFactory.addTypeToType(TypeReference.typeRef(ISyntaxErrorMessageProvider.class), TypeReference.typeRef(ContextualParserMessages.class)).contributeTo(getLanguage().getRuntimeGenModule());
-	}
-}
-
-class Concat extends StringConcatenationClient
-{
-	@Override
-	protected void appendTo(StringConcatenationClient.TargetStringConcatenation builder)
-	{
-		builder.append("GenericParserErrorMessages");
-		builder.append(".class");
 	}
 }

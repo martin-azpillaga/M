@@ -13,6 +13,12 @@ public class RunFragments
 {
 	public static void main(String[] args)
 	{
+		var rootPath = "..";
+		if (args.length > 0)
+		{
+			rootPath = args[0];
+		}
+
 		var generator = new XtextGenerator();
 
 		var configuration = new DefaultGeneratorModule();
@@ -26,7 +32,7 @@ public class RunFragments
 		project.setEclipsePlugin(eclipsePlugin);
 		project.setCreateEclipseMetaData(true);
 		project.setBaseName("m");
-		project.setRootPath("..");
+		project.setRootPath(rootPath);
 		eclipsePlugin.setEnabled(true);
 		
 		code.setPreferXtendStubs(false);
