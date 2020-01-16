@@ -381,18 +381,25 @@ class Path
 		{
 			var terminal = (TerminalRule) element;
 			var value = terminal.getName();
-			error = "Write a " + value + " to set " + report((Assignment) last);
+			error = "Write a " + value + " to " + report((Assignment) last, true);
 		}
 		else if (element instanceof Keyword)
 		{
 			var keyword = (Keyword) element;
 			var value = keyword.getValue();
-			error = "Write " + value + " to introduce " + report(elements.get(elementIndex+1));
+			if (elementIndex < elements.size()-1)
+			{
+				error = "Write " + value + " to " + report(elements.get(elementIndex+1),false);
+			}
+			else
+			{
+				error = "Write " + value + " to finish the list."; 
+			}
 		}
 		return error;
 	}
 	
-	String report(EObject element)
+	String report(EObject element, boolean includeAction)
 	{
 		if (element instanceof Assignment)
 		{
@@ -415,15 +422,36 @@ class Path
 			
 			if (operator.equals("="))
 			{
-				error = "the " + feature + " of " + containerName;
+				if (includeAction)
+				{
+					error = "set the " + feature + " of " + containerName;
+				}
+				else
+				{
+					error = "introduce the " + feature + " of " + containerName;
+				}
 			}
 			else if (operator.equals("+="))
 			{
-				error = "the list of " + feature + " of " + containerName;
+				if (includeAction)
+				{
+					error = "add to the list of " + feature + " of " + containerName;
+				}
+				else
+				{
+					error = "introduce the list of " + feature + " of " + containerName;
+				}
 			}
 			else if (operator == "?=")
 			{
-				error = "the " + feature + " of " + containerName;
+				if (includeAction)
+				{
+					error = "activate the " + feature + " of " + containerName;
+				}
+				else
+				{
+					error = "introduce the " + feature + " of " + containerName;
+				}
 			}
 			return error;
 		}
