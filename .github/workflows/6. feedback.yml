@@ -1,0 +1,15 @@
+name: Publish
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  feedback:
+    name: Feed back
+
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Add labels to the issue
+        run: echo Hello issue!
