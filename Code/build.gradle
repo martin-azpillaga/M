@@ -12,11 +12,14 @@ dependencies {
 	implementation "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:2.20.0"
 	implementation 'org.eclipse.xtext:xtext-antlr-generator'
 	implementation files("${projectDir}/m/src")
+	implementation files("${projectDir}/m/src/m/fragments")
 	implementation files("${projectDir}/bin")
 }
 
 task javac(type: JavaCompile){
-	source = "m/src/m/Generate.java"
+	source "m/src/m/Generate.java"
+	source "m/src/m/fragments/ContextualParserMessages.java"
+	source "m/src/m/parser/GenericParserErrorMessages.java"
 	destinationDir = file("bin")
 	classpath = configurations.implementation
 }
