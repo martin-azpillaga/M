@@ -1,4 +1,4 @@
-name: Publish
+name: Feed back
 
 on:
   issues:
