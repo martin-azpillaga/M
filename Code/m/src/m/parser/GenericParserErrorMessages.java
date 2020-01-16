@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.antlr.runtime.CommonToken;
-import org.antlr.runtime.MismatchedTokenException;
 import org.antlr.runtime.Token;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.Alternatives;
@@ -17,11 +16,9 @@ import org.eclipse.xtext.TerminalRule;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.SyntaxErrorMessage;
 import org.eclipse.xtext.nodemodel.impl.RootNode;
-import org.eclipse.xtext.parser.antlr.AbstractInternalAntlrParser;
 import org.eclipse.xtext.parser.antlr.SyntaxErrorMessageProvider;
 import org.eclipse.xtext.parser.antlr.XtextTokenStream;
 
-import m.parser.antlr.internal.InternalMParser;
 
 public class GenericParserErrorMessages extends SyntaxErrorMessageProvider
 {
