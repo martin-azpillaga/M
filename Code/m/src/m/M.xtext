@@ -1,48 +1,60 @@
 grammar m.M with m.Modular
 
-import "http://www.minim.games/modular"
-import "http://www.eclipse.org/emf/2002/Ecore"
-generate m "http://www.minim.games/M"
+import "azpillaga.world/modular"
+generate m "azpillaga.world/m"
 
-Modules:
-	(entities+=Entity|procedures+=Procedure)*
-;
+Modul:
+	(entities+=Entity|systems+=System)*;
 
 Entity:
-	 name=FILENAME ( ':'  base=FILENAME)?
-	 BEGIN (components+=Component (SEPARATOR components+=Component)*)? END;
+	 name = WORD 
+	(
+		':'
+		base=WORD
+	)?
+	'{'
+	components+=Component (',' components+=Component)*
+	'}';
 
 Component:
-	 name=IDENTIFIER ( value=(Vector|Asset))?;
-	
+	name=WORD
+	value=(Vector|Asset)?;
+
 Vector:
-	values+=FLOAT ( values+=FLOAT)*
-;
+	entries+=NUMBER+;
 
 Asset:
-	value=FILENAME
-;
+	name=WORD;
 
-@Override Statement:
-	Selection|Iteration|Call|Assignment|Loop
-;
+System returns Procedure:
+	name=WORD
+	'{'
+	statements+=Statement+
+	('←' returnValue=Expression)?
+	'}';
+
+@Override
+Statement:
+	Selection | Iteration | FunctionCall | Assignment | Loop;
 
 Loop:
-	'∀' identifier=IdentifierLiteral ('∈' tags+=IdentifierLiteral*)?
-	BEGIN statements+=Statement* END
-;
+	'∀' entity=WORD 
+	('∈' tags+=WORD*)?
+	'{' statements+=Statement* '}';
 
-ACCESS: IDENTIFIER ('.' IDENTIFIER)*;
+ACCESS:
+	WORD ('.' WORD)*;
 
 @Override
 IdentifierLiteral:
 	value=ACCESS;
-	
+
 @Override
 Assignment:
-	identifier=ACCESS kind=AssignmentKind expression=Expression;
+	variable=ACCESS
+	kind=AssignmentKind
+	expression=Expression;
 
 @Override
 Primary returns Expression:
-  Variable |
-  OPEN Expression CLOSE;
+	Variable | '(' Expression ')';

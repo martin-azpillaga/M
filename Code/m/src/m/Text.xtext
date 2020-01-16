@@ -1,19 +1,9 @@
-grammar source.Text with m.M
+grammar m.Text with m.M
 
-import "http://www.eclipse.org/emf/2002/Ecore" as ecore
-import "http://www.minim.games/M"
-import "http://www.minim.games/modular"
+import "azpillaga.world/m"
+import "azpillaga.world/modular"
 
 @Override
-Modules:
-	(entities+=Entity|procedures+=Procedure)*
+Modul:
+	entities+=Entity*
 ;
-
-@Override
-Loop:
-	'bakoitza' identifier=IdentifierLiteral '!'
-;
-
-@Override
-LogicalOr returns Expression:
-	LogicalAnd ({LogicalOr.left=current} ('or'|'||'|'⋁') right=LogicalAnd)*;

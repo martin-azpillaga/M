@@ -1,8 +1,7 @@
 grammar m.Javascript with m.Modular
 
-import "http://www.eclipse.org/emf/2002/Ecore"
-import "http://www.minim.games/modular"
-generate javascript "http://www.minim.games/javascript"
+import "azpillaga.world/modular"
+generate javascript "azpillaga.world/javascript"
 
 Model:
     expressions+=Expression;
