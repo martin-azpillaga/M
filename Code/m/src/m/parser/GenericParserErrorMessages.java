@@ -17,8 +17,11 @@ import org.eclipse.xtext.TerminalRule;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.SyntaxErrorMessage;
 import org.eclipse.xtext.nodemodel.impl.RootNode;
+import org.eclipse.xtext.parser.antlr.AbstractInternalAntlrParser;
 import org.eclipse.xtext.parser.antlr.SyntaxErrorMessageProvider;
 import org.eclipse.xtext.parser.antlr.XtextTokenStream;
+
+import m.parser.antlr.internal.InternalMParser;
 
 public class GenericParserErrorMessages extends SyntaxErrorMessageProvider
 {
@@ -34,16 +37,15 @@ public class GenericParserErrorMessages extends SyntaxErrorMessageProvider
 		var names = context.getTokenNames();
 		var currentNode = context.getCurrentNode();
 		var input = (XtextTokenStream) context.getRecognitionException().input;
-		var errorIndex = context.getRecognitionException().index;
+		var errorOffset = currentNode.getTotalOffset();
 		for (var i = 0; i < names.length; i++)
 		{
 			typeOf.put(names[i], i);
 		}
-		var lookAhead = input.getCurrentLookAhead();
-		System.out.println(lookAhead);
+		System.out.println(errorOffset);
 		var inputtokens = input.getTokens();
 		var tokens = new ArrayList<CommonToken>();
-		for (var i = errorIndex; i < inputtokens.size(); i++)
+		for (var i = errorOffset; i < inputtokens.size(); i++)
 		{
 			var common = (CommonToken) inputtokens.get(i);
 			if (common.getChannel() != Token.HIDDEN_CHANNEL)
@@ -408,17 +410,9 @@ class Path
 			
 			if (container instanceof ParserRule)
 			{
-				containerName = ((ParserRule) container).getName();
+				containerName = "the " + ((ParserRule) container).getName();
 			}
 			
-			if (containerName.startsWith("A")||containerName.startsWith("E")||containerName.startsWith("I")||containerName.startsWith("O")||containerName.startsWith("U"))
-			{
-				containerName = "an " + containerName;
-			}
-			else
-			{
-				containerName = "a " + containerName;
-			}
 			if (operator.equals("="))
 			{
 				error = "the " + feature + " of " + containerName;
