@@ -1,6 +1,8 @@
 name: Feed back
 
-on: issues
+on:
+  issues:
+    types: [opened]
 
 jobs:
   feedback:
