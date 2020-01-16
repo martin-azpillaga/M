@@ -1,4 +1,4 @@
-package m;
+package m.main;
 
 import org.eclipse.xtext.xtext.generator.CodeConfig;
 import org.eclipse.xtext.xtext.generator.DefaultGeneratorModule;
@@ -7,7 +7,9 @@ import org.eclipse.xtext.xtext.generator.XtextGenerator;
 import org.eclipse.xtext.xtext.generator.model.project.BundleProjectConfig;
 import org.eclipse.xtext.xtext.generator.model.project.StandardProjectConfig;
 
-public class Generate 
+import m.fragments.ContextualParserMessagesFragment;
+
+public class RunFragments 
 {
 	public static void main(String[] args)
 	{
@@ -40,6 +42,8 @@ public class Generate
 		generator.addLanguage(language("m.XML","xml"));
 		generator.addLanguage(language("m.JSON","json"));
 		generator.addLanguage(language("m.YAML","yml"));
+		generator.addLanguage(language("m.Text", "text"));
+		generator.addLanguage(language("m.Testua", "testua"));
 		
 		generator.invoke(null);
 	}
@@ -49,6 +53,7 @@ public class Generate
 		var language = new StandardLanguage();
 		language.setName(name);
 		language.setFileExtensions(extensions);
+		language.addFragment(new ContextualParserMessagesFragment());
 		return language;
 	}
 }

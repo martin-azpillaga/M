@@ -1,39 +1,38 @@
 grammar m.Modular hidden(WS)
 
 import "http://www.eclipse.org/emf/2002/Ecore"
-
-generate modular "http://www.minim.games/modular"
+generate modular "azpillaga.world/modular"
 
 Procedure:
-	name=IDENTIFIER
-	(OPEN (arguments+=IDENTIFIER (SEPARATOR arguments+=IDENTIFIER)*)? CLOSE)?
-	BEGIN
+	name=WORD
+	('(' (arguments+=WORD (',' arguments+=WORD)*)? ')')?
+	'{'
 	statements+=Statement*
-	('←' return=Expression)?
-	END;
+	('←' returnValue=Expression)?
+	'}';
 
 Statement:
-	Selection | Iteration | Call | Assignment;
+	Selection | Iteration | FunctionCall | Assignment;
 
 Selection:
-	('→' | '#') branches+=Branch
-	(('⇉' | '##') branches+=Branch)*
-	(BEGIN statements+=Statement* END)?;
+	'→' branches+=Branch
+	('⇉' branches+=Branch)*
+	('{' statements+=Statement* '}')?;
 
 Branch:
 	condition=Expression
-	BEGIN statements+=Statement* END;
+	'{' statements+=Statement* '}';
 
 Iteration:
-	('↺' | '@') condition=Expression
-	BEGIN statements+=Statement* END;
+	'↺' condition=Expression
+	'{' statements+=Statement* '}';
 
 Assignment:
-	identifier=IDENTIFIER kind=AssignmentKind expression=Expression;
+	variable=WORD kind=AssignmentKind expression=Expression;
 
-Call:
-	identifier=IDENTIFIER
-	OPEN (parameters+=Expression (SEPARATOR parameters+=Expression)*)? CLOSE;
+FunctionCall:
+	name=WORD
+	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')';
 	
 
 Expression: Ternary;
@@ -109,41 +108,28 @@ Primary returns Expression:
   StringLiteral |
   BooleanLiteral |
   Variable |
-  OPEN Expression CLOSE;
+  '(' Expression ')';
   
 Variable:
-	IdentifierLiteral | Call;
+	IdentifierLiteral | FunctionCall;
 	
-IdentifierLiteral: value=IDENTIFIER;
-FloatLiteral: value=FLOAT;
+IdentifierLiteral: value=WORD;
+FloatLiteral: value=NUMBER;
 StringLiteral: value=FILENAME;
 BooleanLiteral: value=BOOLEAN;
 
-terminal WS: '\u0020'|'\u0009'|'\u000A'|'\u000D';
+terminal WS: ('\u0020'|'\u0009'|'\u000A'|'\u000D')+;
 terminal BOOLEAN: '⊤'|'⊥';
 terminal fragment FILE: ('\\"'|!('/'|'\u0000'|'"'))+;
 terminal FILENAME: '"' (FILE ('/' FILE)*)? '"';
-terminal IDENTIFIER: '^'? ('_'|LETTER) ('_'|LETTER|DIGIT)*;
-terminal FLOAT returns EFloat: '-'? DIGIT+ ('.' DIGIT+)? ('e' ('-'|'+')? DIGIT+)?;
+terminal WORD: '^'? ('_'|LETTER) ('_'|LETTER|DIGIT)*;
+terminal NUMBER returns EFloat: '-'? DIGIT+ ('.' DIGIT+)? ('e' ('-'|'+')? DIGIT+)?;
 
 terminal fragment LETTER: '\u0061'..'\u007A'|'\u0041'..'\u005A'|'\u00A0'..'\uFFFF';
 terminal fragment DIGIT: '0'..'9';
 
+terminal ANY: .;
+
 enum AssignmentKind:
 	set='=' | increase='+=' | decrease='-=' | multiply='*=' | divide='/='
 	| or='|=' | and='&=' | xor='^=' | shiftLeft='<<=' | shiftRight='>>=';
-
-terminal OPEN:
-	'(';
-
-terminal CLOSE:
-	')';
-
-terminal SEPARATOR:
-	',';
-
-terminal BEGIN:
-	'{';
-
-terminal END:
-	'}';

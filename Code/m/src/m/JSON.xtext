@@ -1,7 +1,7 @@
 grammar m.JSON hidden(WS)
 
 import "http://www.eclipse.org/emf/2002/Ecore"
-generate json "http://www.minim.games/json"
+generate json "azpillaga.world/json"
 
 Value:
 	Object | Array | String | Boolean | Integer32 | Null | Float32;
