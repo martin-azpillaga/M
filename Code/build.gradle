@@ -13,8 +13,9 @@ dependencies {
 	implementation 'org.eclipse.xtext:xtext-antlr-generator'
 	implementation files("${projectDir}/m/src")
 	implementation files("${projectDir}/m/src/m/fragments")
-	implementation files("${projectDir}/bin")
+	implementation files("${projectDir}/build/classes/java/main")
 }
+
 sourceSets {
 	main.java.srcDirs = ["m/src", "m.ide/src", "m.ide/src-gen", "m/src-gen"]
 }
@@ -25,8 +26,8 @@ task runFragments(type: JavaExec) {
 		mkdir "m.ui"
 	}
 	dependsOn compileJava
-	workingDir = "bin"
 	main = "m.main.RunFragments"
+	args "."
 	classpath = configurations.implementation
 }
 
