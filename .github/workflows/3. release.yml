@@ -35,10 +35,6 @@ jobs:
         wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
         sudo dpkg -i pandoc-2.9.1-1-amd64.deb
 
-    - name: Install texlive xetex
-      run: sudo apt-get install texlive-xetex 
-
-
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1.0.0
@@ -56,27 +52,27 @@ jobs:
         yarn
         yarn buildStandalone
 
-    - name: Upload Textual AppImage to release
+    - name: Upload standalone application to release
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./.github/workflows/configuration/dist/m-textual-0.0.0.AppImage
-        asset_name: m-textual.AppImage
+        asset_name: m-standalone.AppImage
         asset_content_type: text/text
 
     - name: Translate all markdown files to html
-      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | pandoc --lua-filter=Tests/links.lua -o "$(dirname "{}")/$(basename "{}" .md).html"' & exit 0
+      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | pandoc --lua-filter=.github/workflows/configuration/links.lua -o "$(dirname "{}")/$(basename "{}" .md).html"' & exit 0
     - name: Translate all markdown files to spanish
-      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | translate | pandoc --lua-filter=Tests/links-es.lua -o "$(dirname "{}")/$(basename "{}" .md)-es.html"' & exit 0
+      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | translate | pandoc --lua-filter=.github/workflows/configuration/links-es.lua -o "$(dirname "{}")/$(basename "{}" .md)-es.html"' & exit 0
     - name: Translate all markdown files to chinese
-      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | translate -t zh-CN | pandoc --lua-filter=Tests/links-zh.lua -o "$(dirname "{}")/$(basename "{}" .md)-zh.html"' & exit 0
+      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | translate -t zh-CN | pandoc --lua-filter=.github/workflows/configuration/links-zh.lua -o "$(dirname "{}")/$(basename "{}" .md)-zh.html"' & exit 0
 
     - name: Zip all html files
       run: zip -r m-html.zip Documentation README.html
 
-    - name: Upload m-html.zip
+    - name: Upload all documentation html pages as zip to release
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -87,67 +83,32 @@ jobs:
         asset_content_type: text/zip
 
 
-    - name: Create jar
+    - name: Create language server
       run: |
         cd Code
-        mkdir m.ide m.ui
-        gradle jar
-
-    - name: Create fat jar
-      run: |
-        cd Code
-        gradle fatjar
-
-    - name: Upload m-ls.jar to release
+        gradle generateLanguageServer
+  
+    - name: Upload language server jar to release
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Code/build/libs/m-ls.jar
-        asset_name: m-ls.jar
+        asset_path: ./Code/build/libs/m-language-server.jar
+        asset_name: m-language-server.jar
         asset_content_type: text/zip
-
-    - name: Upload m-fat-ls.jar to release
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Code/build/libs/m-fat-ls.jar
-        asset_name: m-fat-ls.jar
-        asset_content_type: text/zip
-
 
     - name: Run vsce package to create vsix file
       run: |
         cd .github/workflows/configuration/code
         vsce package
 
-    - name: Upload m.vsix to release
+    - name: Upload visual studio code extension to release
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./.github/workflows/configuration/code/y-0.0.1.vsix
-        asset_name: m.vsix
+        asset_name: m-extension.vsix
         asset_content_type: text/zip
-
-
-    - name: Create m.pdf
-      run: find Documentation -name "*.html" | xargs -I {} sh -c 'cat "{}" && printf "\n"' | pandoc --pdf-engine=xelatex -o m.pdf
-
-    - name: Upload m.pdf
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./m.pdf
-        asset_name: m.pdf
-        asset_content_type: text/pdf
-
-
-
-

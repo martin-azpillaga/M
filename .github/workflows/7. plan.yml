@@ -1,0 +1,13 @@
+name: Plan
+
+on: milestone
+
+jobs:
+  plan:
+    name: Plan
+
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Hello milestone
+        run: Hello milestone!
