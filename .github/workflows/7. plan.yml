@@ -1,6 +1,8 @@
 name: Plan
 
-on: milestone
+on:
+  milestone:
+    types: [created,opened]
 
 jobs:
   plan:
@@ -10,4 +12,4 @@ jobs:
     
     steps:
       - name: Hello milestone
-        run: Hello milestone!
+        run: echo Hello milestone!
