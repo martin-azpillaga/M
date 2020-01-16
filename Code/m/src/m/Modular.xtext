@@ -128,7 +128,7 @@ terminal NUMBER returns EFloat: '-'? DIGIT+ ('.' DIGIT+)? ('e' ('-'|'+')? DIGIT+
 terminal fragment LETTER: '\u0061'..'\u007A'|'\u0041'..'\u005A'|'\u00A0'..'\uFFFF';
 terminal fragment DIGIT: '0'..'9';
 
-terminal ANY: (!(' '))+;
+terminal ANY: .;
 
 enum AssignmentKind:
 	set='=' | increase='+=' | decrease='-=' | multiply='*=' | divide='/='
