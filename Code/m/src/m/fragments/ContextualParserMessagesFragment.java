@@ -6,17 +6,17 @@ import org.eclipse.xtext.xtext.generator.AbstractXtextGeneratorFragment;
 import org.eclipse.xtext.xtext.generator.model.GuiceModuleAccess;
 import org.eclipse.xtext.xtext.generator.model.TypeReference;
 
-import m.parser.GenericParserErrorMessages;
+import m.parser.ContextualParserMessages;
 
 @SuppressWarnings("restriction")
-public class ContextualParserMessages extends AbstractXtextGeneratorFragment
+public class ContextualParserMessagesFragment extends AbstractXtextGeneratorFragment
 {
 	@Override
 	public void generate() 
 	{
 		System.out.println("Generating the parser messages...");
 		GuiceModuleAccess.BindingFactory bindingFactory = new GuiceModuleAccess.BindingFactory();
-		bindingFactory.addTypeToType(TypeReference.typeRef(ISyntaxErrorMessageProvider.class), TypeReference.typeRef(GenericParserErrorMessages.class)).contributeTo(getLanguage().getRuntimeGenModule());
+		bindingFactory.addTypeToType(TypeReference.typeRef(ISyntaxErrorMessageProvider.class), TypeReference.typeRef(ContextualParserMessages.class)).contributeTo(getLanguage().getRuntimeGenModule());
 	}
 }
 

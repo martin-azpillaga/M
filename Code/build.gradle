@@ -17,16 +17,16 @@ dependencies {
 }
 
 task javac(type: JavaCompile){
-	source "m/src/m/Generate.java"
-	source "m/src/m/fragments/ContextualParserMessages.java"
-	source "m/src/m/parser/GenericParserErrorMessages.java"
+	source "m/src/m/main/RunFragments.java"
+	source "m/src/m/fragments/ContextualParserMessagesFragment.java"
+	source "m/src/m/parser/ContextualParserMessages.java"
 	destinationDir = file("bin")
 	classpath = configurations.implementation
 }
 task run(type: JavaExec) {
 	dependsOn javac
 	workingDir = "bin"
-	main = "m.Generate"
+	main = "m.main.RunFragments"
 	classpath = configurations.implementation
 }
 

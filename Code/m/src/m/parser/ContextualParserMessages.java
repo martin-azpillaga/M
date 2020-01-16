@@ -20,7 +20,7 @@ import org.eclipse.xtext.parser.antlr.SyntaxErrorMessageProvider;
 import org.eclipse.xtext.parser.antlr.XtextTokenStream;
 
 
-public class GenericParserErrorMessages extends SyntaxErrorMessageProvider
+public class ContextualParserMessages extends SyntaxErrorMessageProvider
 {
 	public static HashMap<String,Integer> typeOf;
 	public static ArrayList<Path> paths;
@@ -106,7 +106,7 @@ class Path
 		{
 			if (tokenIndex < tokens.size())
 			{
-				GenericParserErrorMessages.paths.remove(this);
+				ContextualParserMessages.paths.remove(this);
 			}
 			return;
 		}
@@ -128,7 +128,7 @@ class Path
 			
 			var name = terminalRule.getName();
 			
-			var expectedType = GenericParserErrorMessages.typeOf.get("RULE_"+name);
+			var expectedType = ContextualParserMessages.typeOf.get("RULE_"+name);
 			
 			if (tokenIndex < 0 || tokenIndex >= tokens.size())
 			{
@@ -154,7 +154,7 @@ class Path
 			
 			var value = keyword.getValue();
 			
-			var expectedType = GenericParserErrorMessages.typeOf.get("'"+value+"'");
+			var expectedType = ContextualParserMessages.typeOf.get("'"+value+"'");
 			
 			if (tokenIndex < 0 || tokenIndex >= tokens.size())
 			{
@@ -191,7 +191,7 @@ class Path
 			{
 				Path path = copy();
 				path.elements.set(elementIndex, rule);
-				GenericParserErrorMessages.paths.add(path);
+				ContextualParserMessages.paths.add(path);
 				path.match();
 				
 				elements.remove(elementIndex);
@@ -214,10 +214,10 @@ class Path
 				{
 					Path path = copy();
 					path.elements.set(elementIndex, e);
-					GenericParserErrorMessages.paths.add(path);
+					ContextualParserMessages.paths.add(path);
 					path.match();
 				}
-				GenericParserErrorMessages.paths.remove(this);
+				ContextualParserMessages.paths.remove(this);
 			}
 			else if (cardinality.equals("*") || cardinality.equals("?"))
 			{
@@ -225,7 +225,7 @@ class Path
 				{
 					Path path = copy();
 					path.elements.set(elementIndex, e);
-					GenericParserErrorMessages.paths.add(path);
+					ContextualParserMessages.paths.add(path);
 					path.match();
 				}
 				this.elements.remove(elementIndex);
@@ -258,7 +258,7 @@ class Path
 					var e = elements.get(i);
 					path.elements.add(elementIndex, e);
 				}
-				GenericParserErrorMessages.paths.add(path);
+				ContextualParserMessages.paths.add(path);
 				path.match();
 				
 				this.elements.remove(elementIndex);
@@ -283,7 +283,7 @@ class Path
 				Path path = copy();
 				path.last = element;
 				path.elements.set(elementIndex, terminal);
-				GenericParserErrorMessages.paths.add(path);
+				ContextualParserMessages.paths.add(path);
 				path.match();
 				
 				elements.remove(elementIndex);
