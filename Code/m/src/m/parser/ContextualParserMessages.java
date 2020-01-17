@@ -2,6 +2,7 @@ package m.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
@@ -71,7 +72,11 @@ public class ContextualParserMessages extends SyntaxErrorMessageProvider
 		{
 			if (path.index == maximumDepth && path.valid)
 			{
-				error += "\n" + path.report();
+				var report = path.report();
+				if (!error.contains(report))
+				{
+					error += "\n"+report;
+				}
 			}
 		}
 		
@@ -227,47 +232,12 @@ class Path
 			var cardinality = group.getCardinality();
 			var elements = group.getElements();
 			
-			if (cardinality == null || cardinality.equals("+"))
+			var replacement = new ArrayList<EObject>();
+			for (var e : elements)
 			{
-				this.elements.remove(index);
-				for (var i = elements.size()-1; i >= 0; i--)
-				{
-					var e = elements.get(i);
-					this.elements.add(index, e);
-				}
-				match();
+				replacement.add(e);
 			}
-			else if (cardinality.equals("?") || cardinality.equals("*"))
-			{
-				this.elements.remove(index);
-				match();
-				
-				var repeat = true;
-				
-				while (repeat)
-				{
-					Path path = copy();
-					path.last = element;
-					for (var i = elements.size()-1; i >= 0; i--)
-					{
-						var e = elements.get(i);
-						path.elements.add(index, e);
-					}
-					ContextualParserMessages.paths.add(path);
-					path.ancestors.add(this);
-					path.match();
-
-					repeat = false;
-					for (var p : ContextualParserMessages.paths)
-					{
-						if (p.ancestors.contains(this) && p.index > this.index)
-						{
-							repeat = true;
-							break;
-						}
-					}
-				}
-			}
+			resolve(replacement,cardinality,null);
 		}
 		else if (element instanceof Assignment)
 		{
@@ -276,109 +246,10 @@ class Path
 			var cardinality = assignment.getCardinality();
 			var terminal = assignment.getTerminal();
 			
-			if (cardinality == null)
-			{
-				last = element;
-				elements.set(index, terminal);
-				match();
-			}
-			else if (cardinality.equals("+"))
-			{
-				elements.remove(index);
-				var originalpath = copy();
-				var originalIndex = index;
-				last = element;
-				elements.add(index, terminal);
-				var maxIndex = this.index;
-				match();
-				
-				var repeat = false;
-				if (this.index > maxIndex)
-				{
-					maxIndex = this.index;
-					repeat = true;
-				}
-				var iteration = 1;
-				
-				while (repeat)
-				{
-					iteration++;
-					var path = originalpath.copy();
-					path.last = element;
-					for (var i = 0; i < iteration; i++)
-					{
-						path.elements.add(originalIndex, terminal);
-					}
-					ContextualParserMessages.paths.add(path);
-					path.ancestors.add(this);
-					path.match();
-
-					repeat = false;
-					for (var p : ContextualParserMessages.paths)
-					{
-						if (p.ancestors.contains(this) && p.index > maxIndex)
-						{
-							maxIndex = p.index;
-							repeat = true;
-							break;
-						}
-					}
-				}
-			}
-			else if (cardinality.equals("?"))
-			{
-				elements.remove(index);
-				var originalPath = copy();
-				var originalIndex = index;
-				match();
-				
-				var path = originalPath.copy();
-				path.last = element;
-
-				path.elements.add(originalIndex, terminal);
-				ContextualParserMessages.paths.add(path);
-				path.ancestors.add(this);
-				path.match();
-			}
-			else if (cardinality.equals("*"))
-			{
- 				elements.remove(index);
-				var originalpath = copy();
-				var originalIndex = index;
-				match();
-				var maxIndex = this.index;
-				
-				var repeat = true;
-				var iteration = 0;
-				
-				while (repeat)
-				{
-					iteration++;
-					var path = originalpath.copy();
-					path.last = element;
-					for (var i = 0; i < iteration; i++)
-					{
-						path.elements.add(originalIndex, terminal);
-					}
-					ContextualParserMessages.paths.add(path);
-					path.ancestors.add(this);
-					path.match();
-
-					repeat = false;
-					for (var p : ContextualParserMessages.paths)
-					{
-						if (p.ancestors.contains(this) && p.index > maxIndex)
-						{
-							maxIndex = p.index;
-							repeat = true;
-							break;
-						}
-					}
-				}
-				
-				
-				
-			}
+			var replacement = new ArrayList<EObject>();
+			replacement.add(terminal);
+			
+			resolve(replacement, cardinality, element);
 		}
 	}
 	
@@ -403,6 +274,134 @@ class Path
 			n.ancestors.add(t);
 		}
 		return n;
+	}
+	
+	void resolve(List<EObject> replacement, String cardinality, EObject last)
+	{
+		if (cardinality == null)
+		{
+			elements.remove(index);
+			this.last = last;
+			for (var i = replacement.size()-1; i >= 0; i--)
+			{
+				elements.add(index, replacement.get(i));
+			}
+			match();
+		}
+		else if (cardinality.equals("+"))
+		{
+			elements.remove(index);
+			var originalpath = copy();
+			var originalIndex = index;
+			this.last = last;
+			for (var i = replacement.size()-1; i >= 0; i--)
+			{
+				elements.add(originalIndex, replacement.get(i));
+			}
+			var maxIndex = this.index;
+			match();
+			
+			var repeat = false;
+			for (var p : ContextualParserMessages.paths)
+			{
+				if ((p == this || p.ancestors.contains(this)) && p.index > maxIndex)
+				{
+					maxIndex = p.index;
+					repeat = true;
+				}
+			}
+			var iteration = 1;
+			
+			while (repeat)
+			{
+				iteration++;
+				var path = originalpath.copy();
+				path.last = last;
+				for (var i = 0; i < iteration; i++)
+				{
+					for (var j = replacement.size()-1; j >= 0; j--)
+					{
+						path.elements.add(originalIndex, replacement.get(j));
+					}
+				}
+				ContextualParserMessages.paths.add(path);
+				path.ancestors.add(this);
+				path.match();
+
+				repeat = false;
+				for (var p : ContextualParserMessages.paths)
+				{
+					if (p.ancestors.contains(this) && p.index > maxIndex)
+					{
+						maxIndex = p.index;
+						repeat = true;
+					}
+				}
+			}
+		}
+		else if (cardinality.equals("?"))
+		{
+			elements.remove(index);
+			var originalPath = copy();
+			var originalIndex = index;
+			match();
+			
+			var path = originalPath.copy();
+			path.last = last;
+
+			for (var j = replacement.size()-1; j >= 0; j--)
+			{
+				path.elements.add(originalIndex, replacement.get(j));
+			}
+			ContextualParserMessages.paths.add(path);
+			path.ancestors.add(this);
+			path.match();
+		}
+		else if (cardinality.equals("*"))
+		{
+			elements.remove(index);
+			var originalpath = copy();
+			var originalIndex = index;
+			match();
+			var maxIndex = this.index;
+			var repeat = true;
+			for (var p : ContextualParserMessages.paths)
+			{
+				if ((p==this||p.ancestors.contains(this)) && p.index > maxIndex)
+				{
+					maxIndex = p.index;
+					repeat = true;
+				}
+			}
+			var iteration = 0;
+			
+			while (repeat)
+			{
+				iteration++;
+				var path = originalpath.copy();
+				path.last = last;
+				for (var i = 0; i < iteration; i++)
+				{
+					for (var j = replacement.size()-1; j >= 0; j--)
+					{
+						path.elements.add(originalIndex, replacement.get(j));
+					}
+				}
+				ContextualParserMessages.paths.add(path);
+				path.ancestors.add(this);
+				path.match();
+
+				repeat = false;
+				for (var p : ContextualParserMessages.paths)
+				{
+					if (p.ancestors.contains(this) && p.index > maxIndex)
+					{
+						maxIndex = p.index;
+						repeat = true;
+					}
+				}
+			}			
+		}
 	}
 	
 	String report()
