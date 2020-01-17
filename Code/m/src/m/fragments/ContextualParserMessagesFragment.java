@@ -12,7 +12,7 @@ import m.parser.ContextualParserMessages;
 public class ContextualParserMessagesFragment extends AbstractXtextGeneratorFragment
 {
 	@Override
-	public void generate() 
+	public void generate()
 	{
 		GuiceModuleAccess.BindingFactory bindingFactory = new GuiceModuleAccess.BindingFactory();
 		bindingFactory.addTypeToType(TypeReference.typeRef(ISyntaxErrorMessageProvider.class), TypeReference.typeRef(ContextualParserMessages.class)).contributeTo(getLanguage().getRuntimeGenModule());
