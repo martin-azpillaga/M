@@ -4,7 +4,7 @@ import "azpillaga.world/modular"
 generate m "azpillaga.world/m"
 
 Modul:
-	single=WORD names+=WORD+ optional+=NUMBER? ':' optionals+=NUMBER*;
+	(single+=WORD names+=WORD+ optional+=NUMBER? ':' optionals+=NUMBER*)*;
 	//(entities+=Entity|systems+=System)*;
 
 Entity:
