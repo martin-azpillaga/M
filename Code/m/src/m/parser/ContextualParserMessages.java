@@ -9,6 +9,8 @@ import org.antlr.runtime.Token;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.Alternatives;
 import org.eclipse.xtext.Assignment;
+import org.eclipse.xtext.EnumLiteralDeclaration;
+import org.eclipse.xtext.EnumRule;
 import org.eclipse.xtext.Group;
 import org.eclipse.xtext.Keyword;
 import org.eclipse.xtext.ParserRule;
@@ -129,6 +131,25 @@ class Path
 			
 			match();
 		}
+		else if (element instanceof EnumRule)
+		{
+			var rule = (EnumRule) element;
+			
+			var realText = tokens.get(index).getText();
+			var alternatives = (Alternatives) rule.getAlternatives();
+			var elements = alternatives.getElements();
+			for (var e : elements)
+			{
+				var enumLiteral = (EnumLiteralDeclaration) e;
+				var expectedText = enumLiteral.getLiteral().getValue();
+				
+				if (realText.equals(expectedText))
+				{
+					index++;
+					match();
+				}
+			}
+		}
 		else if (element instanceof TerminalRule)
 		{
 			var terminalRule = (TerminalRule) element;
@@ -178,52 +199,9 @@ class Path
 			var cardinality = alternatives.getCardinality();
 			var elements = alternatives.getElements();
 			
-			
-			if (cardinality == null || cardinality.equals("+"))
-			{
-				for (var e : elements)
-				{
-					Path path = copy();
-					path.elements.set(index, e);
-					ContextualParserMessages.paths.add(path);
-					path.match();
-				}
-				ContextualParserMessages.paths.remove(this);
-			}
-			else if (cardinality.equals("*") || cardinality.equals("?"))
-			{
-				this.elements.remove(index);
-				var originalPath = this.copy();
-				var iteration = 0;
-				match();
-				var repeat = true;
-				while (repeat)
-				{
-					iteration++;
-					for (var i = 0; i < iteration; i++)
-					{
-						for (var e : elements)
-						{
-							var path = originalPath.copy();
-							
-							path.elements.add(index, e);
-							
-							ContextualParserMessages.paths.add(path);
-							path.ancestors.add(this);
-							path.match();
-						}
-					}
-					repeat = false;
-					for (var p : ContextualParserMessages.paths)
-					{
-						if (p.ancestors.contains(this) && p.index > this.index)
-						{
-							repeat = true;
-							break;
-						}
-					}
-				}
-			}
+			var replacement = new ArrayList<EObject>();
+			replacement.add(elements.get(0));
+			resolve(replacement,cardinality,last);
 		}
 		else if (element instanceof Group)
 		{
@@ -278,6 +256,15 @@ class Path
 	
 	void resolve(List<EObject> replacement, String cardinality, EObject last)
 	{
+		// For alternatives, or even every case, prune out the bad paths
+		// before creating a new iteration and only add elements to
+		// the paths that are promising.
+		// Receive List<List<EObject>>
+		// Create an extra path for each element in the first list
+		// Add an element to this path for every entry in its list.
+		// Assignments call it with [[elem]]
+		// Groups call it with [[a,b,c]]
+		// Alternatives call it with [[a],[b],[c]]
 		if (cardinality == null)
 		{
 			elements.remove(index);
@@ -471,6 +458,20 @@ class Path
 			var terminal = (TerminalRule) element;
 			var value = terminal.getName();
 			error = "Write a " + value + " to " + report((Assignment) last, true);
+		}
+		else if (element instanceof EnumRule)
+		{
+			var rule = (EnumRule) element;
+			var alternatives = (Alternatives) rule.getAlternatives();
+			var elements = alternatives.getElements();
+			
+			error = "Write one of ";
+			for (var e : elements)
+			{
+				var enumLiteral = (EnumLiteralDeclaration) e;
+				error += enumLiteral.getLiteral().getValue() + " ";
+			}
+			error += "to specify the enum type";
 		}
 		else if (element instanceof Keyword)
 		{
