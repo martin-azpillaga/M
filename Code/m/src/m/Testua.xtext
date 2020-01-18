@@ -5,5 +5,4 @@ import "azpillaga.world/modular"
 
 @Override
 Modul:
-	names+=WORD*
-;
+	(entities+=Entity|systems+=System)*;

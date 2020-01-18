@@ -1,9 +1,24 @@
 grammar m.Text with m.M
 
 import "azpillaga.world/m"
-import "azpillaga.world/modular"
+generate text "azpillaga.world/text"
 
 @Override
 Modul:
-	names+=WORD*
+	(entities+=Entity|systems+=System)*;
+	
+Cool:
+	first=WORD
+	x=Expression
+	second=WORD
+	y=Expression
+	':'
+	expression=Expression
+;
+
+CoolCall:
+	first=WORD
+	x=Expression
+	second=WORD
+	y=Expression
 ;
