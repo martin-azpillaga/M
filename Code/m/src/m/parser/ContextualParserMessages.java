@@ -7,6 +7,7 @@ import java.util.List;
 import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.Action;
 import org.eclipse.xtext.Alternatives;
 import org.eclipse.xtext.Assignment;
 import org.eclipse.xtext.EnumLiteralDeclaration;
@@ -181,6 +182,11 @@ class Path
 				index++;
 				match();
 			}
+		}
+		else if (element instanceof Action)
+		{
+			index++;
+			match();
 		}
 		else if (element instanceof RuleCall)
 		{

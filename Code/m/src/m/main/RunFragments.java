@@ -36,6 +36,7 @@ public class RunFragments
 		eclipsePlugin.setEnabled(true);
 		
 		code.setPreferXtendStubs(false);
+		code.setEncoding("UTF-8");
 		
 		configuration.setProject(project);
 		configuration.setCode(code);
