@@ -4,18 +4,14 @@ import "azpillaga.world/modular"
 generate m "azpillaga.world/m"
 
 Modul:
-	(single+=WORD names+=WORD+ optional+=NUMBER? ':' optionals+=NUMBER*)*;
-	//(entities+=Entity|systems+=System)*;
+	entities+=Entity*
+	systems+=System*
+	procedures+=Procedure*;
 
 Entity:
 	 name = WORD 
-	(
-		':'
-		base=WORD
-	)?
-	'{'
-	components+=Component (',' components+=Component)*
-	'}';
+	(':' base=WORD	)?
+	'{'	components+=Component (',' components+=Component)* '}';
 
 Component:
 	name=WORD
@@ -27,12 +23,9 @@ Vector:
 Asset:
 	name=WORD;
 
-System returns Procedure:
+System:
 	name=WORD
-	'{'
-	statements+=Statement+
-	('←' returnValue=Expression)?
-	'}';
+	'{'	statements+=Statement+ '}';
 
 @Override
 Statement:
@@ -43,19 +36,6 @@ Loop:
 	('∈' tags+=WORD*)?
 	'{' statements+=Statement* '}';
 
-ACCESS:
-	WORD ('.' WORD)*;
-
-@Override
-IdentifierLiteral:
-	value=ACCESS;
-
-@Override
-Assignment:
-	variable=ACCESS
-	kind=AssignmentKind
-	expression=Expression;
-
 @Override
 Primary returns Expression:
-	Variable | '(' Expression ')';
+	Variable | FunctionCall | '(' Expression ')';
