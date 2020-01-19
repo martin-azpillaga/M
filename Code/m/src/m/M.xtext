@@ -4,9 +4,7 @@ import "azpillaga.world/modular"
 generate m "azpillaga.world/m"
 
 Modul:
-	entities+=Entity*
-	systems+=System*
-	procedures+=Procedure*;
+	(entities+=Entity|systems+=System|procedures+=Procedure)*;
 
 Entity:
 	 name = WORD 
@@ -29,7 +27,7 @@ System:
 
 @Override
 Statement:
-	Selection | Iteration | FunctionCall | Assignment | Loop;
+	Loop|Selection|Iteration|FunctionCall|Assignment;
 
 Loop:
 	'∀' entity=WORD 
