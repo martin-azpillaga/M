@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.antlr.runtime.CommonToken;
+import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.Token;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.AbstractElement;
 import org.eclipse.xtext.Action;
 import org.eclipse.xtext.Alternatives;
 import org.eclipse.xtext.Assignment;
@@ -19,9 +21,13 @@ import org.eclipse.xtext.RuleCall;
 import org.eclipse.xtext.TerminalRule;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.SyntaxErrorMessage;
+import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
 import org.eclipse.xtext.nodemodel.impl.RootNode;
+import org.eclipse.xtext.parser.antlr.AbstractInternalAntlrParser;
 import org.eclipse.xtext.parser.antlr.SyntaxErrorMessageProvider;
 import org.eclipse.xtext.parser.antlr.XtextTokenStream;
+
+import m.parser.antlr.internal.InternalMParser;
 
 
 public class ContextualParserMessages extends SyntaxErrorMessageProvider
@@ -43,15 +49,29 @@ public class ContextualParserMessages extends SyntaxErrorMessageProvider
 		{
 			typeOf.put(names[i], i);
 		}
-
+		if (context.getRecognitionException().token.getTokenIndex() >= 0)
+		{
+			System.out.println(context.getRecognitionException().token.getTokenIndex());
+			System.out.println(errorOffset);
+			System.out.println(((CompositeNodeWithSemanticElement) currentNode).getLookAhead());
+		}
 		var inputtokens = input.getTokens();
 		var tokens = new ArrayList<CommonToken>();
-		for (var i = errorOffset; i < inputtokens.size(); i++)
+		var totalOffset = 0;
+		for (var t = 0; t < inputtokens.size(); t++)
 		{
-			var common = (CommonToken) inputtokens.get(i);
-			if (common.getChannel() != Token.HIDDEN_CHANNEL)
+			var token = (CommonToken)inputtokens.get(t);
+			
+			if (totalOffset >= errorOffset)
 			{
-				tokens.add(common);
+				if (token.getChannel() != Token.HIDDEN_CHANNEL)
+				{
+					tokens.add(token);
+				}
+			}
+			else
+			{
+				totalOffset += 1+token.getStopIndex() - token.getStartIndex();
 			}
 		}
 		var endOfFile = new CommonToken(-1);
@@ -116,7 +136,7 @@ class Path
 		{
 			if (index < tokens.size())
 			{
-				valid = false;
+				valid = true;
 			}
 			return;
 		}
@@ -204,10 +224,77 @@ class Path
 			
 			var cardinality = alternatives.getCardinality();
 			var elements = alternatives.getElements();
-			
-			var replacement = new ArrayList<EObject>();
-			replacement.add(elements.get(0));
-			resolve(replacement,cardinality,last);
+			this.elements.remove(index);
+			ContextualParserMessages.paths.remove(this);
+			if (cardinality == null)
+			{
+				combinations(elements, this, this, index, 1, 1);
+			}
+			else if (cardinality.equals("?"))
+			{
+				var copy = this.copy();
+				ContextualParserMessages.paths.add(copy);
+				copy.match();
+				combinations(elements, this, this, index, 1, 1);
+			}
+			else if (cardinality.equals("+"))
+			{
+				var iterations = 0;
+				
+				var maxIndex = 0;
+				var repeat = true;
+				while (repeat)
+				{
+					iterations++;
+					combinations(elements, this, this, index, 1, iterations);
+					
+					repeat = false;
+					for (var p : ContextualParserMessages.paths)
+					{
+						if (p.ancestors.contains(this) && p.index > maxIndex)
+						{
+							maxIndex = p.index;
+							repeat = true;
+						}
+					}
+				}
+			}
+			else if (cardinality.equals("*"))
+			{
+				var copy = this.copy();
+				ContextualParserMessages.paths.add(copy);
+				copy.ancestors.add(this);
+				copy.match();
+				
+				var iterations = 0;
+
+				var maxIndex = 0;
+				
+				for (var p : ContextualParserMessages.paths)
+				{
+					if ((p == copy || p.ancestors.contains(copy)) && p.index > maxIndex)
+					{
+						maxIndex = p.index;
+					}
+				}
+				
+				var repeat = true;
+				while (repeat)
+				{
+					iterations++;
+					combinations(elements, this, this, index, 1, iterations);
+					
+					repeat = false;
+					for (var p : ContextualParserMessages.paths)
+					{
+						if (p.ancestors.contains(this) && p.index > maxIndex)
+						{
+							maxIndex = p.index;
+							repeat = true;
+						}
+					}
+				}
+			}
 		}
 		else if (element instanceof Group)
 		{
@@ -234,6 +321,25 @@ class Path
 			replacement.add(terminal);
 			
 			resolve(replacement, cardinality, element);
+		}
+	}
+	
+	void combinations(List<AbstractElement> elements, Path ancestor, Path path, int originalIndex, int iteration, int maxIteration)
+	{
+		for (var e : elements)
+		{
+			var copy = path.copy();
+			copy.elements.add(originalIndex, e);
+			if (iteration == maxIteration)
+			{
+				copy.ancestors.add(ancestor);
+				ContextualParserMessages.paths.add(copy);
+				copy.match();
+			}
+			else
+			{
+				combinations(elements, ancestor, copy, originalIndex, iteration+1, maxIteration);
+			}
 		}
 	}
 	
@@ -400,6 +506,10 @@ class Path
 	String report()
 	{
 		var error = "";
+		if (index >= elements.size())
+		{
+			return "Delete this token";
+		}
 		var element = elements.get(index);
 		if (element instanceof Assignment)
 		{
@@ -550,6 +660,23 @@ class Path
 				}
 			}
 			return error;
+		}
+		else if (element instanceof Group)
+		{
+			var group = (Group) element;
+			
+			var cardinality = group.getCardinality();
+			var first = group.getElements().get(0);
+			elements.set(index+1, first);
+			//report(elementIndex+1);
+			if (cardinality.equals("?") || cardinality.equals("*"))
+			{
+				return "optionally " + report(elements.get(index+1),false);
+			}
+		}
+		else if (element instanceof Keyword)
+		{
+			return "finish";
 		}
 		return "Unrecognized error";
 	}
