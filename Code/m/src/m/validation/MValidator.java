@@ -8,6 +8,7 @@ import org.eclipse.xtext.validation.Check;
 import m.m.Asset;
 import m.m.Component;
 import m.m.Entity;
+import m.m.EntityVariable;
 import m.m.Loop;
 import m.m.MPackage;
 import m.m.Modul;
@@ -156,8 +157,8 @@ public class MValidator extends AbstractMValidator
 						if (statement instanceof Assignment)
 						{
 							var assignment = (Assignment) statement;
-							var fragments = ((Variable)assignment.getVariable()).getFragments();
-							if (fragments.get(0).equals(myEntity))
+							var entity = ((EntityVariable)assignment.getVariable()).getEntity();
+							if (entity.equals(myEntity))
 							{
 								error("Already exists entity " + myEntity + " in the scope", MPackage.Literals.LOOP__ENTITY);
 							}
@@ -168,6 +169,60 @@ public class MValidator extends AbstractMValidator
 			current = container;
 			container = container.eContainer();
 		}
+	}
+	@Check
+	public void scope(EntityVariable variable)
+	{
+		var myEntity = variable.getEntity();
+		var container = variable.eContainer();
+		EObject current = variable;
+		
+		if (container instanceof Assignment)
+		{
+			if (((Assignment) container).getVariable() == variable)
+			{
+				return;
+			}
+		}
+		
+		while (!(container instanceof Modul))
+		{
+			if (container instanceof Block)
+			{
+				var block = (Block) container;
+				if (container instanceof Loop)
+				{
+					var l = (Loop) container;
+					if (l.getEntity().equals(myEntity))
+					{
+						return;
+					}
+				}
+				for (var i = 0; i < block.getStatements().size();i++)
+				{
+					if (block.getStatements().get(i) == current)
+					{
+						break;
+					}
+					else
+					{
+						var statement = block.getStatements().get(i);
+						if (statement instanceof Assignment)
+						{
+							var assignment = (Assignment) statement;
+							var entity = ((EntityVariable)assignment.getVariable()).getEntity();
+							if (entity.equals(myEntity))
+							{
+								return;
+							}
+						}
+					}
+				}
+			}
+			current = container;
+			container = container.eContainer();
+		}
+		error("Entity " + myEntity + " undefined in the scope", MPackage.Literals.ENTITY_VARIABLE__ENTITY);
 	}
 	
 	@Check
