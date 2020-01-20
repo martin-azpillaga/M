@@ -11,6 +11,10 @@ Procedure:
 	('←' returnValue=Expression)?
 	'}';
 
+Block:
+	Branch|Iteration|Procedure
+;
+
 Statement:
 	Selection | Iteration | FunctionCall | Assignment;
 
@@ -33,16 +37,13 @@ Iteration:
 Assignment:
 	variable=Variable kind=AssignmentKind expression=Expression;
 
-FunctionCall:
+FunctionCall returns Expression: {FunctionCall}
 	name=WORD
 	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')';
 	
 
-Expression: Ternary;
+Expression: LogicalOr;
 
-Ternary returns Expression:
-  LogicalOr ({Ternary.check=current}  '?' yes=LogicalOr  ':' no=LogicalOr)*;
-  
 LogicalOr returns Expression:
   LogicalAnd ({LogicalOr.left=current}  '⋁' right=LogicalAnd)*;
   
@@ -95,30 +96,38 @@ Division returns Expression:
 	Multiplication ({Division.left=current}  '/' right=Multiplication)*;
 
 Multiplication returns Expression:
-	BitwiseNot ({Multiplication.left=current}  '*' right=BitwiseNot)*;
-
-BitwiseNot returns Expression:
-	LogicalNot | {BitwiseNot}  '~' expression=LogicalNot;
-
-LogicalNot returns Expression:
-	UnaryMinus | {LogicalNot}  '!' expression=UnaryMinus;
-
-UnaryMinus returns Expression:
-	Primary | {UnaryMinus}  '-' expression=Primary;
+	Primary ({Multiplication.left=current}  '*' right=BitwiseNot)*;
 
 Primary returns Expression:
+  Atomic|
+  BitwiseNot|
+  LogicalNot|
+  UnaryMinus|
+  Brackets;
+
+Atomic returns Expression:
   FloatLiteral |
   StringLiteral |
   BooleanLiteral |
   Variable |
-  FunctionCall |
-  '(' Expression ')';
-	
-Variable:
+  FunctionCall;
+
+Brackets returns Expression:
+	'(' expression=Expression ')'
+;
+BitwiseNot returns Expression:
+	{BitwiseNot} '~' expression=Primary;
+
+LogicalNot returns Expression:
+	{LogicalNot} '!' expression=Primary;
+
+UnaryMinus returns Expression:
+	{UnaryMinus} '-' expression=Primary;	
+Variable returns Expression: {Variable}
 	fragments+=WORD ('.' fragments+=WORD)*;
-FloatLiteral: value=NUMBER;
-StringLiteral: value=PATH;
-BooleanLiteral: value=BOOLEAN;
+FloatLiteral returns Expression: {FloatLiteral} value=NUMBER;
+StringLiteral returns Expression: {StringLiteral} value=PATH;
+BooleanLiteral returns Expression: {BooleanLiteral} value=BOOLEAN;
 
 terminal WS: ('\u0020'|'\u0009'|'\u000A'|'\u000D')+;
 terminal BOOLEAN: '⊤'|'⊥';
