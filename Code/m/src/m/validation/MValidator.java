@@ -84,7 +84,7 @@ public class MValidator extends AbstractMValidator
 		
 		if (amount > 1)
 		{
-			error("Repeated procedure",ModularPackage.Literals.PROCEDURE__NAME);
+			error("Repeated procedure",MPackage.Literals.SYSTEM__NAME);
 		}
 	}
 	
@@ -106,7 +106,7 @@ public class MValidator extends AbstractMValidator
 		
 		if (amount > 1)
 		{
-			error("Repeated system",MPackage.Literals.SYSTEM__NAME);
+			error("Repeated system",ModularPackage.Literals.PROCEDURE__NAME);
 		}
 	}
 	
@@ -216,6 +216,10 @@ public class MValidator extends AbstractMValidator
 				{
 					var l = (Loop) container;
 					if (l.getEntity().equals(myEntity))
+					{
+						return;
+					}
+					else if (l.getTags().contains(myEntity))
 					{
 						return;
 					}
