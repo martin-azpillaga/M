@@ -2,12 +2,17 @@ package m.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.AbstractElement;
+import org.eclipse.xtext.Action;
 import org.eclipse.xtext.Alternatives;
 import org.eclipse.xtext.Assignment;
+import org.eclipse.xtext.EnumLiteralDeclaration;
+import org.eclipse.xtext.EnumRule;
 import org.eclipse.xtext.Group;
 import org.eclipse.xtext.Keyword;
 import org.eclipse.xtext.ParserRule;
@@ -15,6 +20,8 @@ import org.eclipse.xtext.RuleCall;
 import org.eclipse.xtext.TerminalRule;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.SyntaxErrorMessage;
+import org.eclipse.xtext.nodemodel.impl.CompositeNode;
+import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
 import org.eclipse.xtext.nodemodel.impl.RootNode;
 import org.eclipse.xtext.parser.antlr.SyntaxErrorMessageProvider;
 import org.eclipse.xtext.parser.antlr.XtextTokenStream;
@@ -39,39 +46,64 @@ public class ContextualParserMessages extends SyntaxErrorMessageProvider
 		{
 			typeOf.put(names[i], i);
 		}
-		System.out.println(errorOffset);
+		if (context.getRecognitionException().token.getTokenIndex() >= 0)
+		{
+			System.out.println(context.getRecognitionException().token.getTokenIndex());
+			System.out.println(errorOffset);
+			System.out.println(((CompositeNodeWithSemanticElement) currentNode).getLookAhead());
+		}
+		else
+		{
+			//return new SyntaxErrorMessage("SyntaxErrorMessage called twice", "whatever");
+		}
 		var inputtokens = input.getTokens();
 		var tokens = new ArrayList<CommonToken>();
-		for (var i = errorOffset; i < inputtokens.size(); i++)
+		var totalOffset = 0;
+		for (var t = 0; t < inputtokens.size(); t++)
 		{
-			var common = (CommonToken) inputtokens.get(i);
-			if (common.getChannel() != Token.HIDDEN_CHANNEL)
+			var token = (CommonToken)inputtokens.get(t);
+			
+			if (totalOffset >= errorOffset)
 			{
-				tokens.add(common);
+				if (token.getChannel() != Token.HIDDEN_CHANNEL)
+				{
+					tokens.add(token);
+				}
+			}
+			else
+			{
+				totalOffset += 1+token.getStopIndex() - token.getStartIndex();
 			}
 		}
 		var endOfFile = new CommonToken(-1);
 		endOfFile.setText("END OF FILE");
 		tokens.add(endOfFile);
 		
-
+		if (currentNode.getGrammarElement() instanceof Action)
+		{
+			currentNode = ((CompositeNode)currentNode).getFirstChild();
+		}
 		process(currentNode, tokens);
 
 		var maximumDepth = 0;
 		for (var path : paths)
 		{
-			if (path.elementIndex > maximumDepth)
+			if (path.index > maximumDepth && path.valid)
 			{
-				maximumDepth = path.elementIndex;
+				maximumDepth = path.index;
 			}
 		}
 		var errorAt = tokens.get(maximumDepth);
-		var error = "Error at " + errorAt.getText() + ". You can try to:";
+		var error = "Error at " + errorAt.getText();
 		for (var path : paths)
 		{
-			if (path.elementIndex == maximumDepth)
+			if (path.index == maximumDepth && path.valid)
 			{
-				error += "\n" + path.report();
+				var report = path.report();
+				if (!error.contains(report))
+				{
+					error += "\n"+report;
+				}
 			}
 		}
 		
@@ -84,10 +116,11 @@ public class ContextualParserMessages extends SyntaxErrorMessageProvider
 		var path = new Path();
 		path.elements = new ArrayList<EObject>();
 		path.elements.add(grammarElement);
-		path.elementIndex = 0;
+		path.index = 0;
 		path.tokens = tokens;
-		path.tokenIndex = 0;
 		paths.add(path);
+		path.last = null;
+		path.ancestors = new ArrayList<Path>();
 		path.match();
 	}
 }
@@ -95,32 +128,52 @@ public class ContextualParserMessages extends SyntaxErrorMessageProvider
 class Path
 {
 	public ArrayList<CommonToken> tokens;
-	public int tokenIndex;
 	public ArrayList<EObject> elements;
-	public int elementIndex;
+	public int index;
 	public EObject last;
+	public ArrayList<Path> ancestors;
+	public boolean valid = true;
 	
 	public void match()
 	{
-		if (elementIndex >= elements.size())
+		if (index >= elements.size())
 		{
-			if (tokenIndex < tokens.size())
+			if (index < tokens.size())
 			{
-				ContextualParserMessages.paths.remove(this);
+				valid = true;
 			}
 			return;
 		}
 		
-		var element = elements.get(elementIndex);
+		var element = elements.get(index);
 		if (element instanceof ParserRule)
 		{
 			var rule = (ParserRule) element;
 			
 			var alternatives = rule.getAlternatives();
 
-			elements.set(elementIndex, alternatives);
+			elements.set(index, alternatives);
 			
 			match();
+		}
+		else if (element instanceof EnumRule)
+		{
+			var rule = (EnumRule) element;
+			
+			var realText = tokens.get(index).getText();
+			var alternatives = (Alternatives) rule.getAlternatives();
+			var elements = alternatives.getElements();
+			for (var e : elements)
+			{
+				var enumLiteral = (EnumLiteralDeclaration) e;
+				var expectedText = enumLiteral.getLiteral().getValue();
+				
+				if (realText.equals(expectedText))
+				{
+					index++;
+					match();
+				}
+			}
 		}
 		else if (element instanceof TerminalRule)
 		{
@@ -130,22 +183,12 @@ class Path
 			
 			var expectedType = ContextualParserMessages.typeOf.get("RULE_"+name);
 			
-			if (tokenIndex < 0 || tokenIndex >= tokens.size())
-			{
-				return;
-			}
-			
-			var realType = tokens.get(tokenIndex).getType();
+			var realType = tokens.get(index).getType();
 			
 			if (realType == expectedType)
 			{
-				elementIndex++;
-				tokenIndex++;
+				index++;
 				match();
-			}
-			else
-			{
-				return;
 			}
 		}
 		else if (element instanceof Keyword)
@@ -156,49 +199,28 @@ class Path
 			
 			var expectedType = ContextualParserMessages.typeOf.get("'"+value+"'");
 			
-			if (tokenIndex < 0 || tokenIndex >= tokens.size())
-			{
-				
-				return;
-			}
-			
-			var realType = tokens.get(tokenIndex).getType();
+			var realType = tokens.get(index).getType();
 			
 			if (realType == expectedType)
 			{
-				elementIndex++;
-				tokenIndex++;
+				index++;
 				match();
 			}
-			else
-			{
-				return;
-			}
+		}
+		else if (element instanceof Action)
+		{
+			elements.remove(index);
+			match();
 		}
 		else if (element instanceof RuleCall)
 		{
 			var ruleCall = (RuleCall) element;
 			
-			var cardinality = ruleCall.getCardinality();
 			var rule = ruleCall.getRule();
 			
-			if (cardinality == null || cardinality.equals("+"))
-			{
-				elements.set(elementIndex, rule);
-				match();
-			}
-			else if (cardinality.equals("*") || cardinality.equals("?"))
-			{
-				Path path = copy();
-				path.elements.set(elementIndex, rule);
-				ContextualParserMessages.paths.add(path);
-				path.match();
-				
-				elements.remove(elementIndex);
-				match();
-			}
+			elements.set(index, rule);
 			
-			return;
+			match();
 		}
 		else if (element instanceof Alternatives)
 		{
@@ -206,30 +228,76 @@ class Path
 			
 			var cardinality = alternatives.getCardinality();
 			var elements = alternatives.getElements();
-			
-			
-			if (cardinality == null || cardinality.equals("+"))
+			this.elements.remove(index);
+			ContextualParserMessages.paths.remove(this);
+			if (cardinality == null)
 			{
-				for (var e : elements)
-				{
-					Path path = copy();
-					path.elements.set(elementIndex, e);
-					ContextualParserMessages.paths.add(path);
-					path.match();
-				}
-				ContextualParserMessages.paths.remove(this);
+				combinations(elements, this, this, index, 1, 1);
 			}
-			else if (cardinality.equals("*") || cardinality.equals("?"))
+			else if (cardinality.equals("?"))
 			{
-				for (var e : elements)
+				var copy = this.copy();
+				ContextualParserMessages.paths.add(copy);
+				copy.match();
+				combinations(elements, this, this, index, 1, 1);
+			}
+			else if (cardinality.equals("+"))
+			{
+				var iterations = 0;
+				
+				var maxIndex = 0;
+				var repeat = true;
+				while (repeat)
 				{
-					Path path = copy();
-					path.elements.set(elementIndex, e);
-					ContextualParserMessages.paths.add(path);
-					path.match();
+					iterations++;
+					combinations(elements, this, this, index, 1, iterations);
+					
+					repeat = false;
+					for (var p : ContextualParserMessages.paths)
+					{
+						if (p.ancestors.contains(this) && p.index > maxIndex)
+						{
+							maxIndex = p.index;
+							repeat = true;
+						}
+					}
 				}
-				this.elements.remove(elementIndex);
-				match();
+			}
+			else if (cardinality.equals("*"))
+			{
+				var copy = this.copy();
+				ContextualParserMessages.paths.add(copy);
+				copy.ancestors.add(this);
+				copy.match();
+				
+				var iterations = 0;
+
+				var maxIndex = 0;
+				
+				for (var p : ContextualParserMessages.paths)
+				{
+					if ((p == copy || p.ancestors.contains(copy)) && p.index > maxIndex)
+					{
+						maxIndex = p.index;
+					}
+				}
+				
+				var repeat = true;
+				while (repeat)
+				{
+					iterations++;
+					combinations(elements, this, this, index, 1, iterations);
+					
+					repeat = false;
+					for (var p : ContextualParserMessages.paths)
+					{
+						if (p.ancestors.contains(this) && p.index > maxIndex)
+						{
+							maxIndex = p.index;
+							repeat = true;
+						}
+					}
+				}
 			}
 		}
 		else if (element instanceof Group)
@@ -239,31 +307,12 @@ class Path
 			var cardinality = group.getCardinality();
 			var elements = group.getElements();
 			
-			if (cardinality == null || cardinality.equals("+"))
+			var replacement = new ArrayList<EObject>();
+			for (var e : elements)
 			{
-				this.elements.remove(elementIndex);
-				for (var i = elements.size()-1; i >= 0; i--)
-				{
-					var e = elements.get(i);
-					this.elements.add(elementIndex, e);
-				}
-				match();
+				replacement.add(e);
 			}
-			else if (cardinality.equals("?") || cardinality.equals("*"))
-			{
-				Path path = copy();
-				path.elements.remove(elementIndex);
-				for (var i = elements.size()-1; i >= 0; i--)
-				{
-					var e = elements.get(i);
-					path.elements.add(elementIndex, e);
-				}
-				ContextualParserMessages.paths.add(path);
-				path.match();
-				
-				this.elements.remove(elementIndex);
-				match();
-			}
+			resolve(replacement,cardinality,null);
 		}
 		else if (element instanceof Assignment)
 		{
@@ -272,33 +321,37 @@ class Path
 			var cardinality = assignment.getCardinality();
 			var terminal = assignment.getTerminal();
 			
-			if (cardinality == null || cardinality.equals("+"))
-			{
-				last = element;
-				elements.set(elementIndex, terminal);
-				match();
-			}
-			else if (cardinality.equals("*") || cardinality.equals("?"))
-			{
-				Path path = copy();
-				path.last = element;
-				path.elements.set(elementIndex, terminal);
-				ContextualParserMessages.paths.add(path);
-				path.match();
-				
-				elements.remove(elementIndex);
-				match();
-			}
+			var replacement = new ArrayList<EObject>();
+			replacement.add(terminal);
 			
+			resolve(replacement, cardinality, element);
 		}
-		return;
+	}
+	
+	void combinations(List<AbstractElement> elements, Path ancestor, Path path, int originalIndex, int iteration, int maxIteration)
+	{
+		for (var e : elements)
+		{
+			var copy = path.copy();
+			copy.elements.add(originalIndex, e);
+			if (iteration == maxIteration)
+			{
+				copy.ancestors.add(ancestor);
+				ContextualParserMessages.paths.add(copy);
+				copy.match();
+			}
+			else
+			{
+				combinations(elements, ancestor, copy, originalIndex, iteration+1, maxIteration);
+			}
+		}
 	}
 	
 	Path copy()
 	{
 		var n = new Path();
 		n.elements = new ArrayList<>();
-		n.elementIndex = elementIndex;
+		n.index = index;
 		for (var e : elements)
 		{
 			n.elements.add(e);
@@ -308,14 +361,160 @@ class Path
 		{
 			n.tokens.add(t);
 		}
-		n.tokenIndex = tokenIndex;
+		n.last = last;
+		n.ancestors = new ArrayList<Path>();
+		for (var t : ancestors)
+		{
+			n.ancestors.add(t);
+		}
 		return n;
+	}
+	
+	void resolve(List<EObject> replacement, String cardinality, EObject last)
+	{
+		// For alternatives, or even every case, prune out the bad paths
+		// before creating a new iteration and only add elements to
+		// the paths that are promising.
+		// Receive List<List<EObject>>
+		// Create an extra path for each element in the first list
+		// Add an element to this path for every entry in its list.
+		// Assignments call it with [[elem]]
+		// Groups call it with [[a,b,c]]
+		// Alternatives call it with [[a],[b],[c]]
+		if (cardinality == null)
+		{
+			elements.remove(index);
+			this.last = last;
+			for (var i = replacement.size()-1; i >= 0; i--)
+			{
+				elements.add(index, replacement.get(i));
+			}
+			match();
+		}
+		else if (cardinality.equals("+"))
+		{
+			elements.remove(index);
+			var originalpath = copy();
+			var originalIndex = index;
+			this.last = last;
+			for (var i = replacement.size()-1; i >= 0; i--)
+			{
+				elements.add(originalIndex, replacement.get(i));
+			}
+			var maxIndex = this.index;
+			match();
+			
+			var repeat = false;
+			for (var p : ContextualParserMessages.paths)
+			{
+				if ((p == this || p.ancestors.contains(this)) && p.index > maxIndex)
+				{
+					maxIndex = p.index;
+					repeat = true;
+				}
+			}
+			var iteration = 1;
+			
+			while (repeat)
+			{
+				iteration++;
+				var path = originalpath.copy();
+				path.last = last;
+				for (var i = 0; i < iteration; i++)
+				{
+					for (var j = replacement.size()-1; j >= 0; j--)
+					{
+						path.elements.add(originalIndex, replacement.get(j));
+					}
+				}
+				ContextualParserMessages.paths.add(path);
+				path.ancestors.add(this);
+				path.match();
+
+				repeat = false;
+				for (var p : ContextualParserMessages.paths)
+				{
+					if (p.ancestors.contains(this) && p.index > maxIndex)
+					{
+						maxIndex = p.index;
+						repeat = true;
+					}
+				}
+			}
+		}
+		else if (cardinality.equals("?"))
+		{
+			elements.remove(index);
+			var originalPath = copy();
+			var originalIndex = index;
+			match();
+			
+			var path = originalPath.copy();
+			path.last = last;
+
+			for (var j = replacement.size()-1; j >= 0; j--)
+			{
+				path.elements.add(originalIndex, replacement.get(j));
+			}
+			ContextualParserMessages.paths.add(path);
+			path.ancestors.add(this);
+			path.match();
+		}
+		else if (cardinality.equals("*"))
+		{
+			elements.remove(index);
+			var originalpath = copy();
+			var originalIndex = index;
+			match();
+			var maxIndex = this.index;
+			var repeat = true;
+			for (var p : ContextualParserMessages.paths)
+			{
+				if ((p==this||p.ancestors.contains(this)) && p.index > maxIndex)
+				{
+					maxIndex = p.index;
+					repeat = true;
+				}
+			}
+			var iteration = 0;
+			
+			while (repeat)
+			{
+				iteration++;
+				var path = originalpath.copy();
+				//path.last = last;
+				for (var i = 0; i < iteration; i++)
+				{
+					for (var j = replacement.size()-1; j >= 0; j--)
+					{
+						path.elements.add(originalIndex, replacement.get(j));
+					}
+				}
+				ContextualParserMessages.paths.add(path);
+				path.ancestors.add(this);
+				path.match();
+
+				repeat = false;
+				for (var p : ContextualParserMessages.paths)
+				{
+					if (p.ancestors.contains(this) && p.index > maxIndex)
+					{
+						maxIndex = p.index;
+						repeat = true;
+					}
+				}
+			}			
+		}
 	}
 	
 	String report()
 	{
 		var error = "";
-		var element = elements.get(elementIndex);
+		if (index >= elements.size())
+		{
+			return "Delete this token";
+		}
+		var element = elements.get(index);
 		if (element instanceof Assignment)
 		{
 			var assignment = (Assignment) element;
@@ -367,7 +566,7 @@ class Path
 			
 			var cardinality = group.getCardinality();
 			var first = group.getElements().get(0);
-			elements.set(elementIndex+1, first);
+			elements.set(index+1, first);
 			//report(elementIndex+1);
 			if (cardinality.equals("?") || cardinality.equals("*"))
 			{
@@ -380,17 +579,31 @@ class Path
 			var value = terminal.getName();
 			error = "Write a " + value + " to " + report((Assignment) last, true);
 		}
+		else if (element instanceof EnumRule)
+		{
+			var rule = (EnumRule) element;
+			var alternatives = (Alternatives) rule.getAlternatives();
+			var elements = alternatives.getElements();
+			
+			error = "Write one of ";
+			for (var e : elements)
+			{
+				var enumLiteral = (EnumLiteralDeclaration) e;
+				error += enumLiteral.getLiteral().getValue() + " ";
+			}
+			error += "to specify the enum type";
+		}
 		else if (element instanceof Keyword)
 		{
 			var keyword = (Keyword) element;
 			var value = keyword.getValue();
-			if (elementIndex < elements.size()-1)
+			if (index < elements.size()-1)
 			{
-				error = "Write " + value + " to " + report(elements.get(elementIndex+1),false);
+				error = "Write " + value + " to " + report(elements.get(index+1),false);
 			}
 			else
 			{
-				error = "Write " + value + " to finish the list."; 
+				error = "Write " + value + " to finish"; 
 			}
 		}
 		return error;
@@ -451,6 +664,23 @@ class Path
 				}
 			}
 			return error;
+		}
+		else if (element instanceof Group)
+		{
+			var group = (Group) element;
+			
+			var cardinality = group.getCardinality();
+			var first = group.getElements().get(0);
+			elements.set(index+1, first);
+			//report(elementIndex+1);
+			if (cardinality.equals("?") || cardinality.equals("*"))
+			{
+				return "optionally " + report(elements.get(index+1),false);
+			}
+		}
+		else if (element instanceof Keyword)
+		{
+			return "finish";
 		}
 		return "Unrecognized error";
 	}

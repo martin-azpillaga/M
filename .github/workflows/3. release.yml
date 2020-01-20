@@ -70,7 +70,7 @@ jobs:
       run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | translate -t zh-CN | pandoc --lua-filter=.github/workflows/configuration/links-zh.lua -o "$(dirname "{}")/$(basename "{}" .md)-zh.html"' & exit 0
 
     - name: Zip all html files
-      run: zip -r m-html.zip Documentation README.html
+      run: zip -r m-web.zip Documentation README.html
 
     - name: Upload all documentation html pages as zip to release
       uses: actions/upload-release-asset@v1.0.1
@@ -78,8 +78,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./m-html.zip
-        asset_name: m-html.zip
+        asset_path: ./m-web.zip
+        asset_name: m-web.zip
         asset_content_type: text/zip
 
 
