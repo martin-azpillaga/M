@@ -39,5 +39,11 @@ Loop:
 	 '{' statements+=Statement* '}';
 
 @Override
+Variable returns Expression: {EntityVariable}
+	entity=WORD
+	('.' component=WORD)?
+;
+
+@Override
 Atomic returns Expression:
 	Variable | FunctionCall;
