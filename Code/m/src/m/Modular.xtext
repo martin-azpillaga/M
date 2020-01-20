@@ -96,7 +96,7 @@ Division returns Expression:
 	Multiplication ({Division.left=current}  '/' right=Multiplication)*;
 
 Multiplication returns Expression:
-	Primary ({Multiplication.left=current}  '*' right=BitwiseNot)*;
+	Primary ({Multiplication.left=current}  '*' right=Primary)*;
 
 Primary returns Expression:
   Atomic|
