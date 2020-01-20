@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.antlr.runtime.CommonToken;
-import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.Token;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.AbstractElement;
@@ -23,11 +22,8 @@ import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.SyntaxErrorMessage;
 import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
 import org.eclipse.xtext.nodemodel.impl.RootNode;
-import org.eclipse.xtext.parser.antlr.AbstractInternalAntlrParser;
 import org.eclipse.xtext.parser.antlr.SyntaxErrorMessageProvider;
 import org.eclipse.xtext.parser.antlr.XtextTokenStream;
-
-import m.parser.antlr.internal.InternalMParser;
 
 
 public class ContextualParserMessages extends SyntaxErrorMessageProvider
@@ -54,6 +50,10 @@ public class ContextualParserMessages extends SyntaxErrorMessageProvider
 			System.out.println(context.getRecognitionException().token.getTokenIndex());
 			System.out.println(errorOffset);
 			System.out.println(((CompositeNodeWithSemanticElement) currentNode).getLookAhead());
+		}
+		else
+		{
+			//return new SyntaxErrorMessage("SyntaxErrorMessage called twice", "whatever");
 		}
 		var inputtokens = input.getTokens();
 		var tokens = new ArrayList<CommonToken>();
@@ -205,7 +205,7 @@ class Path
 		}
 		else if (element instanceof Action)
 		{
-			index++;
+			elements.remove(index);
 			match();
 		}
 		else if (element instanceof RuleCall)
@@ -478,7 +478,7 @@ class Path
 			{
 				iteration++;
 				var path = originalpath.copy();
-				path.last = last;
+				//path.last = last;
 				for (var i = 0; i < iteration; i++)
 				{
 					for (var j = replacement.size()-1; j >= 0; j--)
