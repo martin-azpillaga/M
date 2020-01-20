@@ -46,16 +46,7 @@ public class ContextualParserMessages extends SyntaxErrorMessageProvider
 		{
 			typeOf.put(names[i], i);
 		}
-		if (context.getRecognitionException().token.getTokenIndex() >= 0)
-		{
-			System.out.println(context.getRecognitionException().token.getTokenIndex());
-			System.out.println(errorOffset);
-			System.out.println(((CompositeNodeWithSemanticElement) currentNode).getLookAhead());
-		}
-		else
-		{
-			//return new SyntaxErrorMessage("SyntaxErrorMessage called twice", "whatever");
-		}
+
 		var inputtokens = input.getTokens();
 		var tokens = new ArrayList<CommonToken>();
 		var totalOffset = 0;
