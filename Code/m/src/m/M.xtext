@@ -9,7 +9,7 @@ Modul:
 Entity:
 	 name = WORD 
 	(':' base=WORD	)?
-	'{'	components+=Component (',' components+=Component)* '}';
+	 '{' components+=Component (',' components+=Component)* '}';
 
 Component:
 	name=WORD
@@ -21,6 +21,10 @@ Vector:
 Asset:
 	name=WORD;
 
+@Override
+Block:
+	System|Branch|Iteration|Loop|Procedure;
+	
 System:
 	name=WORD
 	'{'	statements+=Statement+ '}';
@@ -30,10 +34,10 @@ Statement:
 	Loop|Selection|Iteration|FunctionCall|Assignment;
 
 Loop:
-	'∀' entity=WORD 
-	('∈' tags+=WORD*)?
-	'{' statements+=Statement* '}';
+	 '∀' entity=WORD 
+	('∈' tags+=WORD+)?
+	 '{' statements+=Statement* '}';
 
 @Override
-Primary returns Expression:
-	Variable | FunctionCall | '(' Expression ')';
+Atomic returns Expression:
+	Variable | FunctionCall;

@@ -56,7 +56,7 @@ enum Visibility:
 
 @Override
 Expression:
-	Ternary ({InlineAssignment.left=current} kind=AssignmentKind right=Ternary)*;
+	LogicalOr ({InlineAssignment.left=current} kind=AssignmentKind right=LogicalOr)*;
 
 @Override
 UnaryMinus returns Expression:
