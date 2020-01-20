@@ -21,6 +21,7 @@ jobs:
     - name: Create language server
       run: |
         cd Code
+        gradle runFragments
         gradle generateLanguageServer
 
     - name: Analyze package.json
