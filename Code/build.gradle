@@ -20,19 +20,27 @@ sourceSets {
 	main.java.srcDirs = ["m/src", "m.ide/src", "m.ide/src-gen", "m/src-gen"]
 }
 
+task compileFragments(type: JavaCompile){
+	source += fileTree(dir: 'm/src/m/main', include: '**/*.java')
+	source += fileTree(dir: 'm/src/m/fragments', include: '**/*.java')
+	source += file('m/src/m/parser/ContextualParserMessages.java')
+	classpath = configurations.implementation
+	destinationDir = file('build/classes/java/main')
+}
+
 task runFragments(type: JavaExec) {
 	doFirst{
 		mkdir "m.ide"
 		mkdir "m.ui"
 	}
-	dependsOn compileJava
+	dependsOn compileFragments
 	main = "m.main.RunFragments"
 	args "."
 	classpath = configurations.implementation
 }
 
 task generateLanguageServer(type: Jar) {
-	dependsOn runFragments
+	dependsOn compileJava
 	baseName = 'm-language-server'
     manifest.attributes 'Main-Class': 'org.eclipse.xtext.ide.server.ServerLauncher'
     from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
