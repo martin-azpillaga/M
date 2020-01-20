@@ -84,12 +84,34 @@ public class MValidator extends AbstractMValidator
 		
 		if (amount > 1)
 		{
-			error("Repeated system",MPackage.Literals.SYSTEM__NAME);
+			error("Repeated procedure",ModularPackage.Literals.PROCEDURE__NAME);
 		}
 	}
 	
 	@Check
 	public void unique(Procedure procedure)
+	{
+		var module = (Modul) procedure.eContainer();
+		
+		var amount = 0;
+		
+		for (var s : module.getProcedures())
+		{
+			var name = s.getName();
+			if (name.equals(name))
+			{
+				amount++;
+			}
+		}
+		
+		if (amount > 1)
+		{
+			error("Repeated system",MPackage.Literals.SYSTEM__NAME);
+		}
+	}
+	
+	@Check
+	public void uniqueArguments(Procedure procedure)
 	{
 		var arguments = procedure.getArguments();
 		
