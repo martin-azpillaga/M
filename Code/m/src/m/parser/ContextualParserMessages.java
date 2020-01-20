@@ -20,6 +20,7 @@ import org.eclipse.xtext.RuleCall;
 import org.eclipse.xtext.TerminalRule;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.SyntaxErrorMessage;
+import org.eclipse.xtext.nodemodel.impl.CompositeNode;
 import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
 import org.eclipse.xtext.nodemodel.impl.RootNode;
 import org.eclipse.xtext.parser.antlr.SyntaxErrorMessageProvider;
@@ -78,7 +79,10 @@ public class ContextualParserMessages extends SyntaxErrorMessageProvider
 		endOfFile.setText("END OF FILE");
 		tokens.add(endOfFile);
 		
-
+		if (currentNode.getGrammarElement() instanceof Action)
+		{
+			currentNode = ((CompositeNode)currentNode).getFirstChild();
+		}
 		process(currentNode, tokens);
 
 		var maximumDepth = 0;
