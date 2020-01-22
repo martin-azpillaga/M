@@ -6,141 +6,95 @@ generate modular "azpillaga.world/modular"
 Procedure:
 	name=WORD
 	'(' (arguments+=WORD (',' arguments+=WORD)*)? ')'
-	'{'
-	statements+=Statement*
-	('←' returnValue=Expression)?
-	'}';
-
-Block:
-	Branch|Iteration|Procedure
-;
+	'{'	statements+=Statement* '}';
 
 Statement:
-	Selection | Iteration | FunctionCall | Assignment;
+	Selection|Iteration|Return|FunctionCall|Assignment;
 
 Selection:
 	'→' branches+=Branch
 	('⇉' branches+=Branch)*
-	branches+=DefaultBranch?;
+	branches+=Block?;
 
-Branch:
+Branch returns Block: {Branch}
 	condition=Expression
 	'{' statements+=Statement+ '}';
 
-DefaultBranch returns Branch:
-	'{' statements+=Statement+ '}'
-;
-Iteration:
+Block returns Block: {Block}
+	'{' statements+=Statement+ '}';
+
+Iteration returns Block: {Iteration}
 	'↺' condition=Expression
 	'{' statements+=Statement+ '}';
 
+Return:
+	'←' expression=Expression;
+
 Assignment returns Expression: {Assignment}
-	variable=Variable kind=AssignmentKind expression=Expression;
+	variable=Access
+	kind=AssignmentKind
+	expression=Expression;
 
 FunctionCall returns Expression: {FunctionCall}
 	function=WORD
 	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')';
-	
 
-Expression: LogicalOr;
+Expression:LogicalOr;
 
 LogicalOr returns Expression:
   LogicalAnd ({LogicalOr.left=current}  '⋁' right=LogicalAnd)*;
   
 LogicalAnd returns Expression:
-  BitwiseOr ({LogicalAnd.left=current}  '⋀' right=BitwiseOr)*;
-
-BitwiseOr returns Expression:
-	BitwiseXor ({BitwiseOr.left=current}  '|' right=BitwiseXor)*;
-
-BitwiseXor returns Expression:
-	BitwiseAnd ({BitwiseXor.left=current}  '^' right=BitwiseAnd)*;
-
-BitwiseAnd returns Expression:
-	Equality ({BitwiseAnd.left=current}  '&' right=Equality)*;
+  Equality ({LogicalAnd.left=current}  '⋀' right=Equality)*;
 
 Equality returns Expression:
-	NotEqual ({Equal.left=current}  '==' right=NotEqual)*;
+	Comparison ({Equality.left=current}  kind=EqualityKind right=Comparison)*;
 
-NotEqual returns Expression:
-	GreaterOrEqual ({NotEqual.left=current}  '≠' right=GreaterOrEqual)*;
+Comparison returns Expression:
+	AdditiveExpression ({Comparison.left=current}  kind=ComparisonKind right=AdditiveExpression)*;
 
-GreaterOrEqual returns Expression:
-	Greater ({GreaterOrEqual.left=current}  '≥' right=Greater)*;
+AdditiveExpression returns Expression:
+	MultiplicativeExpression ({AdditiveExpression.left=current}  kind=AdditiveKind right=MultiplicativeExpression)*;
 
-Greater returns Expression:
-	LowerOrEqual ({Greater.left=current}  '>' right=LowerOrEqual)*;
-
-LowerOrEqual returns Expression:
-	Lower ({LowerOrEqual.left=current}  '≤' right=Lower)*;
-
-Lower returns Expression:
-	RightShift ({Lower.left=current}  '<' right=RightShift)*;
-
-RightShift returns Expression:
-	LeftShift ({RightShift.left=current}  '>>' right=LeftShift)*;
-	
-LeftShift returns Expression:
-	Subtraction ({LeftShift.left=current}  '<<' right=Subtraction)*;
-
-Subtraction returns Expression:
-	Addition ({Subtraction.left=current}  '-' right=Addition)*;
-
-Addition returns Expression:
-	Modulo ({Addition.left=current}  '+' right=Modulo)*;
-
-Modulo returns Expression:
-	Division ({Modulo.left=current}  '%' right=Division)*;
-
-Division returns Expression:
-	Multiplication ({Division.left=current}  '/' right=Multiplication)*;
-
-Multiplication returns Expression:
-	Primary ({Multiplication.left=current}  '*' right=Primary)*;
+MultiplicativeExpression returns Expression:
+	Primary ({MultiplicativeExpression.left=current}  kind=MultiplicativeKind right=Primary)*;
 
 Primary returns Expression:
-  Atomic|
-  BitwiseNot|
-  LogicalNot|
-  UnaryMinus|
-  Brackets;
+  Atomic|LogicalNot|UnaryMinus|Brackets;
 
 Atomic returns Expression:
-  FloatLiteral |
-  StringLiteral |
-  BooleanLiteral |
-  Variable |
-  FunctionCall;
+  FloatLiteral|StringLiteral|BooleanLiteral|Access|FunctionCall;
 
 Brackets returns Expression:
-	'(' expression=Expression ')'
-;
-BitwiseNot returns Expression:
-	{BitwiseNot} '~' expression=Primary;
+	'(' expression=Expression ')';
 
 LogicalNot returns Expression:
 	{LogicalNot} '!' expression=Primary;
 
 UnaryMinus returns Expression:
 	{UnaryMinus} '-' expression=Primary;	
-Variable returns Expression: {Variable}
-	fragments+=WORD ('.' fragments+=WORD)*;
-FloatLiteral returns Expression: {FloatLiteral} value=NUMBER;
-StringLiteral returns Expression: {StringLiteral} value=PATH;
-BooleanLiteral returns Expression: {BooleanLiteral} value=BOOLEAN;
 
-terminal WS: ('\u0020'|'\u0009'|'\u000A'|'\u000D')+;
+Access returns Expression: {Access}
+	fragments+=WORD ('.' fragments+=WORD)*;
+
+FloatLiteral returns Expression: {FloatLiteral}	value=NUMBER;
+StringLiteral returns Expression: {StringLiteral} value=STRING;
+BooleanLiteral returns Expression: {BooleanLiteral}	value=BOOLEAN;
+
+
+terminal WS: (' '|'\n'|'\r'|'\t')+;
 terminal BOOLEAN: '⊤'|'⊥';
-terminal PATH: '"' (FILE ('/' FILE)*)? '"';
+terminal STRING: '"' -> '"';
 terminal WORD: '^'? ('_'|LETTER) ('_'|LETTER|DIGIT)*;
 terminal NUMBER returns EFloat: '-'? DIGIT+ ('.' DIGIT+)? ('e' ('-'|'+')? DIGIT+)?;
+terminal ANY: .;
 
-terminal fragment FILE: ('\\"'|!('/'|'\u0000'|'"'))+;
 terminal fragment LETTER: '\u0061'..'\u007A'|'\u0041'..'\u005A'|'\u00A0'..'\uFFFF';
 terminal fragment DIGIT: '0'..'9';
 
-terminal ANY: .;
 
-enum AssignmentKind:
-	set='=' | increase='+=' | decrease='-=' | multiply='*=' | divide='/=' | modulus='%='
-	| or='|=' | and='&=' | xor='^=' | shiftLeft='<<=' | shiftRight='>>=';
+enum EqualityKind: equal='=='|notEqual='!=';
+enum AdditiveKind: add='+'|subtract='-';
+enum MultiplicativeKind: multiply='*'|divide='/'|modulo='%';
+enum ComparisonKind: lower='<'|lowerOrEqual='<='|greaterOrEqual='>='|greater='>';
+enum AssignmentKind: set='=' | increase='+=' | decrease='-=' | multiply='*=' | divide='/=' | modulus='%=';

@@ -3,13 +3,28 @@ package m.validation;
 import static m.validation.Type.*;
 public enum StandardLibrary 
 {
+	// Transform
 	position,rotation,scale,
+	// Rendering 3D
 	mesh,material,
+	// Rendering UI
 	font,text,image,button,number,
-	mass,restitution,friction,velocity,acceleration,force,
-	trigger, extents, radius,
+	// Physics body
+	mass,velocity,acceleration,force,
+	damping,angularDamping,angularVelocity,gravityFactor,
+	// Physics shape
+	trigger,extents,radius,height,sideCount,convexHull,geometry,
+	restitution,friction,
+	// Physics events
+	collisions, collisionEntries, collisionExits,
+	// Rendering camera
 	viewAngle, viewDistance, clearColor, perspective,
-	emission, spotAngle, range;
+	// Rendering lights
+	emission, spotAngle, range, intensity, shadows, cookie,
+	// Audio control
+	audioClip, volume, pitch, loop,
+	// Audio effects
+	distortion, echo, highPass, lowPass, reverb, delay, doppler;
 	
 	public Type getType()
 	{
@@ -41,7 +56,32 @@ public enum StandardLibrary
 			case emission: return float4;
 			case spotAngle: return float1;
 			case range: return float1;
+			case intensity: return float1;
+			case shadows: return float1;
+			case cookie: return Type.image;
+			case audioClip: return Type.audioClip;
+			case volume: return float1;
+			case pitch: return float1;
+			case loop: return tag;
+			case distortion: return float1;
+			case echo: return float1;
+			case highPass: return float1;
+			case lowPass: return float1;
+			case reverb: return float1;
+			case delay: return float1;
+			case doppler: return float1;
+			case angularDamping: return float1;
+			case angularVelocity: return float3;
+			case damping: return float1;
+			case gravityFactor: return float1;
+			case convexHull: return float1;
+			case geometry: return Type.mesh;
+			case height: return float1;
+			case sideCount: return float1;
+			case collisions: return entityList;
+			case collisionEntries: return entityList;
+			case collisionExits: return entityList;
 		}
-		return tag;
+		return none;
 	}
 }
