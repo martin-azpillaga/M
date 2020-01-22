@@ -1,4 +1,4 @@
-package m.parser;
+package m.fragments;
 
 import java.util.ArrayList;
 import java.util.HashMap;
