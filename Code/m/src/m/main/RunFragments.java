@@ -60,7 +60,7 @@ public class RunFragments
 		var language = new StandardLanguage();
 		language.setName(name);
 		language.setFileExtensions(extensions);
-		language.addFragment(new ContextualParserMessagesFragment());
+		//language.addFragment(new ContextualParserMessagesFragment());
 		return language;
 	}
 }

@@ -2,5 +2,8 @@ package m.validation;
 
 public enum Type
 {
-	Tag,Float1,Float2,Float3,Float4,Asset
+	tag,float1,float2,float3,float4,
+	material,mesh,audioClip,font,image,
+	gameObject, input, entity, text, entityList,
+	bool
 }

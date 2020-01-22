@@ -6,8 +6,6 @@ import org.eclipse.xtext.xtext.generator.AbstractXtextGeneratorFragment;
 import org.eclipse.xtext.xtext.generator.model.GuiceModuleAccess;
 import org.eclipse.xtext.xtext.generator.model.TypeReference;
 
-import m.parser.ContextualParserMessages;
-
 @SuppressWarnings("restriction")
 public class ContextualParserMessagesFragment extends AbstractXtextGeneratorFragment
 {
