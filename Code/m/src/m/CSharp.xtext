@@ -111,7 +111,7 @@ Assignment:
 
 @Override
 FunctionCall:
-	name=WORD
+	function=WORD
 	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')' ';';
 
 Annotation:

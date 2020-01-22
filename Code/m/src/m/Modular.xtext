@@ -34,11 +34,11 @@ Iteration:
 	'↺' condition=Expression
 	'{' statements+=Statement+ '}';
 
-Assignment:
+Assignment returns Expression: {Assignment}
 	variable=Variable kind=AssignmentKind expression=Expression;
 
 FunctionCall returns Expression: {FunctionCall}
-	name=WORD
+	function=WORD
 	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')';
 	
 
@@ -142,5 +142,5 @@ terminal fragment DIGIT: '0'..'9';
 terminal ANY: .;
 
 enum AssignmentKind:
-	set='=' | increase='+=' | decrease='-=' | multiply='*=' | divide='/='
+	set='=' | increase='+=' | decrease='-=' | multiply='*=' | divide='/=' | modulus='%='
 	| or='|=' | and='&=' | xor='^=' | shiftLeft='<<=' | shiftRight='>>=';
