@@ -84,7 +84,7 @@ Iteration:
 Selection:
 	'if' branches+=Branch
 	('else' 'if' branches+=Branch)*
-	('else' branches+=DefaultBranch)?;
+	('else' branches+=Block)?;
 
 @Override
 Branch:
@@ -97,21 +97,22 @@ For:
 	statements+=Statement*
 	'}';
 
+@Override
 Return:
 	'return' expression=Expression ';';
 
 Declaration:
-	(var?='var' | type=TYPENAME) variable=Variable 
+	(var?='var' | type=TYPENAME) variable=Access 
 	(assignmentType=AssignmentKind expression=Expression)? ';';
 	
 @Override
 Assignment:
-	variable=Variable kind=AssignmentKind expression=Expression ';'
+	variable=Access kind=AssignmentKind expression=Expression ';'
 ;
 
 @Override
 FunctionCall:
-	name=WORD
+	function=WORD
 	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')' ';';
 
 Annotation:
@@ -130,7 +131,7 @@ Primary returns Expression:
 	FloatLiteral |
 	StringLiteral |
 	BooleanLiteral |
-	Variable|
+	Access|
 	FunctionCall|
 	Index|
 	'(' Expression ')'
