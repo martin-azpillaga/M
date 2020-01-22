@@ -1,10 +1,10 @@
 grammar m.M with m.Modular
-
 import "azpillaga.world/modular"
 generate m "azpillaga.world/m"
 
 Modul:
-	(entities+=Entity|systems+=System|procedures+=Procedure)*;
+	(entities+=Entity|systems+=System|procedures+=Procedure)*
+	end = End;
 
 Entity:
 	 name = WORD 
@@ -12,19 +12,11 @@ Entity:
 	 '{' components+=Component (',' components+=Component)* '}';
 
 Component:
-	name=WORD
-	value=(Vector|Asset)?;
+	name=WORD|
+	{VectorComponent} name=WORD entries+=NUMBER+|
+	{AssetComponent} name=WORD value=WORD;
 
-Vector:
-	entries+=NUMBER+;
 
-Asset:
-	name=WORD;
-
-@Override
-Block:
-	System|Branch|Iteration|Loop|Procedure;
-	
 System:
 	name=WORD
 	'{'	statements+=Statement+ '}';
@@ -33,18 +25,26 @@ System:
 Statement:
 	Loop|Selection|Iteration|FunctionCall|Assignment;
 
-Loop:
-	 '∀' entity=WORD 
-	(':' tags+=WORD+)?
-	('∈' collection=Variable )?
+Loop returns Block: {Loop}
+	 '∀' entity=WORD
+	('∈' collection=ComponentAccess )?
+	('|' tags+=WORD+)?
 	 '{' statements+=Statement* '}';
 
-@Override
-Variable returns Expression: {EntityVariable}
-	entity=WORD
-	('.' component=WORD)?
-;
 
 @Override
 Atomic returns Expression:
-	Variable | FunctionCall;
+	Variable|ComponentAccess|FunctionCall;
+	
+Variable returns Expression: {Variable}
+	name=WORD;
+
+ComponentAccess returns Expression: {ComponentAccess}
+	name=WORD
+	'.' component=WORD;
+
+@Override
+Access returns Expression:
+	Variable|ComponentAccess;
+
+End: {End} 'end'?;

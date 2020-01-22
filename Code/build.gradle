@@ -12,7 +12,7 @@ dependencies {
 	implementation "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:2.20.0"
 	implementation 'org.eclipse.xtext:xtext-antlr-generator'
 	implementation files("${projectDir}/m/src")
-	implementation files("${projectDir}/m/src/m/fragments")
+	implementation files("${projectDir}/m/src/m/parsing")
 	implementation files("${projectDir}/build/classes/java/main")
 }
 
@@ -22,8 +22,7 @@ sourceSets {
 
 task compileFragments(type: JavaCompile){
 	source += fileTree(dir: 'm/src/m/main', include: '**/*.java')
-	source += fileTree(dir: 'm/src/m/fragments', include: '**/*.java')
-	source += file('m/src/m/parser/ContextualParserMessages.java')
+	source += fileTree(dir: 'm/src/m/parsing', include: '**/*.java')
 	classpath = configurations.implementation
 	destinationDir = file('build/classes/java/main')
 }
