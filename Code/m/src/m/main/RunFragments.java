@@ -7,7 +7,7 @@ import org.eclipse.xtext.xtext.generator.XtextGenerator;
 import org.eclipse.xtext.xtext.generator.model.project.BundleProjectConfig;
 import org.eclipse.xtext.xtext.generator.model.project.StandardProjectConfig;
 
-import m.fragments.ContextualParserMessagesFragment;
+import m.parsing.ContextualParserMessagesFragment;
 
 public class RunFragments 
 {

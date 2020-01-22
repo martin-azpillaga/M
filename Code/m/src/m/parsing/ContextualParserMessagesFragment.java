@@ -1,4 +1,4 @@
-package m.fragments;
+package m.parsing;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,13 +21,26 @@ import org.eclipse.xtext.TerminalRule;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.SyntaxErrorMessage;
 import org.eclipse.xtext.nodemodel.impl.CompositeNode;
-import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
 import org.eclipse.xtext.nodemodel.impl.RootNode;
+import org.eclipse.xtext.parser.antlr.ISyntaxErrorMessageProvider;
 import org.eclipse.xtext.parser.antlr.SyntaxErrorMessageProvider;
 import org.eclipse.xtext.parser.antlr.XtextTokenStream;
+import org.eclipse.xtext.xtext.generator.AbstractXtextGeneratorFragment;
+import org.eclipse.xtext.xtext.generator.model.GuiceModuleAccess;
+import org.eclipse.xtext.xtext.generator.model.TypeReference;
 
+@SuppressWarnings("restriction")
+public class ContextualParserMessagesFragment extends AbstractXtextGeneratorFragment
+{
+	@Override
+	public void generate()
+	{
+		GuiceModuleAccess.BindingFactory bindingFactory = new GuiceModuleAccess.BindingFactory();
+		bindingFactory.addTypeToType(TypeReference.typeRef(ISyntaxErrorMessageProvider.class), TypeReference.typeRef(ContextualParserMessages.class)).contributeTo(getLanguage().getRuntimeGenModule());
+	}
+}
 
-public class ContextualParserMessages extends SyntaxErrorMessageProvider
+class ContextualParserMessages extends SyntaxErrorMessageProvider
 {
 	public static HashMap<String,Integer> typeOf;
 	public static ArrayList<Path> paths;
