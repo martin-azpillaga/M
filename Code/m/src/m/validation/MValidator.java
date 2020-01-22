@@ -273,7 +273,7 @@ public class MValidator extends AbstractMValidator
 	@Check
 	public void exists(FunctionCall call)
 	{
-		var name = call.getName();
+		var name = call.getFunction();
 		var functions = new ArrayList<String>();
 		functions.add("create");
 		functions.add("destroy");
@@ -286,7 +286,7 @@ public class MValidator extends AbstractMValidator
 		
 		if (!functions.contains(name))
 		{
-			error("Function " + name + " is not defined", ModularPackage.Literals.FUNCTION_CALL__NAME);
+			error("Function " + name + " is not defined", ModularPackage.Literals.FUNCTION_CALL__FUNCTION);
 		}
 	}
 	
@@ -491,6 +491,28 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
+	public void infer(EntityVariable variable)
+	{
+		var component = variable.getComponent();
+		if (component != null && component.endsWith("Range"))
+		{
+			set(variable, float1);
+			var tag = component.substring(0,component.lastIndexOf("Range"));
+			if (components.containsKey(tag))
+			{
+				if (components.get(tag) != Type.input)
+				{
+					error ("Expected " + components.get(tag) + ", got input", variable, MPackage.Literals.ENTITY_VARIABLE__COMPONENT);
+				}
+			}
+			else
+			{
+				components.put(tag, Type.tag);
+			}
+		}
+	}
+	
+	@Check
 	public void infer(Loop loop)
 	{
 		var entity = loop.getEntity();
@@ -591,7 +613,7 @@ public class MValidator extends AbstractMValidator
 		else if (expression instanceof FunctionCall)
 		{
 			var call = (FunctionCall) expression;
-			var function = call.getName();
+			var function = call.getFunction();
 			if (function.equals("random"))
 			{
 				var parameter0 = call.getParameters().get(0);
