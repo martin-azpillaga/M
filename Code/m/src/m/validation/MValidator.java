@@ -7,31 +7,37 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.validation.Check;
 
-import m.m.Asset;
 import m.m.Component;
+import m.m.ComponentAccess;
 import m.m.End;
 import m.m.Entity;
-import m.m.EntityVariable;
 import m.m.Loop;
 import m.m.MPackage;
 import m.m.Modul;
 import m.m.System;
-import m.m.Vector;
-import m.modular.Addition;
+import m.m.Variable;
+import m.m.VectorComponent;
+import m.modular.AdditiveExpression;
 import m.modular.Assignment;
 import m.modular.Block;
+import m.modular.Comparison;
+import m.modular.Equality;
 import m.modular.Expression;
 import m.modular.FunctionCall;
-import m.modular.Greater;
 import m.modular.Iteration;
+import m.modular.LogicalAnd;
+import m.modular.LogicalNot;
+import m.modular.LogicalOr;
 import m.modular.ModularPackage;
-import m.modular.Multiplication;
+import m.modular.MultiplicativeExpression;
 import m.modular.Procedure;
 import m.modular.Selection;
-import m.modular.Variable;
+import m.modular.Statement;
+import m.modular.UnaryMinus;
 
 @SuppressWarnings("unused")
 public class MValidator extends AbstractMValidator 
@@ -166,6 +172,7 @@ public class MValidator extends AbstractMValidator
 		}
 	}
 	
+	
 	@Check
 	public void uniqueEntity(Loop loop)
 	{
@@ -175,30 +182,31 @@ public class MValidator extends AbstractMValidator
 		
 		while (!(container instanceof Modul))
 		{
-			if (container instanceof Block)
+			if (container instanceof Loop)
+			{
+				var l = (Loop) container;
+				if (l.getEntity().equals(myEntity))
+				{
+					error("Already exists entity " + myEntity + " in the scope", MPackage.Literals.LOOP__ENTITY);
+				}
+			}
+			else if (container instanceof Block)
 			{
 				var block = (Block) container;
-				if (container instanceof Loop)
+				var list = block.getStatements();
+				for (var i = 0; i < list.size();i++)
 				{
-					var l = (Loop) container;
-					if (l.getEntity().equals(myEntity))
-					{
-						error("Already exists entity " + myEntity + " in the scope", MPackage.Literals.LOOP__ENTITY);
-					}
-				}
-				for (var i = 0; i < block.getStatements().size();i++)
-				{
-					if (block.getStatements().get(i) == current)
+					if (list.get(i) == current)
 					{
 						break;
 					}
 					else
 					{
-						var statement = block.getStatements().get(i);
+						var statement = list.get(i);
 						if (statement instanceof Assignment)
 						{
 							var assignment = (Assignment) statement;
-							var entity = ((EntityVariable)assignment.getVariable()).getEntity();
+							var entity = ((Variable)assignment.getVariable()).getName();
 							if (entity.equals(myEntity))
 							{
 								error("Already exists entity " + myEntity + " in the scope", MPackage.Literals.LOOP__ENTITY);
@@ -207,15 +215,33 @@ public class MValidator extends AbstractMValidator
 					}
 				}
 			}
+			
 			current = container;
 			container = container.eContainer();
 		}
 	}
-	@Check
-	public void scope(EntityVariable variable)
+	
+	private void checkStatements(ArrayList<Statement> list, EObject current)
 	{
-		var myEntity = variable.getEntity();
+		
+	}
+	@Check
+	public void scope(Variable variable)
+	{
+		var myEntity = variable.getName();
 		var container = variable.eContainer();
+		if (container instanceof FunctionCall)
+		{
+			var call = (FunctionCall) container;
+			var function = call.getFunction();
+			if (function.equals("add")||function.equals("remove"))
+			{
+				if (call.getParameters().get(0) == variable)
+				{
+					return;
+				}
+			}
+		}
 		EObject current = variable;
 		
 		if (container instanceof Assignment)
@@ -255,10 +281,14 @@ public class MValidator extends AbstractMValidator
 						if (statement instanceof Assignment)
 						{
 							var assignment = (Assignment) statement;
-							var entity = ((EntityVariable)assignment.getVariable()).getEntity();
-							if (entity.equals(myEntity))
+							var assignmentVariable = assignment.getVariable();
+							if (assignmentVariable instanceof Variable)
 							{
-								return;
+								var v = (Variable) assignmentVariable;
+								if (v.getName().equals(myEntity))
+								{
+									return;
+								}
 							}
 						}
 					}
@@ -267,27 +297,7 @@ public class MValidator extends AbstractMValidator
 			current = container;
 			container = container.eContainer();
 		}
-		error("Entity " + myEntity + " undefined in the scope", MPackage.Literals.ENTITY_VARIABLE__ENTITY);
-	}
-	
-	@Check
-	public void exists(FunctionCall call)
-	{
-		var name = call.getFunction();
-		var functions = new ArrayList<String>();
-		functions.add("create");
-		functions.add("destroy");
-		functions.add("add");
-		functions.add("remove");
-		functions.add("join");
-		functions.add("random");
-		functions.add("sin");
-		functions.add("cos");
-		
-		if (!functions.contains(name))
-		{
-			error("Function " + name + " is not defined", ModularPackage.Literals.FUNCTION_CALL__FUNCTION);
-		}
+		error("Entity " + myEntity + " undefined in the scope", variable, MPackage.Literals.VARIABLE__NAME);
 	}
 	
 	@Check
@@ -341,11 +351,11 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void type(Vector vector)
+	public void type(VectorComponent vector)
 	{
 		if (vector.getEntries().size() > 4)
 		{
-			error("Vectors can have up to four entries", MPackage.Literals.VECTOR__ENTRIES,"More than four entries");
+			error("Vectors can have up to four entries", vector, MPackage.Literals.COMPONENT__NAME);
 		}
 	}
 	
@@ -409,40 +419,54 @@ public class MValidator extends AbstractMValidator
 		}
 	}
 	
-	private boolean set(EntityVariable variable, Type type)
+	private void setComponent(String name, Type type, EObject obj, EStructuralFeature feature)
 	{
-		var name = variable.getEntity();
-		var component = variable.getComponent();
-		
-		if (component == null)
+		if (components.containsKey(name))
 		{
-			if (variables.containsKey(name))
+			if (components.get(name) != type)
 			{
-				if (variables.get(name) != type)
-				{
-					error("Expected " + variables.get(name) + ", got " + type, variable, ModularPackage.Literals.EXPRESSION__EXPRESSION);
-				}
-			}
-			else
-			{
-				variables.put(name, type);
-				return true;
+				error("Expected type " + components.get(name) + " but got " + type.toString(), obj, feature);
 			}
 		}
 		else
 		{
-			if (components.containsKey(component))
+			components.put(name, type);
+		}
+	}
+	
+	private boolean set(Variable variable, Type type)
+	{
+		var name = variable.getName();
+		
+		if (variables.containsKey(name))
+		{
+			if (variables.get(name) != type)
 			{
-				if (components.get(component) != type)
-				{
-					error("Type conflict: This variable cannot be " + components.get(component) + " and " + type, variable, ModularPackage.Literals.EXPRESSION__EXPRESSION);
-				}
+				error("Expected " + variables.get(name) + ", got " + type, variable, ModularPackage.Literals.EXPRESSION__EXPRESSION);
 			}
-			else
+		}
+		else
+		{
+			variables.put(name, type);
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean set(ComponentAccess access, Type type)
+	{
+		var component = access.getComponent();
+		if (components.containsKey(component))
+		{
+			if (components.get(component) != type)
 			{
-				components.put(component, type);
-				return true;
+				error("Type conflict: This variable cannot be " + components.get(component) + " and " + type, access, ModularPackage.Literals.EXPRESSION__EXPRESSION);
 			}
+		}
+		else
+		{
+			components.put(component, type);
+			return true;
 		}
 		return false;
 	}
@@ -464,51 +488,49 @@ public class MValidator extends AbstractMValidator
 	
 	
 	@Check
-	public void infer(Component component)
+	public void infer(VectorComponent component)
 	{
-		var value = component.getValue();
-		if (value instanceof Vector)
+		var entries = component.getEntries();
+		var name = component.getName();
+		if (entries.size() == 1)
 		{
-			var entries = ((Vector) value).getEntries();
-			var name = component.getName();
-			if (entries.size() == 1)
-			{
-				set(component,float1);
-			}
-			else if (entries.size() == 2)
-			{
-				set(component, float2);
-			}
-			else if (entries.size() == 3)
-			{
-				set(component, float3);
-			}
-			else if (entries.size() == 4)
-			{
-				set(component, float4);
-			}
+			set(component,float1);
+		}
+		else if (entries.size() == 2)
+		{
+			set(component, float2);
+		}
+		else if (entries.size() == 3)
+		{
+			set(component, float3);
+		}
+		else if (entries.size() == 4)
+		{
+			set(component, float4);
 		}
 	}
 	
 	@Check
-	public void infer(EntityVariable variable)
+	public void infer(ComponentAccess access)
 	{
-		var component = variable.getComponent();
-		if (component != null && component.endsWith("Range"))
+		var component = access.getComponent();
+		if (component.endsWith("Range"))
 		{
-			set(variable, float1);
-			var tag = component.substring(0,component.lastIndexOf("Range"));
-			if (components.containsKey(tag))
-			{
-				if (components.get(tag) != Type.input)
-				{
-					error ("Expected " + components.get(tag) + ", got input", variable, MPackage.Literals.ENTITY_VARIABLE__COMPONENT);
-				}
-			}
-			else
-			{
-				components.put(tag, Type.tag);
-			}
+			set(access, float1);
+			var inputComponent = component.substring(0,component.lastIndexOf("Range"));
+			setComponent(inputComponent, input, access, ModularPackage.Literals.EXPRESSION__EXPRESSION);
+		}
+		else if (component.endsWith("Vector"))
+		{
+			set(access, float2);
+			var inputComponent = component.substring(0,component.lastIndexOf("Vector"));
+			setComponent(inputComponent, input, access, ModularPackage.Literals.EXPRESSION__EXPRESSION);
+		}
+		else if (component.endsWith("Trigger"))
+		{
+			set(access, bool);
+			var inputComponent = component.substring(0,component.lastIndexOf("Trigger"));
+			setComponent(inputComponent, input, access, ModularPackage.Literals.EXPRESSION__EXPRESSION);
 		}
 	}
 	
@@ -516,7 +538,7 @@ public class MValidator extends AbstractMValidator
 	public void infer(Loop loop)
 	{
 		var entity = loop.getEntity();
-		var list = (EntityVariable) loop.getCollection();
+		var list = loop.getCollection();
 		var tags = loop.getTags();
 		
 		if (variables.containsKey(entity))
@@ -536,164 +558,212 @@ public class MValidator extends AbstractMValidator
 		}
 		for (var tag : tags)
 		{
-			if (components.containsKey(tag))
+			setComponent(tag, Type.tag, loop, MPackage.Literals.LOOP__TAGS);
+		}
+	}
+	
+	@Check
+	public void infer(Selection selection)
+	{
+		for (var branch : selection.getBranches())
+		{
+			if (branch.getCondition() != null)
 			{
-				if (components.get(tag) != Type.entity)
-				{
-					error ("Expected " + components.get(tag) + ", got tag", loop, MPackage.Literals.LOOP__TAGS);
-				}
-			}
-			else
-			{
-				components.put(tag, Type.tag);
+				set(branch.getCondition(), bool);
 			}
 		}
 	}
 	
 	@Check
-	public void infer(Expression expression)
+	public void infer(Iteration iteration)
 	{
-		if (expression instanceof Assignment)
+		set(iteration.getCondition(), bool);
+	}
+	
+	@Check
+	public void infer(LogicalOr or)
+	{
+		set(or, bool);
+		set(or.getLeft(), bool);
+		set(or.getRight(), bool);
+	}
+	
+	@Check
+	public void infer(LogicalAnd and)
+	{
+		set(and, bool);
+		set(and.getLeft(), bool);
+		set(and.getRight(), bool);
+	}
+	
+	@Check
+	public void infer(LogicalNot not)
+	{
+		set(not, bool);
+		set(not.getExpression(), bool);
+	}
+	
+	@Check
+	public void infer(UnaryMinus minus)
+	{
+		group(minus, minus.getExpression());
+	}
+	
+	@Check
+	public void infer(Equality equality)
+	{
+		var left = equality.getLeft();
+		var right = equality.getRight();
+		
+		group(left, right);
+	}
+	
+	@Check
+	public void infer(AdditiveExpression additive)
+	{
+		var left = additive.getLeft();
+		var right = additive.getRight();
+		
+		group(additive, left, right);
+	}
+	
+	@Check
+	public void infer(MultiplicativeExpression multiplication)
+	{
+		var left = multiplication.getLeft();
+		var right = multiplication.getRight();
+		
+		group(multiplication, left);
+		set(right, float1);
+	}
+	
+	@Check
+	public void infer(Assignment assignment)
+	{
+		var kind = assignment.getKind();
+		var left = assignment.getVariable();
+		var right = assignment.getExpression();
+		
+		switch (kind)
 		{
-			var assignment = (Assignment) expression;
-			var kind = assignment.getKind();
-			var left = assignment.getVariable();
-			var right = assignment.getExpression();
-			
-			switch (kind)
-			{
-			case AND:
-				//expressions.get(float1).add(left);
-				//expressions.get(float1).add(right);
-				break;
 			case DECREASE:
 				group(assignment,left,right);
 				break;
 			case DIVIDE:
-				//expressions.get(float1).add(right);
+				group(assignment, left);
+				set(right, float1);
 				break;
 			case INCREASE:
 				group(assignment,left,right);
 				break;
 			case MODULUS:
-				//expressions.get(float1).add(right);
+				group(assignment, left);
+				set(right, float1);
 				break;
 			case MULTIPLY:
-				//expressions.get(float1).add(right);
-				break;
-			case OR:
-				//expressions.get(float1).add(left);
-				//expressions.get(float1).add(right);
+				group(assignment, left);
+				set(right, float1);
 				break;
 			case SET:
 				group(assignment,left,right);
-				break;
-			case SHIFT_LEFT:
-				//expressions.get(float1).add(left);
-				//expressions.get(float1).add(right);
-				break;
-			case SHIFT_RIGHT:
-				//expressions.get(float1).add(left);
-				//expressions.get(float1).add(right);
-				break;
-			case XOR:
-				//expressions.get(float1).add(left);
-				//expressions.get(float1).add(right);
 				break;			
-			}
 		}
-		else if (expression instanceof Multiplication)
+	}
+	
+	@Check
+	public void infer(Comparison comparison)
+	{
+		var left = comparison.getLeft();
+		var right = comparison.getRight();
+		
+		set(comparison, bool);
+		set(left, float1);
+		set(right, float1);
+	}
+	
+	@Check
+	public void infer(FunctionCall call)
+	{
+		var function = call.getFunction();
+		if (function.equals("random"))
 		{
-			var multiplication = (Multiplication) expression;
-			var left = multiplication.getLeft();
-			var right = multiplication.getRight();
-			group(multiplication, left);
-			set(right, float1);
+			var parameter0 = call.getParameters().get(0);
+			
+			set(call, float1);
+			set(parameter0, float2);
 		}
-		else if (expression instanceof FunctionCall)
+		else if (function.equals("cos")||function.equals("sin")||function.endsWith("tan"))
 		{
-			var call = (FunctionCall) expression;
-			var function = call.getFunction();
-			if (function.equals("random"))
+			var parameter0 = call.getParameters().get(0);
+			
+			set(call, float1);
+			set(parameter0, float1);
+		}
+		else if (function.equals("create")||function.equals("destroy"))
+		{
+			var parameter0 = call.getParameters().get(0);
+			
+			set(call, none);
+			set(parameter0, entity);
+		}
+		else if (function.equals("remove")||function.equals("add"))
+		{
+			var parameter1 = call.getParameters().get(1);
+			
+			set(call, none);
+			set(parameter1, entity);
+		}
+		else if (function.equals("join"))
+		{
+			var size = call.getParameters().size();
+			if (size == 1)
 			{
 				var parameter0 = call.getParameters().get(0);
 				
-				set(expression, float1);
-				set(parameter0, float2);
-			}
-			else if (function.equals("cos")||function.equals("sin")||function.endsWith("tan"))
-			{
-				var parameter0 = call.getParameters().get(0);
-				
-				set(expression, float1);
+				set(call, float1);
 				set(parameter0, float1);
 			}
-			else if (function.equals("create")||function.equals("destroy"))
+			else if (size == 2)
 			{
 				var parameter0 = call.getParameters().get(0);
-				
-				set(parameter0, entity);
-			}
-			else if (function.equals("remove")||function.equals("add"))
-			{
 				var parameter1 = call.getParameters().get(1);
-				
-				set(parameter1, entity);
+
+				set(call, float2);
+				set(parameter0, float1);
+				set(parameter1, float1);
 			}
-			else if (function.equals("join"))
+			else if (size == 3)
 			{
-				var size = call.getParameters().size();
-				if (size == 1)
-				{
-					var parameter0 = call.getParameters().get(0);
-					
-					set(expression, float1);
-					set(parameter0, float1);
-				}
-				else if (size == 2)
-				{
-					var parameter0 = call.getParameters().get(0);
-					var parameter1 = call.getParameters().get(1);
+				var parameter0 = call.getParameters().get(0);
+				var parameter1 = call.getParameters().get(1);
+				var parameter2 = call.getParameters().get(2);
 
-					set(expression, float2);
-					set(parameter0, float1);
-					set(parameter1, float1);
-				}
-				else if (size == 3)
-				{
-					var parameter0 = call.getParameters().get(0);
-					var parameter1 = call.getParameters().get(1);
-					var parameter2 = call.getParameters().get(2);
+				set(call, float3);
+				set(parameter0, float1);
+				set(parameter1, float1);
+				set(parameter2, float1);
+			}
+			else if (size == 4)
+			{
+				var parameter0 = call.getParameters().get(0);
+				var parameter1 = call.getParameters().get(1);
+				var parameter2 = call.getParameters().get(2);
+				var parameter3 = call.getParameters().get(3);
 
-					set(expression, float3);
-					set(parameter0, float1);
-					set(parameter1, float1);
-					set(parameter2, float1);
-				}
-				else if (size == 4)
-				{
-					var parameter0 = call.getParameters().get(0);
-					var parameter1 = call.getParameters().get(1);
-					var parameter2 = call.getParameters().get(2);
-					var parameter3 = call.getParameters().get(3);
-
-					set(expression, float4);
-					set(parameter0, float1);
-					set(parameter1, float1);
-					set(parameter2, float1);
-					set(parameter3, float1);
-				}
+				set(call, float4);
+				set(parameter0, float1);
+				set(parameter1, float1);
+				set(parameter2, float1);
+				set(parameter3, float1);
 			}
 		}
-		else if (expression instanceof Greater)
+		else if (function.equals("x")||function.equals("y")||function.equals("z")||function.equals("w"))
 		{
-			var greater = (Greater) expression;
-			var left = greater.getLeft();
-			var right = greater.getRight();
-			
-			set(expression, bool);
-			set(left, float1);
-			set(right, float1);
+			set(call, float1);
+		}
+		else
+		{
+			error("Function " + function + " does not exist in the standard library", call, ModularPackage.Literals.FUNCTION_CALL__FUNCTION);
 		}
 	}
 	
@@ -718,6 +788,8 @@ public class MValidator extends AbstractMValidator
 			}
 		}
 	}
+	
+	
 	
 	public void solve()
 	{
@@ -744,40 +816,38 @@ public class MValidator extends AbstractMValidator
 						groups.remove(g);
 						break;
 					}
-					else if (expression instanceof EntityVariable)
+					else if (expression instanceof Variable)
 					{
-						var variable = (EntityVariable) expression;
-						var name = variable.getEntity();
-						var component = variable.getComponent();
-						if (component == null)
+						var variable = (Variable) expression;
+						var name = variable.getName();
+						if (variables.containsKey(name))
 						{
-							if (variables.containsKey(name))
+							repeat = true;
+							
+							var type = variables.get(name);
+							for (var e : group)
 							{
-								repeat = true;
-								
-								var type = variables.get(name);
-								for (var e : group)
-								{
-									set(e, type);
-								}
-								groups.remove(g);
-								break;
+								set(e, type);
 							}
+							groups.remove(g);
+							break;
 						}
-						else
+					}
+					else if (expression instanceof ComponentAccess)
+					{
+						var access = (ComponentAccess) expression;
+						var component = access.getComponent();
+						if (components.containsKey(component))
 						{
-							if (components.containsKey(component))
+							repeat = true;
+							
+							var type = components.get(component);
+							for (var e : group)
 							{
-								repeat = true;
-								
-								var type = components.get(component);
-								for (var e : group)
-								{
-									set(e, type);
-								}
-								groups.remove(g);
-								break;
+								set(e, type);
 							}
+							groups.remove(g);
+							break;
 						}
 					}
 				}
@@ -786,10 +856,18 @@ public class MValidator extends AbstractMValidator
 			// expressions
 			for (var expression : expressions.keySet())
 			{
-				if (expression instanceof EntityVariable)
+				if (expression instanceof Variable)
 				{
-					var variable = (EntityVariable) expression;
+					var variable = (Variable) expression;
 					if (set(variable, expressions.get(expression)))
+					{
+						repeat = true;
+					}
+				}
+				else if (expression instanceof ComponentAccess)
+				{
+					var access = (ComponentAccess) expression;
+					if (set(access, expressions.get(expression)))
 					{
 						repeat = true;
 					}
