@@ -3,10 +3,10 @@ import "azpillaga.world/modular"
 generate m "azpillaga.world/m"
 
 Modul:
-	(entities+=Entity|systems+=System|procedures+=Procedure)*
+	(archetypes+=Archetype|systems+=System|procedures+=Procedure)*
 	end = End;
 
-Entity:
+Archetype:
 	 name = WORD 
 	(':' base=WORD	)?
 	 '{' components+=Component (',' components+=Component)* '}';
