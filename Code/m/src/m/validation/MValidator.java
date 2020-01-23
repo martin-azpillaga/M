@@ -14,7 +14,7 @@ import org.eclipse.xtext.validation.Check;
 import m.m.Component;
 import m.m.ComponentAccess;
 import m.m.End;
-import m.m.Entity;
+import m.m.Archetype;
 import m.m.Loop;
 import m.m.MPackage;
 import m.m.Modul;
@@ -50,11 +50,11 @@ public class MValidator extends AbstractMValidator
 	@Check
 	public void unique(Component component)
 	{
-		var entity = (Entity) component.eContainer();
+		var archetype = (Archetype) component.eContainer();
 		
 		var amount = 0;
 		
-		for (var c : entity.getComponents())
+		for (var c : archetype.getComponents())
 		{
 			var name = c.getName();
 			if (component.getName().equals(name))
@@ -70,16 +70,16 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void unique(Entity entity)
+	public void unique(Archetype archetype)
 	{
-		var module = (Modul) entity.eContainer();
+		var module = (Modul) archetype.eContainer();
 		
 		var amount = 0;
 		
-		for (var e : module.getEntities())
+		for (var e : module.getArchetypes())
 		{
 			var name = e.getName();
-			if (entity.getName().equals(name))
+			if (archetype.getName().equals(name))
 			{
 				amount++;
 			}
@@ -87,7 +87,7 @@ public class MValidator extends AbstractMValidator
 		
 		if (amount > 1)
 		{
-			error("Repeated entity",MPackage.Literals.ENTITY__NAME);
+			error("Repeated entity",MPackage.Literals.ARCHETYPE__NAME);
 		}
 	}
 	
@@ -301,32 +301,32 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void existsBase(Entity entity)
+	public void existsBase(Archetype archetype)
 	{
-		var base = entity.getBase();
+		var base = archetype.getBase();
 		if (base != null)
 		{
-			var module = (Modul) entity.eContainer();
-			for (var e : module.getEntities())
+			var module = (Modul) archetype.eContainer();
+			for (var e : module.getArchetypes())
 			{
 				if (e.getName().equals(base))
 				{
 					return;
 				}
 			}
-			error("The base entity is not declared in this module", MPackage.Literals.ENTITY__BASE);
+			error("The base entity is not declared in this module", MPackage.Literals.ARCHETYPE__BASE);
 		}
 	}
 	
 	@Check
-	public void acyclic(Entity entity)
+	public void acyclic(Archetype archetype)
 	{
-		var base = entity.getBase();
-		var module = (Modul) entity.eContainer();
-		var entities = module.getEntities();
+		var base = archetype.getBase();
+		var module = (Modul) archetype.eContainer();
+		var entities = module.getArchetypes();
 		
 		var visited = new ArrayList<String>();
-		visited.add(entity.getName());
+		visited.add(archetype.getName());
 		
 		while (base != null)
 		{
@@ -336,7 +336,7 @@ public class MValidator extends AbstractMValidator
 				{
 					if (visited.contains(e.getName()))
 					{
-						error("Cyclic base entity dependency", MPackage.Literals.ENTITY__BASE);
+						error("Cyclic base entity dependency", MPackage.Literals.ARCHETYPE__BASE);
 						return;
 					}
 					else
@@ -513,24 +513,29 @@ public class MValidator extends AbstractMValidator
 	@Check
 	public void infer(ComponentAccess access)
 	{
+		magic("Range", access, float1, input);
+		magic("Vector", access, float2, input);
+		magic("Trigger", access, bool, input);
+		
+		magic("Timeout", access, bool, float1);
+		magic("Elapsed", access, float1, float1);
+		
+		magic("Chosen", access, bool, none);
+		
+		magic("Transition", access, bool, none);
+	}
+	
+	private void magic(String word, ComponentAccess access, Type original, Type magic)
+	{
 		var component = access.getComponent();
-		if (component.endsWith("Range"))
+		if (component.endsWith(word))
 		{
-			set(access, float1);
-			var inputComponent = component.substring(0,component.lastIndexOf("Range"));
-			setComponent(inputComponent, input, access, ModularPackage.Literals.EXPRESSION__EXPRESSION);
-		}
-		else if (component.endsWith("Vector"))
-		{
-			set(access, float2);
-			var inputComponent = component.substring(0,component.lastIndexOf("Vector"));
-			setComponent(inputComponent, input, access, ModularPackage.Literals.EXPRESSION__EXPRESSION);
-		}
-		else if (component.endsWith("Trigger"))
-		{
-			set(access, bool);
-			var inputComponent = component.substring(0,component.lastIndexOf("Trigger"));
-			setComponent(inputComponent, input, access, ModularPackage.Literals.EXPRESSION__EXPRESSION);
+			set(access, original);
+			if (magic != none)
+			{
+				var magicParent = component.substring(0, component.lastIndexOf(word));
+				setComponent(magicParent, magic, access, ModularPackage.Literals.EXPRESSION__EXPRESSION);
+			}
 		}
 	}
 	
@@ -685,48 +690,79 @@ public class MValidator extends AbstractMValidator
 	public void infer(FunctionCall call)
 	{
 		var function = call.getFunction();
+		var parameters = call.getParameters();
 		if (function.equals("random"))
 		{
-			var parameter0 = call.getParameters().get(0);
+			if (parameters.size() != 1)
+			{
+				error("random takes a single float2 argument", call, ModularPackage.Literals.FUNCTION_CALL__FUNCTION);
+				return;
+			}
+			var parameter0 = parameters.get(0);
 			
 			set(call, float1);
 			set(parameter0, float2);
 		}
-		else if (function.equals("cos")||function.equals("sin")||function.endsWith("tan"))
+		else if (function.equals("cos")||function.equals("sin")||function.endsWith("tan")||function.endsWith("log")||function.endsWith("sqrt")||function.endsWith("exp"))
 		{
-			var parameter0 = call.getParameters().get(0);
+			if (parameters.size() != 1)
+			{
+				error("math functions take a single float1 argument", call, ModularPackage.Literals.FUNCTION_CALL__FUNCTION);
+				return;
+			}
+			var parameter0 = parameters.get(0);
 			
 			set(call, float1);
 			set(parameter0, float1);
 		}
-		else if (function.equals("create")||function.equals("destroy"))
+		else if (function.equals("create"))
 		{
-			var parameter0 = call.getParameters().get(0);
+			if (parameters.size() != 1)
+			{
+				error("create takes a single entity argument", call, ModularPackage.Literals.FUNCTION_CALL__FUNCTION);
+				return;
+			}
+			var parameter0 = parameters.get(0);
+			
+			set(call, entity);
+			set(parameter0, entity);
+		}
+		else if (function.equals("destroy"))
+		{
+			if (parameters.size() != 1)
+			{
+				error("destroy takes a single entity argument", call, ModularPackage.Literals.FUNCTION_CALL__FUNCTION);
+				return;
+			}
+			var parameter0 = parameters.get(0);
 			
 			set(call, none);
 			set(parameter0, entity);
 		}
 		else if (function.equals("remove")||function.equals("add"))
 		{
-			var parameter1 = call.getParameters().get(1);
+			if (parameters.size() != 1)
+			{
+				error("takes a type and an entity", call, ModularPackage.Literals.FUNCTION_CALL__FUNCTION);
+				return;
+			}
+			var parameter1 = parameters.get(1);
 			
 			set(call, none);
 			set(parameter1, entity);
 		}
 		else if (function.equals("join"))
 		{
-			var size = call.getParameters().size();
-			if (size == 1)
+			if (parameters.size() != 2 && parameters.size() != 3 && parameters.size() != 4)
 			{
-				var parameter0 = call.getParameters().get(0);
-				
-				set(call, float1);
-				set(parameter0, float1);
+				error("join takes two, three or four floats", call, ModularPackage.Literals.FUNCTION_CALL__FUNCTION);
+				return;
 			}
-			else if (size == 2)
+			var size = parameters.size();
+			if (size == 2)
 			{
-				var parameter0 = call.getParameters().get(0);
-				var parameter1 = call.getParameters().get(1);
+				var parameter0 = parameters.get(0);
+				var parameter1 = parameters.get(1);
 
 				set(call, float2);
 				set(parameter0, float1);
@@ -734,9 +770,9 @@ public class MValidator extends AbstractMValidator
 			}
 			else if (size == 3)
 			{
-				var parameter0 = call.getParameters().get(0);
-				var parameter1 = call.getParameters().get(1);
-				var parameter2 = call.getParameters().get(2);
+				var parameter0 = parameters.get(0);
+				var parameter1 = parameters.get(1);
+				var parameter2 = parameters.get(2);
 
 				set(call, float3);
 				set(parameter0, float1);
@@ -745,10 +781,10 @@ public class MValidator extends AbstractMValidator
 			}
 			else if (size == 4)
 			{
-				var parameter0 = call.getParameters().get(0);
-				var parameter1 = call.getParameters().get(1);
-				var parameter2 = call.getParameters().get(2);
-				var parameter3 = call.getParameters().get(3);
+				var parameter0 = parameters.get(0);
+				var parameter1 = parameters.get(1);
+				var parameter2 = parameters.get(2);
+				var parameter3 = parameters.get(3);
 
 				set(call, float4);
 				set(parameter0, float1);
@@ -759,6 +795,11 @@ public class MValidator extends AbstractMValidator
 		}
 		else if (function.equals("x")||function.equals("y")||function.equals("z")||function.equals("w"))
 		{
+			if (parameters.size() != 1)
+			{
+				error("component functions take a single floatn argument", call, ModularPackage.Literals.FUNCTION_CALL__FUNCTION);
+				return;
+			}
 			set(call, float1);
 		}
 		else
@@ -776,9 +817,9 @@ public class MValidator extends AbstractMValidator
 			warning(expressions.get(key).toString(),key, ModularPackage.Literals.EXPRESSION__EXPRESSION);
 		}
 		var modul = (Modul) end.eContainer();
-		for (var entity : modul.getEntities())
+		for (var archetype : modul.getArchetypes())
 		{
-			for (var component : entity.getComponents())
+			for (var component : archetype.getComponents())
 			{
 				var name = component.getName();
 				if (components.containsKey(name))

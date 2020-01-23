@@ -6,5 +6,6 @@ public enum Type
 	material,mesh,audioClip,font,image,
 	gameObject, input, entity, text, entityList,
 	bool,
-	none, numeric, nonNumeric
+	none, numeric, nonNumeric,
+	stateMachine
 }
