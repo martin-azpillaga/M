@@ -5,4 +5,4 @@ import "azpillaga.world/modular"
 
 @Override
 Modul:
-	(entities+=Entity|systems+=System)*;
+	(archetypes+=Archetype|systems+=System)*;
