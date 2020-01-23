@@ -3,12 +3,28 @@ package m.validation;
 import static m.validation.Type.*;
 public enum StandardLibrary 
 {
+	// Input works with magic components
+	// XTrigger, XRange and XVector
+	// Timers work with magic components
+	// XTotal, XElapsed and XTimeout
 	// Transform
 	position,rotation,scale,
 	// Rendering 3D
 	mesh,material,
 	// Rendering UI
 	font,text,image,button,number,
+	// Rendering camera
+	viewAngle, viewDistance, clearColor, perspective,
+	// Rendering lights
+	emission, spotAngle, range, intensity, shadows, cookie,
+	// Audio control
+	audioClip, volume, pitch, loop,
+	// Audio effects
+	distortion, echo, highPass, lowPass, reverb, delay, doppler,
+	// Network components
+	ip,port,networkStream,prediction,owner,
+	// Network synchronization happens with magic component names
+	// X_Server to send to the server, X_Client to send to client
 	// Physics body
 	mass,velocity,acceleration,force,
 	damping,angularDamping,angularVelocity,gravityFactor,
@@ -17,14 +33,14 @@ public enum StandardLibrary
 	restitution,friction,
 	// Physics events
 	collisions, collisionEntries, collisionExits,
-	// Rendering camera
-	viewAngle, viewDistance, clearColor, perspective,
-	// Rendering lights
-	emission, spotAngle, range, intensity, shadows, cookie,
-	// Audio control
-	audioClip, volume, pitch, loop,
-	// Audio effects
-	distortion, echo, highPass, lowPass, reverb, delay, doppler;
+	// Animation
+	stateMachine,
+	// Animation with magic components
+	// XTransition puts the trigger on stateMachine to on/off
+	// AI planner
+	plan;
+	// AI planner with magic components
+	// XChosen set to true if the planner chose X this frame.
 	
 	public Type getType()
 	{
@@ -81,6 +97,13 @@ public enum StandardLibrary
 			case collisions: return entityList;
 			case collisionEntries: return entityList;
 			case collisionExits: return entityList;
+			case ip: return float4;
+			case port: return float1;
+			case networkStream: return tag;
+			case owner: return float1;
+			case prediction: return tag;
+			case plan: return tag;
+			case stateMachine: return Type.stateMachine;
 		}
 		return none;
 	}
