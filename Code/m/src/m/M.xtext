@@ -2,7 +2,7 @@ grammar m.M with m.Modular
 import "azpillaga.world/modular"
 generate m "azpillaga.world/m"
 
-Modul:
+Game:
 	(archetypes+=Archetype|systems+=System|procedures+=Procedure)*
 	end = End;
 
