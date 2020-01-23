@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.validation.Check;
@@ -15,6 +16,7 @@ import m.m.Component;
 import m.m.ComponentAccess;
 import m.m.End;
 import m.m.Archetype;
+import m.m.AssetComponent;
 import m.m.Loop;
 import m.m.MPackage;
 import m.m.Modul;
@@ -38,6 +40,8 @@ import m.modular.Procedure;
 import m.modular.Selection;
 import m.modular.Statement;
 import m.modular.UnaryMinus;
+import static m.modular.ModularPackage.Literals.*;
+import static m.m.MPackage.Literals.*;
 
 @SuppressWarnings("unused")
 public class MValidator extends AbstractMValidator 
@@ -511,30 +515,48 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void infer(ComponentAccess access)
+	public void infer(Component component)
 	{
-		magic("Range", access, float1, input);
-		magic("Vector", access, float2, input);
-		magic("Trigger", access, bool, input);
+		var feature = MPackage.Literals.COMPONENT__NAME;
+		var name = component.getName();
+		magic(name,"Range", float1, input, component, feature);
+		magic(name,"Vector", float2, input, component, feature);
+		magic(name,"Trigger", bool, input, component, feature);
 		
-		magic("Timeout", access, bool, float1);
-		magic("Elapsed", access, float1, float1);
+		magic(name,"Timeout", bool, float1, component, feature);
+		magic(name,"Elapsed", float1, float1, component, feature);
 		
-		magic("Chosen", access, bool, none);
+		magic(name,"Chosen", bool, none, component, feature);
 		
-		magic("Transition", access, bool, none);
+		magic(name,"Transition", bool, none, component, feature);
 	}
 	
-	private void magic(String word, ComponentAccess access, Type original, Type magic)
+	@Check
+	public void infer(ComponentAccess access)
 	{
+		var feature = ModularPackage.Literals.EXPRESSION__EXPRESSION;
 		var component = access.getComponent();
+		magic(component, "Range", float1, input, access, feature);
+		magic(component,"Vector", float2, input, access, feature);
+		magic(component,"Trigger", bool, input, access, feature);
+		
+		magic(component,"Timeout", bool, float1, access, feature);
+		magic(component,"Elapsed", float1, float1, access, feature);
+		
+		magic(component,"Chosen", bool, none, access, feature);
+		
+		magic(component,"Transition", bool, none, access, feature);
+	}
+	
+	private void magic(String component, String word, Type original, Type magic, EObject access, EStructuralFeature feature)
+	{
 		if (component.endsWith(word))
 		{
-			set(access, original);
+			setComponent(component, original, access, feature);
 			if (magic != none)
 			{
 				var magicParent = component.substring(0, component.lastIndexOf(word));
-				setComponent(magicParent, magic, access, ModularPackage.Literals.EXPRESSION__EXPRESSION);
+				setComponent(magicParent, magic, access, feature);
 			}
 		}
 	}
@@ -741,7 +763,7 @@ public class MValidator extends AbstractMValidator
 		}
 		else if (function.equals("remove")||function.equals("add"))
 		{
-			if (parameters.size() != 1)
+			if (parameters.size() != 2)
 			{
 				error("takes a type and an entity", call, ModularPackage.Literals.FUNCTION_CALL__FUNCTION);
 				return;
@@ -812,9 +834,15 @@ public class MValidator extends AbstractMValidator
 	public void check(End end)
 	{
 		solve();
-		for (var key : expressions.keySet())
+		for (var group : groups)
 		{
-			warning(expressions.get(key).toString(),key, ModularPackage.Literals.EXPRESSION__EXPRESSION);
+			for (var expression : group)
+			{
+				if (expression instanceof Variable||expression instanceof ComponentAccess)
+				{
+					warning("Type undecidable", expression, EXPRESSION__EXPRESSION);
+				}
+			}
 		}
 		var modul = (Modul) end.eContainer();
 		for (var archetype : modul.getArchetypes())
@@ -824,7 +852,14 @@ public class MValidator extends AbstractMValidator
 				var name = component.getName();
 				if (components.containsKey(name))
 				{
-					warning(components.get(name).toString(), component, MPackage.Literals.COMPONENT__NAME);
+					if (component instanceof AssetComponent && components.get(name).isNumeric())
+					{
+						error("Type mismatch, expected non-numeric but got " + components.get(name),component, COMPONENT__NAME);
+					}
+				}
+				else
+				{
+					warning("Undecidable type", component, COMPONENT__NAME);
 				}
 			}
 		}
