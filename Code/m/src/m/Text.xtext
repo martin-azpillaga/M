@@ -5,7 +5,7 @@ generate text "azpillaga.world/text"
 
 @Override
 Modul:
-	(entities+=Entity|systems+=System)*;
+	(archetypes+=Archetype|systems+=System)*;
 
 Cool:
 	first=WORD
