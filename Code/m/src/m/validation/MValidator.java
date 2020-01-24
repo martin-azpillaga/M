@@ -15,9 +15,11 @@ import org.eclipse.xtext.validation.Check;
 import m.m.Component;
 import m.m.ComponentAccess;
 import m.m.End;
+import m.m.Exists;
+import m.m.Amount;
 import m.m.Archetype;
 import m.m.AssetComponent;
-import m.m.Loop;
+import m.m.Forall;
 import m.m.MPackage;
 import m.m.Game;
 import m.m.System;
@@ -158,9 +160,9 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void uniqueTags(Loop loop)
+	public void uniqueTags(Forall forall)
 	{
-		var tags = loop.getTags();
+		var tags = forall.getTags();
 		
 		for (var i = 0; i < tags.size(); i++)
 		{
@@ -169,7 +171,7 @@ public class MValidator extends AbstractMValidator
 			{
 				if (itag.equals(tags.get(j)))
 				{
-					error("Repeated tag "+itag, LOOP__ENTITY);
+					error("Repeated tag "+itag, FORALL__VARIABLE);
 					return;
 				}
 			}
@@ -178,20 +180,20 @@ public class MValidator extends AbstractMValidator
 	
 	
 	@Check
-	public void uniqueEntity(Loop loop)
+	public void uniqueEntity(Forall forall)
 	{
-		var myEntity = loop.getEntity();
-		var container = loop.eContainer();
-		EObject current = loop;
+		var myEntity = forall.getVariable();
+		var container = forall.eContainer();
+		EObject current = forall;
 		
 		while (!(container instanceof Game))
 		{
-			if (container instanceof Loop)
+			if (container instanceof Forall)
 			{
-				var l = (Loop) container;
-				if (l.getEntity().equals(myEntity))
+				var l = (Forall) container;
+				if (l.getVariable().equals(myEntity))
 				{
-					error("Already exists entity " + myEntity + " in the scope", LOOP__ENTITY);
+					error("Already exists entity " + myEntity + " in the scope", FORALL__VARIABLE);
 				}
 			}
 			else if (container instanceof Block)
@@ -213,7 +215,7 @@ public class MValidator extends AbstractMValidator
 							var entity = ((Variable)assignment.getVariable()).getName();
 							if (entity.equals(myEntity))
 							{
-								error("Already exists entity " + myEntity + " in the scope", LOOP__ENTITY);
+								error("Already exists entity " + myEntity + " in the scope", FORALL__VARIABLE);
 							}
 						}
 					}
@@ -261,10 +263,10 @@ public class MValidator extends AbstractMValidator
 			if (container instanceof Block)
 			{
 				var block = (Block) container;
-				if (container instanceof Loop)
+				if (container instanceof Forall)
 				{
-					var l = (Loop) container;
-					if (l.getEntity().equals(myEntity))
+					var l = (Forall) container;
+					if (l.getVariable().equals(myEntity))
 					{
 						return;
 					}
@@ -438,6 +440,21 @@ public class MValidator extends AbstractMValidator
 		}
 	}
 	
+	private void setVariable(String name, Type type, EObject obj, EStructuralFeature feature)
+	{
+		if (variables.containsKey(name))
+		{
+			if (variables.get(name) != type)
+			{
+				error("Expected type " + variables.get(name) + " but got " + type.toString(), obj, feature);
+			}
+		}
+		else
+		{
+			variables.put(name, type);
+		}
+	}
+	
 	private boolean set(Variable variable, Type type)
 	{
 		var name = variable.getName();
@@ -534,6 +551,9 @@ public class MValidator extends AbstractMValidator
 	@Check
 	public void infer(ComponentAccess access)
 	{
+		var entity = access.getEntity();
+		setVariable(entity, Type.entity, access, COMPONENT_ACCESS__ENTITY);
+		
 		var feature = EXPRESSION__EXPRESSION;
 		var component = access.getComponent();
 		magic(component, "Range", float1, input, access, feature);
@@ -562,31 +582,41 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void infer(Loop loop)
+	public void infer(Forall forall)
 	{
-		var entity = loop.getEntity();
-		var list = loop.getCollection();
-		var tags = loop.getTags();
+		var variable = forall.getVariable();
+		var collection = forall.getCollection();
+		var tags = forall.getTags();
 		
-		if (variables.containsKey(entity))
+		setVariable(variable, entity, forall, FORALL__VARIABLE);
+
+		if (collection != null)
 		{
-			if (variables.get(entity) != Type.entity)
-			{
-				error ("Expected " + variables.get(entity) + ", got entity", loop, LOOP__ENTITY);
-			}
-		}
-		else
-		{
-			variables.put(entity, Type.entity);
-		}
-		if (list != null)
-		{
-			set(list, Type.entityList);
+			set(collection, Type.entityList);
 		}
 		for (var tag : tags)
 		{
-			setComponent(tag, Type.tag, loop, LOOP__TAGS);
+			setComponent(tag, Type.tag, forall, FORALL__TAGS);
 		}
+	}
+	
+	@Check
+	public void infer(Exists exists)
+	{
+		var variable = exists.getVariable();
+		var collection = exists.getCollection();
+		var condition = exists.getCondition();
+		
+		setVariable(variable, entity, exists, EXISTS__VARIABLE);
+		set(collection, entityList);
+		set(condition, bool);
+	}
+	
+	@Check
+	public void infer(Amount amount)
+	{
+		var bound = amount.getBound();
+		set(bound, float1);
 	}
 	
 	@Check
