@@ -6,11 +6,16 @@ public enum Type
 	material,mesh,audioClip,font,image,
 	gameObject, input, entity, text, entityList,
 	bool,
-	none, numeric, nonNumeric,
+	none,
 	stateMachine;
 
 	public boolean isNumeric() 
 	{
 		return this == float1 || this == float2 || this == float3 || this == float4;
+	}
+	
+	public boolean isList()
+	{
+		return this == entityList;
 	}
 }
