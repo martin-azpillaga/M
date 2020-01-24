@@ -3,56 +3,70 @@ grammar m.CSharp with m.Modular hidden(WS, MULTIPLE_LINES_COMMENT, SINGLE_LINE_C
 import "azpillaga.world/modular"
 generate csharp "azpillaga.world/csharp"
 
-Model:
+CompilationUnit:
 	usings+=Using*
-	types+=Type*;
+	types+=NamespaceMember*;
 
 Using:
-	'using' name=QualifiedName ';';
+	'using' name=QUALIFIEDNAME ';';
 
-Type:
-	{Type}
-	annotations+=Annotation*
-	visibility=Visibility?
-	(({Struct.info=current} 'struct' name=TYPENAME
-	|
-	{Class.info=current} sealed?='sealed'? static?='static'? 'class' name=TYPENAME)
-	(':' superTypes+=TYPENAME (',' superTypes+=TYPENAME)*)?
-	'{' members+=Member* '}'
-	|
-	{Enum.info=current}
-	'enum' name=TYPENAME
-	'{' (values+=WORD (',' values+=WORD)*)? '}');
-
-Info:
-	Member | Type;
-
+NamespaceMember:
+	NamespaceType|Enum;
+NamespaceType:
+	Struct|Class;
 Member:
-	{Member}
-	annotations+=Annotation*
-	visibility=Visibility?
-	(({Struct.info=current} 'struct' name=TYPENAME
-	|
-	{Class.info=current} static?='static'? 'class' name=TYPENAME)
-	(':' superTypes+=TYPENAME (',' superTypes+=TYPENAME)*)?
-	'{' members+=Member* '}'
-	|
-	{Enum.info=current}
-	'enum' name=TYPENAME
-	'{' (value+=WORD (',' values+=WORD)*)? '}'
-	|
-	(({Method.info=current} override?='override')?
-	({Method.info=current} static?='static')?
-	type=TYPENAME
-	({Field.info=current} name=WORD ';'
-	|
-	{Method.info=current} name=TYPENAME '(' (arguments+=Argument (',' arguments+=Argument)*)? ')'
-	'{'
-	statements+=Statement*
-	'}')));
+	NamespaceMember|Method|Field
+;
+Struct:
+	('['annotations+=WORD']')*
+	 visibility=Visibility?
+	 'struct' name=TYPE
+	(':' superTypes+=TYPE (',' superTypes+=TYPE)*)?
+	 '{' members+=Member* '}'
+;
 
-enum Visibility:
-	public | protected | private;
+Class:
+	('['annotations+=WORD']')*
+	 visibility=Visibility?
+	 sealed?='sealed'?
+	 static?='static'?
+	 'class' name=TYPE
+	(':' superTypes+=TYPE (',' superTypes+=TYPE)*)?
+	 '{' members+=Member* '}'
+;
+
+Enum:
+	('['annotations+=WORD']')*
+	 visibility=Visibility?
+	 'enum' name=TYPE
+	 '{' (values+=WORD (',' values+=WORD)*)? '}'
+;
+
+Method:
+	('['annotations+=WORD']')*
+	 visibility=Visibility?
+	 implicit?='implicit'?
+	 opertor?='operator'?
+	 override?='override'?
+	 static?='static'?
+	 type=TYPE
+	 name=WORD
+	 '(' (arguments+=Argument (',' arguments+=Argument)*)? ')'
+	 '{' statements+=Statement*	'}';
+
+Argument:
+	('['annotations+=WORD']')*
+	ref?='ref'?
+	in?='in'?
+	type=TYPE
+	name=WORD;
+
+Field:
+	('['annotations+=WORD']')*
+	 visibility=Visibility?
+	 type=TYPE
+	 name=WORD ';'
+;
 
 @Override
 Expression:
@@ -102,7 +116,7 @@ Return:
 	'return' expression=Expression ';';
 
 Declaration:
-	(var?='var' | type=TYPENAME) variable=Access 
+	(var?='var' | type=TYPE) variable=Access 
 	(assignmentType=AssignmentKind expression=Expression)? ';';
 	
 @Override
@@ -114,12 +128,6 @@ Assignment:
 FunctionCall:
 	function=WORD
 	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')' ';';
-
-Annotation:
-	'[' call=FunctionCall ']';
-
-Argument:
-	annotations+=Annotation* ref?='ref'? type=TYPENAME name=WORD;
 
 Lambda: {Lambda}
 	'(' (arguments+=Argument (',' arguments+=Argument)*)? ')' '=>' '{' statements+=Statement* '}';
@@ -137,15 +145,12 @@ Primary returns Expression:
 	'(' Expression ')'
 ;
 
-QualifiedName:
-	WORD ('.' WORD)*;
+QUALIFIEDNAME: WORD ('.' WORD)*;
 
-TYPENAME:
-	WORD ('<' TYPENAME (',' TYPENAME)* '>')?;
+TYPE: WORD ('<' WORD (',' WORD)* '>')?;
+	
+enum Visibility: default|public|protected|private;
 
-terminal MULTIPLE_LINES_COMMENT:
-	'/*'->'*/';
+terminal MULTIPLE_LINES_COMMENT: '/*'->'*/ ';
 
-terminal SINGLE_LINE_COMMENT:
-	'//' !('\n' | '\r')* ('\r'? '\n')?;
- 
+terminal SINGLE_LINE_COMMENT: '//' !('\n' | '\r')* ('\r'? '\n')?;
