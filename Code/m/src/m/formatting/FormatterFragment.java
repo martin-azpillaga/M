@@ -12,9 +12,15 @@ public class FormatterFragment extends AbstractXtextGeneratorFragment
 	public void generate()
 	{
 		GuiceModuleAccess.BindingFactory bindingFactory = new GuiceModuleAccess.BindingFactory();
-		if (getGrammar().getName().equals("m.JSON"))
+		
+		var grammar = getGrammar().getName();
+		if (grammar.equals("m.JSON"))
 		{
 			bindingFactory.addTypeToType(TypeReference.typeRef(IFormatter2.class), TypeReference.typeRef(JSONFormat.class)).contributeTo(getLanguage().getRuntimeGenModule());
+		}
+		else if (grammar.equals("m.CSharp"))
+		{
+			bindingFactory.addTypeToType(TypeReference.typeRef(IFormatter2.class), TypeReference.typeRef(CSharpFormat.class)).contributeTo(getLanguage().getRuntimeGenModule());
 		}
 	}
 }
