@@ -32,7 +32,8 @@ Forall returns Block: {Forall}
 	 '{' statements+=Statement* '}';
 
 Exists returns Block: {Exists}
-	 '∃' amount=Amount?
+	(negated?='∄'|'∃')
+	 amount=Amount?
 	 variable=WORD
 	('∈' collection=Expression )?
 	('|' condition=Expression)?
