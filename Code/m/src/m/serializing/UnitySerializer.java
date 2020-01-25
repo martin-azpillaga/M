@@ -10,9 +10,12 @@ import java.util.UUID;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 
 import m.CSharpRuntimeModule;
+import m.JSONRuntimeModule;
 import m.YAMLRuntimeModule;
 import m.csharp.CsharpFactory;
 import m.csharp.NamespaceType;
+import m.json.JsonFactory;
+import m.json.Member;
 import m.m.Archetype;
 import m.m.Game;
 import m.m.System;
@@ -27,15 +30,22 @@ public class UnitySerializer
 	ModularFactory modular = ModularFactory.eINSTANCE;
 	CsharpFactory csharp = CsharpFactory.eINSTANCE;
 	YamlFactory yaml = YamlFactory.eINSTANCE;
+	JsonFactory json = JsonFactory.eINSTANCE;
+	
 	CSharpRuntimeModule csharpModule;
 	YAMLRuntimeModule yamlModule;
+	JSONRuntimeModule jsonModule;
+	
 	IFileSystemAccess2 fsa;
 	
 	public void serialize(Game game, IFileSystemAccess2 fsa)
 	{
 		csharpModule = new CSharpRuntimeModule();
 		yamlModule = new YAMLRuntimeModule();
+		jsonModule = new JSONRuntimeModule();
 		this.fsa = fsa;
+		
+		packagesManifest();
 		
 		var components = MValidator.components;
 		
@@ -61,6 +71,43 @@ public class UnitySerializer
 		{
 			serialize(system);
 		}
+	}
+	
+	private void packagesManifest()
+	{
+		var file = json.createObject();
+		var dependencies = json.createMember();
+		dependencies.setName("dependencies");
+		var list = json.createObject();
+		dependencies.setValue(list);
+
+		var members = list.getMembers();
+		members.add(dependency("com.unity.entities","0.3.0-preview.4"));
+		members.add(dependency("com.unity.inputsystem","1.0.0-preview.4"));
+		members.add(dependency("com.unity.netcode","0.0.4-preview.0"));
+		members.add(dependency("com.unity.physics","0.2.5-preview.1"));
+		members.add(dependency("com.unity.rendering.hybrid","0.3.2-preview.17"));
+		members.add(dependency("com.unity.test-framework","1.1.8"));
+		members.add(dependency("com.unity.transport", "0.2.3-preview.0"));
+		members.add(dependency("com.unity.modules.audio","1.0.0"));
+		members.add(dependency("com.unity.modules.animation","1.0.0"));
+		members.add(dependency("com.unity.modules.ui", "1.0.0"));
+		members.add(dependency("com.unity.ugui", "1.0.0"));
+		members.add(dependency("com.unity.modules.particlesystem","1.0.0"));
+		
+		file.getMembers().add(dependencies);
+		
+		GenericSerializer.generate(file, jsonModule, fsa, "Unity/Packages/manifest.json");
+	}
+	
+	private Member dependency(String name, String version)
+	{
+		var member = json.createMember();
+		member.setName(name);
+		var value = json.createString();
+		value.setValue(version);
+		member.setValue(value);
+		return member;
 	}
 	
 	public void serialize(String component, Type type)
