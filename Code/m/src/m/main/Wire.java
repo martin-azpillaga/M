@@ -7,7 +7,10 @@ import org.eclipse.xtext.xtext.generator.XtextGenerator;
 import org.eclipse.xtext.xtext.generator.model.project.BundleProjectConfig;
 import org.eclipse.xtext.xtext.generator.model.project.StandardProjectConfig;
 
-public class RunFragments 
+import m.formatting.FormatterFragment;
+import m.parsing.ContextualParserMessagesFragment;
+
+public class Wire 
 {
 	public static void main(String[] args)
 	{
@@ -58,7 +61,7 @@ public class RunFragments
 		var language = new StandardLanguage();
 		language.setName(name);
 		language.setFileExtensions(extensions);
-		//language.addFragment(new FormatterFragment());
+		language.addFragment(new FormatterFragment());
 		//language.addFragment(new ContextualParserMessagesFragment());
 		return language;
 	}
