@@ -18,7 +18,7 @@ Member:
 	NamespaceMember|Method|Field
 ;
 Struct:
-	('['annotations+=WORD']')*
+	(annotations+=Annotation)*
 	 visibility=Visibility?
 	 'struct' name=TYPE
 	(':' superTypes+=TYPE (',' superTypes+=TYPE)*)?
@@ -26,7 +26,7 @@ Struct:
 ;
 
 Class:
-	('['annotations+=WORD']')*
+	(annotations+=Annotation)*
 	 visibility=Visibility?
 	 sealed?='sealed'?
 	 static?='static'?
@@ -36,14 +36,14 @@ Class:
 ;
 
 Enum:
-	('['annotations+=WORD']')*
+	(annotations+=Annotation)*
 	 visibility=Visibility?
 	 'enum' name=TYPE
 	 '{' (values+=WORD (',' values+=WORD)*)? '}'
 ;
 
 Method:
-	('['annotations+=WORD']')*
+	(annotations+=Annotation)*
 	 visibility=Visibility?
 	 implicit?='implicit'?
 	 opertor?='operator'?
@@ -55,18 +55,21 @@ Method:
 	 '{' statements+=Statement*	'}';
 
 Argument:
-	('['annotations+=WORD']')*
+	(annotations+=Annotation)*
 	ref?='ref'?
 	in?='in'?
 	type=TYPE
 	name=WORD;
 
 Field:
-	('['annotations+=WORD']')*
+	(annotations+=Annotation)*
 	 visibility=Visibility?
 	 type=TYPE
 	 name=WORD ';'
 ;
+
+Annotation:
+	'[' values+=WORD (',' values+=WORD)* ']';
 
 @Override
 Expression:

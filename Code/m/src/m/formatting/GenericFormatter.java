@@ -45,6 +45,21 @@ public abstract class GenericFormatter extends AbstractFormatter2
 		document.prepend(o,f);
 	}
 	
+	protected void prepend(EObject o, Procedure1<? super IHiddenRegionFormatter> f)
+	{
+		document.prepend(o,f);
+	}
+	
+	protected void append(ISemanticRegion o, Procedure1<? super IHiddenRegionFormatter> f)
+	{
+		document.append(o,f);
+	}
+	
+	protected void append(EObject o, Procedure1<? super IHiddenRegionFormatter> f)
+	{
+		document.append(o,f);
+	}
+	
 	protected void indent(ISemanticRegion a, ISemanticRegion b)
 	{
 		document.interior(a, b, indent());
