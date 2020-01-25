@@ -6,8 +6,6 @@ import org.eclipse.xtext.xtext.generator.AbstractXtextGeneratorFragment;
 import org.eclipse.xtext.xtext.generator.model.GuiceModuleAccess;
 import org.eclipse.xtext.xtext.generator.model.TypeReference;
 
-import m.formatting2.MFormatter;
-
 public class FormatterFragment extends AbstractXtextGeneratorFragment
 {
 	@Override
