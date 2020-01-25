@@ -8,31 +8,26 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 import m.json.Member;
 
-public class JSONFormat extends AbstractFormatter2
+public class JSONFormat extends GenericFormatter
 {
 	@Override
-	public void format(Object obj, IFormattableDocument document) 
+	public void format(Object obj) 
 	{
-
-		if (obj instanceof XtextResource)
-		{
-			_format((XtextResource) obj, document);
-		}
-		else if (obj instanceof m.json.Object)
+		if (obj instanceof m.json.Object)
 		{
 			var o = (m.json.Object) obj;
-			var open = textRegionExtensions.regionFor(o).keyword("{");
-			var close = textRegionExtensions.regionFor(o).keyword("}");
+			var open = keyword(o,"{");
+			var close = keyword(o,"}");
 			if (o.eContainer() != null)
 			{
-				document.prepend(open, newLine());
+				prepend(open, newLine());
 			}
-			document.prepend(close, newLine());
-			document.interior(open, close, indent());
-			var commas = textRegionExtensions.regionFor(o).keywords(",");
-			for (var comma : commas)
+			prepend(close, newLine());
+			indent(open, close);
+
+			for (var comma : keywords(o,","))
 			{
-				document.prepend(comma, noSpace());
+				prepend(comma, noSpace());
 			}
 			for (var member : o.getMembers())
 			{
@@ -45,46 +40,5 @@ public class JSONFormat extends AbstractFormatter2
 			document.prepend(member, newLine());
 			format(member.getValue(),document);
 		}
-	}
-	
-	private Procedure1<? super IHiddenRegionFormatter> newLine()
-	{
-		return x -> x.newLine();
-	}
-	
-	private Procedure1<? super IHiddenRegionFormatter> newLines(int num)
-	{
-		return x -> x.setNewLines(num);
-	}
-	
-	private Procedure1<? super IHiddenRegionFormatter> indent()
-	{
-		return x -> x.indent();
-	}
-	
-	private Procedure1<? super IHiddenRegionFormatter> noSpace()
-	{
-		return x -> x.noSpace();
-	}
+	}	
 }
-/*
-def dispatch void format(Object object, extension IFormattableDocument document) 
-{
-	var open = object.regionFor.keyword('{')
-	var close = object.regionFor.keyword('}')
-	if (object.eContainer !== null)
-	{
-		open.prepend[newLine]
-	}
-	close.prepend[newLine]
-	interior(open,close)[indent]
-	object.regionFor.keywords(',').forEach[prepend[noSpace]]
-	object.members.forEach[format]
-}
-
-def dispatch void format(Member member, extension IFormattableDocument document) 
-{
-	member.prepend[newLine]
-	member.regionFor.keyword(':').surround[oneSpace]
-	member.value.format
-}*/
