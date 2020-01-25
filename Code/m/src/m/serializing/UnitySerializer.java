@@ -104,7 +104,7 @@ public class UnitySerializer
 	{
 		var member = json.createMember();
 		member.setName(name);
-		var value = json.createString();
+		var value = json.createStringValue();
 		value.setValue(version);
 		member.setValue(value);
 		return member;

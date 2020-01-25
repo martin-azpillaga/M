@@ -87,7 +87,6 @@ terminal BOOLEAN: '⊤'|'⊥';
 terminal STRING: '"' -> '"';
 terminal WORD: '^'? ('_'|LETTER) ('_'|LETTER|DIGIT)*;
 terminal NUMBER returns EFloat: '-'? DIGIT+ ('.' DIGIT+)? ('e' ('-'|'+')? DIGIT+)?;
-terminal ANY: .;
 
 terminal fragment LETTER: '\u0061'..'\u007A'|'\u0041'..'\u005A'|'\u00A0'..'\uFFFF';
 terminal fragment DIGIT: '0'..'9';
