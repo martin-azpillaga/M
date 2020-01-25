@@ -4,6 +4,7 @@ import static m.csharp.Visibility.PUBLIC;
 import static m.validation.Type.input;
 import static m.validation.Type.tag;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -82,19 +83,21 @@ public class UnitySerializer
 		dependencies.setValue(list);
 
 		var members = list.getMembers();
+		var modules = new String[]{"ai","androidjni","animation","assetbundle","audio","cloth","director","imageconversion","imgui","jsonserialize","particlesystem","physics","physics2d","screencapture","terrain","terrainphysics","tilemap","ui","uielements","umbra","unityanalytics","unitywebrequest","unitywebrequestassetbundle","unitywebrequestaudio","unitywebrequesttexture","unitywebrequestwww","vehicles","video","vr","wind","xr"};
 		members.add(dependency("com.unity.entities","0.3.0-preview.4"));
 		members.add(dependency("com.unity.inputsystem","1.0.0-preview.4"));
 		members.add(dependency("com.unity.netcode","0.0.4-preview.0"));
 		members.add(dependency("com.unity.physics","0.2.5-preview.1"));
 		members.add(dependency("com.unity.rendering.hybrid","0.3.2-preview.17"));
-		members.add(dependency("com.unity.test-framework","1.1.8"));
+		members.add(dependency("com.unity.test-framework","1.1.11"));
 		members.add(dependency("com.unity.transport", "0.2.3-preview.0"));
-		members.add(dependency("com.unity.modules.audio","1.0.0"));
-		members.add(dependency("com.unity.modules.animation","1.0.0"));
-		members.add(dependency("com.unity.modules.ui", "1.0.0"));
 		members.add(dependency("com.unity.ugui", "1.0.0"));
-		members.add(dependency("com.unity.modules.particlesystem","1.0.0"));
-		
+		members.add(dependency("com.unity.xr.legacyinputhelpers", "1.3.8"));
+		members.add(dependency("com.unity.timeline", "1.2.9"));
+		for (var module : modules)
+		{
+			members.add(dependency("com.unity.modules."+module,"1.0.0"));
+		}
 		file.getMembers().add(dependencies);
 		
 		GenericSerializer.generate(file, jsonModule, fsa, "Unity/Packages/manifest.json");
@@ -151,7 +154,11 @@ public class UnitySerializer
 		
 		if (type == input)
 		{
-			namespaces.add("Unity.Input");
+			namespaces.add("UnityEngine.InputSystem");
+		}
+		else if (type == Type.float2||type==Type.float3||type==Type.float4)
+		{
+			namespaces.add("Unity.Mathematics");
 		}
 		
 		member.setVisibility(PUBLIC);
