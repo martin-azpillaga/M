@@ -178,7 +178,7 @@ public class MValidator extends AbstractMValidator
 		}
 	}
 	
-	
+	/*
 	@Check
 	public void uniqueEntity(Forall forall)
 	{
@@ -227,10 +227,6 @@ public class MValidator extends AbstractMValidator
 		}
 	}
 	
-	private void checkStatements(ArrayList<Statement> list, EObject current)
-	{
-		
-	}
 	@Check
 	public void scope(Variable variable)
 	{
@@ -304,7 +300,7 @@ public class MValidator extends AbstractMValidator
 			container = container.eContainer();
 		}
 		error("Entity " + myEntity + " undefined in the scope", variable, VARIABLE__NAME);
-	}
+	}*/
 	
 	@Check
 	public void existsBase(Archetype archetype)
@@ -853,6 +849,24 @@ public class MValidator extends AbstractMValidator
 				return;
 			}
 			set(call, float1);
+		}
+		else if (function.equals("quit"))
+		{
+			if (parameters.size() != 0)
+			{
+				error("quit takes no parameters",call, FUNCTION_CALL__FUNCTION);
+				return;
+			}
+		}
+		else if (function.equals("has"))
+		{
+			if (parameters.size() != 2)
+			{
+				error ("has takes a type and an entity", call, FUNCTION_CALL__FUNCTION);
+				return;
+			}
+			set(call,bool);
+			set(parameters.get(1), entity);
 		}
 		else
 		{
