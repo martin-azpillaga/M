@@ -13,6 +13,7 @@ dependencies {
 	implementation 'org.eclipse.xtext:xtext-antlr-generator'
 	implementation files("${projectDir}/m/src")
 	implementation files("${projectDir}/m/src/m/parsing")
+	implementation files("${projectDir}/m/src/m/formatting")
 	implementation files("${projectDir}/build/classes/java/main")
 }
 
@@ -21,7 +22,7 @@ sourceSets {
 }
 
 task compileFragments(type: JavaCompile){
-	source += fileTree(dir: 'm/src/m/main', include: '**/*.java')
+	source += file('m/src/m/main/RunFragments.java')
 	source += fileTree(dir: 'm/src/m/parsing', include: '**/*.java')
 	classpath = configurations.implementation
 	destinationDir = file('build/classes/java/main')
@@ -38,8 +39,15 @@ task runFragments(type: JavaExec) {
 	classpath = configurations.implementation
 }
 
-task generateLanguageServer(type: Jar) {
+task runWire(type: JavaExec) {
 	dependsOn compileJava
+	main = "m.main.Wire"
+	args "."
+	classpath = configurations.implementation
+}
+
+task generateLanguageServer(type: Jar) {
+	dependsOn runWire
 	baseName = 'm-language-server'
     manifest.attributes 'Main-Class': 'org.eclipse.xtext.ide.server.ServerLauncher'
     from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }

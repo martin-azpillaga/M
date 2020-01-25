@@ -4,7 +4,7 @@ import "azpillaga.world/m"
 generate text "azpillaga.world/text"
 
 @Override
-Modul:
+Game:
 	(archetypes+=Archetype|systems+=System)*;
 
 Cool:

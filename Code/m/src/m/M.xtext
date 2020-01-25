@@ -2,7 +2,7 @@ grammar m.M with m.Modular
 import "azpillaga.world/modular"
 generate m "azpillaga.world/m"
 
-Modul:
+Game:
 	(archetypes+=Archetype|systems+=System|procedures+=Procedure)*
 	end = End;
 
@@ -23,28 +23,42 @@ System:
 
 @Override
 Statement:
-	Loop|Selection|Iteration|FunctionCall|Assignment;
+	Forall|Exists|Selection|Iteration|FunctionCall|Assignment;
 
-Loop returns Block: {Loop}
-	 '∀' entity=WORD
-	('∈' collection=ComponentAccess )?
+Forall returns Block: {Forall}
+	 '∀' variable=WORD
+	('∈' collection=Expression )?
 	('|' tags+=WORD+)?
 	 '{' statements+=Statement* '}';
 
+Exists returns Block: {Exists}
+	(negated?='∄'|'∃')
+	 amount=Amount?
+	 variable=WORD
+	('∈' collection=Expression )?
+	('|' condition=Expression)?
+	 '{' statements+=Statement* '}';
+
+Amount:
+	kind=AmountKind
+	bound=Expression;
 
 @Override
 Atomic returns Expression:
 	Variable|ComponentAccess|FunctionCall;
-	
-Variable returns Expression: {Variable}
-	name=WORD;
-
-ComponentAccess returns Expression: {ComponentAccess}
-	name=WORD
-	'.' component=WORD;
 
 @Override
 Access returns Expression:
 	Variable|ComponentAccess;
 
+Variable returns Expression: {Variable}
+	name=WORD;
+
+ComponentAccess returns Expression: {ComponentAccess}
+	entity=WORD
+	'.' component=WORD;
+
+
+
 End: {End} 'end'?;
+enum AmountKind: lower='<'|lowerOrEqual='<='|equal='='|notEqual='!='|greaterOrEqual='>='|greater='>';
