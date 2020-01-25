@@ -4,5 +4,5 @@ import "azpillaga.world/m"
 import "azpillaga.world/modular"
 
 @Override
-Modul:
+Game:
 	(archetypes+=Archetype|systems+=System)*;
