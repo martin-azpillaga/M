@@ -122,10 +122,13 @@ public class UnitySerializer
 		
 		NamespaceType member;
 		
-		if (type.isNumeric() || type == tag || type.isList())
+		if (type.isNumeric() || type == tag || type == Type.entity || type.isList())
 		{
 			member = csharp.createStruct();
-			member.getAnnotations().add("GenerateAuthoringComponent");
+			
+			var annotation = csharp.createAnnotation();
+			annotation.getValues().add("GenerateAuthoringComponent");
+			member.getAnnotations().add(annotation);
 			
 			if (type.isList())
 			{
@@ -254,7 +257,7 @@ public class UnitySerializer
 			case font: return "FontAsset";
 			case gameObject: return "GameObject";
 			case image: return "Texture";
-			case input: return "PlayerInputAction";
+			case input: return "InputAction";
 			case material: return "Material";
 			case mesh: return "Mesh";
 			case none: return "None";
