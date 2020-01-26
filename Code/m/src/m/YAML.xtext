@@ -1,31 +1,72 @@
-grammar m.YAML
+grammar m.YAML with m.JSON hidden(COMMENT)
 
-import "http://www.eclipse.org/emf/2002/Ecore"
+import "http://www.eclipse.org/emf/2002/Ecore" 
+import "azpillaga.world/json"
 generate yaml "azpillaga.world/yaml"
 
-File:
-	(nodes+=Node WS?)*;
+Stream:
+	(directives+=Directive|documents+=Document)*;
 
-Node:
-	Document | Value;
+Directive: Version|Tag;
+Version:
+	'%YAML' SPACE version=DATA WS;
+Tag:
+	'%TAG' SPACE
+	'!'name=DATA'!' SPACE
+	value=DATA WS;
 
-Value returns Node:
-	Map | KeyValue | KeyValueList;
 
 Document:
-	{Document} '---' SPACE '!u!' tag=NUMBER SPACE '&' id=NUMBER WS value=Map;
+	('---' (SPACE|WS))? 
+	root=Node WS
+	('...'(SPACE|WS))?;
+Node:
+	(tag=TagRef (SPACE|WS))?
+	('&' anchor=DATA (SPACE|WS))?
+	value=Value|
+	'*'alias=DATA
+;
+TagRef:
+	LocalTag|GlobalTag|ResolvedTag;
+
+LocalTag:
+	'!' handle=DATA '!' value=DATA;
+GlobalTag:
+	'!!' handle=DATA;
+ResolvedTag:
+	'!<' handle=DATA '>';
+
+@Override
+Value:
+	Scalar|Sequence|Mapping;
+
+Scalar:
+	value=DATA;
+Sequence:
+	SequenceFlow;
+Mapping:
+	MappingFlow;
+
+SequenceFlow: {SequenceFlow}
+	'[' (SPACE|WS)* (elements+=Value (SPACE|WS)*(',' (SPACE|WS)* elements+=Value(SPACE|WS)*)*)? ']';
+
+MappingFlow: {MappingFlow}
+	'{' (SPACE|WS)*(pairs+=Pair (SPACE|WS)*(',' (SPACE|WS)* pairs+=Pair(SPACE|WS)*)*)? '}';
+
+Pair:
+	key=DATA (SPACE|WS)*':' (SPACE|WS)*value=Value;
 
 KeyValue:
-	key=WORD ':' SPACE value=Element?;
+	key=DATA ':' SPACE value=Element?;
 
 Map:
-	key=WORD ':' WS BEGIN body+=Value (WS body+=Value)* WS? END;
+	key=DATA ':' WS BEGIN body+=Value (WS body+=Value)* WS? END;
 
 KeyValueList:
-	name=WORD ':' WS '-' SPACE values+=(KeyValue | Element) (WS '-' SPACE values+=(KeyValue | Element))*;
+	name=DATA ':' WS '-' SPACE values+=(KeyValue | Element) (WS '-' SPACE values+=(KeyValue | Element))*;
 
 Element:
-	InlineMap | InlineList | InlineSemicolonList | {Word} value=WORD | {Float} value=NUMBER |{Guid}value=GUID;
+	InlineMap | InlineList | InlineSemicolonList | {Word} value=DATA | {Float} value=NUMBER;
 
 InlineList:
 	{InlineList} '[' (elements+=Element (',' SPACE elements+=Element)*)? ']';
@@ -34,35 +75,21 @@ InlineMap:
 	{InlineMap} '{' (SPACE? values+=KeyValue (',' SPACE values+=KeyValue)* SPACE?)? '}';
 
 InlineSemicolonList:
-	{InlineSemicolonList} elements+=WORD ';' elements+=WORD (';' elements+=WORD)*;
+	{InlineSemicolonList} elements+=DATA ';' elements+=DATA (';' elements+=DATA)*;
 
-enum Version:
-	oneOne='%YAML 1.1';
 
-enum Tag:
-	unity='%TAG !u! tag:unity3d.com,2011:';
+@Override
+terminal NUMBER returns EFloat: 'number';
+terminal fragment LETTER: '\u0061'..'\u007A'|'\u0041'..'\u005A'|'\u00A0'..'\uFFFF';
+terminal DATA: ('0'..'9'|LETTER | '_') (':'|','| '.' | '/' | LETTER | '_' | '0'..'9')*;
+terminal COMMENT: '#' (LETTER|' ')* NEWLINE;
 
-terminal WORD:
-	('a'..'z' | 'A'..'Z' | '_') (' ' | '.' | '/' | 'a'..'z' | 'A'..'Z' | '_' | '0'..'9')*;
+terminal SPACE:	' ';
 
-terminal NUMBER:
-	'-'? ('0'..'9')* ('.' ('0'..'9')+ ('e' '-'? '0'..'9'+)?)?;
+@Override 
+terminal WS: NEWLINE SPACE*;
 
-GUID:
-	NUMBER WORD (NUMBER|WORD)*|
-	WORD NUMBER (NUMBER|WORD)*;
+terminal NEWLINE: '\r'? '\n';
 
-terminal SPACE:
-	' ';
-
-terminal WS:
-	NEWLINE SPACE*;
-
-terminal NEWLINE:
-	'\r'? '\n';
-
-terminal BEGIN:
-	'synthetic:BEGIN';
-
-terminal END:
-	'synthetic:END';
+terminal BEGIN:	'synthetic:BEGIN';
+terminal END: 'synthetic:END';

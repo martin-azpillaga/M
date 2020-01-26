@@ -24,6 +24,8 @@ import m.modular.ModularFactory;
 import m.validation.MValidator;
 import m.validation.StandardLibrary;
 import m.validation.Type;
+import m.yaml.Tag;
+import m.yaml.Version;
 import m.yaml.YamlFactory;
 
 public class UnitySerializer
@@ -179,7 +181,7 @@ public class UnitySerializer
 		var fileFormat = yaml.createKeyValue();
 		fileFormat.setKey("fileFormatVersion");
 		var value = yaml.createFloat();
-		value.setValue("2");
+		value.setValue(2);
 		fileFormat.setValue(value);
 		meta.getNodes().add(fileFormat);
 		
@@ -198,21 +200,33 @@ public class UnitySerializer
 	private void serialize(Archetype archetype)
 	{
 		var file = yaml.createFile();
-		var guid = yaml.createKeyValue();
-		guid.setKey("guid");
-		var word = yaml.createGuid();
-		word.setValue(uuid(archetype.getName()+"component"));
-		guid.setValue(word);
-		file.getNodes().add(guid);
+		file.setVersion(Version.ONE_ONE);
+		file.setTag(Tag.UNITY);
+		var go = yaml.createDocument();
+		file.getNodes().add(go);
+		go.setTag(1);
+		go.setId("GameObject".hashCode());
+		var goMap = yaml.createMap();
+		go.setValue(goMap);
+		goMap.setKey("GameObject");
+		var name = yaml.createKeyValue();
+		name.setKey("m_Name");
+		var value = yaml.createWord();
+		value.setValue(archetype.getName());
+		name.setValue(value);
+		goMap.getBody().add(name);
+		
 		GenericSerializer.generate(file, yamlModule, fsa, "Unity/Assets/Design/Archetypes/"+archetype.getName()+".prefab");
+		
+		
 		
 		var meta = yaml.createFile();
 		var guid2 = yaml.createKeyValue();
-		guid.setKey("guid");
+		guid2.setKey("guid");
 		var word2 = yaml.createGuid();
 		word2.setValue(uuid(archetype.getName()+"component"));
 		guid2.setValue(word2);
-		meta.getNodes().add(guid);
+		meta.getNodes().add(guid2);
 		GenericSerializer.generate(meta, yamlModule, fsa, "Unity/Assets/Design/Archetypes/"+archetype.getName()+".prefab.meta");
 	}
 	
@@ -240,6 +254,29 @@ public class UnitySerializer
 	private String uuid(String string)
 	{
 		return UUID.nameUUIDFromBytes(string.getBytes()).toString().replace("-","");
+	}
+	
+	private String hash(String s)
+	{
+		var result = "";
+		var uuid = uuid(s);
+		for (var c = 0; c < 10; c++)
+		{
+			var character = uuid.charAt(c);
+			if (character > 57)
+			{
+				result += ((char)character-49);
+			}
+			else
+			{
+				result += character;
+			}
+		}
+		if (result.startsWith("0"))
+		{
+			result = result.replaceFirst("0","1");
+		}
+		return result;
 	}
 	
 	private String unityName(Type type)
