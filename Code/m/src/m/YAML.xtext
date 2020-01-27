@@ -1,30 +1,86 @@
-grammar m.YAML with m.JSON hidden(COMMENT)
+grammar m.YAML hidden()
 
 import "http://www.eclipse.org/emf/2002/Ecore" 
-import "azpillaga.world/json"
 generate yaml "azpillaga.world/yaml"
 
+// WS? before terminals, but not before ParserRules!
+// Force a WS where needed
+// : included in NOSPACE as otherwise they are keywords
 Stream:
 	(directives+=Directive|documents+=Document)*;
 
 Directive: Version|Tag;
 Version:
-	'%YAML' SPACE version=DATA WS;
+	WS? '%YAML' 
+	WS? version=DATA 
+	WS;
 Tag:
-	'%TAG' SPACE
-	'!'name=DATA'!' SPACE
-	value=DATA WS;
-
+	WS? '%TAG'
+	WS? '!'name=DATA'!'
+	WS? value=DATA 
+	WS;
 
 Document:
-	('---' (SPACE|WS))? 
-	root=Node WS
-	('...'(SPACE|WS))?;
+	(WS? '---')?
+	root=Node
+	(WS? '...' )?
+	 WS;
+TagRef:
+	LocalTag|GlobalTag|ResolvedTag
+;
+LocalTag:
+	WS? '!' handle=DATA'!' WS? data=DATA WS;
+GlobalTag:
+	WS? '!!' handle=DATA WS
+;
+ResolvedTag:
+	WS? '!<' handle=DATA'>'
+;
 Node:
-	(tag=TagRef (SPACE|WS))?
-	('&' anchor=DATA (SPACE|WS))?
-	value=Value|
-	'*'alias=DATA
+	RegularNode|AliasNode
+;
+RegularNode:
+	tag=TagRef?
+	(WS? '&' WS? name=DATA WS)?
+	root=Value
+;
+AliasNode:
+	WS? '*' alias=[RegularNode|DATA]
+;
+Value:
+	DataValue|SingleValue|DoubleValue|Sequence|Map
+;
+DoubleValue: WS? value=STRING;
+SingleValue: WS? value=SINGLE_STRING;
+DataValue: WS? value=DATA;
+Sequence:{Sequence} 
+	WS? '['
+	 (elements+=Value
+	(WS? ', '
+	 elements+=Value)*)?
+	WS? ']';
+Map:{Map}
+	WS? '{'
+	 (pairs+=Pair
+	(WS? ', ' pairs+=Pair)*)?
+	WS? '}';
+Pair:
+	WS? key=(DATA|STRING|SINGLE_STRING) WS? ': ' value=Value
+;
+M:
+	key=DATA ':' WS BEGIN body+=Value (WS body+=Value)* WS? END;
+/*
+Node:
+	ValueNode|AliasNode
+;
+ValueNode:
+	((tag=TagRef VERTICAL? ('&' name=DATA)? VERTICAL)|
+	('&' name=DATA VERTICAL? tag=TagRef? VERTICAL))?
+	value=Value
+;
+
+AliasNode:
+	'*'alias=[ValueNode|DATA]
 ;
 TagRef:
 	LocalTag|GlobalTag|ResolvedTag;
@@ -35,18 +91,42 @@ GlobalTag:
 	'!!' handle=DATA;
 ResolvedTag:
 	'!<' handle=DATA '>';
-
 @Override
 Value:
-	Scalar|Sequence|Mapping;
+	Object|Array|StringValue|SingleValue|DataValue
+;
+SingleValue:
+	value=SINGLE_STRING
+;
+DataValue:
+	value=DATA
+;
+@Override 
+Member:
+	name = (STRING|DATA|SINGLE_STRING) (HORIZONTAL|VERTICAL)*
+	':' (HORIZONTAL|VERTICAL)* value=Value;*/
+/*
+@Override
+Value:
+	Scalar|Sequence;//|Mapping;
 
 Scalar:
+	PlainScalar|SingleScalar|DoubleScalar;
+PlainScalar:
 	value=DATA;
+SingleScalar:
+	value=SINGLE_STRING;
+DoubleScalar:
+	value=STRING;
+
 Sequence:
-	SequenceFlow;
+	SequenceBlock;//|SequenceFlow;
 Mapping:
 	MappingFlow;
 
+SequenceBlock: {SequenceBlock}
+	('-' SPACE elements+=Value WS)*
+;
 SequenceFlow: {SequenceFlow}
 	'[' (SPACE|WS)* (elements+=Value (SPACE|WS)*(',' (SPACE|WS)* elements+=Value(SPACE|WS)*)*)? ']';
 
@@ -76,20 +156,14 @@ InlineMap:
 
 InlineSemicolonList:
 	{InlineSemicolonList} elements+=DATA ';' elements+=DATA (';' elements+=DATA)*;
+*/
+DATA: (NOSPACE)+;
 
-
-@Override
-terminal NUMBER returns EFloat: 'number';
-terminal fragment LETTER: '\u0061'..'\u007A'|'\u0041'..'\u005A'|'\u00A0'..'\uFFFF';
-terminal DATA: ('0'..'9'|LETTER | '_') (':'|','| '.' | '/' | LETTER | '_' | '0'..'9')*;
-terminal COMMENT: '#' (LETTER|' ')* NEWLINE;
-
-terminal SPACE:	' ';
-
-@Override 
-terminal WS: NEWLINE SPACE*;
-
-terminal NEWLINE: '\r'? '\n';
+//terminal COMMENT: ' #' (NOSPACE|' '|'\t')* NOSPACE;
+terminal STRING: '"' -> '"';
+terminal SINGLE_STRING: '\'' -> '\'';
+terminal NOSPACE: '\u0021'..'\u007e'|'\u00a0'..'\uffff';
+terminal WS: (' '|'\t'|'\n'|'\r')+;
 
 terminal BEGIN:	'synthetic:BEGIN';
 terminal END: 'synthetic:END';
