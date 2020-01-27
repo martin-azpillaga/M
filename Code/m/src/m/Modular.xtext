@@ -31,7 +31,7 @@ Return:
 	'←' expression=Expression;
 
 Assignment returns Expression: {Assignment}
-	variable=Access
+	variable=Variable
 	kind=AssignmentKind
 	expression=Expression;
 
@@ -63,7 +63,7 @@ Primary returns Expression:
   Atomic|LogicalNot|UnaryMinus|Brackets;
 
 Atomic returns Expression:
-  FloatLiteral|StringLiteral|BooleanLiteral|Access|FunctionCall;
+  FloatLiteral|StringLiteral|BooleanLiteral|Variable|FunctionCall;
 
 Brackets returns Expression:
 	'(' expression=Expression ')';
@@ -74,8 +74,8 @@ LogicalNot returns Expression:
 UnaryMinus returns Expression:
 	{UnaryMinus} '-' expression=Primary;	
 
-Access returns Expression: {Access}
-	fragments+=WORD ('.' fragments+=WORD)*;
+Variable returns Expression: {Variable}
+	name=WORD;
 
 FloatLiteral returns Expression: {FloatLiteral}	value=NUMBER;
 StringLiteral returns Expression: {StringLiteral} value=STRING;

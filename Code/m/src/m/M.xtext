@@ -44,21 +44,9 @@ Amount:
 	bound=Expression;
 
 @Override
-Atomic returns Expression:
-	Variable|ComponentAccess|FunctionCall;
-
-@Override
-Access returns Expression:
-	Variable|ComponentAccess;
-
-Variable returns Expression: {Variable}
-	name=WORD;
-
-ComponentAccess returns Expression: {ComponentAccess}
-	entity=WORD
-	'.' component=WORD;
-
-
+Variable returns Expression:
+	{Variable} name=WORD|
+	{ComponentAccess} name=WORD '.' component=WORD;
 
 End: {End} 'end'?;
 enum AmountKind: lower='<'|lowerOrEqual='<='|equal='='|notEqual='!='|greaterOrEqual='>='|greater='>';
