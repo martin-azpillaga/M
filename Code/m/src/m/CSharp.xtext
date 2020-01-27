@@ -119,12 +119,12 @@ Return:
 	'return' expression=Expression ';';
 
 Declaration:
-	(var?='var' | type=TYPE) variable=Access 
+	(var?='var' | type=TYPE) variable=Variable 
 	(assignmentType=AssignmentKind expression=Expression)? ';';
 	
 @Override
 Assignment:
-	variable=Access kind=AssignmentKind expression=Expression ';'
+	variable=Variable kind=AssignmentKind expression=Expression ';'
 ;
 
 @Override
@@ -142,7 +142,7 @@ Primary returns Expression:
 	FloatLiteral |
 	StringLiteral |
 	BooleanLiteral |
-	Access|
+	Variable|
 	FunctionCall|
 	Index|
 	'(' Expression ')'
