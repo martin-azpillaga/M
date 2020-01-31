@@ -18,12 +18,12 @@ Component:
 
 
 System:
-	name=WORD
-	'{'	statements+=Statement+ '}';
+	name=WORD ':'
+	statements+=Statement+;
 
 @Override
 Statement:
-	Forall|Exists|Selection|Iteration|FunctionCall|Assignment;
+	Forall|Exists|Selection|Iteration|Action;
 
 Forall returns Block: {Forall}
 	 '∀' variable=WORD
@@ -42,11 +42,6 @@ Exists returns Block: {Exists}
 Amount:
 	kind=AmountKind
 	bound=Expression;
-
-@Override
-Variable returns Expression:
-	{Variable} name=WORD|
-	{ComponentAccess} name=WORD '.' component=WORD;
 
 End: {End} 'end'?;
 enum AmountKind: lower='<'|lowerOrEqual='<='|equal='='|notEqual='!='|greaterOrEqual='>='|greater='>';

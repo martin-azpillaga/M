@@ -84,4 +84,9 @@ public abstract class GenericFormatter extends AbstractFormatter2
 	{
 		return x -> x.noSpace();
 	}
+	
+	protected Procedure1<? super IHiddenRegionFormatter> oneSpace()
+	{
+		return x -> x.oneSpace();
+	}
 }

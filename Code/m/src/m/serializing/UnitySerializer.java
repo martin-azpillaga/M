@@ -1,8 +1,12 @@
 package m.serializing;
 
-import static m.csharp.Visibility.PUBLIC;
-import static m.validation.Type.input;
-import static m.validation.Type.tag;
+import static m.csharp.EnumModifier.*;
+import static m.csharp.ClassModifier.*;
+import static m.csharp.StructModifier.*;
+import static m.csharp.InterfaceModifier.*;
+import static m.csharp.MethodModifier.*;
+import static m.csharp.FieldModifier.*;
+import static m.validation.Type.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -13,8 +17,12 @@ import org.eclipse.xtext.generator.IFileSystemAccess2;
 import m.CSharpRuntimeModule;
 import m.JSONRuntimeModule;
 import m.YAMLRuntimeModule;
+import m.csharp.ClassModifier;
+import m.csharp.CompilationUnit;
 import m.csharp.CsharpFactory;
-import m.csharp.NamespaceType;
+import m.csharp.FieldModifier;
+import m.csharp.MethodModifier;
+import m.csharp.StructModifier;
 import m.json.JsonFactory;
 import m.json.Member;
 import m.m.Archetype;
@@ -86,16 +94,20 @@ public class UnitySerializer
 
 		var members = list.getMembers();
 		var modules = new String[]{"ai","androidjni","animation","assetbundle","audio","cloth","director","imageconversion","imgui","jsonserialize","particlesystem","physics","physics2d","screencapture","terrain","terrainphysics","tilemap","ui","uielements","umbra","unityanalytics","unitywebrequest","unitywebrequestassetbundle","unitywebrequestaudio","unitywebrequesttexture","unitywebrequestwww","vehicles","video","vr","wind","xr"};
-		members.add(dependency("com.unity.entities","0.3.0-preview.4"));
+		members.add(dependency("com.unity.entities","0.5.1-preview.11"));
+		members.add(dependency("com.unity.jobs","0.2.4-preview.11"));
+		members.add(dependency("com.unity.collections","0.5.1-preview.11"));
 		members.add(dependency("com.unity.inputsystem","1.0.0-preview.4"));
-		members.add(dependency("com.unity.netcode","0.0.4-preview.0"));
+		//members.add(dependency("com.unity.netcode","0.0.4-preview.0"));
 		members.add(dependency("com.unity.physics","0.2.5-preview.1"));
-		members.add(dependency("com.unity.rendering.hybrid","0.3.2-preview.17"));
+		members.add(dependency("com.unity.rendering.hybrid","0.3.3-preview.11"));
 		members.add(dependency("com.unity.test-framework","1.1.11"));
 		members.add(dependency("com.unity.transport", "0.2.3-preview.0"));
 		members.add(dependency("com.unity.ugui", "1.0.0"));
 		members.add(dependency("com.unity.xr.legacyinputhelpers", "1.3.8"));
-		members.add(dependency("com.unity.timeline", "1.2.9"));
+		members.add(dependency("com.unity.timeline", "1.2.10"));
+		members.add(dependency("com.unity.ide.rider","1.1.4"));
+		members.add(dependency("com.unity.ide.vscode", "1.1.4"));
 		for (var module : modules)
 		{
 			members.add(dependency("com.unity.modules."+module,"1.0.0"));
@@ -117,138 +129,153 @@ public class UnitySerializer
 	
 	public void serialize(String component, Type type)
 	{
-		var unit = csharp.createCompilationUnit();
+		CompilationUnit unit = csharp.createCompilationUnit();
 		
 		var namespaces = new HashSet<String>();
 		namespaces.add("Unity.Entities");
 		
-		NamespaceType member;
-		
-		if (type.isNumeric() || type == tag || type == Type.entity || type.isList())
+		if (type.isNumeric())
 		{
-			member = csharp.createStruct();
-			
-			var annotation = csharp.createAnnotation();
-			annotation.getValues().add("GenerateAuthoringComponent");
-			member.getAnnotations().add(annotation);
-			
-			if (type.isList())
+			if (type != float1)
 			{
-				member.getSuperTypes().add("IBufferElementData");
+				namespaces.add("Unity.Mathematics");
 			}
-			else
-			{
-				member.getSuperTypes().add("IComponentData");
-			}
+			
+			var struct = csharp.createStruct();
+			struct.getModifiers().add(StructModifier.PUBLIC);
+			struct.setName(component);
+			struct.getSuperTypes().add("IComponentData");
+			
+			var attributeSection = csharp.createAttributeSection();
+			var generate = csharp.createAttribute();
+			generate.setName("GenerateAuthoringComponent");
+			attributeSection.getAttributes().add(generate);
+			struct.getAttributes().add(attributeSection);
+			
+			var value = csharp.createField();
+			value.getModifiers().add(FieldModifier.PUBLIC);
+			value.setType(unityName(type));
+			value.setName("Value");
+			struct.getMembers().add(value);
+			
+			unit.getTypes().add(struct);
+		}
+		else if (type == tag)
+		{
+			var struct = csharp.createStruct();
+			struct.getModifiers().add(StructModifier.PUBLIC);
+			struct.setName(component);
+			struct.getSuperTypes().add("IComponentData");
+			
+			var attributeSection = csharp.createAttributeSection();
+			var generate = csharp.createAttribute();
+			generate.setName("GenerateAuthoringComponent");
+			attributeSection.getAttributes().add(generate);
+			struct.getAttributes().add(attributeSection);
+			
+			unit.getTypes().add(struct);
+		}
+		else if (type.isList())
+		{
+			namespaces.add("UnityEngine");
+			namespaces.add("System.Collections.Generic");
+			
+			var struct = csharp.createStruct();
+			struct.getModifiers().add(StructModifier.PUBLIC);
+			struct.setName(component);
+			struct.getSuperTypes().add("IBufferElementData");
+			
+			var value = csharp.createField();
+			value.getModifiers().add(FieldModifier.PUBLIC);
+			value.setType(unityName(type));
+			value.setName("Value");
+			struct.getMembers().add(value);
+			
+			var clazz = csharp.createClass();
+			clazz.getModifiers().add(ClassModifier.PUBLIC);
+			clazz.setName(component+"Authoring");
+			clazz.getSuperTypes().add("MonoBehaviour");
+			clazz.getSuperTypes().add("IConvertGameObjectToEntity");
+			clazz.getSuperTypes().add("IDeclareReferencedPrefabs");
+			
+			var field = csharp.createField();
+			field.getModifiers().add(FieldModifier.PUBLIC);
+			field.setType("List<GameObject>");
+			field.setName("Value");
+			clazz.getMembers().add(field);
+			
+			var method = csharp.createMethod();
+			method.getModifiers().add(MethodModifier.PUBLIC);
+			method.setType("void");
+			method.setName("Convert");
+			clazz.getMembers().add(method);
+			
+			var entity = csharp.createParameter();
+			entity.setType("Entity");
+			entity.setName("entity");
+			var entityManager = csharp.createParameter();
+			entityManager.setType("EntityManager");
+			entityManager.setName("entityManager");
+			var conversionSystem = csharp.createParameter();
+			conversionSystem.setType("GameObjectConversionSystem");
+			conversionSystem.setName("gameObjectConversionSystem");
+			method.getParameters().add(entity);
+			method.getParameters().add(entityManager);
+			method.getParameters().add(conversionSystem);
+			
+			var declare = csharp.createMethod();
+			declare.getModifiers().add(MethodModifier.PUBLIC);
+			declare.setType("void");
+			declare.setName("DeclareReferencedPrefabs");
+			clazz.getMembers().add(declare);
+			
+			var referencedPrefabs = csharp.createParameter();
+			referencedPrefabs.setType("List<GameObject>");
+			referencedPrefabs.setName("referencedPrefabs");
+			declare.getParameters().add(referencedPrefabs);
+			
+			unit.getTypes().add(struct);
+			unit.getTypes().add(clazz);
 		}
 		else
 		{
-			member = csharp.createClass();
-			member.getSuperTypes().add("MonoBehaviour");
 			namespaces.add("UnityEngine");
-		}
-		
-		if (type != tag)
-		{
-			var valueField = csharp.createField();
-			valueField.setVisibility(PUBLIC);
-			valueField.setType(unityName(type));
-			valueField.setName("Value");
-			member.getMembers().add(valueField);
+			
+			var clazz = csharp.createClass();
+			clazz.getModifiers().add(ClassModifier.PUBLIC);
+			clazz.setName(component+"Authoring");
+			clazz.getSuperTypes().add("MonoBehaviour");
+			
+			var value = csharp.createField();
+			value.getModifiers().add(FieldModifier.PUBLIC);
+			value.setType(unityName(type));
+			value.setName("Value");
+			clazz.getMembers().add(value);
+			unit.getTypes().add(clazz);
 		}
 		
 		if (type == input)
 		{
 			namespaces.add("UnityEngine.InputSystem");
 		}
-		else if (type == Type.float2||type==Type.float3||type==Type.float4)
-		{
-			namespaces.add("Unity.Mathematics");
-		}
-		
-		member.setVisibility(PUBLIC);
-		member.setName(component);
-		unit.getTypes().add(member);
 
 		for (var namespace : namespaces)
 		{
-			var using = csharp.createUsing();
-			using.setName(namespace);
+			var using = csharp.createNamespaceUsing();
+			using.setNamespace(namespace);
 			unit.getUsings().add(using);			
 		}
-		
-		var meta = yaml.createFile();
-		var fileFormat = yaml.createKeyValue();
-		fileFormat.setKey("fileFormatVersion");
-		var value = yaml.createFloat();
-		value.setValue(2);
-		fileFormat.setValue(value);
-		meta.getNodes().add(fileFormat);
-		
-		var guid = yaml.createKeyValue();
-		guid.setKey("guid");
-		var word = yaml.createGuid();
-		word.setValue(uuid(component+"component"));
-		guid.setValue(word);
-		meta.getNodes().add(guid);
-
-		GenericSerializer.generate(meta, yamlModule, fsa, "Unity/Assets/Code/Components/"+component+".cs.meta");
-
-		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Components/"+component+".cs");
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Components/"+component+"Authoring.cs");
 	}
 	
 	private void serialize(Archetype archetype)
 	{
-		var file = yaml.createFile();
-		file.setVersion(Version.ONE_ONE);
-		file.setTag(Tag.UNITY);
-		var go = yaml.createDocument();
-		file.getNodes().add(go);
-		go.setTag(1);
-		go.setId("GameObject".hashCode());
-		var goMap = yaml.createMap();
-		go.setValue(goMap);
-		goMap.setKey("GameObject");
-		var name = yaml.createKeyValue();
-		name.setKey("m_Name");
-		var value = yaml.createWord();
-		value.setValue(archetype.getName());
-		name.setValue(value);
-		goMap.getBody().add(name);
 		
-		GenericSerializer.generate(file, yamlModule, fsa, "Unity/Assets/Design/Archetypes/"+archetype.getName()+".prefab");
-		
-		
-		
-		var meta = yaml.createFile();
-		var guid2 = yaml.createKeyValue();
-		guid2.setKey("guid");
-		var word2 = yaml.createGuid();
-		word2.setValue(uuid(archetype.getName()+"component"));
-		guid2.setValue(word2);
-		meta.getNodes().add(guid2);
-		GenericSerializer.generate(meta, yamlModule, fsa, "Unity/Assets/Design/Archetypes/"+archetype.getName()+".prefab.meta");
 	}
 	
 	private void serialize(System system)
 	{
-		var file = yaml.createFile();
-		var guid = yaml.createKeyValue();
-		guid.setKey("guid");
-		var word = yaml.createGuid();
-		word.setValue(uuid(system.getName()+"component"));
-		guid.setValue(word);
-		file.getNodes().add(guid);
-		GenericSerializer.generate(file, yamlModule, fsa, "Unity/Assets/Code/Systems/"+system.getName()+".prefab");
 		
-		var meta = yaml.createFile();
-		var guid2 = yaml.createKeyValue();
-		guid.setKey("guid");
-		var word2 = yaml.createGuid();
-		word2.setValue(uuid(system.getName()+"component"));
-		guid2.setValue(word2);
-		meta.getNodes().add(guid);
-		GenericSerializer.generate(meta, yamlModule, fsa, "Unity/Assets/Code/Systems/"+system.getName()+".prefab.meta");
 	}
 	
 	private String uuid(String string)
