@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import m.csharp.CompilationUnit;
 import m.csharp.Struct;
 import m.csharp.Field;
+import m.csharp.Method;
 import m.services.CSharpGrammarAccess;
 
 public class CSharpFormat extends GenericFormatter
@@ -28,38 +29,65 @@ public class CSharpFormat extends GenericFormatter
 			}
 			for (var type : unit.getTypes())
 			{
-				prepend(type, newLines(2));
-				for (var annotation : type.getAnnotations())
+				if (unit.getUsings().size() > 0)
 				{
-					if (annotation != type.getAnnotations().get(0))
-					{
-						prepend(annotation,newLine());
-					}
-					append(keyword(annotation,"["), noSpace());
-					prepend(keyword(annotation,"]"), noSpace());
-					if (annotation == type.getAnnotations().get(type.getAnnotations().size() -1))
-					{
-						append(keyword(annotation,"]"), newLine());
-					}					
+					prepend(type, newLines(2));
 				}
-				prepend(keyword(type,"{"),newLine());
-				prepend(keyword(type,"}"),newLine());
-				indent(keyword(type,"{"),keyword(type,"}"));
 				format(type);
 			}
 		}
-		else if (o instanceof m.csharp.Class)
+		if (o instanceof Struct)
 		{
-			var clazz = (m.csharp.Class) o;
-			for (var member : clazz.getMembers())
+			var struct = (Struct) o;
+			for (var attribute : struct.getAttributes())
+			{
+				if (attribute != struct.getAttributes().get(0))
+				{
+					prepend(attribute,newLine());
+				}
+				append(keyword(attribute,"["), noSpace());
+				prepend(keyword(attribute,"]"), noSpace());
+				if (attribute == struct.getAttributes().get(struct.getAttributes().size() -1))
+				{
+					append(keyword(attribute,"]"), newLine());
+				}					
+			}
+			for (var comma : keywords(struct, ","))
+			{
+				prepend(comma,noSpace());
+			}
+			prepend(keyword(struct,"{"),newLine());
+			prepend(keyword(struct,"}"),newLine());
+			indent(keyword(struct,"{"),keyword(struct,"}"));
+			for (var member : struct.getMembers())
 			{
 				prepend(member, newLine());
 				format(member);
 			}
 		}
-		else if (o instanceof Struct)
+		else if (o instanceof m.csharp.Class)
 		{
-			var struct = (Struct) o;
+			var struct = (m.csharp.Class) o;
+			for (var attribute : struct.getAttributes())
+			{
+				if (attribute != struct.getAttributes().get(0))
+				{
+					prepend(attribute,newLine());
+				}
+				append(keyword(attribute,"["), noSpace());
+				prepend(keyword(attribute,"]"), noSpace());
+				if (attribute == struct.getAttributes().get(struct.getAttributes().size() -1))
+				{
+					append(keyword(attribute,"]"), newLine());
+				}					
+			}
+			for (var comma : keywords(struct, ","))
+			{
+				prepend(comma,noSpace());
+			}
+			prepend(keyword(struct,"{"),newLine());
+			prepend(keyword(struct,"}"),newLine());
+			indent(keyword(struct,"{"),keyword(struct,"}"));
 			for (var member : struct.getMembers())
 			{
 				prepend(member, newLine());
@@ -71,6 +99,30 @@ public class CSharpFormat extends GenericFormatter
 			var field = (Field) o;
 			prepend(keyword(field,";"), noSpace());
 		}
+		else if (o instanceof Method)
+		{
+			var method = (Method) o;
+			for (var comma : keywords(method, ","))
+			{
+				prepend(comma,noSpace());
+			}
+			prepend(keyword(method,")"), noSpace());
+			prepend(keyword(method, "{"),newLine());
+			prepend(keyword(method,"}"),newLine());
+			indent(keyword(method,"{"),keyword(method,"}"));
+			
+			var parameters = method.getParameters();
+			for (var parameter : parameters)
+			{
+				if (parameter != parameters.get(0))
+				{
+					prepend(parameter, oneSpace());
+				}
+				else
+				{
+					prepend(parameter, noSpace());
+				}
+			}
+		}
 	}
-
 }

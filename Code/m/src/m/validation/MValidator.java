@@ -13,7 +13,6 @@ import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.validation.Check;
 
 import m.m.Component;
-import m.m.ComponentAccess;
 import m.m.End;
 import m.m.Exists;
 import m.m.Amount;
@@ -23,15 +22,17 @@ import m.m.Forall;
 import m.m.MPackage;
 import m.m.Game;
 import m.m.System;
-import m.m.Variable;
+import m.modular.Variable;
 import m.m.VectorComponent;
+import m.modular.AccessExpression;
+import m.modular.Action;
 import m.modular.AdditiveExpression;
 import m.modular.Assignment;
 import m.modular.Block;
 import m.modular.Comparison;
 import m.modular.Equality;
 import m.modular.Expression;
-import m.modular.FunctionCall;
+import m.modular.Function;
 import m.modular.Iteration;
 import m.modular.LogicalAnd;
 import m.modular.LogicalNot;
@@ -470,9 +471,15 @@ public class MValidator extends AbstractMValidator
 		return false;
 	}
 	
-	private boolean set(ComponentAccess access, Type type)
+	private boolean set(AccessExpression access, Type type)
 	{
-		var component = access.getComponent();
+		var right = access.getRight();
+		if (right instanceof Function)
+		{
+			error("Can only access components",access, EXPRESSION__EXPRESSION);
+			return false;
+		}
+		var component = ((Variable)right).getName();
 		if (components.containsKey(component))
 		{
 			if (components.get(component) != type)
@@ -545,13 +552,13 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void infer(ComponentAccess access)
+	public void infer(AccessExpression access)
 	{
-		var entity = access.getEntity();
-		setVariable(entity, Type.entity, access, COMPONENT_ACCESS__ENTITY);
-		
+		var entity = ((Variable)access.getLeft()).getName();
+		setVariable(entity, Type.entity, access, ACCESS_EXPRESSION__LEFT);
+
 		var feature = EXPRESSION__EXPRESSION;
-		var component = access.getComponent();
+		var component = ((Variable)access.getRight()).getName();
 		magic(component, "Range", float1, input, access, feature);
 		magic(component,"Vector", float2, input, access, feature);
 		magic(component,"Trigger", bool, input, access, feature);
@@ -691,10 +698,45 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
+	public void infer(Action action)
+	{
+		var left = action.getAccess();
+		var kind = action.getKind();
+		var right = action.getExpression();
+		
+		if (right == null) return;
+		
+		switch (kind)
+		{
+			case DECREASE:
+				group(action,left,right);
+				break;
+			case DIVIDE:
+				group(action, left);
+				set(right, float1);
+				break;
+			case INCREASE:
+				group(action,left,right);
+				break;
+			case MODULUS:
+				group(action, left);
+				set(right, float1);
+				break;
+			case MULTIPLY:
+				group(action, left);
+				set(right, float1);
+				break;
+			case SET:
+				group(action,left,right);
+				break;			
+		}
+	}
+	
+	@Check
 	public void infer(Assignment assignment)
 	{
 		var kind = assignment.getKind();
-		var left = assignment.getVariable();
+		var left = assignment.getLeft();
 		var right = assignment.getExpression();
 		
 		switch (kind)
@@ -735,15 +777,15 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void infer(FunctionCall call)
+	public void infer(Function call)
 	{
-		var function = call.getFunction();
+		var function = call.getName();
 		var parameters = call.getParameters();
 		if (function.equals("random"))
 		{
 			if (parameters.size() != 1)
 			{
-				error("random takes a single float2 argument", call, FUNCTION_CALL__FUNCTION);
+				error("random takes a single float2 argument", call, FUNCTION__NAME);
 				return;
 			}
 			var parameter0 = parameters.get(0);
@@ -755,7 +797,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 1)
 			{
-				error("math functions take a single float1 argument", call, FUNCTION_CALL__FUNCTION);
+				error("math functions take a single float1 argument", call, FUNCTION__NAME);
 				return;
 			}
 			var parameter0 = parameters.get(0);
@@ -767,7 +809,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 1)
 			{
-				error("create takes a single entity argument", call, FUNCTION_CALL__FUNCTION);
+				error("create takes a single entity argument", call, FUNCTION__NAME);
 				return;
 			}
 			var parameter0 = parameters.get(0);
@@ -779,7 +821,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 1)
 			{
-				error("destroy takes a single entity argument", call, FUNCTION_CALL__FUNCTION);
+				error("destroy takes a single entity argument", call, FUNCTION__NAME);
 				return;
 			}
 			var parameter0 = parameters.get(0);
@@ -791,7 +833,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 2)
 			{
-				error("takes a type and an entity", call, FUNCTION_CALL__FUNCTION);
+				error("takes a type and an entity", call, FUNCTION__NAME);
 				return;
 			}
 			var parameter1 = parameters.get(1);
@@ -803,7 +845,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 2 && parameters.size() != 3 && parameters.size() != 4)
 			{
-				error("join takes two, three or four floats", call, FUNCTION_CALL__FUNCTION);
+				error("join takes two, three or four floats", call, FUNCTION__NAME);
 				return;
 			}
 			var size = parameters.size();
@@ -845,7 +887,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 1)
 			{
-				error("component functions take a single floatn argument", call, FUNCTION_CALL__FUNCTION);
+				error("component functions take a single floatn argument", call, FUNCTION__NAME);
 				return;
 			}
 			set(call, float1);
@@ -854,7 +896,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 0)
 			{
-				error("quit takes no parameters",call, FUNCTION_CALL__FUNCTION);
+				error("quit takes no parameters",call, FUNCTION__NAME);
 				return;
 			}
 		}
@@ -862,7 +904,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 2)
 			{
-				error ("has takes a type and an entity", call, FUNCTION_CALL__FUNCTION);
+				error ("has takes a type and an entity", call, FUNCTION__NAME);
 				return;
 			}
 			set(call,bool);
@@ -870,7 +912,7 @@ public class MValidator extends AbstractMValidator
 		}
 		else
 		{
-			error("Function " + function + " does not exist in the standard library", call, FUNCTION_CALL__FUNCTION);
+			error("Function " + function + " does not exist in the standard library", call, FUNCTION__NAME);
 		}
 	}
 	
@@ -882,7 +924,7 @@ public class MValidator extends AbstractMValidator
 		{
 			for (var expression : group)
 			{
-				if (expression instanceof Variable||expression instanceof ComponentAccess)
+				if (expression instanceof AccessExpression)
 				{
 					warning("Type undecidable", expression, EXPRESSION__EXPRESSION);
 				}
@@ -953,10 +995,10 @@ public class MValidator extends AbstractMValidator
 							break;
 						}
 					}
-					else if (expression instanceof ComponentAccess)
+					else if (expression instanceof AccessExpression)
 					{
-						var access = (ComponentAccess) expression;
-						var component = access.getComponent();
+						var access = (AccessExpression) expression;
+						var component = ((Variable)access.getRight()).getName();
 						if (components.containsKey(component))
 						{
 							repeat = true;
@@ -984,9 +1026,9 @@ public class MValidator extends AbstractMValidator
 						repeat = true;
 					}
 				}
-				else if (expression instanceof ComponentAccess)
+				else if (expression instanceof AccessExpression)
 				{
-					var access = (ComponentAccess) expression;
+					var access = (AccessExpression) expression;
 					if (set(access, expressions.get(expression)))
 					{
 						repeat = true;

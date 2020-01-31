@@ -6,6 +6,7 @@ generate yaml "azpillaga.world/yaml"
 // WS? before terminals, but not before ParserRules!
 // Force a WS where needed
 // : included in NOSPACE as otherwise they are keywords
+// terminal rule SPACE and force a space after :
 Stream:
 	(directives+=Directive|documents+=Document)*;
 
@@ -48,7 +49,7 @@ AliasNode:
 	WS? '*' alias=[RegularNode|DATA]
 ;
 Value:
-	DataValue|SingleValue|DoubleValue|Sequence|Map
+	DataValue|SingleValue|DoubleValue|Sequence|Map|M
 ;
 DoubleValue: WS? value=STRING;
 SingleValue: WS? value=SINGLE_STRING;
@@ -68,7 +69,7 @@ Pair:
 	WS? key=(DATA|STRING|SINGLE_STRING) WS? ': ' value=Value
 ;
 M:
-	key=DATA ':' WS BEGIN body+=Value (WS body+=Value)* WS? END;
+	key=DATA ': ' WS BEGIN body+=Value (WS body+=Value)* WS? END;
 /*
 Node:
 	ValueNode|AliasNode
