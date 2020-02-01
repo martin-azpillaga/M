@@ -28,6 +28,7 @@ import m.json.Member;
 import m.m.Archetype;
 import m.m.Game;
 import m.m.System;
+import m.modular.AssignmentKind;
 import m.modular.ModularFactory;
 import m.validation.MValidator;
 import m.validation.StandardLibrary;
@@ -98,6 +99,7 @@ public class UnitySerializer
 		members.add(dependency("com.unity.jobs","0.2.4-preview.11"));
 		members.add(dependency("com.unity.collections","0.5.1-preview.11"));
 		members.add(dependency("com.unity.inputsystem","1.0.0-preview.4"));
+		members.add(dependency("com.unity.dots.editor", "0.3.0-preview"));
 		//members.add(dependency("com.unity.netcode","0.0.4-preview.0"));
 		members.add(dependency("com.unity.physics","0.2.5-preview.1"));
 		members.add(dependency("com.unity.rendering.hybrid","0.3.3-preview.11"));
@@ -153,9 +155,11 @@ public class UnitySerializer
 			struct.getAttributes().add(attributeSection);
 			
 			var value = csharp.createField();
+			var valueDeclarator = csharp.createFieldDeclarator();
+			value.getDeclarators().add(valueDeclarator);
 			value.getModifiers().add(FieldModifier.PUBLIC);
 			value.setType(unityName(type));
-			value.setName("Value");
+			valueDeclarator.setName("Value");
 			struct.getMembers().add(value);
 			
 			unit.getTypes().add(struct);
@@ -186,9 +190,11 @@ public class UnitySerializer
 			struct.getSuperTypes().add("IBufferElementData");
 			
 			var value = csharp.createField();
+			var valueDeclarator = csharp.createFieldDeclarator();
+			value.getDeclarators().add(valueDeclarator);
 			value.getModifiers().add(FieldModifier.PUBLIC);
 			value.setType(unityName(type));
-			value.setName("Value");
+			valueDeclarator.setName("Value");
 			struct.getMembers().add(value);
 			
 			var clazz = csharp.createClass();
@@ -199,9 +205,11 @@ public class UnitySerializer
 			clazz.getSuperTypes().add("IDeclareReferencedPrefabs");
 			
 			var field = csharp.createField();
+			var fieldDeclarator = csharp.createFieldDeclarator();
+			field.getDeclarators().add(fieldDeclarator);
 			field.getModifiers().add(FieldModifier.PUBLIC);
 			field.setType("List<GameObject>");
-			field.setName("Value");
+			fieldDeclarator.setName("Value");
 			clazz.getMembers().add(field);
 			
 			var method = csharp.createMethod();
@@ -223,6 +231,40 @@ public class UnitySerializer
 			method.getParameters().add(entityManager);
 			method.getParameters().add(conversionSystem);
 			
+			var addbuffer = csharp.createCall();
+			var addAccess = modular.createAccessExpression();
+			var addAccessLeft = modular.createVariable();
+			var addAccessRight = csharp.createParameterizedFunction();
+			var addAccessArgument = csharp.createArgument();
+			var addAccessValue = modular.createVariable();
+			method.getStatements().add(addbuffer);
+			addbuffer.setCall(addAccess);
+			addAccess.setLeft(addAccessLeft);
+			addAccess.setRight(addAccessRight);
+			addAccessRight.getArguments().add(addAccessArgument);
+			addAccessArgument.setValue(addAccessValue);
+			addAccessLeft.setName("entityManager");
+			addAccessRight.setName("AddBuffer");
+			addAccessRight.getTypes().add(component);
+			addAccessValue.setName("entity");
+			
+			var foreachV = csharp.createForeach();
+			var collectionV = modular.createVariable();
+			method.getStatements().add(foreachV);
+			foreachV.setCollection(collectionV);
+			foreachV.setVariable("v");
+			collectionV.setName("Value");
+			
+			var declareBoard = csharp.createDeclaration();
+			var newBoard = csharp.createParameterizedFunction();
+			foreachV.getStatements().add(declareBoard);
+			declareBoard.setExpression(newBoard);
+			declareBoard.setVariable(component);
+			declareBoard.setNew(true);
+			declareBoard.setKind(AssignmentKind.SET);
+			newBoard.setName(component);
+			
+			
 			var declare = csharp.createMethod();
 			declare.getModifiers().add(MethodModifier.PUBLIC);
 			declare.setType("void");
@@ -233,6 +275,28 @@ public class UnitySerializer
 			referencedPrefabs.setType("List<GameObject>");
 			referencedPrefabs.setName("referencedPrefabs");
 			declare.getParameters().add(referencedPrefabs);
+			
+			var foreach = csharp.createForeach();
+			foreach.setVariable("v");
+			var collection = modular.createVariable();
+			collection.setName("Value");
+			foreach.setCollection(collection);
+			var action = csharp.createCall();
+			var access = modular.createAccessExpression();
+			var left = modular.createVariable();
+			left.setName("referencedPrefabs");
+			var right = csharp.createParameterizedFunction();
+			right.setName("Add");
+			var v = modular.createVariable();
+			v.setName("v");
+			var argv = csharp.createArgument();
+			argv.setValue(v);
+			right.getArguments().add(argv);
+			access.setLeft(left);
+			access.setRight(right);
+			action.setCall(access);
+			foreach.getStatements().add(action);
+			declare.getStatements().add(foreach);
 			
 			unit.getTypes().add(struct);
 			unit.getTypes().add(clazz);
@@ -247,9 +311,11 @@ public class UnitySerializer
 			clazz.getSuperTypes().add("MonoBehaviour");
 			
 			var value = csharp.createField();
+			var valueDeclarator = csharp.createFieldDeclarator();
+			value.getDeclarators().add(valueDeclarator);
 			value.getModifiers().add(FieldModifier.PUBLIC);
 			value.setType(unityName(type));
-			value.setName("Value");
+			valueDeclarator.setName("Value");
 			clazz.getMembers().add(value);
 			unit.getTypes().add(clazz);
 		}
