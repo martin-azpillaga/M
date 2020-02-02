@@ -80,7 +80,7 @@ Variable:
 
 Function:
 	name=WORD
-	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')'
+	'(' (arguments+=Expression (',' arguments+=Expression)*)? ')'
 ;
 
 terminal WS: (' '|'\n'|'\r'|'\t')+;

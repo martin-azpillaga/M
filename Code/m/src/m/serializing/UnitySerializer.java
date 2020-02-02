@@ -231,18 +231,21 @@ public class UnitySerializer
 			method.getParameters().add(entityManager);
 			method.getParameters().add(conversionSystem);
 			
-			var addbuffer = csharp.createCall();
+			var addbuffer = csharp.createDeclaration();
+			var declareBuffer = csharp.createDeclarator();
 			var addAccess = modular.createAccessExpression();
 			var addAccessLeft = modular.createVariable();
 			var addAccessRight = csharp.createParameterizedFunction();
 			var addAccessArgument = csharp.createArgument();
 			var addAccessValue = modular.createVariable();
 			method.getStatements().add(addbuffer);
-			addbuffer.setCall(addAccess);
+			addbuffer.getDeclarators().add(declareBuffer);
+			declareBuffer.setValue(addAccess);
 			addAccess.setLeft(addAccessLeft);
 			addAccess.setRight(addAccessRight);
 			addAccessRight.getArguments().add(addAccessArgument);
 			addAccessArgument.setValue(addAccessValue);
+			declareBuffer.setVariable("buffer");
 			addAccessLeft.setName("entityManager");
 			addAccessRight.setName("AddBuffer");
 			addAccessRight.getTypes().add(component);
@@ -255,15 +258,40 @@ public class UnitySerializer
 			foreachV.setVariable("v");
 			collectionV.setName("Value");
 			
-			var declareBoard = csharp.createDeclaration();
-			var newBoard = csharp.createParameterizedFunction();
-			foreachV.getStatements().add(declareBoard);
-			declareBoard.setExpression(newBoard);
-			declareBoard.setVariable(component);
-			declareBoard.setNew(true);
-			declareBoard.setKind(AssignmentKind.SET);
-			newBoard.setName(component);
+			var addElementStatement = csharp.createExpressionStatement();
+			var addElement = modular.createAccessExpression();
+			var addLeft = modular.createVariable();
+			var addRight = csharp.createParameterizedFunction();
+			var addArgument = csharp.createArgument();
+			var creation = csharp.createCreation();
+			foreachV.getStatements().add(addElementStatement);
+			addElementStatement.setExpression(addElement);
+			addElement.setLeft(addLeft);
+			addElement.setRight(addRight);
+			addRight.getArguments().add(addArgument);
+			addArgument.setValue(creation);
+			addLeft.setName("buffer");
+			addRight.setName("Add");
 			
+			var valueMember = csharp.createMemberInitializer();
+			var valueValue = modular.createAccessExpression();
+			
+			creation.getMembers().add(valueMember);
+			creation.setType(component);
+			valueMember.setName("Value");
+			valueMember.setValue(valueValue);
+			
+			var convertLeft = modular.createVariable();
+			var convertRight = csharp.createParameterizedFunction();
+			var convertArgument = csharp.createArgument();
+			var convertArgumentV = modular.createVariable();
+			valueValue.setLeft(convertLeft);
+			valueValue.setRight(convertRight);
+			convertRight.getArguments().add(convertArgument);
+			convertArgument.setValue(convertArgumentV);
+			convertLeft.setName("gameObjectConversionSystem");
+			convertRight.setName("GetPrimaryEntity");
+			convertArgumentV.setName("v");
 			
 			var declare = csharp.createMethod();
 			declare.getModifiers().add(MethodModifier.PUBLIC);
@@ -281,7 +309,7 @@ public class UnitySerializer
 			var collection = modular.createVariable();
 			collection.setName("Value");
 			foreach.setCollection(collection);
-			var action = csharp.createCall();
+			var action = csharp.createExpressionStatement();
 			var access = modular.createAccessExpression();
 			var left = modular.createVariable();
 			left.setName("referencedPrefabs");
@@ -294,7 +322,7 @@ public class UnitySerializer
 			right.getArguments().add(argv);
 			access.setLeft(left);
 			access.setRight(right);
-			action.setCall(access);
+			action.setExpression(access);
 			foreach.getStatements().add(action);
 			declare.getStatements().add(foreach);
 			
