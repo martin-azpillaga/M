@@ -362,7 +362,12 @@ enum AttributeTarget:
 ;
 @Override
 Statement:
-	Foreach|For|Iteration|Selection|=>Declaration|Call|Return|EmptyStatement|Try
+	LabeledStatement|Foreach|For|Do|Iteration|Selection|Switch|=>Declaration|ExpressionStatement|Return|Yield|Break|Continue|Goto|EmptyStatement|Try
+	|Lock|Checked|Unchecked|Throw
+;
+
+LabeledStatement:
+	=>(label=WORD ':') statement=Statement
 ;
 
 EmptyStatement:{EmptyStatement}';';
@@ -387,7 +392,7 @@ Catch: {Catch}
 @Override
 Iteration:
 	'while' '(' condition=Expression ')'
-	'{' statements+=Statement* '}';
+	('{' statements+=Statement* '}'|statements+=Statement);
 
 @Override
 Selection:
@@ -395,20 +400,60 @@ Selection:
 	('else' 'if' branches+=Branch)*
 	('else' branches+=Block)?;
 
-For:
-	'for' '(' initialization=Expression ';' condition=Expression ';' increment=Expression ')'
-	'{'
-	statements+=Statement*
-	'}';
+Switch:
+	'switch' '(' expression=Expression ')'
+	'{' cases+=Case* '}'
+;
+Case: 
+	'case' condition=Expression ':'  statements+=Statement*|
+	{Case} 'default' ':' statements+=Statement*
+;
+For: {For}
+	'for' '(' initialization=Expression? ';' condition=Expression? ';' iterator=Expression? ')'
+	('{' statements+=Statement* '}'|statements+=Statement);
 
 Foreach:
 	'foreach' '(' ('var'|type=QUALIFIEDTYPE) variable=WORD 'in' collection=Expression ')'
+	('{' statements+=Statement* '}'|statements+=Statement);
+
+Do:
+	'do'
 	'{' statements+=Statement* '}'
+	'while' '(' condition=Expression ')' ';'
 ;
+
 Return:
 	'return' expression=Expression ';';
+Yield:
+	'yield' (break?='break'|'return' expression=Expression) ';'
+;
+Break: {Break}
+	'break'';'
+;
+Continue: {Continue}
+	'continue' ';'
+;
+Goto:
+	'goto' label=WORD|
+	'goto' 'case' case=Expression ';'|
+	'goto' default?='default' ';'
+;
+Throw:
+	'throw' expression=Expression ';';
 
-Lambda: {Lambda}
+Checked: {Checked}
+	'checked'
+	('{' statements+=Statement* '}'|statements+=Statement);
+
+Unchecked: {Unchecked}
+	'unchecked'
+	('{' statements+=Statement* '}'|statements+=Statement);
+
+Lock:
+	'lock' '(' expression=Expression ')'
+	('{' statements+=Statement* '}'|statements+=Statement);
+
+Lambda returns Expression: {Lambda}
 	'(' (parameters+=Parameter (',' parameters+=Parameter)*)? ')' '=>' '{' statements+=Statement* '}';
 
 ArrayInitializer: {ArrayInitializer}
@@ -422,13 +467,43 @@ Atomic returns Expression:
 	FloatLiteral |
 	StringLiteral |
 	BooleanLiteral |
-	(=>Function|
+	(=>ParameterizedFunction|
 	Variable)|
-	Index
+	Creation|
+	Index|
+	This|
+	Base|
+	Typeof
+;
+This: {This} 'this';
+Base: {Base} 'base';
+Typeof: 'typeof' '(' type=WORD ')'|
+	'typeof' '(' unboundType=QUALIFIEDTYPE '<' dimensions+=','* '>' ')';
+
+Creation:
+	'new' type=WORD // Should be qualifiedType
+	((
+		(
+			=>('{' (members+=MemberInitializer (',' members+=MemberInitializer)*)? '}')
+			|
+			=>('{' elements+=LogicalOr (',' elements+=LogicalOr)* '}')
+		)
+	)|(
+		'(' (arguments+=Argument (',' arguments+=Argument)*)? ')'
+		(
+			=>('{' (members+=MemberInitializer (',' members+=MemberInitializer)*)? '}')
+			|
+			=>('{' elements+=LogicalOr (',' elements+=LogicalOr)* '}')
+		)?
+	))
 ;
 
-@Override
-Function returns Function: {ParameterizedFunction}
+MemberInitializer:
+	name=WORD '=' value=Expression|
+	'[' indices+=Expression (',' indices+=Expression)* ']' '=' value=Expression
+;
+
+ParameterizedFunction:
 	name=WORD
 	('<' types+=QUALIFIEDTYPE (',' types+=QUALIFIEDTYPE)* '>')?
 	'(' (arguments+=Argument (',' arguments+=Argument)*)? ')'
@@ -449,11 +524,31 @@ Index:
 ;
 
 Declaration:
-	('var'|type=QUALIFIEDTYPE) variable=WORD (';'|kind=AssignmentKind new?='new'? expression=Expression ';');
+	('var'|constant?='const'? type=QUALIFIEDTYPE) declarators+=Declarator+ ';';
 
-Call:
-	call=AccessExpression ';'
+Declarator:
+	variable=WORD ('=' value=(Expression|ArrayInitializer))?
 ;
+ExpressionStatement:
+	expression=Expression ';'
+;
+
+@Override
+Expression:
+	=>Lambda|Assignment
+;
+
+@Override
+Assignment returns Expression:
+	Ternary ({Assignment.left=current} kind=AssignmentKind right=Ternary)*;
+
+Ternary returns Expression:
+	NullCoalescing ({Ternary.left=current} '?' yes=NullCoalescing ':' no=NullCoalescing)*;
+
+NullCoalescing returns Expression:
+	LogicalOr ({NullCoalescing.left=current} '??' right=LogicalOr)*;
+
+
 
 QUALIFIEDNAME: WORD ('.' WORD)*;
 TypeParameter: 

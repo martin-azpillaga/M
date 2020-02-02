@@ -780,7 +780,7 @@ public class MValidator extends AbstractMValidator
 	public void infer(Function call)
 	{
 		var function = call.getName();
-		var parameters = call.getParameters();
+		var parameters = call.getArguments();
 		if (function.equals("random"))
 		{
 			if (parameters.size() != 1)
