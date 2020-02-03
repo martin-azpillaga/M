@@ -43,6 +43,7 @@ public class Wire
 		configuration.setCode(code);
 		generator.setConfiguration(configuration);
 		
+		//generator.addLanguage(language("m.Mtext", "mtext"));
 		generator.addLanguage(language("m.Modular","modular"));
 		generator.addLanguage(language("m.M","m"));
 		generator.addLanguage(language("m.CSharp","cs"));

@@ -473,14 +473,19 @@ Atomic returns Expression:
 	Index|
 	This|
 	Base|
+	Default|
 	Typeof
 ;
-This: {This} 'this';
-Base: {Base} 'base';
-Typeof: 'typeof' '(' type=WORD ')'|
-	'typeof' '(' unboundType=QUALIFIEDTYPE '<' dimensions+=','* '>' ')';
+This returns Expression: {This} 'this';
+Base returns Expression: {Base} 'base';
+Default returns Expression: {Default} 'default';
+Typeof returns Expression: {Typeof}
+	(
+	'typeof' '(' type=WORD ')'|
+	'typeof' '(' unboundType=QUALIFIEDTYPE '<' dimensions+=','* '>' ')'
+	);
 
-Creation:
+Creation returns Expression: {Creation}
 	'new' type=WORD // Should be qualifiedType
 	((
 		(
