@@ -108,8 +108,8 @@ public class UnitySerializer
 		members.add(dependency("com.unity.ugui", "1.0.0"));
 		members.add(dependency("com.unity.xr.legacyinputhelpers", "1.3.8"));
 		members.add(dependency("com.unity.timeline", "1.2.10"));
-		members.add(dependency("com.unity.ide.rider","1.1.4"));
-		members.add(dependency("com.unity.ide.vscode", "1.1.4"));
+		//members.add(dependency("com.unity.ide.rider","1.1.4"));
+		//members.add(dependency("com.unity.ide.vscode", "1.1.4"));
 		for (var module : modules)
 		{
 			members.add(dependency("com.unity.modules."+module,"1.0.0"));
@@ -333,10 +333,24 @@ public class UnitySerializer
 		{
 			namespaces.add("UnityEngine");
 			
-			var clazz = csharp.createClass();
-			clazz.getModifiers().add(ClassModifier.PUBLIC);
-			clazz.setName(component+"Authoring");
-			clazz.getSuperTypes().add("MonoBehaviour");
+			var data = csharp.createClass();
+			data.getModifiers().add(ClassModifier.PUBLIC);
+			data.setName(component);
+			data.getSuperTypes().add("IComponentData");
+			
+			var dataValue = csharp.createField();
+			var dataValueDeclarator = csharp.createFieldDeclarator();
+			dataValue.getModifiers().add(FieldModifier.PUBLIC);
+			dataValue.setType(unityName(type));
+			dataValue.getDeclarators().add(dataValueDeclarator);
+			dataValueDeclarator.setName("Value");
+			data.getMembers().add(dataValue);
+			
+			var authoring = csharp.createClass();
+			authoring.getModifiers().add(ClassModifier.PUBLIC);
+			authoring.setName(component+"Authoring");
+			authoring.getSuperTypes().add("MonoBehaviour");
+			authoring.getSuperTypes().add("IConvertGameObjectToEntity");
 			
 			var value = csharp.createField();
 			var valueDeclarator = csharp.createFieldDeclarator();
@@ -344,8 +358,56 @@ public class UnitySerializer
 			value.getModifiers().add(FieldModifier.PUBLIC);
 			value.setType(unityName(type));
 			valueDeclarator.setName("Value");
-			clazz.getMembers().add(value);
-			unit.getTypes().add(clazz);
+			authoring.getMembers().add(value);
+			
+			var method = csharp.createMethod();
+			method.getModifiers().add(MethodModifier.PUBLIC);
+			method.setType("void");
+			method.setName("Convert");
+			authoring.getMembers().add(method);
+			
+			var entity = csharp.createParameter();
+			entity.setType("Entity");
+			entity.setName("entity");
+			var entityManager = csharp.createParameter();
+			entityManager.setType("EntityManager");
+			entityManager.setName("entityManager");
+			var conversionSystem = csharp.createParameter();
+			conversionSystem.setType("GameObjectConversionSystem");
+			conversionSystem.setName("gameObjectConversionSystem");
+			method.getParameters().add(entity);
+			method.getParameters().add(entityManager);
+			method.getParameters().add(conversionSystem);
+			
+			var addObjectStatement = csharp.createExpressionStatement();
+			var addObject = modular.createAccessExpression();
+			var addLeft = modular.createVariable();
+			var addRight = csharp.createParameterizedFunction();
+			var entityArgument = csharp.createArgument();
+			var entityArgumentValue = modular.createVariable();
+			var objectArgument = csharp.createArgument();
+			var objectArgumentValue = csharp.createCreation();
+			var valueMember = csharp.createMemberInitializer();
+			var valueMemberValue = modular.createVariable();
+			method.getStatements().add(addObjectStatement);
+			addObjectStatement.setExpression(addObject);
+			addObject.setLeft(addLeft);
+			addObject.setRight(addRight);
+			addRight.getArguments().add(entityArgument);
+			addRight.getArguments().add(objectArgument);
+			entityArgument.setValue(entityArgumentValue);
+			objectArgument.setValue(objectArgumentValue);
+			objectArgumentValue.getMembers().add(valueMember);
+			valueMember.setValue(valueMemberValue);
+			addLeft.setName("entityManager");
+			addRight.setName("AddComponentObject");
+			entityArgumentValue.setName("entity");
+			objectArgumentValue.setType(component);
+			valueMember.setName("Value");
+			valueMemberValue.setName("Value");
+			
+			unit.getTypes().add(data);
+			unit.getTypes().add(authoring);
 		}
 		
 		if (type == input)
