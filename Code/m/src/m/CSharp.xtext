@@ -554,8 +554,13 @@ Ternary returns Expression:
 NullCoalescing returns Expression:
 	LogicalOr ({NullCoalescing.left=current} '??' right=LogicalOr)*;
 
+@Override
+AccessExpression returns Expression:
+	Postfix ({AccessExpression.left=current} '.' right=Postfix)*;
 
-
+Postfix returns Expression:
+	Atomic (({Increment.expression=current} '++')|({Decrement.expression=current} '--'))?
+;
 QUALIFIEDNAME: WORD ('.' WORD)*;
 TypeParameter: 
 	attributes+=AttributeSection* 

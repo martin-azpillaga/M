@@ -3,6 +3,7 @@ import "azpillaga.world/modular"
 generate m "azpillaga.world/m"
 
 Game:
+	(archetypes+=Archetype|systems+=System|procedures+=Procedure)
 	(archetypes+=Archetype|systems+=System|procedures+=Procedure)*
 	end = End;
 
