@@ -88,6 +88,8 @@ public class UnitySerializer
 		{
 			serialize(system);
 		}
+		
+		extras();
 	}
 	
 	private void packagesManifest()
@@ -509,7 +511,6 @@ public class UnitySerializer
 				assignment.setRight(assignmentRight);
 				assignmentLeft.setName(queryKey);
 				assignmentRight.setName("GetEntityQuery");
-				
 			}
 		}
 		
@@ -530,7 +531,7 @@ public class UnitySerializer
 			unit.getUsings().add(using);			
 		}
 		
-		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/"+system.getName()+".cs");
+		//GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/"+system.getName()+".cs");
 	}
 	
 	private void addStatements(List<Statement> statements, List<Statement> list, HashMap<String,Query> queries)
@@ -641,6 +642,86 @@ public class UnitySerializer
 			case text: return "String";
 		}
 		return "None";
+	}
+	
+	private void extras()
+	{
+		var engineComponents = new String[] {"Camera", "Light"};
+		var unit = csharp.createCompilationUnit();
+		var namespaces = new String[]{"UnityEngine","Unity.Entities"};
+		for (var namespace : namespaces)
+		{
+			var using = csharp.createNamespaceUsing();
+			unit.getUsings().add(using);
+			using.setNamespace(namespace);
+		}
+		
+		var clazz = csharp.createClass();
+		unit.getTypes().add(clazz);
+		clazz.getModifiers().add(ClassModifier.PUBLIC);
+		clazz.setName("EngineComponentConversion");
+		clazz.getSuperTypes().add("GameObjectConversionSystem");
+		
+		var onUpdate = csharp.createMethod();
+		clazz.getMembers().add(onUpdate);
+		onUpdate.getModifiers().add(MethodModifier.PROTECTED);
+		onUpdate.getModifiers().add(MethodModifier.OVERRIDE);
+		onUpdate.setType("void");
+		onUpdate.setName("OnUpdate");
+		
+		for (var engineComponent : engineComponents)
+		{
+			var statement = csharp.createExpressionStatement();
+			var function = csharp.createParameterizedFunction();
+			onUpdate.getStatements().add(statement);
+			statement.setExpression(function);
+			function.setName("HybridComponent");
+			function.getTypes().add(engineComponent);
+		}
+		
+		var hybrid = csharp.createMethod();
+		var T = csharp.createTypeParameter();
+		var componentConstraint = csharp.createTypeConstraint();
+		clazz.getMembers().add(hybrid);
+		hybrid.getTypeParameters().add(T);
+		hybrid.getTypeConstraints().add(componentConstraint);
+		hybrid.setType("void");
+		hybrid.setName("HybridComponent");
+		T.setName("T");
+		componentConstraint.setType("T");
+		componentConstraint.getSuperTypes().add("Component");
+		
+		var statement = csharp.createExpressionStatement();
+		var access = modular.createAccessExpression();
+		var accessLeft = modular.createVariable();
+		var accessRight = csharp.createParameterizedFunction();
+		var lambdaArgument = csharp.createArgument();
+		var lambda = csharp.createLambda();
+		var Tparameter = csharp.createParameter();
+		hybrid.getStatements().add(statement);
+		statement.setExpression(access);
+		access.setLeft(accessLeft);
+		access.setRight(accessRight);
+		accessRight.getArguments().add(lambdaArgument);
+		lambdaArgument.setValue(lambda);
+		lambda.getParameters().add(Tparameter);
+		accessLeft.setName("Entities");
+		accessRight.setName("ForEach");
+		Tparameter.setType("T");
+		Tparameter.setName("component");
+		
+		var addStatement = csharp.createExpressionStatement();
+		var addFunction = csharp.createParameterizedFunction();
+		var componentArgument = csharp.createArgument();
+		var component = modular.createVariable();
+		lambda.getStatements().add(addStatement);
+		addStatement.setExpression(addFunction);
+		addFunction.getArguments().add(componentArgument);
+		componentArgument.setValue(component);
+		addFunction.setName("AddHybridComponent");
+		component.setName("component");
+		
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/EngineComponentConversion.cs");
 	}
 }
 
