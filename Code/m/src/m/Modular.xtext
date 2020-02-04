@@ -75,7 +75,7 @@ AccessExpression returns Expression:
 Atomic returns Expression:
 	Function|Variable;
 
-Variable:
+Variable returns Expression: {Variable}
 	name=WORD;
 
 Function:
