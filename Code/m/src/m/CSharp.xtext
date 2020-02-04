@@ -409,7 +409,7 @@ Case:
 	{Case} 'default' ':' statements+=Statement*
 ;
 For: {For}
-	'for' '(' initialization=Expression? ';' condition=Expression? ';' iterator=Expression? ')'
+	'for' '(' initialization=Statement condition=Expression? ';' iterator=Expression? ')'
 	('{' statements+=Statement* '}'|statements+=Statement);
 
 Foreach:
@@ -463,8 +463,8 @@ ArrayInitializer: {ArrayInitializer}
 ;
 
 @Override
-Atomic returns Expression: 
-	FloatLiteral |
+Atomic returns Expression:
+	(FloatLiteral |
 	StringLiteral |
 	BooleanLiteral |
 	(=>ParameterizedFunction|
@@ -474,8 +474,9 @@ Atomic returns Expression:
 	This|
 	Base|
 	Default|
-	Typeof
+	Typeof)
 ;
+
 This returns Expression: {This} 'this';
 Base returns Expression: {Base} 'base';
 Default returns Expression: {Default} 'default';
