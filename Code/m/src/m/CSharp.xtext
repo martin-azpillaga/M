@@ -3,23 +3,6 @@ grammar m.CSharp with m.Modular hidden(WS, MULTIPLE_LINES_COMMENT, SINGLE_LINE_C
 import "azpillaga.world/modular"
 generate csharp "azpillaga.world/csharp"
 
-// => ( grammar ) significa
-// Si y solo si todo de grammar esta presente, sigue por este camino
-// Sino busca una alternativa
-// Si y solo si!
-// Si esta presente sigue por aqui pero solo si esta presente
-// Ejemplo
-// Si hago en Mem: =>(modifiers+=Modifier*) ...
-// Si esta presente y solo si esta presente ire por este camino
-// Pero esto es siempre dado que 0 modifiers siempre estaran presentes
-// Ahora, si hago en Mem: =>(modifiers* type name typeparams* '(' )
-// Si hayu un parentesis a la vista cogere este camino pero solo si hay un
-// parentesis a la vista.
-//
-// El orden y los parentesis importan mucho. Ejemplo =>Field|Method no
-// funciona, ni (Method|=>Field) pero (=>Field|Method) si
-// Siempre poner => en la primera alternativa, reordenar para optimizar si eso
-
 CompilationUnit:
 	externAliases+=ExternAlias*
 	globalAttributes+=GlobalAttribute*
@@ -509,7 +492,7 @@ MemberInitializer:
 	'[' indices+=Expression (',' indices+=Expression)* ']' '=' value=Expression
 ;
 
-ParameterizedFunction:
+ParameterizedFunction returns Expression: {ParameterizedFunction}
 	name=WORD
 	('<' types+=QUALIFIEDTYPE (',' types+=QUALIFIEDTYPE)* '>')?
 	'(' (arguments+=Argument (',' arguments+=Argument)*)? ')'
