@@ -2,10 +2,21 @@ package m.formatting;
 
 import com.google.inject.Inject;
 
+import m.csharp.Argument;
 import m.csharp.CompilationUnit;
+import m.csharp.Creation;
+import m.csharp.Declaration;
+import m.csharp.Declarator;
+import m.csharp.ExpressionStatement;
 import m.csharp.Struct;
+import m.modular.AccessExpression;
 import m.csharp.Field;
+import m.csharp.For;
+import m.csharp.Foreach;
+import m.csharp.Lambda;
+import m.csharp.MemberInitializer;
 import m.csharp.Method;
+import m.csharp.ParameterizedFunction;
 import m.services.CSharpGrammarAccess;
 
 public class CSharpFormat extends GenericFormatter
@@ -122,6 +133,142 @@ public class CSharpFormat extends GenericFormatter
 				{
 					prepend(parameter, noSpace());
 				}
+			}
+			var statements = method.getStatements();
+			for (var statement : statements)
+			{
+				prepend(statement, newLine());
+				format(statement);
+			}
+		}
+		else if (o instanceof Foreach)
+		{
+			var foreach = (Foreach) o;
+			append(keyword(foreach,"("), noSpace());
+			prepend(keyword(foreach,")"), noSpace());
+			prepend(keyword(foreach, "{"),newLine());
+			prepend(keyword(foreach,"}"),newLine());
+			indent(keyword(foreach,"{"),keyword(foreach,"}"));
+			for (var statement : foreach.getStatements())
+			{
+				prepend(statement, newLine());
+				format(statement);
+			}
+		}
+		else if (o instanceof For)
+		{
+			var f = (For) o;
+			prepend(keyword(f,";"), noSpace());
+			append(keyword(f,"("), noSpace());
+			prepend(keyword(f,")"), noSpace());
+			prepend(keyword(f, "{"),newLine());
+			prepend(keyword(f,"}"),newLine());
+			indent(keyword(f,"{"),keyword(f,"}"));
+			format(f.getInitialization());
+			format(f.getCondition());
+			format(f.getIterator());
+			for (var statement : f.getStatements())
+			{
+				prepend(statement, newLine());
+				format(statement);
+			}
+		}
+		else if (o instanceof Declaration)
+		{
+			var declaration = (Declaration) o;
+			for (var comma : keywords(declaration, ","))
+			{
+				prepend(comma,noSpace());
+			}
+			prepend(keyword(declaration,";"), noSpace());
+			for (var declarator : declaration.getDeclarators())
+			{
+				format(declarator);
+			}
+		}
+		else if (o instanceof ExpressionStatement)
+		{
+			var statement = (ExpressionStatement) o;
+			prepend(keyword(statement,";"), noSpace());
+			format(statement.getExpression());
+		}
+		else if (o instanceof Declarator)
+		{
+			var declarator = (Declarator) o;
+			format(declarator.getValue());
+		}
+		else if (o instanceof AccessExpression)
+		{
+			var access = (AccessExpression) o;
+			var left = access.getLeft();
+			var right = access.getRight();
+			prepend(keyword(access,"."), noSpace());
+			prepend(right, noSpace());
+			format(left);
+			format(right);
+		}
+		else if (o instanceof ParameterizedFunction)
+		{
+			var function = (ParameterizedFunction) o;
+			var types = function.getTypes();
+			prepend(keyword(function,"<"), noSpace());
+			append(keyword(function,"<"), noSpace());
+			prepend(keyword(function,">"), noSpace());
+			prepend(keyword(function,"("), noSpace());
+			prepend(keyword(function,")"), noSpace());
+			append(keyword(function,"("), noSpace());
+			for (var comma : keywords(function, ","))
+			{
+				prepend(comma,noSpace());
+			}
+			
+			var arguments = function.getArguments();
+			for (var argument : arguments)
+			{
+				format(argument);
+			}
+		}
+		else if (o instanceof Argument)
+		{
+			var argument = (Argument) o;
+			format(argument.getValue());
+		}
+		else if (o instanceof Creation)
+		{
+			var creation = (Creation) o;
+			for (var member : creation.getMembers())
+			{
+				format(member);
+			}
+		}
+		else if (o instanceof MemberInitializer)
+		{
+			var member = (MemberInitializer) o;
+			format(member.getValue());
+		}
+		else if (o instanceof Lambda)
+		{
+			var lambda = (Lambda) o;
+			prepend(keyword(lambda,"("), noSpace());
+			prepend(keyword(lambda,")"), noSpace());
+			append(keyword(lambda,"("), noSpace());
+			for (var comma : keywords(lambda, ","))
+			{
+				prepend(comma,noSpace());
+			}
+			
+			var parameters = lambda.getParameters();
+			for (var parameter : parameters)
+			{
+				format(parameter);
+			}
+			prepend(keyword(lambda, "{"),newLine());
+			prepend(keyword(lambda,"}"),newLine());
+			indent(keyword(lambda,"{"),keyword(lambda,"}"));
+			for (var statement : lambda.getStatements())
+			{
+				prepend(statement, newLine());
+				format(statement);
 			}
 		}
 	}

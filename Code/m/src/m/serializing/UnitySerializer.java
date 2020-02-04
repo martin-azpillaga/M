@@ -9,7 +9,9 @@ import static m.csharp.FieldModifier.*;
 import static m.validation.Type.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 import org.eclipse.xtext.generator.IFileSystemAccess2;
@@ -26,10 +28,13 @@ import m.csharp.StructModifier;
 import m.json.JsonFactory;
 import m.json.Member;
 import m.m.Archetype;
+import m.m.Forall;
 import m.m.Game;
 import m.m.System;
 import m.modular.AssignmentKind;
+import m.modular.ComparisonKind;
 import m.modular.ModularFactory;
+import m.modular.Statement;
 import m.validation.MValidator;
 import m.validation.StandardLibrary;
 import m.validation.Type;
@@ -431,7 +436,157 @@ public class UnitySerializer
 	
 	private void serialize(System system)
 	{
+		var unit = csharp.createCompilationUnit();
+		var namespaces = new HashSet<String>();
+		var queries = new HashMap<String,Query>();
+
+		namespaces.add("Unity.Entities");
+		namespaces.add("Unity.Jobs");
 		
+		var clazz = csharp.createClass();
+		unit.getTypes().add(clazz);
+		clazz.getModifiers().add(ClassModifier.PUBLIC);
+		clazz.setName(system.getName());
+		clazz.getSuperTypes().add("JobComponentSystem");
+		
+		var onUpdate = csharp.createMethod();
+		var handleParameter = csharp.createParameter();
+		clazz.getMembers().add(onUpdate);
+		onUpdate.getModifiers().add(MethodModifier.PROTECTED);
+		onUpdate.getModifiers().add(MethodModifier.OVERRIDE);
+		onUpdate.setType("JobHandle");
+		onUpdate.setName("OnUpdate");
+		onUpdate.getParameters().add(handleParameter);
+		handleParameter.setType("JobHandle");
+		handleParameter.setName("inputDependencies");
+		
+		var runStatement = csharp.createExpressionStatement();
+		var run = modular.createAccessExpression();
+		var jobWithCode = modular.createAccessExpression();
+		var job = modular.createVariable();
+		var withCode = csharp.createParameterizedFunction();
+		var updateArgument = csharp.createArgument();
+		var lambda = csharp.createLambda();
+		var runCall = csharp.createParameterizedFunction();
+		onUpdate.getStatements().add(runStatement);
+		runStatement.setExpression(run);
+		run.setLeft(jobWithCode);
+		run.setRight(runCall);
+		jobWithCode.setLeft(job);
+		jobWithCode.setRight(withCode);
+		withCode.getArguments().add(updateArgument);
+		updateArgument.setValue(lambda);
+		job.setName("Job");
+		withCode.setName("WithCode");
+		runCall.setName("Run");
+		
+		addStatements(system.getStatements(), lambda.getStatements(), queries);
+		
+		var returnDefault = csharp.createReturn();
+		var defaultValue = csharp.createDefault();
+		onUpdate.getStatements().add(returnDefault);
+		returnDefault.setExpression(defaultValue);
+		
+		if (queries.size() > 0)
+		{
+			var onCreate = csharp.createMethod();
+			clazz.getMembers().add(0, onCreate);
+			onCreate.getModifiers().add(MethodModifier.PROTECTED);
+			onCreate.getModifiers().add(MethodModifier.OVERRIDE);
+			onCreate.setType("void");
+			onCreate.setName("OnCreate");
+			
+			for (var queryKey : queries.keySet())
+			{
+				var query = queries.get(queryKey);
+				var assignmentExpression = csharp.createExpressionStatement();
+				var assignment = modular.createAssignment();
+				var assignmentLeft = modular.createVariable();
+				var assignmentRight = csharp.createParameterizedFunction();
+				onCreate.getStatements().add(assignmentExpression);
+				assignmentExpression.setExpression(assignment);
+				assignment.setLeft(assignmentLeft);
+				assignment.setRight(assignmentRight);
+				assignmentLeft.setName(queryKey);
+				assignmentRight.setName("GetEntityQuery");
+				
+			}
+		}
+		
+		for (var queryKey : queries.keySet())
+		{
+			var field = csharp.createField();
+			var declarator = csharp.createFieldDeclarator();
+			clazz.getMembers().add(0, field);
+			field.getDeclarators().add(declarator);
+			field.setType("EntityQuery");
+			declarator.setName(queryKey);
+		}
+		
+		for (var namespace : namespaces)
+		{
+			var using = csharp.createNamespaceUsing();
+			using.setNamespace(namespace);
+			unit.getUsings().add(using);			
+		}
+		
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/"+system.getName()+".cs");
+	}
+	
+	private void addStatements(List<Statement> statements, List<Statement> list, HashMap<String,Query> queries)
+	{
+		for (var statement : statements)
+		{
+			if (statement instanceof Forall)
+			{
+				var forall = (Forall) statement;
+				var variable = forall.getVariable();
+				var collection = forall.getCollection();
+				var tags = forall.getTags();
+				
+				for (var tag : tags)
+				{
+					if (!queries.containsKey(variable))
+					{
+						queries.put(variable, new Query());
+					}
+					queries.get(variable).add(tag, AccessKind.tag);
+				}
+				
+				if (collection == null)
+				{
+					var forStatement = csharp.createFor();
+					var initialization = csharp.createDeclaration();
+					var indexDeclarator = csharp.createDeclarator();
+					var zero = csharp.createFloatLiteral();
+					var condition = modular.createComparison();
+					var conditionLeft = modular.createVariable();
+					var conditionRight = modular.createVariable();
+					var iterator = modular.createAssignment();
+					var iteratorLeft = modular.createVariable();
+					var iteratorRight = csharp.createFloatLiteral();
+					forStatement.setInitialization(initialization);
+					forStatement.setCondition(condition);
+					forStatement.setIterator(iterator);
+					initialization.getDeclarators().add(indexDeclarator);
+					indexDeclarator.setValue(zero);
+					condition.setLeft(conditionLeft);
+					condition.setRight(conditionRight);
+					iterator.setLeft(iteratorLeft);
+					iterator.setRight(iteratorRight);
+					
+					indexDeclarator.setVariable(variable+"_index");
+					zero.setValue(0);
+					conditionLeft.setName(variable+"_index");
+					condition.setKind(ComparisonKind.LOWER);
+					conditionRight.setName(variable+"_amount");
+					iteratorLeft.setName(variable+"_index");
+					iterator.setKind(AssignmentKind.INCREASE);
+					iteratorRight.setValue(1);
+					list.add(forStatement);
+				}
+			}
+		}
 	}
 	
 	private String uuid(String string)
@@ -487,4 +642,27 @@ public class UnitySerializer
 		}
 		return "None";
 	}
+}
+
+class Query
+{
+	public HashMap<String, HashSet<AccessKind>> components;
+	
+	public Query()
+	{
+		components = new HashMap<String, HashSet<AccessKind>>();
+	}
+	
+	public void add(String component, AccessKind kind)
+	{
+		if (!components.containsKey(component))
+		{
+			components.put(component, new HashSet<AccessKind>());
+		}
+		components.get(component).add(kind);
+	}
+}
+enum AccessKind
+{
+	read, write, subtract, tag
 }
