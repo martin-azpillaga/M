@@ -3,28 +3,24 @@ import "azpillaga.world/modular"
 generate m "azpillaga.world/m"
 
 Game:
-	(archetypes+=Archetype|systems+=System|procedures+=Procedure)
-	(archetypes+=Archetype|systems+=System|procedures+=Procedure)*
-	end = End;
+	(archetypes+=Archetype|systems+=System)*
+	end=End;
 
 Archetype:
 	 name = WORD 
-	(':' base=WORD	)?
+	(':' base=WORD)?
 	 '{' components+=Component (',' components+=Component)* '}';
 
 Component:
-	name=WORD|
-	{VectorComponent} name=WORD entries+=NUMBER+|
-	{AssetComponent} name=WORD value=WORD;
-
-
+	name=WORD
+;
 System:
 	name=WORD ':'
 	statements+=Statement+;
 
 @Override
 Statement:
-	Forall|Exists|Selection|Iteration|Action;
+	Selection|Iteration|Forall|Exists|Assignment|Function;
 
 Forall returns Block: {Forall}
 	 '∀' variable=WORD
@@ -40,9 +36,22 @@ Exists returns Block: {Exists}
 	('|' condition=Expression)?
 	 '{' statements+=Statement* '}';
 
+Assignment:
+	variable=(Variable|ComponentAccess) kind=AssignmentKind expression=Expression
+;
+
+ComponentAccess returns Expression: {ComponentAccess}
+	entity=WORD '.' component=WORD;
+
+@Override
+Primary returns Expression:
+	Variable|=>ComponentAccess|=>Function|LogicalNot|Brackets
+;
+
 Amount:
 	kind=AmountKind
 	bound=Expression;
 
-End: {End} 'end'?;
+End: {End};
+
 enum AmountKind: lower='<'|lowerOrEqual='<='|equal='='|notEqual='!='|greaterOrEqual='>='|greater='>';
