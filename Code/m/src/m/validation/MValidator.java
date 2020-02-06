@@ -5,29 +5,29 @@ import static m.validation.Type.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
+import org.eclipse.emf.common.util.DiagnosticChain;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.EcoreUtil2;
+import org.eclipse.xtext.service.OperationCanceledError;
 import org.eclipse.xtext.validation.Check;
+import org.eclipse.xtext.validation.EValidatorRegistrar;
 
-import m.m.Component;
-import m.m.End;
 import m.m.Exists;
 import m.m.Amount;
 import m.m.Archetype;
-import m.m.AssetComponent;
 import m.m.Forall;
 import m.m.MPackage;
 import m.m.Game;
 import m.m.System;
 import m.modular.Variable;
-import m.m.VectorComponent;
-import m.modular.AccessExpression;
-import m.modular.Action;
 import m.modular.AdditiveExpression;
-import m.modular.Assignment;
+import m.m.Assignment;
+import m.m.Component;
 import m.modular.Block;
 import m.modular.Comparison;
 import m.modular.Equality;
@@ -42,7 +42,6 @@ import m.modular.MultiplicativeExpression;
 import m.modular.Procedure;
 import m.modular.Selection;
 import m.modular.Statement;
-import m.modular.UnaryMinus;
 import static m.modular.ModularPackage.Literals.*;
 import static m.m.MPackage.Literals.*;
 
@@ -55,7 +54,13 @@ public class MValidator extends AbstractMValidator
 	public static ArrayList<ArrayList<Expression>> groups;
 	
 	@Check
-	public void unique(Component component)
+	public void check(Game game)
+	{
+		java.lang.System.out.println("Game");
+	}
+
+	@Check
+	public void uniqueComponents(Component component)
 	{
 		var archetype = (Archetype) component.eContainer();
 		
@@ -79,6 +84,7 @@ public class MValidator extends AbstractMValidator
 	@Check
 	public void unique(Archetype archetype)
 	{
+		
 		var module = (Game) archetype.eContainer();
 		
 		var amount = 0;
@@ -117,28 +123,6 @@ public class MValidator extends AbstractMValidator
 		if (amount > 1)
 		{
 			error("Repeated procedure",SYSTEM__NAME);
-		}
-	}
-	
-	@Check
-	public void unique(Procedure procedure)
-	{
-		var module = (Game) procedure.eContainer();
-		
-		var amount = 0;
-		
-		for (var s : module.getProcedures())
-		{
-			var name = s.getName();
-			if (name.equals(name))
-			{
-				amount++;
-			}
-		}
-		
-		if (amount > 1)
-		{
-			error("Repeated system",PROCEDURE__NAME);
 		}
 	}
 	
@@ -354,15 +338,6 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void type(VectorComponent vector)
-	{
-		if (vector.getEntries().size() > 4)
-		{
-			error("Vectors can have up to four entries", vector, COMPONENT__NAME);
-		}
-	}
-	
-	@Check
 	public void clean(Game modul)
 	{
 		components = new HashMap<>();
@@ -471,6 +446,7 @@ public class MValidator extends AbstractMValidator
 		return false;
 	}
 	
+	/*
 	private boolean set(AccessExpression access, Type type)
 	{
 		var right = access.getRight();
@@ -493,7 +469,7 @@ public class MValidator extends AbstractMValidator
 			return true;
 		}
 		return false;
-	}
+	}*/
 	
 	private void set(Expression expression, Type type)
 	{
@@ -511,28 +487,7 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	
-	@Check
-	public void infer(VectorComponent component)
-	{
-		var entries = component.getEntries();
-		var name = component.getName();
-		if (entries.size() == 1)
-		{
-			set(component,float1);
-		}
-		else if (entries.size() == 2)
-		{
-			set(component, float2);
-		}
-		else if (entries.size() == 3)
-		{
-			set(component, float3);
-		}
-		else if (entries.size() == 4)
-		{
-			set(component, float4);
-		}
-	}
+	
 	
 	@Check
 	public void infer(Component component)
@@ -551,6 +506,7 @@ public class MValidator extends AbstractMValidator
 		magic(name,"Transition", bool, none, component, feature);
 	}
 	
+	/*
 	@Check
 	public void infer(AccessExpression access)
 	{
@@ -570,7 +526,7 @@ public class MValidator extends AbstractMValidator
 		
 		magic(component,"Transition", bool, none, access, feature);
 	}
-	
+	*/
 	private void magic(String component, String word, Type original, Type magic, EObject access, EStructuralFeature feature)
 	{
 		if (component.endsWith(word))
@@ -664,12 +620,6 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void infer(UnaryMinus minus)
-	{
-		group(minus, minus.getExpression());
-	}
-	
-	@Check
 	public void infer(Equality equality)
 	{
 		var left = equality.getLeft();
@@ -698,69 +648,31 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void infer(Action action)
-	{
-		var left = action.getAccess();
-		var kind = action.getKind();
-		var right = action.getExpression();
-		
-		if (right == null) return;
-		
-		switch (kind)
-		{
-			case DECREASE:
-				group(action,left,right);
-				break;
-			case DIVIDE:
-				group(action, left);
-				set(right, float1);
-				break;
-			case INCREASE:
-				group(action,left,right);
-				break;
-			case MODULUS:
-				group(action, left);
-				set(right, float1);
-				break;
-			case MULTIPLY:
-				group(action, left);
-				set(right, float1);
-				break;
-			case SET:
-				group(action,left,right);
-				break;			
-		}
-	}
-	
-	@Check
 	public void infer(Assignment assignment)
 	{
 		var kind = assignment.getKind();
-		var left = assignment.getLeft();
+		var left = assignment.getVariable();
 		var right = assignment.getExpression();
 		
 		switch (kind)
 		{
 			case DECREASE:
-				group(assignment,left,right);
+				group(left,right);
 				break;
 			case DIVIDE:
-				group(assignment, left);
 				set(right, float1);
 				break;
 			case INCREASE:
-				group(assignment,left,right);
+				group(left,right);
 				break;
 			case MODULUS:
-				group(assignment, left);
 				set(right, float1);
 				break;
 			case MULTIPLY:
-				group(assignment, left);
 				set(right, float1);
 				break;
 			case SET:
-				group(assignment,left,right);
+				group(left,right);
 				break;			
 		}
 	}
@@ -916,8 +828,24 @@ public class MValidator extends AbstractMValidator
 		}
 	}
 	
+	/*
 	@Check
-	public void check(End end)
+	public void check(Archetype a)
+	{
+		var game = (Game) a.eContainer();
+		if (a != game.getArchetypes().get(game.getArchetypes().size()-1))
+		{
+			return;
+		}
+		if (game.getSystems().size() != 0)
+		{
+			return;
+		}
+		report(game);
+	}
+	
+	
+	private void report(Game game)
 	{
 		solve();
 		for (var group : groups)
@@ -930,8 +858,7 @@ public class MValidator extends AbstractMValidator
 				}
 			}
 		}
-		var modul = (Game) end.eContainer();
-		for (var archetype : modul.getArchetypes())
+		for (var archetype : game.getArchetypes())
 		{
 			for (var component : archetype.getComponents())
 			{
@@ -1036,5 +963,5 @@ public class MValidator extends AbstractMValidator
 				}
 			}
 		}
-	}
+	}*/
 }

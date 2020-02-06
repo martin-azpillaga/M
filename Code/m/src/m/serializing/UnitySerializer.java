@@ -240,7 +240,7 @@ public class UnitySerializer
 			
 			var addbuffer = csharp.createDeclaration();
 			var declareBuffer = csharp.createDeclarator();
-			var addAccess = modular.createAccessExpression();
+			var addAccess = csharp.createAccessExpression();
 			var addAccessLeft = modular.createVariable();
 			var addAccessRight = csharp.createParameterizedFunction();
 			var addAccessArgument = csharp.createArgument();
@@ -266,7 +266,7 @@ public class UnitySerializer
 			collectionV.setName("Value");
 			
 			var addElementStatement = csharp.createExpressionStatement();
-			var addElement = modular.createAccessExpression();
+			var addElement = csharp.createAccessExpression();
 			var addLeft = modular.createVariable();
 			var addRight = csharp.createParameterizedFunction();
 			var addArgument = csharp.createArgument();
@@ -281,7 +281,7 @@ public class UnitySerializer
 			addRight.setName("Add");
 			
 			var valueMember = csharp.createMemberInitializer();
-			var valueValue = modular.createAccessExpression();
+			var valueValue = csharp.createAccessExpression();
 			
 			creation.getMembers().add(valueMember);
 			creation.setType(component);
@@ -317,7 +317,7 @@ public class UnitySerializer
 			collection.setName("Value");
 			foreach.setCollection(collection);
 			var action = csharp.createExpressionStatement();
-			var access = modular.createAccessExpression();
+			var access = csharp.createAccessExpression();
 			var left = modular.createVariable();
 			left.setName("referencedPrefabs");
 			var right = csharp.createParameterizedFunction();
@@ -387,7 +387,7 @@ public class UnitySerializer
 			method.getParameters().add(conversionSystem);
 			
 			var addObjectStatement = csharp.createExpressionStatement();
-			var addObject = modular.createAccessExpression();
+			var addObject = csharp.createAccessExpression();
 			var addLeft = modular.createVariable();
 			var addRight = csharp.createParameterizedFunction();
 			var entityArgument = csharp.createArgument();
@@ -463,8 +463,8 @@ public class UnitySerializer
 		handleParameter.setName("inputDependencies");
 		
 		var runStatement = csharp.createExpressionStatement();
-		var run = modular.createAccessExpression();
-		var jobWithCode = modular.createAccessExpression();
+		var run = csharp.createAccessExpression();
+		var jobWithCode = csharp.createAccessExpression();
 		var job = modular.createVariable();
 		var withCode = csharp.createParameterizedFunction();
 		var updateArgument = csharp.createArgument();
@@ -502,7 +502,7 @@ public class UnitySerializer
 			{
 				var query = queries.get(queryKey);
 				var assignmentExpression = csharp.createExpressionStatement();
-				var assignment = modular.createAssignment();
+				var assignment = csharp.createAssignment();
 				var assignmentLeft = modular.createVariable();
 				var assignmentRight = csharp.createParameterizedFunction();
 				onCreate.getStatements().add(assignmentExpression);
@@ -531,7 +531,7 @@ public class UnitySerializer
 			unit.getUsings().add(using);			
 		}
 		
-		//GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/"+system.getName()+".cs");
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/"+system.getName()+".cs");
 	}
 	
 	private void addStatements(List<Statement> statements, List<Statement> list, HashMap<String,Query> queries)
@@ -563,7 +563,7 @@ public class UnitySerializer
 					var condition = modular.createComparison();
 					var conditionLeft = modular.createVariable();
 					var conditionRight = modular.createVariable();
-					var iterator = modular.createAssignment();
+					var iterator = csharp.createAssignment();
 					var iteratorLeft = modular.createVariable();
 					var iteratorRight = csharp.createFloatLiteral();
 					forStatement.setInitialization(initialization);
@@ -577,14 +577,16 @@ public class UnitySerializer
 					iterator.setRight(iteratorRight);
 					
 					indexDeclarator.setVariable(variable+"_index");
-					zero.setValue(0);
+					zero.setValue("0");
 					conditionLeft.setName(variable+"_index");
 					condition.setKind(ComparisonKind.LOWER);
 					conditionRight.setName(variable+"_amount");
 					iteratorLeft.setName(variable+"_index");
 					iterator.setKind(AssignmentKind.INCREASE);
-					iteratorRight.setValue(1);
+					iteratorRight.setValue("1");
 					list.add(forStatement);
+					
+					addStatements(forall.getStatements(), forStatement.getStatements(), queries);
 				}
 			}
 		}
@@ -692,7 +694,7 @@ public class UnitySerializer
 		componentConstraint.getSuperTypes().add("Component");
 		
 		var statement = csharp.createExpressionStatement();
-		var access = modular.createAccessExpression();
+		var access = csharp.createAccessExpression();
 		var accessLeft = modular.createVariable();
 		var accessRight = csharp.createParameterizedFunction();
 		var lambdaArgument = csharp.createArgument();

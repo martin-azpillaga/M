@@ -445,7 +445,6 @@ ArrayInitializer: {ArrayInitializer}
 	','? )? '}'
 ;
 
-@Override
 Atomic returns Expression:
 	(FloatLiteral |
 	StringLiteral |
@@ -527,7 +526,6 @@ Expression:
 	=>Lambda|Assignment
 ;
 
-@Override
 Assignment returns Expression:
 	Ternary ({Assignment.left=current} kind=AssignmentKind right=Ternary)*;
 
@@ -538,6 +536,9 @@ NullCoalescing returns Expression:
 	LogicalOr ({NullCoalescing.left=current} '??' right=LogicalOr)*;
 
 @Override
+MultiplicativeExpression returns Expression:
+	AccessExpression ({MultiplicativeExpression.left=current}  kind=MultiplicativeKind right=AccessExpression)*;
+
 AccessExpression returns Expression:
 	Postfix ({AccessExpression.left=current} '.' right=Postfix)*;
 

@@ -8,7 +8,6 @@ import com.google.inject.Guice;
 import org.eclipse.xtext.resource.SaveOptions;
 import org.eclipse.xtext.serializer.impl.Serializer;
 import m.YAMLRuntimeModule;
-import m.XMLRuntimeModule;
 
 public class GenericSerializer 
 {
@@ -24,10 +23,6 @@ public class GenericSerializer
 		var serialized = serializer.serialize(o, options);
 		
 		if (module.getClass() == YAMLRuntimeModule.class)
-		{
-			serialized = serialized.replace("\t","  ");
-		}
-		if (module.getClass() == XMLRuntimeModule.class)
 		{
 			serialized = serialized.replace("\t","  ");
 		}

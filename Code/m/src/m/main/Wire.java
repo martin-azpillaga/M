@@ -43,16 +43,16 @@ public class Wire
 		configuration.setCode(code);
 		generator.setConfiguration(configuration);
 		
-		//generator.addLanguage(language("m.Mtext", "mtext"));
 		generator.addLanguage(language("m.Modular","modular"));
 		generator.addLanguage(language("m.M","m"));
 		generator.addLanguage(language("m.CSharp","cs"));
-		generator.addLanguage(language("m.Javascript","js"));
-		generator.addLanguage(language("m.XML","xml"));
+		//generator.addLanguage(language("m.CSharpStrict", "cstrict"));
+		//generator.addLanguage(language("m.Javascript","js"));
+		//generator.addLanguage(language("m.XML","xml"));
 		generator.addLanguage(language("m.JSON","json"));
 		generator.addLanguage(language("m.YAML","yml"));
-		generator.addLanguage(language("m.Text", "text"));
-		generator.addLanguage(language("m.Testua", "testua"));
+		//generator.addLanguage(language("m.Text", "text"));
+		//generator.addLanguage(language("m.Testua", "testua"));
 		
 		generator.invoke(null);
 	}
