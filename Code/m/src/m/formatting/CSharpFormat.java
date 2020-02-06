@@ -9,7 +9,6 @@ import m.csharp.Declaration;
 import m.csharp.Declarator;
 import m.csharp.ExpressionStatement;
 import m.csharp.Struct;
-import m.modular.AccessExpression;
 import m.csharp.Field;
 import m.csharp.For;
 import m.csharp.Foreach;
@@ -196,16 +195,6 @@ public class CSharpFormat extends GenericFormatter
 		{
 			var declarator = (Declarator) o;
 			format(declarator.getValue());
-		}
-		else if (o instanceof AccessExpression)
-		{
-			var access = (AccessExpression) o;
-			var left = access.getLeft();
-			var right = access.getRight();
-			prepend(keyword(access,"."), noSpace());
-			prepend(right, noSpace());
-			format(left);
-			format(right);
 		}
 		else if (o instanceof ParameterizedFunction)
 		{
