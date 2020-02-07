@@ -539,6 +539,7 @@ NullCoalescing returns Expression:
 MultiplicativeExpression returns Expression:
 	AccessExpression ({MultiplicativeExpression.left=current}  kind=MultiplicativeKind right=AccessExpression)*;
 
+@Override
 AccessExpression returns Expression:
 	Postfix ({AccessExpression.left=current} '.' right=Postfix)*;
 

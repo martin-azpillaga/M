@@ -12,8 +12,10 @@ Archetype:
 	 '{' components+=Component (',' components+=Component)* '}';
 
 Component:
-	name=WORD
-;
+	name=WORD|
+	{VectorComponent} name=WORD entries+=NUMBER+|
+	{AssetComponent} name=WORD value=WORD;
+
 System:
 	name=WORD ':'
 	statements+=Statement+;
