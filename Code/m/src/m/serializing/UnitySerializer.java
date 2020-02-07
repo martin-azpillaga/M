@@ -30,6 +30,7 @@ import m.json.Member;
 import m.m.Archetype;
 import m.m.Assignment;
 import m.m.ComponentAccess;
+import m.m.Exists;
 import m.m.Forall;
 import m.m.Game;
 import m.m.System;
@@ -596,12 +597,7 @@ public class UnitySerializer
 				var forall = (Forall) statement;
 				var variable = forall.getVariable();
 				var collection = forall.getCollection();
-				var tags = forall.getTags();
-				
-				for (var tag : tags)
-				{
-					querySet.add(variable, tag, AccessKind.tag);
-				}
+
 				
 				if (collection == null)
 				{
@@ -633,6 +629,45 @@ public class UnitySerializer
 					
 					addStatements(forall.getStatements(), forStatement.getStatements(), querySet);
 				}
+			}
+			else if (statement instanceof Exists)
+			{
+				var exists = (Exists) statement;
+				var variable = exists.getVariable();
+				var collection = exists.getCollection();
+				var conditionExpression = exists.getCondition();
+				cs(conditionExpression, querySet);
+				
+				if (collection == null)
+				{
+					var forStatement = csharp.createFor();
+					var initialization = csharp.createDeclaration();
+					var indexDeclarator = csharp.createDeclarator();
+					var zero = csharp.createFloatLiteral();
+					var condition = modular.createComparison();
+					var conditionLeft = modular.createVariable();
+					var conditionRight = modular.createVariable();
+					var iterator = csharp.createIncrement();
+					var iteratorExpression = modular.createVariable();
+					forStatement.setInitialization(initialization);
+					forStatement.setCondition(condition);
+					forStatement.setIterator(iterator);
+					initialization.getDeclarators().add(indexDeclarator);
+					indexDeclarator.setValue(zero);
+					condition.setLeft(conditionLeft);
+					condition.setRight(conditionRight);
+					iterator.setExpression(iteratorExpression);
+					
+					indexDeclarator.setVariable(variable+"_index");
+					zero.setValue("0");
+					conditionLeft.setName(variable+"_index");
+					condition.setKind(ComparisonKind.LOWER);
+					conditionRight.setName(variable+"_amount");
+					iteratorExpression.setName(variable+"_index");
+					list.add(forStatement);
+					
+					addStatements(exists.getStatements(), forStatement.getStatements(), querySet);
+				}			
 			}
 			else if (statement instanceof Assignment)
 			{

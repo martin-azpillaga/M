@@ -7,17 +7,16 @@ Game:
 	end=End;
 
 Archetype:
-	 name = WORD 
-	(':' base=WORD)?
-	 '{' components+=Component (',' components+=Component)* '}';
+	 name = WORD '≔'
+	(base=WORD '∪')?
+	 '{' components+=Component (','? components+=Component)* '}';
 
 Component:
 	name=WORD|
-	{VectorComponent} name=WORD entries+=NUMBER+|
-	{AssetComponent} name=WORD value=WORD;
+	{VectorComponent} name=WORD '[' entries+=NUMBER (','? entries+=NUMBER)* ']';
 
 System:
-	name=WORD ':'
+	name=WORD '≔'
 	statements+=Statement+;
 
 @Override
@@ -27,8 +26,8 @@ Statement:
 Forall returns Block: {Forall}
 	 '∀' variable=WORD
 	('∈' collection=Expression )?
-	('|' tags+=WORD+)?
-	 '{' statements+=Statement* '}';
+	('|' condition=Expression)?
+	 '[' statements+=Statement (','? statements+=Statement)* ']';
 
 Exists returns Block: {Exists}
 	(negated?='∄'|'∃')
@@ -36,10 +35,32 @@ Exists returns Block: {Exists}
 	 variable=WORD
 	('∈' collection=Expression )?
 	('|' condition=Expression)?
-	 '{' statements+=Statement* '}';
+	 '[' statements+=Statement (','? statements+=Statement)* ']';
+
+@Override
+Branch returns Block: {Branch}
+	condition=Expression
+	'[' statements+=Statement (','? statements+=Statement)* ']';
+
+@Override
+Block returns Block: {Block}
+	'[' statements+=Statement (','? statements+=Statement)* ']';
+
+@Override
+Iteration returns Block: {Iteration}
+	'↺' condition=Expression
+	'[' statements+=Statement (','? statements+=Statement)* ']';
+
+@Override
+LogicalNot returns Expression: {LogicalNot} 
+	'¬' expression=Primary;
+
+@Override
+Equality returns Expression:
+	Comparison ({Equality.left=current}  kind=EqualityKind right=Comparison)*;
 
 Assignment:
-	variable=(Variable|ComponentAccess) kind=AssignmentKind expression=Expression
+	variable=(Variable|ComponentAccess) '=' expression=Expression
 ;
 
 ComponentAccess returns Expression: {ComponentAccess}
@@ -47,7 +68,13 @@ ComponentAccess returns Expression: {ComponentAccess}
 
 @Override
 Primary returns Expression:
-	Variable|=>ComponentAccess|=>Function|LogicalNot|Brackets
+	=>ComponentAccess|=>Function|Variable|LogicalNot|Brackets
+;
+
+@Override
+Function returns Expression: {Function}
+	name=WORD
+	'[' (arguments+=Expression (','? arguments+=Expression)*)? ']'
 ;
 
 Amount:
@@ -55,5 +82,8 @@ Amount:
 	bound=Expression;
 
 End: {End};
-
-enum AmountKind: lower='<'|lowerOrEqual='<='|equal='='|notEqual='!='|greaterOrEqual='>='|greater='>';
+@Override
+enum EqualityKind: equal='=='|notEqual='≠';
+@Override
+enum MultiplicativeKind: multiply='×'|divide='÷';
+enum AmountKind: lower='<'|lowerOrEqual='≤'|equal='=='|notEqual='≠'|greaterOrEqual='≥'|greater='>';
