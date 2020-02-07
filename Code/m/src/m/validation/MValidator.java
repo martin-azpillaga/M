@@ -20,7 +20,6 @@ import org.eclipse.xtext.validation.EValidatorRegistrar;
 import m.m.Exists;
 import m.m.Amount;
 import m.m.Archetype;
-import m.m.AssetComponent;
 import m.m.Forall;
 import m.m.MPackage;
 import m.m.Game;
@@ -137,25 +136,6 @@ public class MValidator extends AbstractMValidator
 				if (arguments.get(i).equals(arguments.get(j)))
 				{
 					error("Repeated argument "+arguments.get(i), PROCEDURE__NAME);
-					return;
-				}
-			}
-		}
-	}
-	
-	@Check
-	public void uniqueTags(Forall forall)
-	{
-		var tags = forall.getTags();
-		
-		for (var i = 0; i < tags.size(); i++)
-		{
-			var itag = tags.get(i);
-			for (var j = i+1; j < tags.size(); j++)
-			{
-				if (itag.equals(tags.get(j)))
-				{
-					error("Repeated tag "+itag, FORALL__VARIABLE);
 					return;
 				}
 			}
@@ -569,17 +549,17 @@ public class MValidator extends AbstractMValidator
 	{
 		var variable = forall.getVariable();
 		var collection = forall.getCollection();
-		var tags = forall.getTags();
+		var condition = forall.getCondition();
 		
 		setVariable(variable, entity, forall, FORALL__VARIABLE);
 
 		if (collection != null)
 		{
-			set(collection, Type.entityList);
+			set(collection, entityList);
 		}
-		for (var tag : tags)
+		if (condition != null)
 		{
-			setComponent(tag, Type.tag, forall, FORALL__TAGS);
+			set(condition, bool);
 		}
 	}
 	
@@ -591,8 +571,14 @@ public class MValidator extends AbstractMValidator
 		var condition = exists.getCondition();
 		
 		setVariable(variable, entity, exists, EXISTS__VARIABLE);
-		set(collection, entityList);
-		set(condition, bool);
+		if (collection != null)
+		{
+			set(collection, entityList);
+		}
+		if (condition != null)
+		{
+			set(condition, bool);
+		}
 	}
 	
 	@Check
@@ -674,31 +660,9 @@ public class MValidator extends AbstractMValidator
 	@Check
 	public void infer(Assignment assignment)
 	{
-		var kind = assignment.getKind();
 		var left = assignment.getVariable();
 		var right = assignment.getExpression();
-		
-		switch (kind)
-		{
-			case DECREASE:
-				group(left,right);
-				break;
-			case DIVIDE:
-				set(right, float1);
-				break;
-			case INCREASE:
-				group(left,right);
-				break;
-			case MODULUS:
-				set(right, float1);
-				break;
-			case MULTIPLY:
-				set(right, float1);
-				break;
-			case SET:
-				group(left,right);
-				break;			
-		}
+		group(left,right);
 	}
 	
 	@Check
@@ -775,6 +739,20 @@ public class MValidator extends AbstractMValidator
 			var parameter1 = parameters.get(1);
 			
 			set(call, none);
+			set(parameter1, entity);
+		}
+		else if (function.equals("has"))
+		{
+			if (parameters.size() != 2)
+			{
+				error("takes a type and an entity", call, FUNCTION__NAME);
+				return;
+			}
+			var parameter0 = (Variable) parameters.get(0);
+			var parameter1 = parameters.get(1);
+			
+			set(call, bool);
+			setComponent(parameter0.getName(), tag, call, FUNCTION__NAME);
 			set(parameter1, entity);
 		}
 		else if (function.equals("join"))
@@ -879,14 +857,8 @@ public class MValidator extends AbstractMValidator
 			for (var component : archetype.getComponents())
 			{
 				var name = component.getName();
-				if (components.containsKey(name))
-				{
-					if (component instanceof AssetComponent && components.get(name).isNumeric())
-					{
-						error("Type mismatch, expected non-numeric but got " + components.get(name),component, COMPONENT__NAME);
-					}
-				}
-				else
+				
+				if (!components.containsKey(name))
 				{
 					warning("Undecidable type", component, COMPONENT__NAME);
 				}

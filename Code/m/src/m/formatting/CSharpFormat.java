@@ -3,12 +3,14 @@ package m.formatting;
 import com.google.inject.Inject;
 
 import m.csharp.Argument;
+import m.csharp.Assignment;
 import m.csharp.CompilationUnit;
 import m.csharp.Creation;
 import m.csharp.Declaration;
 import m.csharp.Declarator;
 import m.csharp.ExpressionStatement;
 import m.csharp.Struct;
+import m.modular.AccessExpression;
 import m.csharp.Field;
 import m.csharp.For;
 import m.csharp.Foreach;
@@ -259,6 +261,20 @@ public class CSharpFormat extends GenericFormatter
 				prepend(statement, newLine());
 				format(statement);
 			}
+		}
+		else if (o instanceof AccessExpression)
+		{
+			var a = (AccessExpression) o;
+			prepend(keyword(a, "."), noSpace());
+			append(keyword(a, "."), noSpace());
+			format(a.getLeft());
+			format(a.getRight());
+		}
+		else if (o instanceof Assignment)
+		{
+			var a = (Assignment) o;
+			format(a.getLeft());
+			format(a.getRight());
 		}
 	}
 }
