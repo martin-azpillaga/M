@@ -71,9 +71,10 @@ Function returns Expression: {Function}
 ;
 
 terminal WS: (' '|'\n'|'\r'|'\t')+;
-terminal NUMBER: '-'? DIGIT+ ('.' DIGIT+)? ('e' ('-'|'+')? DIGIT+)?;
+terminal NUMBER: '-'? DIGIT+ ('.' DIGIT+)? ('×' '1''0' '⁻'? SUPERSCRIPT+)?;
 
 terminal fragment DIGIT: '0'..'9';
+terminal fragment SUPERSCRIPT: '⁰'|'¹'|'²'|'³'|'⁴'..'⁹';
 
 
 enum EqualityKind: equal='=='|notEqual='!=';
