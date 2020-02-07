@@ -28,13 +28,25 @@ import m.csharp.StructModifier;
 import m.json.JsonFactory;
 import m.json.Member;
 import m.m.Archetype;
+import m.m.Assignment;
+import m.m.ComponentAccess;
 import m.m.Forall;
 import m.m.Game;
 import m.m.System;
+import m.modular.AdditiveExpression;
 import m.modular.AssignmentKind;
+import m.modular.Brackets;
+import m.modular.Comparison;
 import m.modular.ComparisonKind;
+import m.modular.Equality;
+import m.modular.Expression;
+import m.modular.LogicalAnd;
+import m.modular.LogicalNot;
+import m.modular.LogicalOr;
 import m.modular.ModularFactory;
+import m.modular.MultiplicativeExpression;
 import m.modular.Statement;
+import m.modular.Variable;
 import m.validation.MValidator;
 import m.validation.StandardLibrary;
 import m.validation.Type;
@@ -240,7 +252,7 @@ public class UnitySerializer
 			
 			var addbuffer = csharp.createDeclaration();
 			var declareBuffer = csharp.createDeclarator();
-			var addAccess = csharp.createAccessExpression();
+			var addAccess = modular.createAccessExpression();
 			var addAccessLeft = modular.createVariable();
 			var addAccessRight = csharp.createParameterizedFunction();
 			var addAccessArgument = csharp.createArgument();
@@ -266,7 +278,7 @@ public class UnitySerializer
 			collectionV.setName("Value");
 			
 			var addElementStatement = csharp.createExpressionStatement();
-			var addElement = csharp.createAccessExpression();
+			var addElement = modular.createAccessExpression();
 			var addLeft = modular.createVariable();
 			var addRight = csharp.createParameterizedFunction();
 			var addArgument = csharp.createArgument();
@@ -281,7 +293,7 @@ public class UnitySerializer
 			addRight.setName("Add");
 			
 			var valueMember = csharp.createMemberInitializer();
-			var valueValue = csharp.createAccessExpression();
+			var valueValue = modular.createAccessExpression();
 			
 			creation.getMembers().add(valueMember);
 			creation.setType(component);
@@ -317,7 +329,7 @@ public class UnitySerializer
 			collection.setName("Value");
 			foreach.setCollection(collection);
 			var action = csharp.createExpressionStatement();
-			var access = csharp.createAccessExpression();
+			var access = modular.createAccessExpression();
 			var left = modular.createVariable();
 			left.setName("referencedPrefabs");
 			var right = csharp.createParameterizedFunction();
@@ -387,7 +399,7 @@ public class UnitySerializer
 			method.getParameters().add(conversionSystem);
 			
 			var addObjectStatement = csharp.createExpressionStatement();
-			var addObject = csharp.createAccessExpression();
+			var addObject = modular.createAccessExpression();
 			var addLeft = modular.createVariable();
 			var addRight = csharp.createParameterizedFunction();
 			var entityArgument = csharp.createArgument();
@@ -440,7 +452,7 @@ public class UnitySerializer
 	{
 		var unit = csharp.createCompilationUnit();
 		var namespaces = new HashSet<String>();
-		var queries = new HashMap<String,Query>();
+		var querySet = new QuerySet();
 
 		namespaces.add("Unity.Entities");
 		namespaces.add("Unity.Jobs");
@@ -462,9 +474,12 @@ public class UnitySerializer
 		handleParameter.setType("JobHandle");
 		handleParameter.setName("inputDependencies");
 		
+		
+		
+		
 		var runStatement = csharp.createExpressionStatement();
-		var run = csharp.createAccessExpression();
-		var jobWithCode = csharp.createAccessExpression();
+		var run = modular.createAccessExpression();
+		var jobWithCode = modular.createAccessExpression();
 		var job = modular.createVariable();
 		var withCode = csharp.createParameterizedFunction();
 		var updateArgument = csharp.createArgument();
@@ -482,15 +497,36 @@ public class UnitySerializer
 		withCode.setName("WithCode");
 		runCall.setName("Run");
 		
-		addStatements(system.getStatements(), lambda.getStatements(), queries);
+		addStatements(system.getStatements(), lambda.getStatements(), querySet);
+		
+		for (var query : querySet.queries.keySet())
+		{
+			var amountDeclaration = csharp.createDeclaration();
+			var amountDeclarator = csharp.createDeclarator();
+			var amount = modular.createAccessExpression();
+			var amountLeft = modular.createVariable();
+			var amountRight = csharp.createParameterizedFunction();
+			onUpdate.getStatements().add(0,amountDeclaration);
+			amountDeclaration.getDeclarators().add(amountDeclarator);
+			amountDeclarator.setValue(amount);
+			amount.setLeft(amountLeft);
+			amount.setRight(amountRight);
+			amountDeclarator.setVariable(query+"_amount");
+			amountLeft.setName(query);
+			amountRight.setName("CalculateEntityCount");
+		}
 		
 		var returnDefault = csharp.createReturn();
 		var defaultValue = csharp.createDefault();
 		onUpdate.getStatements().add(returnDefault);
 		returnDefault.setExpression(defaultValue);
 		
-		if (queries.size() > 0)
+		if (querySet.queries.size() > 0)
 		{
+			var staticUsing = csharp.createStaticUsing();
+			staticUsing.setNamespace("Unity.Entities.ComponentType");
+			unit.getUsings().add(staticUsing);
+			
 			var onCreate = csharp.createMethod();
 			clazz.getMembers().add(0, onCreate);
 			onCreate.getModifiers().add(MethodModifier.PROTECTED);
@@ -498,9 +534,9 @@ public class UnitySerializer
 			onCreate.setType("void");
 			onCreate.setName("OnCreate");
 			
-			for (var queryKey : queries.keySet())
+			for (var queryKey : querySet.queries.keySet())
 			{
-				var query = queries.get(queryKey);
+				var query = querySet.queries.get(queryKey);
 				var assignmentExpression = csharp.createExpressionStatement();
 				var assignment = csharp.createAssignment();
 				var assignmentLeft = modular.createVariable();
@@ -511,10 +547,27 @@ public class UnitySerializer
 				assignment.setRight(assignmentRight);
 				assignmentLeft.setName(queryKey);
 				assignmentRight.setName("GetEntityQuery");
+				
+				for (var component : query.keySet())
+				{
+					var accesses = query.get(component);
+					var totalAccess = "ReadOnly";
+					if (accesses.contains(AccessKind.write))
+					{
+						totalAccess = "ReadWrite";
+					}
+					
+					var componentAccessArgument = csharp.createArgument();
+					var accessType = csharp.createParameterizedFunction();
+					assignmentRight.getArguments().add(componentAccessArgument);
+					componentAccessArgument.setValue(accessType);
+					accessType.setName(totalAccess);
+					accessType.getTypes().add(unityName(component, namespaces));
+				}
 			}
 		}
 		
-		for (var queryKey : queries.keySet())
+		for (var queryKey : querySet.queries.keySet())
 		{
 			var field = csharp.createField();
 			var declarator = csharp.createFieldDeclarator();
@@ -534,7 +587,7 @@ public class UnitySerializer
 		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/"+system.getName()+".cs");
 	}
 	
-	private void addStatements(List<Statement> statements, List<Statement> list, HashMap<String,Query> queries)
+	private void addStatements(List<Statement> statements, List<Statement> list, QuerySet querySet)
 	{
 		for (var statement : statements)
 		{
@@ -547,11 +600,7 @@ public class UnitySerializer
 				
 				for (var tag : tags)
 				{
-					if (!queries.containsKey(variable))
-					{
-						queries.put(variable, new Query());
-					}
-					queries.get(variable).add(tag, AccessKind.tag);
+					querySet.add(variable, tag, AccessKind.tag);
 				}
 				
 				if (collection == null)
@@ -563,9 +612,8 @@ public class UnitySerializer
 					var condition = modular.createComparison();
 					var conditionLeft = modular.createVariable();
 					var conditionRight = modular.createVariable();
-					var iterator = csharp.createAssignment();
-					var iteratorLeft = modular.createVariable();
-					var iteratorRight = csharp.createFloatLiteral();
+					var iterator = csharp.createIncrement();
+					var iteratorExpression = modular.createVariable();
 					forStatement.setInitialization(initialization);
 					forStatement.setCondition(condition);
 					forStatement.setIterator(iterator);
@@ -573,23 +621,104 @@ public class UnitySerializer
 					indexDeclarator.setValue(zero);
 					condition.setLeft(conditionLeft);
 					condition.setRight(conditionRight);
-					iterator.setLeft(iteratorLeft);
-					iterator.setRight(iteratorRight);
+					iterator.setExpression(iteratorExpression);
 					
 					indexDeclarator.setVariable(variable+"_index");
 					zero.setValue("0");
 					conditionLeft.setName(variable+"_index");
 					condition.setKind(ComparisonKind.LOWER);
 					conditionRight.setName(variable+"_amount");
-					iteratorLeft.setName(variable+"_index");
-					iterator.setKind(AssignmentKind.INCREASE);
-					iteratorRight.setValue("1");
+					iteratorExpression.setName(variable+"_index");
 					list.add(forStatement);
 					
-					addStatements(forall.getStatements(), forStatement.getStatements(), queries);
+					addStatements(forall.getStatements(), forStatement.getStatements(), querySet);
 				}
 			}
+			else if (statement instanceof Assignment)
+			{
+				var assignment = (Assignment) statement;
+				var variable = assignment.getVariable();
+				var expression = assignment.getExpression();
+				
+				if (variable instanceof Variable)
+				{
+					
+				}
+				else if (variable instanceof ComponentAccess)
+				{
+					var access = (ComponentAccess) variable;
+					var entity = access.getEntity();
+					var component = access.getComponent();
+					querySet.add(entity, component, AccessKind.write);
+				}
+				cs(expression, querySet);
+			}
 		}
+	}
+	
+	private void cs(Expression expression, QuerySet querySet)
+	{
+		if (expression instanceof ComponentAccess)
+		{
+			var access = (ComponentAccess) expression;
+			querySet.add(access.getEntity(), access.getComponent(), AccessKind.read);
+		}
+		else if (expression instanceof LogicalOr)
+		{
+			var e = (LogicalOr) expression;
+			cs(e.getLeft(), querySet);
+			cs(e.getRight(), querySet);
+		}
+		else if (expression instanceof LogicalAnd)
+		{
+			var e = (LogicalAnd) expression;
+			cs(e.getLeft(), querySet);
+			cs(e.getRight(), querySet);
+		}
+		else if (expression instanceof Equality)
+		{
+			var e = (Equality) expression;
+			cs(e.getLeft(), querySet);
+			cs(e.getRight(), querySet);	
+		}
+		else if (expression instanceof Comparison)
+		{
+			var e = (Comparison) expression;
+			cs(e.getLeft(), querySet);
+			cs(e.getRight(), querySet);
+		}
+		else if (expression instanceof AdditiveExpression)
+		{
+			var e = (AdditiveExpression) expression;
+			cs(e.getLeft(), querySet);
+			cs(e.getRight(), querySet);
+		}
+		else if (expression instanceof MultiplicativeExpression)
+		{
+			var e = (MultiplicativeExpression) expression;
+			cs(e.getLeft(), querySet);
+			cs(e.getRight(), querySet);
+		}
+		else if (expression instanceof LogicalNot)
+		{
+			var e = (LogicalNot) expression;
+			cs(e.getExpression(), querySet);
+		}
+		else if (expression instanceof Brackets)
+		{
+			var e = (LogicalNot) expression;
+			cs(e.getExpression(), querySet);
+		}
+	}
+	
+	private String unityName(String component, HashSet<String> namespaces)
+	{
+		if (component.equals("velocity"))
+		{
+			namespaces.add("Unity.Physics");
+			return "PhysicsVelocity";
+		}
+		return component;
 	}
 	
 	private String uuid(String string)
@@ -694,7 +823,7 @@ public class UnitySerializer
 		componentConstraint.getSuperTypes().add("Component");
 		
 		var statement = csharp.createExpressionStatement();
-		var access = csharp.createAccessExpression();
+		var access = modular.createAccessExpression();
 		var accessLeft = modular.createVariable();
 		var accessRight = csharp.createParameterizedFunction();
 		var lambdaArgument = csharp.createArgument();
@@ -727,22 +856,28 @@ public class UnitySerializer
 	}
 }
 
-class Query
+class QuerySet
 {
-	public HashMap<String, HashSet<AccessKind>> components;
+	public HashMap<String,HashMap<String, HashSet<AccessKind>>> queries;
 	
-	public Query()
+	public QuerySet()
 	{
-		components = new HashMap<String, HashSet<AccessKind>>();
+		queries = new HashMap<String,HashMap<String, HashSet<AccessKind>>>();
 	}
 	
-	public void add(String component, AccessKind kind)
+	public void add(String entity, String component, AccessKind kind)
 	{
-		if (!components.containsKey(component))
+		if (!queries.containsKey(entity))
 		{
-			components.put(component, new HashSet<AccessKind>());
+			queries.put(entity, new HashMap<String,HashSet<AccessKind>>());
 		}
-		components.get(component).add(kind);
+		var query = queries.get(entity);
+		
+		if (!query.containsKey(component))
+		{
+			query.put(component, new HashSet<AccessKind>());
+		}
+		query.get(component).add(kind);
 	}
 }
 enum AccessKind
