@@ -48,14 +48,17 @@ AdditiveExpression returns Expression:
 MultiplicativeExpression returns Expression:
 	Primary ({MultiplicativeExpression.left=current}  kind=MultiplicativeKind right=Primary)*;
 
+AccessExpression returns Expression:
+	Primary ({AccessExpression.left=current} '.' right=Primary)*;
+	
 Primary returns Expression:
   Variable|=>Function|LogicalNot|Brackets;
 
-Brackets returns Expression:
+Brackets returns Expression: {Brackets}
 	'(' expression=Expression ')';
 
-LogicalNot returns Expression:
-	{LogicalNot} '!' expression=Primary;
+LogicalNot returns Expression: {LogicalNot} 
+	'!' expression=Primary;
 
 Variable returns Expression: {Variable}
 	name=WORD;

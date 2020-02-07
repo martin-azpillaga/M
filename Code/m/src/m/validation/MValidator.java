@@ -20,14 +20,18 @@ import org.eclipse.xtext.validation.EValidatorRegistrar;
 import m.m.Exists;
 import m.m.Amount;
 import m.m.Archetype;
+import m.m.AssetComponent;
 import m.m.Forall;
 import m.m.MPackage;
 import m.m.Game;
 import m.m.System;
+import m.m.VectorComponent;
 import m.modular.Variable;
 import m.modular.AdditiveExpression;
 import m.m.Assignment;
 import m.m.Component;
+import m.m.ComponentAccess;
+import m.m.End;
 import m.modular.Block;
 import m.modular.Comparison;
 import m.modular.Equality;
@@ -52,12 +56,7 @@ public class MValidator extends AbstractMValidator
 	public static HashMap<String,Type> components;
 	public static HashMap<String,Type> variables;
 	public static ArrayList<ArrayList<Expression>> groups;
-	
-	@Check
-	public void check(Game game)
-	{
-		java.lang.System.out.println("Game");
-	}
+
 
 	@Check
 	public void uniqueComponents(Component component)
@@ -338,6 +337,16 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
+	public void type(VectorComponent vector)
+	{
+		if (vector.getEntries().size() > 4)
+		{
+			error("Vectors can have up to four entries", vector, COMPONENT__NAME);
+		}
+	}
+
+	
+	@Check
 	public void clean(Game modul)
 	{
 		components = new HashMap<>();
@@ -435,7 +444,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (variables.get(name) != type)
 			{
-				error("Expected " + variables.get(name) + ", got " + type, variable, EXPRESSION__EXPRESSION);
+				error("Expected " + variables.get(name) + ", got " + type, variable, VARIABLE__NAME);
 			}
 		}
 		else
@@ -446,21 +455,15 @@ public class MValidator extends AbstractMValidator
 		return false;
 	}
 	
-	/*
-	private boolean set(AccessExpression access, Type type)
+	
+	private boolean set(ComponentAccess access, Type type)
 	{
-		var right = access.getRight();
-		if (right instanceof Function)
-		{
-			error("Can only access components",access, EXPRESSION__EXPRESSION);
-			return false;
-		}
-		var component = ((Variable)right).getName();
+		var component = access.getComponent();
 		if (components.containsKey(component))
 		{
 			if (components.get(component) != type)
 			{
-				error("Type conflict: This variable cannot be " + components.get(component) + " and " + type, access, EXPRESSION__EXPRESSION);
+				error("Type conflict: This variable cannot be " + components.get(component) + " and " + type, access, VARIABLE__NAME);
 			}
 		}
 		else
@@ -469,7 +472,7 @@ public class MValidator extends AbstractMValidator
 			return true;
 		}
 		return false;
-	}*/
+	}
 	
 	private void set(Expression expression, Type type)
 	{
@@ -477,7 +480,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (expressions.get(expression) != type)
 			{
-				error("Expected type " + expressions.get(expression) + " but got " + type.toString(), expression, EXPRESSION__EXPRESSION);
+				//error("Expected type " + expressions.get(expression) + " but got " + type.toString(), expression);
 			}
 		}
 		else
@@ -485,8 +488,6 @@ public class MValidator extends AbstractMValidator
 			expressions.put(expression, type);
 		}
 	}
-	
-	
 	
 	
 	@Check
@@ -504,6 +505,29 @@ public class MValidator extends AbstractMValidator
 		magic(name,"Chosen", bool, none, component, feature);
 		
 		magic(name,"Transition", bool, none, component, feature);
+	}
+	
+	@Check
+	public void infer(VectorComponent component)
+	{
+		var entries = component.getEntries();
+		var name = component.getName();
+		if (entries.size() == 1)
+		{
+			set(component,float1);
+		}
+		else if (entries.size() == 2)
+		{
+			set(component, float2);
+		}
+		else if (entries.size() == 3)
+		{
+			set(component, float3);
+		}
+		else if (entries.size() == 4)
+		{
+			set(component, float4);
+		}
 	}
 	
 	/*
@@ -828,19 +852,11 @@ public class MValidator extends AbstractMValidator
 		}
 	}
 	
-	/*
+	
 	@Check
-	public void check(Archetype a)
+	public void check(End end)
 	{
-		var game = (Game) a.eContainer();
-		if (a != game.getArchetypes().get(game.getArchetypes().size()-1))
-		{
-			return;
-		}
-		if (game.getSystems().size() != 0)
-		{
-			return;
-		}
+		var game = (Game) end.eContainer();
 		report(game);
 	}
 	
@@ -852,9 +868,9 @@ public class MValidator extends AbstractMValidator
 		{
 			for (var expression : group)
 			{
-				if (expression instanceof AccessExpression)
+				if (expression instanceof ComponentAccess)
 				{
-					warning("Type undecidable", expression, EXPRESSION__EXPRESSION);
+					warning("Type undecidable", expression, COMPONENT_ACCESS__COMPONENT);
 				}
 			}
 		}
@@ -922,10 +938,10 @@ public class MValidator extends AbstractMValidator
 							break;
 						}
 					}
-					else if (expression instanceof AccessExpression)
+					else if (expression instanceof ComponentAccess)
 					{
-						var access = (AccessExpression) expression;
-						var component = ((Variable)access.getRight()).getName();
+						var access = (ComponentAccess) expression;
+						var component = access.getComponent();
 						if (components.containsKey(component))
 						{
 							repeat = true;
@@ -953,9 +969,9 @@ public class MValidator extends AbstractMValidator
 						repeat = true;
 					}
 				}
-				else if (expression instanceof AccessExpression)
+				else if (expression instanceof ComponentAccess)
 				{
-					var access = (AccessExpression) expression;
+					var access = (ComponentAccess) expression;
 					if (set(access, expressions.get(expression)))
 					{
 						repeat = true;
@@ -963,5 +979,5 @@ public class MValidator extends AbstractMValidator
 				}
 			}
 		}
-	}*/
+	}
 }
