@@ -1,11 +1,6 @@
 package m.serializing;
 
-import static m.csharp.EnumModifier.*;
-import static m.csharp.ClassModifier.*;
-import static m.csharp.StructModifier.*;
-import static m.csharp.InterfaceModifier.*;
-import static m.csharp.MethodModifier.*;
-import static m.csharp.FieldModifier.*;
+import static m.csharp.Modifier.*;
 import static m.validation.Type.*;
 
 import java.util.ArrayList;
@@ -19,12 +14,8 @@ import org.eclipse.xtext.generator.IFileSystemAccess2;
 import m.CSharpRuntimeModule;
 import m.JSONRuntimeModule;
 import m.YAMLRuntimeModule;
-import m.csharp.ClassModifier;
 import m.csharp.CompilationUnit;
 import m.csharp.CsharpFactory;
-import m.csharp.FieldModifier;
-import m.csharp.MethodModifier;
-import m.csharp.StructModifier;
 import m.json.JsonFactory;
 import m.json.Member;
 import m.m.Archetype;
@@ -164,7 +155,7 @@ public class UnitySerializer
 			}
 			
 			var struct = csharp.createStruct();
-			struct.getModifiers().add(StructModifier.PUBLIC);
+			struct.getModifiers().add(PUBLIC);
 			struct.setName(component);
 			struct.getSuperTypes().add("IComponentData");
 			
@@ -175,11 +166,11 @@ public class UnitySerializer
 			struct.getAttributes().add(attributeSection);
 			
 			var value = csharp.createField();
-			var valueDeclarator = csharp.createFieldDeclarator();
+			var valueDeclarator = csharp.createDeclarator();
 			value.getDeclarators().add(valueDeclarator);
-			value.getModifiers().add(FieldModifier.PUBLIC);
+			value.getModifiers().add(PUBLIC);
 			value.setType(unityName(type));
-			valueDeclarator.setName("Value");
+			valueDeclarator.setVariable("Value");
 			struct.getMembers().add(value);
 			
 			unit.getTypes().add(struct);
@@ -187,7 +178,7 @@ public class UnitySerializer
 		else if (type == tag)
 		{
 			var struct = csharp.createStruct();
-			struct.getModifiers().add(StructModifier.PUBLIC);
+			struct.getModifiers().add(PUBLIC);
 			struct.setName(component);
 			struct.getSuperTypes().add("IComponentData");
 			
@@ -205,35 +196,35 @@ public class UnitySerializer
 			namespaces.add("System.Collections.Generic");
 			
 			var struct = csharp.createStruct();
-			struct.getModifiers().add(StructModifier.PUBLIC);
+			struct.getModifiers().add(PUBLIC);
 			struct.setName(component);
 			struct.getSuperTypes().add("IBufferElementData");
 			
 			var value = csharp.createField();
-			var valueDeclarator = csharp.createFieldDeclarator();
+			var valueDeclarator = csharp.createDeclarator();
 			value.getDeclarators().add(valueDeclarator);
-			value.getModifiers().add(FieldModifier.PUBLIC);
+			value.getModifiers().add(PUBLIC);
 			value.setType(unityName(type));
-			valueDeclarator.setName("Value");
+			valueDeclarator.setVariable("Value");
 			struct.getMembers().add(value);
 			
 			var clazz = csharp.createClass();
-			clazz.getModifiers().add(ClassModifier.PUBLIC);
+			clazz.getModifiers().add(PUBLIC);
 			clazz.setName(component+"Authoring");
 			clazz.getSuperTypes().add("MonoBehaviour");
 			clazz.getSuperTypes().add("IConvertGameObjectToEntity");
 			clazz.getSuperTypes().add("IDeclareReferencedPrefabs");
 			
 			var field = csharp.createField();
-			var fieldDeclarator = csharp.createFieldDeclarator();
+			var fieldDeclarator = csharp.createDeclarator();
 			field.getDeclarators().add(fieldDeclarator);
-			field.getModifiers().add(FieldModifier.PUBLIC);
+			field.getModifiers().add(PUBLIC);
 			field.setType("List<GameObject>");
-			fieldDeclarator.setName("Value");
+			fieldDeclarator.setVariable("Value");
 			clazz.getMembers().add(field);
 			
 			var method = csharp.createMethod();
-			method.getModifiers().add(MethodModifier.PUBLIC);
+			method.getModifiers().add(PUBLIC);
 			method.setType("void");
 			method.setName("Convert");
 			clazz.getMembers().add(method);
@@ -314,7 +305,7 @@ public class UnitySerializer
 			convertArgumentV.setName("v");
 			
 			var declare = csharp.createMethod();
-			declare.getModifiers().add(MethodModifier.PUBLIC);
+			declare.getModifiers().add(PUBLIC);
 			declare.setType("void");
 			declare.setName("DeclareReferencedPrefabs");
 			clazz.getMembers().add(declare);
@@ -354,34 +345,34 @@ public class UnitySerializer
 			namespaces.add("UnityEngine");
 			
 			var data = csharp.createClass();
-			data.getModifiers().add(ClassModifier.PUBLIC);
+			data.getModifiers().add(PUBLIC);
 			data.setName(component);
 			data.getSuperTypes().add("IComponentData");
 			
 			var dataValue = csharp.createField();
-			var dataValueDeclarator = csharp.createFieldDeclarator();
-			dataValue.getModifiers().add(FieldModifier.PUBLIC);
+			var dataValueDeclarator = csharp.createDeclarator();
+			dataValue.getModifiers().add(PUBLIC);
 			dataValue.setType(unityName(type));
 			dataValue.getDeclarators().add(dataValueDeclarator);
-			dataValueDeclarator.setName("Value");
+			dataValueDeclarator.setVariable("Value");
 			data.getMembers().add(dataValue);
 			
 			var authoring = csharp.createClass();
-			authoring.getModifiers().add(ClassModifier.PUBLIC);
+			authoring.getModifiers().add(PUBLIC);
 			authoring.setName(component+"Authoring");
 			authoring.getSuperTypes().add("MonoBehaviour");
 			authoring.getSuperTypes().add("IConvertGameObjectToEntity");
 			
 			var value = csharp.createField();
-			var valueDeclarator = csharp.createFieldDeclarator();
+			var valueDeclarator = csharp.createDeclarator();
 			value.getDeclarators().add(valueDeclarator);
-			value.getModifiers().add(FieldModifier.PUBLIC);
+			value.getModifiers().add(PUBLIC);
 			value.setType(unityName(type));
-			valueDeclarator.setName("Value");
+			valueDeclarator.setVariable("Value");
 			authoring.getMembers().add(value);
 			
 			var method = csharp.createMethod();
-			method.getModifiers().add(MethodModifier.PUBLIC);
+			method.getModifiers().add(PUBLIC);
 			method.setType("void");
 			method.setName("Convert");
 			authoring.getMembers().add(method);
@@ -460,15 +451,15 @@ public class UnitySerializer
 		
 		var clazz = csharp.createClass();
 		unit.getTypes().add(clazz);
-		clazz.getModifiers().add(ClassModifier.PUBLIC);
+		clazz.getModifiers().add(PUBLIC);
 		clazz.setName(system.getName());
 		clazz.getSuperTypes().add("JobComponentSystem");
 		
 		var onUpdate = csharp.createMethod();
 		var handleParameter = csharp.createParameter();
 		clazz.getMembers().add(onUpdate);
-		onUpdate.getModifiers().add(MethodModifier.PROTECTED);
-		onUpdate.getModifiers().add(MethodModifier.OVERRIDE);
+		onUpdate.getModifiers().add(PROTECTED);
+		onUpdate.getModifiers().add(OVERRIDE);
 		onUpdate.setType("JobHandle");
 		onUpdate.setName("OnUpdate");
 		onUpdate.getParameters().add(handleParameter);
@@ -530,8 +521,8 @@ public class UnitySerializer
 			
 			var onCreate = csharp.createMethod();
 			clazz.getMembers().add(0, onCreate);
-			onCreate.getModifiers().add(MethodModifier.PROTECTED);
-			onCreate.getModifiers().add(MethodModifier.OVERRIDE);
+			onCreate.getModifiers().add(PROTECTED);
+			onCreate.getModifiers().add(OVERRIDE);
 			onCreate.setType("void");
 			onCreate.setName("OnCreate");
 			
@@ -571,11 +562,11 @@ public class UnitySerializer
 		for (var queryKey : querySet.queries.keySet())
 		{
 			var field = csharp.createField();
-			var declarator = csharp.createFieldDeclarator();
+			var declarator = csharp.createDeclarator();
 			clazz.getMembers().add(0, field);
 			field.getDeclarators().add(declarator);
 			field.setType("EntityQuery");
-			declarator.setName(queryKey);
+			declarator.setVariable(queryKey);
 		}
 		
 		for (var namespace : namespaces)
@@ -824,14 +815,14 @@ public class UnitySerializer
 		
 		var clazz = csharp.createClass();
 		unit.getTypes().add(clazz);
-		clazz.getModifiers().add(ClassModifier.PUBLIC);
+		clazz.getModifiers().add(PUBLIC);
 		clazz.setName("EngineComponentConversion");
 		clazz.getSuperTypes().add("GameObjectConversionSystem");
 		
 		var onUpdate = csharp.createMethod();
 		clazz.getMembers().add(onUpdate);
-		onUpdate.getModifiers().add(MethodModifier.PROTECTED);
-		onUpdate.getModifiers().add(MethodModifier.OVERRIDE);
+		onUpdate.getModifiers().add(PROTECTED);
+		onUpdate.getModifiers().add(OVERRIDE);
 		onUpdate.setType("void");
 		onUpdate.setName("OnUpdate");
 		
