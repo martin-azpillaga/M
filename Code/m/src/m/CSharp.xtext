@@ -9,90 +9,118 @@ CompilationUnit:
 	usings+=Using*
 	types+=NamespaceMember*;
 
-GlobalAttribute:
-	'[' ('assembly'|'module') ':' attributes+=Attribute (',' attributes+=Attribute)* ']';
+ExternAlias:
+	'extern' 'alias' name=WORD ';';
+
+AttributeSection:
+	'[' (target=AttributeTarget ':')? 
+	attributes+=Attribute (',' attributes+=Attribute)* ']';
+
+GlobalAttribute returns AttributeSection:
+	'[' target=GlobalAttributeTarget ':' 
+	attributes+=Attribute (',' attributes+=Attribute)* ']';
 
 Attribute:
-	name=WORD arguments=AttributeArguments?
-;
-AttributeArguments: {AttributeArguments}
-	'(' 
+	name=WORD
+	('(' 
 	(
-		positionals+=LogicalOr (',' positionals+=LogicalOr)*
-		(',' named+=NamedArgument (',' named+=NamedArgument)*)?
+		positionalArguments+=LogicalOr (',' positionalArguments+=LogicalOr)*
+		(',' namedArguments+=NamedArgument (',' namedArguments+=NamedArgument)*)?
 		|
-		named+=NamedArgument (',' named+=NamedArgument)*
+		namedArguments+=NamedArgument (',' namedArguments+=NamedArgument)*
 	)?
-	')'
-;
+	')')?;
+
 NamedArgument:
-	name=WORD '=' expression=Expression
-;
-ExternAlias:
-	'extern' 'alias' name=WORD ';'
-;
+	name=WORD '=' expression=Expression;
+
 Using:
 	AliasUsing|NamespaceUsing|StaticUsing;
 
 AliasUsing:
-	'using'
-	alias=WORD '=' namespace=QUALIFIEDTYPE
-	';'
-;
-QUALIFIEDTYPE:
-	TYPE ('.' TYPE)*
-	|
-	WORD '::' TYPE ('.' TYPE)*
-;
+	'using' alias=WORD 
+	'=' namespace=QUALIFIEDTYPE ';';
+
 NamespaceUsing:
-	'using'
-	namespace=QUALIFIEDTYPE
-	';'
-;
+	'using' namespace=QUALIFIEDTYPE ';';
+
 StaticUsing:
-	'using'
-	'static'
-	namespace=QUALIFIEDTYPE
-	';'
-;
+	'using'	'static' namespace=QUALIFIEDTYPE ';';
+
+NamespaceMember:
+	=>Namespace|=>Struct|=>Class|=>Enum|=>Interface|=>Delegate;
 
 Namespace:
-	'namespace' qname=QUALIFIEDNAME 
+	'namespace' name=QUALIFIEDNAME 
 	'{' 
 	externAliases+=ExternAlias*
 	usings+=Using*
 	members+=NamespaceMember* 
-	'}'
-	 ';'?
-;
-NamespaceMember:
-	=>Namespace|=>Struct|=>Class|=>Enum|=>Interface|=>Delegate;
+	'}' ';'?;
+
+Struct:
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	'struct' name=WORD
+	('<' typeParameters+=TypeParameter (',' typeParameters+=TypeParameter)* '>')?
+	(':' superTypes+=QUALIFIEDTYPE (',' superTypes+=QUALIFIEDTYPE)*)?
+	typeConstraints+=TypeConstraint*
+	'{' members+=Member* '}' ';'?;
+
+Class:
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	'class' name=WORD
+	('<' typeParameters+=TypeParameter (',' typeParameters+=TypeParameter)* '>')?
+	(':' superTypes+=QUALIFIEDTYPE (',' superTypes+=QUALIFIEDTYPE)*)?
+	typeConstraints+=TypeConstraint*
+	'{' members+=Member* '}' ';'?;
+
+Enum:
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	'enum' name=WORD
+	(':' base=WORD)?
+	'{' (values+=WORD (',' values+=WORD)*)? '}' ';'?;
+
+Interface:
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	'interface' name=WORD
+	('<' typeParameters+=TypeParameter (',' typeParameters+=TypeParameter)* '>')?
+	(':' superTypes+=QUALIFIEDTYPE (',' superTypes+=QUALIFIEDTYPE)*)?
+	typeConstraints+=TypeConstraint*
+	'{' members+=Member* '}' ';'?;
+
+Delegate:
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	'delegate' returnType=QUALIFIEDTYPE
+	name=WORD
+	('<' typeParameters+=TypeParameter (',' typeParameters+=TypeParameter)* '>')?
+	'(' (parameters+=Parameter (','parameters+=Parameter)*)? ')'
+ 	typeConstraints+=TypeConstraint* ';';
+
+
+
 Member:
-	=>Struct|=>Class|=>Interface|=>Delegate|=>Enum|=>Field|=>Method|=>Constant|=>Property|=>Event|=>Indexer|=>Operator|=>Constructor|=>Destructor|=>StaticConstructor
-;
-enum MethodModifier:
-	new|public|protected|internal|private|static|virtual|sealed|override|abstract|extern|async|unsafe|partial
-;
-enum ClassModifier:
-	new|public|protected|internal|private|abstract|sealed|static|unsafe|partial
-;
-enum FieldModifier:
-	new|public|protected|internal|private|static|readonly|volatile|unsafe;
-enum StructModifier:
-	new|public|protected|internal|private|unsafe;
-enum EnumModifier:
-	new|public|protected|internal|private;
+	=>Struct|=>Class|=>Interface|=>Delegate|=>Enum|=>Field|=>Method|=>Constant|=>Property|=>Event|=>Indexer|=>Operator|=>Constructor|=>Destructor|=>StaticConstructor;
+
+Field:
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	type=QUALIFIEDTYPE
+	declarators+=Declarator (',' declarators+=Declarator)*
+	';';
+
+
 Method:
 	attributes+=AttributeSection*
- 	modifiers+=MethodModifier*
+ 	modifiers+=Modifier*
  	type=QUALIFIEDTYPE
  	(memberName=QUALIFIEDTYPE '.')? name=WORD
  	('<' typeParameters+=TypeParameter (',' typeParameters+=TypeParameter)* '>')?
- 	'(' 
- 	(
- 		parameters+=Parameter (',' parameters+=Parameter)*
- 	)?
- 	')'
+ 	'(' (parameters+=Parameter (',' parameters+=Parameter)*)?')'
  	typeConstraints+=TypeConstraint*
  	(
  		'{' statements+=Statement*	'}' |
@@ -102,7 +130,7 @@ Method:
 
 Property:
 	attributes+=AttributeSection*
-	modifiers+=PropertyModifier*
+	modifiers+=Modifier*
 	type=QUALIFIEDTYPE
 	(memberName=WORD '.')? // Should be type
 	name=WORD
@@ -115,14 +143,11 @@ Property:
 		'}'
 		('=' expression=Expression ';')?|
 		'=>' expression=Expression ';'
-	)
-;
-enum PropertyModifier:
-	new|public|internal|protected|private|static|virtual|sealed|override|abstract|extern|unsafe;
+	);
 
 Getter: {Getter}
 	attributes+=AttributeSection*
-	modifier=AccessModifier?
+	modifier=Modifier?
 	'get'
 	(
 	'{' statements+=Statement* '}'|
@@ -132,7 +157,7 @@ Getter: {Getter}
 
 Setter: {Setter}
 	attributes+=AttributeSection*
-	modifier=AccessModifier?
+	modifier=Modifier?
 	'set'
 	(
 	'{' statements+=Statement* '}'|
@@ -140,17 +165,14 @@ Setter: {Setter}
 	)
 ;
 
-enum AccessModifier:
-	protected|internal|private
-;
 
 Event:
 	attributes+=AttributeSection*
-	modifiers+=EventModifier*
+	modifiers+=Modifier*
 	'event'
 	type=QUALIFIEDTYPE
 	(
-		declarators+=FieldDeclarator (',' declarators+=FieldDeclarator)*
+		declarators+=Declarator (',' declarators+=Declarator)*
 		';'
 		|
 		(memberName=WORD '.')?  // Should be type
@@ -158,8 +180,6 @@ Event:
 		'{' (=>add=Add remove=Remove|remove=Remove add=Add) '}'
 	)
 ;
-enum EventModifier:
-	new|public|protected|internal|private|static|virtual|sealed|override|abstract|extern|unsafe;
 
 Add: {Add}
 	attributes+=AttributeSection*
@@ -175,7 +195,7 @@ Remove: {Remove}
 
 Indexer:
 	attributes+=AttributeSection*
-	modifiers+=IndexerModifier*
+	modifiers+=Modifier*
 	type=QUALIFIEDTYPE
 	(interface=QUALIFIEDTYPE '.')?
 	'this'
@@ -186,8 +206,6 @@ Indexer:
 		'=>' expression=Expression ';'
 	)
 ;
-enum IndexerModifier:
-	new|public|protected|internal|private|virtual|sealed|override|abstract|extern|unsafe;
 
 Operator:
 	attributes+=AttributeSection*
@@ -199,26 +217,16 @@ Operator:
 	)
 	('{' statements+=Statement* '}'|'=>' expression=Expression ';'|empty?=';')
 ;
-enum UnaryOperator:
-	plus='+'|minus='-'|not='!'|bitwiseNot='~'|increment='++'|decrement='--'|t='true'|f='false';
-enum BinaryOperator:
-	plus='+'|minus='-'|times='*'|divide='/'|remainder='%'|bitwiseAnd='&'|bitwiseOr='|'|bitwiseXor='^'|leftShift='<<'|rightShift='>>'|equal='=='|notEqual='!='|greater='>'|greaterOrEqual='>='|lower='<'|lowerOrEqual='<='
-;
-enum OperatorModifier:
-	public|static|extern|unsafe
-;
 
 Constructor:
 	attributes+=AttributeSection*
-	modifiers+=ConstructorModifier*
+	modifiers+=Modifier*
 	name=WORD
 	'(' (parameters+=Parameter (',' parameters+=Parameter)*)? ')'
-	(':' (base?='base'|'this') '(' (arguments+=Argument (',' arguments+=Argument)*)? ')')?
-	('{' statements+=Statement* '}'|empty?=';')
-;
-enum ConstructorModifier:
-	public|protected|internal|private|extern|unsafe
-;
+	(':' (base?='base'|'this') 
+	'(' (arguments+=Argument (',' arguments+=Argument)*)? ')')?
+	('{' statements+=Statement* '}'|empty?=';');
+
 StaticConstructor:
 	attributes+=AttributeSection*
 	(extern?='extern'? 'static'|'static' extern?='extern')
@@ -234,115 +242,33 @@ Destructor:
 	'(' ')'
 	('{' statements+=Statement* '}'|empty?=';')
 ;
-Field:
-	attributes+=AttributeSection*
-	modifiers+=FieldModifier*
-	type=QUALIFIEDTYPE
-	declarators+=FieldDeclarator (',' declarators+=FieldDeclarator)*
-	';'
-;
-FieldDeclarator:
-	name=WORD ('=' value=(Expression|ArrayInitializer))?
-;
+
 
 Constant:
 	attributes+=AttributeSection*
-	modifiers+=ConstantModifier*
+	modifiers+=Modifier*
 	'const'
 	type=QUALIFIEDTYPE
 	declarators+=ConstantDeclarator (',' declarators+=ConstantDeclarator)*
 	';'
 ;
 
-ConstantDeclarator:
-	name=WORD '=' value=Expression
-;
+Declarator:
+	variable=WORD ('=' value=(Expression|ArrayInitializer))?;
 
-Struct:
-	attributes+=AttributeSection*
-	modifiers+=StructModifier*
-	 'struct' name=WORD
-	 ('<' typeParameters+=TypeParameter (',' typeParameters+=TypeParameter)* '>')?
-	(':' superTypes+=QUALIFIEDTYPE (',' superTypes+=QUALIFIEDTYPE)*)?
-	typeConstraints+=TypeConstraint*
-	 '{' members+=Member* '}'
-	 ';'?
-;
-
-Class:
-	attributes+=AttributeSection*
-	 modifiers+=ClassModifier*
-	 'class' name=WORD
-	 ('<' typeParameters+=TypeParameter (',' typeParameters+=TypeParameter)* '>')?
-	(':' superTypes+=QUALIFIEDTYPE (',' superTypes+=QUALIFIEDTYPE)*)?
-	typeConstraints+=TypeConstraint*
-	 '{' members+=Member* '}'
-	 ';'?
-;
-
-Enum:
-	attributes+=AttributeSection*
-	modifiers+=EnumModifier*
-	 'enum' name=WORD
-	 (':' base=WORD)?
-	 '{' (values+=WORD (',' values+=WORD)*)? '}'
-	 ';'?
-;
-
-Interface:
-	(attributes+=AttributeSection)*
-	 modifiers+=InterfaceModifier*
-	 'interface' name=WORD
-	 ('<' typeParameters+=TypeParameter (',' typeParameters+=TypeParameter)* '>')?
-	 (':' superTypes+=QUALIFIEDTYPE (',' superTypes+=QUALIFIEDTYPE)*)?
-	 typeConstraints+=TypeConstraint*
-	 '{' members+=Member* '}'
-	 ';'?
-;
-
-enum InterfaceModifier:
-	new|public|protected|internal|private|partial|unsafe
-;
-
-Delegate:
-	attributes+=AttributeSection*
-	modifiers+=DelegateModifiers*
-	'delegate' returnType=QUALIFIEDTYPE
-	name=WORD
-	('<' variants+=VariantParameter (',' variants+=VariantParameter)* '>')?
-	'(' (parameters+=Parameter (','parameters+=Parameter)*)? ')'
- 	typeConstraints+=TypeConstraint*
-	';'
-;
-VariantParameter:
-	attributes+=AttributeSection*
-	varianceAttributeSection=VarianceAttributeSection?
-	type=WORD
-;
-enum VarianceAttributeSection:
-	none|in|out
-;
-enum DelegateModifiers:
-	new|public|protected|internal|private|unsafe;
-enum ConstantModifier:
-	new|public|private|protected|internal
-;
+ConstantDeclarator returns Declarator:
+	name=WORD '=' value=Expression;
 
 
-Parameter:
-	attributes+=AttributeSection*
-	(ref?='ref'|out?='out'|this?='this')?
-	params?='params'?
-	type=QUALIFIEDTYPE
-	name=WORD
-	('=' default=Expression)?;
 
-AttributeSection:
-	'[' (target=AttributeTarget ':')? attributes+=Attribute (',' attributes+=Attribute)* ']';
 
-enum AttributeTarget:
-	field|event|method|param|property|return|type
-;
+
+
+
+
+
+
+
 @Override
 Statement:
 	LabeledStatement|Foreach|For|Do|Iteration|Selection|Switch|=>Declaration|ExpressionStatement|Return|Yield|Break|Continue|Goto|EmptyStatement|Try
@@ -514,9 +440,7 @@ Index:
 Declaration:
 	('var'|constant?='const'? type=QUALIFIEDTYPE) declarators+=Declarator+ ';';
 
-Declarator:
-	variable=WORD ('=' value=(Expression|ArrayInitializer))?
-;
+
 ExpressionStatement:
 	expression=Expression ';'
 ;
@@ -546,14 +470,19 @@ AccessExpression returns Expression:
 Postfix returns Expression:
 	Atomic (({Increment.expression=current} '++')|({Decrement.expression=current} '--'))?
 ;
-QUALIFIEDNAME: WORD ('.' WORD)*;
+
+Parameter:
+	attributes+=AttributeSection*
+	(ref?='ref'|out?='out'|this?='this')?
+	params?='params'?
+	type=QUALIFIEDTYPE
+	name=WORD
+	('=' default=Expression)?;
+
 TypeParameter: 
 	attributes+=AttributeSection* 
-	name=WORD
-;
-TYPE:
-	WORD ('<' TYPE (',' TYPE)* '>')? ('[' ','* ']')?
-;
+	name=WORD;
+
 TypeConstraint:
 	'where' type=WORD
 	':' 
@@ -562,8 +491,37 @@ TypeConstraint:
 		(class?='class'|struct?='struct') (',' superTypes+=QUALIFIEDTYPE)+ (',' constructor?='new' '(' ')')? |
 		superTypes+=QUALIFIEDTYPE (',' superTypes+=QUALIFIEDTYPE)* (',' constructor?='new' '(' ')')? |
 		constructor?='new' '(' ')'		
-	)
+	);
+
+QUALIFIEDNAME: WORD ('.' WORD)*;
+
+TYPE:
+	WORD ('<' TYPE (',' TYPE)* '>')? ('[' ','* ']')?
 ;
+QUALIFIEDTYPE:
+	TYPE ('.' TYPE)*
+	|
+	WORD '::' TYPE ('.' TYPE)*
+;
+
+enum Modifier:
+	new|public|protected|internal|private|static|virtual|sealed|override|abstract|extern|async|unsafe|partial|readonly|volatile;
+
+enum UnaryOperator:
+	plus='+'|minus='-'|not='!'|bitwiseNot='~'|increment='++'|decrement='--'|t='true'|f='false';
+enum BinaryOperator:
+	plus='+'|minus='-'|times='*'|divide='/'|remainder='%'|bitwiseAnd='&'|bitwiseOr='|'|bitwiseXor='^'|leftShift='<<'|rightShift='>>'|equal='=='|notEqual='!='|greater='>'|greaterOrEqual='>='|lower='<'|lowerOrEqual='<='
+;
+enum OperatorModifier:
+	public|static|extern|unsafe
+;
+
+enum GlobalAttributeTarget returns AttributeTarget:
+	assembly|module;
+
+enum AttributeTarget:
+	field|event|method|param|property|return|type;
+
 FloatLiteral returns Expression: {FloatLiteral}	value=NUMBER;
 StringLiteral returns Expression: {StringLiteral} value=STRING;
 BooleanLiteral returns Expression: {BooleanLiteral}	value=BOOLEAN;

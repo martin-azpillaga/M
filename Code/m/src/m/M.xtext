@@ -83,7 +83,7 @@ Amount:
 
 End: {End};
 @Override
-enum EqualityKind: equal='=='|notEqual='≠';
+enum EqualityKind: equal='='|notEqual='≠';
 @Override
 enum MultiplicativeKind: multiply='×'|divide='÷';
-enum AmountKind: lower='<'|lowerOrEqual='≤'|equal='=='|notEqual='≠'|greaterOrEqual='≥'|greater='>';
+enum AmountKind: lower='<'|lowerOrEqual='≤'|equal='='|notEqual='≠'|greaterOrEqual='≥'|greater='>';
