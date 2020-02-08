@@ -257,7 +257,7 @@ Declarator:
 	variable=WORD ('=' value=(Expression|ArrayInitializer))?;
 
 ConstantDeclarator returns Declarator:
-	name=WORD '=' value=Expression;
+	variable=WORD '=' value=Expression;
 
 
 
@@ -276,10 +276,11 @@ Statement:
 ;
 
 LabeledStatement:
-	=>(label=WORD ':') statement=Statement
-;
+	=>(label=WORD ':')
+	statement=Statement;
 
-EmptyStatement:{EmptyStatement}';';
+EmptyStatement:{EmptyStatement}
+	';';
 
 Try:
 	'try'

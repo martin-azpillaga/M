@@ -1,51 +1,85 @@
 package m.formatting;
 
-import static m.formatting.FormatRule.angleBrackets;
-import static m.formatting.FormatRule.colon;
-import static m.formatting.FormatRule.comma;
-import static m.formatting.FormatRule.curlyBrackets;
-import static m.formatting.FormatRule.dot;
-import static m.formatting.FormatRule.roundBrackets;
-import static m.formatting.FormatRule.semicolon;
-import static m.formatting.FormatRule.squareBrackets;
-
+import static m.formatting.FormatRule.*;
 import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
 
 import com.google.inject.Inject;
-
 import m.csharp.Add;
 import m.csharp.AliasUsing;
+import m.csharp.Argument;
+import m.csharp.ArrayInitializer;
+import m.csharp.Assignment;
 import m.csharp.Attribute;
 import m.csharp.AttributeSection;
+import m.csharp.Break;
+import m.csharp.Case;
+import m.csharp.Catch;
+import m.csharp.Checked;
 import m.csharp.CompilationUnit;
 import m.csharp.Constant;
 import m.csharp.Constructor;
+import m.csharp.Continue;
+import m.csharp.Creation;
+import m.csharp.Declaration;
 import m.csharp.Declarator;
+import m.csharp.Decrement;
 import m.csharp.Delegate;
 import m.csharp.Destructor;
+import m.csharp.Do;
 import m.csharp.Enum;
 import m.csharp.Event;
+import m.csharp.ExpressionStatement;
 import m.csharp.ExternAlias;
 import m.csharp.Field;
+import m.csharp.For;
+import m.csharp.Foreach;
 import m.csharp.Getter;
+import m.csharp.Goto;
+import m.csharp.Increment;
+import m.csharp.Index;
 import m.csharp.Indexer;
 import m.csharp.Interface;
+import m.csharp.LabeledStatement;
+import m.csharp.Lambda;
+import m.csharp.Lock;
+import m.csharp.MemberInitializer;
 import m.csharp.Method;
 import m.csharp.NamedArgument;
 import m.csharp.Namespace;
 import m.csharp.NamespaceUsing;
+import m.csharp.NullCoalescing;
 import m.csharp.Operator;
 import m.csharp.Parameter;
+import m.csharp.ParameterizedFunction;
 import m.csharp.Property;
 import m.csharp.Remove;
+import m.csharp.Return;
 import m.csharp.Setter;
 import m.csharp.StaticConstructor;
 import m.csharp.StaticUsing;
 import m.csharp.Struct;
+import m.csharp.Switch;
+import m.csharp.Ternary;
+import m.csharp.Throw;
+import m.csharp.Try;
 import m.csharp.TypeConstraint;
 import m.csharp.TypeParameter;
+import m.csharp.Typeof;
+import m.csharp.Unchecked;
+import m.csharp.Yield;
+import m.modular.AccessExpression;
+import m.modular.AdditiveExpression;
+import m.modular.Block;
+import m.modular.Branch;
+import m.modular.Comparison;
+import m.modular.Equality;
+import m.modular.Iteration;
+import m.modular.LogicalAnd;
+import m.modular.LogicalOr;
+import m.modular.MultiplicativeExpression;
+import m.modular.Selection;
 import m.services.CSharpGrammarAccess;
 
 enum FormatRule
@@ -54,6 +88,8 @@ enum FormatRule
 	semicolon,
 	dot,
 	colon,
+	questionMark,
+	brackets,
 	roundBrackets,
 	squareBrackets,
 	curlyBrackets,
@@ -96,6 +132,14 @@ public class CSharpFormat extends GenericFormatter
 			case colon:
 				prepend(keyword(":",a),noSpace());
 				break;
+			case questionMark:
+				prepend(keyword("?",a),noSpace());
+				break;
+			case brackets:
+				prepend(keyword("(",a),noSpace());
+				append(keyword("(",a),noSpace());
+				prepend(keyword(")",a),noSpace());
+				break;
 			case roundBrackets:
 				append(keyword("(",a),noSpace());
 				prepend(keyword(")",a),noSpace());
@@ -111,6 +155,7 @@ public class CSharpFormat extends GenericFormatter
 				prepend(close, newLine());
 				indent(open, close);
 			case angleBrackets:
+				prepend(keyword("<",a), noSpace());
 				append(keyword("<",a),noSpace());
 				prepend(keyword(">",a),noSpace());
 				break;
@@ -146,7 +191,7 @@ public class CSharpFormat extends GenericFormatter
 			format(a);
 			if (a == list.get(0))
 			{
-				if (condition)
+				if (!condition)
 				{
 					prepend(a, newLines(2));
 				}
@@ -186,7 +231,7 @@ public class CSharpFormat extends GenericFormatter
 		else if (o instanceof Attribute)
 		{
 			var a = (Attribute) o;
-			apply(a, roundBrackets);
+			apply(a, brackets);
 			formatAll(a.getPositionalArguments());
 			formatAll(a.getNamedArguments());
 		}
@@ -223,6 +268,10 @@ public class CSharpFormat extends GenericFormatter
 			var a = (Struct) o;
 			apply(a, curlyBrackets, angleBrackets, comma, semicolon);
 			exceptFirst(a.getAttributes());
+			if (a.getAttributes().size() > 0)
+			{
+				append(a.getAttributes().get(a.getAttributes().size()-1),newLine());
+			}
 			formatAll(a.getTypeParameters());
 			formatAll(a.getTypeConstraints());
 			all(a.getMembers());
@@ -274,7 +323,7 @@ public class CSharpFormat extends GenericFormatter
 		else if (o instanceof TypeConstraint)
 		{
 			var a = (TypeConstraint) o;
-			apply (a, roundBrackets, comma);
+			apply (a, brackets, comma);
 		}
 		else if (o instanceof Declarator)
 		{
@@ -417,6 +466,279 @@ public class CSharpFormat extends GenericFormatter
 		else if (o instanceof Remove)
 		{
 			var a = (Remove) o;
+			apply(a, curlyBrackets);
+			all(a.getStatements());
+		}
+		else if (o instanceof LabeledStatement)
+		{
+			var a = (LabeledStatement) o;
+			apply(a, colon);
+			format(a.getStatement());
+		}
+		else if (o instanceof Try)
+		{
+			var a = (Try) o;
+			apply(a, curlyBrackets);
+			all(a.getStatements());
+			formatAll(a.getCatches());
+			all(a.getFinally());
+		}
+		else if (o instanceof Catch)
+		{
+			var a = (Catch) o;
+			apply(a, curlyBrackets, roundBrackets);
+			format(a.getFilter());
+			all(a.getStatements());
+		}
+		else if (o instanceof Iteration)
+		{
+			var a = (Iteration) o;
+			apply(a, roundBrackets, curlyBrackets);
+			format(a.getCondition());
+			all(a.getStatements());
+		}
+		else if (o instanceof Selection)
+		{
+			var a = (Selection) o;
+			formatAll(a.getBranches());
+		}
+		else if (o instanceof Branch)
+		{
+			var a = (Branch) o;
+			apply(a, curlyBrackets);
+			format(a.getCondition());
+			all(a.getStatements());
+		}
+		else if (o instanceof Switch)
+		{
+			var a = (Switch) o;
+			apply(a, roundBrackets, curlyBrackets);
+			format(a.getExpression());
+			all(a.getCases());
+		}
+		else if (o instanceof Case)
+		{
+			var a = (Case) o;
+			apply(a, colon);
+			format(a.getCondition());
+			all(a.getStatements());
+		}
+		else if (o instanceof For)
+		{
+			var a = (For) o;
+			apply(a, roundBrackets, curlyBrackets, semicolon);
+			format(a.getInitialization());
+			format(a.getCondition());
+			format(a.getIterator());
+			all(a.getStatements());
+		}
+		else if (o instanceof Foreach)
+		{
+			var a = (Foreach) o;
+			apply(a, roundBrackets, curlyBrackets);
+			format(a.getCollection());
+			all(a.getStatements());
+		}
+		else if (o instanceof Do)
+		{
+			var a = (Do) o;
+			apply(a, roundBrackets, curlyBrackets);
+			all(a.getStatements());
+			format(a.getCondition());
+		}
+		else if (o instanceof Declaration)
+		{
+			var a = (Declaration) o;
+			apply(a, semicolon);
+			formatAll(a.getDeclarators());
+		}
+		else if (o instanceof Return)
+		{
+			var a = (Return) o;
+			apply(a, semicolon);
+			format(a.getExpression());
+		}
+		else if (o instanceof Yield)
+		{
+			var a = (Yield) o;
+			apply(a, semicolon);
+			format(a.getExpression());
+		}
+		else if (o instanceof Break)
+		{
+			var a = (Break) o;
+			apply(a, semicolon);
+		}
+		else if (o instanceof Continue)
+		{
+			var a = (Continue) o;
+			apply(a, semicolon);
+		}
+		else if (o instanceof Goto)
+		{
+			var a = (Goto) o;
+			apply(a, semicolon);
+			format(a.getCase());
+		}
+		else if (o instanceof Throw)
+		{
+			var a = (Throw) o;
+			apply(a, semicolon);
+			format(a.getExpression());
+		}
+		else if (o instanceof Checked)
+		{
+			var a = (Checked) o;
+			apply(a, curlyBrackets);
+			all(a.getStatements());
+		}
+		else if (o instanceof Unchecked)
+		{
+			var a = (Unchecked) o;
+			apply(a, curlyBrackets);
+			all(a.getStatements());
+		}
+		else if (o instanceof Lock)
+		{
+			var a = (Lock) o;
+			apply(a, roundBrackets, curlyBrackets);
+			format(a.getExpression());
+			all(a.getStatements());
+		}
+		else if (o instanceof ExpressionStatement)
+		{
+			var a = (ExpressionStatement) o;
+			apply(a, semicolon);
+			format(a.getExpression());
+		}
+		else if (o instanceof Lambda)
+		{
+			var a = (Lambda) o;
+			apply(a, roundBrackets, curlyBrackets, comma);
+			formatAll(a.getParameters());
+			all(a.getStatements());
+		}
+		else if (o instanceof ArrayInitializer)
+		{
+			var a = (ArrayInitializer) o;
+			apply(a, comma);
+			formatAll(a.getVariables());
+		}
+		else if (o instanceof Creation)
+		{
+			var a = (Creation) o;
+			apply(a, brackets, comma);
+			formatAll(a.getMembers());
+			formatAll(a.getElements());
+			formatAll(a.getArguments());
+		}
+		else if (o instanceof Assignment)
+		{
+			var a = (Assignment) o;
+			format(a.getLeft());
+			format(a.getRight());
+		}
+		else if (o instanceof Ternary)
+		{
+			var a = (Ternary) o;
+			apply(a, questionMark);
+			format(a.getLeft());
+			format(a.getYes());
+			format(a.getNo());
+		}
+		else if (o instanceof NullCoalescing)
+		{
+			var a = (NullCoalescing) o;
+			format(a.getLeft());
+			format(a.getRight());
+		}
+		else if (o instanceof LogicalOr)
+		{
+			var a = (LogicalOr) o;
+			format(a.getLeft());
+			format(a.getRight());
+		}
+		else if (o instanceof LogicalAnd)
+		{
+			var a = (LogicalAnd) o;
+			format(a.getLeft());
+			format(a.getRight());
+		}
+		else if (o instanceof Equality)
+		{
+			var a = (Equality) o;
+			format(a.getLeft());
+			format(a.getRight());
+		}
+		else if (o instanceof Comparison)
+		{
+			var a = (Comparison) o;
+			format(a.getLeft());
+			format(a.getRight());
+		}
+		else if (o instanceof AdditiveExpression)
+		{
+			var a = (AdditiveExpression) o;
+			format(a.getLeft());
+			format(a.getRight());
+		}
+		else if (o instanceof MultiplicativeExpression)
+		{
+			var a = (MultiplicativeExpression) o;
+			format(a.getLeft());
+			format(a.getRight());
+		}
+		else if (o instanceof AccessExpression)
+		{
+			var a = (AccessExpression) o;
+			apply(a, dot);
+			format(a.getLeft());
+			format(a.getRight());
+		}
+		else if (o instanceof Increment)
+		{
+			var a = (Increment) o;
+			format(a.getExpression());
+			prepend(keyword("++",a),noSpace());
+		}
+		else if (o instanceof Decrement)
+		{
+			var a = (Decrement) o;
+			format(a.getExpression());
+			prepend(keyword("++",a),noSpace());
+		}
+		else if (o instanceof Typeof)
+		{
+			var a = (Typeof) o;
+			apply(a, brackets, comma);
+		}
+		else if (o instanceof ParameterizedFunction)
+		{
+			var a = (ParameterizedFunction) o;
+			apply(a, brackets, angleBrackets, comma);
+			formatAll(a.getArguments());
+		}
+		else if (o instanceof Argument)
+		{
+			var a = (Argument) o;
+			format(a.getValue());
+		}
+		else if (o instanceof Index)
+		{
+			var a = (Index) o;
+			apply(a, squareBrackets, comma);
+			formatAll(a.getIndices());
+		}
+		else if (o instanceof MemberInitializer)
+		{
+			var a = (MemberInitializer) o;
+			apply(a, squareBrackets, comma);
+			format(a.getValue());
+			formatAll(a.getIndices());
+		}
+		else if (o instanceof Block)
+		{
+			var a = (Block) o;
 			apply(a, curlyBrackets);
 			all(a.getStatements());
 		}
