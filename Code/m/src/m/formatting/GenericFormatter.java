@@ -30,7 +30,7 @@ public abstract class GenericFormatter extends AbstractFormatter2
 	
 	protected abstract void format(Object obj);
 	
-	protected ISemanticRegion keyword(EObject o, String key)
+	protected ISemanticRegion keyword(String key, EObject o)
 	{
 		return textRegionExtensions.regionFor(o).keyword(key);
 	}
@@ -69,6 +69,7 @@ public abstract class GenericFormatter extends AbstractFormatter2
 	{
 		return x -> x.newLine();
 	}
+	
 	
 	protected Procedure1<? super IHiddenRegionFormatter> newLines(int num)
 	{

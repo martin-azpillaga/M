@@ -1,280 +1,424 @@
 package m.formatting;
 
+import static m.formatting.FormatRule.angleBrackets;
+import static m.formatting.FormatRule.colon;
+import static m.formatting.FormatRule.comma;
+import static m.formatting.FormatRule.curlyBrackets;
+import static m.formatting.FormatRule.dot;
+import static m.formatting.FormatRule.roundBrackets;
+import static m.formatting.FormatRule.semicolon;
+import static m.formatting.FormatRule.squareBrackets;
+
+import java.util.List;
+
+import org.eclipse.emf.ecore.EObject;
+
 import com.google.inject.Inject;
 
-import m.csharp.Argument;
-import m.csharp.Assignment;
+import m.csharp.Add;
+import m.csharp.AliasUsing;
+import m.csharp.Attribute;
+import m.csharp.AttributeSection;
 import m.csharp.CompilationUnit;
-import m.csharp.Creation;
-import m.csharp.Declaration;
+import m.csharp.Constant;
+import m.csharp.Constructor;
 import m.csharp.Declarator;
-import m.csharp.ExpressionStatement;
-import m.csharp.Struct;
-import m.modular.AccessExpression;
+import m.csharp.Delegate;
+import m.csharp.Destructor;
+import m.csharp.Enum;
+import m.csharp.Event;
+import m.csharp.ExternAlias;
 import m.csharp.Field;
-import m.csharp.For;
-import m.csharp.Foreach;
-import m.csharp.Lambda;
-import m.csharp.MemberInitializer;
+import m.csharp.Getter;
+import m.csharp.Indexer;
+import m.csharp.Interface;
 import m.csharp.Method;
-import m.csharp.ParameterizedFunction;
+import m.csharp.NamedArgument;
+import m.csharp.Namespace;
+import m.csharp.NamespaceUsing;
+import m.csharp.Operator;
+import m.csharp.Parameter;
+import m.csharp.Property;
+import m.csharp.Remove;
+import m.csharp.Setter;
+import m.csharp.StaticConstructor;
+import m.csharp.StaticUsing;
+import m.csharp.Struct;
+import m.csharp.TypeConstraint;
+import m.csharp.TypeParameter;
 import m.services.CSharpGrammarAccess;
+
+enum FormatRule
+{
+	comma,
+	semicolon,
+	dot,
+	colon,
+	roundBrackets,
+	squareBrackets,
+	curlyBrackets,
+	angleBrackets
+}
 
 public class CSharpFormat extends GenericFormatter
 {
 	@Inject
 	CSharpGrammarAccess grammar;
 	
+	private void formatAll(List<? extends EObject> list)
+	{
+		for (var a : list)
+		{
+			format(a);
+		}
+	}
+	
+	protected void apply(EObject a, FormatRule... rules)
+	{
+		for (var rule : rules)
+		{
+			switch (rule)
+			{
+			case comma:
+				for (var comma : keywords(a, ","))
+				{
+					prepend(comma,noSpace());
+				}
+				break;
+			case semicolon:
+				prepend(keyword(";",a),noSpace());
+				break;
+			case dot:
+				var dot = keyword(".",a);
+				prepend(dot, noSpace());
+				append(dot, noSpace());
+				break;
+			case colon:
+				prepend(keyword(":",a),noSpace());
+				break;
+			case roundBrackets:
+				append(keyword("(",a),noSpace());
+				prepend(keyword(")",a),noSpace());
+				break;
+			case squareBrackets:
+				append(keyword("[",a),noSpace());
+				prepend(keyword("]",a),noSpace());
+				break;
+			case curlyBrackets:
+				var open = keyword("{",a);
+				var close = keyword("}", a);
+				prepend(open, newLine());
+				prepend(close, newLine());
+				indent(open, close);
+			case angleBrackets:
+				append(keyword("<",a),noSpace());
+				prepend(keyword(">",a),noSpace());
+				break;
+			default:
+				break;
+			}
+		}
+	}
+	protected void exceptFirst(List<? extends EObject> list)
+	{
+		for (var a : list)
+		{
+			format(a);
+			if (a != list.get(0))
+			{
+				prepend(a,newLine());
+			}
+		}
+	}
+	protected void all(List<? extends EObject> list)
+	{
+		for (var a : list)
+		{
+			format(a);
+			prepend(a,newLine());
+		}
+	}
+	
+	protected void firstIf(boolean condition, List<? extends EObject> list)
+	{
+		for (var a : list)
+		{
+			format(a);
+			if (a == list.get(0))
+			{
+				if (condition)
+				{
+					prepend(a, newLines(2));
+				}
+			}
+			else
+			{
+				prepend(a, newLine());
+			}
+		}
+	}
 	@Override
 	protected void format(Object o)
 	{
 		if (o instanceof CompilationUnit)
 		{
 			var unit = (CompilationUnit) o;
-			for (var using : unit.getUsings())
-			{
-				if (using != unit.getUsings().get(0))
-				{
-					prepend(using,newLine());
-				}
-				prepend(keyword(using,";"), noSpace());
-			}
-			for (var type : unit.getTypes())
-			{
-				if (unit.getUsings().size() > 0)
-				{
-					prepend(type, newLines(2));
-				}
-				format(type);
-			}
+			var aliases = unit.getExternAliases();
+			var attributes = unit.getGlobalAttributes();
+			var usings = unit.getUsings();
+			var types = unit.getTypes();
+			exceptFirst(aliases);
+			firstIf(aliases.isEmpty(), attributes);
+			firstIf(aliases.isEmpty() && attributes.isEmpty(), usings);
+			firstIf(aliases.isEmpty() && attributes.isEmpty() && usings.isEmpty(), types);
 		}
-		if (o instanceof Struct)
+		else if (o instanceof ExternAlias)
 		{
-			var struct = (Struct) o;
-			for (var attribute : struct.getAttributes())
-			{
-				if (attribute != struct.getAttributes().get(0))
-				{
-					prepend(attribute,newLine());
-				}
-				append(keyword(attribute,"["), noSpace());
-				prepend(keyword(attribute,"]"), noSpace());
-				if (attribute == struct.getAttributes().get(struct.getAttributes().size() -1))
-				{
-					append(keyword(attribute,"]"), newLine());
-				}					
-			}
-			for (var comma : keywords(struct, ","))
-			{
-				prepend(comma,noSpace());
-			}
-			prepend(keyword(struct,"{"),newLine());
-			prepend(keyword(struct,"}"),newLine());
-			indent(keyword(struct,"{"),keyword(struct,"}"));
-			for (var member : struct.getMembers())
-			{
-				prepend(member, newLine());
-				format(member);
-			}
+			var a = (ExternAlias) o;
+			apply(a, semicolon);
+		}
+		else if (o instanceof AttributeSection)
+		{
+			var a = (AttributeSection) o;
+			apply(a, colon, squareBrackets);
+			formatAll(a.getAttributes());
+		}
+		else if (o instanceof Attribute)
+		{
+			var a = (Attribute) o;
+			apply(a, roundBrackets);
+			formatAll(a.getPositionalArguments());
+			formatAll(a.getNamedArguments());
+		}
+		else if (o instanceof NamedArgument)
+		{
+			var a = (NamedArgument) o;
+			format(a.getExpression());
+		}
+		else if (o instanceof AliasUsing)
+		{
+			var a = (AliasUsing) o;
+			apply(a, semicolon);
+		}
+		else if (o instanceof NamespaceUsing)
+		{
+			var a = (NamespaceUsing) o;
+			apply(a, semicolon);
+		}
+		else if (o instanceof StaticUsing)
+		{
+			var a = (StaticUsing) o;
+			apply(a, semicolon);
+		}
+		else if (o instanceof Namespace)
+		{
+			var a = (Namespace) o;
+			apply(a, curlyBrackets, semicolon);
+			formatAll(a.getExternAliases());
+			formatAll(a.getUsings());
+			formatAll(a.getMembers());
+		}
+		else if (o instanceof Struct)
+		{
+			var a = (Struct) o;
+			apply(a, curlyBrackets, angleBrackets, comma, semicolon);
+			exceptFirst(a.getAttributes());
+			formatAll(a.getTypeParameters());
+			formatAll(a.getTypeConstraints());
+			all(a.getMembers());
 		}
 		else if (o instanceof m.csharp.Class)
 		{
-			var struct = (m.csharp.Class) o;
-			for (var attribute : struct.getAttributes())
-			{
-				if (attribute != struct.getAttributes().get(0))
-				{
-					prepend(attribute,newLine());
-				}
-				append(keyword(attribute,"["), noSpace());
-				prepend(keyword(attribute,"]"), noSpace());
-				if (attribute == struct.getAttributes().get(struct.getAttributes().size() -1))
-				{
-					append(keyword(attribute,"]"), newLine());
-				}					
-			}
-			for (var comma : keywords(struct, ","))
-			{
-				prepend(comma,noSpace());
-			}
-			prepend(keyword(struct,"{"),newLine());
-			prepend(keyword(struct,"}"),newLine());
-			indent(keyword(struct,"{"),keyword(struct,"}"));
-			for (var member : struct.getMembers())
-			{
-				prepend(member, newLine());
-				format(member);
-			}
+			var a = (m.csharp.Class) o;
+			apply(a, curlyBrackets, angleBrackets, comma, semicolon);
+			exceptFirst(a.getAttributes());
+			formatAll(a.getTypeParameters());
+			formatAll(a.getTypeConstraints());
+			all(a.getMembers());
 		}
-		else if (o instanceof Field)
+		else if (o instanceof Enum)
 		{
-			var field = (Field) o;
-			prepend(keyword(field,";"), noSpace());
+			var a = (Enum) o;
+			apply(a, curlyBrackets, comma, semicolon);
+			exceptFirst(a.getAttributes());
 		}
-		else if (o instanceof Method)
+		else if (o instanceof Interface)
 		{
-			var method = (Method) o;
-			for (var comma : keywords(method, ","))
-			{
-				prepend(comma,noSpace());
-			}
-			prepend(keyword(method,")"), noSpace());
-			prepend(keyword(method, "{"),newLine());
-			prepend(keyword(method,"}"),newLine());
-			indent(keyword(method,"{"),keyword(method,"}"));
-			
-			var parameters = method.getParameters();
-			for (var parameter : parameters)
-			{
-				if (parameter != parameters.get(0))
-				{
-					prepend(parameter, oneSpace());
-				}
-				else
-				{
-					prepend(parameter, noSpace());
-				}
-			}
-			var statements = method.getStatements();
-			for (var statement : statements)
-			{
-				prepend(statement, newLine());
-				format(statement);
-			}
+			var a = (Interface) o;
+			apply(a, angleBrackets, curlyBrackets, comma, semicolon);
+			exceptFirst(a.getAttributes());
+			formatAll(a.getTypeParameters());
+			formatAll(a.getTypeConstraints());
+			all(a.getMembers());
 		}
-		else if (o instanceof Foreach)
+		else if (o instanceof Delegate)
 		{
-			var foreach = (Foreach) o;
-			append(keyword(foreach,"("), noSpace());
-			prepend(keyword(foreach,")"), noSpace());
-			prepend(keyword(foreach, "{"),newLine());
-			prepend(keyword(foreach,"}"),newLine());
-			indent(keyword(foreach,"{"),keyword(foreach,"}"));
-			for (var statement : foreach.getStatements())
-			{
-				prepend(statement, newLine());
-				format(statement);
-			}
+			var a = (Delegate) o;
+			apply(a, angleBrackets, roundBrackets, comma, semicolon);
+			exceptFirst(a.getAttributes());
+			formatAll(a.getTypeParameters());
+			formatAll(a.getParameters());
+			formatAll(a.getTypeConstraints());
 		}
-		else if (o instanceof For)
+		else if (o instanceof Parameter)
 		{
-			var f = (For) o;
-			prepend(keyword(f,";"), noSpace());
-			append(keyword(f,"("), noSpace());
-			prepend(keyword(f,")"), noSpace());
-			prepend(keyword(f, "{"),newLine());
-			prepend(keyword(f,"}"),newLine());
-			indent(keyword(f,"{"),keyword(f,"}"));
-			format(f.getInitialization());
-			format(f.getCondition());
-			format(f.getIterator());
-			for (var statement : f.getStatements())
-			{
-				prepend(statement, newLine());
-				format(statement);
-			}
+			var a = (Parameter) o;
+			formatAll(a.getAttributes());
+			format(a.getDefault());
 		}
-		else if (o instanceof Declaration)
+		else if (o instanceof TypeParameter)
 		{
-			var declaration = (Declaration) o;
-			for (var comma : keywords(declaration, ","))
-			{
-				prepend(comma,noSpace());
-			}
-			prepend(keyword(declaration,";"), noSpace());
-			for (var declarator : declaration.getDeclarators())
-			{
-				format(declarator);
-			}
+			var a = (TypeParameter) o;
+			formatAll(a.getAttributes());
 		}
-		else if (o instanceof ExpressionStatement)
+		else if (o instanceof TypeConstraint)
 		{
-			var statement = (ExpressionStatement) o;
-			prepend(keyword(statement,";"), noSpace());
-			format(statement.getExpression());
+			var a = (TypeConstraint) o;
+			apply (a, roundBrackets, comma);
 		}
 		else if (o instanceof Declarator)
 		{
-			var declarator = (Declarator) o;
-			format(declarator.getValue());
+			var a = (Declarator) o;
+			format(a.getValue());
 		}
-		else if (o instanceof ParameterizedFunction)
+		else if (o instanceof Field)
 		{
-			var function = (ParameterizedFunction) o;
-			var types = function.getTypes();
-			prepend(keyword(function,"<"), noSpace());
-			append(keyword(function,"<"), noSpace());
-			prepend(keyword(function,">"), noSpace());
-			prepend(keyword(function,"("), noSpace());
-			prepend(keyword(function,")"), noSpace());
-			append(keyword(function,"("), noSpace());
-			for (var comma : keywords(function, ","))
-			{
-				prepend(comma,noSpace());
-			}
-			
-			var arguments = function.getArguments();
-			for (var argument : arguments)
-			{
-				format(argument);
-			}
+			var a = (Field) o;
+			apply(a, semicolon, comma);
+			exceptFirst(a.getAttributes());
+			formatAll(a.getDeclarators());
 		}
-		else if (o instanceof Argument)
+		else if (o instanceof Method)
 		{
-			var argument = (Argument) o;
-			format(argument.getValue());
+			var a = (Method) o;
+			apply(a, angleBrackets, roundBrackets, curlyBrackets, comma, semicolon, dot);
+			exceptFirst(a.getAttributes());
+			formatAll(a.getTypeParameters());
+			formatAll(a.getTypeConstraints());
+			all(a.getStatements());
+			format(a.getExpression());
 		}
-		else if (o instanceof Creation)
+		else if (o instanceof Property)
 		{
-			var creation = (Creation) o;
-			for (var member : creation.getMembers())
+			var a = (Property) o;
+			apply(a, curlyBrackets, semicolon, dot);
+			exceptFirst(a.getAttributes());
+			format(a.getExpression());
+			var getter = a.getGetter();
+			var setter = a.getSetter();
+			if (getter != null)
 			{
-				format(member);
+				prepend(getter, newLine());
+				format(getter);
 			}
-		}
-		else if (o instanceof MemberInitializer)
-		{
-			var member = (MemberInitializer) o;
-			format(member.getValue());
-		}
-		else if (o instanceof Lambda)
-		{
-			var lambda = (Lambda) o;
-			prepend(keyword(lambda,"("), noSpace());
-			prepend(keyword(lambda,")"), noSpace());
-			append(keyword(lambda,"("), noSpace());
-			for (var comma : keywords(lambda, ","))
+			if (setter != null)
 			{
-				prepend(comma,noSpace());
-			}
-			
-			var parameters = lambda.getParameters();
-			for (var parameter : parameters)
-			{
-				format(parameter);
-			}
-			prepend(keyword(lambda, "{"),newLine());
-			prepend(keyword(lambda,"}"),newLine());
-			indent(keyword(lambda,"{"),keyword(lambda,"}"));
-			for (var statement : lambda.getStatements())
-			{
-				prepend(statement, newLine());
-				format(statement);
+				prepend(setter, newLine());
+				format(setter);
 			}
 		}
-		else if (o instanceof AccessExpression)
+		else if (o instanceof Constant)
 		{
-			var a = (AccessExpression) o;
-			prepend(keyword(a, "."), noSpace());
-			append(keyword(a, "."), noSpace());
-			format(a.getLeft());
-			format(a.getRight());
+			var a = (Constant) o;
+			apply(a, comma, semicolon);
+			exceptFirst(a.getAttributes());
+			formatAll(a.getDeclarators());
 		}
-		else if (o instanceof Assignment)
+		else if (o instanceof Event)
 		{
-			var a = (Assignment) o;
-			format(a.getLeft());
-			format(a.getRight());
+			var a = (Event) o;
+			apply(a, comma, semicolon, dot, curlyBrackets);
+			exceptFirst(a.getAttributes());
+			formatAll(a.getDeclarators());
+			var add = a.getAdd();
+			var remove = a.getRemove();
+			if (add != null)
+			{
+				prepend(add, newLine());
+				format(add);
+			}
+			if (remove != null)
+			{
+				prepend(remove, newLine());
+				format(remove);
+			}
+		}
+		else if (o instanceof Indexer)
+		{
+			var a = (Indexer) o;
+			apply(a, squareBrackets, curlyBrackets, comma, semicolon, dot);
+			exceptFirst(a.getAttributes());
+			formatAll(a.getParameters());
+			format(a.getExpression());
+			var getter = a.getGetter();
+			var setter = a.getSetter();
+			if (getter != null)
+			{
+				prepend(getter, newLine());
+				format(getter);
+			}
+			if (setter != null)
+			{
+				prepend(setter, newLine());
+				format(setter);
+			}
+		}
+		else if (o instanceof Operator)
+		{
+			var a = (Operator) o;
+			apply(a, roundBrackets, curlyBrackets, comma, semicolon);
+			exceptFirst(a.getAttributes());
+			all(a.getStatements());
+			format(a.getExpression());
+		}
+		else if (o instanceof Constructor)
+		{
+			var a = (Constructor) o;
+			apply(a, roundBrackets, curlyBrackets, comma, semicolon);
+			exceptFirst(a.getAttributes());
+			formatAll(a.getParameters());
+			formatAll(a.getArguments());
+			all(a.getStatements());
+		}
+		else if (o instanceof Destructor)
+		{
+			var a = (Destructor) o;
+			apply(a, roundBrackets, curlyBrackets, semicolon);
+			exceptFirst(a.getAttributes());
+			all(a.getStatements());
+		}
+		else if (o instanceof StaticConstructor)
+		{
+			var a = (StaticConstructor) o;
+			apply(a, roundBrackets, curlyBrackets, semicolon);
+			exceptFirst(a.getAttributes());
+			all(a.getStatements());
+		}
+		else if (o instanceof Getter)
+		{
+			var a = (Getter) o;
+			apply(a, curlyBrackets, semicolon);
+			exceptFirst(a.getAttributes());
+			all(a.getStatements());
+		}
+		else if (o instanceof Setter)
+		{
+			var a = (Setter) o;
+			apply(a, curlyBrackets, semicolon);
+			exceptFirst(a.getAttributes());
+			all(a.getStatements());
+		}
+		else if (o instanceof Add)
+		{
+			var a = (Add) o;
+			apply(a, curlyBrackets);
+			all(a.getStatements());
+		}
+		else if (o instanceof Remove)
+		{
+			var a = (Remove) o;
+			apply(a, curlyBrackets);
+			all(a.getStatements());
 		}
 	}
 }
