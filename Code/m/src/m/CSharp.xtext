@@ -379,7 +379,7 @@ Atomic returns Expression:
 	(=>ParameterizedFunction|
 	Variable)|
 	Creation|
-	Index|
+	=>Index|
 	This|
 	Base|
 	Default|
@@ -435,7 +435,7 @@ Argument:
 
 Index:
 	name=WORD
-	'[' indices+=Expression (',' indices+=Expression)? ']'
+	'[' indices+=Expression (',' indices+=Expression)* ']'
 ;
 
 Declaration:

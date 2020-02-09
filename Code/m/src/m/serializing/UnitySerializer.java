@@ -25,6 +25,7 @@ import m.m.ComponentAccess;
 import m.m.Exists;
 import m.m.Forall;
 import m.m.Game;
+import m.m.Set;
 import m.m.System;
 import m.modular.AdditiveExpression;
 import m.modular.AssignmentKind;
@@ -483,7 +484,7 @@ public class UnitySerializer
 		{
 			var using = csharp.createNamespaceUsing();
 			using.setNamespace(namespace);
-			unit.getUsings().add(using);			
+			unit.getUsings().add(using);
 		}
 		
 		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/"+system.getName()+".cs");
@@ -499,8 +500,8 @@ public class UnitySerializer
 				var variable = forall.getVariable();
 				var collection = forall.getCollection();
 				var conditionExpression = forall.getCondition();
-				cs(collection, querySet);
-				cs(conditionExpression, querySet);
+				cs(collection, querySet, namespaces);
+				cs(conditionExpression, querySet, namespaces);
 
 				
 				
@@ -536,18 +537,30 @@ public class UnitySerializer
 				{
 					for (var component : myQuery.keySet())
 					{
+						if (!component.equals("Entity"))
+						{
+							var parameter = csharp.createParameter();
+							parameter.setType(unityName(component, namespaces));
+							
+							parameter.setName(component+"_"+variable);
+							
+							if (myQuery.get(component).contains(AccessKind.write) && isValueType(component))
+							{
+								parameter.setRef(true);
+								lambda.getParameters().add(lambda.getParameters().size(), parameter);
+							}
+							else
+							{
+								lambda.getParameters().add(0, parameter);
+							}
+						}
+					}
+					if (myQuery.containsKey("Entity"))
+					{
 						var parameter = csharp.createParameter();
-						parameter.setType(unityName(component, namespaces));
-						parameter.setName(component);
-						if (myQuery.get(component).contains(AccessKind.write) && isValueType(component))
-						{
-							parameter.setRef(true);
-							lambda.getParameters().add(lambda.getParameters().size(), parameter);
-						}
-						else
-						{
-							lambda.getParameters().add(0, parameter);
-						}
+						parameter.setType("Entity");
+						parameter.setName("entity_"+variable);
+						lambda.getParameters().add(0, parameter);
 					}
 				}
 			}
@@ -557,7 +570,7 @@ public class UnitySerializer
 				var variable = exists.getVariable();
 				var collection = exists.getCollection();
 				var conditionExpression = exists.getCondition();
-				cs(conditionExpression, querySet);
+				cs(conditionExpression, querySet, namespaces);
 				
 				var forStatement = csharp.createFor();
 				var initialization = csharp.createDeclaration();
@@ -596,7 +609,25 @@ public class UnitySerializer
 				
 				if (variable instanceof Variable)
 				{
+					var a = (Variable) variable;
+					var cs = csharp.createDeclaration();
+					var declarator = csharp.createDeclarator();
 					
+					if (expression instanceof Set)
+					{
+						namespaces.add("Unity.Collections");
+						cs.setType("NativeList<Entity>");
+						cs.getDeclarators().add(declarator);
+						declarator.setVariable(a.getName());
+						list.add(cs);
+					}
+					else
+					{
+						cs.getDeclarators().add(declarator);
+						declarator.setVariable(a.getName());
+						declarator.setValue(cs(expression, querySet, namespaces));
+						list.add(cs);
+					}
 				}
 				else if (variable instanceof ComponentAccess)
 				{
@@ -604,8 +635,23 @@ public class UnitySerializer
 					var entity = access.getEntity();
 					var component = access.getComponent();
 					querySet.add(entity, component, AccessKind.write);
+					
+					var csStatement = csharp.createExpressionStatement();
+					var csAssignment = csharp.createAssignment();
+					var left = cs(access, querySet, namespaces);
+					var right = cs(expression, querySet, namespaces);
+					list.add(csStatement);
+					csStatement.setExpression(csAssignment);
+					csAssignment.setLeft(left);
+					csAssignment.setRight(right);
 				}
-				cs(expression, querySet);
+			}
+			else if (statement instanceof Function)
+			{
+				var function = (Function) statement;
+				var cs = csharp.createExpressionStatement();
+				cs.setExpression(cs(function, querySet, namespaces));
+				list.add(cs);
 			}
 		}
 	}
@@ -660,7 +706,7 @@ public class UnitySerializer
 		withCode.setName("WithCode");
 		runCall.setName("Run");
 		
-		addStatements(system.getStatements(), lambda.getStatements(), querySet);
+		addStatements(system.getStatements(), lambda.getStatements(), querySet, namespaces);
 		
 		for (var query : querySet.queries.keySet())
 		{
@@ -750,7 +796,7 @@ public class UnitySerializer
 		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/"+system.getName()+".cs");
 	}
 	
-	private void addStatements(List<Statement> statements, List<Statement> list, QuerySet querySet)
+	private void addStatements(List<Statement> statements, List<Statement> list, QuerySet querySet, namespaces)
 	{
 		for (var statement : statements)
 		{
@@ -760,8 +806,8 @@ public class UnitySerializer
 				var variable = forall.getVariable();
 				var collection = forall.getCollection();
 				var conditionExpression = forall.getCondition();
-				cs(collection, querySet);
-				cs(conditionExpression, querySet);
+				cs(collection, querySet, namespaces);
+				cs(conditionExpression, querySet, namespaces);
 
 				
 				
@@ -791,7 +837,7 @@ public class UnitySerializer
 				iteratorExpression.setName(variable+"_index");
 				list.add(forStatement);
 				
-				addStatements(forall.getStatements(), forStatement.getStatements(), querySet);
+				addStatements(forall.getStatements(), forStatement.getStatements(), querySet, namespaces);
 				
 			}
 			else if (statement instanceof Exists)
@@ -800,7 +846,7 @@ public class UnitySerializer
 				var variable = exists.getVariable();
 				var collection = exists.getCollection();
 				var conditionExpression = exists.getCondition();
-				cs(conditionExpression, querySet);
+				cs(conditionExpression, querySet, namespaces);
 				
 				var forStatement = csharp.createFor();
 				var initialization = csharp.createDeclaration();
@@ -828,7 +874,7 @@ public class UnitySerializer
 				iteratorExpression.setName(variable+"_index");
 				list.add(forStatement);
 				
-				addStatements(exists.getStatements(), forStatement.getStatements(), querySet);
+				addStatements(exists.getStatements(), forStatement.getStatements(), querySet, namespaces);
 				
 			}
 			else if (statement instanceof Assignment)
@@ -848,78 +894,219 @@ public class UnitySerializer
 					var component = access.getComponent();
 					querySet.add(entity, component, AccessKind.write);
 				}
-				cs(expression, querySet);
+				cs(expression, querySet, namespaces);
 			}
 		}
 	}*/
 	
-	private void cs(Expression expression, QuerySet querySet)
+	private Expression cs(Expression expression, QuerySet querySet, HashSet<String> namespaces)
 	{
-		if (expression instanceof ComponentAccess)
-		{
-			var access = (ComponentAccess) expression;
-			querySet.add(access.getEntity(), access.getComponent(), AccessKind.read);
-		}
-		else if (expression instanceof LogicalOr)
+		if (expression instanceof LogicalOr)
 		{
 			var e = (LogicalOr) expression;
-			cs(e.getLeft(), querySet);
-			cs(e.getRight(), querySet);
+			var cs = modular.createLogicalOr();
+			cs.setLeft(cs(e.getLeft(), querySet, namespaces));
+			cs.setRight(cs(e.getRight(), querySet, namespaces));
+			return cs;
 		}
 		else if (expression instanceof LogicalAnd)
 		{
 			var e = (LogicalAnd) expression;
-			cs(e.getLeft(), querySet);
-			cs(e.getRight(), querySet);
+			var cs = modular.createLogicalAnd();
+			cs.setLeft(cs(e.getLeft(), querySet, namespaces));
+			cs.setRight(cs(e.getRight(), querySet, namespaces));
+			return cs;
 		}
 		else if (expression instanceof Equality)
 		{
 			var e = (Equality) expression;
-			cs(e.getLeft(), querySet);
-			cs(e.getRight(), querySet);	
+			var cs = modular.createEquality();
+			cs.setKind(e.getKind());
+			cs.setLeft(cs(e.getLeft(), querySet, namespaces));
+			cs.setRight(cs(e.getRight(), querySet, namespaces));
+			return cs;
 		}
 		else if (expression instanceof Comparison)
 		{
 			var e = (Comparison) expression;
-			cs(e.getLeft(), querySet);
-			cs(e.getRight(), querySet);
+			var cs = modular.createComparison();
+			cs.setKind(e.getKind());
+			cs.setLeft(cs(e.getLeft(), querySet, namespaces));
+			cs.setRight(cs(e.getRight(), querySet, namespaces));
+			return cs;
 		}
 		else if (expression instanceof AdditiveExpression)
 		{
 			var e = (AdditiveExpression) expression;
-			cs(e.getLeft(), querySet);
-			cs(e.getRight(), querySet);
+			var cs = modular.createAdditiveExpression();
+			cs.setKind(e.getKind());
+			cs.setLeft(cs(e.getLeft(), querySet, namespaces));
+			cs.setRight(cs(e.getRight(), querySet, namespaces));
+			return cs;
 		}
 		else if (expression instanceof MultiplicativeExpression)
 		{
 			var e = (MultiplicativeExpression) expression;
-			cs(e.getLeft(), querySet);
-			cs(e.getRight(), querySet);
+			var cs = modular.createMultiplicativeExpression();
+			cs.setKind(e.getKind());
+			cs.setLeft(cs(e.getLeft(), querySet, namespaces));
+			cs.setRight(cs(e.getRight(), querySet, namespaces));
+			return cs;
 		}
 		else if (expression instanceof LogicalNot)
 		{
 			var e = (LogicalNot) expression;
-			cs(e.getExpression(), querySet);
+			var cs = modular.createLogicalNot();
+			cs.setExpression(cs(e,querySet, namespaces));
+			return cs;
 		}
 		else if (expression instanceof Brackets)
 		{
 			var e = (LogicalNot) expression;
-			cs(e.getExpression(), querySet);
+			var cs = modular.createLogicalNot();
+			cs.setExpression(cs(e,querySet, namespaces));
+			return cs;
 		}
 		else if (expression instanceof Function)
 		{
-			var a = (Function) expression;
-			if (a.getName().equals("has"))
+			var e = (Function) expression;
+			var name = e.getName();
+			
+			if (name.equals("has"))
 			{
-				var parameter0 = ((Variable)a.getArguments().get(0)).getName();
-				var parameter1 = ((Variable)a.getArguments().get(1)).getName();
+				var parameter0 = ((Variable)e.getArguments().get(0)).getName();
+				var parameter1 = ((Variable)e.getArguments().get(1)).getName();
 				querySet.add(parameter1, parameter0, AccessKind.tag);
 			}
-			for (var argument : a.getArguments())
+			else if (name.equals("sin")||name.equals("cos")||name.equals("tan")||name.equals("exp")||name.equals("log"))
 			{
-				cs(argument, querySet);
+				namespaces.add("Unity.Mathematics");
+				var cs = modular.createAccessExpression();
+				var left = modular.createVariable();
+				var right = csharp.createParameterizedFunction();
+				cs.setLeft(left);
+				cs.setRight(right);
+				left.setName("math");
+				right.setName(e.getName());
+				for (var argument : e.getArguments())
+				{
+					var csArgument = csharp.createArgument();
+					csArgument.setValue(cs(argument, querySet, namespaces));
+					right.getArguments().add(csArgument);
+				}
+				return cs;
+			}
+			else if (name.equals("random"))
+			{				
+				var cs = modular.createAccessExpression();
+				var unity = modular.createVariable();
+				var random = modular.createVariable();
+				var untilRandom = modular.createAccessExpression();
+				var range = csharp.createParameterizedFunction();
+				var lowArgument = csharp.createArgument();
+				var highArgument = csharp.createArgument();
+				var lowX = modular.createAccessExpression();
+				var x = modular.createVariable();
+				var highY = modular.createAccessExpression();
+				var y = modular.createVariable();
+				cs.setLeft(untilRandom);
+				cs.setRight(range);
+				untilRandom.setLeft(unity);
+				untilRandom.setRight(random);
+				unity.setName("UnityEngine");
+				random.setName("Random");
+				range.setName("Range");
+				range.getArguments().add(lowArgument);
+				range.getArguments().add(highArgument);
+				lowArgument.setValue(lowX);
+				lowX.setLeft(cs(e.getArguments().get(0), querySet, namespaces));
+				lowX.setRight(x);
+				highArgument.setValue(highY);
+				highY.setLeft(cs(e.getArguments().get(0), querySet, namespaces));
+				highY.setRight(y);
+				x.setName("x");
+				y.setName("y");
+				return cs;
+			}
+			else if (name.equals("join"))
+			{
+				namespaces.add("Unity.Mathematics");
+				var argument0 = cs(e.getArguments().get(0), querySet, namespaces);
+				var argument1 = cs(e.getArguments().get(1), querySet, namespaces);
+				var argument2 = cs(e.getArguments().get(2), querySet, namespaces);
+				
+				var cs0 = csharp.createArgument();
+				var cs1 = csharp.createArgument();
+				var cs2 = csharp.createArgument();
+				
+				cs0.setValue(argument0);
+				cs1.setValue(argument1);
+				cs2.setValue(argument2);
+				
+				var cs = csharp.createCreation();
+				cs.setType("float3");
+				cs.getArguments().add(cs0);
+				cs.getArguments().add(cs1);
+				cs.getArguments().add(cs2);
+				
+				return cs;
+			}
+			else if (name.equals("remove"))
+			{
+				var component = ((Variable)e.getArguments().get(0)).getName();
+				var variable = ((Variable)e.getArguments().get(1)).getName();
+				
+				querySet.add(variable, component, AccessKind.read);
+				querySet.add(variable, "Entity", AccessKind.read);
+				
+				var cs = modular.createAccessExpression();
+				var entityManager = modular.createVariable();
+				var remove = csharp.createParameterizedFunction();
+				var argument = csharp.createArgument();
+				var entity = modular.createVariable();
+				cs.setLeft(entityManager);
+				cs.setRight(remove);
+				entityManager.setName("EntityManager");
+				remove.setName("RemoveComponent");
+				remove.getTypes().add(component);
+				remove.getArguments().add(argument);
+				argument.setValue(entity);
+				entity.setName("entity_"+variable);
+				
+				return cs;
 			}
 		}
+		else if (expression instanceof Variable)
+		{
+			var e = (Variable) expression;
+			var cs = modular.createVariable();
+			cs.setName(e.getName());
+			return cs;
+		}
+		else if (expression instanceof ComponentAccess)
+		{
+			var access = (ComponentAccess) expression;
+			querySet.add(access.getEntity(), access.getComponent(), AccessKind.read);
+			var csExpression = modular.createAccessExpression();
+			var component = modular.createVariable();
+			var field = modular.createVariable();
+			csExpression.setLeft(component);
+			csExpression.setRight(field);
+			component.setName(access.getComponent()+"_"+access.getEntity());
+			field.setName(field(access.getComponent()));
+			return csExpression;
+		}
+		else if (expression instanceof Set)
+		{
+			var e = (Set) expression;
+			var variable = e.getVariable();
+			var superset = e.getSuperset();
+			var predicate = e.getPredicate();
+			
+			var selection = modular.createSelection();
+			
+		}
+		return null;
 	}
 	
 	private boolean isValueType(String component)
@@ -979,6 +1166,19 @@ public class UnitySerializer
 			result = result.replaceFirst("0","1");
 		}
 		return result;
+	}
+	
+	private String field(String component)
+	{
+		var engineComponents = StandardLibrary.values();
+		for (var engineComponent : engineComponents)
+		{
+			if (component.equals(engineComponent.toString()))
+			{
+				return engineComponent.getField();
+			}
+		}
+		return "Value";
 	}
 	
 	private String unityName(Type type)
