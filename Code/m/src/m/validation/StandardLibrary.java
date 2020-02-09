@@ -257,4 +257,128 @@ public enum StandardLibrary
 		
 		}
 	}
+	
+	public boolean isValueType()
+	{
+		switch(this)
+		{
+		case acceleration: return true;
+
+		case angularDamping: return true;
+
+		case angularVelocity: return true;
+
+		case audioClip: return false;
+
+		case button: return false;
+
+		case chorus: return false;
+
+		case clearColor: return false;
+
+		case collisionEntries: return true;
+
+		case collisionExits: return true;
+
+		case collisions: return true;
+
+		case convexHull: return true;
+
+		case cookie: return false;
+
+		case damping: return true;
+
+		case distortion: return false;
+
+		case doppler: return false;
+
+		case echo: return false;
+
+		case emission: return false;
+
+		case extents: return true;
+
+		case font: return false;
+
+		case force: return true;
+
+		case friction: return true;
+
+		case geometry: return true;
+
+		case gravityFactor: return true;
+
+		case height: return true;
+
+		case highPass: return false;
+
+		case image: return false;
+
+		case intensity: return false;
+
+		case ip: return false;
+
+		case loop: return false;
+
+		case lowPass: return false;
+
+		case mass: return true;
+
+		case material: return true;
+
+		case mesh: return true;
+
+		case networkStream: return false;
+
+		case number: return false;
+
+		case owner: return false;
+
+		case perspective:
+
+		case pitch: return false;
+
+		case plan: return false;
+
+		case port: return false;
+
+		case position: return true;
+
+		case prediction: return false;
+
+		case radius: return true;
+
+		case range: return false;
+
+		case restitution: return true;
+
+		case reverb: return false;
+
+		case rotation: return true;
+
+		case scale: return true;
+
+		case shadows: return false;
+
+		case sideCount: return true;
+
+		case spotAngle: return false;
+
+		case stateMachine: return false;
+
+		case text: return false;
+
+		case trigger: return true;
+
+		case velocity: return true;
+
+		case viewAngle: return false;
+
+		case viewDistance: return false;
+
+		case volume: return false;
+
+		default: return false;
+		}
+	}
 }

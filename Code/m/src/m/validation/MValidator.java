@@ -18,10 +18,10 @@ import org.eclipse.xtext.validation.Check;
 import org.eclipse.xtext.validation.EValidatorRegistrar;
 
 import m.m.Exists;
-import m.m.Amount;
 import m.m.Archetype;
 import m.m.Forall;
 import m.m.MPackage;
+import m.m.Set;
 import m.m.Game;
 import m.m.System;
 import m.m.VectorComponent;
@@ -582,10 +582,15 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void infer(Amount amount)
+	public void infer(Set set)
 	{
-		var bound = amount.getBound();
-		set(bound, float1);
+		setVariable(set.getVariable(), entity, set, SET__VARIABLE);
+		if (set.getSuperset() != null)
+		{
+			set(set.getSuperset(), entityList);
+		}
+		set(set.getPredicate(), bool);	
+		set(set, entityList);
 	}
 	
 	@Check
@@ -823,6 +828,23 @@ public class MValidator extends AbstractMValidator
 			}
 			set(call,bool);
 			set(parameters.get(1), entity);
+		}
+		else if (function.equals("empty"))
+		{
+			if (parameters.size() != 1)
+			{
+				error ("empty takes a list argument", call, FUNCTION__NAME);
+			}
+			set(call, bool);
+			set(parameters.get(0), entityList);
+		}
+		else if (function.equals("addTo"))
+		{
+			
+		}
+		else if (function.equals("removeFrom"))
+		{
+			
 		}
 		else
 		{
