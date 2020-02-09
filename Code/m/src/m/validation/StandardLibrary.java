@@ -258,6 +258,17 @@ public enum StandardLibrary
 		}
 	}
 	
+	public String getField()
+	{
+		switch(this)
+		{
+		case velocity: return "Linear";
+		case position: return "Value";
+		case number: return "text";
+		default: return "FieldNotImplemented";
+		}
+	}
+	
 	public boolean isValueType()
 	{
 		switch(this)
