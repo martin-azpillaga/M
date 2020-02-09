@@ -16,6 +16,7 @@ import m.JSONRuntimeModule;
 import m.YAMLRuntimeModule;
 import m.csharp.CompilationUnit;
 import m.csharp.CsharpFactory;
+import m.csharp.ParameterizedFunction;
 import m.json.JsonFactory;
 import m.json.Member;
 import m.m.Archetype;
@@ -32,6 +33,7 @@ import m.modular.Comparison;
 import m.modular.ComparisonKind;
 import m.modular.Equality;
 import m.modular.Expression;
+import m.modular.Function;
 import m.modular.LogicalAnd;
 import m.modular.LogicalNot;
 import m.modular.LogicalOr;
@@ -82,6 +84,9 @@ public class UnitySerializer
 				serialize(component, type);
 			}
 		}
+		serialize("Collisions", entityList);
+		serialize("CollisionEntries", entityList);
+		serialize("CollisionExits", entityList);
 		
 		for (var archetype : game.getArchetypes())
 		{
@@ -588,38 +593,40 @@ public class UnitySerializer
 				var forall = (Forall) statement;
 				var variable = forall.getVariable();
 				var collection = forall.getCollection();
+				var conditionExpression = forall.getCondition();
+				cs(collection, querySet);
+				cs(conditionExpression, querySet);
 
 				
-				if (collection == null)
-				{
-					var forStatement = csharp.createFor();
-					var initialization = csharp.createDeclaration();
-					var indexDeclarator = csharp.createDeclarator();
-					var zero = csharp.createFloatLiteral();
-					var condition = modular.createComparison();
-					var conditionLeft = modular.createVariable();
-					var conditionRight = modular.createVariable();
-					var iterator = csharp.createIncrement();
-					var iteratorExpression = modular.createVariable();
-					forStatement.setInitialization(initialization);
-					forStatement.setCondition(condition);
-					forStatement.setIterator(iterator);
-					initialization.getDeclarators().add(indexDeclarator);
-					indexDeclarator.setValue(zero);
-					condition.setLeft(conditionLeft);
-					condition.setRight(conditionRight);
-					iterator.setExpression(iteratorExpression);
-					
-					indexDeclarator.setVariable(variable+"_index");
-					zero.setValue("0");
-					conditionLeft.setName(variable+"_index");
-					condition.setKind(ComparisonKind.LOWER);
-					conditionRight.setName(variable+"_amount");
-					iteratorExpression.setName(variable+"_index");
-					list.add(forStatement);
-					
-					addStatements(forall.getStatements(), forStatement.getStatements(), querySet);
-				}
+				
+				var forStatement = csharp.createFor();
+				var initialization = csharp.createDeclaration();
+				var indexDeclarator = csharp.createDeclarator();
+				var zero = csharp.createFloatLiteral();
+				var condition = modular.createComparison();
+				var conditionLeft = modular.createVariable();
+				var conditionRight = modular.createVariable();
+				var iterator = csharp.createIncrement();
+				var iteratorExpression = modular.createVariable();
+				forStatement.setInitialization(initialization);
+				forStatement.setCondition(condition);
+				forStatement.setIterator(iterator);
+				initialization.getDeclarators().add(indexDeclarator);
+				indexDeclarator.setValue(zero);
+				condition.setLeft(conditionLeft);
+				condition.setRight(conditionRight);
+				iterator.setExpression(iteratorExpression);
+				
+				indexDeclarator.setVariable(variable+"_index");
+				zero.setValue("0");
+				conditionLeft.setName(variable+"_index");
+				condition.setKind(ComparisonKind.LOWER);
+				conditionRight.setName(variable+"_amount");
+				iteratorExpression.setName(variable+"_index");
+				list.add(forStatement);
+				
+				addStatements(forall.getStatements(), forStatement.getStatements(), querySet);
+				
 			}
 			else if (statement instanceof Exists)
 			{
@@ -629,36 +636,34 @@ public class UnitySerializer
 				var conditionExpression = exists.getCondition();
 				cs(conditionExpression, querySet);
 				
-				if (collection == null)
-				{
-					var forStatement = csharp.createFor();
-					var initialization = csharp.createDeclaration();
-					var indexDeclarator = csharp.createDeclarator();
-					var zero = csharp.createFloatLiteral();
-					var condition = modular.createComparison();
-					var conditionLeft = modular.createVariable();
-					var conditionRight = modular.createVariable();
-					var iterator = csharp.createIncrement();
-					var iteratorExpression = modular.createVariable();
-					forStatement.setInitialization(initialization);
-					forStatement.setCondition(condition);
-					forStatement.setIterator(iterator);
-					initialization.getDeclarators().add(indexDeclarator);
-					indexDeclarator.setValue(zero);
-					condition.setLeft(conditionLeft);
-					condition.setRight(conditionRight);
-					iterator.setExpression(iteratorExpression);
-					
-					indexDeclarator.setVariable(variable+"_index");
-					zero.setValue("0");
-					conditionLeft.setName(variable+"_index");
-					condition.setKind(ComparisonKind.LOWER);
-					conditionRight.setName(variable+"_amount");
-					iteratorExpression.setName(variable+"_index");
-					list.add(forStatement);
-					
-					addStatements(exists.getStatements(), forStatement.getStatements(), querySet);
-				}			
+				var forStatement = csharp.createFor();
+				var initialization = csharp.createDeclaration();
+				var indexDeclarator = csharp.createDeclarator();
+				var zero = csharp.createFloatLiteral();
+				var condition = modular.createComparison();
+				var conditionLeft = modular.createVariable();
+				var conditionRight = modular.createVariable();
+				var iterator = csharp.createIncrement();
+				var iteratorExpression = modular.createVariable();
+				forStatement.setInitialization(initialization);
+				forStatement.setCondition(condition);
+				forStatement.setIterator(iterator);
+				initialization.getDeclarators().add(indexDeclarator);
+				indexDeclarator.setValue(zero);
+				condition.setLeft(conditionLeft);
+				condition.setRight(conditionRight);
+				iterator.setExpression(iteratorExpression);
+				
+				indexDeclarator.setVariable(variable+"_index");
+				zero.setValue("0");
+				conditionLeft.setName(variable+"_index");
+				condition.setKind(ComparisonKind.LOWER);
+				conditionRight.setName(variable+"_amount");
+				iteratorExpression.setName(variable+"_index");
+				list.add(forStatement);
+				
+				addStatements(exists.getStatements(), forStatement.getStatements(), querySet);
+				
 			}
 			else if (statement instanceof Assignment)
 			{
@@ -735,14 +740,31 @@ public class UnitySerializer
 			var e = (LogicalNot) expression;
 			cs(e.getExpression(), querySet);
 		}
+		else if (expression instanceof Function)
+		{
+			var a = (Function) expression;
+			if (a.getName().equals("has"))
+			{
+				var parameter0 = ((Variable)a.getArguments().get(0)).getName();
+				var parameter1 = ((Variable)a.getArguments().get(1)).getName();
+				querySet.add(parameter1, parameter0, AccessKind.tag);
+			}
+			for (var argument : a.getArguments())
+			{
+				cs(argument, querySet);
+			}
+		}
 	}
 	
 	private String unityName(String component, HashSet<String> namespaces)
 	{
-		if (component.equals("velocity"))
+		var engineComponents = StandardLibrary.values();
+		for (var engineComponent : engineComponents)
 		{
-			namespaces.add("Unity.Physics");
-			return "PhysicsVelocity";
+			if (component.equals(engineComponent.toString()))
+			{
+				return engineComponent.getUnityType(namespaces);
+			}
 		}
 		return component;
 	}
