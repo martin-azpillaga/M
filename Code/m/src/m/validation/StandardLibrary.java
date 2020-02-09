@@ -1,6 +1,8 @@
 package m.validation;
 
 import static m.validation.Type.*;
+
+import java.util.HashSet;
 public enum StandardLibrary 
 {
 	// Input works with magic components
@@ -20,7 +22,7 @@ public enum StandardLibrary
 	// Audio control
 	audioClip, volume, pitch, loop,
 	// Audio effects
-	distortion, echo, highPass, lowPass, reverb, delay, doppler,
+	distortion, echo, highPass, lowPass, reverb, chorus, doppler,
 	// Network components
 	ip,port,networkStream,prediction,owner,
 	// Network synchronization happens with magic component names
@@ -84,7 +86,7 @@ public enum StandardLibrary
 			case highPass: return float1;
 			case lowPass: return float1;
 			case reverb: return float1;
-			case delay: return float1;
+			case chorus: return float1;
 			case doppler: return float1;
 			case angularDamping: return float1;
 			case angularVelocity: return float3;
@@ -106,5 +108,153 @@ public enum StandardLibrary
 			case stateMachine: return Type.stateMachine;
 		}
 		return none;
+	}
+	public String getUnityType(HashSet<String> namespaces)
+	{
+		switch (this)
+		{
+		case acceleration: return "noUnityName";
+		case angularDamping: namespaces.add("Unity.Physics"); return "PhysicsDamping";
+		case angularVelocity: namespaces.add("Unity.Physics"); return "PhysicsVelocity";
+		case audioClip: namespaces.add("UnityEngine"); return "AudioSource";
+		case button: namespaces.add("UnityEngine.UI"); return "Button";
+		case clearColor: namespaces.add("UnityEngine"); return "Camera";
+		case collisionEntries: return "CollisionEntries";
+		case collisionExits: return "CollisionExits";
+		case collisions: return "Collisions";
+		case convexHull: namespaces.add("Unity.Physics"); return "PhysicsCollider";
+		case cookie: namespaces.add("UnityEngine"); return "Light";
+		case damping: namespaces.add("Unity.Physics"); return "PhysicsDamping";
+		case chorus: namespaces.add("UnityEngine"); return "AudioChorusFilter";
+		case distortion:
+			namespaces.add("UnityEngine");
+			return "AudioDistortionFilter";
+		case doppler:
+			namespaces.add("UnityEngine");
+			return "AudioSource";
+		case echo:
+			namespaces.add("UnityEngine");
+			return "AudioEchoFilter";
+		case emission:
+			namespaces.add("UnityEngine");
+			return "Light";
+		case extents:
+			namespaces.add("Unity.Physics");
+			return "PhysicsShape";
+		case font:
+			namespaces.add("UnityEngine");
+			return "Font";
+		case force: return "noUnityName";
+		case friction:
+			namespaces.add("Unity.Physics");
+			return "PhysicsCollider";
+		case geometry:
+			namespaces.add("Unity.Physics");
+			return "PhysicsCollider";
+		case gravityFactor:
+			namespaces.add("Unity.Physics");
+			return "PhysicsGravityFactor";
+		case height:
+			namespaces.add("Unity.Physics");
+			return "PhysicsCollider";
+		case highPass:
+			namespaces.add("UnityEngine");
+			return "AudioHighPassFilter";
+		case image:
+			namespaces.add("UnityEngine.UI");
+			return "Image";
+		case intensity:
+			namespaces.add("UnityEngine");
+			return "Light";
+		case ip:
+			return "noUnityName";
+		case loop:
+			namespaces.add("UnityEngine");
+			return "AudioSource";
+		case lowPass:
+			namespaces.add("UnityEngine");
+			return "AudioLowpassFilter";
+		case mass:
+			namespaces.add("Unity.Physics");
+			return "PhysicsMass";
+		case material:
+			namespaces.add("Unity.Hybrid.Rendering");
+			return "RenderMesh";
+		case mesh:
+			namespaces.add("Unity.Hybrid.Rendering");
+			return "RenderMesh";
+		case networkStream:
+			return "noUnityName";
+		case number:
+			namespaces.add("UnityEngine.UI");
+			return "Text";
+		case owner:
+			return "noUnityName";
+		case perspective:
+			namespaces.add("UnityEngine");
+			return "Camera";
+		case pitch:
+			namespaces.add("UnityEngine");
+			return "AudioSource";
+		case plan:
+			return "noUnityName";
+		case port:
+			return "noUnityName";
+		case position:
+			namespaces.add("Unity.Transforms");
+			return "Translation";
+		case prediction:
+			return "noUnityName";
+		case radius:
+			namespaces.add("Unity.Physics");
+			return "PhysicsCollider";
+		case range:
+			namespaces.add("UnityEngine");
+			return "Light";
+		case restitution:
+			namespaces.add("Unity.Physics");
+			return "PhysicsCollider";
+		case reverb:
+			namespaces.add("UnityEngine");
+			return "AudioReverbFilter";
+		case rotation:
+			namespaces.add("Unity.Transforms");
+			return "Rotation";
+		case scale:
+			namespaces.add("Unity.Transforms");
+			return "NonUniformScale";
+		case shadows:
+			namespaces.add("Unity.Hybrid.Rendering");
+			return "RenderMesh";
+		case sideCount:
+			namespaces.add("Unity.Physics");
+			return "PhysicsCollider";
+		case spotAngle:
+			namespaces.add("UnityEngine");
+			return "Light";
+		case stateMachine:
+			return "noUnityName";
+		case text:
+			namespaces.add("UnityEngine");
+			return "Text";
+		case trigger:
+			namespaces.add("Unity.Physics");
+			return "PhysicsCollider";
+		case velocity:
+			namespaces.add("Unity.Physics");
+			return "PhysicsVelocity";
+		case viewAngle:
+			namespaces.add("UnityEngine");
+			return "Camera";
+		case viewDistance:
+			namespaces.add("UnityEngine");
+			return "Camera";
+		case volume:
+			namespaces.add("UnityEngine");
+			return "AudioSource";
+		default:
+			return "noUnityName";
+		
+		}
 	}
 }

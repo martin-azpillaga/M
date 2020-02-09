@@ -82,6 +82,7 @@ Amount:
 	bound=Expression;
 
 End: {End};
+
 @Override
 enum EqualityKind: equal='='|notEqual='≠';
 @Override
