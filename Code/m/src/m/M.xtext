@@ -31,7 +31,6 @@ Forall returns Block: {Forall}
 
 Exists returns Block: {Exists}
 	(negated?='∄'|'∃')
-	 amount=Amount?
 	 variable=WORD
 	('∈' collection=Expression )?
 	('|' condition=Expression)?
@@ -68,7 +67,7 @@ ComponentAccess returns Expression: {ComponentAccess}
 
 @Override
 Primary returns Expression:
-	=>ComponentAccess|=>Function|Variable|LogicalNot|Brackets
+	=>ComponentAccess|=>Function|Variable|Set|LogicalNot|Brackets
 ;
 
 @Override
@@ -77,9 +76,9 @@ Function returns Expression: {Function}
 	'[' (arguments+=Expression (','? arguments+=Expression)*)? ']'
 ;
 
-Amount:
-	kind=AmountKind
-	bound=Expression;
+Set returns Expression: {Set}
+	'{' variable=WORD ('∈' superset=Expression)? '|' predicate=Expression '}'
+;
 
 End: {End};
 
