@@ -335,7 +335,7 @@ public class MValidator extends AbstractMValidator
 		groups = new ArrayList<>();
 		for (var entry : StandardLibrary.values())
 		{
-			components.put(entry.toString(), entry.getType());
+			components.put(entry.toString(), entry.type);
 		}
 	}
 	
@@ -443,7 +443,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (components.get(component) != type)
 			{
-				error("Type conflict: This variable cannot be " + components.get(component) + " and " + type, access, VARIABLE__NAME);
+				error("Type conflict: This variable cannot be " + components.get(component) + " and " + type, access, COMPONENT_ACCESS__ENTITY);
 			}
 		}
 		else
