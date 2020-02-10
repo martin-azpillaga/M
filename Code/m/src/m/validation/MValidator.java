@@ -18,11 +18,14 @@ import org.eclipse.xtext.validation.Check;
 import org.eclipse.xtext.validation.EValidatorRegistrar;
 
 import m.m.Exists;
+import m.m.ExplicitSet;
 import m.m.Archetype;
 import m.m.Forall;
 import m.m.MPackage;
-import m.m.Set;
+import m.m.SetExpression;
+import m.m.SetKind;
 import m.m.Game;
+import m.m.ImplicitSet;
 import m.m.System;
 import m.m.VectorComponent;
 import m.modular.Variable;
@@ -548,15 +551,10 @@ public class MValidator extends AbstractMValidator
 	public void infer(Forall forall)
 	{
 		var variable = forall.getVariable();
-		var collection = forall.getCollection();
 		var condition = forall.getCondition();
 		
 		setVariable(variable, entity, forall, FORALL__VARIABLE);
-
-		if (collection != null)
-		{
-			set(collection, entityList);
-		}
+		
 		if (condition != null)
 		{
 			set(condition, bool);
@@ -567,14 +565,9 @@ public class MValidator extends AbstractMValidator
 	public void infer(Exists exists)
 	{
 		var variable = exists.getVariable();
-		var collection = exists.getCollection();
 		var condition = exists.getCondition();
 		
 		setVariable(variable, entity, exists, EXISTS__VARIABLE);
-		if (collection != null)
-		{
-			set(collection, entityList);
-		}
 		if (condition != null)
 		{
 			set(condition, bool);
@@ -582,15 +575,43 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void infer(Set set)
+	public void infer(ImplicitSet set)
 	{
-		setVariable(set.getVariable(), entity, set, SET__VARIABLE);
-		if (set.getSuperset() != null)
-		{
-			set(set.getSuperset(), entityList);
-		}
+		setVariable(set.getVariable(), entity, set, IMPLICIT_SET__VARIABLE);
 		set(set.getPredicate(), bool);	
 		set(set, entityList);
+	}
+	
+	@Check
+	public void infer(ExplicitSet set)
+	{
+		for (var element : set.getElements())
+		{
+			set(element, entity);
+		}
+		set(set, entityList);
+	}
+	
+	@Check
+	public void infer(SetExpression expression)
+	{
+		var left = expression.getLeft();
+		var right = expression.getRight();
+		var kind = expression.getKind();
+		
+		switch(kind)
+		{
+		case MEMBERSHIP:
+			set(left, entity);
+			set(right, entityList);
+			set(expression, bool);
+			break;
+		case UNION:
+			set(left, entityList);
+			set(right, entityList);
+			set(expression, entityList);
+			break;
+		}
 	}
 	
 	@Check

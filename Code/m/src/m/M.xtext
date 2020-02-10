@@ -2,6 +2,8 @@ grammar m.M with m.Modular
 import "azpillaga.world/modular"
 generate m "azpillaga.world/m"
 
+// The definable set are those definable by expressions!
+
 Game:
 	(archetypes+=Archetype|systems+=System)*
 	end=End;
@@ -25,14 +27,12 @@ Statement:
 
 Forall returns Block: {Forall}
 	 '∀' variable=WORD
-	('∈' collection=Expression )?
 	('|' condition=Expression)?
 	 '[' statements+=Statement (','? statements+=Statement)* ']';
 
 Exists returns Block: {Exists}
 	(negated?='∄'|'∃')
 	 variable=WORD
-	('∈' collection=Expression )?
 	('|' condition=Expression)?
 	 '[' statements+=Statement (','? statements+=Statement)* ']';
 
@@ -58,6 +58,13 @@ LogicalNot returns Expression: {LogicalNot}
 Equality returns Expression:
 	Comparison ({Equality.left=current}  kind=EqualityKind right=Comparison)*;
 
+@Override
+MultiplicativeExpression returns Expression:
+	SetExpression ({MultiplicativeExpression.left=current} kind=MultiplicativeKind right=SetExpression)*;
+
+SetExpression returns Expression:
+	Primary ({SetExpression.left=current} kind=SetKind right=Primary)*;
+
 Assignment:
 	variable=(Variable|ComponentAccess) '=' expression=Expression
 ;
@@ -67,8 +74,7 @@ ComponentAccess returns Expression: {ComponentAccess}
 
 @Override
 Primary returns Expression:
-	=>ComponentAccess|=>Function|Variable|Set|LogicalNot|Brackets
-;
+	=>ComponentAccess|=>Function|Variable|=>ImplicitSet|ExplicitSet|LogicalNot|Brackets;
 
 @Override
 Function returns Expression: {Function}
@@ -76,12 +82,16 @@ Function returns Expression: {Function}
 	'[' (arguments+=Expression (','? arguments+=Expression)*)? ']'
 ;
 
-Set returns Expression: {Set}
-	'{' variable=WORD ('∈' superset=Expression)? '|' predicate=Expression '}'
+ImplicitSet returns Expression: {ImplicitSet}
+	'{' variable=WORD '|' predicate=Expression '}'
 ;
+
+ExplicitSet returns Expression: {ExplicitSet}
+	'{' elements+=Expression (',' elements+=Expression)* '}';
 
 End: {End};
 
+enum SetKind: membership='∈'|union='∪'|intersection='∩'|difference='∖';
 @Override
 enum EqualityKind: equal='='|notEqual='≠';
 @Override
