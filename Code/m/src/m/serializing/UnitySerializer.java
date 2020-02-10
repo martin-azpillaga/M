@@ -102,6 +102,7 @@ public class UnitySerializer
 		
 		
 		extras();
+		systemGroups();
 	}
 	
 	private void packagesManifest()
@@ -461,6 +462,14 @@ public class UnitySerializer
 		namespaces.add("Unity.Jobs");
 		
 		var clazz = csharp.createClass();
+		var attributeSection = csharp.createAttributeSection();
+		var attribute = csharp.createAttribute();
+		var typeof = csharp.createTypeof();
+		clazz.getAttributes().add(attributeSection);
+		attributeSection.getAttributes().add(attribute);
+		attribute.setName("UpdateInGroup");
+		attribute.getPositionalArguments().add(typeof);
+		typeof.setType("Gameplay");
 		unit.getTypes().add(clazz);
 		clazz.getModifiers().add(PUBLIC);
 		clazz.setName(system.getName());
@@ -1306,6 +1315,26 @@ public class UnitySerializer
 		component.setName("component");
 		
 		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/EngineComponentConversion.cs");
+	}
+	
+	private void systemGroups()
+	{
+		var unit = csharp.createCompilationUnit();
+		var using = csharp.createNamespaceUsing();
+		var gameplay = csharp.createClass();
+		var engine = csharp.createClass();
+		unit.getUsings().add(using);
+		unit.getTypes().add(gameplay);
+		unit.getTypes().add(engine);
+		
+		using.setNamespace("Unity.Entities");
+		
+		gameplay.setName("Gameplay");
+		gameplay.getSuperTypes().add("ComponentSystemGroup");
+		engine.setName("Engine");
+		engine.getSuperTypes().add("ComponentSystemGroup");
+		
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/SystemGroups.cs");
 	}
 }
 
