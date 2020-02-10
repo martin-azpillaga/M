@@ -435,9 +435,12 @@ public class UnitySerializer
 
 		for (var namespace : namespaces)
 		{
-			var using = csharp.createNamespaceUsing();
-			using.setNamespace(namespace);
-			unit.getUsings().add(using);			
+			if (namespace != null)
+			{
+				var using = csharp.createNamespaceUsing();
+				using.setNamespace(namespace);
+				unit.getUsings().add(using);			
+			}
 		}
 		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Components/"+component+"Authoring.cs");
 	}
@@ -482,9 +485,12 @@ public class UnitySerializer
 		
 		for (var namespace : namespaces)
 		{
-			var using = csharp.createNamespaceUsing();
-			using.setNamespace(namespace);
-			unit.getUsings().add(using);
+			if (namespace != null)
+			{
+				var using = csharp.createNamespaceUsing();
+				using.setNamespace(namespace);
+				unit.getUsings().add(using);
+			}
 		}
 		
 		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/"+system.getName()+".cs");
@@ -620,6 +626,17 @@ public class UnitySerializer
 						cs.getDeclarators().add(declarator);
 						declarator.setVariable(a.getName());
 						list.add(cs);
+						
+						var disposeStatement = csharp.createExpressionStatement();
+						var untilDispose = modular.createAccessExpression();
+						var array = modular.createVariable();
+						var dispose = csharp.createParameterizedFunction();
+						disposeStatement.setExpression(untilDispose);
+						untilDispose.setLeft(array);
+						untilDispose.setRight(dispose);
+						array.setName(a.getName());
+						dispose.setName("Dispose");
+						list.add(disposeStatement);
 					}
 					else
 					{
@@ -1116,7 +1133,7 @@ public class UnitySerializer
 		{
 			if (component.equals(engineComponent.toString()))
 			{
-				return engineComponent.isValueType();
+				return engineComponent.isValueType;
 			}
 		}
 		return MValidator.components.get(component).isValueType();
@@ -1130,7 +1147,8 @@ public class UnitySerializer
 		{
 			if (component.equals(engineComponent.toString()))
 			{
-				name = engineComponent.getUnityType(namespaces);
+				namespaces.add(engineComponent.namespace);
+				name = engineComponent.unityType;
 			}
 		}
 		if (MValidator.components.get(component) == entityList)
@@ -1175,7 +1193,7 @@ public class UnitySerializer
 		{
 			if (component.equals(engineComponent.toString()))
 			{
-				return engineComponent.getField();
+				return engineComponent.unityField;
 			}
 		}
 		return "Value";
@@ -1214,9 +1232,12 @@ public class UnitySerializer
 		var namespaces = new String[]{"UnityEngine","Unity.Entities"};
 		for (var namespace : namespaces)
 		{
-			var using = csharp.createNamespaceUsing();
-			unit.getUsings().add(using);
-			using.setNamespace(namespace);
+			if (namespace != null)
+			{
+				var using = csharp.createNamespaceUsing();
+				unit.getUsings().add(using);
+				using.setNamespace(namespace);
+			}
 		}
 		
 		var clazz = csharp.createClass();
