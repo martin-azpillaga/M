@@ -1,9 +1,13 @@
 package m.serializing;
 
-import static m.csharp.Modifier.*;
-import static m.validation.Type.*;
+import static m.csharp.Modifier.OVERRIDE;
+import static m.csharp.Modifier.PROTECTED;
+import static m.csharp.Modifier.PUBLIC;
+import static m.validation.Type.entityList;
+import static m.validation.Type.float1;
+import static m.validation.Type.input;
+import static m.validation.Type.tag;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,19 +20,18 @@ import m.JSONRuntimeModule;
 import m.YAMLRuntimeModule;
 import m.csharp.CompilationUnit;
 import m.csharp.CsharpFactory;
-import m.csharp.ParameterizedFunction;
 import m.json.JsonFactory;
 import m.json.Member;
 import m.m.Archetype;
 import m.m.Assignment;
 import m.m.ComponentAccess;
 import m.m.Exists;
+import m.m.ExplicitSet;
 import m.m.Forall;
 import m.m.Game;
-import m.m.Set;
+import m.m.ImplicitSet;
 import m.m.System;
 import m.modular.AdditiveExpression;
-import m.modular.AssignmentKind;
 import m.modular.Brackets;
 import m.modular.Comparison;
 import m.modular.ComparisonKind;
@@ -45,8 +48,6 @@ import m.modular.Variable;
 import m.validation.MValidator;
 import m.validation.StandardLibrary;
 import m.validation.Type;
-import m.yaml.Tag;
-import m.yaml.Version;
 import m.yaml.YamlFactory;
 
 public class UnitySerializer
@@ -504,9 +505,7 @@ public class UnitySerializer
 			{
 				var forall = (Forall) statement;
 				var variable = forall.getVariable();
-				var collection = forall.getCollection();
 				var conditionExpression = forall.getCondition();
-				cs(collection, querySet, namespaces);
 				cs(conditionExpression, querySet, namespaces);
 
 				
@@ -574,7 +573,6 @@ public class UnitySerializer
 			{
 				var exists = (Exists) statement;
 				var variable = exists.getVariable();
-				var collection = exists.getCollection();
 				var conditionExpression = exists.getCondition();
 				cs(conditionExpression, querySet, namespaces);
 				
@@ -619,7 +617,7 @@ public class UnitySerializer
 					var cs = csharp.createDeclaration();
 					var declarator = csharp.createDeclarator();
 					
-					if (expression instanceof Set)
+					if (expression instanceof ImplicitSet)
 					{
 						namespaces.add("Unity.Collections");
 						cs.setType("NativeList<Entity>");
@@ -1113,15 +1111,17 @@ public class UnitySerializer
 			field.setName(field(access.getComponent()));
 			return csExpression;
 		}
-		else if (expression instanceof Set)
+		else if (expression instanceof ImplicitSet)
 		{
-			var e = (Set) expression;
+			var e = (ImplicitSet) expression;
 			var variable = e.getVariable();
-			var superset = e.getSuperset();
 			var predicate = e.getPredicate();
 			
 			var selection = modular.createSelection();
-			
+		}
+		else if (expression instanceof ExplicitSet)
+		{
+			var e = (ExplicitSet) expression;
 		}
 		return null;
 	}
