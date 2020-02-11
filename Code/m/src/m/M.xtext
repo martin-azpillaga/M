@@ -11,89 +11,115 @@ Game:
 Archetype:
 	 name = WORD '≔'
 	(base=WORD '∪')?
-	 '{' components+=Component (','? components+=Component)* '}';
-
-Component:
-	name=WORD|
-	{VectorComponent} name=WORD '[' entries+=NUMBER (','? entries+=NUMBER)* ']';
+	 '{' components+=WORD (','? components+=WORD)* '}';
 
 System:
-	name=WORD '≔'
-	statements+=Statement+;
+	name=WORD '≔' 
+	'['	statements+=Statement+ ']';
 
 @Override
 Statement:
-	Selection|Iteration|Forall|Exists|Assignment|Function;
-
-Forall returns Block: {Forall}
-	 '∀' variable=WORD
-	('|' condition=Expression)?
-	 '[' statements+=Statement (','? statements+=Statement)* ']';
-
-Exists returns Block: {Exists}
-	(negated?='∄'|'∃')
-	 variable=WORD
-	('|' condition=Expression)?
-	 '[' statements+=Statement (','? statements+=Statement)* ']';
+	Selection|Iteration|Forall|Assignment|Function;
 
 @Override
-Branch returns Block: {Branch}
-	condition=Expression
-	'[' statements+=Statement (','? statements+=Statement)* ']';
-
-@Override
-Block returns Block: {Block}
-	'[' statements+=Statement (','? statements+=Statement)* ']';
+Selection: {MySelection}
+	'→' condition=Expression  '[' yes+=Statement* ']'
+	('[' no+=Statement* ']')?;
 
 @Override
 Iteration returns Block: {Iteration}
 	'↺' condition=Expression
-	'[' statements+=Statement (','? statements+=Statement)* ']';
+	'[' statements+=Statement* ']';
+
+Forall returns Block: {Forall}
+	 '∀' variable=WORD
+	 '[' statements+=Statement* ']';
+
+Assignment:
+	variable=(Variable|ComponentAccess) '≔' expression=Expression;
 
 @Override
-LogicalNot returns Expression: {LogicalNot} 
-	'¬' expression=Primary;
+Function returns Expression: {Function}
+	name=WORD
+	'[' (arguments+=Expression (','? arguments+=Expression)*)? ']';
+
+@Override
+Expression:LogicalOr;
+
+@Override
+LogicalOr returns Expression:
+  LogicalAnd ({LogicalOr.left=current}  '⋁' right=LogicalAnd)*;
+  
+@Override
+LogicalAnd returns Expression:
+  Equality ({LogicalAnd.left=current}  '⋀' right=Equality)*;
 
 @Override
 Equality returns Expression:
 	Comparison ({Equality.left=current}  kind=EqualityKind right=Comparison)*;
 
 @Override
+Comparison returns Expression:
+	AdditiveExpression (({Comparison.left=current}  kind=ComparisonKind right=AdditiveExpression))*;
+
+@Override
+AdditiveExpression returns Expression:
+	MultiplicativeExpression ({AdditiveExpression.left=current}  kind=AdditiveKind right=MultiplicativeExpression)*;
+
+@Override
 MultiplicativeExpression returns Expression:
-	SetExpression ({MultiplicativeExpression.left=current} kind=MultiplicativeKind right=SetExpression)*;
+	SetExpression ({MultiplicativeExpression.left=current}  kind=MultiplicativeKind right=SetExpression)*;
 
 SetExpression returns Expression:
-	Primary ({SetExpression.left=current} kind=SetKind right=Primary)*;
+	ConcatenateExpression ({SetExpression.left=current} kind=SetKind right=ConcatenateExpression)*;
 
-Assignment:
-	variable=(Variable|ComponentAccess) '=' expression=Expression
-;
+ConcatenateExpression returns Expression:
+	Primary ({ConcatenateExpression.left=current} '~' right=Primary)*;
+
+@Override
+Primary returns Expression:
+	=>ComponentAccess|=>Function|Variable|=>ImplicitSet|ExplicitSet|LogicalNot|Brackets|Cardinal|Join;
+
+@Override
+Brackets returns Expression: {Brackets}
+	'(' expression=Expression ')';
+
+@Override
+LogicalNot returns Expression: {LogicalNot} 
+	'¬' expression=Primary;
+
+Cardinal returns Expression: {Cardinal}
+	'#' expression=Primary;
+
+Join returns Expression: {Join}
+	=>('[' entries+=Expression (','? entries+=Expression)+ ']');
+
+@Override
+Variable returns Expression: {Variable}
+	name=WORD;
 
 ComponentAccess returns Expression: {ComponentAccess}
 	entity=WORD '.' component=WORD;
 
-@Override
-Primary returns Expression:
-	=>ComponentAccess|=>Function|Variable|=>ImplicitSet|ExplicitSet|LogicalNot|Brackets;
-
-@Override
-Function returns Expression: {Function}
-	name=WORD
-	'[' (arguments+=Expression (','? arguments+=Expression)*)? ']'
-;
-
 ImplicitSet returns Expression: {ImplicitSet}
-	'{' variable=WORD '|' predicate=Expression '}'
-;
+	'{' variable=WORD '|' predicate=Expression '}';
 
 ExplicitSet returns Expression: {ExplicitSet}
-	'{' elements+=Expression (',' elements+=Expression)* '}';
+	'{' elements+=Expression (','? elements+=Expression)* '}';
 
 End: {End};
 
+@Override
+terminal WORD: (START_ID|'_') CONTINUE_ID*;
+@Override
+terminal WS: (' '|'\n'|'\r'|'\t')+;
+
+@Override
+enum ComparisonKind: lower='<'|lowerOrEqual='≤'|greaterOrEqual='≥'|greater='>';
+@Override
+enum AdditiveKind: add='+'|subtract='-';
 enum SetKind: membership='∈'|union='∪'|intersection='∩'|difference='∖';
 @Override
 enum EqualityKind: equal='='|notEqual='≠';
 @Override
 enum MultiplicativeKind: multiply='×'|divide='÷';
-enum AmountKind: lower='<'|lowerOrEqual='≤'|equal='='|notEqual='≠'|greaterOrEqual='≥'|greater='>';

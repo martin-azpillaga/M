@@ -26,7 +26,6 @@ import m.json.Member;
 import m.m.Archetype;
 import m.m.Assignment;
 import m.m.ComponentAccess;
-import m.m.Exists;
 import m.m.ExplicitSet;
 import m.m.Forall;
 import m.m.Game;
@@ -1150,6 +1149,9 @@ public class UnitySerializer
 				var parameter0 = ((Variable)e.getArguments().get(0)).getName();
 				var parameter1 = ((Variable)e.getArguments().get(1)).getName();
 				querySet.add(parameter1, parameter0, AccessKind.tag);
+				var cs = csharp.createBooleanLiteral();
+				cs.setValue("true");
+				return cs;
 			}
 			else if (name.equals("sin")||name.equals("cos")||name.equals("tan")||name.equals("exp")||name.equals("log"))
 			{
@@ -1223,6 +1225,29 @@ public class UnitySerializer
 				cs.getArguments().add(cs2);
 				
 				return cs;
+			}
+			else if (name.equals("add"))
+			{
+				var component = ((Variable)e.getArguments().get(0)).getName();
+				var variable = ((Variable)e.getArguments().get(1)).getName();
+				querySet.add(variable, "Entity", AccessKind.read);
+				
+				var cs = modular.createAccessExpression();
+				var entityManager = modular.createVariable();
+				var remove = csharp.createParameterizedFunction();
+				var argument = csharp.createArgument();
+				var entity = modular.createVariable();
+				cs.setLeft(entityManager);
+				cs.setRight(remove);
+				entityManager.setName("commandBuffer");
+				remove.setName("AddComponent");
+				remove.getTypes().add(component);
+				remove.getArguments().add(argument);
+				argument.setValue(entity);
+				entity.setName("entity_"+variable);
+				
+				return cs;				
+				
 			}
 			else if (name.equals("remove"))
 			{
