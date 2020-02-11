@@ -17,7 +17,6 @@ import org.eclipse.xtext.service.OperationCanceledError;
 import org.eclipse.xtext.validation.Check;
 import org.eclipse.xtext.validation.EValidatorRegistrar;
 
-import m.m.Exists;
 import m.m.ExplicitSet;
 import m.m.Archetype;
 import m.m.Forall;
@@ -26,12 +25,11 @@ import m.m.SetExpression;
 import m.m.SetKind;
 import m.m.Game;
 import m.m.ImplicitSet;
+import m.m.Join;
 import m.m.System;
-import m.m.VectorComponent;
 import m.modular.Variable;
 import m.modular.AdditiveExpression;
 import m.m.Assignment;
-import m.m.Component;
 import m.m.ComponentAccess;
 import m.m.End;
 import m.modular.Block;
@@ -61,24 +59,19 @@ public class MValidator extends AbstractMValidator
 
 
 	@Check
-	public void uniqueComponents(Component component)
+	public void uniqueComponents(Archetype archetype)
 	{
-		var archetype = (Archetype) component.eContainer();
-		
-		var amount = 0;
-		
-		for (var c : archetype.getComponents())
+		var components = archetype.getComponents();
+		for (var i = 0; i < components.size(); i++)
 		{
-			var name = c.getName();
-			if (component.getName().equals(name))
+			var current = components.get(i);
+			for (var j = i+1; j < components.size(); j++)
 			{
-				amount++;
+				if (current.equals(components.get(j)))
+				{
+					error("Repeated component: "+current, ARCHETYPE__NAME);
+				}
 			}
-		}
-		
-		if (amount > 1)
-		{
-			error("Repeated component",COMPONENT__NAME);
 		}
 	}
 	
@@ -318,15 +311,6 @@ public class MValidator extends AbstractMValidator
 			return;
 		}
 	}
-	
-	@Check
-	public void type(VectorComponent vector)
-	{
-		if (vector.getEntries().size() > 4)
-		{
-			error("Vectors can have up to four entries", vector, COMPONENT__NAME);
-		}
-	}
 
 	
 	@Check
@@ -370,22 +354,6 @@ public class MValidator extends AbstractMValidator
 				list.add(e);
 			}
 			groups.add(list);
-		}
-	}
-	
-	private void set(Component component, Type type)
-	{
-		var name = component.getName();
-		if (components.containsKey(name))
-		{
-			if (components.get(name) != type)
-			{
-				error("Expected type " + components.get(name) + " but got " + type.toString(), component, COMPONENT__NAME);
-			}
-		}
-		else
-		{
-			components.put(name, type);
 		}
 	}
 	
@@ -474,43 +442,22 @@ public class MValidator extends AbstractMValidator
 	
 	
 	@Check
-	public void infer(Component component)
+	public void infer(Archetype archetype)
 	{
-		var feature = COMPONENT__NAME;
-		var name = component.getName();
-		magic(name,"Range", float1, input, component, feature);
-		magic(name,"Vector", float2, input, component, feature);
-		magic(name,"Trigger", bool, input, component, feature);
-		
-		magic(name,"Timeout", bool, float1, component, feature);
-		magic(name,"Elapsed", float1, float1, component, feature);
-		
-		magic(name,"Chosen", bool, none, component, feature);
-		
-		magic(name,"Transition", bool, none, component, feature);
-	}
-	
-	@Check
-	public void infer(VectorComponent component)
-	{
-		var entries = component.getEntries();
-		var name = component.getName();
-		if (entries.size() == 1)
+		for (var component : archetype.getComponents())
 		{
-			set(component,float1);
-		}
-		else if (entries.size() == 2)
-		{
-			set(component, float2);
-		}
-		else if (entries.size() == 3)
-		{
-			set(component, float3);
-		}
-		else if (entries.size() == 4)
-		{
-			set(component, float4);
-		}
+			var feature = ARCHETYPE__NAME;
+			magic(component,"Range", float1, input, archetype, feature);
+			magic(component,"Vector", float2, input, archetype, feature);
+			magic(component,"Triggered", bool, input, archetype, feature);
+			
+			magic(component,"Timeout", bool, float1, archetype, feature);
+			magic(component,"Elapsed", float1, float1, archetype, feature);
+			
+			magic(component,"Chosen", bool, none, archetype, feature);
+			
+			magic(component,"Transition", bool, none, archetype, feature);
+		}		
 	}
 	
 	/*
@@ -555,19 +502,6 @@ public class MValidator extends AbstractMValidator
 		
 		setVariable(variable, entity, forall, FORALL__VARIABLE);
 		
-		if (condition != null)
-		{
-			set(condition, bool);
-		}
-	}
-	
-	@Check
-	public void infer(Exists exists)
-	{
-		var variable = exists.getVariable();
-		var condition = exists.getCondition();
-		
-		setVariable(variable, entity, exists, EXISTS__VARIABLE);
 		if (condition != null)
 		{
 			set(condition, bool);
@@ -681,6 +615,32 @@ public class MValidator extends AbstractMValidator
 		
 		group(multiplication, left);
 		set(right, float1);
+	}
+	
+	@Check
+	public void infer(Join join)
+	{
+		var entries = join.getEntries();
+		for (var entry : entries)
+		{
+			set(entry, float1);
+		}
+		if (entries.size() == 2)
+		{
+			set(join, float2);
+		}
+		else if (entries.size() == 3)
+		{
+			set(join, float3);
+		}
+		else if (entries.size() == 4)
+		{
+			set(join, float4);
+		}
+		else
+		{
+			error("Only 4-vectors are supported", join, JOIN__ENTRIES);
+		}
 	}
 	
 	@Check
@@ -898,12 +858,10 @@ public class MValidator extends AbstractMValidator
 		for (var archetype : game.getArchetypes())
 		{
 			for (var component : archetype.getComponents())
-			{
-				var name = component.getName();
-				
-				if (!components.containsKey(name))
+			{				
+				if (!components.containsKey(component))
 				{
-					warning("Undecidable type", component, COMPONENT__NAME);
+					warning("Undecidable type: " + component, archetype, ARCHETYPE__NAME);
 				}
 			}
 		}
