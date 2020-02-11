@@ -72,11 +72,13 @@ import m.csharp.Yield;
 import m.modular.AccessExpression;
 import m.modular.AdditiveExpression;
 import m.modular.Block;
+import m.modular.Brackets;
 import m.modular.Branch;
 import m.modular.Comparison;
 import m.modular.Equality;
 import m.modular.Iteration;
 import m.modular.LogicalAnd;
+import m.modular.LogicalNot;
 import m.modular.LogicalOr;
 import m.modular.MultiplicativeExpression;
 import m.modular.Selection;
@@ -717,6 +719,18 @@ public class CSharpFormat extends GenericFormatter
 			var a = (ParameterizedFunction) o;
 			apply(a, brackets, angleBrackets, comma);
 			formatAll(a.getArguments());
+		}
+		else if (o instanceof LogicalNot)
+		{
+			var a = (LogicalNot) o;
+			append(keyword("!",a),noSpace());
+			format(a.getExpression());
+		}
+		else if (o instanceof Brackets)
+		{
+			var a = (Brackets) o;
+			apply(a, brackets);
+			format(a.getExpression());
 		}
 		else if (o instanceof Argument)
 		{
