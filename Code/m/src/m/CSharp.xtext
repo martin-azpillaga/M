@@ -545,7 +545,7 @@ enum AttributeTarget:
 FloatLiteral returns Expression: {FloatLiteral}	value=NUMBER;
 StringLiteral returns Expression: {StringLiteral} value=STRING;
 BooleanLiteral returns Expression: {BooleanLiteral}	value=BOOLEAN;
-terminal BOOLEAN: '⊤'|'⊥';
+BOOLEAN: 'true'|'false';
 terminal STRING: '"' -> '"';
 
 terminal MULTIPLE_LINES_COMMENT: '/*'->'*/ ';
