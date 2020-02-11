@@ -310,6 +310,11 @@ Selection:
 	('else' 'if' branches+=Branch)*
 	('else' branches+=Block)?;
 
+@Override
+Branch returns Block: {Branch}
+	'(' condition=Expression ')'
+	'{' statements+=Statement+ '}';
+
 Switch:
 	'switch' '(' expression=Expression ')'
 	'{' cases+=Case* '}'
@@ -366,24 +371,38 @@ Lock:
 Lambda returns Expression: {Lambda}
 	'(' (parameters+=Parameter (',' parameters+=Parameter)*)? ')' '=>' '{' statements+=Statement* '}';
 
-ArrayInitializer: {ArrayInitializer}
+ArrayInitializer returns Expression: {ArrayInitializer}
 	'{' 
 	(variables+=(Expression|ArrayInitializer) (',' variables+=(Expression|ArrayInitializer))* 
 	','? )? '}'
 ;
 
+@Override
+LogicalOr returns Expression:
+  LogicalAnd ({LogicalOr.left=current}  '||' right=LogicalAnd)*;
+
+@Override
+LogicalAnd returns Expression:
+  Equality ({LogicalAnd.left=current}  '&&' right=Equality)*;
+
+@Override
+LogicalNot returns Expression: {LogicalNot} 
+	'!' expression=Atomic;
+
 Atomic returns Expression:
-	(FloatLiteral |
-	StringLiteral |
-	BooleanLiteral |
-	(=>ParameterizedFunction|
-	Variable)|
-	Creation|
+	=>FloatLiteral |
+	=>StringLiteral |
+	=>BooleanLiteral |
+	=>ParameterizedFunction|
+	=>Variable|
+	=>Creation|
 	=>Index|
-	This|
-	Base|
-	Default|
-	Typeof)
+	=>This|
+	=>Base|
+	=>Default|
+	=>Typeof|
+	=>LogicalNot|
+	=>Brackets
 ;
 
 This returns Expression: {This} 'this';
@@ -396,7 +415,7 @@ Typeof returns Expression: {Typeof}
 	);
 
 Creation returns Expression: {Creation}
-	'new' type=WORD // Should be qualifiedType
+	'new' type=TYPE // Should be qualifiedType
 	((
 		(
 			=>('{' (members+=MemberInitializer (',' members+=MemberInitializer)*)? '}')
