@@ -18,35 +18,31 @@ import org.eclipse.xtext.validation.Check;
 import org.eclipse.xtext.validation.EValidatorRegistrar;
 
 import m.m.ExplicitSet;
+import m.m.Expression;
+import m.m.AdditiveExpression;
 import m.m.Archetype;
 import m.m.Forall;
+import m.m.Function;
 import m.m.MPackage;
+import m.m.MultiplicativeExpression;
+import m.m.Selection;
 import m.m.SetExpression;
 import m.m.SetKind;
 import m.m.Game;
 import m.m.ImplicitSet;
+import m.m.Iteration;
 import m.m.Join;
+import m.m.LogicalAnd;
+import m.m.LogicalNot;
+import m.m.LogicalOr;
 import m.m.System;
-import m.modular.Variable;
-import m.modular.AdditiveExpression;
+import m.m.Variable;
 import m.m.Assignment;
+import m.m.Comparison;
 import m.m.ComponentAccess;
 import m.m.End;
-import m.modular.Block;
-import m.modular.Comparison;
-import m.modular.Equality;
-import m.modular.Expression;
-import m.modular.Function;
-import m.modular.Iteration;
-import m.modular.LogicalAnd;
-import m.modular.LogicalNot;
-import m.modular.LogicalOr;
-import m.modular.ModularPackage;
-import m.modular.MultiplicativeExpression;
-import m.modular.Procedure;
-import m.modular.Selection;
-import m.modular.Statement;
-import static m.modular.ModularPackage.Literals.*;
+import m.m.Equality;
+
 import static m.m.MPackage.Literals.*;
 
 @SuppressWarnings("unused")
@@ -120,6 +116,7 @@ public class MValidator extends AbstractMValidator
 		}
 	}
 	
+	/*
 	@Check
 	public void uniqueArguments(Procedure procedure)
 	{
@@ -498,14 +495,8 @@ public class MValidator extends AbstractMValidator
 	public void infer(Forall forall)
 	{
 		var variable = forall.getVariable();
-		var condition = forall.getCondition();
 		
 		setVariable(variable, entity, forall, FORALL__VARIABLE);
-		
-		if (condition != null)
-		{
-			set(condition, bool);
-		}
 	}
 	
 	@Check
@@ -545,19 +536,25 @@ public class MValidator extends AbstractMValidator
 			set(right, entityList);
 			set(expression, entityList);
 			break;
+		case DIFFERENCE:
+			set(left, entityList);
+			set(right, entityList);
+			set(expression, entityList);
+			break;
+		case INTERSECTION:
+			set(left, entityList);
+			set(right, entityList);
+			set(expression, entityList);
+			break;
+		default:
+			break;
 		}
 	}
 	
 	@Check
 	public void infer(Selection selection)
 	{
-		for (var branch : selection.getBranches())
-		{
-			if (branch.getCondition() != null)
-			{
-				set(branch.getCondition(), bool);
-			}
-		}
+		set(selection.getCondition(), bool);
 	}
 	
 	@Check
