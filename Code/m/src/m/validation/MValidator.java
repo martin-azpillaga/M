@@ -5,44 +5,44 @@ import static m.validation.Type.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
+import org.eclipse.emf.common.util.DiagnosticChain;
+import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.EcoreUtil2;
+import org.eclipse.xtext.service.OperationCanceledError;
 import org.eclipse.xtext.validation.Check;
+import org.eclipse.xtext.validation.EValidatorRegistrar;
 
-import m.m.Component;
-import m.m.ComponentAccess;
-import m.m.End;
-import m.m.Exists;
-import m.m.Amount;
+import m.m.ExplicitSet;
+import m.m.Expression;
+import m.m.AdditiveExpression;
 import m.m.Archetype;
-import m.m.AssetComponent;
 import m.m.Forall;
+import m.m.Function;
 import m.m.MPackage;
+import m.m.MultiplicativeExpression;
+import m.m.Selection;
+import m.m.SetExpression;
+import m.m.SetKind;
 import m.m.Game;
+import m.m.ImplicitSet;
+import m.m.Iteration;
+import m.m.Join;
+import m.m.LogicalAnd;
+import m.m.LogicalNot;
+import m.m.LogicalOr;
 import m.m.System;
 import m.m.Variable;
-import m.m.VectorComponent;
-import m.modular.AdditiveExpression;
-import m.modular.Assignment;
-import m.modular.Block;
-import m.modular.Comparison;
-import m.modular.Equality;
-import m.modular.Expression;
-import m.modular.FunctionCall;
-import m.modular.Iteration;
-import m.modular.LogicalAnd;
-import m.modular.LogicalNot;
-import m.modular.LogicalOr;
-import m.modular.ModularPackage;
-import m.modular.MultiplicativeExpression;
-import m.modular.Procedure;
-import m.modular.Selection;
-import m.modular.Statement;
-import m.modular.UnaryMinus;
-import static m.modular.ModularPackage.Literals.*;
+import m.m.Assignment;
+import m.m.Comparison;
+import m.m.ComponentAccess;
+import m.m.End;
+import m.m.Equality;
+
 import static m.m.MPackage.Literals.*;
 
 @SuppressWarnings("unused")
@@ -52,32 +52,29 @@ public class MValidator extends AbstractMValidator
 	public static HashMap<String,Type> components;
 	public static HashMap<String,Type> variables;
 	public static ArrayList<ArrayList<Expression>> groups;
-	
+
+
 	@Check
-	public void unique(Component component)
+	public void uniqueComponents(Archetype archetype)
 	{
-		var archetype = (Archetype) component.eContainer();
-		
-		var amount = 0;
-		
-		for (var c : archetype.getComponents())
+		var components = archetype.getComponents();
+		for (var i = 0; i < components.size(); i++)
 		{
-			var name = c.getName();
-			if (component.getName().equals(name))
+			var current = components.get(i);
+			for (var j = i+1; j < components.size(); j++)
 			{
-				amount++;
+				if (current.equals(components.get(j)))
+				{
+					error("Repeated component: "+current, ARCHETYPE__NAME);
+				}
 			}
-		}
-		
-		if (amount > 1)
-		{
-			error("Repeated component",COMPONENT__NAME);
 		}
 	}
 	
 	@Check
 	public void unique(Archetype archetype)
 	{
+		
 		var module = (Game) archetype.eContainer();
 		
 		var amount = 0;
@@ -119,28 +116,7 @@ public class MValidator extends AbstractMValidator
 		}
 	}
 	
-	@Check
-	public void unique(Procedure procedure)
-	{
-		var module = (Game) procedure.eContainer();
-		
-		var amount = 0;
-		
-		for (var s : module.getProcedures())
-		{
-			var name = s.getName();
-			if (name.equals(name))
-			{
-				amount++;
-			}
-		}
-		
-		if (amount > 1)
-		{
-			error("Repeated system",PROCEDURE__NAME);
-		}
-	}
-	
+	/*
 	@Check
 	public void uniqueArguments(Procedure procedure)
 	{
@@ -153,25 +129,6 @@ public class MValidator extends AbstractMValidator
 				if (arguments.get(i).equals(arguments.get(j)))
 				{
 					error("Repeated argument "+arguments.get(i), PROCEDURE__NAME);
-					return;
-				}
-			}
-		}
-	}
-	
-	@Check
-	public void uniqueTags(Forall forall)
-	{
-		var tags = forall.getTags();
-		
-		for (var i = 0; i < tags.size(); i++)
-		{
-			var itag = tags.get(i);
-			for (var j = i+1; j < tags.size(); j++)
-			{
-				if (itag.equals(tags.get(j)))
-				{
-					error("Repeated tag "+itag, FORALL__VARIABLE);
 					return;
 				}
 			}
@@ -351,15 +308,7 @@ public class MValidator extends AbstractMValidator
 			return;
 		}
 	}
-	
-	@Check
-	public void type(VectorComponent vector)
-	{
-		if (vector.getEntries().size() > 4)
-		{
-			error("Vectors can have up to four entries", vector, COMPONENT__NAME);
-		}
-	}
+
 	
 	@Check
 	public void clean(Game modul)
@@ -370,7 +319,7 @@ public class MValidator extends AbstractMValidator
 		groups = new ArrayList<>();
 		for (var entry : StandardLibrary.values())
 		{
-			components.put(entry.toString(), entry.getType());
+			components.put(entry.toString(), entry.type);
 		}
 	}
 	
@@ -402,22 +351,6 @@ public class MValidator extends AbstractMValidator
 				list.add(e);
 			}
 			groups.add(list);
-		}
-	}
-	
-	private void set(Component component, Type type)
-	{
-		var name = component.getName();
-		if (components.containsKey(name))
-		{
-			if (components.get(name) != type)
-			{
-				error("Expected type " + components.get(name) + " but got " + type.toString(), component, COMPONENT__NAME);
-			}
-		}
-		else
-		{
-			components.put(name, type);
 		}
 	}
 	
@@ -459,7 +392,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (variables.get(name) != type)
 			{
-				error("Expected " + variables.get(name) + ", got " + type, variable, EXPRESSION__EXPRESSION);
+				error("Expected " + variables.get(name) + ", got " + type, variable, VARIABLE__NAME);
 			}
 		}
 		else
@@ -470,6 +403,7 @@ public class MValidator extends AbstractMValidator
 		return false;
 	}
 	
+	
 	private boolean set(ComponentAccess access, Type type)
 	{
 		var component = access.getComponent();
@@ -477,7 +411,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (components.get(component) != type)
 			{
-				error("Type conflict: This variable cannot be " + components.get(component) + " and " + type, access, EXPRESSION__EXPRESSION);
+				error("Type conflict: This variable cannot be " + components.get(component) + " and " + type, access, COMPONENT_ACCESS__ENTITY);
 			}
 		}
 		else
@@ -494,7 +428,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (expressions.get(expression) != type)
 			{
-				error("Expected type " + expressions.get(expression) + " but got " + type.toString(), expression, EXPRESSION__EXPRESSION);
+				//error("Expected type " + expressions.get(expression) + " but got " + type.toString(), expression);
 			}
 		}
 		else
@@ -505,53 +439,33 @@ public class MValidator extends AbstractMValidator
 	
 	
 	@Check
-	public void infer(VectorComponent component)
+	public void infer(Archetype archetype)
 	{
-		var entries = component.getEntries();
-		var name = component.getName();
-		if (entries.size() == 1)
+		for (var component : archetype.getComponents())
 		{
-			set(component,float1);
-		}
-		else if (entries.size() == 2)
-		{
-			set(component, float2);
-		}
-		else if (entries.size() == 3)
-		{
-			set(component, float3);
-		}
-		else if (entries.size() == 4)
-		{
-			set(component, float4);
-		}
+			var feature = ARCHETYPE__NAME;
+			magic(component,"Range", float1, input, archetype, feature);
+			magic(component,"Vector", float2, input, archetype, feature);
+			magic(component,"Triggered", bool, input, archetype, feature);
+			
+			magic(component,"Timeout", bool, float1, archetype, feature);
+			magic(component,"Elapsed", float1, float1, archetype, feature);
+			
+			magic(component,"Chosen", bool, none, archetype, feature);
+			
+			magic(component,"Transition", bool, none, archetype, feature);
+		}		
 	}
 	
+	/*
 	@Check
-	public void infer(Component component)
+	public void infer(AccessExpression access)
 	{
-		var feature = COMPONENT__NAME;
-		var name = component.getName();
-		magic(name,"Range", float1, input, component, feature);
-		magic(name,"Vector", float2, input, component, feature);
-		magic(name,"Trigger", bool, input, component, feature);
-		
-		magic(name,"Timeout", bool, float1, component, feature);
-		magic(name,"Elapsed", float1, float1, component, feature);
-		
-		magic(name,"Chosen", bool, none, component, feature);
-		
-		magic(name,"Transition", bool, none, component, feature);
-	}
-	
-	@Check
-	public void infer(ComponentAccess access)
-	{
-		var entity = access.getEntity();
-		setVariable(entity, Type.entity, access, COMPONENT_ACCESS__ENTITY);
-		
+		var entity = ((Variable)access.getLeft()).getName();
+		setVariable(entity, Type.entity, access, ACCESS_EXPRESSION__LEFT);
+
 		var feature = EXPRESSION__EXPRESSION;
-		var component = access.getComponent();
+		var component = ((Variable)access.getRight()).getName();
 		magic(component, "Range", float1, input, access, feature);
 		magic(component,"Vector", float2, input, access, feature);
 		magic(component,"Trigger", bool, input, access, feature);
@@ -563,7 +477,7 @@ public class MValidator extends AbstractMValidator
 		
 		magic(component,"Transition", bool, none, access, feature);
 	}
-	
+	*/
 	private void magic(String component, String word, Type original, Type magic, EObject access, EStructuralFeature feature)
 	{
 		if (component.endsWith(word))
@@ -581,50 +495,66 @@ public class MValidator extends AbstractMValidator
 	public void infer(Forall forall)
 	{
 		var variable = forall.getVariable();
-		var collection = forall.getCollection();
-		var tags = forall.getTags();
 		
 		setVariable(variable, entity, forall, FORALL__VARIABLE);
-
-		if (collection != null)
-		{
-			set(collection, Type.entityList);
-		}
-		for (var tag : tags)
-		{
-			setComponent(tag, Type.tag, forall, FORALL__TAGS);
-		}
 	}
 	
 	@Check
-	public void infer(Exists exists)
+	public void infer(ImplicitSet set)
 	{
-		var variable = exists.getVariable();
-		var collection = exists.getCollection();
-		var condition = exists.getCondition();
+		setVariable(set.getVariable(), entity, set, IMPLICIT_SET__VARIABLE);
+		set(set.getPredicate(), bool);	
+		set(set, entityList);
+	}
+	
+	@Check
+	public void infer(ExplicitSet set)
+	{
+		for (var element : set.getElements())
+		{
+			set(element, entity);
+		}
+		set(set, entityList);
+	}
+	
+	@Check
+	public void infer(SetExpression expression)
+	{
+		var left = expression.getLeft();
+		var right = expression.getRight();
+		var kind = expression.getKind();
 		
-		setVariable(variable, entity, exists, EXISTS__VARIABLE);
-		set(collection, entityList);
-		set(condition, bool);
-	}
-	
-	@Check
-	public void infer(Amount amount)
-	{
-		var bound = amount.getBound();
-		set(bound, float1);
+		switch(kind)
+		{
+		case MEMBERSHIP:
+			set(left, entity);
+			set(right, entityList);
+			set(expression, bool);
+			break;
+		case UNION:
+			set(left, entityList);
+			set(right, entityList);
+			set(expression, entityList);
+			break;
+		case DIFFERENCE:
+			set(left, entityList);
+			set(right, entityList);
+			set(expression, entityList);
+			break;
+		case INTERSECTION:
+			set(left, entityList);
+			set(right, entityList);
+			set(expression, entityList);
+			break;
+		default:
+			break;
+		}
 	}
 	
 	@Check
 	public void infer(Selection selection)
 	{
-		for (var branch : selection.getBranches())
-		{
-			if (branch.getCondition() != null)
-			{
-				set(branch.getCondition(), bool);
-			}
-		}
+		set(selection.getCondition(), bool);
 	}
 	
 	@Check
@@ -657,12 +587,6 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void infer(UnaryMinus minus)
-	{
-		group(minus, minus.getExpression());
-	}
-	
-	@Check
 	public void infer(Equality equality)
 	{
 		var left = equality.getLeft();
@@ -691,36 +615,37 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
+	public void infer(Join join)
+	{
+		var entries = join.getEntries();
+		for (var entry : entries)
+		{
+			set(entry, float1);
+		}
+		if (entries.size() == 2)
+		{
+			set(join, float2);
+		}
+		else if (entries.size() == 3)
+		{
+			set(join, float3);
+		}
+		else if (entries.size() == 4)
+		{
+			set(join, float4);
+		}
+		else
+		{
+			error("Only 4-vectors are supported", join, JOIN__ENTRIES);
+		}
+	}
+	
+	@Check
 	public void infer(Assignment assignment)
 	{
-		var kind = assignment.getKind();
 		var left = assignment.getVariable();
 		var right = assignment.getExpression();
-		
-		switch (kind)
-		{
-			case DECREASE:
-				group(assignment,left,right);
-				break;
-			case DIVIDE:
-				group(assignment, left);
-				set(right, float1);
-				break;
-			case INCREASE:
-				group(assignment,left,right);
-				break;
-			case MODULUS:
-				group(assignment, left);
-				set(right, float1);
-				break;
-			case MULTIPLY:
-				group(assignment, left);
-				set(right, float1);
-				break;
-			case SET:
-				group(assignment,left,right);
-				break;			
-		}
+		group(left,right);
 	}
 	
 	@Check
@@ -735,15 +660,15 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void infer(FunctionCall call)
+	public void infer(Function call)
 	{
-		var function = call.getFunction();
-		var parameters = call.getParameters();
+		var function = call.getName();
+		var parameters = call.getArguments();
 		if (function.equals("random"))
 		{
 			if (parameters.size() != 1)
 			{
-				error("random takes a single float2 argument", call, FUNCTION_CALL__FUNCTION);
+				error("random takes a single float2 argument", call, FUNCTION__NAME);
 				return;
 			}
 			var parameter0 = parameters.get(0);
@@ -755,7 +680,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 1)
 			{
-				error("math functions take a single float1 argument", call, FUNCTION_CALL__FUNCTION);
+				error("math functions take a single float1 argument", call, FUNCTION__NAME);
 				return;
 			}
 			var parameter0 = parameters.get(0);
@@ -767,7 +692,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 1)
 			{
-				error("create takes a single entity argument", call, FUNCTION_CALL__FUNCTION);
+				error("create takes a single entity argument", call, FUNCTION__NAME);
 				return;
 			}
 			var parameter0 = parameters.get(0);
@@ -779,7 +704,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 1)
 			{
-				error("destroy takes a single entity argument", call, FUNCTION_CALL__FUNCTION);
+				error("destroy takes a single entity argument", call, FUNCTION__NAME);
 				return;
 			}
 			var parameter0 = parameters.get(0);
@@ -791,7 +716,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 2)
 			{
-				error("takes a type and an entity", call, FUNCTION_CALL__FUNCTION);
+				error("takes a type and an entity", call, FUNCTION__NAME);
 				return;
 			}
 			var parameter1 = parameters.get(1);
@@ -799,11 +724,25 @@ public class MValidator extends AbstractMValidator
 			set(call, none);
 			set(parameter1, entity);
 		}
+		else if (function.equals("has"))
+		{
+			if (parameters.size() != 2)
+			{
+				error("takes a type and an entity", call, FUNCTION__NAME);
+				return;
+			}
+			var parameter0 = (Variable) parameters.get(0);
+			var parameter1 = parameters.get(1);
+			
+			set(call, bool);
+			setComponent(parameter0.getName(), tag, call, FUNCTION__NAME);
+			set(parameter1, entity);
+		}
 		else if (function.equals("join"))
 		{
 			if (parameters.size() != 2 && parameters.size() != 3 && parameters.size() != 4)
 			{
-				error("join takes two, three or four floats", call, FUNCTION_CALL__FUNCTION);
+				error("join takes two, three or four floats", call, FUNCTION__NAME);
 				return;
 			}
 			var size = parameters.size();
@@ -845,7 +784,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 1)
 			{
-				error("component functions take a single floatn argument", call, FUNCTION_CALL__FUNCTION);
+				error("component functions take a single floatn argument", call, FUNCTION__NAME);
 				return;
 			}
 			set(call, float1);
@@ -854,7 +793,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 0)
 			{
-				error("quit takes no parameters",call, FUNCTION_CALL__FUNCTION);
+				error("quit takes no parameters",call, FUNCTION__NAME);
 				return;
 			}
 		}
@@ -862,48 +801,64 @@ public class MValidator extends AbstractMValidator
 		{
 			if (parameters.size() != 2)
 			{
-				error ("has takes a type and an entity", call, FUNCTION_CALL__FUNCTION);
+				error ("has takes a type and an entity", call, FUNCTION__NAME);
 				return;
 			}
 			set(call,bool);
 			set(parameters.get(1), entity);
 		}
+		else if (function.equals("empty"))
+		{
+			if (parameters.size() != 1)
+			{
+				error ("empty takes a list argument", call, FUNCTION__NAME);
+			}
+			set(call, bool);
+			set(parameters.get(0), entityList);
+		}
+		else if (function.equals("addTo"))
+		{
+			
+		}
+		else if (function.equals("removeFrom"))
+		{
+			
+		}
 		else
 		{
-			error("Function " + function + " does not exist in the standard library", call, FUNCTION_CALL__FUNCTION);
+			error("Function " + function + " does not exist in the standard library", call, FUNCTION__NAME);
 		}
 	}
 	
+	
 	@Check
 	public void check(End end)
+	{
+		var game = (Game) end.eContainer();
+		report(game);
+	}
+	
+	
+	private void report(Game game)
 	{
 		solve();
 		for (var group : groups)
 		{
 			for (var expression : group)
 			{
-				if (expression instanceof Variable||expression instanceof ComponentAccess)
+				if (expression instanceof ComponentAccess)
 				{
-					warning("Type undecidable", expression, EXPRESSION__EXPRESSION);
+					warning("Type undecidable", expression, COMPONENT_ACCESS__COMPONENT);
 				}
 			}
 		}
-		var modul = (Game) end.eContainer();
-		for (var archetype : modul.getArchetypes())
+		for (var archetype : game.getArchetypes())
 		{
 			for (var component : archetype.getComponents())
-			{
-				var name = component.getName();
-				if (components.containsKey(name))
+			{				
+				if (!components.containsKey(component))
 				{
-					if (component instanceof AssetComponent && components.get(name).isNumeric())
-					{
-						error("Type mismatch, expected non-numeric but got " + components.get(name),component, COMPONENT__NAME);
-					}
-				}
-				else
-				{
-					warning("Undecidable type", component, COMPONENT__NAME);
+					warning("Undecidable type: " + component, archetype, ARCHETYPE__NAME);
 				}
 			}
 		}
