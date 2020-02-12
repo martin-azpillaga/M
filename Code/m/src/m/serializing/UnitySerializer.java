@@ -23,31 +23,35 @@ import m.csharp.CompilationUnit;
 import m.csharp.CsharpFactory;
 import m.json.JsonFactory;
 import m.json.Member;
+import m.m.AdditiveExpression;
 import m.m.Archetype;
 import m.m.Assignment;
+import m.m.Brackets;
+import m.m.Comparison;
 import m.m.ComponentAccess;
+import m.m.Equality;
 import m.m.ExplicitSet;
+import m.m.Expression;
 import m.m.Forall;
+import m.m.Function;
 import m.m.Game;
 import m.m.ImplicitSet;
+import m.m.Join;
+import m.m.LogicalAnd;
+import m.m.LogicalNot;
+import m.m.LogicalOr;
 import m.m.MFactory;
+import m.m.MultiplicativeExpression;
+import m.m.Selection;
 import m.m.SetExpression;
+import m.m.Statement;
 import m.m.System;
-import m.modular.AdditiveExpression;
-import m.modular.Brackets;
-import m.modular.Comparison;
+import m.m.Variable;
+import m.modular.AdditiveKind;
 import m.modular.ComparisonKind;
-import m.modular.Equality;
-import m.modular.Expression;
-import m.modular.Function;
-import m.modular.LogicalAnd;
-import m.modular.LogicalNot;
-import m.modular.LogicalOr;
+import m.modular.EqualityKind;
 import m.modular.ModularFactory;
-import m.modular.MultiplicativeExpression;
-import m.modular.Selection;
-import m.modular.Statement;
-import m.modular.Variable;
+import m.modular.MultiplicativeKind;
 import m.validation.MValidator;
 import m.validation.StandardLibrary;
 import m.validation.Type;
@@ -535,9 +539,9 @@ public class UnitySerializer
 		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/"+system.getName()+".cs");
 	}
 	
-	private void addStatementsUnified(List<Statement> statements, List<Statement> list, QuerySet querySet, HashSet<String> namespaces)
+	private void addStatementsUnified(List<Statement> statements, List<m.modular.Statement> list, QuerySet querySet, HashSet<String> namespaces)
 	{
-		var tail = new ArrayList<Statement>();
+		var tail = new ArrayList<m.modular.Statement>();
 		
 		for (var statement : statements)
 		{
@@ -545,7 +549,7 @@ public class UnitySerializer
 			{
 				var forall = (Forall) statement;
 				var variable = forall.getVariable();
-				var conditionExpression = forall.getCondition();
+				var conditionExpression = forall.getConditiion();
 				var condition = cs(conditionExpression, querySet, namespaces);
 				
 				
@@ -625,13 +629,12 @@ public class UnitySerializer
 			{
 				var selection = (Selection) statement;
 				var cs = modular.createSelection();
-				for (var branch : selection.getBranches())
-				{
-					var csBranch = modular.createBranch();
-					cs.getBranches().add(csBranch);
-					csBranch.setCondition(cs(branch.getCondition(), querySet, namespaces));
-					addStatementsUnified(branch.getStatements(), csBranch.getStatements(), querySet, namespaces);
-				}
+				
+				var csBranch = modular.createBranch();
+				cs.getBranches().add(csBranch);
+				csBranch.setCondition(cs(selection.getCondition(), querySet, namespaces));
+				addStatementsUnified(selection.getPositiveStatements(), csBranch.getStatements(), querySet, namespaces);
+				
 				list.add(cs);
 			}
 			else if (statement instanceof Assignment)
@@ -1047,7 +1050,7 @@ public class UnitySerializer
 		}
 	}*/
 	
-	private Expression cs(Expression expression, QuerySet querySet, HashSet<String> namespaces)
+	private m.modular.Expression cs(Expression expression, QuerySet querySet, HashSet<String> namespaces)
 	{
 		if (expression instanceof LogicalOr)
 		{
@@ -1069,7 +1072,7 @@ public class UnitySerializer
 		{
 			var e = (Equality) expression;
 			var cs = modular.createEquality();
-			cs.setKind(e.getKind());
+			cs.setKind(cs(e.getKind()));
 			cs.setLeft(cs(e.getLeft(), querySet, namespaces));
 			cs.setRight(cs(e.getRight(), querySet, namespaces));
 			return cs;
@@ -1078,7 +1081,7 @@ public class UnitySerializer
 		{
 			var e = (Comparison) expression;
 			var cs = modular.createComparison();
-			cs.setKind(e.getKind());
+			cs.setKind(cs(e.getKind()));
 			cs.setLeft(cs(e.getLeft(), querySet, namespaces));
 			cs.setRight(cs(e.getRight(), querySet, namespaces));
 			return cs;
@@ -1087,7 +1090,7 @@ public class UnitySerializer
 		{
 			var e = (AdditiveExpression) expression;
 			var cs = modular.createAdditiveExpression();
-			cs.setKind(e.getKind());
+			cs.setKind(cs(e.getKind()));
 			cs.setLeft(cs(e.getLeft(), querySet, namespaces));
 			cs.setRight(cs(e.getRight(), querySet, namespaces));
 			return cs;
@@ -1096,7 +1099,7 @@ public class UnitySerializer
 		{
 			var e = (MultiplicativeExpression) expression;
 			var cs = modular.createMultiplicativeExpression();
-			cs.setKind(e.getKind());
+			cs.setKind(cs(e.getKind()));
 			cs.setLeft(cs(e.getLeft(), querySet, namespaces));
 			cs.setRight(cs(e.getRight(), querySet, namespaces));
 			return cs;
@@ -1137,6 +1140,30 @@ public class UnitySerializer
 			var e = (LogicalNot) expression;
 			var cs = modular.createLogicalNot();
 			cs.setExpression(cs(e.getExpression(),querySet, namespaces));
+			return cs;
+		}
+		else if (expression instanceof Join)
+		{
+			var e = (Join) expression;
+			namespaces.add("Unity.Mathematics");
+			var argument0 = cs(e.getEntries().get(0), querySet, namespaces);
+			var argument1 = cs(e.getEntries().get(1), querySet, namespaces);
+			var argument2 = cs(e.getEntries().get(2), querySet, namespaces);
+			
+			var cs0 = csharp.createArgument();
+			var cs1 = csharp.createArgument();
+			var cs2 = csharp.createArgument();
+			
+			cs0.setValue(argument0);
+			cs1.setValue(argument1);
+			cs2.setValue(argument2);
+			
+			var cs = csharp.createCreation();
+			cs.setType("float3");
+			cs.getArguments().add(cs0);
+			cs.getArguments().add(cs1);
+			cs.getArguments().add(cs2);
+			
 			return cs;
 		}
 		else if (expression instanceof Function)
@@ -1201,29 +1228,6 @@ public class UnitySerializer
 				highY.setRight(y);
 				x.setName("x");
 				y.setName("y");
-				return cs;
-			}
-			else if (name.equals("join"))
-			{
-				namespaces.add("Unity.Mathematics");
-				var argument0 = cs(e.getArguments().get(0), querySet, namespaces);
-				var argument1 = cs(e.getArguments().get(1), querySet, namespaces);
-				var argument2 = cs(e.getArguments().get(2), querySet, namespaces);
-				
-				var cs0 = csharp.createArgument();
-				var cs1 = csharp.createArgument();
-				var cs2 = csharp.createArgument();
-				
-				cs0.setValue(argument0);
-				cs1.setValue(argument1);
-				cs2.setValue(argument2);
-				
-				var cs = csharp.createCreation();
-				cs.setType("float3");
-				cs.getArguments().add(cs0);
-				cs.getArguments().add(cs1);
-				cs.getArguments().add(cs2);
-				
 				return cs;
 			}
 			else if (name.equals("add"))
@@ -1332,6 +1336,48 @@ public class UnitySerializer
 			var e = (ExplicitSet) expression;
 		}
 		return null;
+	}
+	
+	private m.modular.ComparisonKind cs(m.m.ComparisonKind kind)
+	{
+		switch (kind)
+		{
+		case GREATER: return ComparisonKind.GREATER;
+		case GREATER_OR_EQUAL: return ComparisonKind.GREATER_OR_EQUAL;
+		case LOWER: return ComparisonKind.LOWER;
+		case LOWER_OR_EQUAL: return ComparisonKind.LOWER_OR_EQUAL;
+		}
+		return ComparisonKind.GREATER;
+	}
+	
+	private EqualityKind cs(m.m.EqualityKind kind)
+	{
+		switch(kind)
+		{
+		case EQUAL: return EqualityKind.EQUAL;
+		case NOT_EQUAL: return EqualityKind.NOT_EQUAL;
+		}
+		return EqualityKind.EQUAL;
+	}
+	
+	private AdditiveKind cs(m.m.AdditiveKind kind)
+	{
+		switch (kind)
+		{
+		case ADD: return AdditiveKind.ADD;
+		case SUBTRACT: return AdditiveKind.SUBTRACT;
+		default: return AdditiveKind.ADD;
+		}
+	}
+	
+	private MultiplicativeKind cs(m.m.MultiplicativeKind kind)
+	{
+		switch (kind)
+		{
+		case MULTIPLY: return MultiplicativeKind.MULTIPLY;
+		case DIVIDE: return MultiplicativeKind.DIVIDE;
+		default: return MultiplicativeKind.DIVIDE;
+		}
 	}
 	
 	private boolean isValueType(String component)
