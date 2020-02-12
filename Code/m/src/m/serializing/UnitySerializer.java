@@ -21,6 +21,13 @@ import m.JSONRuntimeModule;
 import m.YAMLRuntimeModule;
 import m.csharp.CompilationUnit;
 import m.csharp.CsharpFactory;
+import m.csharp.Field;
+import m.csharp.Modifier;
+import m.csharp.Namespace;
+import m.csharp.NamespaceUsing;
+import m.csharp.StaticUsing;
+import m.csharp.Struct;
+import m.csharp.Using;
 import m.json.JsonFactory;
 import m.json.Member;
 import m.m.AdditiveExpression;
@@ -111,6 +118,7 @@ public class UnitySerializer
 		
 		extras();
 		systemGroups();
+		inputSystem();
 	}
 	
 	private void packagesManifest()
@@ -159,12 +167,12 @@ public class UnitySerializer
 	
 	public void serialize(String component, Type type)
 	{
-		CompilationUnit unit = csharp.createCompilationUnit();
+		var unit = unit();
 		
 		var namespaces = new HashSet<String>();
 		namespaces.add("Unity.Entities");
 		
-		if (type.isNumeric())
+		if (type.isNumeric() || type == Type.bool)
 		{
 			if (type != float1)
 			{
@@ -1277,6 +1285,42 @@ public class UnitySerializer
 				
 				return cs;
 			}
+			else if (name.equals("x"))
+			{
+				var cs = modular.createAccessExpression();
+				var x = modular.createVariable();
+				cs.setLeft(cs(e.getArguments().get(0), querySet, namespaces));
+				cs.setRight(x);
+				x.setName("x");
+				return cs;
+			}
+			else if (name.equals("y"))
+			{
+				var cs = modular.createAccessExpression();
+				var x = modular.createVariable();
+				cs.setLeft(cs(e.getArguments().get(0), querySet, namespaces));
+				cs.setRight(x);
+				x.setName("y");
+				return cs;
+			}
+			else if (name.equals("z"))
+			{
+				var cs = modular.createAccessExpression();
+				var x = modular.createVariable();
+				cs.setLeft(cs(e.getArguments().get(0), querySet, namespaces));
+				cs.setRight(x);
+				x.setName("z");
+				return cs;
+			}
+			else if (name.equals("w"))
+			{
+				var cs = modular.createAccessExpression();
+				var x = modular.createVariable();
+				cs.setLeft(cs(e.getArguments().get(0), querySet, namespaces));
+				cs.setRight(x);
+				x.setName("w");
+				return cs;
+			}
 			else if (name.equals("empty"))
 			{
 				var set = cs(e.getArguments().get(0),querySet,namespaces);
@@ -1580,6 +1624,368 @@ public class UnitySerializer
 		engine.getSuperTypes().add("ComponentSystemGroup");
 		
 		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/SystemGroups.cs");
+	}
+	
+	private void inputSystem()
+	{
+		var unit = unit();
+		unit.getUsings().add(namespaceUsing("UnityEngine"));
+		unit.getUsings().add(namespaceUsing("UnityEngine.InputSystem"));
+		unit.getUsings().add(namespaceUsing("Unity.Entities"));
+		unit.getUsings().add(namespaceUsing("Unity.Jobs"));
+		
+		var clazz = csharp.createClass();
+		var attributeSection = csharp.createAttributeSection();
+		var attribute = csharp.createAttribute();
+		var typeof = csharp.createTypeof();
+		clazz.getAttributes().add(attributeSection);
+		attributeSection.getAttributes().add(attribute);
+		attribute.setName("UpdateInGroup");
+		attribute.getPositionalArguments().add(typeof);
+		typeof.setType("Engine");
+		unit.getTypes().add(clazz);
+		clazz.getModifiers().add(PUBLIC);
+		clazz.setName("Input");
+		clazz.getSuperTypes().add("JobComponentSystem");
+		
+		var onUpdate = csharp.createMethod();
+		var handleParameter = csharp.createParameter();
+		clazz.getMembers().add(onUpdate);
+		onUpdate.getModifiers().add(PROTECTED);
+		onUpdate.getModifiers().add(OVERRIDE);
+		onUpdate.setType("JobHandle");
+		onUpdate.setName("OnUpdate");
+		onUpdate.getParameters().add(handleParameter);
+		handleParameter.setType("JobHandle");
+		handleParameter.setName("inputDependencies");
+		
+		for (var component : MValidator.components.keySet())
+		{
+			if (MValidator.components.get(component) == input)
+			{
+				for (var valueComponent : MValidator.components.keySet())
+				{
+					if (valueComponent.equals(component+"Range"))
+					{
+						var runStatement = csharp.createExpressionStatement();
+						var run = modular.createAccessExpression();
+						var runCall = csharp.createParameterizedFunction();
+						var withoutBurst = modular.createAccessExpression();
+						var withoutBurstCall = csharp.createParameterizedFunction();
+						var foreach = modular.createAccessExpression();
+						var foreachCall = csharp.createParameterizedFunction();
+						var lambdaArgument = csharp.createArgument();
+						var lambda = csharp.createLambda();
+						var entities = modular.createVariable();
+						onUpdate.getStatements().add(runStatement);
+						runStatement.setExpression(run);
+						run.setLeft(withoutBurst);
+						run.setRight(runCall);
+						withoutBurst.setLeft(foreach);
+						withoutBurst.setRight(withoutBurstCall);
+						foreach.setLeft(entities);
+						foreach.setRight(foreachCall);
+						foreachCall.getArguments().add(lambdaArgument);
+						lambdaArgument.setValue(lambda);
+						entities.setName("Entities");
+						foreachCall.setName("ForEach");
+						withoutBurstCall.setName("WithoutBurst");
+						runCall.setName("Run");
+						
+						var inputParameter = csharp.createParameter();
+						var valueParameter = csharp.createParameter();
+						
+						lambda.getParameters().add(inputParameter);
+						lambda.getParameters().add(valueParameter);
+						inputParameter.setType(component);
+						inputParameter.setName(component);
+						valueParameter.setType(valueComponent);
+						valueParameter.setName(valueComponent);
+						valueParameter.setRef(true);
+						
+						var actionDeclaration = csharp.createDeclaration();
+						var actionDeclarator = csharp.createDeclarator();
+						var inputAccess = modular.createAccessExpression();
+						var inputLeft = modular.createVariable();
+						var inputRight = modular.createVariable();
+						lambda.getStatements().add(actionDeclaration);
+						inputAccess.setLeft(inputLeft);
+						inputAccess.setRight(inputRight);
+						actionDeclaration.getDeclarators().add(actionDeclarator);
+						actionDeclarator.setVariable("action");
+						actionDeclarator.setValue(inputAccess);
+						
+						inputLeft.setName(component);
+						inputRight.setName("Value");
+						
+						var enableStatement = csharp.createExpressionStatement();
+						var untilEnable = modular.createAccessExpression();
+						var left = modular.createVariable();
+						var right = csharp.createParameterizedFunction();
+						lambda.getStatements().add(enableStatement);
+						enableStatement.setExpression(untilEnable);
+						untilEnable.setLeft(left);
+						untilEnable.setRight(right);
+						left.setName("action");
+						right.setName("Enable");
+						
+						var assignmentStatement = csharp.createExpressionStatement();
+						var assignment = csharp.createAssignment();
+						var variable = modular.createAccessExpression();
+						var variableLeft = modular.createVariable();
+						var variableRight = modular.createVariable();
+						lambda.getStatements().add(assignmentStatement);
+						assignmentStatement.setExpression(assignment);
+						assignment.setLeft(variable);
+						variable.setLeft(variableLeft);
+						variable.setRight(variableRight);
+						variableLeft.setName(valueComponent);
+						variableRight.setName("Value");
+						
+						var read = modular.createAccessExpression();
+						var readLeft = modular.createVariable();
+						var readRight = csharp.createParameterizedFunction();
+						assignment.setRight(read);
+						read.setLeft(readLeft);
+						read.setRight(readRight);
+						readLeft.setName("action");
+						readRight.setName("ReadValue");
+						readRight.getTypes().add("float");
+					}
+					else if (valueComponent.equals(component+"Vector"))
+					{
+						var runStatement = csharp.createExpressionStatement();
+						var run = modular.createAccessExpression();
+						var runCall = csharp.createParameterizedFunction();
+						var withoutBurst = modular.createAccessExpression();
+						var withoutBurstCall = csharp.createParameterizedFunction();
+						var foreach = modular.createAccessExpression();
+						var foreachCall = csharp.createParameterizedFunction();
+						var lambdaArgument = csharp.createArgument();
+						var lambda = csharp.createLambda();
+						var entities = modular.createVariable();
+						onUpdate.getStatements().add(runStatement);
+						runStatement.setExpression(run);
+						run.setLeft(withoutBurst);
+						run.setRight(runCall);
+						withoutBurst.setLeft(foreach);
+						withoutBurst.setRight(withoutBurstCall);
+						foreach.setLeft(entities);
+						foreach.setRight(foreachCall);
+						foreachCall.getArguments().add(lambdaArgument);
+						lambdaArgument.setValue(lambda);
+						entities.setName("Entities");
+						foreachCall.setName("ForEach");
+						withoutBurstCall.setName("WithoutBurst");
+						runCall.setName("Run");
+						
+						var inputParameter = csharp.createParameter();
+						var valueParameter = csharp.createParameter();
+						
+						lambda.getParameters().add(inputParameter);
+						lambda.getParameters().add(valueParameter);
+						inputParameter.setType(component);
+						inputParameter.setName(component);
+						valueParameter.setType(valueComponent);
+						valueParameter.setName(valueComponent);
+						valueParameter.setRef(true);
+						
+						var actionDeclaration = csharp.createDeclaration();
+						var actionDeclarator = csharp.createDeclarator();
+						var inputAccess = modular.createAccessExpression();
+						var inputLeft = modular.createVariable();
+						var inputRight = modular.createVariable();
+						lambda.getStatements().add(actionDeclaration);
+						inputAccess.setLeft(inputLeft);
+						inputAccess.setRight(inputRight);
+						actionDeclaration.getDeclarators().add(actionDeclarator);
+						actionDeclarator.setVariable("action");
+						actionDeclarator.setValue(inputAccess);
+						
+						inputLeft.setName(component);
+						inputRight.setName("Value");
+						
+						var enableStatement = csharp.createExpressionStatement();
+						var untilEnable = modular.createAccessExpression();
+						var left = modular.createVariable();
+						var right = csharp.createParameterizedFunction();
+						lambda.getStatements().add(enableStatement);
+						enableStatement.setExpression(untilEnable);
+						untilEnable.setLeft(left);
+						untilEnable.setRight(right);
+						left.setName("action");
+						right.setName("Enable");
+						
+						var assignmentStatement = csharp.createExpressionStatement();
+						var assignment = csharp.createAssignment();
+						var variable = modular.createAccessExpression();
+						var variableLeft = modular.createVariable();
+						var variableRight = modular.createVariable();
+						lambda.getStatements().add(assignmentStatement);
+						assignmentStatement.setExpression(assignment);
+						assignment.setLeft(variable);
+						variable.setLeft(variableLeft);
+						variable.setRight(variableRight);
+						variableLeft.setName(valueComponent);
+						variableRight.setName("Value");
+						
+						var read = modular.createAccessExpression();
+						var readLeft = modular.createVariable();
+						var readRight = csharp.createParameterizedFunction();
+						assignment.setRight(read);
+						read.setLeft(readLeft);
+						read.setRight(readRight);
+						readLeft.setName("action");
+						readRight.setName("ReadValue");
+						readRight.getTypes().add("Vector2");
+					}
+					else if (valueComponent.equals(component+"Triggered"))
+					{
+						var runStatement = csharp.createExpressionStatement();
+						var run = modular.createAccessExpression();
+						var runCall = csharp.createParameterizedFunction();
+						var withoutBurst = modular.createAccessExpression();
+						var withoutBurstCall = csharp.createParameterizedFunction();
+						var foreach = modular.createAccessExpression();
+						var foreachCall = csharp.createParameterizedFunction();
+						var lambdaArgument = csharp.createArgument();
+						var lambda = csharp.createLambda();
+						var entities = modular.createVariable();
+						onUpdate.getStatements().add(runStatement);
+						runStatement.setExpression(run);
+						run.setLeft(withoutBurst);
+						run.setRight(runCall);
+						withoutBurst.setLeft(foreach);
+						withoutBurst.setRight(withoutBurstCall);
+						foreach.setLeft(entities);
+						foreach.setRight(foreachCall);
+						foreachCall.getArguments().add(lambdaArgument);
+						lambdaArgument.setValue(lambda);
+						entities.setName("Entities");
+						foreachCall.setName("ForEach");
+						withoutBurstCall.setName("WithoutBurst");
+						runCall.setName("Run");
+						
+						var inputParameter = csharp.createParameter();
+						var valueParameter = csharp.createParameter();
+						
+						lambda.getParameters().add(inputParameter);
+						lambda.getParameters().add(valueParameter);
+						inputParameter.setType(component);
+						inputParameter.setName(component);
+						valueParameter.setType(valueComponent);
+						valueParameter.setName(valueComponent);
+						valueParameter.setRef(true);
+						
+						var actionDeclaration = csharp.createDeclaration();
+						var actionDeclarator = csharp.createDeclarator();
+						var inputAccess = modular.createAccessExpression();
+						var inputLeft = modular.createVariable();
+						var inputRight = modular.createVariable();
+						lambda.getStatements().add(actionDeclaration);
+						inputAccess.setLeft(inputLeft);
+						inputAccess.setRight(inputRight);
+						actionDeclaration.getDeclarators().add(actionDeclarator);
+						actionDeclarator.setVariable("action");
+						actionDeclarator.setValue(inputAccess);
+						
+						inputLeft.setName(component);
+						inputRight.setName("Value");
+						
+						var enableStatement = csharp.createExpressionStatement();
+						var untilEnable = modular.createAccessExpression();
+						var left = modular.createVariable();
+						var right = csharp.createParameterizedFunction();
+						lambda.getStatements().add(enableStatement);
+						enableStatement.setExpression(untilEnable);
+						untilEnable.setLeft(left);
+						untilEnable.setRight(right);
+						left.setName("action");
+						right.setName("Enable");
+						
+						var assignmentStatement = csharp.createExpressionStatement();
+						var assignment = csharp.createAssignment();
+						var variable = modular.createAccessExpression();
+						var variableLeft = modular.createVariable();
+						var variableRight = modular.createVariable();
+						lambda.getStatements().add(assignmentStatement);
+						assignmentStatement.setExpression(assignment);
+						assignment.setLeft(variable);
+						variable.setLeft(variableLeft);
+						variable.setRight(variableRight);
+						variableLeft.setName(valueComponent);
+						variableRight.setName("Value");
+						
+						var equality = modular.createEquality();
+						var read = modular.createAccessExpression();
+						var readLeft = modular.createVariable();
+						var readRight = modular.createVariable();
+						var startedPhase = modular.createAccessExpression();
+						var enumeration = modular.createVariable();
+						var started = modular.createVariable();
+						equality.setLeft(read);
+						equality.setRight(startedPhase);
+						startedPhase.setLeft(enumeration);
+						startedPhase.setRight(started);
+						assignment.setRight(equality);
+						read.setLeft(readLeft);
+						read.setRight(readRight);
+						readLeft.setName("action");
+						readRight.setName("phase");
+						enumeration.setName("InputActionPhase");
+						started.setName("Started");
+					}
+				}
+			}
+		}
+		
+		
+		
+		var returnDefault = csharp.createReturn();
+		var defaultValue = csharp.createDefault();
+		onUpdate.getStatements().add(returnDefault);
+		returnDefault.setExpression(defaultValue);
+		
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/Input.cs");
+	}
+	
+	CompilationUnit unit ()
+	{
+		return csharp.createCompilationUnit();
+	}
+	
+	CompilationUnit addUsing(CompilationUnit unit, Using using)
+	{
+		unit.getUsings().add(using);
+		return unit;
+	}
+	
+	NamespaceUsing namespaceUsing(String namespace)
+	{
+		var using = csharp.createNamespaceUsing();
+		using.setNamespace(namespace);
+		return using;
+	}
+	
+	StaticUsing staticUsing(String namespace)
+	{
+		var using = csharp.createStaticUsing();
+		using.setNamespace(namespace);
+		return using;
+	}
+	
+	Namespace namespace(String name)
+	{
+		var namespace = csharp.createNamespace();
+		namespace.setName(name);
+		return namespace;
+	}
+	
+	Struct struct(String name)
+	{
+		var struct = csharp.createStruct();
+		struct.setName(name);
+		return struct;
 	}
 }
 
