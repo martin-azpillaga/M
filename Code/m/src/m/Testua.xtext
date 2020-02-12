@@ -1,7 +1,6 @@
 grammar m.Testua with m.M
 
 import "azpillaga.world/m"
-import "azpillaga.world/modular"
 
 @Override
 Game:
