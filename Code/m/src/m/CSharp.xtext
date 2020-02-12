@@ -4,98 +4,305 @@ import "azpillaga.world/modular"
 generate csharp "azpillaga.world/csharp"
 
 CompilationUnit:
+	externAliases+=ExternAlias*
+	globalAttributes+=GlobalAttribute*
 	usings+=Using*
 	types+=NamespaceMember*;
 
+ExternAlias:
+	'extern' 'alias' name=WORD ';';
+
+AttributeSection:
+	'[' (target=AttributeTarget ':')? 
+	attributes+=Attribute (',' attributes+=Attribute)* ']';
+
+GlobalAttribute returns AttributeSection:
+	'[' target=GlobalAttributeTarget ':' 
+	attributes+=Attribute (',' attributes+=Attribute)* ']';
+
+Attribute:
+	name=WORD
+	('(' 
+	(
+		positionalArguments+=LogicalOr (',' positionalArguments+=LogicalOr)*
+		(',' namedArguments+=NamedArgument (',' namedArguments+=NamedArgument)*)?
+		|
+		namedArguments+=NamedArgument (',' namedArguments+=NamedArgument)*
+	)?
+	')')?;
+
+NamedArgument:
+	name=WORD '=' expression=Expression;
+
 Using:
-	'using' name=QUALIFIEDNAME ';';
+	AliasUsing|NamespaceUsing|StaticUsing;
+
+AliasUsing:
+	'using' alias=WORD 
+	'=' namespace=QUALIFIEDTYPE ';';
+
+NamespaceUsing:
+	'using' namespace=QUALIFIEDTYPE ';';
+
+StaticUsing:
+	'using'	'static' namespace=QUALIFIEDTYPE ';';
 
 NamespaceMember:
-	NamespaceType|Enum;
-NamespaceType:
-	Struct|Class;
-Member:
-	NamespaceMember|Method|Field
-;
+	=>Namespace|=>Struct|=>Class|=>Enum|=>Interface|=>Delegate;
+
+Namespace:
+	'namespace' name=QUALIFIEDNAME 
+	'{' 
+	externAliases+=ExternAlias*
+	usings+=Using*
+	members+=NamespaceMember* 
+	'}' ';'?;
+
 Struct:
-	(annotations+=Annotation)*
-	 visibility=Visibility?
-	 'struct' name=TYPE
-	(':' superTypes+=TYPE (',' superTypes+=TYPE)*)?
-	 '{' members+=Member* '}'
-;
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	'struct' name=WORD
+	('<' typeParameters+=TypeParameter (',' typeParameters+=TypeParameter)* '>')?
+	(':' superTypes+=QUALIFIEDTYPE (',' superTypes+=QUALIFIEDTYPE)*)?
+	typeConstraints+=TypeConstraint*
+	'{' members+=Member* '}' ';'?;
 
 Class:
-	(annotations+=Annotation)*
-	 visibility=Visibility?
-	 sealed?='sealed'?
-	 static?='static'?
-	 'class' name=TYPE
-	(':' superTypes+=TYPE (',' superTypes+=TYPE)*)?
-	 '{' members+=Member* '}'
-;
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	'class' name=WORD
+	('<' typeParameters+=TypeParameter (',' typeParameters+=TypeParameter)* '>')?
+	(':' superTypes+=QUALIFIEDTYPE (',' superTypes+=QUALIFIEDTYPE)*)?
+	typeConstraints+=TypeConstraint*
+	'{' members+=Member* '}' ';'?;
 
 Enum:
-	(annotations+=Annotation)*
-	 visibility=Visibility?
-	 'enum' name=TYPE
-	 '{' (values+=WORD (',' values+=WORD)*)? '}'
-;
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	'enum' name=WORD
+	(':' base=WORD)?
+	'{' (values+=WORD (',' values+=WORD)*)? '}' ';'?;
 
-Method:
-	(annotations+=Annotation)*
-	 visibility=Visibility?
-	 implicit?='implicit'?
-	 opertor?='operator'?
-	 override?='override'?
-	 static?='static'?
-	 type=TYPE
-	 name=WORD
-	 '(' (arguments+=Argument (',' arguments+=Argument)*)? ')'
-	 '{' statements+=Statement*	'}';
+Interface:
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	'interface' name=WORD
+	('<' typeParameters+=TypeParameter (',' typeParameters+=TypeParameter)* '>')?
+	(':' superTypes+=QUALIFIEDTYPE (',' superTypes+=QUALIFIEDTYPE)*)?
+	typeConstraints+=TypeConstraint*
+	'{' members+=Member* '}' ';'?;
 
-Argument:
-	(annotations+=Annotation)*
-	ref?='ref'?
-	in?='in'?
-	type=TYPE
-	name=WORD;
+Delegate:
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	'delegate' returnType=QUALIFIEDTYPE
+	name=WORD
+	('<' typeParameters+=TypeParameter (',' typeParameters+=TypeParameter)* '>')?
+	'(' (parameters+=Parameter (','parameters+=Parameter)*)? ')'
+ 	typeConstraints+=TypeConstraint* ';';
+
+
+
+Member:
+	=>Struct|=>Class|=>Interface|=>Delegate|=>Enum|=>Field|=>Method|=>Constant|=>Property|=>Event|=>Indexer|=>Operator|=>Constructor|=>Destructor|=>StaticConstructor;
 
 Field:
-	(annotations+=Annotation)*
-	 visibility=Visibility?
-	 type=TYPE
-	 name=WORD ';'
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	type=QUALIFIEDTYPE
+	declarators+=Declarator (',' declarators+=Declarator)*
+	';';
+
+
+Method:
+	attributes+=AttributeSection*
+ 	modifiers+=Modifier*
+ 	type=QUALIFIEDTYPE
+ 	(memberName=QUALIFIEDTYPE '.')? name=WORD
+ 	('<' typeParameters+=TypeParameter (',' typeParameters+=TypeParameter)* '>')?
+ 	'(' (parameters+=Parameter (',' parameters+=Parameter)*)?')'
+ 	typeConstraints+=TypeConstraint*
+ 	(
+ 		'{' statements+=Statement*	'}' |
+ 		'=>' expression=Expression ';' |
+ 		empty?=';'
+ 	);
+
+Property:
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	type=QUALIFIEDTYPE
+	(memberName=WORD '.')? // Should be type
+	name=WORD
+	(
+		'{'
+			(
+				=>getter=Getter =>setter=Setter? |
+				=>setter=Setter =>getter=Getter?
+			)
+		'}'
+		('=' expression=Expression ';')?|
+		'=>' expression=Expression ';'
+	);
+
+Getter: {Getter}
+	attributes+=AttributeSection*
+	modifier=Modifier?
+	'get'
+	(
+	'{' statements+=Statement* '}'|
+	empty?=';'
+	)
 ;
 
-Annotation:
-	'[' values+=WORD (',' values+=WORD)* ']';
+Setter: {Setter}
+	attributes+=AttributeSection*
+	modifier=Modifier?
+	'set'
+	(
+	'{' statements+=Statement* '}'|
+	empty?=';'
+	)
+;
 
-@Override
-Expression:
-	LogicalOr ({InlineAssignment.left=current} kind=AssignmentKind right=LogicalOr)*;
 
-@Override
-UnaryMinus returns Expression:
-	UnaryPlus | {UnaryMinus} '-' expression=UnaryPlus;
+Event:
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	'event'
+	type=QUALIFIEDTYPE
+	(
+		declarators+=Declarator (',' declarators+=Declarator)*
+		';'
+		|
+		(memberName=WORD '.')?  // Should be type
+		name=WORD
+		'{' (=>add=Add remove=Remove|remove=Remove add=Add) '}'
+	)
+;
 
-UnaryPlus returns Expression:
-	PreDecrement | {UnaryPlus} '+' expression=PreDecrement;
+Add: {Add}
+	attributes+=AttributeSection*
+	'add'
+	'{' statements+=Statement* '}'
+;
 
-PreDecrement returns Expression:
-	PreIncrement | {PreDecrement} '--' expression=PreIncrement;
+Remove: {Remove}
+	attributes+=AttributeSection*
+	'remove'
+	'{' statements+=Statement* '}'
+;
 
-PreIncrement returns Expression:
-	Primary | {PreIncrement} '++' expression=Primary;
+Indexer:
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	type=QUALIFIEDTYPE
+	(interface=QUALIFIEDTYPE '.')?
+	'this'
+	'[' parameters+=Parameter (',' parameters+=Parameter)* ']'
+	(
+		'{' (=>getter=Getter setter=Setter | setter=Setter getter=Getter) '}'
+		|
+		'=>' expression=Expression ';'
+	)
+;
+
+Operator:
+	attributes+=AttributeSection*
+	modifiers+=OperatorModifier+
+	(
+		=>(type=QUALIFIEDTYPE 'operator' unaryOperator=UnaryOperator '(' firstType=QUALIFIEDTYPE firstName=WORD ')')|
+		=>(type=QUALIFIEDTYPE 'operator' binaryOperator=BinaryOperator '(' firstType=QUALIFIEDTYPE firstName=WORD ',' secondType=QUALIFIEDTYPE secondName=WORD ')')|
+		=>((implicit?='implicit'|explicit?='explicit') 'operator' type=TYPE '(' firstType=QUALIFIEDTYPE firstName=WORD ')') // Should be type
+	)
+	('{' statements+=Statement* '}'|'=>' expression=Expression ';'|empty?=';')
+;
+
+Constructor:
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	name=WORD
+	'(' (parameters+=Parameter (',' parameters+=Parameter)*)? ')'
+	(':' (base?='base'|'this') 
+	'(' (arguments+=Argument (',' arguments+=Argument)*)? ')')?
+	('{' statements+=Statement* '}'|empty?=';');
+
+StaticConstructor:
+	attributes+=AttributeSection*
+	(extern?='extern'? 'static'|'static' extern?='extern')
+	name=WORD
+	'(' ')'
+	('{' statements+=Statement* '}' | empty?=';')
+;
+Destructor:
+	attributes+=AttributeSection*
+	extern?='extern'?
+	'~'
+	name=WORD
+	'(' ')'
+	('{' statements+=Statement* '}'|empty?=';')
+;
+
+
+Constant:
+	attributes+=AttributeSection*
+	modifiers+=Modifier*
+	'const'
+	type=QUALIFIEDTYPE
+	declarators+=ConstantDeclarator (',' declarators+=ConstantDeclarator)*
+	';'
+;
+
+Declarator:
+	variable=WORD ('=' value=(Expression|ArrayInitializer))?;
+
+ConstantDeclarator returns Declarator:
+	variable=WORD '=' value=Expression;
+
+
+
+
+
+
+
+
+
+
 
 @Override
 Statement:
-	Selection | Iteration | FunctionCall | Assignment | For | Declaration | Return;
+	LabeledStatement|Foreach|For|Do|Iteration|Selection|Switch|=>Declaration|ExpressionStatement|Return|Yield|Break|Continue|Goto|EmptyStatement|Try
+	|Lock|Checked|Unchecked|Throw
+;
+
+LabeledStatement:
+	=>(label=WORD ':')
+	statement=Statement;
+
+EmptyStatement:{EmptyStatement}
+	';';
+
+Try:
+	'try'
+	'{' statements+=Statement* '}'
+	catches+=Catch+
+	(
+	'finally'
+	'{' finally+=Statement*	'}'
+	)?
+;
+
+Catch: {Catch}
+	'catch'
+	('(' type=QUALIFIEDTYPE variable=WORD? ')')?
+	('when' '(' filter=Expression ')')?
+	'{' statements+=Statement* '}'
+;
 
 @Override
 Iteration:
 	'while' '(' condition=Expression ')'
-	'{' statements+=Statement* '}';
+	('{' statements+=Statement* '}'|statements+=Statement);
 
 @Override
 Selection:
@@ -104,56 +311,242 @@ Selection:
 	('else' branches+=Block)?;
 
 @Override
-Branch:
+Branch returns Block: {Branch}
 	'(' condition=Expression ')'
-	'{' statements+=Statement* '}';
+	'{' statements+=Statement+ '}';
 
-For:
-	'for' '(' initialization=Assignment ';' condition=Expression ';' increment=Assignment ')'
-	'{'
-	statements+=Statement*
-	'}';
+Switch:
+	'switch' '(' expression=Expression ')'
+	'{' cases+=Case* '}'
+;
+Case: 
+	'case' condition=Expression ':'  statements+=Statement*|
+	{Case} 'default' ':' statements+=Statement*
+;
+For: {For}
+	'for' '(' initialization=Statement condition=Expression? ';' iterator=Expression? ')'
+	('{' statements+=Statement* '}'|statements+=Statement);
 
-@Override
+Foreach:
+	'foreach' '(' ('var'|type=QUALIFIEDTYPE) variable=WORD 'in' collection=Expression ')'
+	('{' statements+=Statement* '}'|statements+=Statement);
+
+Do:
+	'do'
+	'{' statements+=Statement* '}'
+	'while' '(' condition=Expression ')' ';'
+;
+
 Return:
 	'return' expression=Expression ';';
+Yield:
+	'yield' (break?='break'|'return' expression=Expression) ';'
+;
+Break: {Break}
+	'break'';'
+;
+Continue: {Continue}
+	'continue' ';'
+;
+Goto:
+	'goto' label=WORD|
+	'goto' 'case' case=Expression ';'|
+	'goto' default?='default' ';'
+;
+Throw:
+	'throw' expression=Expression ';';
+
+Checked: {Checked}
+	'checked'
+	('{' statements+=Statement* '}'|statements+=Statement);
+
+Unchecked: {Unchecked}
+	'unchecked'
+	('{' statements+=Statement* '}'|statements+=Statement);
+
+Lock:
+	'lock' '(' expression=Expression ')'
+	('{' statements+=Statement* '}'|statements+=Statement);
+
+Lambda returns Expression: {Lambda}
+	'(' (parameters+=Parameter (',' parameters+=Parameter)*)? ')' '=>' '{' statements+=Statement* '}';
+
+ArrayInitializer returns Expression: {ArrayInitializer}
+	'{' 
+	(variables+=(Expression|ArrayInitializer) (',' variables+=(Expression|ArrayInitializer))* 
+	','? )? '}'
+;
+
+@Override
+LogicalOr returns Expression:
+  LogicalAnd ({LogicalOr.left=current}  '||' right=LogicalAnd)*;
+
+@Override
+LogicalAnd returns Expression:
+  Equality ({LogicalAnd.left=current}  '&&' right=Equality)*;
+
+@Override
+LogicalNot returns Expression: {LogicalNot} 
+	'!' expression=Atomic;
+
+Atomic returns Expression:
+	=>FloatLiteral |
+	=>StringLiteral |
+	=>BooleanLiteral |
+	=>ParameterizedFunction|
+	=>Variable|
+	=>Creation|
+	=>Index|
+	=>This|
+	=>Base|
+	=>Default|
+	=>Typeof|
+	=>LogicalNot|
+	=>Brackets
+;
+
+This returns Expression: {This} 'this';
+Base returns Expression: {Base} 'base';
+Default returns Expression: {Default} 'default';
+Typeof returns Expression: {Typeof}
+	(
+	'typeof' '(' type=WORD ')'|
+	'typeof' '(' unboundType=QUALIFIEDTYPE '<' dimensions+=','* '>' ')'
+	);
+
+Creation returns Expression: {Creation}
+	'new' type=TYPE // Should be qualifiedType
+	((
+		(
+			=>('{' (members+=MemberInitializer (',' members+=MemberInitializer)*)? '}')
+			|
+			=>('{' elements+=LogicalOr (',' elements+=LogicalOr)* '}')
+		)
+	)|(
+		'(' (arguments+=Argument (',' arguments+=Argument)*)? ')'
+		(
+			=>('{' (members+=MemberInitializer (',' members+=MemberInitializer)*)? '}')
+			|
+			=>('{' elements+=LogicalOr (',' elements+=LogicalOr)* '}')
+		)?
+	))
+;
+
+MemberInitializer:
+	name=WORD '=' value=Expression|
+	'[' indices+=Expression (',' indices+=Expression)* ']' '=' value=Expression
+;
+
+ParameterizedFunction returns Expression: {ParameterizedFunction}
+	name=WORD
+	('<' types+=QUALIFIEDTYPE (',' types+=QUALIFIEDTYPE)* '>')?
+	'(' (arguments+=Argument (',' arguments+=Argument)*)? ')'
+;
+
+Argument:
+	(name=WORD':')?
+	(
+		value=Expression
+		|ref?='ref' value=Variable
+		|out?='out' value=Variable
+	)
+;
+
+Index:
+	name=WORD
+	'[' indices+=Expression (',' indices+=Expression)* ']'
+;
 
 Declaration:
-	(var?='var' | type=TYPE) variable=Access 
-	(assignmentType=AssignmentKind expression=Expression)? ';';
-	
-@Override
-Assignment:
-	variable=Access kind=AssignmentKind expression=Expression ';'
+	('var'|constant?='const'? type=QUALIFIEDTYPE) declarators+=Declarator+ ';';
+
+
+ExpressionStatement:
+	expression=Expression ';'
 ;
 
 @Override
-FunctionCall:
-	function=WORD
-	'(' (parameters+=Expression (',' parameters+=Expression)*)? ')' ';';
+Expression:
+	=>Lambda|Assignment
+;
 
-Lambda: {Lambda}
-	'(' (arguments+=Argument (',' arguments+=Argument)*)? ')' '=>' '{' statements+=Statement* '}';
+Assignment returns Expression:
+	Ternary ({Assignment.left=current} kind=AssignmentKind right=Ternary)*;
 
-Index: identifier=WORD  '[' (parameters+=Expression ( ',' parameters+=Expression)*)?  ']';
+Ternary returns Expression:
+	NullCoalescing ({Ternary.left=current} '?' yes=NullCoalescing ':' no=NullCoalescing)*;
+
+NullCoalescing returns Expression:
+	LogicalOr ({NullCoalescing.left=current} '??' right=LogicalOr)*;
 
 @Override
-Primary returns Expression: 
-	FloatLiteral |
-	StringLiteral |
-	BooleanLiteral |
-	Access|
-	FunctionCall|
-	Index|
-	'(' Expression ')'
+MultiplicativeExpression returns Expression:
+	AccessExpression ({MultiplicativeExpression.left=current}  kind=MultiplicativeKind right=AccessExpression)*;
+
+@Override
+AccessExpression returns Expression:
+	Postfix ({AccessExpression.left=current} '.' right=Postfix)*;
+
+Postfix returns Expression:
+	Atomic (({Increment.expression=current} '++')|({Decrement.expression=current} '--'))?
 ;
+
+Parameter:
+	attributes+=AttributeSection*
+	(ref?='ref'|out?='out'|this?='this')?
+	params?='params'?
+	type=QUALIFIEDTYPE
+	name=WORD
+	('=' default=Expression)?;
+
+TypeParameter: 
+	attributes+=AttributeSection* 
+	name=WORD;
+
+TypeConstraint:
+	'where' type=WORD
+	':' 
+	(
+		(class?='class'|struct?='struct') (',' constructor?='new' '(' ')')? |
+		(class?='class'|struct?='struct') (',' superTypes+=QUALIFIEDTYPE)+ (',' constructor?='new' '(' ')')? |
+		superTypes+=QUALIFIEDTYPE (',' superTypes+=QUALIFIEDTYPE)* (',' constructor?='new' '(' ')')? |
+		constructor?='new' '(' ')'		
+	);
 
 QUALIFIEDNAME: WORD ('.' WORD)*;
 
-TYPE: WORD ('<' WORD (',' WORD)* '>')?;
-	
-enum Visibility: default|public|protected|private;
+TYPE:
+	WORD ('<' TYPE (',' TYPE)* '>')? ('[' ','* ']')?
+;
+QUALIFIEDTYPE:
+	TYPE ('.' TYPE)*
+	|
+	WORD '::' TYPE ('.' TYPE)*
+;
+
+enum Modifier:
+	new|public|protected|internal|private|static|virtual|sealed|override|abstract|extern|async|unsafe|partial|readonly|volatile;
+
+enum UnaryOperator:
+	plus='+'|minus='-'|not='!'|bitwiseNot='~'|increment='++'|decrement='--'|t='true'|f='false';
+enum BinaryOperator:
+	plus='+'|minus='-'|times='*'|divide='/'|remainder='%'|bitwiseAnd='&'|bitwiseOr='|'|bitwiseXor='^'|leftShift='<<'|rightShift='>>'|equal='=='|notEqual='!='|greater='>'|greaterOrEqual='>='|lower='<'|lowerOrEqual='<='
+;
+enum OperatorModifier:
+	public|static|extern|unsafe
+;
+
+enum GlobalAttributeTarget returns AttributeTarget:
+	assembly|module;
+
+enum AttributeTarget:
+	field|event|method|param|property|return|type;
+
+FloatLiteral returns Expression: {FloatLiteral}	value=NUMBER;
+StringLiteral returns Expression: {StringLiteral} value=STRING;
+BooleanLiteral returns Expression: {BooleanLiteral}	value=BOOLEAN;
+BOOLEAN: 'true'|'false';
+terminal STRING: '"' -> '"';
 
 terminal MULTIPLE_LINES_COMMENT: '/*'->'*/ ';
-
 terminal SINGLE_LINE_COMMENT: '//' !('\n' | '\r')* ('\r'? '\n')?;

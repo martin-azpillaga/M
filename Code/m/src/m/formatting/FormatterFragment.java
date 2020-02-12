@@ -22,5 +22,9 @@ public class FormatterFragment extends AbstractXtextGeneratorFragment
 		{
 			bindingFactory.addTypeToType(TypeReference.typeRef(IFormatter2.class), TypeReference.typeRef(CSharpFormat.class)).contributeTo(getLanguage().getRuntimeGenModule());
 		}
+		else if (grammar.equals("m.YAML"))
+		{
+			bindingFactory.addTypeToType(TypeReference.typeRef(IFormatter2.class), TypeReference.typeRef(YAMLFormat.class)).contributeTo(getLanguage().getRuntimeGenModule());
+		}
 	}
 }

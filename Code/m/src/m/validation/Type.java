@@ -18,4 +18,10 @@ public enum Type
 	{
 		return this == entityList;
 	}
+	
+	public boolean isValueType()
+	{
+		return this == tag || this == float1 || this == float2 || this == float3 || this == float4 || 
+				this == material || this == mesh || this == entity || this == entityList || this == bool;
+	}
 }

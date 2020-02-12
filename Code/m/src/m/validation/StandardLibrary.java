@@ -1,6 +1,8 @@
 package m.validation;
 
 import static m.validation.Type.*;
+
+import java.util.HashSet;
 public enum StandardLibrary 
 {
 	// Input works with magic components
@@ -8,103 +10,95 @@ public enum StandardLibrary
 	// Timers work with magic components
 	// XTotal, XElapsed and XTimeout
 	// Transform
-	position,rotation,scale,
+	position(float3, "Unity.Transforms", "Translation", "Value", true),
+	rotation(float4, "Unity.Transforms", "Rotation", "Value", true),
+	scale(float3, "Unity.Transforms", "NonUniformScale", "Value", true),
 	// Rendering 3D
-	mesh,material,
+	mesh(Type.mesh, "Unity.Hybrid.Rendering", "RenderMesh", "mesh", true),
+	material(Type.material, "Unity.Hybrid.Rendering", "RenderMesh", "material", true),
 	// Rendering UI
-	font,text,image,button,number,
+	font(Type.font, "UnityEngine.UI", "Text", "font", false),
+	text(Type.text, "UnityEngine.UI", "Text", "text", false),
+	image(Type.image, "UnityEngine.UI", "Image", "source", false),
+	button(tag, "UnityEngine.UI", "Button", "active", false),
+	number(float1, "UnityEngine.UI", "Text", "text", false),
 	// Rendering camera
-	viewAngle, viewDistance, clearColor, perspective,
+	viewAngle(float1, "UnityEngine", "Camera", "viewAngle", false),
+	viewDistance(float1, "UnityEngine", "Camera", "farClipPlane", false),
+	clearColor(float3, "UnityEngine", "Camera", "backgroundColor", false),
+	perspective(tag, "UnityEngine", "Camera", "isOrthographic", false),
 	// Rendering lights
-	emission, spotAngle, range, intensity, shadows, cookie,
+	emission(float4, "UnityEngine", "Light", "color", false),
+	spotAngle(float1, "UnityEngine", "Light", "spotAngle", false),
+	range(float1, "UnityEngine", "Light", "range", false),
+	intensity(float1, "UnityEngine", "Light", "intensity", false),
+	shadows(tag, "UnityEngine", "Light", "castShadows", false),
+	cookie(Type.image, "UnityEngine", "Light", "cookie", false),
 	// Audio control
-	audioClip, volume, pitch, loop,
+	audioClip(Type.audioClip, "UnityEngine", "AudioSource", "clip", false),
+	volume(float1, "UnityEngine", "AudioSource", "volume", false),
+	pitch(float1, "UnityEngine", "AudioSource", "pitch", false),
+	loop(tag, "UnityEngine", "AudioSource", "loop", false),
 	// Audio effects
-	distortion, echo, highPass, lowPass, reverb, delay, doppler,
+	distortion(float1, "UnityEngine", "AudioDistortionFilter", "value", false),
+	echo(float1, "UnityEngine", "AudioReverbFilter", "echo", false),
+	highPass(float1, "UnityEngine", "AudioHighPassFilter", "value", false),
+	lowPass(float1, "UnityEngine", "AudioLowPassFilter", "value", false),
+	reverb(float1, "UnityEngine", "AudioReverbFilter", "value", false),
+	chorus(float1, "UnityEngine", "AudioChorusFilter", "value", false),
+	doppler(float1, "UnityEngine", "AudioSource", "dopplerEffect", false),
 	// Network components
-	ip,port,networkStream,prediction,owner,
+	ip(float4, null, "port", "Value", true),
+	port(float1, null, "port", "Value", true),
+	networkStream(tag, null, "networkStream", null, true),
+	prediction(tag, null, "prediction", null, true),
+	owner(float1, null, "owner", "Value", true),
 	// Network synchronization happens with magic component names
 	// X_Server to send to the server, X_Client to send to client
 	// Physics body
-	mass,velocity,acceleration,force,
-	damping,angularDamping,angularVelocity,gravityFactor,
+	mass(float1, "Unity.Physics", "PhysicsMass", "value", true),
+	velocity(float3, "Unity.Physics",  "PhysicsVelocity", "Linear", true),
+	acceleration(float3, "Unity.Physics", null, null, false),
+	force(float3, "Unity.Physics", null, null, false),
+	damping(float1, "Unity.Physics", "PhysicsCollider", null, true),
+	angularDamping(float1, "Unity.Physics", "PhysicsCollider", null, true),
+	angularVelocity(float3, "Unity.Physics", "PhysicsVelocity", "Angular", true),
+	gravityFactor(float1, "Unity.Physics", "GravityFactor", "Value", true),
 	// Physics shape
-	trigger,extents,radius,height,sideCount,convexHull,geometry,
-	restitution,friction,
+	trigger(tag, "Unity.Physics", "PhysicsCollider", null, true),
+	extents(float3, "Unity.Physics", "PhysicsCollider", null, true),
+	radius(float1, "Unity.Physics", "PhysicsCollider", null, true),
+	height(float1, "Unity.Physics", "PhysicsCollider", null, true),
+	sideCount(float1, "Unity.Physics", "PhysicsCollider", null, true),
+	convexHull(tag, "Unity.Physics", "PhysicsCollider", null, true),
+	geometry(tag, "Unity.Physics", "PhysicsCollider", null, true),
+	restitution(float1, "Unity.Physics", "PhysicsCollider", null, true),
+	friction(float1, "Unity.Physics", "PhysicsCollider", null, true),
 	// Physics events
-	collisions, collisionEntries, collisionExits,
+	collisions(entityList, null, "Collisions", "Value", true),
+	collisionEntries(entityList, null, "CollisionEntries", "Value", true),
+	collisionExits(entityList, null, "CollisionExits", "Value", true),
 	// Animation
-	stateMachine,
+	stateMachine(Type.stateMachine, "UnityEngine", "Animator", "Controller", false),
 	// Animation with magic components
 	// XTransition puts the trigger on stateMachine to on/off
 	// AI planner
-	plan;
+	plan(tag, "UnityEngine.AI", "AIPlanner", null, false);
 	// AI planner with magic components
 	// XChosen set to true if the planner chose X this frame.
 	
-	public Type getType()
+	public final Type type;
+	public final String namespace;
+	public final String unityType;
+	public final String unityField;
+	public final boolean isValueType;
+	
+	StandardLibrary(Type type, String namespace, String unityType, String unityField, boolean isValueType)
 	{
-		switch (this)
-		{
-			case button: return tag;
-			case font: return Type.font;
-			case friction: return float1;
-			case image: return Type.image;
-			case mass: return float1;
-			case material: return Type.material;
-			case mesh: return Type.mesh;
-			case position: return float3;
-			case restitution: return float1;
-			case rotation: return float4;
-			case scale: return float3;
-			case text: return Type.text;
-			case velocity: return Type.float3;
-			case acceleration: return Type.float3;
-			case force: return Type.float3;
-			case number: return Type.float1;
-			case trigger: return tag;
-			case extents: return float3;
-			case radius: return float1;
-			case viewAngle: return float1;
-			case viewDistance: return float1;
-			case clearColor: return float4;
-			case perspective: return tag;
-			case emission: return float4;
-			case spotAngle: return float1;
-			case range: return float1;
-			case intensity: return float1;
-			case shadows: return float1;
-			case cookie: return Type.image;
-			case audioClip: return Type.audioClip;
-			case volume: return float1;
-			case pitch: return float1;
-			case loop: return tag;
-			case distortion: return float1;
-			case echo: return float1;
-			case highPass: return float1;
-			case lowPass: return float1;
-			case reverb: return float1;
-			case delay: return float1;
-			case doppler: return float1;
-			case angularDamping: return float1;
-			case angularVelocity: return float3;
-			case damping: return float1;
-			case gravityFactor: return float1;
-			case convexHull: return float1;
-			case geometry: return Type.mesh;
-			case height: return float1;
-			case sideCount: return float1;
-			case collisions: return entityList;
-			case collisionEntries: return entityList;
-			case collisionExits: return entityList;
-			case ip: return float4;
-			case port: return float1;
-			case networkStream: return tag;
-			case owner: return float1;
-			case prediction: return tag;
-			case plan: return tag;
-			case stateMachine: return Type.stateMachine;
-		}
-		return none;
+		this.type = type;
+		this.namespace = namespace;
+		this.unityType = unityType;
+		this.unityField = unityField;
+		this.isValueType = isValueType;
 	}
 }
