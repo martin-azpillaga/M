@@ -1,9 +1,8 @@
-package m.validation;
+package m.library;
 
-import static m.validation.Type.*;
+import static m.library.SimpleType.*;
 
-import java.util.HashSet;
-public enum StandardLibrary 
+public enum Component 
 {
 	// Input works with magic components
 	// XTrigger, XRange and XVector
@@ -14,12 +13,12 @@ public enum StandardLibrary
 	rotation(float4, "Unity.Transforms", "Rotation", "Value", true),
 	scale(float3, "Unity.Transforms", "NonUniformScale", "Value", true),
 	// Rendering 3D
-	mesh(Type.mesh, "Unity.Hybrid.Rendering", "RenderMesh", "mesh", true),
-	material(Type.material, "Unity.Hybrid.Rendering", "RenderMesh", "material", true),
+	mesh(SimpleType.mesh, "Unity.Hybrid.Rendering", "RenderMesh", "mesh", true),
+	material(SimpleType.material, "Unity.Hybrid.Rendering", "RenderMesh", "material", true),
 	// Rendering UI
-	font(Type.font, "UnityEngine.UI", "Text", "font", false),
-	text(Type.text, "UnityEngine.UI", "Text", "text", false),
-	image(Type.image, "UnityEngine.UI", "Image", "source", false),
+	font(SimpleType.font, "UnityEngine.UI", "Text", "font", false),
+	text(SimpleType.text, "UnityEngine.UI", "Text", "text", false),
+	image(SimpleType.image, "UnityEngine.UI", "Image", "source", false),
 	button(tag, "UnityEngine.UI", "Button", "active", false),
 	number(float1, "UnityEngine.UI", "Text", "text", false),
 	// Rendering camera
@@ -33,9 +32,9 @@ public enum StandardLibrary
 	range(float1, "UnityEngine", "Light", "range", false),
 	intensity(float1, "UnityEngine", "Light", "intensity", false),
 	shadows(tag, "UnityEngine", "Light", "castShadows", false),
-	cookie(Type.image, "UnityEngine", "Light", "cookie", false),
+	cookie(SimpleType.image, "UnityEngine", "Light", "cookie", false),
 	// Audio control
-	audioClip(Type.audioClip, "UnityEngine", "AudioSource", "clip", false),
+	audioClip(SimpleType.audioClip, "UnityEngine", "AudioSource", "clip", false),
 	volume(float1, "UnityEngine", "AudioSource", "volume", false),
 	pitch(float1, "UnityEngine", "AudioSource", "pitch", false),
 	loop(tag, "UnityEngine", "AudioSource", "loop", false),
@@ -79,7 +78,7 @@ public enum StandardLibrary
 	collisionEntries(entityList, null, "CollisionEntries", "Value", true),
 	collisionExits(entityList, null, "CollisionExits", "Value", true),
 	// Animation
-	stateMachine(Type.stateMachine, "UnityEngine", "Animator", "Controller", false),
+	stateMachine(SimpleType.stateMachine, "UnityEngine", "Animator", "Controller", false),
 	// Animation with magic components
 	// XTransition puts the trigger on stateMachine to on/off
 	// AI planner
@@ -87,13 +86,13 @@ public enum StandardLibrary
 	// AI planner with magic components
 	// XChosen set to true if the planner chose X this frame.
 	
-	public final Type type;
+	public final SimpleType type;
 	public final String namespace;
 	public final String unityType;
 	public final String unityField;
 	public final boolean isValueType;
 	
-	StandardLibrary(Type type, String namespace, String unityType, String unityField, boolean isValueType)
+	Component(SimpleType type, String namespace, String unityType, String unityField, boolean isValueType)
 	{
 		this.type = type;
 		this.namespace = namespace;
