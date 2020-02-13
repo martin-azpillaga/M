@@ -1,6 +1,9 @@
 package m.validation;
 
-import static m.validation.Type.*;
+import m.library.Component;
+import m.library.SimpleType;
+import m.library.Type;
+import static m.library.SimpleType.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,6 +45,7 @@ import m.m.Comparison;
 import m.m.ComponentAccess;
 import m.m.End;
 import m.m.Equality;
+import m.library.Type;
 
 import static m.m.MPackage.Literals.*;
 
@@ -49,7 +53,7 @@ import static m.m.MPackage.Literals.*;
 public class MValidator extends AbstractMValidator 
 {
 	public static HashMap<Expression,Type> expressions;
-	public static HashMap<String,Type> components;
+	public static HashMap<String,SimpleType> components;
 	public static HashMap<String,Type> variables;
 	public static ArrayList<ArrayList<Expression>> groups;
 
@@ -317,7 +321,7 @@ public class MValidator extends AbstractMValidator
 		variables = new HashMap<>();
 		expressions = new HashMap<>();
 		groups = new ArrayList<>();
-		for (var entry : StandardLibrary.values())
+		for (var entry : Component.values())
 		{
 			components.put(entry.toString(), entry.type);
 		}
@@ -354,7 +358,7 @@ public class MValidator extends AbstractMValidator
 		}
 	}
 	
-	private void setComponent(String name, Type type, EObject obj, EStructuralFeature feature)
+	private void setComponent(String name, SimpleType type, EObject obj, EStructuralFeature feature)
 	{
 		if (components.containsKey(name))
 		{
@@ -404,7 +408,7 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	
-	private boolean set(ComponentAccess access, Type type)
+	private boolean set(ComponentAccess access, SimpleType type)
 	{
 		var component = access.getComponent();
 		if (components.containsKey(component))
@@ -422,7 +426,7 @@ public class MValidator extends AbstractMValidator
 		return false;
 	}
 	
-	private void set(Expression expression, Type type)
+	private boolean set(Expression expression, Type type)
 	{
 		if (expressions.containsKey(expression))
 		{
@@ -434,7 +438,9 @@ public class MValidator extends AbstractMValidator
 		else
 		{
 			expressions.put(expression, type);
+			return true;
 		}
+		return false;
 	}
 	
 	
@@ -478,7 +484,7 @@ public class MValidator extends AbstractMValidator
 		magic(component,"Transition", bool, none, access, feature);
 	}
 	*/
-	private void magic(String component, String word, Type original, Type magic, EObject access, EStructuralFeature feature)
+	private void magic(String component, String word, SimpleType original, SimpleType magic, EObject access, EStructuralFeature feature)
 	{
 		if (component.endsWith(word))
 		{
