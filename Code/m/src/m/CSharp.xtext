@@ -390,13 +390,13 @@ LogicalNot returns Expression: {LogicalNot}
 	'!' expression=Atomic;
 
 Atomic returns Expression:
+	=>Index|
 	=>FloatLiteral |
 	=>StringLiteral |
 	=>BooleanLiteral |
 	=>ParameterizedFunction|
 	=>Variable|
 	=>Creation|
-	=>Index|
 	=>This|
 	=>Base|
 	=>Default|
