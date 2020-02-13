@@ -267,6 +267,8 @@ public class MValidator extends AbstractMValidator
 	public void existsBase(Archetype archetype)
 	{
 		var base = archetype.getBase();
+		if (base == null) return;
+		
 		var module = (Game) archetype.eContainer();
 		for (var e : module.getArchetypes())
 		{
@@ -302,14 +304,7 @@ public class MValidator extends AbstractMValidator
 					else
 					{
 						visited.add(e.getName());
-						if (e instanceof Archetype)
-						{
-							base = ((Archetype) e).getBase();
-						}
-						else
-						{
-							base = null;
-						}
+						base = e.getBase();
 					}
 				}
 			}
