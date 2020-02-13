@@ -20,7 +20,7 @@ System:
 
 
 Statement:
-	Assignment|Function|Selection|Iteration|Forall;
+	Assignment|Call|Selection|Iteration|Forall;
 
 Selection:
 	 '→'condition=Expression
@@ -32,12 +32,15 @@ Iteration:
 	'['	(statements+=Statement (','? statements+=Statement)*)? ']';
 
 Forall:
-	 '∀' variable=WORD ('|' conditiion=Expression)?
+	 '∀' variable=WORD ('|' condition=Expression)?
 	'['	(statements+=Statement (','? statements+=Statement)*)? ']';
 
 Assignment:
-	variable=(Variable|ComponentAccess)
+	atom=Atom
 	'≔' expression=Expression;
+
+Call:
+	function=Function;
 
 
 
@@ -60,47 +63,47 @@ MultiplicativeExpression returns Expression:
 	SetExpression ({MultiplicativeExpression.left=current}  kind=MultiplicativeKind right=SetExpression)*;
 
 SetExpression returns Expression:
-	ConcatenateExpression ({SetExpression.left=current} kind=SetKind right=ConcatenateExpression)*;
-
-ConcatenateExpression returns Expression:
-	Primary ({ConcatenateExpression.left=current} '~' right=Primary)*;
-
+	Primary ({SetExpression.left=current} kind=SetKind right=Primary)*;
 
 
 Primary returns Expression:
-	=>Function|=>Atom|=>ImplicitSet|ExplicitSet|LogicalNot|Brackets|Cardinal|Join;
+	=>Function|Atom|Collection|Cardinal|LogicalNot;
 
-Function returns Expression: {Function}
+Function:
 	name=WORD
 	'[' (arguments+=Expression (','? arguments+=Expression)*)? ']';
 
-Brackets returns Expression: {Brackets}
-	'(' expression=Expression ')';
-
-LogicalNot returns Expression: {LogicalNot} 
+LogicalNot:
 	'¬' expression=Primary;
 
-Cardinal returns Expression: {Cardinal}
+Cardinal:
 	'#' expression=Primary;
 
-Join returns Expression: {Join}
+
+Collection:
+	Brackets|Join|ImplicitSet|ExplicitSet;
+
+Brackets:
+	'(' expression=Expression ')';
+
+Join:
 	'[' entries+=Expression (','? entries+=Expression)+ ']';
 
-ImplicitSet returns Expression: {ImplicitSet}
+ImplicitSet:
 	'{' variable=WORD '|' predicate=Expression '}';
 
-ExplicitSet returns Expression: {ExplicitSet}
+ExplicitSet: {ExplicitSet}
 	'{' (elements+=Expression (','? elements+=Expression)*)? '}';
 
 
 
-Atom returns Expression:
-	=>ComponentAccess|Variable;
+Atom:
+	=>Cell|Variable;
 
-Variable returns Expression: {Variable}
+Variable:
 	name=WORD;
 
-ComponentAccess returns Expression: {ComponentAccess}
+Cell:
 	entity=WORD '.' component=WORD;
 
 

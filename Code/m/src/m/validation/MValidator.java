@@ -41,8 +41,8 @@ import m.m.LogicalOr;
 import m.m.System;
 import m.m.Variable;
 import m.m.Assignment;
+import m.m.Cell;
 import m.m.Comparison;
-import m.m.ComponentAccess;
 import m.m.End;
 import m.m.Equality;
 import m.library.Type;
@@ -116,7 +116,7 @@ public class MValidator extends AbstractMValidator
 		
 		if (amount > 1)
 		{
-			error("Repeated procedure",SYSTEM__NAME);
+			error("Repeated procedure",ARCHETYPE__NAME);
 		}
 	}
 	
@@ -267,18 +267,15 @@ public class MValidator extends AbstractMValidator
 	public void existsBase(Archetype archetype)
 	{
 		var base = archetype.getBase();
-		if (base != null)
+		var module = (Game) archetype.eContainer();
+		for (var e : module.getArchetypes())
 		{
-			var module = (Game) archetype.eContainer();
-			for (var e : module.getArchetypes())
+			if (e.getName().equals(base))
 			{
-				if (e.getName().equals(base))
-				{
-					return;
-				}
+				return;
 			}
-			error("The base entity is not declared in this module", ARCHETYPE__BASE);
 		}
+		error("The base entity is not declared in this module", ARCHETYPE__NAME);
 	}
 	
 	@Check
@@ -299,13 +296,20 @@ public class MValidator extends AbstractMValidator
 				{
 					if (visited.contains(e.getName()))
 					{
-						error("Cyclic base entity dependency", ARCHETYPE__BASE);
+						error("Cyclic base entity dependency", ARCHETYPE__NAME);
 						return;
 					}
 					else
 					{
 						visited.add(e.getName());
-						base = e.getBase();
+						if (e instanceof Archetype)
+						{
+							base = ((Archetype) e).getBase();
+						}
+						else
+						{
+							base = null;
+						}
 					}
 				}
 			}
@@ -408,14 +412,14 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	
-	private boolean set(ComponentAccess access, SimpleType type)
+	private boolean set(Cell access, SimpleType type)
 	{
 		var component = access.getComponent();
 		if (components.containsKey(component))
 		{
 			if (components.get(component) != type)
 			{
-				error("Type conflict: This variable cannot be " + components.get(component) + " and " + type, access, COMPONENT_ACCESS__ENTITY);
+				error("Type conflict: This variable cannot be " + components.get(component) + " and " + type, access, CELL__ENTITY);
 			}
 		}
 		else
@@ -649,7 +653,7 @@ public class MValidator extends AbstractMValidator
 	@Check
 	public void infer(Assignment assignment)
 	{
-		var left = assignment.getVariable();
+		var left = assignment.getAtom();
 		var right = assignment.getExpression();
 		group(left,right);
 	}
@@ -852,9 +856,9 @@ public class MValidator extends AbstractMValidator
 		{
 			for (var expression : group)
 			{
-				if (expression instanceof ComponentAccess)
+				if (expression instanceof Cell)
 				{
-					warning("Type undecidable", expression, COMPONENT_ACCESS__COMPONENT);
+					warning("Type undecidable", expression, CELL__COMPONENT);
 				}
 			}
 		}
@@ -914,9 +918,9 @@ public class MValidator extends AbstractMValidator
 							break;
 						}
 					}
-					else if (expression instanceof ComponentAccess)
+					else if (expression instanceof Cell)
 					{
-						var access = (ComponentAccess) expression;
+						var access = (Cell) expression;
 						var component = access.getComponent();
 						if (components.containsKey(component))
 						{
@@ -945,9 +949,9 @@ public class MValidator extends AbstractMValidator
 						repeat = true;
 					}
 				}
-				else if (expression instanceof ComponentAccess)
+				else if (expression instanceof Cell)
 				{
-					var access = (ComponentAccess) expression;
+					var access = (Cell) expression;
 					if (set(access, expressions.get(expression)))
 					{
 						repeat = true;
