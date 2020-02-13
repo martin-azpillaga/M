@@ -3,10 +3,7 @@ package m.serializing;
 import static m.csharp.Modifier.OVERRIDE;
 import static m.csharp.Modifier.PROTECTED;
 import static m.csharp.Modifier.PUBLIC;
-import static m.validation.Type.entityList;
-import static m.validation.Type.float1;
-import static m.validation.Type.input;
-import static m.validation.Type.tag;
+import static m.library.SimpleType.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -76,8 +73,9 @@ import m.modular.EqualityKind;
 import m.modular.ModularFactory;
 import m.modular.MultiplicativeKind;
 import m.validation.MValidator;
-import m.validation.StandardLibrary;
-import m.validation.Type;
+import m.library.Component;
+import m.library.SimpleType;
+import m.library.Type;
 import m.yaml.YamlFactory;
 
 public class UnitySerializer
@@ -109,7 +107,7 @@ public class UnitySerializer
 		{
 			try 
 			{
-				StandardLibrary.valueOf(component);
+				Component.valueOf(component);
 			}
 			catch (Exception exception)
 			{
@@ -183,14 +181,14 @@ public class UnitySerializer
 		return member;
 	}
 	
-	public void serialize(String component, Type type)
+	public void serialize(String component, SimpleType type)
 	{
 		var unit = unit();
 		
 		var namespaces = new HashSet<String>();
 		namespaces.add("Unity.Entities");
 		
-		if (type.isNumeric() || type == Type.bool)
+		if (type == float1 || type == float2 || type == float3 || type == float4 || type == bool)
 		{
 			if (type != float1)
 			{
@@ -233,7 +231,7 @@ public class UnitySerializer
 			
 			unit.getTypes().add(struct);
 		}
-		else if (type.isList())
+		else if (type.isCollection)
 		{
 			namespaces.add("UnityEngine");
 			namespaces.add("System.Collections.Generic");
@@ -1316,7 +1314,7 @@ public class UnitySerializer
 	
 	private boolean isValueType(String component)
 	{
-		var engineComponents = StandardLibrary.values();
+		var engineComponents = Component.values();
 		for (var engineComponent : engineComponents)
 		{
 			if (component.equals(engineComponent.toString()))
@@ -1324,12 +1322,12 @@ public class UnitySerializer
 				return engineComponent.isValueType;
 			}
 		}
-		return MValidator.components.get(component).isValueType();
+		return MValidator.components.get(component).isValueType;
 	}
 	
 	private String unityName(String component, HashSet<String> namespaces)
 	{
-		var engineComponents = StandardLibrary.values();
+		var engineComponents = Component.values();
 		var name = component;
 		for (var engineComponent : engineComponents)
 		{
@@ -1376,7 +1374,7 @@ public class UnitySerializer
 	
 	private String field(String component)
 	{
-		var engineComponents = StandardLibrary.values();
+		var engineComponents = Component.values();
 		for (var engineComponent : engineComponents)
 		{
 			if (component.equals(engineComponent.toString()))
@@ -1387,7 +1385,7 @@ public class UnitySerializer
 		return "Value";
 	}
 	
-	private String unityName(Type type)
+	private String unityName(SimpleType type)
 	{
 		switch(type)
 		{
@@ -1400,7 +1398,6 @@ public class UnitySerializer
 			case float3: return "float3";
 			case float4: return "float4";
 			case font: return "FontAsset";
-			case gameObject: return "GameObject";
 			case image: return "Texture";
 			case input: return "InputAction";
 			case material: return "Material";
@@ -1409,6 +1406,7 @@ public class UnitySerializer
 			case stateMachine: return "AnimatorController";
 			case tag: return "None";
 			case text: return "String";
+			case type: return "Type";
 		}
 		return "None";
 	}
