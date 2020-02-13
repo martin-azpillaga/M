@@ -46,7 +46,7 @@ import m.m.Archetype;
 import m.m.Assignment;
 import m.m.Brackets;
 import m.m.Comparison;
-import m.m.ComponentAccess;
+import m.m.Cell;
 import m.m.Equality;
 import m.m.ExplicitSet;
 import m.m.Expression;
@@ -573,7 +573,7 @@ public class UnitySerializer
 			{
 				var forall = (Forall) statement;
 				var variable = forall.getVariable();
-				var conditionExpression = forall.getConditiion();
+				var conditionExpression = forall.getCondition();
 				var condition = cs(conditionExpression, querySet, namespaces);
 				
 				
@@ -664,7 +664,7 @@ public class UnitySerializer
 			else if (statement instanceof Assignment)
 			{
 				var assignment = (Assignment) statement;
-				var variable = assignment.getVariable();
+				var variable = assignment.getAtom();
 				var expression = assignment.getExpression();
 				
 				if (variable instanceof Variable)
@@ -799,9 +799,9 @@ public class UnitySerializer
 						list.add(cs);
 					}
 				}
-				else if (variable instanceof ComponentAccess)
+				else if (variable instanceof Cell)
 				{
-					var access = (ComponentAccess) variable;
+					var access = (Cell) variable;
 					var entity = access.getEntity();
 					var component = access.getComponent();
 					querySet.add(entity, component, AccessKind.write);
@@ -1235,9 +1235,9 @@ public class UnitySerializer
 			var e = (Variable) expression;
 			return variable(e.getName());
 		}
-		else if (expression instanceof ComponentAccess)
+		else if (expression instanceof Cell)
 		{
-			var access = (ComponentAccess) expression;
+			var access = (Cell) expression;
 			querySet.add(access.getEntity(), access.getComponent(), AccessKind.read);
 			var csExpression = modular.createAccessExpression();
 			var component = modular.createVariable();
