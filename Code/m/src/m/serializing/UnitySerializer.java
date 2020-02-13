@@ -45,6 +45,7 @@ import m.m.AdditiveExpression;
 import m.m.Archetype;
 import m.m.Assignment;
 import m.m.Brackets;
+import m.m.Call;
 import m.m.Comparison;
 import m.m.Cell;
 import m.m.Equality;
@@ -816,11 +817,11 @@ public class UnitySerializer
 					csAssignment.setRight(right);
 				}
 			}
-			else if (statement instanceof Function)
+			else if (statement instanceof Call)
 			{
-				var function = (Function) statement;
+				var call = (Call) statement;
 				var cs = csharp.createExpressionStatement();
-				cs.setExpression(cs(function, querySet, namespaces));
+				cs.setExpression(cs(call.getFunction(), querySet, namespaces));
 				list.add(cs);
 			}
 		}
