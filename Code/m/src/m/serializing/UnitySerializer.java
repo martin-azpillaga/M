@@ -1608,43 +1608,45 @@ public class UnitySerializer
 				var totalExists = MValidator.components.containsKey(total);
 				var signalExists = MValidator.components.containsKey(signal);
 				
-				var lambda = csharp.createLambda();
-				var run = access(access(access(variable("Entities"),function("ForEach",argument(lambda))),function("WithoutBurst")), function("Run"));
-				
-				onUpdate.getStatements().add(statement(run));
-
-				if (totalExists)
-				{
-					lambda.getParameters().add(parameter(total, total));
-				}
-				
-				lambda.getParameters().add(refParameter(elapsed, elapsed));
-				
-				if (signalExists)
-				{
-					lambda.getParameters().add(refParameter(signal, signal));
-				}
-				
+				var elapsedLambda = csharp.createLambda();
+				elapsedLambda.getParameters().add(refParameter(elapsed, elapsed));
 				var addDelta = assignment(access(variable(elapsed), variable("Value")), AssignmentKind.INCREASE, variable("deltaTime"));
-				lambda.getStatements().add(statement(addDelta));
+				elapsedLambda.getStatements().add(statement(addDelta));
 				
+				var elapsedRun = access(access(access(variable("Entities"),function("ForEach",argument(elapsedLambda))),function("WithoutBurst")), function("Run"));
+				onUpdate.getStatements().add(statement(elapsedRun));
+
 				if (totalExists && signalExists)
 				{
+					var signalLambda = csharp.createLambda();
+					signalLambda.getParameters().add(parameter(total,total));
+					signalLambda.getParameters().add(refParameter(elapsed, elapsed));
+					signalLambda.getParameters().add(refParameter(signal, signal));
 					var setSignal = assignment(access(variable(signal), variable("Value")), AssignmentKind.SET, comparison(access(variable(elapsed), variable("Value")), ComparisonKind.GREATER_OR_EQUAL, access(variable(total), variable("Value"))));
-					lambda.getStatements().add(statement(setSignal));
+					signalLambda.getStatements().add(statement(setSignal));
+					
+					var signalRun = access(access(access(variable("Entities"),function("ForEach",argument(signalLambda))),function("WithoutBurst")), function("Run"));
+					onUpdate.getStatements().add(statement(signalRun));
 				}
 				
 				if (totalExists)
 				{
+					var cycleLambda = csharp.createLambda();
+					cycleLambda.getParameters().add(parameter(total,total));
+					cycleLambda.getParameters().add(refParameter(elapsed, elapsed));
+					var cycleRun = access(access(access(variable("Entities"),function("ForEach",argument(cycleLambda))),function("WithoutBurst")), function("Run"));
+					onUpdate.getStatements().add(statement(cycleRun));
+					
 					var selection = modular.createSelection();
 					var ifBranch = modular.createBranch();
 					selection.getBranches().add(ifBranch);
 					ifBranch.setCondition(comparison(access(variable(elapsed), variable("Value")), ComparisonKind.GREATER_OR_EQUAL, access(variable(total), variable("Value"))));
 					ifBranch.getStatements().add(statement(assignment(access(variable(elapsed), variable("Value")), AssignmentKind.DECREASE, access(variable(total), variable("Value")))));
 					
-					lambda.getStatements().add(selection);
+					cycleLambda.getStatements().add(selection);
+
 				}
-				
+
 				
 			}
 		}
