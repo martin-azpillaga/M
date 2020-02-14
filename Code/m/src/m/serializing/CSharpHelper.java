@@ -25,15 +25,13 @@ import m.csharp.StaticUsing;
 import m.csharp.Struct;
 import m.csharp.Typeof;
 import m.csharp.Using;
-import m.modular.AccessExpression;
-import m.modular.AssignmentKind;
-import m.modular.ComparisonKind;
-import m.modular.ModularFactory;
+import m.csharp.AccessExpression;
+import m.csharp.AssignmentKind;
+import m.csharp.ComparisonKind;
 
 public class CSharpHelper 
 {
 	static CsharpFactory csharp = CsharpFactory.eINSTANCE;
-	static ModularFactory modular = ModularFactory.eINSTANCE;
 	
 	public static CompilationUnit unit ()
 	{
@@ -76,7 +74,7 @@ public class CSharpHelper
 		return attributeSection;
 	}
 	
-	public static AttributeSection attribute(String name, m.modular.Expression[] arguments)
+	public static AttributeSection attribute(String name, m.csharp.Expression[] arguments)
 	{
 		var attributeSection = csharp.createAttributeSection();
 		var attribute = csharp.createAttribute();
@@ -187,16 +185,16 @@ public class CSharpHelper
 		return method;
 	}
 	
-	public static m.modular.Selection ifStatement(m.modular.Expression condition)
+	public static m.csharp.Selection ifStatement(m.csharp.Expression condition)
 	{
-		var selection = modular.createSelection();
-		var branch = modular.createBranch();
+		var selection = csharp.createSelection();
+		var branch = csharp.createBranch();
 		branch.setCondition(condition);
 		selection.getBranches().add(branch);
 		return selection;
 	}
 	
-	public static Foreach foreach(String variable, m.modular.Expression collection)
+	public static Foreach foreach(String variable, m.csharp.Expression collection)
 	{
 		var foreach = csharp.createForeach();
 		foreach.setVariable(variable);
@@ -204,7 +202,7 @@ public class CSharpHelper
 		return foreach;
 	}
 	
-	public static Return returnStatement(m.modular.Expression expression)
+	public static Return returnStatement(m.csharp.Expression expression)
 	{
 		var returnStatement = csharp.createReturn();
 		returnStatement.setExpression(expression);
@@ -226,9 +224,9 @@ public class CSharpHelper
 		return csharp.createDefault();
 	}
 	
-	public static m.modular.Variable variable(String name)
+	public static m.csharp.Variable variable(String name)
 	{
-		var variable = modular.createVariable();
+		var variable = csharp.createVariable();
 		variable.setName(name);
 		return variable;
 	}
@@ -259,9 +257,9 @@ public class CSharpHelper
 		return function;
 	}
 	
-	public static m.modular.LogicalNot not(m.modular.Expression expression)
+	public static m.csharp.LogicalNot not(m.csharp.Expression expression)
 	{
-		var not = modular.createLogicalNot();
+		var not = csharp.createLogicalNot();
 		not.setExpression(expression);
 		return not;
 	}
@@ -273,30 +271,30 @@ public class CSharpHelper
 		return typeof;
 	}
 	
-	public static m.modular.Brackets brackets(m.modular.Expression expression)
+	public static m.csharp.Brackets brackets(m.csharp.Expression expression)
 	{
-		var brackets = modular.createBrackets();
+		var brackets = csharp.createBrackets();
 		brackets.setExpression(expression);
 		return brackets;
 	}
 	
-	public static AccessExpression access(m.modular.Expression left, m.modular.Expression right)
+	public static AccessExpression access(m.csharp.Expression left, m.csharp.Expression right)
 	{
-		var access = modular.createAccessExpression();
+		var access = csharp.createAccessExpression();
 		access.setLeft(left);
 		access.setRight(right);
 		return access;
 	}
 	
-	public static m.modular.Equality equality(m.modular.Expression left, m.modular.Expression right)
+	public static m.csharp.Equality equality(m.csharp.Expression left, m.csharp.Expression right)
 	{
-		var equality = modular.createEquality();
+		var equality = csharp.createEquality();
 		equality.setLeft(left);
 		equality.setRight(right);
 		return equality;
 	}
 	
-	public static m.csharp.Assignment assignment(m.modular.Expression left, m.modular.Expression right)
+	public static m.csharp.Assignment assignment(m.csharp.Expression left, m.csharp.Expression right)
 	{
 		var assignment = csharp.createAssignment();
 		assignment.setLeft(left);
@@ -304,7 +302,7 @@ public class CSharpHelper
 		return assignment;
 	}
 	
-	public static m.csharp.Assignment assignment(m.modular.Expression left, AssignmentKind kind, m.modular.Expression right)
+	public static m.csharp.Assignment assignment(m.csharp.Expression left, AssignmentKind kind, m.csharp.Expression right)
 	{
 		var assignment = csharp.createAssignment();
 		assignment.setLeft(left);
@@ -313,14 +311,14 @@ public class CSharpHelper
 		return assignment;
 	}
 	
-	public static ExpressionStatement statement(m.modular.Expression expression)
+	public static ExpressionStatement statement(m.csharp.Expression expression)
 	{
 		var statement = csharp.createExpressionStatement();
 		statement.setExpression(expression);
 		return statement;
 	}
 	
-	public static Declarator declarator(String name, m.modular.Expression expression)
+	public static Declarator declarator(String name, m.csharp.Expression expression)
 	{
 		var declarator = csharp.createDeclarator();
 		declarator.setVariable(name);
@@ -373,7 +371,7 @@ public class CSharpHelper
 		return parameter;
 	}
 	
-	public static MemberInitializer member(String name, m.modular.Expression value)
+	public static MemberInitializer member(String name, m.csharp.Expression value)
 	{
 		var memberInitializer = csharp.createMemberInitializer();
 		memberInitializer.setName(name);
@@ -381,14 +379,14 @@ public class CSharpHelper
 		return memberInitializer;
 	}
 	
-	public static Argument argument(m.modular.Expression expression)
+	public static Argument argument(m.csharp.Expression expression)
 	{
 		var argument = csharp.createArgument();
 		argument.setValue(expression);
 		return argument;
 	}
 	
-	public static Argument refArgument(m.modular.Expression expression)
+	public static Argument refArgument(m.csharp.Expression expression)
 	{
 		var argument = csharp.createArgument();
 		argument.setRef(true);
@@ -403,9 +401,9 @@ public class CSharpHelper
 		return floatLiteral;
 	}
 	
-	public static m.modular.Comparison comparison(m.modular.Expression left, ComparisonKind kind, m.modular.Expression right)
+	public static m.csharp.Comparison comparison(m.csharp.Expression left, ComparisonKind kind, m.csharp.Expression right)
 	{
-		var comparison = modular.createComparison();
+		var comparison = csharp.createComparison();
 		comparison.setLeft(left);
 		comparison.setRight(right);
 		comparison.setKind(kind);

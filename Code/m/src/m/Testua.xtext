@@ -1,7 +1,0 @@
-grammar m.Testua with m.M
-
-import "azpillaga.world/m"
-
-@Override
-Game:
-	(archetypes+=Archetype|systems+=System)*;

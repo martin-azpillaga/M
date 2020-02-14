@@ -2,8 +2,6 @@ grammar m.M hidden(WS)
 import "http://www.eclipse.org/emf/2002/Ecore"
 generate m "azpillaga.world/m"
 
-// The definable set are those definable by expressions!
-
 Game:
 	(archetypes+=Archetype|systems+=System)*
 	end=End;
@@ -110,10 +108,6 @@ Cell:
 	entity=WORD '.' component=WORD;
 
 
-
-terminal WORD: (START_ID|'_') CONTINUE_ID*;
-terminal WS: (' '|'\n'|'\r'|'\t')+;
-
 enum EqualityKind: equal='='|notEqual='≠';
 enum ComparisonKind: lower='<'|lowerOrEqual='≤'|greaterOrEqual='≥'|greater='>';
 enum AdditiveKind: add='+'|subtract='-';
@@ -121,6 +115,10 @@ enum MultiplicativeKind: multiply='×'|divide='÷';
 enum SetKind: membership='∈'|union='∪'|intersection='∩'|difference='∖';
 
 End: {End};
+
+
+terminal WORD: (START_ID|'_') CONTINUE_ID*;
+terminal WS: (' '|'\n'|'\r'|'\t')+;
 
 terminal fragment START_ID:
 'a'..'z'|
