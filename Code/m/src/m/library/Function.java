@@ -20,13 +20,14 @@ public enum Function
 	sqrt("sqrt", float1, float1, float1),
 	
 	rng("rng", float1, float1, float1),
+	rng2("random", float2, float1),
 	
 	//ECS functions
 	create("create", entity, entity),
 	delete("delete", entity, none),
-	add("add", none, entity, none),
-	remove("remove", none, entity, none),
-	has("has", entity, none, bool);
+	add("add", SimpleType.type, entity, none),
+	remove("remove", SimpleType.type, entity, none),
+	has("has", SimpleType.type, entity, bool);
 	
 	private Function(String name, Type... types)
 	{
@@ -43,5 +44,5 @@ public enum Function
 	}
 	
 	public final String name;
-	public final Type type;
+	public final ComplexType type;
 }
