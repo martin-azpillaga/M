@@ -11,7 +11,10 @@ Game:
 Archetype:
 	 name=WORD '≔'
 	(base=WORD '∪')?
-	 '{' (components+=WORD (','? components+=WORD)*)? '}';
+	 '{' (components+=Component (','? components+=Component)*)? '}';
+
+Component:
+	name=WORD;
 
 System:
 	name=WORD '≔'
@@ -20,7 +23,7 @@ System:
 
 
 Statement:
-	Assignment|Call|Selection|Iteration|Forall;
+	Selection|Iteration|Forall|Assignment|Call;
 
 Selection:
 	 '→'condition=Expression
