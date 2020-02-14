@@ -1,7 +1,0 @@
-grammar m.Javascript with m.Modular
-
-import "azpillaga.world/modular"
-generate javascript "azpillaga.world/javascript"
-
-Model:
-    expressions+=Expression;
