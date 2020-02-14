@@ -46,6 +46,7 @@ import m.m.Archetype;
 import m.m.Assignment;
 import m.m.Brackets;
 import m.m.Call;
+import m.m.Cardinal;
 import m.m.Comparison;
 import m.m.Cell;
 import m.m.Equality;
@@ -1162,6 +1163,11 @@ public class UnitySerializer
 			var argument2 = cs(e.getEntries().get(2), querySet, namespaces);
 			
 			return creation("float3",argument(argument0),argument(argument1), argument(argument2));
+		}
+		else if (expression instanceof Cardinal)
+		{
+			var e = (Cardinal) expression;
+			return access(cs(e.getExpression(), querySet, namespaces), variable("Length"));
 		}
 		else if (expression instanceof Function)
 		{
