@@ -541,25 +541,9 @@ public class UnitySerializer
 		handleParameter.setType("JobHandle");
 		handleParameter.setName("inputDependencies");
 		
-		var declareBuffer = csharp.createDeclaration();
-		var commandBuffer = csharp.createDeclarator();
-		var untilCreateBuffer = csharp.createAccessExpression();
-		var untilGetSystem = csharp.createAccessExpression();
-		var world = csharp.createVariable();
-		var getSystem = csharp.createParameterizedFunction();
-		var createBuffer = csharp.createParameterizedFunction();
-		onUpdate.getStatements().add(declareBuffer);
-		declareBuffer.getDeclarators().add(commandBuffer);
-		commandBuffer.setVariable("commandBuffer");
-		commandBuffer.setValue(untilCreateBuffer);
-		untilCreateBuffer.setLeft(untilGetSystem);
-		untilCreateBuffer.setRight(createBuffer);
-		untilGetSystem.setLeft(world);
-		untilGetSystem.setRight(getSystem);
-		world.setName("World");
-		getSystem.setName("GetOrCreateSystem");
-		getSystem.getTypes().add("EndSimulationEntityCommandBufferSystem");
-		createBuffer.setName("CreateCommandBuffer");
+		var getBuffer = access(access(variable("World"),function("GetOrCreateSystem", new String[] {"EndSimulationEntityCommandBufferSystem"})),function("CreateCommandBuffer"));
+		onUpdate.getStatements().add(statement(assignment(variable("commandBuffer"),getBuffer)));
+		systemClass.getMembers().add(0,field("EntityCommandBuffer", declarator("commandBuffer")));
 		
 		addStatementsUnified(system.getStatements(), onUpdate.getStatements(), querySet, namespaces);
 		
@@ -1731,9 +1715,10 @@ public class UnitySerializer
 		clearLambda.getStatements().add(statement(access(variable("buffer"),function("Clear"))));
 		
 		var clearRun = access(access(access(variable("Entities"),function("ForEach",argument(clearLambda))),function("WithoutBurst")), function("Run"));
-		onUpdate.getStatements().add(statement(clearRun));
+		
 		
 		var lambda = lambda(new Parameter[] {refParameter("ISimulation", "simulation"), refParameter("PhysicsWorld", "world"), parameter("JobHandle", "inDeps")});
+		lambda.getStatements().add(statement(clearRun));
 		lambda.getStatements().add(declaration(declarator("collisionData",creation("NativeList<CollisionData>", argument(access(variable("Allocator"),variable("TempJob")))))));
 		var schedule = function("Schedule", argument(variable("simulation")), refArgument(variable("world")), argument(variable("inDeps")));
 		lambda.getStatements().add(declaration(declarator("job",access(creation("CollisionJob",member("collisionData", variable("collisionData")), member("world", variable("world"))),schedule))));
