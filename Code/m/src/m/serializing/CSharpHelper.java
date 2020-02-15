@@ -2,16 +2,22 @@ package m.serializing;
 
 import m.csharp.Argument;
 import m.csharp.AttributeSection;
+import m.csharp.BooleanLiteral;
 import m.csharp.CompilationUnit;
 import m.csharp.Creation;
 import m.csharp.CsharpFactory;
 import m.csharp.Declaration;
 import m.csharp.Declarator;
 import m.csharp.Default;
+import m.csharp.Expression;
 import m.csharp.ExpressionStatement;
 import m.csharp.Field;
 import m.csharp.FloatLiteral;
+import m.csharp.For;
 import m.csharp.Foreach;
+import m.csharp.Increment;
+import m.csharp.Index;
+import m.csharp.Interface;
 import m.csharp.Lambda;
 import m.csharp.MemberInitializer;
 import m.csharp.Method;
@@ -20,9 +26,13 @@ import m.csharp.Namespace;
 import m.csharp.NamespaceUsing;
 import m.csharp.Parameter;
 import m.csharp.ParameterizedFunction;
+import m.csharp.Property;
 import m.csharp.Return;
+import m.csharp.Statement;
 import m.csharp.StaticUsing;
 import m.csharp.Struct;
+import m.csharp.TypeConstraint;
+import m.csharp.TypeParameter;
 import m.csharp.Typeof;
 import m.csharp.Using;
 import m.csharp.AccessExpression;
@@ -102,6 +112,17 @@ public class CSharpHelper
 		return clazz;
 	}
 	
+	public static m.csharp.Class clazz(Modifier[] modifiers, String name)
+	{
+		var clazz = csharp.createClass();
+		clazz.setName(name);
+		for (var modifier : modifiers)
+		{
+			clazz.getModifiers().add(modifier);
+		}
+		return clazz;
+	}
+	
 	public static Struct struct(Modifier[] modifiers, String name)
 	{
 		var struct = csharp.createStruct();
@@ -129,6 +150,28 @@ public class CSharpHelper
 		var struct = csharp.createStruct();
 		struct.setName(name);
 		return struct;
+	}
+	
+	public static Interface Interface(Modifier[] modifiers, String name)
+	{
+		var Interface = csharp.createInterface();
+		for (var modifier : modifiers)
+		{
+			Interface.getModifiers().add(modifier);
+		}
+		Interface.setName(name);
+		return Interface;
+	}
+	
+	public static Property getter(String type, String name)
+	{
+		var property = csharp.createProperty();
+		property.setType(type);
+		property.setName(name);
+		var getter = csharp.createGetter();
+		getter.setEmpty(true);
+		property.setGetter(getter);
+		return property;
 	}
 	
 	public static Field field(Modifier[] modifiers, String type, Declarator...declarators)
@@ -185,6 +228,45 @@ public class CSharpHelper
 		return method;
 	}
 	
+	public static Method method(Modifier[] modifiers, String type, String name, String[] typeParameters, Parameter[] parameters)
+	{
+		var method = csharp.createMethod();
+		for (var modifier : modifiers)
+		{
+			method.getModifiers().add(modifier);
+		}
+		method.setType(type);
+		for (var t : typeParameters)
+		{
+			method.getTypeParameters().add(typeParameter(t));
+		}
+		method.setName(name);
+		for (var parameter : parameters)
+		{
+			method.getParameters().add(parameter);
+		}
+		return method;
+	}
+	
+	public static TypeParameter typeParameter(String name)
+	{
+		var typeParameter = csharp.createTypeParameter();
+		typeParameter.setName(name);
+		return typeParameter;
+	}
+	
+	public static TypeConstraint typeStructConstraint(String name, String[] superTypes)
+	{
+		var typeConstraint = csharp.createTypeConstraint();
+		typeConstraint.setStruct(true);
+		typeConstraint.setType(name);
+		for (var superType : superTypes)
+		{
+			typeConstraint.getSuperTypes().add(superType);
+		}
+		return typeConstraint;
+	}
+	
 	public static m.csharp.Selection ifStatement(m.csharp.Expression condition)
 	{
 		var selection = csharp.createSelection();
@@ -194,12 +276,46 @@ public class CSharpHelper
 		return selection;
 	}
 	
+	public static For forStatement(Statement initialization, Expression condition, Expression iterator)
+	{
+		var forStatement = csharp.createFor();
+		forStatement.setInitialization(initialization);
+		forStatement.setCondition(condition);
+		forStatement.setIterator(iterator);
+		return forStatement;
+	}
+	
 	public static Foreach foreach(String variable, m.csharp.Expression collection)
 	{
 		var foreach = csharp.createForeach();
 		foreach.setVariable(variable);
 		foreach.setCollection(collection);
 		return foreach;
+	}
+	
+	public static Increment increment(Expression expression)
+	{
+		var increment = csharp.createIncrement();
+		increment.setExpression(expression);
+		return increment;
+	}
+	
+	public static Index index(String name, Expression... indices)
+	{
+		var index = csharp.createIndex();
+		index.setName(name);
+		for (var indice : indices)
+		{
+			index.getIndices().add(indice);
+		}
+		return index;
+	}
+	
+	public static BooleanLiteral booleanLiteral(String value)
+	{
+		var literal = csharp.createBooleanLiteral();
+		literal.setValue(value);
+		return literal;
 	}
 	
 	public static Return returnStatement(m.csharp.Expression expression)
@@ -357,6 +473,15 @@ public class CSharpHelper
 	public static Parameter parameter(String type, String name)
 	{
 		var parameter = csharp.createParameter();
+		parameter.setType(type);
+		parameter.setName(name);
+		return parameter;
+	}
+	
+	public static Parameter thisParameter(String type, String name)
+	{
+		var parameter = csharp.createParameter();
+		parameter.setThis(true);
 		parameter.setType(type);
 		parameter.setName(name);
 		return parameter;
