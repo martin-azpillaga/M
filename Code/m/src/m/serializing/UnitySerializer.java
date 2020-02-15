@@ -1,6 +1,6 @@
 package m.serializing;
 
-import static m.csharp.Modifier.OVERRIDE;
+import static m.csharp.Modifier.*;
 import static m.csharp.Modifier.PROTECTED;
 import static m.csharp.Modifier.PUBLIC;
 import static m.csharp.Modifier.STATIC;
@@ -1790,6 +1790,32 @@ public class UnitySerializer
 		
 		unit.getTypes().add(iEntity);
 		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/Extensions.cs");
+	}
+	private void conversion()
+	{
+		var unit = unit();
+
+		unit.getUsings().add(namespaceUsing("Unity.Entities"));
+		unit.getUsings().add(namespaceUsing("UnityEngine"));
+		
+		var clazz = clazz(new Modifier[] {PUBLIC}, "EngineComponentConversion", new String[] {"GameObjectConversionSystem"});
+		unit.getTypes().add(clazz);
+		
+		var onUpdate = method(new Modifier[] {PROTECTED,OVERRIDE}, "void", "OnUpdate");
+		onUpdate.getStatements().add(statement(function("HybridComponent",new String[] {"Camera"})));
+		onUpdate.getStatements().add(statement(function("HybridComponent",new String[] {"Light"})));
+		
+		var hybrid = method(new Modifier[] {PRIVATE}, "void", "HybridComponent", new String[] {"T"});
+		hybrid.getTypeConstraints().add(typeConstraint("T", new String[] {"Component"}));
+		
+		var lambda = lambda(new Parameter[] {parameter("T", "component")});
+		lambda.getStatements().add(statement(function("AddHybridComponent", argument(variable("component")))));
+		hybrid.getStatements().add(statement(access(variable("Entities"),function("ForEach",argument(lambda)))));
+		
+		clazz.getMembers().add(onUpdate);
+		clazz.getMembers().add(hybrid);
+		
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/EngineComponentConversion.cs");
 	}
 }
 

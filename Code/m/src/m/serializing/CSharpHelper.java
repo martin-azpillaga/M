@@ -248,6 +248,22 @@ public class CSharpHelper
 		return method;
 	}
 	
+	public static Method method(Modifier[] modifiers, String type, String name, String[] typeParameters)
+	{
+		var method = csharp.createMethod();
+		for (var modifier : modifiers)
+		{
+			method.getModifiers().add(modifier);
+		}
+		method.setType(type);
+		for (var t : typeParameters)
+		{
+			method.getTypeParameters().add(typeParameter(t));
+		}
+		method.setName(name);
+		return method;
+	}
+	
 	public static TypeParameter typeParameter(String name)
 	{
 		var typeParameter = csharp.createTypeParameter();
@@ -259,6 +275,17 @@ public class CSharpHelper
 	{
 		var typeConstraint = csharp.createTypeConstraint();
 		typeConstraint.setStruct(true);
+		typeConstraint.setType(name);
+		for (var superType : superTypes)
+		{
+			typeConstraint.getSuperTypes().add(superType);
+		}
+		return typeConstraint;
+	}
+	
+	public static TypeConstraint typeConstraint(String name, String[] superTypes)
+	{
+		var typeConstraint = csharp.createTypeConstraint();
 		typeConstraint.setType(name);
 		for (var superType : superTypes)
 		{
