@@ -57,6 +57,7 @@ import m.YAMLRuntimeModule;
 import m.csharp.AdditiveKind;
 import m.csharp.Argument;
 import m.csharp.AssignmentKind;
+import m.csharp.Class;
 import m.csharp.ComparisonKind;
 import m.csharp.CsharpFactory;
 import m.csharp.EqualityKind;
@@ -108,6 +109,7 @@ public class UnitySerializer
 	JSONRuntimeModule jsonModule;
 	
 	IFileSystemAccess2 fsa;
+	Class systemClass;
 	
 	public void serialize(Game game, IFileSystemAccess2 fsa)
 	{
@@ -526,6 +528,8 @@ public class UnitySerializer
 		clazz.setName(system.getName());
 		clazz.getSuperTypes().add("JobComponentSystem");
 		
+		systemClass = clazz;
+		
 		var onUpdate = csharp.createMethod();
 		var handleParameter = csharp.createParameter();
 		clazz.getMembers().add(onUpdate);
@@ -641,7 +645,9 @@ public class UnitySerializer
 							var parameter = csharp.createParameter();
 							parameter.setType(unityName(component, namespaces));
 							
-							parameter.setName(component+"_"+variable);
+							parameter.setName(component+"_"+variable+"_");
+							systemClass.getMembers().add(0, field(unityName(component, namespaces),declarator(component+"_"+variable)));
+							lambda.getStatements().add(0,statement(assignment(variable(component+"_"+variable), variable(component+"_"+variable+"_"))));
 							
 							if (myQuery.get(component).contains(AccessKind.write) && isValueType(component))
 							{
@@ -656,10 +662,9 @@ public class UnitySerializer
 					}
 					if (myQuery.containsKey("Entity"))
 					{
-						var parameter = csharp.createParameter();
-						parameter.setType("Entity");
-						parameter.setName("entity_"+variable);
-						lambda.getParameters().add(0, parameter);
+						lambda.getParameters().add(0, parameter("Entity","entity_"+variable+"_"));
+						lambda.getStatements().add(0, statement(assignment(variable("entity_"+variable), variable("entity_"+variable+"_"))));
+						systemClass.getMembers().add(0,field("Entity",declarator("entity_"+variable)));
 					}
 				}
 			}
@@ -684,8 +689,9 @@ public class UnitySerializer
 				if (variable instanceof Variable)
 				{
 					var a = (Variable) variable;
-					var cs = csharp.createDeclaration();
-					var declarator = csharp.createDeclarator();
+					var ass = assignment(variable(a.getName()),variable("dummy"));
+					var type = "";
+					var cs = statement(ass);
 					
 					if (expression instanceof ImplicitSet)
 					{
@@ -704,10 +710,8 @@ public class UnitySerializer
 						untilTempJob.setRight(tempJob);
 						creation.setType("NativeList<Entity>");
 						namespaces.add("Unity.Collections");
-						cs.setType("NativeList<Entity>");
-						cs.getDeclarators().add(declarator);
-						declarator.setVariable(a.getName());
-						declarator.setValue(creation);
+						type = "NativeList<Entity>";
+						ass.setRight(creation);
 						allocator.setName("Allocator");
 						tempJob.setName("TempJob");
 						
@@ -807,11 +811,12 @@ public class UnitySerializer
 					}
 					else
 					{
-						cs.getDeclarators().add(declarator);
-						declarator.setVariable(a.getName());
-						declarator.setValue(cs(expression, querySet, namespaces));
+						type = "float";
+						ass.setRight(cs(expression, querySet, namespaces));
 						list.add(cs);
 					}
+					
+					systemClass.getMembers().add(0,field(type, declarator(a.getName())));
 				}
 				else if (variable instanceof Cell)
 				{
@@ -822,7 +827,7 @@ public class UnitySerializer
 					
 					var csStatement = csharp.createExpressionStatement();
 					var csAssignment = csharp.createAssignment();
-					var left = cs(access, querySet, namespaces);
+					var left = access(variable(access.getComponent()+"_"+access.getEntity()+"_"),variable(fieldName(access.getComponent())));
 					var right = cs(expression, querySet, namespaces);
 					list.add(csStatement);
 					csStatement.setExpression(csAssignment);
