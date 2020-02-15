@@ -3,6 +3,7 @@ package m.serializing;
 import static m.csharp.Modifier.OVERRIDE;
 import static m.csharp.Modifier.PROTECTED;
 import static m.csharp.Modifier.PUBLIC;
+import static m.csharp.Modifier.STATIC;
 import static m.library.SimpleType.bool;
 import static m.library.SimpleType.entityList;
 import static m.library.SimpleType.float1;
@@ -11,6 +12,9 @@ import static m.library.SimpleType.float3;
 import static m.library.SimpleType.float4;
 import static m.library.SimpleType.input;
 import static m.library.SimpleType.tag;
+import static m.serializing.CSharpHelper.*;
+import static m.serializing.CSharpHelper.index;
+import static m.serializing.CSharpHelper.increment;
 import static m.serializing.CSharpHelper.access;
 import static m.serializing.CSharpHelper.argument;
 import static m.serializing.CSharpHelper.assignment;
@@ -42,6 +46,7 @@ import static m.serializing.CSharpHelper.struct;
 import static m.serializing.CSharpHelper.typeof;
 import static m.serializing.CSharpHelper.unit;
 import static m.serializing.CSharpHelper.variable;
+import static m.serializing.CSharpHelper.thisParameter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -96,6 +101,7 @@ import m.m.System;
 import m.m.Variable;
 import m.validation.MValidator;
 import m.yaml.YamlFactory;
+import static m.serializing.CSharpHelper.forStatement;
 
 public class UnitySerializer
 {
@@ -151,6 +157,7 @@ public class UnitySerializer
 		inputSystem();
 		Physics();
 		timers();
+		extensions();
 	}
 	
 	private void packagesManifest()
@@ -1755,6 +1762,34 @@ public class UnitySerializer
 		clazz.getMembers().add(onUpdate);
 		clazz.getMembers().add(job);
 		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/DetectCollisions.cs");
+	}
+	
+	private void extensions()
+	{
+		var unit = unit();
+		
+		unit.getUsings().add(namespaceUsing("Unity.Entities"));
+		unit.getUsings().add(namespaceUsing("Unity.Collections"));
+		
+		var clazz = clazz(new Modifier[] {PUBLIC, STATIC}, "Extensions");
+		unit.getTypes().add(clazz);
+		
+		var contains = method(new Modifier[] {PUBLIC, STATIC}, "bool", "Contains", new String[] {"T"}, new Parameter[] {thisParameter("DynamicBuffer<T>","buffer"), parameter("Entity", "entity")});
+		contains.getTypeConstraints().add(typeStructConstraint("T", new String[] {"IEntity"}));
+		
+		var f = forStatement(declaration(declarator("i",floatLiteral("0"))),comparison(variable("i"), ComparisonKind.LOWER, access(variable("buffer"),variable("Length"))), increment(variable("i")));
+		var ifStatement = ifStatement(equality(access(index("buffer",variable("i")),variable("Value")), variable("entity")));
+		ifStatement.getBranches().get(0).getStatements().add(returnStatement(booleanLiteral("true")));
+		f.getStatements().add(ifStatement);
+		contains.getStatements().add(f);
+		contains.getStatements().add(returnStatement(booleanLiteral("false")));
+		clazz.getMembers().add(contains);
+		
+		var iEntity = Interface(new Modifier[] {PUBLIC}, "IEntity");
+		iEntity.getMembers().add(getter("Entity", "Value"));
+		
+		unit.getTypes().add(iEntity);
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/Extensions.cs");
 	}
 }
 
