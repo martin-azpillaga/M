@@ -26,7 +26,10 @@ Statement:
 Selection:
 	 '→'condition=Expression
 	'['	(positiveStatements+=Statement (','? positiveStatements+=Statement)*)? ']'
-	('[' (negativeStatements+=Statement (','? negativeStatements+=Statement)*)? ']')?;
+	('*'(
+		next=Selection |
+		('[' (negativeStatements+=Statement (','? negativeStatements+=Statement)*)? ']')
+	))?;
 
 Iteration:
 	'↺' condition=Expression
@@ -75,7 +78,7 @@ Function:
 	'[' (arguments+=Expression (','? arguments+=Expression)*)? ']';
 
 LogicalNot:
-	'¬' expression=Primary;
+	'¬' expression=Cardinal;
 
 Cardinal:
 	'#' expression=Primary;
