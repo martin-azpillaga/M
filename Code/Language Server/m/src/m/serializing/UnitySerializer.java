@@ -170,6 +170,7 @@ public class UnitySerializer
 
 		var members = list.getMembers();
 		var modules = new String[]{"ai","androidjni","animation","assetbundle","audio","cloth","director","imageconversion","imgui","jsonserialize","particlesystem","physics","physics2d","screencapture","terrain","terrainphysics","tilemap","ui","uielements","umbra","unityanalytics","unitywebrequest","unitywebrequestassetbundle","unitywebrequestaudio","unitywebrequesttexture","unitywebrequestwww","vehicles","video","vr","wind","xr"};
+		members.add(dependency("com.unity.ui.runtime", "https://github.com/martin-azpillaga/UI.git"));
 		members.add(dependency("com.unity.entities","0.5.1-preview.11"));
 		members.add(dependency("com.unity.jobs","0.2.4-preview.11"));
 		members.add(dependency("com.unity.collections","0.5.1-preview.11"));
