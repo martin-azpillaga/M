@@ -120,7 +120,7 @@ End: {End};
 enum EqualityKind: equal='='|notEqual='≠';
 enum ComparisonKind: lower='<'|lowerOrEqual='≤'|greaterOrEqual='≥'|greater='>';
 enum AdditiveKind: add='+'|subtract='-';
-enum MultiplicativeKind: multiply='×'|divide='÷';
+enum MultiplicativeKind: multiply='×'|divide='÷'|remainder='%';
 enum SetKind: membership='∈'|union='∪'|intersection='∩'|difference='∖';
 
 terminal WORD: (START_ID|'_') CONTINUE_ID*;

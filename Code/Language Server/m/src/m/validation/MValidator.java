@@ -128,7 +128,7 @@ public class MValidator extends AbstractMValidator
 				return;
 			}
 		}
-		error("The base entity is not declared in this module", ARCHETYPE__BASE);
+		error("Base entity "+ base + "undefined", ARCHETYPE__BASE);
 	}
 	
 	@Check
@@ -226,7 +226,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (components.get(name) != type)
 			{
-				error("Expected type " + components.get(name) + " but got " + type.toString(), obj, feature);
+				error("Incompatible types: " + components.get(name) + " and " + type.toString(), obj, feature);
 			}
 		}
 		return isNew;
@@ -243,7 +243,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (variables.get(name) != type)
 			{
-				error("Expected type " + variables.get(name) + " but got " + type.toString(), obj, feature);
+				error("Incompatible types: " + variables.get(name) + " and " + type.toString(), obj, feature);
 			}
 		}
 		return isNew;
@@ -260,7 +260,7 @@ public class MValidator extends AbstractMValidator
 		{
 			if (expressions.get(expression) != type)
 			{
-				error("Expected type " + expressions.get(expression) + " but got " + type.toString(), o, feature);
+				error("Incompatible types: " + expressions.get(expression) + " and " + type.toString(), o, feature);
 			}
 		}
 		return isNew;
@@ -343,7 +343,6 @@ public class MValidator extends AbstractMValidator
 		
 		group(atom,expression);
 	}
-	
 	
 	
 	
