@@ -59,6 +59,7 @@ public class Wire
 	static StandardLanguage language(String name, String extensions)
 	{
 		var language = new StandardLanguage();
+		language.addReferencedResource("platform:/resource/m/model/Game.genmodel");
 		language.setName(name);
 		language.setFileExtensions(extensions);
 		language.addFragment(new FormatterFragment());
