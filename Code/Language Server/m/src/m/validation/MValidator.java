@@ -1,39 +1,7 @@
 package m.validation;
 
-import static m.library.SimpleType.bool;
-import static m.library.SimpleType.entity;
-import static m.library.SimpleType.entityList;
-import static m.library.SimpleType.float1;
-import static m.library.SimpleType.float2;
-import static m.library.SimpleType.float3;
-import static m.library.SimpleType.float4;
-import static m.m.MPackage.Literals.ARCHETYPE__BASE;
-import static m.m.MPackage.Literals.ARCHETYPE__NAME;
-import static m.m.MPackage.Literals.CARDINAL__EXPRESSION;
-import static m.m.MPackage.Literals.CELL__COMPONENT;
-import static m.m.MPackage.Literals.CELL__ENTITY;
-import static m.m.MPackage.Literals.COMPARISON__KIND;
-import static m.m.MPackage.Literals.COMPARISON__LEFT;
-import static m.m.MPackage.Literals.COMPARISON__RIGHT;
-import static m.m.MPackage.Literals.COMPONENT__NAME;
-import static m.m.MPackage.Literals.EXPLICIT_SET__ELEMENTS;
-import static m.m.MPackage.Literals.FORALL__CONDITION;
-import static m.m.MPackage.Literals.FORALL__VARIABLE;
-import static m.m.MPackage.Literals.FUNCTION__NAME;
-import static m.m.MPackage.Literals.IMPLICIT_SET__PREDICATE;
-import static m.m.MPackage.Literals.IMPLICIT_SET__VARIABLE;
-import static m.m.MPackage.Literals.ITERATION__CONDITION;
-import static m.m.MPackage.Literals.JOIN__ENTRIES;
-import static m.m.MPackage.Literals.LOGICAL_AND__LEFT;
-import static m.m.MPackage.Literals.LOGICAL_NOT__EXPRESSION;
-import static m.m.MPackage.Literals.LOGICAL_OR__LEFT;
-import static m.m.MPackage.Literals.MULTIPLICATIVE_EXPRESSION__RIGHT;
-import static m.m.MPackage.Literals.SELECTION__CONDITION;
-import static m.m.MPackage.Literals.SET_EXPRESSION__KIND;
-import static m.m.MPackage.Literals.SET_EXPRESSION__LEFT;
-import static m.m.MPackage.Literals.SET_EXPRESSION__RIGHT;
-import static m.m.MPackage.Literals.SYSTEM__NAME;
-import static m.m.MPackage.Literals.VARIABLE__NAME;
+import static m.library.SimpleType.*;
+import static game.GamePackage.Literals.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,29 +13,30 @@ import org.eclipse.xtext.validation.Check;
 import m.library.Component;
 import m.library.MagicName;
 import m.library.SimpleType;
-import m.m.AdditiveExpression;
-import m.m.Archetype;
-import m.m.Assignment;
-import m.m.Cardinal;
-import m.m.Cell;
-import m.m.Comparison;
-import m.m.End;
-import m.m.Equality;
-import m.m.ExplicitSet;
-import m.m.Expression;
-import m.m.Forall;
-import m.m.Function;
-import m.m.Game;
-import m.m.ImplicitSet;
-import m.m.Iteration;
-import m.m.Join;
-import m.m.LogicalAnd;
-import m.m.LogicalNot;
-import m.m.LogicalOr;
-import m.m.MultiplicativeExpression;
-import m.m.Selection;
-import m.m.SetExpression;
-import m.m.Variable;
+import game.Addition;
+import game.Archetype;
+import game.Assignment;
+import game.Brackets;
+import game.Cardinal;
+import game.Cell;
+import game.Comparison;
+import game.End;
+import game.Equality;
+import game.ExplicitSet;
+import game.Expression;
+import game.Forall;
+import game.Function;
+import game.Game;
+import game.ImplicitSet;
+import game.Iteration;
+import game.Join;
+import game.And;
+import game.LogicalNot;
+import game.Or;
+import game.Multiplication;
+import game.Selection;
+import game.SetExpression;
+import game.Variable;
 
 public class MValidator extends AbstractMValidator 
 {
@@ -100,7 +69,7 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void unique(m.m.Component component)
+	public void unique(game.Component component)
 	{
 		var archetype = (Archetype) component.eContainer();
 		
@@ -122,7 +91,7 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void unique(m.m.System system)
+	public void unique(game.System system)
 	{
 		var module = (Game) system.eContainer();
 		
@@ -304,7 +273,7 @@ public class MValidator extends AbstractMValidator
 	
 	
 	@Check
-	public void infer(m.m.Component component)
+	public void infer(game.Component component)
 	{
 		magicNames(component.getName(), component, COMPONENT__NAME);
 	}
@@ -379,19 +348,19 @@ public class MValidator extends AbstractMValidator
 	
 	
 	@Check
-	public void infer(LogicalOr or)
+	public void infer(Or or)
 	{
-		setExpression(or, bool, or, LOGICAL_OR__LEFT);
-		setExpression(or.getLeft(), bool, or, LOGICAL_OR__LEFT);
-		setExpression(or.getRight(), bool, or, LOGICAL_AND__LEFT);
+		setExpression(or, bool, or, OR__LEFT);
+		setExpression(or.getLeft(), bool, or, OR__LEFT);
+		setExpression(or.getRight(), bool, or, AND__LEFT);
 	}
 	
 	@Check
-	public void infer(LogicalAnd and)
+	public void infer(And and)
 	{
-		setExpression(and, bool, and, LOGICAL_AND__LEFT);
-		setExpression(and.getLeft(), bool, and, LOGICAL_AND__LEFT);
-		setExpression(and.getRight(), bool, and, LOGICAL_AND__LEFT);
+		setExpression(and, bool, and, AND__LEFT);
+		setExpression(and.getLeft(), bool, and, AND__LEFT);
+		setExpression(and.getRight(), bool, and, AND__LEFT);
 	}
 	
 	@Check
@@ -414,7 +383,7 @@ public class MValidator extends AbstractMValidator
 	
 	
 	@Check
-	public void infer(AdditiveExpression additive)
+	public void infer(Addition additive)
 	{
 		var left = additive.getLeft();
 		var right = additive.getRight();
@@ -423,13 +392,13 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	@Check
-	public void infer(MultiplicativeExpression multiplication)
+	public void infer(Multiplication multiplication)
 	{
 		var left = multiplication.getLeft();
 		var right = multiplication.getRight();
 		
 		group(multiplication, left);
-		setExpression(right, float1, multiplication, MULTIPLICATIVE_EXPRESSION__RIGHT);
+		setExpression(right, float1, multiplication, MULTIPLICATION__RIGHT);
 	}
 	
 	@Check
@@ -675,6 +644,14 @@ public class MValidator extends AbstractMValidator
 				{
 					var cell = (Cell) expression;
 					if (setComponent(cell.getComponent(), expressions.get(expression), cell, CELL__COMPONENT))
+					{
+						repeat = true;
+					}
+				}
+				else if (expression instanceof Brackets)
+				{
+					var brackets = (Brackets) expression;
+					if (setExpression(brackets.getExpression(),expressions.get(brackets),brackets,BRACKETS__EXPRESSION))
 					{
 						repeat = true;
 					}

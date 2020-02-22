@@ -73,39 +73,38 @@ import m.json.JsonFactory;
 import m.json.Member;
 import m.library.Component;
 import m.library.SimpleType;
-import m.m.AdditiveExpression;
-import m.m.Archetype;
-import m.m.Assignment;
-import m.m.Brackets;
-import m.m.Call;
-import m.m.Cardinal;
-import m.m.Cell;
-import m.m.Comparison;
-import m.m.Equality;
-import m.m.ExplicitSet;
-import m.m.Expression;
-import m.m.Forall;
-import m.m.Function;
-import m.m.Game;
-import m.m.ImplicitSet;
-import m.m.Join;
-import m.m.LogicalAnd;
-import m.m.LogicalNot;
-import m.m.LogicalOr;
-import m.m.MFactory;
-import m.m.MultiplicativeExpression;
-import m.m.Selection;
-import m.m.SetExpression;
-import m.m.Statement;
-import m.m.System;
-import m.m.Variable;
+import game.Addition;
+import game.Archetype;
+import game.Assignment;
+import game.Brackets;
+import game.Call;
+import game.Cardinal;
+import game.Cell;
+import game.Comparison;
+import game.Equality;
+import game.ExplicitSet;
+import game.Expression;
+import game.Forall;
+import game.Function;
+import game.Game;
+import game.ImplicitSet;
+import game.Join;
+import game.And;
+import game.LogicalNot;
+import game.Or;
+import game.GameFactory;
+import game.Multiplication;
+import game.Selection;
+import game.SetExpression;
+import game.Statement;
+import game.System;
+import game.Variable;
 import m.validation.MValidator;
 import m.yaml.YamlFactory;
 import static m.serializing.CSharpHelper.forStatement;
 
 public class UnitySerializer
 {
-	MFactory m = MFactory.eINSTANCE;
 	CsharpFactory csharp = CsharpFactory.eINSTANCE;
 	YamlFactory yaml = YamlFactory.eINSTANCE;
 	JsonFactory json = JsonFactory.eINSTANCE;
@@ -1087,17 +1086,17 @@ public class UnitySerializer
 	
 	private m.csharp.Expression cs(Expression expression, QuerySet querySet, HashSet<String> namespaces)
 	{
-		if (expression instanceof LogicalOr)
+		if (expression instanceof Or)
 		{
-			var e = (LogicalOr) expression;
+			var e = (Or) expression;
 			var cs = csharp.createLogicalOr();
 			cs.setLeft(cs(e.getLeft(), querySet, namespaces));
 			cs.setRight(cs(e.getRight(), querySet, namespaces));
 			return cs;
 		}
-		else if (expression instanceof LogicalAnd)
+		else if (expression instanceof And)
 		{
-			var e = (LogicalAnd) expression;
+			var e = (And) expression;
 			var cs = csharp.createLogicalAnd();
 			cs.setLeft(cs(e.getLeft(), querySet, namespaces));
 			cs.setRight(cs(e.getRight(), querySet, namespaces));
@@ -1121,18 +1120,18 @@ public class UnitySerializer
 			cs.setRight(cs(e.getRight(), querySet, namespaces));
 			return cs;
 		}
-		else if (expression instanceof AdditiveExpression)
+		else if (expression instanceof Addition)
 		{
-			var e = (AdditiveExpression) expression;
+			var e = (Addition) expression;
 			var cs = csharp.createAdditiveExpression();
 			cs.setKind(cs(e.getKind()));
 			cs.setLeft(cs(e.getLeft(), querySet, namespaces));
 			cs.setRight(cs(e.getRight(), querySet, namespaces));
 			return cs;
 		}
-		else if (expression instanceof MultiplicativeExpression)
+		else if (expression instanceof Multiplication)
 		{
-			var e = (MultiplicativeExpression) expression;
+			var e = (Multiplication) expression;
 			var cs = csharp.createMultiplicativeExpression();
 			cs.setKind(cs(e.getKind()));
 			cs.setLeft(cs(e.getLeft(), querySet, namespaces));
@@ -1160,7 +1159,7 @@ public class UnitySerializer
 		}
 		else if (expression instanceof Brackets)
 		{
-			var e = (LogicalNot) expression;
+			var e = (Brackets) expression;
 			return brackets(cs(e.getExpression(),querySet, namespaces));
 		}
 		else if (expression instanceof Join)
@@ -1286,7 +1285,7 @@ public class UnitySerializer
 		return null;
 	}
 	
-	private m.csharp.ComparisonKind cs(m.m.ComparisonKind kind)
+	private m.csharp.ComparisonKind cs(game.ComparisonKind kind)
 	{
 		switch (kind)
 		{
@@ -1298,7 +1297,7 @@ public class UnitySerializer
 		return ComparisonKind.GREATER;
 	}
 	
-	private EqualityKind cs(m.m.EqualityKind kind)
+	private EqualityKind cs(game.EqualityKind kind)
 	{
 		switch(kind)
 		{
@@ -1308,7 +1307,7 @@ public class UnitySerializer
 		return EqualityKind.EQUAL;
 	}
 	
-	private AdditiveKind cs(m.m.AdditiveKind kind)
+	private AdditiveKind cs(game.AdditiveKind kind)
 	{
 		switch (kind)
 		{
@@ -1318,7 +1317,7 @@ public class UnitySerializer
 		}
 	}
 	
-	private MultiplicativeKind cs(m.m.MultiplicativeKind kind)
+	private MultiplicativeKind cs(game.MultiplicativeKind kind)
 	{
 		switch (kind)
 		{
