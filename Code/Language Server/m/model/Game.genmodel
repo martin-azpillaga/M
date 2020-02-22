@@ -22,6 +22,7 @@
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="Game.ecore#//MultiplicativeKind">
       <genEnumLiterals ecoreEnumLiteral="Game.ecore#//MultiplicativeKind/multiply"/>
       <genEnumLiterals ecoreEnumLiteral="Game.ecore#//MultiplicativeKind/divide"/>
+      <genEnumLiterals ecoreEnumLiteral="Game.ecore#//MultiplicativeKind/remainder"/>
     </genEnums>
     <genEnums typeSafeEnumCompatible="false" ecoreEnum="Game.ecore#//SetKind">
       <genEnumLiterals ecoreEnumLiteral="Game.ecore#//SetKind/membership"/>
