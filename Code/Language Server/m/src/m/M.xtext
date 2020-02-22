@@ -1,6 +1,6 @@
 grammar m.M hidden(WS)
 import "http://www.eclipse.org/emf/2002/Ecore"
-generate m "azpillaga.world/m"
+import "azpillaga.world/game"
 
 Game:
 	(archetypes+=Archetype|systems+=System)*
@@ -26,10 +26,11 @@ Statement:
 Selection:
 	 '→'condition=Expression
 	'['	(positiveStatements+=Statement (','? positiveStatements+=Statement)*)? ']'
-	('*'(
-		next=Selection |
-		('[' (negativeStatements+=Statement (','? negativeStatements+=Statement)*)? ']')
-	))?;
+	('*' (
+	('[' (negativeStatements+=Statement (','? negativeStatements+=Statement)*)? ']')|
+	negativeStatements+=Selection)
+	)?;
+
 
 Iteration:
 	'↺' condition=Expression
@@ -48,29 +49,32 @@ Call:
 
 
 
-Expression returns Expression:
-  LogicalAnd ({LogicalOr.left=current}  '⋁' right=LogicalAnd)*;
 
-LogicalAnd returns Expression:
-  Equality ({LogicalAnd.left=current}  '⋀' right=Equality)*;
+Expression: Orable;
 
-Equality returns Expression:
-	Comparison ({Equality.left=current}  kind=EqualityKind right=Comparison)*;
+Orable:
+  Andable ({Or.left=current}  '⋁' right=Andable)*;
 
-Comparison returns Expression:
-	AdditiveExpression (({Comparison.left=current}  kind=ComparisonKind right=AdditiveExpression))*;
+Andable:
+  Equatable ({And.left=current}  '⋀' right=Equatable)*;
 
-AdditiveExpression returns Expression:
-	MultiplicativeExpression ({AdditiveExpression.left=current}  kind=AdditiveKind right=MultiplicativeExpression)*;
+Equatable:
+	Comparable ({Equality.left=current}  kind=EqualityKind right=Comparable)*;
 
-MultiplicativeExpression returns Expression:
-	SetExpression ({MultiplicativeExpression.left=current}  kind=MultiplicativeKind right=SetExpression)*;
+Comparable:
+	Addable (({Comparison.left=current}  kind=ComparisonKind right=Addable))*;
 
-SetExpression returns Expression:
+Addable:
+	Multipliable ({Addition.left=current}  kind=AdditiveKind right=Multipliable)*;
+
+Multipliable:
+	Setable ({Multiplication.left=current}  kind=MultiplicativeKind right=Setable)*;
+
+Setable:
 	Primary ({SetExpression.left=current} kind=SetKind right=Primary)*;
 
 
-Primary returns Expression:
+Primary:
 	=>Function|Atom|Collection|Cardinal|LogicalNot;
 
 Function:
@@ -110,15 +114,14 @@ Variable:
 Cell:
 	entity=WORD '.' component=WORD;
 
+End: {End};
+
 
 enum EqualityKind: equal='='|notEqual='≠';
 enum ComparisonKind: lower='<'|lowerOrEqual='≤'|greaterOrEqual='≥'|greater='>';
 enum AdditiveKind: add='+'|subtract='-';
 enum MultiplicativeKind: multiply='×'|divide='÷';
 enum SetKind: membership='∈'|union='∪'|intersection='∩'|difference='∖';
-
-End: {End};
-
 
 terminal WORD: (START_ID|'_') CONTINUE_ID*;
 terminal WS: (' '|'\n'|'\r'|'\t')+;
