@@ -175,6 +175,7 @@
   <eClassifiers xsi:type="ecore:EEnum" name="MultiplicativeKind">
     <eLiterals name="multiply" literal="×"/>
     <eLiterals name="divide" value="1" literal="÷"/>
+    <eLiterals name="remainder" value="2" literal="remainder"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="SetKind">
     <eLiterals name="membership" literal="∈"/>
