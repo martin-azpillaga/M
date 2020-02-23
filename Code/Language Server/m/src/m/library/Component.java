@@ -20,7 +20,7 @@ public enum Component
 	text(SimpleType.text, "UnityEngine.UI", "Text", "text", false),
 	image(SimpleType.image, "UnityEngine.UI", "Image", "source", false),
 	button(tag, "UnityEngine.UI", "Button", "active", false),
-	number(float1, "UnityEngine.UI", "Text", "text", false),
+	number(float1, null, "Number", "Value", true),
 	// Rendering camera
 	viewAngle(float1, "UnityEngine", "Camera", "viewAngle", false),
 	viewDistance(float1, "UnityEngine", "Camera", "farClipPlane", false),
