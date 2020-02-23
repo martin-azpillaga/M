@@ -6,7 +6,7 @@ import static m.csharp.Modifier.PUBLIC;
 import static m.csharp.Modifier.STATIC;
 import static m.library.SimpleType.bool;
 import static m.library.SimpleType.entityList;
-import static m.library.SimpleType.float1;
+import static m.library.SimpleType.*;
 import static m.library.SimpleType.float2;
 import static m.library.SimpleType.float3;
 import static m.library.SimpleType.float4;
@@ -136,7 +136,7 @@ public class UnitySerializer
 			catch (Exception exception)
 			{
 				var type = components.get(component);
-				serialize(component, type);
+				serialize(component, type, false);
 			}
 		}
 		
@@ -147,7 +147,7 @@ public class UnitySerializer
 		
 		for (var system : game.getSystems())
 		{
-			serializeUnified(system);
+			serializeUnified(system, false);
 		}
 		
 		
@@ -157,6 +157,8 @@ public class UnitySerializer
 		Physics();
 		timers();
 		extensions();
+		conversion();
+		ui();
 	}
 	
 	private void packagesManifest()
@@ -175,6 +177,7 @@ public class UnitySerializer
 		members.add(dependency("com.unity.collections","0.5.1-preview.11"));
 		members.add(dependency("com.unity.inputsystem","1.0.0-preview.4"));
 		members.add(dependency("com.unity.dots.editor", "0.3.0-preview"));
+		members.add(dependency("com.unity.ui.builder", "0.10.1-preview"));
 		//members.add(dependency("com.unity.netcode","0.0.4-preview.0"));
 		members.add(dependency("com.unity.physics","0.2.5-preview.1"));
 		members.add(dependency("com.unity.rendering.hybrid","0.3.3-preview.11"));
@@ -204,7 +207,7 @@ public class UnitySerializer
 		return member;
 	}
 	
-	public void serialize(String component, SimpleType type)
+	public void serialize(String component, SimpleType type, boolean engineType)
 	{
 		var unit = unit();
 		
@@ -504,7 +507,14 @@ public class UnitySerializer
 				unit.getUsings().add(using);			
 			}
 		}
-		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Components/"+component+"Authoring.cs");
+		if (engineType)
+		{
+			GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Engine/Components/"+component+"Authoring.cs");
+		}
+		else
+		{
+			GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Gameplay/Components/"+component+"Authoring.cs");
+		}
 	}
 	
 	private void serialize(Archetype archetype)
@@ -512,7 +522,7 @@ public class UnitySerializer
 		
 	}
 	
-	private void serializeUnified(System system)
+	private void serializeUnified(System system, boolean engine)
 	{
 		var unit = csharp.createCompilationUnit();
 		var namespaces = new HashSet<String>();
@@ -569,7 +579,14 @@ public class UnitySerializer
 			}
 		}
 		
-		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/"+system.getName()+".cs");
+		if (engine)
+		{
+			GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Engine/Systems/"+system.getName()+".cs");
+		}
+		else
+		{
+			GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Gameplay/Systems/"+system.getName()+".cs");
+		}
 	}
 	
 	private void addStatementsUnified(List<Statement> statements, List<m.csharp.Statement> list, QuerySet querySet, HashSet<String> namespaces)
@@ -1420,7 +1437,7 @@ public class UnitySerializer
 			case none: return "None";
 			case stateMachine: return "AnimatorController";
 			case tag: return "None";
-			case text: return "String";
+			case text: return "string";
 			case type: return "Type";
 		}
 		return "None";
@@ -1506,7 +1523,7 @@ public class UnitySerializer
 		addFunction.setName("AddHybridComponent");
 		component.setName("component");
 		
-		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/EngineComponentConversion.cs");
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Engine/Systems/EngineComponentConversion.cs");
 	}
 	
 	private void systemGroups()
@@ -1526,7 +1543,7 @@ public class UnitySerializer
 		engine.setName("Engine");
 		engine.getSuperTypes().add("ComponentSystemGroup");
 		
-		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/SystemGroups.cs");
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Engine/Systems/SystemGroups.cs");
 	}
 	
 	private void inputSystem()
@@ -1593,7 +1610,7 @@ public class UnitySerializer
 		onUpdate.getStatements().add(returnDefault);
 		returnDefault.setExpression(defaultValue);
 		
-		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/Input.cs");
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Engine/Systems/ReadInput.cs");
 	}
 	
 	private void timers()
@@ -1668,14 +1685,14 @@ public class UnitySerializer
 		
 		onUpdate.getStatements().add(returnStatement(defaultExpression()));
 		
-		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/TickTimers.cs");
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Engine/Systems/TickTimers.cs");
 	}
 	
 	private void Physics()
 	{
-		serialize("Collisions", entityList);
-		serialize("CollisionEntries", entityList);
-		serialize("CollisionExits", entityList);
+		serialize("Collisions", entityList, true);
+		serialize("CollisionEntries", entityList, true);
+		serialize("CollisionExits", entityList, true);
 		
 		var unit = unit();
 		unit.getUsings().add(namespaceUsing("UnityEngine"));
@@ -1761,7 +1778,7 @@ public class UnitySerializer
 		clazz.getMembers().add(onCreate);
 		clazz.getMembers().add(onUpdate);
 		clazz.getMembers().add(job);
-		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/DetectCollisions.cs");
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Engine/Systems/DetectCollisions.cs");
 	}
 	
 	private void extensions()
@@ -1789,7 +1806,7 @@ public class UnitySerializer
 		iEntity.getMembers().add(getter("Entity", "Value"));
 		
 		unit.getTypes().add(iEntity);
-		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/Extensions.cs");
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Engine/Systems/Extensions.cs");
 	}
 	private void conversion()
 	{
@@ -1815,7 +1832,13 @@ public class UnitySerializer
 		clazz.getMembers().add(onUpdate);
 		clazz.getMembers().add(hybrid);
 		
-		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/Engine/EngineComponentConversion.cs");
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Engine/Systems/EngineComponentConversion.cs");
+	}
+	
+	private void ui()
+	{
+		serialize("Number", float1, true);
+		serialize("Text", text, true);
 	}
 }
 
