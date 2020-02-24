@@ -151,13 +151,12 @@ public class UnitySerializer
 		}
 		
 		
-		extras();
+		conversion();
 		systemGroups();
 		inputSystem();
 		Physics();
 		timers();
 		extensions();
-		conversion();
 		ui();
 	}
 	
@@ -1443,11 +1442,11 @@ public class UnitySerializer
 		return "None";
 	}
 	
-	private void extras()
+	private void conversion()
 	{
-		var engineComponents = new String[] {"Camera", "Light"};
+		var engineComponents = new String[] {"Camera", "Light", "PanelScaler", "PanelRenderer"};
 		var unit = csharp.createCompilationUnit();
-		var namespaces = new String[]{"UnityEngine","Unity.Entities"};
+		var namespaces = new String[]{"UnityEngine","Unity.Entities", "Unity.UIElements.Runtime"};
 		for (var namespace : namespaces)
 		{
 			if (namespace != null)
@@ -1548,6 +1547,11 @@ public class UnitySerializer
 	
 	private void inputSystem()
 	{
+		serialize("inputValue", float1, true);
+		serialize("inputVector", float2, true);
+		serialize("inputTriggered", bool, true);
+		serialize("input", input, true);
+		
 		var unit = unit();
 		unit.getUsings().add(namespaceUsing("UnityEngine"));
 		unit.getUsings().add(namespaceUsing("UnityEngine.InputSystem"));
@@ -1562,6 +1566,22 @@ public class UnitySerializer
 		var onUpdate = method(new Modifier[] {PROTECTED,OVERRIDE}, "JobHandle", "OnUpdate", new Parameter[] {parameter("JobHandle", "inputDependencies")});
 		clazz.getMembers().add(onUpdate);
 		
+		var lambda = csharp.createLambda();
+		var run = access(access(access(variable("Entities"),function("ForEach",argument(lambda))),function("WithoutBurst")), function("Run"));
+		
+		onUpdate.getStatements().add(statement(run));
+		
+		lambda.getParameters().add(parameter("input", "input"));
+		lambda.getParameters().add(refParameter("inputValue", "inputValue"));
+		
+		lambda.getStatements().add(declaration(declarator("action", access(variable("input"), variable("Value")))));
+		
+		lambda.getStatements().add(statement(access(variable("action"),function("Enable"))));
+		var field = access(variable("inputValue"),variable("Value"));
+		m.csharp.Expression read = access(variable("action"),function("ReadValue", new String[] {"float"}));
+		
+		lambda.getStatements().add(statement(assignment(field,read)));
+		/*
 		for (var component : MValidator.components.keySet())
 		{
 			if (MValidator.components.get(component) == input)
@@ -1602,7 +1622,7 @@ public class UnitySerializer
 				}
 			}
 		}
-		
+		*/
 		
 		
 		var returnDefault = csharp.createReturn();
@@ -1615,6 +1635,10 @@ public class UnitySerializer
 	
 	private void timers()
 	{
+		serialize("timer", float1, true);
+		serialize("elapsed", float1, true);
+		serialize("timeout", float1, true);
+		
 		var unit = unit();
 		unit.getUsings().add(namespaceUsing("UnityEngine"));
 		unit.getUsings().add(namespaceUsing("Unity.Entities"));
@@ -1808,37 +1832,13 @@ public class UnitySerializer
 		unit.getTypes().add(iEntity);
 		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Engine/Systems/Extensions.cs");
 	}
-	private void conversion()
-	{
-		var unit = unit();
-
-		unit.getUsings().add(namespaceUsing("Unity.Entities"));
-		unit.getUsings().add(namespaceUsing("UnityEngine"));
-		
-		var clazz = clazz(new Modifier[] {PUBLIC}, "EngineComponentConversion", new String[] {"GameObjectConversionSystem"});
-		unit.getTypes().add(clazz);
-		
-		var onUpdate = method(new Modifier[] {PROTECTED,OVERRIDE}, "void", "OnUpdate");
-		onUpdate.getStatements().add(statement(function("HybridComponent",new String[] {"Camera"})));
-		onUpdate.getStatements().add(statement(function("HybridComponent",new String[] {"Light"})));
-		
-		var hybrid = method(new Modifier[] {PRIVATE}, "void", "HybridComponent", new String[] {"T"});
-		hybrid.getTypeConstraints().add(typeConstraint("T", new String[] {"Component"}));
-		
-		var lambda = lambda(new Parameter[] {parameter("T", "component")});
-		lambda.getStatements().add(statement(function("AddHybridComponent", argument(variable("component")))));
-		hybrid.getStatements().add(statement(access(variable("Entities"),function("ForEach",argument(lambda)))));
-		
-		clazz.getMembers().add(onUpdate);
-		clazz.getMembers().add(hybrid);
-		
-		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Engine/Systems/EngineComponentConversion.cs");
-	}
 	
 	private void ui()
 	{
 		serialize("Number", float1, true);
 		serialize("Text", text, true);
+		serialize("Label", text, true);
+		serialize("LabelClass", text, true);
 	}
 }
 
