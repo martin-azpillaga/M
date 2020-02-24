@@ -1835,10 +1835,47 @@ public class UnitySerializer
 	
 	private void ui()
 	{
-		serialize("Number", float1, true);
-		serialize("Text", text, true);
-		serialize("Label", text, true);
-		serialize("LabelClass", text, true);
+		serialize("number", float1, true);
+		serialize("text", text, true);
+		serialize("label", text, true);
+		serialize("labelClass", text, true);
+		
+		var unit = unit();
+		unit.getUsings().add(namespaceUsing("UnityEngine"));
+		unit.getUsings().add(namespaceUsing("UnityEngine.UIElements"));
+		unit.getUsings().add(namespaceUsing("Unity.UIElements.Runtime"));
+		unit.getUsings().add(namespaceUsing("Unity.Entities"));
+		unit.getUsings().add(namespaceUsing("Unity.Jobs"));
+		
+		var clazz = clazz(new Modifier[] {PUBLIC}, "UI", new String[] {"JobComponentSystem"});
+		clazz.getAttributes().add(attribute("UpdateInGroup", new m.csharp.Expression[] {typeof("Engine")}));
+		
+		unit.getTypes().add(clazz);
+		
+		var onUpdate = method(new Modifier[] {PROTECTED,OVERRIDE}, "JobHandle", "OnUpdate", new Parameter[] {parameter("JobHandle", "inputDependencies")});
+		clazz.getMembers().add(onUpdate);
+		
+		var lambda = csharp.createLambda();
+		var run = access(access(access(variable("Entities"),function("ForEach",argument(lambda))),function("WithoutBurst")), function("Run"));
+		
+		onUpdate.getStatements().add(statement(run));
+		
+		lambda.getParameters().add(parameter("PanelRenderer", "panel"));
+		
+		var inner = lambda(new Parameter[] {parameter("label", "label"),parameter("number","number")});
+		var innerRun = access(access(access(variable("Entities"),function("ForEach",argument(inner))),function("WithoutBurst")), function("Run"));
+
+		lambda.getStatements().add(statement(innerRun));
+		
+		var foreachLabel = lambda(new Parameter[] {parameter("Label", "l")});
+		foreachLabel.getStatements().add(statement(assignment(access(variable("l"),variable("text")), access(access(variable("number"),variable("Value")),function("ToString")))));
+		inner.getStatements().add(statement(access(access(access(variable("panel"),variable("visualTree")),function("Query", new String[] {"Label"}, argument(access(variable("label"),variable("Value"))))),function("ForEach", argument(foreachLabel)))));
+		var returnDefault = csharp.createReturn();
+		var defaultValue = csharp.createDefault();
+		onUpdate.getStatements().add(returnDefault);
+		returnDefault.setExpression(defaultValue);
+		
+		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Engine/Systems/UI.cs");
 	}
 }
 

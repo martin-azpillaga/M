@@ -21,10 +21,10 @@ public enum Component
 	material(SimpleType.material, "Unity.Hybrid.Rendering", "RenderMesh", "material", true),
 	// Rendering UI
 	font(SimpleType.font, "UnityEngine.UI", "Text", "font", false),
-	text(SimpleType.text, "UnityEngine.UI", "Text", "text", false),
+	text(SimpleType.text, null, "text", "text", false),
 	image(SimpleType.image, "UnityEngine.UI", "Image", "source", false),
 	button(tag, "UnityEngine.UI", "Button", "active", false),
-	number(float1, null, "Number", "Value", true),
+	number(float1, null, "number", "Value", true),
 	// Rendering camera
 	viewAngle(float1, "UnityEngine", "Camera", "viewAngle", false),
 	viewDistance(float1, "UnityEngine", "Camera", "farClipPlane", false),
