@@ -5,9 +5,13 @@ import static m.library.SimpleType.*;
 public enum Component 
 {
 	// Input works with magic components
-	// XTrigger, XRange and XVector
+	 inputTriggered(bool, null, "inputTriggered", "Value", true),
+	 inputValue(float1, null, "inputValue", "Value", true),
+	 inputVector(float2, null, "inputVector", "Value", true),
 	// Timers work with magic components
-	// XTotal, XElapsed and XTimeout
+	 timer(float1, null, "timer", "Value", true),
+	 elapsed(float1, null, "elapsed", "Value", true),
+	 timeout(bool, null, "timeout", "Value", true),
 	// Transform
 	position(float3, "Unity.Transforms", "Translation", "Value", true),
 	rotation(float4, "Unity.Transforms", "Rotation", "Value", true),
