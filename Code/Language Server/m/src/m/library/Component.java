@@ -5,9 +5,13 @@ import static m.library.SimpleType.*;
 public enum Component 
 {
 	// Input works with magic components
-	// XTrigger, XRange and XVector
+	 inputTriggered(bool, null, "inputTriggered", "Value", true),
+	 inputValue(float1, null, "inputValue", "Value", true),
+	 inputVector(float2, null, "inputVector", "Value", true),
 	// Timers work with magic components
-	// XTotal, XElapsed and XTimeout
+	 timer(float1, null, "timer", "Value", true),
+	 elapsed(float1, null, "elapsed", "Value", true),
+	 timeout(bool, null, "timeout", "Value", true),
 	// Transform
 	position(float3, "Unity.Transforms", "Translation", "Value", true),
 	rotation(float4, "Unity.Transforms", "Rotation", "Value", true),
@@ -17,10 +21,10 @@ public enum Component
 	material(SimpleType.material, "Unity.Hybrid.Rendering", "RenderMesh", "material", true),
 	// Rendering UI
 	font(SimpleType.font, "UnityEngine.UI", "Text", "font", false),
-	text(SimpleType.text, "UnityEngine.UI", "Text", "text", false),
+	text(SimpleType.text, null, "text", "text", false),
 	image(SimpleType.image, "UnityEngine.UI", "Image", "source", false),
 	button(tag, "UnityEngine.UI", "Button", "active", false),
-	number(float1, "UnityEngine.UI", "Text", "text", false),
+	number(float1, null, "number", "Value", true),
 	// Rendering camera
 	viewAngle(float1, "UnityEngine", "Camera", "viewAngle", false),
 	viewDistance(float1, "UnityEngine", "Camera", "farClipPlane", false),
