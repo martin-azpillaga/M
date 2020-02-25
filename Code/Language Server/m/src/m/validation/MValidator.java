@@ -275,7 +275,7 @@ public class MValidator extends AbstractMValidator
 	@Check
 	public void infer(game.Component component)
 	{
-		magicNames(component.getName(), component, COMPONENT__NAME);
+		//magicNames(component.getName(), component, COMPONENT__NAME);
 	}
 	
 	@Check
@@ -285,7 +285,7 @@ public class MValidator extends AbstractMValidator
 		var component = cell.getComponent();
 		
 		setVariable(entity, SimpleType.entity, cell, CELL__ENTITY);
-		magicNames(component, cell, CELL__COMPONENT);
+		//magicNames(component, cell, CELL__COMPONENT);
 	}
 	
 	private void magicNames(String component, EObject o, EStructuralFeature feature)
