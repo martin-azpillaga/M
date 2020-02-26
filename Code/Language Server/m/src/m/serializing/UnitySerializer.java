@@ -115,6 +115,7 @@ public class UnitySerializer
 	
 	IFileSystemAccess2 fsa;
 	Class systemClass;
+	boolean mainThread = true;
 	
 	public void serialize(Game game, IFileSystemAccess2 fsa)
 	{
@@ -147,7 +148,7 @@ public class UnitySerializer
 		
 		for (var system : game.getSystems())
 		{
-			serializeUnified(system, false);
+			serialize(system);
 		}
 		
 		
@@ -171,9 +172,9 @@ public class UnitySerializer
 		var members = list.getMembers();
 		var modules = new String[]{"ai","androidjni","animation","assetbundle","audio","cloth","director","imageconversion","imgui","jsonserialize","particlesystem","physics","physics2d","screencapture","terrain","terrainphysics","tilemap","ui","uielements","umbra","unityanalytics","unitywebrequest","unitywebrequestassetbundle","unitywebrequestaudio","unitywebrequesttexture","unitywebrequestwww","vehicles","video","vr","wind","xr"};
 		members.add(dependency("com.unity.ui.runtime", "https://github.com/martin-azpillaga/UI.git"));
-		members.add(dependency("com.unity.entities","0.5.1-preview.11"));
-		members.add(dependency("com.unity.jobs","0.2.4-preview.11"));
-		members.add(dependency("com.unity.collections","0.5.1-preview.11"));
+		members.add(dependency("com.unity.entities","0.6.0-preview.24"));
+		members.add(dependency("com.unity.jobs","0.2.5-preview.20"));
+		members.add(dependency("com.unity.collections","0.5.2-preview.8"));
 		members.add(dependency("com.unity.inputsystem","1.0.0-preview.4"));
 		members.add(dependency("com.unity.dots.editor", "0.3.0-preview"));
 		members.add(dependency("com.unity.ui.builder", "0.10.1-preview"));
@@ -410,6 +411,14 @@ public class UnitySerializer
 			
 			unit.getTypes().add(struct);
 			unit.getTypes().add(clazz);
+		}
+		else if (type == entity)
+		{
+			namespaces.add("UnityEngine");
+			var struct = struct(new Modifier[] {PUBLIC}, "creation", new String[] {"IComponentData"});
+			struct.getMembers().add(field(new Modifier[] {PUBLIC}, "Entity", declarator("Value")));
+			struct.getAttributes().add(attribute("GenerateAuthoringComponent"));
+			unit.getTypes().add(struct);
 		}
 		else
 		{
@@ -655,7 +664,7 @@ public class UnitySerializer
 							parameter.setName(component+"_"+variable+"_");
 							systemClass.getMembers().add(0, field(unityName(component, namespaces),declarator(component+"_"+variable)));
 							lambda.getStatements().add(0,statement(assignment(variable(component+"_"+variable), variable(component+"_"+variable+"_"))));
-							
+														systemClass.getMembers().add(0, field(unityName(component, namespaces),declarator(component+"_"+variable)));
 							if (myQuery.get(component).contains(AccessKind.write) && isValueType(component))
 							{
 								parameter.setRef(true);
@@ -771,7 +780,7 @@ public class UnitySerializer
 						argument.setValue(entityArgument);
 						entityArgument.setName("entity_"+entity);
 						
-						querySet.add(entity, "Entity", AccessKind.read);
+						//querySet.add(entity, "Entity", AccessKind.read);
 						
 						var myQuery = querySet.queries.get(entity);
 						if (myQuery != null)
@@ -857,106 +866,43 @@ public class UnitySerializer
 		}
 	}
 	
-	/*
 	private void serialize(System system)
 	{
-		var unit = csharp.createCompilationUnit();
+		var unit = unit();
 		var namespaces = new HashSet<String>();
 		var querySet = new QuerySet();
+		
+		unit.getUsings().add(staticUsing("Unity.Collections.Allocator"));
 
 		namespaces.add("Unity.Entities");
 		namespaces.add("Unity.Jobs");
 		
-		var clazz = csharp.createClass();
+		var clazz = clazz(new Modifier[] {PUBLIC}, system.getName(), new String[] {"SystemBase"});
+		clazz.getAttributes().add(attribute("UpdateInGroup", new m.csharp.Expression[] {typeof("Gameplay")}));
 		unit.getTypes().add(clazz);
-		clazz.getModifiers().add(PUBLIC);
-		clazz.setName(system.getName());
-		clazz.getSuperTypes().add("JobComponentSystem");
+		systemClass = clazz;
 		
-		var onUpdate = csharp.createMethod();
-		var handleParameter = csharp.createParameter();
+		var onUpdate = method(new Modifier[] {PROTECTED, OVERRIDE}, "void", "OnUpdate");
 		clazz.getMembers().add(onUpdate);
-		onUpdate.getModifiers().add(PROTECTED);
-		onUpdate.getModifiers().add(OVERRIDE);
-		onUpdate.setType("JobHandle");
-		onUpdate.setName("OnUpdate");
-		onUpdate.getParameters().add(handleParameter);
-		handleParameter.setType("JobHandle");
-		handleParameter.setName("inputDependencies");
 		
-		
-		
-		
-		var runStatement = csharp.createExpressionStatement();
-		var run = csharp.createAccessExpression();
-		var jobWithCode = csharp.createAccessExpression();
-		var job = csharp.createVariable();
-		var withCode = csharp.createParameterizedFunction();
-		var updateArgument = csharp.createArgument();
-		var lambda = csharp.createLambda();
-		var runCall = csharp.createParameterizedFunction();
-		onUpdate.getStatements().add(runStatement);
-		runStatement.setExpression(run);
-		run.setLeft(jobWithCode);
-		run.setRight(runCall);
-		jobWithCode.setLeft(job);
-		jobWithCode.setRight(withCode);
-		withCode.getArguments().add(updateArgument);
-		updateArgument.setValue(lambda);
-		job.setName("Job");
-		withCode.setName("WithCode");
-		runCall.setName("Run");
-		
-		addStatements(system.getStatements(), lambda.getStatements(), querySet, namespaces);
-		
-		for (var query : querySet.queries.keySet())
-		{
-			var amountDeclaration = csharp.createDeclaration();
-			var amountDeclarator = csharp.createDeclarator();
-			var amount = csharp.createAccessExpression();
-			var amountLeft = csharp.createVariable();
-			var amountRight = csharp.createParameterizedFunction();
-			onUpdate.getStatements().add(0,amountDeclaration);
-			amountDeclaration.getDeclarators().add(amountDeclarator);
-			amountDeclarator.setValue(amount);
-			amount.setLeft(amountLeft);
-			amount.setRight(amountRight);
-			amountDeclarator.setVariable(query+"_amount");
-			amountLeft.setName(query);
-			amountRight.setName("CalculateEntityCount");
-		}
-		
-		var returnDefault = csharp.createReturn();
-		var defaultValue = csharp.createDefault();
-		onUpdate.getStatements().add(returnDefault);
-		returnDefault.setExpression(defaultValue);
+		addStatements(system.getStatements(), onUpdate.getStatements(), querySet, namespaces);
 		
 		if (querySet.queries.size() > 0)
 		{
-			var staticUsing = csharp.createStaticUsing();
-			staticUsing.setNamespace("Unity.Entities.ComponentType");
-			unit.getUsings().add(staticUsing);
+			unit.getUsings().add(staticUsing("Unity.Entities.ComponentType"));
 			
-			var onCreate = csharp.createMethod();
-			clazz.getMembers().add(0, onCreate);
-			onCreate.getModifiers().add(PROTECTED);
-			onCreate.getModifiers().add(OVERRIDE);
-			onCreate.setType("void");
-			onCreate.setName("OnCreate");
+			var onCreate = method(new Modifier[] {PROTECTED, OVERRIDE}, "void", "OnCreate");
+			clazz.getMembers().add(0,onCreate);
 			
 			for (var queryKey : querySet.queries.keySet())
 			{
+				clazz.getMembers().add(0,field("EntityQuery", declarator(queryKey)));
+				
 				var query = querySet.queries.get(queryKey);
-				var assignmentExpression = csharp.createExpressionStatement();
-				var assignment = csharp.createAssignment();
-				var assignmentLeft = csharp.createVariable();
-				var assignmentRight = csharp.createParameterizedFunction();
-				onCreate.getStatements().add(assignmentExpression);
-				assignmentExpression.setExpression(assignment);
-				assignment.setLeft(assignmentLeft);
-				assignment.setRight(assignmentRight);
-				assignmentLeft.setName(queryKey);
-				assignmentRight.setName("GetEntityQuery");
+				
+				var function = function("GetEntityQuery");
+				var get = statement(assignment(variable(queryKey),function));
+				onCreate.getStatements().add(get);
 				
 				for (var component : query.keySet())
 				{
@@ -967,138 +913,270 @@ public class UnitySerializer
 						totalAccess = "ReadWrite";
 					}
 					
-					var componentAccessArgument = csharp.createArgument();
-					var accessType = csharp.createParameterizedFunction();
-					assignmentRight.getArguments().add(componentAccessArgument);
-					componentAccessArgument.setValue(accessType);
-					accessType.setName(totalAccess);
-					accessType.getTypes().add(unityName(component, namespaces));
+					function.getArguments().add(argument(function(totalAccess, new String[] {unityName(component, namespaces)})));
 				}
 			}
 		}
 		
-		for (var queryKey : querySet.queries.keySet())
-		{
-			var field = csharp.createField();
-			var declarator = csharp.createDeclarator();
-			clazz.getMembers().add(0, field);
-			field.getDeclarators().add(declarator);
-			field.setType("EntityQuery");
-			declarator.setVariable(queryKey);
-		}
-		
 		for (var namespace : namespaces)
 		{
-			var using = csharp.createNamespaceUsing();
-			using.setNamespace(namespace);
-			unit.getUsings().add(using);			
+			if (namespace != null)
+			{
+				unit.getUsings().add(namespaceUsing(namespace));
+			}
 		}
 		
 		GenericSerializer.generate(unit, csharpModule, fsa, "Unity/Assets/Code/Systems/"+system.getName()+".cs");
 	}
 	
-	private void addStatements(List<Statement> statements, List<Statement> list, QuerySet querySet, namespaces)
+	private void addStatements(List<Statement> statements, List<m.csharp.Statement> list, QuerySet querySet, HashSet<String> namespaces)
 	{
+		var tail = new ArrayList<m.csharp.Statement>();
+		
 		for (var statement : statements)
 		{
 			if (statement instanceof Forall)
 			{
 				var forall = (Forall) statement;
+				
 				var variable = forall.getVariable();
-				var collection = forall.getCollection();
 				var conditionExpression = forall.getCondition();
-				cs(collection, querySet, namespaces);
-				cs(conditionExpression, querySet, namespaces);
-
 				
+				var loop = forStatement(declaration(declarator("i_"+variable, floatLiteral("0"))),comparison(variable("i_"+variable), ComparisonKind.LOWER, access(variable(variable),function("CalculateEntityCount"))),increment(variable("i_"+variable)));
+				list.add(loop);
 				
-				var forStatement = csharp.createFor();
-				var initialization = csharp.createDeclaration();
-				var indexDeclarator = csharp.createDeclarator();
-				var zero = csharp.createFloatLiteral();
-				var condition = csharp.createComparison();
-				var conditionLeft = csharp.createVariable();
-				var conditionRight = csharp.createVariable();
-				var iterator = csharp.createIncrement();
-				var iteratorExpression = csharp.createVariable();
-				forStatement.setInitialization(initialization);
-				forStatement.setCondition(condition);
-				forStatement.setIterator(iterator);
-				initialization.getDeclarators().add(indexDeclarator);
-				indexDeclarator.setValue(zero);
-				condition.setLeft(conditionLeft);
-				condition.setRight(conditionRight);
-				iterator.setExpression(iteratorExpression);
+				var block = loop.getStatements();
 				
-				indexDeclarator.setVariable(variable+"_index");
-				zero.setValue("0");
-				conditionLeft.setName(variable+"_index");
-				condition.setKind(ComparisonKind.LOWER);
-				conditionRight.setName(variable+"_amount");
-				iteratorExpression.setName(variable+"_index");
-				list.add(forStatement);
+				if (conditionExpression != null)
+				{
+					if (!(conditionExpression instanceof Function && ((Function)conditionExpression).getName().equals("has")))
+					{
+						var selection = csharp.createSelection();
+						var first = csharp.createBranch();
+						selection.getBranches().add(first);
+						first.setCondition(cs(conditionExpression,querySet,namespaces));
+						loop.getStatements().add(selection);
+						block = first.getStatements();
+					}
+					else
+					{
+						// Hack for executing access inference
+						cs(conditionExpression, querySet, namespaces);
+					}
+				}
 				
-				addStatements(forall.getStatements(), forStatement.getStatements(), querySet, namespaces);
+				addStatements(forall.getStatements(), block, querySet, namespaces);
 				
+				var myQuery = querySet.queries.get(variable);
+				if (myQuery != null)
+				{
+					for (var component : myQuery.keySet())
+					{
+						if (!myQuery.get(component).contains(AccessKind.tag))
+						{
+							var type = MValidator.components.get(component);
+							if (type.isValueType)
+							{
+								list.add(0,declaration(declarator(component+"s_"+variable, access(variable(variable),function("ToComponentDataArray", new String[] {unityName(component, namespaces)}, argument(variable("TempJob")))))));
+								loop.getStatements().add(0,declaration(declarator(component+"_"+variable, index(component+"s_"+variable, variable("i_"+variable)))));
+								list.add(statement(access(variable(component+"s_"+variable),function("Dispose"))));
+							}
+							else if (type.isCollection)
+							{
+								loop.getStatements().add(0, declaration(declarator(component+"_"+variable,access(variable("EntityManager"),function("GetBuffer", new String[] {unityName(component, namespaces)}, argument(variable("entity_"+variable)))))));
+							}
+							
+						}
+					}
+					list.add(0,declaration(declarator("entities_"+variable, access(variable(variable),function("ToEntityArray", argument(variable("TempJob")))))));
+					loop.getStatements().add(0,declaration(declarator("entity_"+variable, index("entities_"+variable, variable("i_"+variable)))));
+					list.add(statement(access(variable("entities_"+variable),function("Dispose"))));
+				}
 			}
-			else if (statement instanceof Exists)
+			else if (statement instanceof Selection)
 			{
-				var exists = (Exists) statement;
-				var variable = exists.getVariable();
-				var collection = exists.getCollection();
-				var conditionExpression = exists.getCondition();
-				cs(conditionExpression, querySet, namespaces);
+				var selection = (Selection) statement;
+				var cs = csharp.createSelection();
 				
-				var forStatement = csharp.createFor();
-				var initialization = csharp.createDeclaration();
-				var indexDeclarator = csharp.createDeclarator();
-				var zero = csharp.createFloatLiteral();
-				var condition = csharp.createComparison();
-				var conditionLeft = csharp.createVariable();
-				var conditionRight = csharp.createVariable();
-				var iterator = csharp.createIncrement();
-				var iteratorExpression = csharp.createVariable();
-				forStatement.setInitialization(initialization);
-				forStatement.setCondition(condition);
-				forStatement.setIterator(iterator);
-				initialization.getDeclarators().add(indexDeclarator);
-				indexDeclarator.setValue(zero);
-				condition.setLeft(conditionLeft);
-				condition.setRight(conditionRight);
-				iterator.setExpression(iteratorExpression);
+				var csBranch = csharp.createBranch();
+				cs.getBranches().add(csBranch);
+				csBranch.setCondition(cs(selection.getCondition(), querySet, namespaces));
+				addStatements(selection.getPositiveStatements(), csBranch.getStatements(), querySet, namespaces);
 				
-				indexDeclarator.setVariable(variable+"_index");
-				zero.setValue("0");
-				conditionLeft.setName(variable+"_index");
-				condition.setKind(ComparisonKind.LOWER);
-				conditionRight.setName(variable+"_amount");
-				iteratorExpression.setName(variable+"_index");
-				list.add(forStatement);
-				
-				addStatements(exists.getStatements(), forStatement.getStatements(), querySet, namespaces);
-				
+				list.add(cs);
 			}
 			else if (statement instanceof Assignment)
 			{
 				var assignment = (Assignment) statement;
-				var variable = assignment.getVariable();
+				var variable = assignment.getAtom();
 				var expression = assignment.getExpression();
 				
 				if (variable instanceof Variable)
 				{
+					var a = (Variable) variable;
+					var ass = declarator(a.getName());
+					var declaration = declaration(ass);
+					var type = "";
+					var cs = declaration;
 					
+					if (expression instanceof ImplicitSet)
+					{
+						var set = (ImplicitSet) expression;
+						var predicate = set.getPredicate();
+						var entity = set.getVariable();
+						
+						var creation = csharp.createCreation();
+						var allocatorArgument = csharp.createArgument();
+						var untilTempJob = csharp.createAccessExpression();
+						var allocator = csharp.createVariable();
+						var tempJob = csharp.createVariable();
+						creation.getArguments().add(allocatorArgument);
+						allocatorArgument.setValue(untilTempJob);
+						untilTempJob.setLeft(allocator);
+						untilTempJob.setRight(tempJob);
+						creation.setType("NativeList<Entity>");
+						namespaces.add("Unity.Collections");
+						type = "NativeList<Entity>";
+						ass.setValue(creation);
+						allocator.setName("Allocator");
+						tempJob.setName("TempJob");
+						
+						list.add(cs);
+						
+						var runStatement = csharp.createExpressionStatement();
+						var run = csharp.createAccessExpression();
+						var runCall = csharp.createParameterizedFunction();
+						var withoutBurst = csharp.createAccessExpression();
+						var withoutBurstCall = csharp.createParameterizedFunction();
+						var foreach = csharp.createAccessExpression();
+						var foreachCall = csharp.createParameterizedFunction();
+						var lambdaArgument = csharp.createArgument();
+						var lambda = csharp.createLambda();
+						var entities = csharp.createVariable();
+						list.add(runStatement);
+						runStatement.setExpression(run);
+						run.setLeft(withoutBurst);
+						run.setRight(runCall);
+						withoutBurst.setLeft(foreach);
+						withoutBurst.setRight(withoutBurstCall);
+						foreach.setLeft(entities);
+						foreach.setRight(foreachCall);
+						foreachCall.getArguments().add(lambdaArgument);
+						lambdaArgument.setValue(lambda);
+						entities.setName("Entities");
+						foreachCall.setName("ForEach");
+						withoutBurstCall.setName("WithoutBurst");
+						runCall.setName("Run");
+						
+						var selection = csharp.createSelection();
+						var first = csharp.createBranch();
+						selection.getBranches().add(first);
+						first.setCondition(cs(predicate, querySet, namespaces));
+						lambda.getStatements().add(selection);
+						
+						var addStatement = csharp.createExpressionStatement();
+						var untilAdd = csharp.createAccessExpression();
+						var nativeList = csharp.createVariable();
+						var add = csharp.createParameterizedFunction();
+						var argument = csharp.createArgument();
+						var entityArgument = csharp.createVariable();
+						addStatement.setExpression(untilAdd);
+						first.getStatements().add(addStatement);
+						untilAdd.setLeft(nativeList);
+						untilAdd.setRight(add);
+						nativeList.setName(a.getName());
+						add.setName("Add");
+						add.getArguments().add(argument);
+						argument.setValue(entityArgument);
+						entityArgument.setName("entity_"+entity);
+						
+						querySet.add(entity, "Entity", AccessKind.read);
+						
+						var myQuery = querySet.queries.get(entity);
+						if (myQuery != null)
+						{
+							for (var component : myQuery.keySet())
+							{
+								if (!component.equals("Entity"))
+								{
+									var parameter = csharp.createParameter();
+									parameter.setType(unityName(component, namespaces));
+									
+									parameter.setName(component+"_"+entity);
+									
+									if (myQuery.get(component).contains(AccessKind.write) && isValueType(component))
+									{
+										parameter.setRef(true);
+										lambda.getParameters().add(lambda.getParameters().size(), parameter);
+									}
+									else
+									{
+										lambda.getParameters().add(0, parameter);
+									}
+								}
+							}
+							if (myQuery.containsKey("Entity"))
+							{
+								var parameter = csharp.createParameter();
+								parameter.setType("Entity");
+								parameter.setName("entity_"+entity);
+								lambda.getParameters().add(0, parameter);
+							}
+						}
+						
+						var disposeStatement = csharp.createExpressionStatement();
+						var untilDispose = csharp.createAccessExpression();
+						var array = csharp.createVariable();
+						var dispose = csharp.createParameterizedFunction();
+						disposeStatement.setExpression(untilDispose);
+						untilDispose.setLeft(array);
+						untilDispose.setRight(dispose);
+						array.setName(a.getName());
+						dispose.setName("Dispose");
+						tail.add(disposeStatement);
+					}
+					else
+					{
+						type = "float";
+						ass.setValue(cs(expression, querySet, namespaces));
+						list.add(cs);
+					}
 				}
-				else if (variable instanceof ComponentAccess)
+				else if (variable instanceof Cell)
 				{
-					var access = (ComponentAccess) variable;
+					var access = (Cell) variable;
 					var entity = access.getEntity();
 					var component = access.getComponent();
 					querySet.add(entity, component, AccessKind.write);
+					
+					var csStatement = csharp.createExpressionStatement();
+					var csAssignment = csharp.createAssignment();
+					var left = access(variable(access.getComponent()+"_"+access.getEntity()),variable(fieldName(access.getComponent())));
+					var right = cs(expression, querySet, namespaces);
+					list.add(csStatement);
+					csStatement.setExpression(csAssignment);
+					csAssignment.setLeft(left);
+					csAssignment.setRight(right);
+					if (MValidator.components.get(component).isValueType)
+					{
+						list.add(statement(access(variable("EntityManager"),function("SetComponentData", argument(variable("entity_"+entity)), argument(variable(component+"_"+entity))))));
+					}
 				}
-				cs(expression, querySet, namespaces);
+			}
+			else if (statement instanceof Call)
+			{
+				var call = (Call) statement;
+				var cs = csharp.createExpressionStatement();
+				cs.setExpression(cs(call.getFunction(), querySet, namespaces));
+				list.add(cs);
 			}
 		}
-	}*/
+		
+		for (var t : tail)
+		{
+			list.add(t);
+		}
+	}
 	
 	private m.csharp.Expression cs(Expression expression, QuerySet querySet, HashSet<String> namespaces)
 	{
@@ -1162,7 +1240,7 @@ public class UnitySerializer
 			{
 			case MEMBERSHIP:
 				var name = ((Variable)e.getLeft()).getName();
-				querySet.add(name, "Entity", AccessKind.read);
+				//querySet.add(name, "Entity", AccessKind.read);
 				var buffer = cs(e.getRight(), querySet, namespaces);
 				
 				return access(buffer, function("Contains",argument(variable("entity_"+name))));
@@ -1219,14 +1297,31 @@ public class UnitySerializer
 				var y = argument(access(cs(e.getArguments().get(0), querySet, namespaces),variable("y")));
 				return access(library,function("Range", x, y));
 			}
+			else if (name.equals("create"))
+			{
+				var prefab = cs(e.getArguments().get(0), querySet, namespaces);
+				
+				return access(variable("EntityManager"),function("Instantiate", argument(prefab)));
+			}
+			else if (name.equals("delete"))
+			{
+				var prefab = cs(e.getArguments().get(0), querySet, namespaces);
+				
+				return access(variable("EntityManager"), function("DestroyEntity", argument(prefab)));
+			}
 			else if (name.equals("add"))
 			{
 				var component = ((Variable)e.getArguments().get(0)).getName();
 				var variable = ((Variable)e.getArguments().get(1)).getName();
-				querySet.add(variable, "Entity", AccessKind.read);
-				
-				return access(variable("commandBuffer"),function("AddComponent", new String[] {component}, argument(variable("entity_"+variable))));				
-				
+				if (!mainThread)
+				{
+					//querySet.add(variable, "Entity", AccessKind.read);
+					return access(variable("commandBuffer"),function("AddComponent", new String[] {component}, argument(variable("entity_"+variable))));
+				}
+				else
+				{
+					return access(variable("EntityManager"),function("AddComponent", new String[] {component}, argument(variable("entity_"+variable))));
+				}
 			}
 			else if (name.equals("remove"))
 			{
@@ -1234,9 +1329,15 @@ public class UnitySerializer
 				var variable = ((Variable)e.getArguments().get(1)).getName();
 				
 				querySet.add(variable, component, AccessKind.read);
-				querySet.add(variable, "Entity", AccessKind.read);
-				
-				return access(variable("commandBuffer"),function("RemoveComponent", new String[] {component},argument(variable("entity_"+variable))));
+				if (!mainThread)
+				{
+					//querySet.add(variable, "Entity", AccessKind.read);
+					return access(variable("commandBuffer"),function("RemoveComponent", new String[] {component},argument(variable("entity_"+variable))));
+				}
+				else
+				{
+					return access(variable("EntityManager"),function("RemoveComponent", new String[] {component}, argument(variable("entity_"+variable))));
+				}
 			}
 			else if (name.equals("x"))
 			{
@@ -1367,10 +1468,6 @@ public class UnitySerializer
 				namespaces.add(engineComponent.namespace);
 				name = engineComponent.unityType;
 			}
-		}
-		if (MValidator.components.get(component) == entityList)
-		{
-			name = "DynamicBuffer<"+name+">";
 		}
 		return name;
 	}
@@ -1581,6 +1678,22 @@ public class UnitySerializer
 		m.csharp.Expression read = access(variable("action"),function("ReadValue", new String[] {"float"}));
 		
 		lambda.getStatements().add(statement(assignment(field,read)));
+		
+		var trigger = csharp.createLambda();
+		var triggerRun = access(access(access(variable("Entities"),function("ForEach",argument(trigger))),function("WithoutBurst")), function("Run"));
+		
+		onUpdate.getStatements().add(statement(triggerRun));
+		
+		trigger.getParameters().add(parameter("input", "input"));
+		trigger.getParameters().add(refParameter("inputTriggered", "inputTriggered"));
+		
+		trigger.getStatements().add(declaration(declarator("action", access(variable("input"), variable("Value")))));
+		
+		trigger.getStatements().add(statement(access(variable("action"),function("Enable"))));
+		var triggerField = access(variable("inputTriggered"),variable("Value"));
+		var triggerRead = equality(access(variable("action"),variable("phase")), access(variable("InputActionPhase"), variable("Started")));
+		
+		trigger.getStatements().add(statement(assignment(triggerField,triggerRead)));
 		/*
 		for (var component : MValidator.components.keySet())
 		{
@@ -1637,7 +1750,7 @@ public class UnitySerializer
 	{
 		serialize("timer", float1, true);
 		serialize("elapsed", float1, true);
-		serialize("timeout", float1, true);
+		serialize("timeout", bool, true);
 		
 		var unit = unit();
 		unit.getUsings().add(namespaceUsing("UnityEngine"));
@@ -1652,7 +1765,7 @@ public class UnitySerializer
 		
 		onUpdate.getStatements().add(declaration("float", declarator("deltaTime", access(variable("Time"), variable("DeltaTime")))));
 		clazz.getMembers().add(onUpdate);
-		
+		/*
 		for (var elapsed : MValidator.components.keySet())
 		{
 			if (elapsed.endsWith("Elapsed"))
@@ -1705,7 +1818,7 @@ public class UnitySerializer
 
 				
 			}
-		}
+		}*/
 		
 		onUpdate.getStatements().add(returnStatement(defaultExpression()));
 		

@@ -7,6 +7,8 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="systems" upperBound="-1"
         eType="#//System" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="end" eType="#//End" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="version" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Archetype">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -123,7 +125,7 @@
         eType="#//Expression" containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="LogicalNot" eSuperTypes="#//Primary">
-    <eStructuralFeatures xsi:type="ecore:EReference" name="expression" eType="#//Cardinal"
+    <eStructuralFeatures xsi:type="ecore:EReference" name="expression" eType="#//Primary"
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Cardinal" eSuperTypes="#//Primary">
