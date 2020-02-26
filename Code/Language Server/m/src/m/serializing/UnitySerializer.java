@@ -105,6 +105,7 @@ import static m.serializing.CSharpHelper.forStatement;
 
 public class UnitySerializer
 {
+	GameFactory m = GameFactory.eINSTANCE;
 	CsharpFactory csharp = CsharpFactory.eINSTANCE;
 	YamlFactory yaml = YamlFactory.eINSTANCE;
 	JsonFactory json = JsonFactory.eINSTANCE;
@@ -906,14 +907,17 @@ public class UnitySerializer
 				
 				for (var component : query.keySet())
 				{
-					var accesses = query.get(component);
-					var totalAccess = "ReadOnly";
-					if (accesses.contains(AccessKind.write))
+					if (component != "Entity")
 					{
-						totalAccess = "ReadWrite";
+						var accesses = query.get(component);
+						var totalAccess = "ReadOnly";
+						if (accesses.contains(AccessKind.write))
+						{
+							totalAccess = "ReadWrite";
+						}
+						
+						function.getArguments().add(argument(function(totalAccess, new String[] {unityName(component, namespaces)})));
 					}
-					
-					function.getArguments().add(argument(function(totalAccess, new String[] {unityName(component, namespaces)})));
 				}
 			}
 		}
@@ -932,6 +936,64 @@ public class UnitySerializer
 	private void addStatements(List<Statement> statements, List<m.csharp.Statement> list, QuerySet querySet, HashSet<String> namespaces)
 	{
 		var tail = new ArrayList<m.csharp.Statement>();
+		
+		for (var i = 0; i < statements.size(); i++)
+		{
+			var statement = statements.get(i);
+			if (statement instanceof Assignment)
+			{
+				var assignment = (Assignment) statement;
+				var atom = assignment.getAtom();
+				var expression = assignment.getExpression();
+				
+				if (atom instanceof Variable && expression instanceof Function)
+				{
+					var v = (Variable) atom;
+					var f = (Function) expression;
+					
+					if (f.getName().equals("create"))
+					{
+						var forall = m.createForall();
+						var has = m.createFunction();
+						var prefabArgument = m.createVariable();
+						var entityArgument = m.createVariable();
+						has.setName("has");
+						prefabArgument.setName("prefab");
+						entityArgument.setName(v.getName());
+						has.getArguments().add(prefabArgument);
+						has.getArguments().add(entityArgument);
+						forall.setVariable(v.getName());
+						forall.setCondition(has);
+						
+						var selection = m.createSelection();
+						var condition = m.createEquality();
+						var entityVariable = m.createVariable();
+						entityVariable.setName("entity_"+v.getName());
+						condition.setLeft(entityVariable);
+						condition.setKind(game.EqualityKind.EQUAL);
+						condition.setRight((game.Comparable)f.getArguments().get(0));
+						selection.setCondition(condition);
+						forall.getStatements().add(selection);
+						
+						for (var j = i+1; j < statements.size(); j++)
+						{
+							selection.getPositiveStatements().add(statements.get(j));
+						}
+						
+						var createStatement = m.createCall();
+						var create = m.createFunction();
+						var creationArgument = m.createVariable();
+						createStatement.setFunction(create);
+						create.setName("create");
+						creationArgument.setName("entity_"+v.getName());
+						create.getArguments().add(creationArgument);
+						selection.getPositiveStatements().add(createStatement);
+						
+						statements.set(i, forall);
+					}
+				}
+			}
+		}
 		
 		for (var statement : statements)
 		{
@@ -1008,15 +1070,14 @@ public class UnitySerializer
 			else if (statement instanceof Assignment)
 			{
 				var assignment = (Assignment) statement;
-				var variable = assignment.getAtom();
+				var atom = assignment.getAtom();
 				var expression = assignment.getExpression();
 				
-				if (variable instanceof Variable)
+				if (atom instanceof Variable)
 				{
-					var a = (Variable) variable;
+					var a = (Variable) atom;
 					var ass = declarator(a.getName());
 					var declaration = declaration(ass);
-					var type = "";
 					var cs = declaration;
 					
 					if (expression instanceof ImplicitSet)
@@ -1036,7 +1097,6 @@ public class UnitySerializer
 						untilTempJob.setRight(tempJob);
 						creation.setType("NativeList<Entity>");
 						namespaces.add("Unity.Collections");
-						type = "NativeList<Entity>";
 						ass.setValue(creation);
 						allocator.setName("Allocator");
 						tempJob.setName("TempJob");
@@ -1137,14 +1197,13 @@ public class UnitySerializer
 					}
 					else
 					{
-						type = "float";
 						ass.setValue(cs(expression, querySet, namespaces));
 						list.add(cs);
 					}
 				}
-				else if (variable instanceof Cell)
+				else if (atom instanceof Cell)
 				{
-					var access = (Cell) variable;
+					var access = (Cell) atom;
 					var entity = access.getEntity();
 					var component = access.getComponent();
 					querySet.add(entity, component, AccessKind.write);

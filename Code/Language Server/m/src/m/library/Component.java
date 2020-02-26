@@ -4,6 +4,7 @@ import static m.library.SimpleType.*;
 
 public enum Component 
 {
+	prefab(tag, "Unity.Entities", "Prefab", null, true),
 	// Input works with magic components
 	 inputTriggered(bool, null, "inputTriggered", "Value", true),
 	 inputValue(float1, null, "inputValue", "Value", true),
