@@ -134,6 +134,21 @@ public class CSharpHelper
 		return struct;
 	}
 	
+	public static Struct struct(Modifier[] modifiers, String name, String[] superTypes)
+	{
+		var struct = csharp.createStruct();
+		struct.setName(name);
+		for (var modifier : modifiers)
+		{
+			struct.getModifiers().add(modifier);
+		}
+		for (var superType : superTypes)
+		{
+			struct.getSuperTypes().add(superType);
+		}
+		return struct;
+	}
+	
 	public static Struct struct(String name, String[] superTypes)
 	{
 		var struct = csharp.createStruct();
