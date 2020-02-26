@@ -3,16 +3,8 @@ import "http://www.eclipse.org/emf/2002/Ecore"
 import "azpillaga.world/game"
 
 Game:
-	(archetypes+=Archetype|systems+=System)*
+	systems+=System*
 	end=End;
-
-Archetype:
-	 name=WORD '≔'
-	(base=WORD '∪')?
-	 '{' (components+=Component (','? components+=Component)*)? '}';
-
-Component:
-	name=WORD;
 
 System:
 	name=WORD '≔'
@@ -31,7 +23,6 @@ Selection:
 	negativeStatements+=Selection)
 	)?;
 
-
 Iteration:
 	'↺' condition=Expression
 	'['	(statements+=Statement (','? statements+=Statement)*)? ']';
@@ -46,7 +37,6 @@ Assignment:
 
 Call:
 	function=Function;
-
 
 
 
@@ -82,7 +72,7 @@ Function:
 	'[' (arguments+=Expression (','? arguments+=Expression)*)? ']';
 
 LogicalNot:
-	'¬' expression=Cardinal;
+	'¬' expression=Primary;
 
 Cardinal:
 	'#' expression=Primary;

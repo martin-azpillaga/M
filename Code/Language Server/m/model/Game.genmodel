@@ -34,6 +34,8 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Game.ecore#//Game/archetypes"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Game.ecore#//Game/systems"/>
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Game.ecore#//Game/end"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Game.ecore#//Game/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Game.ecore#//Game/version"/>
     </genClasses>
     <genClasses ecoreClass="Game.ecore#//Archetype">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Game.ecore#//Archetype/name"/>
