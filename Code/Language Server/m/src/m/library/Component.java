@@ -17,6 +17,9 @@ public enum Component
 	position(float3, "Unity.Transforms", "Translation", "Value", true),
 	rotation(float4, "Unity.Transforms", "Rotation", "Value", true),
 	scale(float3, "Unity.Transforms", "NonUniformScale", "Value", true),
+	worldPosition(float3, "Unity.Transforms", "LocalToWorld", "Position", true),
+	parent(entity, "Unity.Transforms", "Parent", "Value", true),
+	children(entityList, "Unity.Transforms", "Child", "Value", true),
 	// Rendering 3D
 	mesh(SimpleType.mesh, "Unity.Hybrid.Rendering", "RenderMesh", "mesh", true),
 	material(SimpleType.material, "Unity.Hybrid.Rendering", "RenderMesh", "material", true),
