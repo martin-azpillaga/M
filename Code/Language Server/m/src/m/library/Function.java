@@ -96,6 +96,10 @@ public enum Function
 	enable("enable", SimpleType.type, none),
 	disable("disable", SimpleType.type, none),
 	
+	// UNIX IO
+	write("write", any, none),
+	halt("halt",none),
+	
 	// Collection functions
 	append("append", entity, entityList, none);
 	

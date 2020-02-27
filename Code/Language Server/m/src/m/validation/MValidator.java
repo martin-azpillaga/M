@@ -531,7 +531,10 @@ public class MValidator extends AbstractMValidator
 				for (var i = 0; i < engineFunction.type.parameters.size(); i++)
 				{
 					var simpleType = (SimpleType) parameters.get(i);
-					setExpression(arguments.get(i), simpleType, call, FUNCTION__NAME);
+					if (simpleType != any)
+					{
+						setExpression(arguments.get(i), simpleType, call, FUNCTION__NAME);
+					}
 				}
 				
 				break;
