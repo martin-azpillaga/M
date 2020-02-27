@@ -1425,11 +1425,15 @@ public class UnitySerializer
 			{
 				return access(cs(e.getArguments().get(0), querySet, namespaces), variable("w"));
 			}
-			else if (name.equals("empty"))
+			else if (name.equals("write"))
 			{
-				var set = cs(e.getArguments().get(0),querySet,namespaces);
-				
-				return comparison(access(set, variable("Length")), ComparisonKind.GREATER, floatLiteral("0"));
+				namespaces.add("UnityEngine");
+				return access(variable("Debug"),function("Log", argument(cs(e.getArguments().get(0), querySet, namespaces))));
+			}
+			else if (name.equals("halt"))
+			{
+				namespaces.add("UnityEditor");
+				return assignment(access(variable("EditorApplication"),variable("isPlaying")),booleanLiteral("false"));
 			}
 		}
 		else if (expression instanceof Variable)

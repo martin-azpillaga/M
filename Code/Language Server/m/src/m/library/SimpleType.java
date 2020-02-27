@@ -23,6 +23,7 @@ public enum SimpleType implements Type
 	entityList(false, true),
 
 	type(false, false),
+	any(false, false),
 	none(false, false);
 	
 	public final boolean isValueType;
