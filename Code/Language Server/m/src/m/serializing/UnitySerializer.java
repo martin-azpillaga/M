@@ -416,7 +416,7 @@ public class UnitySerializer
 		else if (type == entity)
 		{
 			namespaces.add("UnityEngine");
-			var struct = struct(new Modifier[] {PUBLIC}, "creation", new String[] {"IComponentData"});
+			var struct = struct(new Modifier[] {PUBLIC}, component, new String[] {"IComponentData"});
 			struct.getMembers().add(field(new Modifier[] {PUBLIC}, "Entity", declarator("Value")));
 			struct.getAttributes().add(attribute("GenerateAuthoringComponent"));
 			unit.getTypes().add(struct);
@@ -919,6 +919,10 @@ public class UnitySerializer
 						function.getArguments().add(argument(function(totalAccess, new String[] {unityName(component, namespaces)})));
 					}
 				}
+				if (query.isEmpty())
+				{
+					function.getArguments().add(argument(creation("ComponentType[]")));
+				}
 			}
 		}
 		
@@ -1364,9 +1368,15 @@ public class UnitySerializer
 			}
 			else if (name.equals("delete"))
 			{
-				var prefab = cs(e.getArguments().get(0), querySet, namespaces);
-				
-				return access(variable("EntityManager"), function("DestroyEntity", argument(prefab)));
+				var entityArgument = e.getArguments().get(0);
+				var prefab = cs(entityArgument, querySet, namespaces);
+				if (entityArgument instanceof Variable)
+				{
+					prefab = variable("entity_" + ((Variable)entityArgument).getName());
+				}
+				var variable = ((Variable)e.getArguments().get(0)).getName();
+				querySet.addEmpty(variable);
+				return access(variable("EntityManager"), function("DestroyEntityAndChildren", argument(prefab)));
 			}
 			else if (name.equals("add"))
 			{
@@ -1374,11 +1384,12 @@ public class UnitySerializer
 				var variable = ((Variable)e.getArguments().get(1)).getName();
 				if (!mainThread)
 				{
-					//querySet.add(variable, "Entity", AccessKind.read);
+					querySet.add(variable, "Entity", AccessKind.read);
 					return access(variable("commandBuffer"),function("AddComponent", new String[] {component}, argument(variable("entity_"+variable))));
 				}
 				else
 				{
+					querySet.addEmpty(variable);
 					return access(variable("EntityManager"),function("AddComponent", new String[] {component}, argument(variable("entity_"+variable))));
 				}
 			}
@@ -1983,10 +1994,26 @@ public class UnitySerializer
 		
 		unit.getUsings().add(namespaceUsing("Unity.Entities"));
 		unit.getUsings().add(namespaceUsing("Unity.Collections"));
-		
+		unit.getUsings().add(namespaceUsing("Unity.Transforms"));
 		var clazz = clazz(new Modifier[] {PUBLIC, STATIC}, "Extensions");
 		unit.getTypes().add(clazz);
 		
+		var destroyChildren = method(new Modifier[] {PUBLIC, STATIC}, "void", "DestroyEntityAndChildren", new Parameter[] {thisParameter("EntityManager", "entityManager"), parameter("Entity", "entity")});
+		clazz.getMembers().add(destroyChildren);
+		
+		var selection = ifStatement(access(variable("entityManager"),function("HasComponent", new String[] {"Child"}, argument(variable("entity")))));
+		var getChildren = declaration(declarator("childBuffer", access(variable("entityManager"),function("GetBuffer", new String[] {"Child"}, argument(variable("entity"))))));
+		var forChildren = foreach("child", variable("childBuffer"));
+		var recursion = statement(access(variable("entityManager"),function("DestroyEntityAndChildren", argument(access(variable("child"),variable("Value"))))));
+		
+		var destroyCurrent = statement(access(variable("entityManager"),function("DestroyEntity", argument(variable("entity")))));
+		
+		destroyChildren.getStatements().add(selection);
+		destroyChildren.getStatements().add(destroyCurrent);
+		selection.getBranches().get(0).getStatements().add(getChildren);
+		selection.getBranches().get(0).getStatements().add(forChildren);
+		forChildren.getStatements().add(recursion);
+			
 		var contains = method(new Modifier[] {PUBLIC, STATIC}, "bool", "Contains", new String[] {"T"}, new Parameter[] {thisParameter("DynamicBuffer<T>","buffer"), parameter("Entity", "entity")});
 		contains.getTypeConstraints().add(typeStructConstraint("T", new String[] {"IEntity"}));
 		
@@ -2073,6 +2100,13 @@ class QuerySet
 			query.put(component, new HashSet<AccessKind>());
 		}
 		query.get(component).add(kind);
+	}
+	public void addEmpty(String entity)
+	{
+		if (!queries.containsKey(entity))
+		{
+			queries.put(entity, new HashMap<String,HashSet<AccessKind>>());
+		}
 	}
 }
 
