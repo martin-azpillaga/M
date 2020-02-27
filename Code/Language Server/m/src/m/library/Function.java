@@ -94,7 +94,10 @@ public enum Function
 	remove("remove", SimpleType.type, entity, none),
 	has("has", SimpleType.type, entity, bool),
 	enable("enable", SimpleType.type, none),
-	disable("disable", SimpleType.type, none);
+	disable("disable", SimpleType.type, none),
+	
+	// Collection functions
+	append("append", entity, entityList, none);
 	
 	private Function(String name, Type... types)
 	{
