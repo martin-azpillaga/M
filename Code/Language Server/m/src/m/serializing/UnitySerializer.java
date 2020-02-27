@@ -1839,6 +1839,38 @@ public class UnitySerializer
 		
 		onUpdate.getStatements().add(declaration("float", declarator("deltaTime", access(variable("Time"), variable("DeltaTime")))));
 		clazz.getMembers().add(onUpdate);
+		
+		var elapsedLambda = csharp.createLambda();
+		elapsedLambda.getParameters().add(refParameter("elapsed", "elapsed"));
+		var addDelta = assignment(access(variable("elapsed"), variable("Value")), AssignmentKind.INCREASE, variable("deltaTime"));
+		elapsedLambda.getStatements().add(statement(addDelta));
+		
+		var elapsedRun = access(access(access(variable("Entities"),function("ForEach",argument(elapsedLambda))),function("WithoutBurst")), function("Run"));
+		onUpdate.getStatements().add(statement(elapsedRun));
+		
+		var signalLambda = csharp.createLambda();
+		signalLambda.getParameters().add(parameter("timer","timer"));
+		signalLambda.getParameters().add(refParameter("elapsed", "elapsed"));
+		signalLambda.getParameters().add(refParameter("timeout", "timeout"));
+		var setSignal = assignment(access(variable("timeout"), variable("Value")), AssignmentKind.SET, comparison(access(variable("elapsed"), variable("Value")), ComparisonKind.GREATER_OR_EQUAL, access(variable("timer"), variable("Value"))));
+		signalLambda.getStatements().add(statement(setSignal));
+		
+		var signalRun = access(access(access(variable("Entities"),function("ForEach",argument(signalLambda))),function("WithoutBurst")), function("Run"));
+		onUpdate.getStatements().add(statement(signalRun));
+		
+		var cycleLambda = csharp.createLambda();
+		cycleLambda.getParameters().add(parameter("timer","timer"));
+		cycleLambda.getParameters().add(refParameter("elapsed", "elapsed"));
+		var cycleRun = access(access(access(variable("Entities"),function("ForEach",argument(cycleLambda))),function("WithoutBurst")), function("Run"));
+		onUpdate.getStatements().add(statement(cycleRun));
+		
+		var selection = csharp.createSelection();
+		var ifBranch = csharp.createBranch();
+		selection.getBranches().add(ifBranch);
+		ifBranch.setCondition(comparison(access(variable("elapsed"), variable("Value")), ComparisonKind.GREATER_OR_EQUAL, access(variable("timer"), variable("Value"))));
+		ifBranch.getStatements().add(statement(assignment(access(variable("elapsed"), variable("Value")), AssignmentKind.DECREASE, access(variable("timer"), variable("Value")))));
+		
+		cycleLambda.getStatements().add(selection);
 		/*
 		for (var elapsed : MValidator.components.keySet())
 		{
