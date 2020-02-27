@@ -48,7 +48,7 @@ public class Wire
 		//generator.addLanguage(language("m.CSharpStrict", "cstrict"));
 		//generator.addLanguage(language("m.Javascript","js"));
 		generator.addLanguage(language("m.XML","xml"));
-		generator.addLanguage(language("m.JSON","json"));
+		generator.addLanguage(language("m.JSON","json,project"));
 		generator.addLanguage(language("m.YAML","yml"));
 		//generator.addLanguage(language("m.Text", "text"));
 		//generator.addLanguage(language("m.Testua", "testua"));
