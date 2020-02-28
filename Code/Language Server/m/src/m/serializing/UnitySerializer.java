@@ -1765,7 +1765,7 @@ public class UnitySerializer
 		
 		trigger.getStatements().add(statement(access(variable("action"),function("Enable"))));
 		var triggerField = access(variable("inputTriggered"),variable("Value"));
-		var triggerRead = equality(access(variable("action"),variable("phase")), access(variable("InputActionPhase"), variable("Started")));
+		var triggerRead = access(variable("action"),variable("triggered"));
 		
 		trigger.getStatements().add(statement(assignment(triggerField,triggerRead)));
 		/*
