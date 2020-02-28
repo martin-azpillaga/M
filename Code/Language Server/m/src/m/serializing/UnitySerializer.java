@@ -919,7 +919,7 @@ public class UnitySerializer
 						function.getArguments().add(argument(function(totalAccess, new String[] {unityName(component, namespaces)})));
 					}
 				}
-				if (query.isEmpty())
+				if (query.isEmpty() || (query.size() == 1 && query.containsKey("Entity")))
 				{
 					function.getArguments().add(argument(creation("ComponentType[]")));
 				}
