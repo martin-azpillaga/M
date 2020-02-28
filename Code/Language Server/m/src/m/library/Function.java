@@ -95,6 +95,12 @@ public enum Function
 	has("has", SimpleType.type, entity, bool),
 	enable("enable", SimpleType.type, none),
 	disable("disable", SimpleType.type, none),
+	load("load", world, none),
+	unload("unload", world, none),
+	
+	// UNIX IO
+	write("write", any, none),
+	halt("halt",none),
 	
 	// Collection functions
 	append("append", entity, entityList, none);
