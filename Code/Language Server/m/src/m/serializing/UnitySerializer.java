@@ -424,82 +424,12 @@ public class UnitySerializer
 		else
 		{
 			namespaces.add("UnityEngine");
+			namespaces.add("Unity.Scenes");
 			
-			var data = csharp.createClass();
-			data.getModifiers().add(PUBLIC);
-			data.setName(component);
-			data.getSuperTypes().add("IComponentData");
-			
-			var dataValue = csharp.createField();
-			var dataValueDeclarator = csharp.createDeclarator();
-			dataValue.getModifiers().add(PUBLIC);
-			dataValue.setType(unityName(type));
-			dataValue.getDeclarators().add(dataValueDeclarator);
-			dataValueDeclarator.setVariable("Value");
-			data.getMembers().add(dataValue);
-			
-			var authoring = csharp.createClass();
-			authoring.getModifiers().add(PUBLIC);
-			authoring.setName(component+"Authoring");
-			authoring.getSuperTypes().add("MonoBehaviour");
-			authoring.getSuperTypes().add("IConvertGameObjectToEntity");
-			
-			var value = csharp.createField();
-			var valueDeclarator = csharp.createDeclarator();
-			value.getDeclarators().add(valueDeclarator);
-			value.getModifiers().add(PUBLIC);
-			value.setType(unityName(type));
-			valueDeclarator.setVariable("Value");
-			authoring.getMembers().add(value);
-			
-			var method = csharp.createMethod();
-			method.getModifiers().add(PUBLIC);
-			method.setType("void");
-			method.setName("Convert");
-			authoring.getMembers().add(method);
-			
-			var entity = csharp.createParameter();
-			entity.setType("Entity");
-			entity.setName("entity");
-			var entityManager = csharp.createParameter();
-			entityManager.setType("EntityManager");
-			entityManager.setName("entityManager");
-			var conversionSystem = csharp.createParameter();
-			conversionSystem.setType("GameObjectConversionSystem");
-			conversionSystem.setName("gameObjectConversionSystem");
-			method.getParameters().add(entity);
-			method.getParameters().add(entityManager);
-			method.getParameters().add(conversionSystem);
-			
-			var addObjectStatement = csharp.createExpressionStatement();
-			var addObject = csharp.createAccessExpression();
-			var addLeft = csharp.createVariable();
-			var addRight = csharp.createParameterizedFunction();
-			var entityArgument = csharp.createArgument();
-			var entityArgumentValue = csharp.createVariable();
-			var objectArgument = csharp.createArgument();
-			var objectArgumentValue = csharp.createCreation();
-			var valueMember = csharp.createMemberInitializer();
-			var valueMemberValue = csharp.createVariable();
-			method.getStatements().add(addObjectStatement);
-			addObjectStatement.setExpression(addObject);
-			addObject.setLeft(addLeft);
-			addObject.setRight(addRight);
-			addRight.getArguments().add(entityArgument);
-			addRight.getArguments().add(objectArgument);
-			entityArgument.setValue(entityArgumentValue);
-			objectArgument.setValue(objectArgumentValue);
-			objectArgumentValue.getMembers().add(valueMember);
-			valueMember.setValue(valueMemberValue);
-			addLeft.setName("entityManager");
-			addRight.setName("AddComponentObject");
-			entityArgumentValue.setName("entity");
-			objectArgumentValue.setType(component);
-			valueMember.setName("Value");
-			valueMemberValue.setName("Value");
-			
-			unit.getTypes().add(data);
-			unit.getTypes().add(authoring);
+			var clazz = clazz(new Modifier[] {PUBLIC}, component, new String[] {"IComponentData"});
+			clazz.getMembers().add(field(new Modifier[] {PUBLIC}, unityName(type), declarator("Value")));
+			clazz.getAttributes().add(attribute("GenerateAuthoringComponent"));
+			unit.getTypes().add(clazz);
 		}
 		
 		if (type == input)
@@ -919,7 +849,7 @@ public class UnitySerializer
 						function.getArguments().add(argument(function(totalAccess, new String[] {unityName(component, namespaces)})));
 					}
 				}
-				if (query.isEmpty())
+				if (query.isEmpty() || (query.size() == 1 && query.containsKey("Entity")))
 				{
 					function.getArguments().add(argument(creation("ComponentType[]")));
 				}
@@ -1050,6 +980,11 @@ public class UnitySerializer
 							else if (type.isCollection)
 							{
 								loop.getStatements().add(0, declaration(declarator(component+"_"+variable,access(variable("EntityManager"),function("GetBuffer", new String[] {unityName(component, namespaces)}, argument(variable("entity_"+variable)))))));
+							}
+							else
+							{
+								list.add(0,declaration(declarator(component+"s_"+variable, access(variable(variable),function("ToComponentDataArray", new String[] {unityName(component, namespaces)})))));
+								loop.getStatements().add(0,declaration(declarator(component+"_"+variable, index(component+"s_"+variable, variable("i_"+variable)))));
 							}
 							
 						}
@@ -1425,11 +1360,37 @@ public class UnitySerializer
 			{
 				return access(cs(e.getArguments().get(0), querySet, namespaces), variable("w"));
 			}
-			else if (name.equals("empty"))
+			else if (name.equals("write"))
 			{
-				var set = cs(e.getArguments().get(0),querySet,namespaces);
-				
-				return comparison(access(set, variable("Length")), ComparisonKind.GREATER, floatLiteral("0"));
+				namespaces.add("UnityEngine");
+				return access(variable("Debug"),function("Log", argument(cs(e.getArguments().get(0), querySet, namespaces))));
+			}
+			else if (name.equals("halt"))
+			{
+				namespaces.add("UnityEditor");
+				return assignment(access(variable("EditorApplication"),variable("isPlaying")),booleanLiteral("false"));
+			}
+			else if (name.equals("load"))
+			{
+				var world = cs(e.getArguments().get(0), querySet, namespaces);
+				namespaces.add("Unity.Scenes");
+				return access(access(variable("World"),function("GetOrCreateSystem", new String[] {"SceneSystem"})),function("LoadSceneAsync",argument(access(world,variable("SceneGUID")))));
+			}
+			else if (name.equals("unload"))
+			{
+				var world = cs(e.getArguments().get(0), querySet, namespaces);
+				namespaces.add("Unity.Scenes");
+				return access(access(variable("World"),function("GetOrCreateSystem", new String[] {"SceneSystem"})),function("UnloadScene",argument(access(world,variable("SceneGUID")))));
+			}
+			else if (name.equals("enable"))
+			{
+				var system = ((Variable)e.getArguments().get(0)).getName();
+				return assignment(access(access(variable("World"),function("GetOrCreateSystem", new String[] {system})),variable("Enabled")),booleanLiteral("true"));
+			}
+			else if (name.equals("disable"))
+			{
+				var system = ((Variable)e.getArguments().get(0)).getName();
+				return assignment(access(access(variable("World"),function("GetOrCreateSystem", new String[] {system})),variable("Enabled")),booleanLiteral("false"));
 			}
 		}
 		else if (expression instanceof Variable)
@@ -1605,6 +1566,8 @@ public class UnitySerializer
 			case tag: return "None";
 			case text: return "string";
 			case type: return "Type";
+			case any: return "Object";
+			case world: return "SubScene";
 		}
 		return "None";
 	}
@@ -1761,7 +1724,7 @@ public class UnitySerializer
 		
 		trigger.getStatements().add(statement(access(variable("action"),function("Enable"))));
 		var triggerField = access(variable("inputTriggered"),variable("Value"));
-		var triggerRead = equality(access(variable("action"),variable("phase")), access(variable("InputActionPhase"), variable("Started")));
+		var triggerRead = access(variable("action"),variable("triggered"));
 		
 		trigger.getStatements().add(statement(assignment(triggerField,triggerRead)));
 		/*
@@ -1835,6 +1798,38 @@ public class UnitySerializer
 		
 		onUpdate.getStatements().add(declaration("float", declarator("deltaTime", access(variable("Time"), variable("DeltaTime")))));
 		clazz.getMembers().add(onUpdate);
+		
+		var elapsedLambda = csharp.createLambda();
+		elapsedLambda.getParameters().add(refParameter("elapsed", "elapsed"));
+		var addDelta = assignment(access(variable("elapsed"), variable("Value")), AssignmentKind.INCREASE, variable("deltaTime"));
+		elapsedLambda.getStatements().add(statement(addDelta));
+		
+		var elapsedRun = access(access(access(variable("Entities"),function("ForEach",argument(elapsedLambda))),function("WithoutBurst")), function("Run"));
+		onUpdate.getStatements().add(statement(elapsedRun));
+		
+		var signalLambda = csharp.createLambda();
+		signalLambda.getParameters().add(parameter("timer","timer"));
+		signalLambda.getParameters().add(refParameter("elapsed", "elapsed"));
+		signalLambda.getParameters().add(refParameter("timeout", "timeout"));
+		var setSignal = assignment(access(variable("timeout"), variable("Value")), AssignmentKind.SET, comparison(access(variable("elapsed"), variable("Value")), ComparisonKind.GREATER_OR_EQUAL, access(variable("timer"), variable("Value"))));
+		signalLambda.getStatements().add(statement(setSignal));
+		
+		var signalRun = access(access(access(variable("Entities"),function("ForEach",argument(signalLambda))),function("WithoutBurst")), function("Run"));
+		onUpdate.getStatements().add(statement(signalRun));
+		
+		var cycleLambda = csharp.createLambda();
+		cycleLambda.getParameters().add(parameter("timer","timer"));
+		cycleLambda.getParameters().add(refParameter("elapsed", "elapsed"));
+		var cycleRun = access(access(access(variable("Entities"),function("ForEach",argument(cycleLambda))),function("WithoutBurst")), function("Run"));
+		onUpdate.getStatements().add(statement(cycleRun));
+		
+		var selection = csharp.createSelection();
+		var ifBranch = csharp.createBranch();
+		selection.getBranches().add(ifBranch);
+		ifBranch.setCondition(comparison(access(variable("elapsed"), variable("Value")), ComparisonKind.GREATER_OR_EQUAL, access(variable("timer"), variable("Value"))));
+		ifBranch.getStatements().add(statement(assignment(access(variable("elapsed"), variable("Value")), AssignmentKind.DECREASE, access(variable("timer"), variable("Value")))));
+		
+		cycleLambda.getStatements().add(selection);
 		/*
 		for (var elapsed : MValidator.components.keySet())
 		{
