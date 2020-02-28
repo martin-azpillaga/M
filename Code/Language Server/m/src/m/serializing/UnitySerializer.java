@@ -1384,11 +1384,13 @@ public class UnitySerializer
 			}
 			else if (name.equals("enable"))
 			{
-				
+				var system = ((Variable)e.getArguments().get(0)).getName();
+				return assignment(access(access(variable("World"),function("GetOrCreateSystem", new String[] {system})),variable("Enabled")),booleanLiteral("true"));
 			}
 			else if (name.equals("disable"))
 			{
-				
+				var system = ((Variable)e.getArguments().get(0)).getName();
+				return assignment(access(access(variable("World"),function("GetOrCreateSystem", new String[] {system})),variable("Enabled")),booleanLiteral("false"));
 			}
 		}
 		else if (expression instanceof Variable)
