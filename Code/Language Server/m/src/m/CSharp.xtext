@@ -466,7 +466,7 @@ Creation returns Expression: {Creation}
 			=>('{' elements+=LogicalOr (',' elements+=LogicalOr)* '}')
 		)
 	)|(
-		'(' (arguments+=Argument (',' arguments+=Argument)*)? ')'
+		'(' arguments+=Argument (',' arguments+=Argument)* ')'
 		(
 			=>('{' (members+=MemberInitializer (',' members+=MemberInitializer)*)? '}')
 			|
