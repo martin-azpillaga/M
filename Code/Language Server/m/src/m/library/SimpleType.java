@@ -20,9 +20,11 @@ public enum SimpleType implements Type
 	text(false, false),
 
 	entity(true, false),
+	world(false, false),
 	entityList(false, true),
 
 	type(false, false),
+	any(false, false),
 	none(false, false);
 	
 	public final boolean isValueType;
