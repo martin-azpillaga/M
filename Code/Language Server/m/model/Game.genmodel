@@ -36,6 +36,12 @@
       <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Game.ecore#//Game/end"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Game.ecore#//Game/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Game.ecore#//Game/version"/>
+      <genFeatures property="None" children="true" createChild="true" ecoreFeature="ecore:EReference Game.ecore#//Game/types"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Game.ecore#//Game/components"/>
+    </genClasses>
+    <genClasses ecoreClass="Game.ecore#//ComponentData">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Game.ecore#//ComponentData/name"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Game.ecore#//ComponentData/type"/>
     </genClasses>
     <genClasses ecoreClass="Game.ecore#//Archetype">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Game.ecore#//Archetype/name"/>
@@ -145,7 +151,10 @@
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Game.ecore#//Cell/entity"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Game.ecore#//Cell/component"/>
     </genClasses>
+    <genClasses ecoreClass="Game.ecore#//Type">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Game.ecore#//Type/name"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Game.ecore#//Type/parameters"/>
+    </genClasses>
     <genClasses ecoreClass="Game.ecore#//End"/>
-    <genClasses ecoreClass="Game.ecore#//asdasdasdasdsa"/>
   </genPackages>
 </genmodel:GenModel>
