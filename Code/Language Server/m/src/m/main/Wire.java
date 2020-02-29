@@ -7,9 +7,6 @@ import org.eclipse.xtext.xtext.generator.XtextGenerator;
 import org.eclipse.xtext.xtext.generator.model.project.BundleProjectConfig;
 import org.eclipse.xtext.xtext.generator.model.project.StandardProjectConfig;
 
-import m.formatting.FormatterFragment;
-import m.parsing.ContextualParserMessagesFragment;
-
 public class Wire 
 {
 	public static void main(String[] args)

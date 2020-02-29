@@ -1,4 +1,4 @@
-package m.parsing;
+package m.main;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +28,8 @@ import org.eclipse.xtext.parser.antlr.XtextTokenStream;
 import org.eclipse.xtext.xtext.generator.AbstractXtextGeneratorFragment;
 import org.eclipse.xtext.xtext.generator.model.GuiceModuleAccess;
 import org.eclipse.xtext.xtext.generator.model.TypeReference;
+
+import m.parsing.ContextualParserMessages;
 
 @SuppressWarnings("restriction")
 public class ContextualParserMessagesFragment extends AbstractXtextGeneratorFragment
