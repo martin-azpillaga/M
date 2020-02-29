@@ -9,6 +9,13 @@
     <eStructuralFeatures xsi:type="ecore:EReference" name="end" eType="#//End" containment="true"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="version" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
+        eType="#//Type" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="components" eType="#//ComponentData"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ComponentData">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//Type"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Archetype">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
@@ -160,6 +167,11 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="entity" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="component" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
   </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Type">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="parameters" upperBound="-1"
+        eType="#//Type"/>
+  </eClassifiers>
   <eClassifiers xsi:type="ecore:EEnum" name="EqualityKind">
     <eLiterals name="equal" literal="="/>
     <eLiterals name="notEqual" value="1" literal="≠"/>
@@ -186,5 +198,4 @@
     <eLiterals name="difference" value="3" literal="∖"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="End"/>
-  <eClassifiers xsi:type="ecore:EClass" name="asdasdasdasdsa"/>
 </ecore:EPackage>
