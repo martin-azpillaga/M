@@ -60,7 +60,7 @@ public class Wire
 		language.setName(name);
 		language.setFileExtensions(extensions);
 		language.addFragment(new FormatterFragment());
-		language.addFragment(new ContextualParserMessagesFragment());
+		//language.addFragment(new ContextualParserMessagesFragment());
 		return language;
 	}
 }
