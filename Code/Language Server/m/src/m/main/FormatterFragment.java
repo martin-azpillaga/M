@@ -1,10 +1,14 @@
-package m.formatting;
+package m.main;
 
 import org.eclipse.xtext.formatting2.IFormatter2;
 import org.eclipse.xtext.parser.antlr.ISyntaxErrorMessageProvider;
 import org.eclipse.xtext.xtext.generator.AbstractXtextGeneratorFragment;
 import org.eclipse.xtext.xtext.generator.model.GuiceModuleAccess;
 import org.eclipse.xtext.xtext.generator.model.TypeReference;
+
+import m.formatting.CSharpFormat;
+import m.formatting.JSONFormat;
+import m.formatting.YAMLFormat;
 
 public class FormatterFragment extends AbstractXtextGeneratorFragment
 {
