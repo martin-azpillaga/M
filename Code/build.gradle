@@ -22,8 +22,8 @@ sourceSets {
 }
 
 task compileFragments(type: JavaCompile){
-	source += file('m/src/m/main/RunFragments.java')
-	source += fileTree(dir: 'm/src/m/parsing', include: '**/*.java')
+	workingDir = "Language Server"
+	source += fileTree(dir: 'm/src/m/main', include: '**/*.java')
 	classpath = configurations.implementation
 	destinationDir = file('build/classes/java/main')
 }
@@ -48,7 +48,7 @@ task runWire(type: JavaExec) {
 
 task generateLanguageServer(type: Jar) {
 	dependsOn runWire
-	baseName = 'm-language-server'
+	archiveBaseName = 'm-language-server'
     manifest.attributes 'Main-Class': 'org.eclipse.xtext.ide.server.ServerLauncher'
     from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
 	exclude '**/*.java', 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', '**/*.xtend', '**/*.mwe2', '**/*.g', '**/*.xtext'
