@@ -115,6 +115,7 @@ enum SetKind: membership='∈'|union='∪'|intersection='∩'|difference='∖';
 
 terminal WORD: (START_ID|'_') CONTINUE_ID*;
 terminal WS: (' '|'\n'|'\r'|'\t')+;
+terminal ANY: .;
 
 terminal fragment START_ID:
 'a'..'z'|

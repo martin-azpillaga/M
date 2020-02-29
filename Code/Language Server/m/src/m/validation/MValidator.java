@@ -11,7 +11,6 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.validation.Check;
 
 import m.library.Component;
-import m.library.MagicName;
 import m.library.SimpleType;
 import game.Addition;
 import game.Archetype;
@@ -272,42 +271,15 @@ public class MValidator extends AbstractMValidator
 	
 	
 	
-	@Check
-	public void infer(game.Component component)
-	{
-		//magicNames(component.getName(), component, COMPONENT__NAME);
-	}
+	
 	
 	@Check
 	public void infer(Cell cell)
 	{
 		var entity = cell.getEntity();
-		var component = cell.getComponent();
 		
 		setVariable(entity, SimpleType.entity, cell, CELL__ENTITY);
-		//magicNames(component, cell, CELL__COMPONENT);
-	}
-	
-	private void magicNames(String component, EObject o, EStructuralFeature feature)
-	{
-		for (var magicName : MagicName.values())
-		{
-			if (component.endsWith(magicName.ending))
-			{
-				setComponent(component, magicName.type, o, feature);
-				
-				if (magicName.baseType != SimpleType.none)
-				{
-					var base = component.substring(0, component.lastIndexOf(magicName.ending));
-					setComponent(base, magicName.baseType, o, feature);
-				}
-				break;
-			}
-		}
-	}
-	
-	
-	
+	}	
 	
 	@Check
 	public void infer(Selection selection)

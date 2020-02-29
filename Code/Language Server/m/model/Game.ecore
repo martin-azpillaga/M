@@ -11,7 +11,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="version" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
         eType="#//Type" containment="true"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="components" eType="#//ComponentData"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="components" upperBound="-1"
+        eType="#//ComponentData"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="ComponentData">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
