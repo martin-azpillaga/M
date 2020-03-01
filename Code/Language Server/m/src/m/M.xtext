@@ -13,7 +13,7 @@ System:
 
 
 Statement:
-	Selection|Iteration|Forall|Assignment|Call;
+	Selection|Iteration|Forall|Assignment|Subprocess;
 
 Selection:
 	 '→'condition=Expression
@@ -28,15 +28,15 @@ Iteration:
 	'['	(statements+=Statement (','? statements+=Statement)*)? ']';
 
 Forall:
-	 '∀' variable=WORD ('|' condition=Expression)?
+	'∀' variable=Variable ('|' condition=Expression)?
 	'['	(statements+=Statement (','? statements+=Statement)*)? ']';
 
 Assignment:
 	atom=Atom
 	'≔' expression=Expression;
 
-Call:
-	function=Function;
+Subprocess:
+	call=Call;
 
 
 
@@ -61,13 +61,13 @@ Multipliable:
 	Setable ({Multiplication.left=current}  kind=MultiplicativeKind right=Setable)*;
 
 Setable:
-	Primary ({SetExpression.left=current} kind=SetKind right=Primary)*;
+	Primary ({SetExpression.left=current} '∈' right=Primary)*;
 
 
 Primary:
-	=>Function|Atom|Collection|Cardinal|LogicalNot;
+	=>Call|Atom|Collection|Cardinal|LogicalNot;
 
-Function:
+Call:
 	name=WORD
 	'[' (arguments+=Expression (','? arguments+=Expression)*)? ']';
 
@@ -79,7 +79,7 @@ Cardinal:
 
 
 Collection:
-	Brackets|Join|ImplicitSet|ExplicitSet;
+	Brackets|Join|ImplicitSet;
 
 Brackets:
 	'(' expression=Expression ')';
@@ -88,11 +88,7 @@ Join:
 	'[' entries+=Expression (','? entries+=Expression)+ ']';
 
 ImplicitSet:
-	'{' variable=WORD '|' predicate=Expression '}';
-
-ExplicitSet: {ExplicitSet}
-	'{' (elements+=Expression (','? elements+=Expression)*)? '}';
-
+	'{' variable=Variable '|' predicate=Expression '}';
 
 
 Atom:
@@ -102,7 +98,7 @@ Variable:
 	name=WORD;
 
 Cell:
-	entity=WORD '.' component=WORD;
+	entity=Variable '.' component=Variable;
 
 End: {End};
 
@@ -111,7 +107,6 @@ enum EqualityKind: equal='='|notEqual='≠';
 enum ComparisonKind: lower='<'|lowerOrEqual='≤'|greaterOrEqual='≥'|greater='>';
 enum AdditiveKind: add='+'|subtract='-';
 enum MultiplicativeKind: multiply='×'|divide='÷'|remainder='%';
-enum SetKind: membership='∈'|union='∪'|intersection='∩'|difference='∖';
 
 terminal WORD: (START_ID|'_') CONTINUE_ID*;
 terminal WS: (' '|'\n'|'\r'|'\t')+;
