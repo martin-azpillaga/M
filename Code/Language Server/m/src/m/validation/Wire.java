@@ -1,4 +1,4 @@
-package m.main;
+package m.validation;
 
 import org.eclipse.xtext.xtext.generator.CodeConfig;
 import org.eclipse.xtext.xtext.generator.DefaultGeneratorModule;
@@ -6,6 +6,8 @@ import org.eclipse.xtext.xtext.generator.StandardLanguage;
 import org.eclipse.xtext.xtext.generator.XtextGenerator;
 import org.eclipse.xtext.xtext.generator.model.project.BundleProjectConfig;
 import org.eclipse.xtext.xtext.generator.model.project.StandardProjectConfig;
+
+import m.main.FormatterFragment;
 
 public class Wire 
 {
