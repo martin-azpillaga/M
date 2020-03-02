@@ -8,7 +8,7 @@ import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
 import m.json.Member;
 
-public class JSONFormat extends GenericFormatter
+public class JSONFormat extends FormattingHelper
 {
 	@Override
 	public void format(Object obj) 

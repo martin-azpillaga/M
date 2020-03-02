@@ -1,4 +1,4 @@
-package m.parsing;
+package m.validation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,7 +84,7 @@ public class ContextualParserMessages extends SyntaxErrorMessageProvider
 			}
 		}
 		var errorAt = tokens.get(maximumDepth);
-		var error = "Error at " + errorAt.getText();
+		var error = "Syntax error at " + errorAt.getText();
 		for (var path : paths)
 		{
 			if (path.index == maximumDepth && path.valid)
@@ -97,7 +97,7 @@ public class ContextualParserMessages extends SyntaxErrorMessageProvider
 			}
 		}
 		
-		return new SyntaxErrorMessage(error, "syntax error");
+		return new SyntaxErrorMessage(error, "Syntax error");
 	}
 	
 	void process(INode node, ArrayList<CommonToken> tokens)
