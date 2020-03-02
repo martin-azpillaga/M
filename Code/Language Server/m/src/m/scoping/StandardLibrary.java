@@ -1,4 +1,4 @@
-package m.validation;
+package m.scoping;
 
 import game.Function;
 import game.Game;
