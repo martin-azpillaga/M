@@ -1,13 +1,15 @@
 package m.validation;
 
 import static game.GamePackage.Literals.*;
+import static m.scoping.StandardLibrary.*;
+
 import java.util.*;
 import java.util.HashMap;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.validation.Check;
 import game.*;
-import static m.validation.StandardLibrary.*;
+import m.scoping.StandardLibrary;
 
 public class MValidator extends AbstractMValidator 
 {

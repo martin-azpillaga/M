@@ -216,7 +216,7 @@ public class UnitySerializer
 			{
 				var forall = (Forall) statement;
 				
-				var variable = forall.getVariable();
+				var variable = forall.getVariable().getName();
 				var conditionExpression = forall.getCondition();
 				
 				var loop = forStatement(declaration(declarator("i_"+variable, floatLiteral("0"))),comparison(variable("i_"+variable), ComparisonKind.LOWER, access(variable(variable),function("CalculateEntityCount"))),increment(variable("i_"+variable)));
@@ -558,9 +558,9 @@ public class UnitySerializer
 			var e = (Cardinal) expression;
 			return access(cs(e.getExpression(), querySet, namespaces), variable("Length"));
 		}
-		else if (expression instanceof Function)
+		else if (expression instanceof Call)
 		{
-			var e = (Function) expression;
+			var e = (Call) expression;
 			var name = e.getName();
 			
 			if (name.equals("has"))
@@ -676,14 +676,14 @@ public class UnitySerializer
 		else if (expression instanceof Cell)
 		{
 			var access = (Cell) expression;
-			querySet.add(access.getEntity(), access.getComponent(), AccessKind.read);
+			querySet.add(access.getEntity().getName(), access.getComponent().getName(), AccessKind.read);
 			var csExpression = csharp.createAccessExpression();
 			var component = csharp.createVariable();
 			var field = csharp.createVariable();
 			csExpression.setLeft(component);
 			csExpression.setRight(field);
 			component.setName(access.getComponent()+"_"+access.getEntity());
-			field.setName(fieldName(access.getComponent()));
+			field.setName(fieldName(access.getComponent().getName()));
 			
 			return csExpression;
 		}
@@ -694,10 +694,6 @@ public class UnitySerializer
 			var predicate = e.getPredicate();
 			
 			var selection = csharp.createSelection();
-		}
-		else if (expression instanceof ExplicitSet)
-		{
-			var e = (ExplicitSet) expression;
 		}
 		return null;
 	}
