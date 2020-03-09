@@ -7,14 +7,9 @@ dependencies {
 	implementation platform("org.eclipse.xtext:xtext-dev-bom:2.20.0")
 	implementation "org.eclipse.xtext:org.eclipse.xtext:2.20.0"
 	implementation "org.eclipse.xtext:org.eclipse.xtext.ide:2.20.0"
-	implementation 'org.eclipse.emf:org.eclipse.emf.mwe2.launch'
 	implementation "org.eclipse.xtext:org.eclipse.xtext.common.types:2.20.0"
 	implementation "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:2.20.0"
-	implementation 'org.eclipse.xtext:xtext-antlr-generator'
-	implementation files("${projectDir}/m/src")
-	implementation files("${projectDir}/m/src/m/parsing")
-	implementation files("${projectDir}/m/src/m/formatting")
-	implementation files("${projectDir}/build/classes/java/main")
+	implementation fileTree("${projectDir}/Language Server/m/src")
 }
 
 sourceSets {
@@ -22,8 +17,7 @@ sourceSets {
 }
 
 task compileFragments(type: JavaCompile){
-	workingDir = "Language Server"
-	source += fileTree(dir: 'm/src/m/main', include: '**/*.java')
+	source += file('Language Server/m/src/m/main/Wire.java')
 	classpath = configurations.implementation
 	destinationDir = file('build/classes/java/main')
 }
