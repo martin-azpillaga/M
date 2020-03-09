@@ -39,7 +39,42 @@ public class MValidator extends AbstractMValidator
 		}
 	}
 
-	
+	@Check
+	public void scope(Call call)
+	{
+		var name = call.getName();
+		var arguments = call.getArguments();
+		
+		var found = false;
+		
+		for (var function : game.getFunctions())
+		{
+			if (name.equals(function.getName()))
+			{
+				found = true;
+				
+				if (name.equals(has.getName()))
+				{
+					setComponent(((Variable)arguments.get(0)).getName(), tag, call, CALL__NAME);
+				}
+				
+				var parameters = function.getType().getParameters();
+				if (arguments.size() + 1  != parameters.size())
+				{
+					error(name + " " + parameters + " not applicable to " + name + " " + arguments, call, CALL__NAME);
+					break;
+				}
+				
+				break;
+			}
+		}
+		
+		if (!found)
+		{
+			error("Function " + name + " undefined", call, CALL__NAME);
+		}
+		
+	}
 	
 	
 	
@@ -102,7 +137,7 @@ public class MValidator extends AbstractMValidator
 		}
 		else
 		{
-			expression.setType(type);
+			//expression.setType(type);
 		}
 	}
 	
@@ -291,25 +326,11 @@ public class MValidator extends AbstractMValidator
 		var name = call.getName();
 		var arguments = call.getArguments();
 		
-		var found = false;
-		
 		for (var function : game.getFunctions())
 		{
 			if (name.equals(function.getName()))
-			{
-				found = true;
-				
-				if (name.equals(has.getName()))
-				{
-					setComponent(((Variable)arguments.get(0)).getName(), tag, call, CALL__NAME);
-				}
-				
+			{				
 				var parameters = function.getType().getParameters();
-				if (arguments.size() + 1  != parameters.size())
-				{
-					error(name + " " + parameters + " not applicable to " + name + " " + arguments, call, CALL__NAME);
-					break;
-				}
 				for (var i = 0; i < parameters.size(); i++)
 				{
 					var simpleType = parameters.get(i);
@@ -321,13 +342,7 @@ public class MValidator extends AbstractMValidator
 				
 				break;
 			}
-		}
-		
-		if (!found)
-		{
-			error("Function " + name + " undefined", call, CALL__NAME);
-		}
-		
+		}		
 	}
 	
 	

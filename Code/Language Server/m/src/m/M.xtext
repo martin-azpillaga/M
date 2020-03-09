@@ -10,10 +10,8 @@ System:
 	name=WORD '≔'
 	'['	(statements+=Statement (','? statements+=Statement)*)? ']';
 
-
-
 Statement:
-	Selection|Iteration|Forall|Assignment|Subprocess;
+	Selection|Iteration|Forall|=>Assignment|Subprocess;
 
 Selection:
 	 '→'condition=Expression
@@ -32,7 +30,7 @@ Forall:
 	'['	(statements+=Statement (','? statements+=Statement)*)? ']';
 
 Assignment:
-	atom=Atom
+	atom=Index
 	'≔' expression=Expression;
 
 Subprocess:
@@ -65,7 +63,7 @@ Setable:
 
 
 Primary:
-	=>Call|Atom|Collection|Cardinal|LogicalNot;
+	=>Call|=>Index|Atom|Collection|Cardinal|LogicalNot;
 
 Call:
 	name=WORD
@@ -77,6 +75,8 @@ LogicalNot:
 Cardinal:
 	'#' expression=Primary;
 
+Index:
+	atom=Atom '~' expression=Expression '~';
 
 Collection:
 	Brackets|Join|ImplicitSet;
@@ -91,8 +91,9 @@ ImplicitSet:
 	'{' variable=Variable '|' predicate=Expression '}';
 
 
+
 Atom:
-	=>Cell|Variable;
+	Cell|Variable;
 
 Variable:
 	name=WORD;
@@ -106,7 +107,7 @@ End: {End};
 enum EqualityKind: equal='='|notEqual='≠';
 enum ComparisonKind: lower='<'|lowerOrEqual='≤'|greaterOrEqual='≥'|greater='>';
 enum AdditiveKind: add='+'|subtract='-';
-enum MultiplicativeKind: multiply='×'|divide='÷'|remainder='%';
+enum MultiplicativeKind: multiply='×'|divide='÷';
 
 terminal WORD: (START_ID|'_') CONTINUE_ID*;
 terminal WS: (' '|'\n'|'\r'|'\t')+;
