@@ -21,6 +21,6 @@ jobs:
 
     - name: Create language server
       run: |
-        cd Code/Language\ Server
+        cd Code
         gradle runWire
         gradle generateLanguageServer
