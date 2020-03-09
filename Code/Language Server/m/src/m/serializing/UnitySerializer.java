@@ -42,8 +42,6 @@ import game.Variable;
 import game.Expression;
 import game.Forall;
 import m.CSharpRuntimeModule;
-import m.library.Component;
-import m.library.SimpleType;
 import m.validation.MValidator;
 import m.serializing.GameHelper;
 

@@ -19,7 +19,7 @@ task compileWire(type: JavaCompile){
 	destinationDir 	 = file('build/classes/java/main')
 }
 
-task runWire(type: JavaExec) {
+task runWire(type: JavaExec){
 	doFirst{
 		mkdir "Language Server/m.ide"
 		mkdir "Language Server/m.ui"
@@ -36,10 +36,12 @@ sourceSets {
 }
 
 task generateLanguageServer(type: Jar) {
-	dependsOn runWire
 	archiveBaseName = 'm-language-server'
     manifest.attributes 'Main-Class': 'org.eclipse.xtext.ide.server.ServerLauncher'
-    from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
+    from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) }}
+	from ('./Language Server/m.ide/src-gen/') {
+		include 'META-INF/services/org.eclipse.xtext.ISetup'
+	}
 	exclude '**/*.java', 'META-INF/INDEX.LIST', 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', '**/*.xtend', '**/*.mwe2', '**/*.g', '**/*.xtext', '*.html', 'about.*', '*.profile', '.options', '.api_description', 'about_files', 'plugin.xml', 'systembundle.properties', 'profile.list', 'schema',
 			'**/*.png'
 	with jar
