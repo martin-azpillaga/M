@@ -1,5 +1,6 @@
 package m.main;
 
+import org.eclipse.emf.mwe2.ecore.EcoreGenerator;
 import org.eclipse.xtext.formatting2.IFormatter2;
 import org.eclipse.xtext.parser.antlr.ISyntaxErrorMessageProvider;
 import org.eclipse.xtext.xtext.generator.AbstractXtextGeneratorFragment;
@@ -58,9 +59,11 @@ public class Wire
 		generator.addLanguage(simpleLanguage("m.JSON","json,project"));
 		generator.addLanguage(simpleLanguage("m.YAML","yml"));
 		
-		
-		
 		generator.invoke(null);
+		
+		var ecore = new EcoreGenerator();
+		ecore.setGenModel("platform:/resource/m/model/Game.genmodel");
+		ecore.invoke(null);
 	}
 	
 	static StandardLanguage fullLanguage(String name, String extensions)

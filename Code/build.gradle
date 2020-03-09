@@ -9,35 +9,31 @@ dependencies {
 	implementation "org.eclipse.xtext:org.eclipse.xtext.ide:2.20.0"
 	implementation "org.eclipse.xtext:org.eclipse.xtext.common.types:2.20.0"
 	implementation "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:2.20.0"
-	implementation fileTree("${projectDir}/Language Server/m/src")
 }
 
-sourceSets {
-	main.java.srcDirs = ["m/src", "m.ide/src", "m.ide/src-gen", "m/src-gen"]
-}
+
 
 task compileFragments(type: JavaCompile){
 	source += file('Language Server/m/src/m/main/Wire.java')
+	source += file('Language Server/m/src/m/validation/ContextualParserMessages.java')
 	classpath = configurations.implementation
 	destinationDir = file('build/classes/java/main')
 }
 
-task runFragments(type: JavaExec) {
+task runWire(type: JavaExec) {
 	doFirst{
-		mkdir "m.ide"
-		mkdir "m.ui"
+		mkdir "Language Server/m.ide"
+		mkdir "Language Server/m.ui"
 	}
 	dependsOn compileFragments
-	main = "m.main.RunFragments"
-	args "."
+	main = "m.main.Wire"
+	args "Language Server"
 	classpath = configurations.implementation
+	classpath += files("${projectDir}/build/classes/java/main")
 }
 
-task runWire(type: JavaExec) {
-	dependsOn compileJava
-	main = "m.main.Wire"
-	args "."
-	classpath = configurations.implementation
+sourceSets {
+	main.java.srcDirs = ["Language Server/m/src", "Language Server/m.ide/src", "Language Server/m.ide/src-gen", "Language Server/m/src-gen"]
 }
 
 task generateLanguageServer(type: Jar) {
