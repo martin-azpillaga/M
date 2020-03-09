@@ -59,15 +59,15 @@ public class UnitySerializer
 		
 		for (var component : game.getComponents())
 		{
-			serialize(component);
+			//serialize(component);
 		}
 		
 		for (var system : game.getSystems())
 		{
-			serialize(system);
+			//serialize(system);
 		}
 	}
-	
+	/*
 	private void serialize(ComponentData component)
 	{
 		var name = component.getName();
@@ -825,7 +825,7 @@ class QuerySet
 		{
 			queries.put(entity, new HashMap<String,HashSet<AccessKind>>());
 		}
-	}
+	}*/
 }
 
 enum AccessKind

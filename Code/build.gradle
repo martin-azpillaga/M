@@ -13,11 +13,10 @@ dependencies {
 
 
 
-task compileFragments(type: JavaCompile){
-	source += file('Language Server/m/src/m/main/Wire.java')
-	source += file('Language Server/m/src/m/validation/ContextualParserMessages.java')
-	classpath = configurations.implementation
-	destinationDir = file('build/classes/java/main')
+task compileWire(type: JavaCompile){
+	source 			+= file('Language Server/m/src/m/main/Wire.java')
+	classpath 		 = configurations.implementation
+	destinationDir 	 = file('build/classes/java/main')
 }
 
 task runWire(type: JavaExec) {
@@ -25,11 +24,11 @@ task runWire(type: JavaExec) {
 		mkdir "Language Server/m.ide"
 		mkdir "Language Server/m.ui"
 	}
-	dependsOn compileFragments
-	main = "m.main.Wire"
-	args "Language Server"
-	classpath = configurations.implementation
-	classpath += files("${projectDir}/build/classes/java/main")
+	dependsOn 	+= compileWire
+	main 		 = "m.main.Wire"
+	args 		+= "Language Server"
+	classpath 	 = configurations.implementation
+	classpath 	+= files('build/classes/java/main')
 }
 
 sourceSets {
@@ -41,6 +40,7 @@ task generateLanguageServer(type: Jar) {
 	archiveBaseName = 'm-language-server'
     manifest.attributes 'Main-Class': 'org.eclipse.xtext.ide.server.ServerLauncher'
     from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
-	exclude '**/*.java', 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', '**/*.xtend', '**/*.mwe2', '**/*.g', '**/*.xtext'
-    with jar
+	exclude '**/*.java', 'META-INF/INDEX.LIST', 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', '**/*.xtend', '**/*.mwe2', '**/*.g', '**/*.xtext', '*.html', 'about.*', '*.profile', '.options', '.api_description', 'about_files', 'plugin.xml', 'systembundle.properties', 'profile.list', 'schema',
+			'**/*.png'
+	with jar
 }

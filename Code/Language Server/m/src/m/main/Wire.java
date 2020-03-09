@@ -1,6 +1,7 @@
 package m.main;
 
 import org.eclipse.emf.mwe2.ecore.EcoreGenerator;
+import org.eclipse.emf.mwe2.runtime.workflow.Workflow;
 import org.eclipse.xtext.formatting2.IFormatter2;
 import org.eclipse.xtext.parser.antlr.ISyntaxErrorMessageProvider;
 import org.eclipse.xtext.xtext.generator.AbstractXtextGeneratorFragment;
@@ -17,8 +18,6 @@ import org.eclipse.xtext.xtext.generator.model.project.BundleProjectConfig;
 import org.eclipse.xtext.xtext.generator.model.project.StandardProjectConfig;
 import org.eclipse.xtext.xtext.generator.parser.antlr.XtextAntlrGeneratorFragment2;
 import org.eclipse.xtext.xtext.generator.serializer.SerializerFragment2;
-
-import m.validation.ContextualParserMessages;
 
 public class Wire 
 {
@@ -97,7 +96,7 @@ class ContextualParserMessagesFragment extends AbstractXtextGeneratorFragment
 	public void generate()
 	{
 		GuiceModuleAccess.BindingFactory bindingFactory = new GuiceModuleAccess.BindingFactory();
-		bindingFactory.addTypeToType(TypeReference.typeRef(ISyntaxErrorMessageProvider.class), TypeReference.typeRef(ContextualParserMessages.class)).contributeTo(getLanguage().getRuntimeGenModule());
+		bindingFactory.addTypeToType(TypeReference.typeRef(ISyntaxErrorMessageProvider.class), TypeReference.typeRef("m.validation.ContextualParserMessages")).contributeTo(getLanguage().getRuntimeGenModule());
 	}
 }
 
