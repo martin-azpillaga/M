@@ -189,6 +189,20 @@ public class CSharpHelper
 		return property;
 	}
 	
+	public static Property property(String type, String name)
+	{
+		var property = csharp.createProperty();
+		property.setType(type);
+		property.setName(name);
+		var getter = csharp.createGetter();
+		getter.setEmpty(true);
+		var setter = csharp.createSetter();
+		setter.setEmpty(true);
+		property.setGetter(getter);
+		property.setSetter(setter);
+		return property;
+	}
+	
 	public static Field field(Modifier[] modifiers, String type, Declarator...declarators)
 	{
 		var field = csharp.createField();

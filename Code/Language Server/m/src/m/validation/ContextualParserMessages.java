@@ -1,4 +1,4 @@
-package m.parsing;
+package m.validation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,25 +22,11 @@ import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.SyntaxErrorMessage;
 import org.eclipse.xtext.nodemodel.impl.CompositeNode;
 import org.eclipse.xtext.nodemodel.impl.RootNode;
-import org.eclipse.xtext.parser.antlr.ISyntaxErrorMessageProvider;
 import org.eclipse.xtext.parser.antlr.SyntaxErrorMessageProvider;
 import org.eclipse.xtext.parser.antlr.XtextTokenStream;
-import org.eclipse.xtext.xtext.generator.AbstractXtextGeneratorFragment;
-import org.eclipse.xtext.xtext.generator.model.GuiceModuleAccess;
-import org.eclipse.xtext.xtext.generator.model.TypeReference;
+import org.eclipse.xtext.parser.antlr.ISyntaxErrorMessageProvider.IParserErrorContext;
 
-@SuppressWarnings("restriction")
-public class ContextualParserMessagesFragment extends AbstractXtextGeneratorFragment
-{
-	@Override
-	public void generate()
-	{
-		GuiceModuleAccess.BindingFactory bindingFactory = new GuiceModuleAccess.BindingFactory();
-		bindingFactory.addTypeToType(TypeReference.typeRef(ISyntaxErrorMessageProvider.class), TypeReference.typeRef(ContextualParserMessages.class)).contributeTo(getLanguage().getRuntimeGenModule());
-	}
-}
-
-class ContextualParserMessages extends SyntaxErrorMessageProvider
+public class ContextualParserMessages extends SyntaxErrorMessageProvider
 {
 	public static HashMap<String,Integer> typeOf;
 	public static ArrayList<Path> paths;
@@ -98,7 +84,7 @@ class ContextualParserMessages extends SyntaxErrorMessageProvider
 			}
 		}
 		var errorAt = tokens.get(maximumDepth);
-		var error = "Error at " + errorAt.getText();
+		var error = "Syntax error at " + errorAt.getText();
 		for (var path : paths)
 		{
 			if (path.index == maximumDepth && path.valid)
@@ -111,7 +97,7 @@ class ContextualParserMessages extends SyntaxErrorMessageProvider
 			}
 		}
 		
-		return new SyntaxErrorMessage(error, "syntax error");
+		return new SyntaxErrorMessage(error, "Syntax error");
 	}
 	
 	void process(INode node, ArrayList<CommonToken> tokens)
@@ -689,4 +675,3 @@ class Path
 		return "Unrecognized error";
 	}
 }
-

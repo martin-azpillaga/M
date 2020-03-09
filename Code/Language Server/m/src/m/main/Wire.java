@@ -1,14 +1,23 @@
 package m.main;
 
+import org.eclipse.emf.mwe2.ecore.EcoreGenerator;
+import org.eclipse.emf.mwe2.runtime.workflow.Workflow;
+import org.eclipse.xtext.formatting2.IFormatter2;
+import org.eclipse.xtext.parser.antlr.ISyntaxErrorMessageProvider;
+import org.eclipse.xtext.xtext.generator.AbstractXtextGeneratorFragment;
 import org.eclipse.xtext.xtext.generator.CodeConfig;
 import org.eclipse.xtext.xtext.generator.DefaultGeneratorModule;
 import org.eclipse.xtext.xtext.generator.StandardLanguage;
 import org.eclipse.xtext.xtext.generator.XtextGenerator;
+import org.eclipse.xtext.xtext.generator.XtextGeneratorLanguage;
+import org.eclipse.xtext.xtext.generator.ecore.EMFGeneratorFragment2;
+import org.eclipse.xtext.xtext.generator.grammarAccess.GrammarAccessFragment2;
+import org.eclipse.xtext.xtext.generator.model.GuiceModuleAccess;
+import org.eclipse.xtext.xtext.generator.model.TypeReference;
 import org.eclipse.xtext.xtext.generator.model.project.BundleProjectConfig;
 import org.eclipse.xtext.xtext.generator.model.project.StandardProjectConfig;
-
-import m.formatting.FormatterFragment;
-import m.parsing.ContextualParserMessagesFragment;
+import org.eclipse.xtext.xtext.generator.parser.antlr.XtextAntlrGeneratorFragment2;
+import org.eclipse.xtext.xtext.generator.serializer.SerializerFragment2;
 
 public class Wire 
 {
@@ -43,27 +52,65 @@ public class Wire
 		configuration.setCode(code);
 		generator.setConfiguration(configuration);
 		
-		generator.addLanguage(language("m.M","m"));
-		generator.addLanguage(language("m.CSharp","cs"));
-		//generator.addLanguage(language("m.CSharpStrict", "cstrict"));
-		//generator.addLanguage(language("m.Javascript","js"));
-		generator.addLanguage(language("m.XML","xml"));
-		generator.addLanguage(language("m.JSON","json,project"));
-		generator.addLanguage(language("m.YAML","yml"));
-		//generator.addLanguage(language("m.Text", "text"));
-		//generator.addLanguage(language("m.Testua", "testua"));
+		generator.addLanguage(fullLanguage("m.M","m"));
+		generator.addLanguage(simpleLanguage("m.CSharp","cs"));
+		generator.addLanguage(simpleLanguage("m.XML","xml"));
+		generator.addLanguage(simpleLanguage("m.JSON","json,project"));
+		generator.addLanguage(simpleLanguage("m.YAML","yml"));
 		
 		generator.invoke(null);
+		
+		var ecore = new EcoreGenerator();
+		ecore.setGenModel("platform:/resource/m/model/Game.genmodel");
+		ecore.invoke(null);
 	}
 	
-	static StandardLanguage language(String name, String extensions)
+	static StandardLanguage fullLanguage(String name, String extensions)
 	{
 		var language = new StandardLanguage();
 		language.addReferencedResource("platform:/resource/m/model/Game.genmodel");
 		language.setName(name);
 		language.setFileExtensions(extensions);
 		language.addFragment(new FormatterFragment());
-		//language.addFragment(new ContextualParserMessagesFragment());
+		language.addFragment(new ContextualParserMessagesFragment());
+		return language;
+	}
+	
+	static XtextGeneratorLanguage simpleLanguage(String name, String extensions)
+	{
+		var language = new XtextGeneratorLanguage();
+		language.setName(name);
+		language.setFileExtensions(extensions);
+		language.addFragment(new EMFGeneratorFragment2());
+		language.addFragment(new GrammarAccessFragment2());
+		language.addFragment(new XtextAntlrGeneratorFragment2());
+		language.addFragment(new SerializerFragment2());
+		language.addFragment(new FormatterFragment());
 		return language;
 	}
 }
+
+class ContextualParserMessagesFragment extends AbstractXtextGeneratorFragment
+{
+	@Override
+	public void generate()
+	{
+		GuiceModuleAccess.BindingFactory bindingFactory = new GuiceModuleAccess.BindingFactory();
+		bindingFactory.addTypeToType(TypeReference.typeRef(ISyntaxErrorMessageProvider.class), TypeReference.typeRef("m.validation.ContextualParserMessages")).contributeTo(getLanguage().getRuntimeGenModule());
+	}
+}
+
+class FormatterFragment extends AbstractXtextGeneratorFragment
+{
+	@Override
+	public void generate()
+	{
+		GuiceModuleAccess.BindingFactory bindingFactory = new GuiceModuleAccess.BindingFactory();
+		
+		var grammarPath = getGrammar().getName();
+		var grammar = grammarPath.substring(grammarPath.lastIndexOf('.')+1);
+		
+		bindingFactory.addTypeToType(TypeReference.typeRef(IFormatter2.class), TypeReference.typeRef("m.formatting."+grammar+"Format")).contributeTo(getLanguage().getRuntimeGenModule());
+	}
+}
+

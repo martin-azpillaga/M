@@ -1,103 +1,30 @@
 package m.validation;
 
-import static m.library.SimpleType.*;
 import static game.GamePackage.Literals.*;
+import static m.scoping.StandardLibrary.*;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.util.HashMap;
-
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.validation.Check;
-
-import m.library.Component;
-import m.library.MagicName;
-import m.library.SimpleType;
-import game.Addition;
-import game.Archetype;
-import game.Assignment;
-import game.Brackets;
-import game.Cardinal;
-import game.Cell;
-import game.Comparison;
-import game.End;
-import game.Equality;
-import game.ExplicitSet;
-import game.Expression;
-import game.Forall;
-import game.Function;
-import game.Game;
-import game.ImplicitSet;
-import game.Iteration;
-import game.Join;
-import game.And;
-import game.LogicalNot;
-import game.Or;
-import game.Multiplication;
-import game.Selection;
-import game.SetExpression;
-import game.Variable;
+import game.*;
+import m.scoping.StandardLibrary;
 
 public class MValidator extends AbstractMValidator 
 {
-	public static HashMap<Expression,SimpleType> expressions  = new HashMap<>();
-	public static HashMap<String,SimpleType> components  = new HashMap<>();
-	public static HashMap<String,SimpleType> variables  = new HashMap<>();
-	public static ArrayList<ArrayList<Expression>> groups  = new ArrayList<>();
-
-	
-	@Check
-	public void unique(Archetype archetype)
-	{
-		var game = (Game) archetype.eContainer();
-		
-		var amount = 0;
-		
-		for (var e : game.getArchetypes())
-		{
-			var name = e.getName();
-			if (archetype.getName().equals(name))
-			{
-				amount++;
-			}
-		}
-		
-		if (amount > 1)
-		{
-			error("Repeated archetype", archetype, ARCHETYPE__NAME);
-		}
-	}
-	
-	@Check
-	public void unique(game.Component component)
-	{
-		var archetype = (Archetype) component.eContainer();
-		
-		var amount = 0;
-		
-		for (var c : archetype.getComponents())
-		{
-			var name = c.getName();
-			if (component.getName().equals(name))
-			{
-				amount++;
-			}
-		}
-		
-		if (amount > 1)
-		{
-			error("Repeated component", component, COMPONENT__NAME);
-		}
-	}
+	Game game;
+	ArrayList<ArrayList<Expression>> groups = new ArrayList<>();
+	HashMap<String,Type> components = new HashMap<String, Type>();
 	
 	@Check
 	public void unique(game.System system)
 	{
-		var module = (Game) system.eContainer();
+		var game = (Game) system.eContainer();
 		
 		var amount = 0;
 		
-		for (var s : module.getSystems())
+		for (var s : game.getSystems())
 		{
 			var name = s.getName();
 			if (system.getName().equals(name))
@@ -111,59 +38,43 @@ public class MValidator extends AbstractMValidator
 			error("Repeated system", system, SYSTEM__NAME);
 		}
 	}
-	
-	
-	
-	@Check
-	public void existsBase(Archetype archetype)
-	{
-		var base = archetype.getBase();
-		if (base == null) return;
-		
-		var module = (Game) archetype.eContainer();
-		for (var e : module.getArchetypes())
-		{
-			if (e.getName().equals(base))
-			{
-				return;
-			}
-		}
-		error("Base entity "+ base + "undefined", ARCHETYPE__BASE);
-	}
-	
-	@Check
-	public void acyclicBase(Archetype archetype)
-	{
-		var base = archetype.getBase();
-		var module = (Game) archetype.eContainer();
-		var entities = module.getArchetypes();
-		
-		var visited = new ArrayList<String>();
-		visited.add(archetype.getName());
-		
-		while (base != null)
-		{
-			for (var e : entities)
-			{
-				if (e.getName().equals(base))
-				{
-					if (visited.contains(e.getName()))
-					{
-						error("Cyclic archetype dependency", ARCHETYPE__BASE);
-						return;
-					}
-					else
-					{
-						visited.add(e.getName());
-						base = e.getBase();
-					}
-				}
-			}
-			return;
-		}
-	}
 
-	
+	@Check
+	public void scope(Call call)
+	{
+		var name = call.getName();
+		var arguments = call.getArguments();
+		
+		var found = false;
+		
+		for (var function : game.getFunctions())
+		{
+			if (name.equals(function.getName()))
+			{
+				found = true;
+				
+				if (name.equals(has.getName()))
+				{
+					setComponent(((Variable)arguments.get(0)).getName(), tag, call, CALL__NAME);
+				}
+				
+				var parameters = function.getType().getParameters();
+				if (arguments.size() + 1  != parameters.size())
+				{
+					error(name + " " + parameters + " not applicable to " + name + " " + arguments, call, CALL__NAME);
+					break;
+				}
+				
+				break;
+			}
+		}
+		
+		if (!found)
+		{
+			error("Function " + name + " undefined", call, CALL__NAME);
+		}
+		
+	}
 	
 	
 	
@@ -171,17 +82,16 @@ public class MValidator extends AbstractMValidator
 	
 	
 	@Check
-	public void clear(Game modul)
+	public void clear(Game _game)
 	{
-		components.clear();
-		variables.clear();
-		expressions.clear();
+		game = _game;
 		groups.clear();
+		components.clear();
 		
-		for (var entry : Component.values())
-		{
-			components.put(entry.toString(), entry.type);
-		}
+		var standard = getGame();
+		game.getTypes().addAll(standard.getTypes());
+		game.getComponents().addAll(standard.getComponents());
+		game.getFunctions().addAll(standard.getFunctions());
 	}
 	
 	private void group(Expression... expressions)
@@ -213,70 +123,42 @@ public class MValidator extends AbstractMValidator
 			}
 			groups.add(list);
 		}
-	}
-
-	private boolean setComponent(String name, SimpleType type, EObject obj, EStructuralFeature feature)
+	}	
+	
+	private void set(Expression expression, Type type, EObject o, EStructuralFeature feature)
 	{
-		var isNew = !components.containsKey(name);
-		if (isNew)
+		var currentType = expression.getType();
+		if (currentType != null)
 		{
-			components.put(name, type);			
+			if (currentType != type)
+			{
+				error("Incompatible types: " + expression.getType().getName() + " and " + type.getName(), o, feature);
+			}
 		}
 		else
 		{
-			if (components.get(name) != type)
-			{
-				error("Incompatible types: " + components.get(name) + " and " + type.toString(), obj, feature);
-			}
+			//expression.setType(type);
 		}
-		return isNew;
 	}
 	
-	private boolean setVariable(String name, SimpleType type, EObject obj, EStructuralFeature feature)
+	private void setComponent(String name, Type type, EObject o, EStructuralFeature feature)
 	{
-		var isNew = !variables.containsKey(name);
-		if (isNew)
+		var existent = components.containsKey(name);
+		if (existent)
 		{
-			variables.put(name, type);
+			var current = components.get(name);
+			if (current != type)
+			{
+				error("Incompatible types: "+current.getName()+" and "+type.getName(), o, feature);
+			}
 		}
 		else
 		{
-			if (variables.get(name) != type)
-			{
-				error("Incompatible types: " + variables.get(name) + " and " + type.toString(), obj, feature);
-			}
+			components.put(name, type);
 		}
-		return isNew;
-	}
-	
-	private boolean setExpression(Expression expression, SimpleType type, EObject o, EStructuralFeature feature)
-	{
-		var isNew = !expressions.containsKey(expression);
-		if (isNew)
-		{
-			expressions.put(expression, type);			
-		}
-		else
-		{
-			if (expressions.get(expression) != type)
-			{
-				error("Incompatible types: " + expressions.get(expression) + " and " + type.toString(), o, feature);
-			}
-		}
-		return isNew;
 	}
 	
 	
-	
-	
-	
-	
-	
-	@Check
-	public void infer(game.Component component)
-	{
-		//magicNames(component.getName(), component, COMPONENT__NAME);
-	}
 	
 	@Check
 	public void infer(Cell cell)
@@ -284,41 +166,20 @@ public class MValidator extends AbstractMValidator
 		var entity = cell.getEntity();
 		var component = cell.getComponent();
 		
-		setVariable(entity, SimpleType.entity, cell, CELL__ENTITY);
-		//magicNames(component, cell, CELL__COMPONENT);
-	}
-	
-	private void magicNames(String component, EObject o, EStructuralFeature feature)
-	{
-		for (var magicName : MagicName.values())
-		{
-			if (component.endsWith(magicName.ending))
-			{
-				setComponent(component, magicName.type, o, feature);
-				
-				if (magicName.baseType != SimpleType.none)
-				{
-					var base = component.substring(0, component.lastIndexOf(magicName.ending));
-					setComponent(base, magicName.baseType, o, feature);
-				}
-				break;
-			}
-		}
-	}
-	
-	
-	
+		set(entity, StandardLibrary.entity, cell, CELL__ENTITY);
+		set(component, type, cell, CELL__COMPONENT);
+	}	
 	
 	@Check
 	public void infer(Selection selection)
 	{
-		setExpression(selection.getCondition(), bool, selection, SELECTION__CONDITION);
+		set(selection.getCondition(), bool, selection, SELECTION__CONDITION);
 	}
 	
 	@Check
 	public void infer(Iteration iteration)
 	{
-		setExpression(iteration.getCondition(), bool, iteration, ITERATION__CONDITION);
+		set(iteration.getCondition(), bool, iteration, ITERATION__CONDITION);
 	}
 	
 	@Check
@@ -329,10 +190,10 @@ public class MValidator extends AbstractMValidator
 		
 		if (condition != null)
 		{
-			setExpression(condition, bool, forall, FORALL__CONDITION);
+			set(condition, bool, forall, FORALL__CONDITION);
 		}
 		
-		setVariable(variable, entity, forall, FORALL__VARIABLE);
+		set(variable, entity, forall, FORALL__VARIABLE);
 	}
 	
 	@Check
@@ -344,29 +205,27 @@ public class MValidator extends AbstractMValidator
 		group(atom,expression);
 	}
 	
-	
-	
 	@Check
 	public void infer(Or or)
 	{
-		setExpression(or, bool, or, OR__LEFT);
-		setExpression(or.getLeft(), bool, or, OR__LEFT);
-		setExpression(or.getRight(), bool, or, AND__LEFT);
+		set(or, bool, or, OR__LEFT);
+		set(or.getLeft(), bool, or, OR__LEFT);
+		set(or.getRight(), bool, or, AND__LEFT);
 	}
 	
 	@Check
 	public void infer(And and)
 	{
-		setExpression(and, bool, and, AND__LEFT);
-		setExpression(and.getLeft(), bool, and, AND__LEFT);
-		setExpression(and.getRight(), bool, and, AND__LEFT);
+		set(and, bool, and, AND__LEFT);
+		set(and.getLeft(), bool, and, AND__LEFT);
+		set(and.getRight(), bool, and, AND__LEFT);
 	}
 	
 	@Check
 	public void infer(LogicalNot not)
 	{
-		setExpression(not, bool, not, LOGICAL_NOT__EXPRESSION);
-		setExpression(not.getExpression(), bool, not, LOGICAL_NOT__EXPRESSION);
+		set(not, bool, not, LOGICAL_NOT__EXPRESSION);
+		set(not.getExpression(), bool, not, LOGICAL_NOT__EXPRESSION);
 	}
 	
 	@Check
@@ -378,16 +237,13 @@ public class MValidator extends AbstractMValidator
 		group(left, right);
 	}
 	
-	
-	
-	
 	@Check
-	public void infer(Addition additive)
+	public void infer(Addition addition)
 	{
-		var left = additive.getLeft();
-		var right = additive.getRight();
+		var left = addition.getLeft();
+		var right = addition.getRight();
 		
-		group(additive, left, right);
+		group(addition, left, right);
 	}
 	
 	@Check
@@ -397,7 +253,7 @@ public class MValidator extends AbstractMValidator
 		var right = multiplication.getRight();
 		
 		group(multiplication, left);
-		setExpression(right, float1, multiplication, MULTIPLICATION__RIGHT);
+		set(right, float1, multiplication, MULTIPLICATION__RIGHT);
 	}
 	
 	@Check
@@ -406,30 +262,17 @@ public class MValidator extends AbstractMValidator
 		var left = comparison.getLeft();
 		var right = comparison.getRight();
 		
-		setExpression(comparison, bool, comparison, COMPARISON__KIND);
-		setExpression(left, float1, comparison, COMPARISON__LEFT);
-		setExpression(right, float1, comparison, COMPARISON__RIGHT);
+		set(comparison, bool, comparison, COMPARISON__KIND);
+		set(left, float1, comparison, COMPARISON__LEFT);
+		set(right, float1, comparison, COMPARISON__RIGHT);
 	}
-	
-	
-	
 	
 	@Check
 	public void infer(ImplicitSet set)
 	{
-		setVariable(set.getVariable(), entity, set, IMPLICIT_SET__VARIABLE);
-		setExpression(set.getPredicate(), bool, set, IMPLICIT_SET__PREDICATE);	
-		setExpression(set, entityList, set, IMPLICIT_SET__VARIABLE);
-	}
-	
-	@Check
-	public void infer(ExplicitSet set)
-	{
-		for (var element : set.getElements())
-		{
-			setExpression(element, entity, set, EXPLICIT_SET__ELEMENTS);
-		}
-		setExpression(set, entityList, set, EXPLICIT_SET__ELEMENTS);
+		set(set.getVariable(), entity, set, IMPLICIT_SET__VARIABLE);
+		set(set.getPredicate(), bool, set, IMPLICIT_SET__PREDICATE);	
+		set(set, entityList, set, IMPLICIT_SET__VARIABLE);
 	}
 	
 	@Check
@@ -437,40 +280,17 @@ public class MValidator extends AbstractMValidator
 	{
 		var left = expression.getLeft();
 		var right = expression.getRight();
-		var kind = expression.getKind();
-		
-		switch(kind)
-		{
-		case MEMBERSHIP:
-			setExpression(left, entity, expression, SET_EXPRESSION__LEFT);
-			setExpression(right, entityList, expression, SET_EXPRESSION__RIGHT);
-			setExpression(expression, bool, expression, SET_EXPRESSION__KIND);
-			break;
-		case UNION:
-			setExpression(left, entityList, expression, SET_EXPRESSION__LEFT);
-			setExpression(right, entityList, expression, SET_EXPRESSION__RIGHT);
-			setExpression(expression, entityList, expression, SET_EXPRESSION__KIND);
-			break;
-		case DIFFERENCE:
-			setExpression(left, entityList, expression, SET_EXPRESSION__LEFT);
-			setExpression(right, entityList, expression, SET_EXPRESSION__RIGHT);
-			setExpression(expression, entityList, expression, SET_EXPRESSION__KIND);
-			break;
-		case INTERSECTION:
-			setExpression(left, entityList, expression, SET_EXPRESSION__LEFT);
-			setExpression(right, entityList, expression, SET_EXPRESSION__RIGHT);
-			setExpression(expression, entityList, expression, SET_EXPRESSION__KIND);
-			break;
-		default:
-			break;
-		}
+
+		set(left, entity, expression, SET_EXPRESSION__LEFT);
+		set(right, entityList, expression, SET_EXPRESSION__RIGHT);
+		set(expression, bool, expression, SET_EXPRESSION__LEFT);
 	}
 	
 	@Check
 	public void infer(Cardinal cardinal)
 	{
-		setExpression(cardinal, float1, cardinal, CARDINAL__EXPRESSION);
-		setExpression(cardinal.getExpression(), entityList, cardinal, CARDINAL__EXPRESSION);
+		set(cardinal, float1, cardinal, CARDINAL__EXPRESSION);
+		set(cardinal.getExpression(), entityList, cardinal, CARDINAL__EXPRESSION);
 	}
 	
 	@Check
@@ -479,73 +299,50 @@ public class MValidator extends AbstractMValidator
 		var entries = join.getEntries();
 		for (var entry : entries)
 		{
-			setExpression(entry, float1, join, JOIN__ENTRIES);
+			set(entry, float1, join, JOIN__ENTRIES);
 		}
 		if (entries.size() == 2)
 		{
-			setExpression(join, float2, join, JOIN__ENTRIES);
+			set(join, float2, join, JOIN__ENTRIES);
 		}
 		else if (entries.size() == 3)
 		{
-			setExpression(join, float3, join, JOIN__ENTRIES);
+			set(join, float3, join, JOIN__ENTRIES);
 		}
 		else if (entries.size() == 4)
 		{
-			setExpression(join, float4, join, JOIN__ENTRIES);
+			set(join, float4, join, JOIN__ENTRIES);
 		}
 		else
 		{
 			error("Only 4-vectors are supported", join, JOIN__ENTRIES);
 		}
 	}
-	
-	
-	
-	
+
 	
 	@Check
-	public void infer(Function call)
+	public void infer(Call call)
 	{
-		var function = call.getName();
+		var name = call.getName();
 		var arguments = call.getArguments();
 		
-		var found = false;
-		
-		for (var engineFunction : m.library.Function.values())
+		for (var function : game.getFunctions())
 		{
-			if (function.equals(engineFunction.name))
-			{
-				found = true;
-				
-				if (function.equals(m.library.Function.has.name))
+			if (name.equals(function.getName()))
+			{				
+				var parameters = function.getType().getParameters();
+				for (var i = 0; i < parameters.size(); i++)
 				{
-					setComponent(((Variable)arguments.get(0)).getName(), SimpleType.tag, call, FUNCTION__NAME);
-				}
-				
-				var parameters = engineFunction.type.parameters;
-				if (arguments.size() != parameters.size())
-				{
-					error(function + " takes " + engineFunction.type, call, FUNCTION__NAME);
-					break;
-				}
-				for (var i = 0; i < engineFunction.type.parameters.size(); i++)
-				{
-					var simpleType = (SimpleType) parameters.get(i);
+					var simpleType = parameters.get(i);
 					if (simpleType != any)
 					{
-						setExpression(arguments.get(i), simpleType, call, FUNCTION__NAME);
+						set(arguments.get(i), simpleType, call, CALL__NAME);
 					}
 				}
 				
 				break;
 			}
-		}
-		
-		if (!found)
-		{
-			error("Function " + function + " undefined", call, FUNCTION__NAME);
-		}
-		
+		}		
 	}
 	
 	
@@ -563,11 +360,6 @@ public class MValidator extends AbstractMValidator
 	public void solve()
 	{
 		var repeat = true;
-		var newExpressions = new ArrayList<Expression>();
-		for (var expression : expressions.keySet())
-		{
-			newExpressions.add(expression);
-		}
 		
 		while (repeat)
 		{
@@ -579,41 +371,22 @@ public class MValidator extends AbstractMValidator
 				var group = groups.get(g);
 				for (var expression : group)
 				{
-					if (expressions.containsKey(expression))
+					if (expression.getType() != null)
 					{
 						repeat = true;
 						
-						var type = expressions.get(expression);
+						var type = expression.getType();
 						for (var e : group)
 						{
-							setExpression(e, type, e, null);
-							newExpressions.add(e);
+							set(e, type, e, null);
 						}
 						groups.remove(g);
 						break;
 					}
-					else if (expression instanceof Variable)
-					{
-						var variable = (Variable) expression;
-						var name = variable.getName();
-						if (variables.containsKey(name))
-						{
-							repeat = true;
-							
-							var type = variables.get(name);
-							for (var e : group)
-							{
-								setExpression(e, type, e, null);
-								newExpressions.add(e);
-							}
-							groups.remove(g);
-							break;
-						}
-					}
 					else if (expression instanceof Cell)
 					{
 						var access = (Cell) expression;
-						var component = access.getComponent();
+						var component = access.getComponent().getName();
 						if (components.containsKey(component))
 						{
 							repeat = true;
@@ -621,8 +394,7 @@ public class MValidator extends AbstractMValidator
 							var type = components.get(component);
 							for (var e : group)
 							{
-								setExpression(e, type, e, null);
-								newExpressions.add(e);
+								set(e, type, e, null);
 							}
 							groups.remove(g);
 							break;
@@ -630,38 +402,6 @@ public class MValidator extends AbstractMValidator
 					}
 				}
 			}
-			
-			// expressions
-			for (var expression : newExpressions)
-			{
-				if (expression instanceof Variable)
-				{
-					var variable = (Variable) expression;
-					if (setVariable(variable.getName(), expressions.get(expression), variable, VARIABLE__NAME))
-					{
-						repeat = true;
-					}
-				}
-				else if (expression instanceof Cell)
-				{
-					var cell = (Cell) expression;
-					if (setComponent(cell.getComponent(), expressions.get(expression), cell, CELL__COMPONENT))
-					{
-						repeat = true;
-					}
-				}
-				else if (expression instanceof Brackets)
-				{
-					var brackets = (Brackets) expression;
-					if (setExpression(brackets.getExpression(),expressions.get(brackets),brackets,BRACKETS__EXPRESSION))
-					{
-						repeat = true;
-					}
-				}
-			}
-
-			
-			newExpressions.clear();
 		}
 	}
 	
@@ -674,16 +414,6 @@ public class MValidator extends AbstractMValidator
 				if (expression instanceof Cell)
 				{
 					warning("Undecidable type", expression, CELL__COMPONENT);
-				}
-			}
-		}
-		for (var archetype : game.getArchetypes())
-		{
-			for (var component : archetype.getComponents())
-			{				
-				if (!components.containsKey(component.getName()))
-				{
-					warning("Undecidable type", component, COMPONENT__NAME);
 				}
 			}
 		}

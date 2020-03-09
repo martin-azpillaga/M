@@ -10,7 +10,7 @@ import org.eclipse.xtext.formatting2.regionaccess.ISemanticRegion;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.xbase.lib.Procedures.Procedure1;
 
-public abstract class GenericFormatter extends AbstractFormatter2
+public abstract class FormattingHelper extends AbstractFormatter2
 {
 	protected IFormattableDocument document;
 
