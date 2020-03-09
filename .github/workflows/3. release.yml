@@ -26,9 +26,6 @@ jobs:
       with:
         java-version: 11
 
-    - name: Install vsce for packaging vscode extension
-      run: sudo npm install -g vsce
-
     - name: Install pandoc
       run: |
         sudo apt remove pandoc
@@ -85,7 +82,7 @@ jobs:
 
     - name: Create language server
       run: |
-        cd Code/Language\ Server
+        cd Code
         gradle runWire
         gradle generateLanguageServer
   
@@ -97,19 +94,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./Code/Language\ Server/build/libs/m-language-server.jar
         asset_name: m-language-server.jar
-        asset_content_type: text/zip
-
-    - name: Run vsce package to create vsix file
-      run: |
-        cd .github/workflows/configuration/code
-        vsce package
-
-    - name: Upload visual studio code extension to release
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./.github/workflows/configuration/code/y-0.0.1.vsix
-        asset_name: m-extension.vsix
         asset_content_type: text/zip
