@@ -85,8 +85,8 @@ jobs:
 
     - name: Create language server
       run: |
-        cd Code
-        gradle runFragments
+        cd Code/Language\ Server
+        gradle runWire
         gradle generateLanguageServer
   
     - name: Upload language server jar to release
@@ -95,7 +95,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Code/build/libs/m-language-server.jar
+        asset_path: ./Code/Language\ Server/build/libs/m-language-server.jar
         asset_name: m-language-server.jar
         asset_content_type: text/zip
 
