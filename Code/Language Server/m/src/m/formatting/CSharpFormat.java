@@ -98,7 +98,7 @@ enum FormatRule
 	angleBrackets
 }
 
-public class CSharpFormat extends GenericFormatter
+public class CSharpFormat extends FormattingHelper
 {
 	@Inject
 	CSharpGrammarAccess grammar;

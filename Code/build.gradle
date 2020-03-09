@@ -7,50 +7,42 @@ dependencies {
 	implementation platform("org.eclipse.xtext:xtext-dev-bom:2.20.0")
 	implementation "org.eclipse.xtext:org.eclipse.xtext:2.20.0"
 	implementation "org.eclipse.xtext:org.eclipse.xtext.ide:2.20.0"
-	implementation 'org.eclipse.emf:org.eclipse.emf.mwe2.launch'
 	implementation "org.eclipse.xtext:org.eclipse.xtext.common.types:2.20.0"
 	implementation "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:2.20.0"
-	implementation 'org.eclipse.xtext:xtext-antlr-generator'
-	implementation files("${projectDir}/m/src")
-	implementation files("${projectDir}/m/src/m/parsing")
-	implementation files("${projectDir}/m/src/m/formatting")
-	implementation files("${projectDir}/build/classes/java/main")
+}
+
+
+
+task compileWire(type: JavaCompile){
+	source 			+= file('Language Server/m/src/m/main/Wire.java')
+	classpath 		 = configurations.implementation
+	destinationDir 	 = file('build/classes/java/main')
+}
+
+task runWire(type: JavaExec){
+	doFirst{
+		mkdir "Language Server/m.ide"
+		mkdir "Language Server/m.ui"
+	}
+	dependsOn 	+= compileWire
+	main 		 = "m.main.Wire"
+	args 		+= "Language Server"
+	classpath 	 = configurations.implementation
+	classpath 	+= files('build/classes/java/main')
 }
 
 sourceSets {
-	main.java.srcDirs = ["m/src", "m.ide/src", "m.ide/src-gen", "m/src-gen"]
-}
-
-task compileFragments(type: JavaCompile){
-	source += file('m/src/m/main/RunFragments.java')
-	source += fileTree(dir: 'm/src/m/parsing', include: '**/*.java')
-	classpath = configurations.implementation
-	destinationDir = file('build/classes/java/main')
-}
-
-task runFragments(type: JavaExec) {
-	doFirst{
-		mkdir "m.ide"
-		mkdir "m.ui"
-	}
-	dependsOn compileFragments
-	main = "m.main.RunFragments"
-	args "."
-	classpath = configurations.implementation
-}
-
-task runWire(type: JavaExec) {
-	dependsOn compileJava
-	main = "m.main.Wire"
-	args "."
-	classpath = configurations.implementation
+	main.java.srcDirs = ["Language Server/m/src", "Language Server/m.ide/src", "Language Server/m.ide/src-gen", "Language Server/m/src-gen"]
 }
 
 task generateLanguageServer(type: Jar) {
-	dependsOn runWire
-	baseName = 'm-language-server'
+	archiveBaseName = 'm-language-server'
     manifest.attributes 'Main-Class': 'org.eclipse.xtext.ide.server.ServerLauncher'
-    from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) } }
-	exclude '**/*.java', 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', '**/*.xtend', '**/*.mwe2', '**/*.g', '**/*.xtext'
-    with jar
+    from { configurations.implementation.collect { it.isDirectory() ? it : zipTree(it) }}
+	from ('./Language Server/m.ide/src-gen/') {
+		include 'META-INF/services/org.eclipse.xtext.ISetup'
+	}
+	exclude '**/*.java', 'META-INF/INDEX.LIST', 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA', '**/*.xtend', '**/*.mwe2', '**/*.g', '**/*.xtext', '*.html', 'about.*', '*.profile', '.options', '.api_description', 'about_files', 'plugin.xml', 'systembundle.properties', 'profile.list', 'schema',
+			'**/*.png'
+	with jar
 }
