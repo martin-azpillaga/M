@@ -17,9 +17,6 @@ import org.eclipse.xtext.xtext.generator.model.project.StandardProjectConfig;
 import org.eclipse.xtext.xtext.generator.parser.antlr.XtextAntlrGeneratorFragment2;
 import org.eclipse.xtext.xtext.generator.serializer.SerializerFragment2;
 
-import m.formatting.CSharpFormat;
-import m.formatting.JSONFormat;
-import m.formatting.YAMLFormat;
 import m.validation.ContextualParserMessages;
 
 public class Wire 
@@ -86,6 +83,7 @@ public class Wire
 		language.addFragment(new GrammarAccessFragment2());
 		language.addFragment(new XtextAntlrGeneratorFragment2());
 		language.addFragment(new SerializerFragment2());
+		language.addFragment(new FormatterFragment());
 		return language;
 	}
 }
@@ -107,19 +105,10 @@ class FormatterFragment extends AbstractXtextGeneratorFragment
 	{
 		GuiceModuleAccess.BindingFactory bindingFactory = new GuiceModuleAccess.BindingFactory();
 		
-		var grammar = getGrammar().getName();
-		if (grammar.equals("m.JSON"))
-		{
-			bindingFactory.addTypeToType(TypeReference.typeRef(IFormatter2.class), TypeReference.typeRef(JSONFormat.class)).contributeTo(getLanguage().getRuntimeGenModule());
-		}
-		else if (grammar.equals("m.CSharp"))
-		{
-			bindingFactory.addTypeToType(TypeReference.typeRef(IFormatter2.class), TypeReference.typeRef(CSharpFormat.class)).contributeTo(getLanguage().getRuntimeGenModule());
-		}
-		else if (grammar.equals("m.YAML"))
-		{
-			bindingFactory.addTypeToType(TypeReference.typeRef(IFormatter2.class), TypeReference.typeRef(YAMLFormat.class)).contributeTo(getLanguage().getRuntimeGenModule());
-		}
+		var grammarPath = getGrammar().getName();
+		var grammar = grammarPath.substring(grammarPath.lastIndexOf('.')+1);
+		
+		bindingFactory.addTypeToType(TypeReference.typeRef(IFormatter2.class), TypeReference.typeRef("m.formatting."+grammar+"Format")).contributeTo(getLanguage().getRuntimeGenModule());
 	}
 }
 
