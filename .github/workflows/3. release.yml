@@ -45,7 +45,7 @@ jobs:
 
     - name: Create theia application (package.json)
       run: |
-        cd .github/workflows/configuration
+        cd Code/Application
         yarn
         yarn buildStandalone
 
