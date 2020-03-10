@@ -45,9 +45,8 @@ jobs:
 
     - name: Create theia application (package.json)
       run: |
-        cd .github/workflows/configuration
-        yarn
-        yarn buildStandalone
+        cd Code/Application
+        yarn all
 
     - name: Upload standalone application to release
       uses: actions/upload-release-asset@v1.0.1
