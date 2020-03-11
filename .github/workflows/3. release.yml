@@ -46,7 +46,7 @@ jobs:
     - name: Create theia application (package.json)
       run: |
         cd Code/Application
-        yarn all
+        yarn standalone
 
     - name: Upload standalone application to release
       uses: actions/upload-release-asset@v1.0.1
@@ -54,8 +54,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./.github/workflows/configuration/dist/m-textual-0.0.0.AppImage
-        asset_name: m-standalone.AppImage
+        asset_path: ./Code/Application/dist/m-0.0.0.AppImage
+        asset_name: m.AppImage
         asset_content_type: text/text
 
     - name: Translate all markdown files to html
