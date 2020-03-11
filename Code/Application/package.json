@@ -1,4 +1,7 @@
 {
+  "name": "m",
+  "version": "0.0.0",
+  "main": "src-gen/frontend/electron-main.js",
   "dependencies": {
     "@theia/navigator": "next",
     "@theia/electron": "next",
@@ -10,6 +13,15 @@
     "@theia/cli": "next"
   },
   "scripts": {
-      "all": "yarn && theia rebuild:browser && theia rebuild:electron && theia build --app-target electron && theia start --app-target electron"
+      "standalone": "yarn && theia rebuild:browser && theia rebuild:electron && theia build --app-target electron && electron-builder --linux"
+  },
+  "build": {
+    "appId": "world.azpillaga.m",
+    "linux": 
+    {
+      "target": [ "AppImage" ],
+      "category": "Utility"
+    },
+    "files": ["**/*"]
   }
 }
