@@ -167,7 +167,7 @@
         containment="true"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Atom" abstract="true" interface="true"
-      eSuperTypes="#//Primary">
+      eSuperTypes="#//Index">
     <eStructuralFeatures xsi:type="ecore:EReference" name="index" eType="#//Expression"
         containment="true"/>
   </eClassifiers>
