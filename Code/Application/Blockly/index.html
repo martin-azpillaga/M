@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <title>M editor</title>
+
+  <link rel="stylesheet" href="index.css">
+
+  
+  
+</head>
+
+<body>
+
+  <header>
+    <button id="load-button">Load</button>
+    <span id="title">Hosted at <a href="https://github.com/martin-azpillaga/M/issues/new/choose" target="_blank">Github</a> by Martin Azpillaga</span>
+    <button id="save-button">Save</button>
+  </header>
+
+  <section>  
+    <div id="blocklyDiv"></div>
+  </section>
+
+  <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
+    <category name="Statements">
+      <block type="selection"></block>
+      <block type="iteration"></block>
+      <block type="forall">
+        <field name="entity">entity</field>
+      </block>
+      <block type="assignment">
+        <field name="entity">entity</field>
+      </block>
+    </category>
+  </xml>
+  
+  <input id="uploaded-input" type="file"/>
+
+  <script src="blockly.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>
