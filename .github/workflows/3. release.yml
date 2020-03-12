@@ -18,8 +18,10 @@ jobs:
     - name: Install yarn with node 10
       run: npm install -g yarn
 
-    - name: Install google translate cli
-      run: sudo npm install -g google-translate-cli
+    - name: Install electron-builder
+      run: |
+        cd Code/Application
+        yarn add electron-builder --dev
 
     - name: Download java 11
       uses: actions/setup-java@v1
@@ -43,12 +45,25 @@ jobs:
         draft: true
         prerelease: true
 
-    - name: Create theia application (package.json)
+    - name: Pandoc markdown files to html
+      run: |
+        find Documentation -name "*.md" | xargs -I {} sh -c 'cat "{}" | pandoc --lua-filter=.github/workflows/configuration/links.lua -o "$(dirname "{}")/$(basename "{}" .md).html"'
+        pandoc --lua-filter=.github/workflows/configuration/links.lua README.md -o README.html
+
+    - name: Create language server
+      run: |
+        cd Code
+        cp ../.github/workflows/configuration/build.gradle build.gradle
+        gradle runWire
+        gradle generateLanguageServer
+        mv build/libs/m-language-server.jar Application/Theia/ls.jar
+
+    - name: Build application
       run: |
         cd Code/Application
         yarn standalone
 
-    - name: Upload standalone application to release
+    - name: Upload application to release
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -57,41 +72,3 @@ jobs:
         asset_path: ./Code/Application/dist/m-0.0.0.AppImage
         asset_name: m.AppImage
         asset_content_type: text/text
-
-    - name: Translate all markdown files to html
-      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | pandoc --lua-filter=.github/workflows/configuration/links.lua -o "$(dirname "{}")/$(basename "{}" .md).html"' & exit 0
-    - name: Translate all markdown files to spanish
-      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | translate | pandoc --lua-filter=.github/workflows/configuration/links-es.lua -o "$(dirname "{}")/$(basename "{}" .md)-es.html"' & exit 0
-    - name: Translate all markdown files to chinese
-      run: find . -name "*.md" ! -path "./.github/*" | xargs -I {} sh -c 'cat "{}" | translate -t zh-CN | pandoc --lua-filter=.github/workflows/configuration/links-zh.lua -o "$(dirname "{}")/$(basename "{}" .md)-zh.html"' & exit 0
-
-    - name: Zip all html files
-      run: zip -r m-web.zip Documentation README.html
-
-    - name: Upload all documentation html pages as zip to release
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./m-web.zip
-        asset_name: m-web.zip
-        asset_content_type: text/zip
-
-
-    - name: Create language server
-      run: |
-        cd Code
-        cp ../.github/workflows/configuration/build.gradle build.gradle
-        gradle runWire
-        gradle generateLanguageServer
-  
-    - name: Upload language server jar to release
-      uses: actions/upload-release-asset@v1.0.1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./Code/Language\ Server/build/libs/m-language-server.jar
-        asset_name: m-language-server.jar
-        asset_content_type: text/zip
