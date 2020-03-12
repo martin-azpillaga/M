@@ -203,6 +203,7 @@ app.on('ready', () => {
                     mainWindow.loadURL('file://' + join(__dirname, 'lib/index.html') + '?port=' + port);
                     const newWindow = new BrowserWindow({});
                     newWindow.loadURL('file://' + join(__dirname, 'Blockly/index.html'));
+                    new BrowserWindow({}).loadURL('file://'+join(__dirname,'../../README.html'))
                 }
             });
         }
