@@ -48,7 +48,7 @@ jobs:
     - name: Pandoc markdown files to html
       run: |
         find Documentation -name "*.md" | xargs -I {} sh -c 'cat "{}" | pandoc --lua-filter=.github/workflows/configuration/links.lua -o "$(dirname "{}")/$(basename "{}" .md).html"'
-        pandoc --lua-filter=.github/workflows/configuration/links.lua README.md -o README.html
+        pandoc --lua-filter=.github/workflows/configuration/links.lua README.md -o Code/Application/README.html
 
     - name: Create language server
       run: |
