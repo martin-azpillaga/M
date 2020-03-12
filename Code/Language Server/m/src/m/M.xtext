@@ -63,7 +63,7 @@ Setable:
 
 
 Primary:
-	=>Call|=>Index|Atom|Collection|Cardinal|LogicalNot;
+	=>Call|=>Index|Collection|Cardinal|LogicalNot;
 
 Call:
 	name=WORD
@@ -76,7 +76,7 @@ Cardinal:
 	'#' expression=Primary;
 
 Index:
-	atom=Atom '~' expression=Expression '~';
+	Atom =>({Index.atom=current} '~' expression=Expression '~')?;
 
 Collection:
 	Brackets|Join|ImplicitSet;

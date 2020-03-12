@@ -22,5 +22,6 @@ jobs:
     - name: Create language server
       run: |
         cd Code
+        cp ../.github/workflows/configuration/build.gradle build.gradle
         gradle runWire
         gradle generateLanguageServer
