@@ -200,10 +200,10 @@ app.on('ready', () => {
                 if (error) {
                     console.error(error);
                 } else {
-                    mainWindow.loadURL('file://' + join(__dirname, 'lib/index.html') + '?port=' + port);
+                    //mainWindow.loadURL('file://' + join(__dirname, 'lib/index.html') + '?port=' + port);
                     const newWindow = new BrowserWindow({});
                     newWindow.loadURL('file://' + join(__dirname, 'Blockly/index.html'));
-                    new BrowserWindow({}).loadURL('file://'+join(__dirname,'../../README.html'))
+                    new BrowserWindow({}).loadURL('file://'+join(__dirname,'README.html'))
                 }
             });
         }
