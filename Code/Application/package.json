@@ -1,6 +1,14 @@
 {
   "name": "m",
   "version": "0.0.0",
+  "description": "A text editor for the M programming language",
+  "author": {"name": "Martin", "email": "media@azpillaga.world", "url": "https://azpillaga.world"},
+  "engines": {"node": "10.x"},
+  "license": "AGPL v3",
+  "repository": {"url": "https://github.com/martin-azpillaga/M"},
+  "bugs": {"url": "https://github.com/martin-azpillaga/M/issues"},
+  "homepage": "https://azpillaga.world/M",
+  "keywords": ["text editor", "data oriented", "programming language", "game development"],
   "main": "main.js",
   "dependencies": {
     "@theia/navigator": "next",
