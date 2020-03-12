@@ -1,13 +1,13 @@
 {
   "name": "m",
   "version": "0.0.0",
-  "main": "src-gen/frontend/electron-main.js",
+  "main": "main.js",
   "dependencies": {
     "@theia/navigator": "next",
     "@theia/electron": "next",
     "@theia/file-search": "next",
     "@theia/preferences": "next",
-    "@theia/m": "file:./Extension"
+    "@theia/m": "file:./Theia"
   },
   "devDependencies": {
     "@theia/cli": "next"
