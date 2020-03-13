@@ -1,7 +1,5 @@
 package m.main;
 
-import org.eclipse.emf.mwe2.ecore.EcoreGenerator;
-import org.eclipse.emf.mwe2.runtime.workflow.Workflow;
 import org.eclipse.xtext.formatting2.IFormatter2;
 import org.eclipse.xtext.parser.antlr.ISyntaxErrorMessageProvider;
 import org.eclipse.xtext.xtext.generator.AbstractXtextGeneratorFragment;
@@ -23,27 +21,22 @@ public class Wire
 {
 	public static void main(String[] args)
 	{
-		var rootPath = "..";
-		if (args.length > 0)
-		{
-			rootPath = args[0];
-		}
+		var rootPath = args.length > 0 ? args[0] : "..";
 
 		var generator = new XtextGenerator();
 
 		var configuration = new DefaultGeneratorModule();
 		var project = new StandardProjectConfig();
-		var eclipsePlugin = new BundleProjectConfig();
-		var ide = new BundleProjectConfig();
-		ide.setEnabled(true);
 		var code = new CodeConfig();
 		
-		project.setGenericIde(ide);
+		
+		var eclipsePlugin = new BundleProjectConfig();
+		eclipsePlugin.setEnabled(true);
 		project.setEclipsePlugin(eclipsePlugin);
 		project.setCreateEclipseMetaData(true);
+		
 		project.setBaseName("m");
 		project.setRootPath(rootPath);
-		eclipsePlugin.setEnabled(true);
 		
 		code.setPreferXtendStubs(false);
 		code.setEncoding("UTF-8");
@@ -54,24 +47,15 @@ public class Wire
 		
 		generator.addLanguage(fullLanguage("m.M","m"));
 		generator.addLanguage(simpleLanguage("m.CSharp","cs"));
-		generator.addLanguage(simpleLanguage("m.XML","xml"));
-		generator.addLanguage(simpleLanguage("m.JSON","json,project"));
-		generator.addLanguage(simpleLanguage("m.YAML","yml"));
 		
 		generator.invoke(null);
-		
-		var ecore = new EcoreGenerator();
-		ecore.setGenModel("platform:/resource/m/model/Game.genmodel");
-		ecore.invoke(null);
 	}
 	
 	static StandardLanguage fullLanguage(String name, String extensions)
 	{
 		var language = new StandardLanguage();
-		language.addReferencedResource("platform:/resource/m/model/Game.genmodel");
 		language.setName(name);
 		language.setFileExtensions(extensions);
-		language.addFragment(new FormatterFragment());
 		language.addFragment(new ContextualParserMessagesFragment());
 		return language;
 	}
@@ -95,7 +79,7 @@ class ContextualParserMessagesFragment extends AbstractXtextGeneratorFragment
 	@Override
 	public void generate()
 	{
-		GuiceModuleAccess.BindingFactory bindingFactory = new GuiceModuleAccess.BindingFactory();
+		var bindingFactory = new GuiceModuleAccess.BindingFactory();
 		bindingFactory.addTypeToType(TypeReference.typeRef(ISyntaxErrorMessageProvider.class), TypeReference.typeRef("m.validation.ContextualParserMessages")).contributeTo(getLanguage().getRuntimeGenModule());
 	}
 }
@@ -105,7 +89,7 @@ class FormatterFragment extends AbstractXtextGeneratorFragment
 	@Override
 	public void generate()
 	{
-		GuiceModuleAccess.BindingFactory bindingFactory = new GuiceModuleAccess.BindingFactory();
+		var bindingFactory = new GuiceModuleAccess.BindingFactory();
 		
 		var grammarPath = getGrammar().getName();
 		var grammar = grammarPath.substring(grammarPath.lastIndexOf('.')+1);
