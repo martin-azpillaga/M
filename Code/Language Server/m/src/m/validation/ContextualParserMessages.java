@@ -581,7 +581,7 @@ class Path
 				var enumLiteral = (EnumLiteralDeclaration) e;
 				error += enumLiteral.getLiteral().getValue() + " ";
 			}
-			error += "to specify the enum type";
+			error += "to specify the " + rule.getName();
 		}
 		else if (element instanceof Keyword)
 		{
@@ -665,7 +665,7 @@ class Path
 			//report(elementIndex+1);
 			if (cardinality.equals("?") || cardinality.equals("*"))
 			{
-				return "optionally " + report(elements.get(index+1),false);
+				return report(elements.get(index+1),false);
 			}
 		}
 		else if (element instanceof Keyword)
