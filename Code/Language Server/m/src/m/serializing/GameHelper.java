@@ -1,14 +1,6 @@
 package m.serializing;
 
-import game.Call;
-import game.ComponentData;
-import game.Expression;
-import game.Forall;
-import game.Function;
-import game.Game;
-import game.GameFactory;
-import game.Type;
-import game.Variable;
+import m.game.*;
 
 public class GameHelper
 {
@@ -18,6 +10,8 @@ public class GameHelper
 	{
 		return game.createGame();
 	}
+	
+	/*
 	
 	public static Type type(String name)
 	{
@@ -102,5 +96,5 @@ public class GameHelper
 		function.setName(name);
 		function.setType(type);
 		return function;
-	}
+	}*/
 }

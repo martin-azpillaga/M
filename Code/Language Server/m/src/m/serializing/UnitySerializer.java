@@ -17,30 +17,29 @@ import m.csharp.EqualityKind;
 import m.csharp.Modifier;
 import m.csharp.MultiplicativeKind;
 import m.csharp.Parameter;
-import game.Addition;
-import game.And;
-import game.Assignment;
-import game.Brackets;
-import game.Call;
-import game.Cardinal;
-import game.Cell;
-import game.Comparison;
-import game.ComponentData;
-import game.Equality;
-import game.Function;
-import game.Game;
-import game.ImplicitSet;
-import game.Join;
-import game.LogicalNot;
-import game.Multiplication;
-import game.Or;
-import game.Selection;
-import game.SetExpression;
-import game.Statement;
-import game.System;
-import game.Variable;
-import game.Expression;
-import game.Forall;
+import m.game.Addition;
+import m.game.And;
+import m.game.Assignment;
+import m.game.Brackets;
+import m.game.Call;
+import m.game.Cardinal;
+import m.game.Cell;
+import m.game.Comparison;
+import m.game.Equality;
+import m.game.Function;
+import m.game.Game;
+import m.game.ImplicitSet;
+import m.game.Join;
+import m.game.Not;
+import m.game.Multiplication;
+import m.game.Or;
+import m.game.Selection;
+import m.game.Member;
+import m.game.Statement;
+import m.game.System;
+import m.game.Variable;
+import m.game.Expression;
+import m.game.Forall;
 import m.CSharpRuntimeModule;
 import m.validation.MValidator;
 import m.serializing.GameHelper;
@@ -54,7 +53,7 @@ public class UnitySerializer
 	{
 		csharpModule = new CSharpRuntimeModule();
 		this.fsa = fsa;
-		
+		/*
 		for (var component : game.getComponents())
 		{
 			//serialize(component);
@@ -63,7 +62,7 @@ public class UnitySerializer
 		for (var system : game.getSystems())
 		{
 			//serialize(system);
-		}
+		}*/
 	}
 	/*
 	private void serialize(ComponentData component)
@@ -531,9 +530,9 @@ public class UnitySerializer
 				break;
 			}
 		}
-		else if (expression instanceof LogicalNot)
+		else if (expression instanceof Not)
 		{
-			var e = (LogicalNot) expression;
+			var e = (Not) expression;
 			return not(brackets(cs(e.getExpression(), querySet, namespaces)));
 		}
 		else if (expression instanceof Brackets)

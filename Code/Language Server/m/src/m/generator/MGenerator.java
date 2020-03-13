@@ -5,7 +5,7 @@ import org.eclipse.xtext.generator.AbstractGenerator;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.generator.IGeneratorContext;
 
-import game.Game;
+import m.game.Game;
 import m.serializing.UnitySerializer;
 
 public class MGenerator extends AbstractGenerator 
