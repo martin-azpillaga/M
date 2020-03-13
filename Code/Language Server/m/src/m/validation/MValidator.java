@@ -34,10 +34,12 @@ import m.game.Subprocess;
 import m.game.System;
 import m.game.Variable;
 
+import static m.validation.Type.*;
+
 public class MValidator extends AbstractMValidator 
 {
 	GameProject project;
-	ArrayList<ArrayList<Expression>> groups = new ArrayList<>();
+	ArrayList<HashSet<Expression>> groups = new ArrayList<>();
 	HashMap<String,Type> libraryComponents = new HashMap<String, Type>();
 	HashMap<String,Type> libraryFunctions = new HashMap<String, Type>();
 	HashMap<String,Type> components = new HashMap<String, Type>();
@@ -45,31 +47,45 @@ public class MValidator extends AbstractMValidator
 	HashMap<Expression, Type> expressions = new HashMap<Expression, Type>();
 	HashSet<String> variableNames = new HashSet<String>();
 	
+	EObject currentObject;
+	EStructuralFeature currentFeature;
+	
 	@Check
 	public void validate(Game game)
 	{
 		project = new GameProject();
-		initializeStandardLibrary();
+		
+		if (libraryComponents.isEmpty())
+		{
+			libraryComponents.put("mass", number);
+			libraryComponents.put("velocity", number3);
+			libraryComponents.put("emission", number4);
+			libraryComponents.put("inputValue", number);
+			libraryComponents.put("timeout", truthValue);
+			libraryComponents.put("position", number3);
+			
+			libraryFunctions.put("has", entityTypeToTruth);
+			libraryFunctions.put("add", entityTypeAction);
+			libraryFunctions.put("remove", entityTypeAction);
+			libraryFunctions.put("create", entityAction);
+			libraryFunctions.put("destroy", entityAction);
+			libraryFunctions.put("random", number2ToNumber);
+			libraryFunctions.put("cos", numberToNumber);
+			libraryFunctions.put("sin", numberToNumber);
+			libraryFunctions.put("halt", noneAction);
+		}
 		
 		var functionNames = new HashSet<String>();
 		var systemNames = new HashSet<String>();
+		components.clear();
+		groups.clear();
+		functions.clear();
+		expressions.clear();
+		variableNames.clear();
 		
 		for (var function : libraryFunctions.keySet())
 		{
 			functionNames.add(function);
-		}
-		
-		for (var function : game.getFunctions())
-		{
-			project.functions.add(function);
-			if (functionNames.contains(function.getName()))
-			{
-				error("Scoping error\nFunction already defined", function, FUNCTION__NAME);
-			}
-			else
-			{
-				functionNames.add(function.getName());
-			}
 		}
 		
 		for (var system : game.getSystems())
@@ -84,45 +100,161 @@ public class MValidator extends AbstractMValidator
 				systemNames.add(system.getName());
 			}
 			
-			infer(system.getStatements());
+			validate(system.getStatements());
 			variableNames.clear();
+		}
+		
+		
+		var repeat = true;
+		
+		while (repeat)
+		{
+			repeat = false;
+			
+			for (var expression : expressions.keySet())
+			{
+				if (expression instanceof Cell)
+				{
+					var cell = (Cell) expression;
+					var component = cell.getComponent().getName();
+					
+					if (!libraryComponents.containsKey(component))
+					{
+						var type = expressions.get(expression);
+
+						components.put(component, type);
+					}
+				}
+				else if (expression instanceof Variable)
+				{
+					var variable = (Variable) expression;
+					var variableName = variable.getName();
+					var type = expressions.get(expression);
+					
+					var block = expression.eContainer();
+					while (!(block instanceof Forall))
+					{
+						block = block.eContainer();
+					}
+					var forall = (Forall) block;
+					
+					propagate(forall, variableName, type);
+				}
+			}
+			
+			// Groups
+			for (var g = 0; g < groups.size(); g++)
+			{
+				var group = groups.get(g);
+				for (var expression : group)
+				{
+					if (expressions.containsKey(expression))
+					{
+						repeat = true;
+
+						var type = expressions.get(expression);
+						for (var e : group)
+						{
+							set(e, type, e, null);
+						}
+						groups.remove(g);
+						break;
+					}
+					else if (expression instanceof Cell)
+					{
+						var cell = (Cell) expression;
+						var component = cell.getComponent().getName();
+						if (components.containsKey(component))
+						{
+							repeat = true;
+							
+							var type = components.get(component);
+							for (var e : group)
+							{
+								set(e, type, e, null);
+							}
+							groups.remove(g);
+							break;
+						}
+						else if (libraryComponents.containsKey(component))
+						{
+							repeat = true;
+							
+							var type = libraryComponents.get(component);
+							for (var e : group)
+							{
+								set(e, type, e, null);
+							}
+							groups.remove(g);
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		
+		
+		for (var group : groups)
+		{
+			for (var expression : group)
+			{
+				if (expression instanceof Cell)
+				{
+					error("Type error\nUndecidable type", expression, CELL__COMPONENT);
+				}
+				else if (expression instanceof Variable)
+				{
+					error("Type error\nUndecidable type", expression, VARIABLE__NAME);
+				}
+			}
 		}
 	}
 	
-	private void infer(List<Statement> statements)
+	private void propagate(Forall block, String variableName, Type type)
+	{
+		
+	}
+
+	private void validate(List<Statement> statements)
 	{
 		for (var statement : statements)
 		{
 			if (statement instanceof Selection)
 			{
 				var selection = (Selection) statement;
-				set(selection.getCondition(), Type.truthValue, selection, SELECTION__CONDITION);
-				infer(selection.getCondition());
+				
+				set(selection.getCondition(), truthValue, selection, SELECTION__CONDITION);
+				
+				validate(selection.getCondition());
 				var restore = new HashSet<String>();
 				restore.addAll(variableNames);
-				infer(selection.getPositiveStatements());
+				validate(selection.getPositiveStatements());
 				variableNames.clear();
 				variableNames.addAll(restore);
-				infer(selection.getNegativeStatements());
+				validate(selection.getNegativeStatements());
 				variableNames.clear();
 				variableNames.addAll(restore);
 			}
 			else if (statement instanceof Iteration)
 			{
 				var iteration = (Iteration) statement;
-				set(iteration.getCondition(), Type.truthValue, iteration, ITERATION__CONDITION);
-				infer(iteration.getCondition());
+				
+				set(iteration.getCondition(), truthValue, iteration, ITERATION__CONDITION);
+				
+				validate(iteration.getCondition());
 				var restore = new HashSet<String>();
 				restore.addAll(variableNames);
-				infer(iteration.getStatements());
+				validate(iteration.getStatements());
 				variableNames.clear();
 				variableNames.addAll(restore);
 			}
 			else if (statement instanceof Forall)
 			{
 				var forall = (Forall) statement;
-				set(forall.getVariable(), Type.entity, forall.getVariable(), VARIABLE__NAME);
-				set(forall.getCondition(), Type.truthValue, forall, FORALL__CONDITION);
+				
+				set(forall.getVariable(), entity, forall.getVariable(), VARIABLE__NAME);
+				set(forall.getCondition(), truthValue, forall, FORALL__CONDITION);
 				
 				var variableName = forall.getVariable().getName();
 				var restore = new HashSet<String>();
@@ -132,8 +264,8 @@ public class MValidator extends AbstractMValidator
 					error("Scoping error\nVariable already defined", forall.getVariable(), VARIABLE__NAME);
 				}
 				variableNames.add(variableName);
-				infer(forall.getStatements());
-				infer(forall.getCondition());
+				validate(forall.getStatements());
+				validate(forall.getCondition());
 				variableNames.clear();
 				variableNames.addAll(restore);
 			}
@@ -142,10 +274,10 @@ public class MValidator extends AbstractMValidator
 				var assignment = (Assignment) statement;
 				var atom = assignment.getAtom();
 				var expression = assignment.getExpression();
-				group(atom, expression);
 				
-				infer(expression);
+				group(new Expression[] {atom, expression});
 				
+				validate(expression);
 				if (atom instanceof Variable)
 				{
 					var variable = (Variable) atom;
@@ -156,18 +288,18 @@ public class MValidator extends AbstractMValidator
 					}
 					variableNames.add(variableName);
 				}
-				
-				infer(atom);
+				validate(atom);
 			}
 			else if (statement instanceof Subprocess)
 			{
 				var subprocess = (Subprocess) statement;
-				infer(subprocess.getCall());
+				
+				validate(subprocess.getCall());
 			}
 		}
 	}
 	
-	private void infer(Expression expression)
+	private void validate(Expression expression)
 	{
 		if (expression instanceof Variable)
 		{
@@ -182,86 +314,166 @@ public class MValidator extends AbstractMValidator
 		else if (expression instanceof Cell)
 		{
 			var cell = (Cell) expression;
-			infer(cell.getEntity());
-		}
-		else if (expression instanceof Or)
-		{
-			var or = (Or) expression;
-			infer(or.getLeft());
-			infer(or.getRight());
-		}
-		else if (expression instanceof And)
-		{
-			var and = (And) expression;
-			infer(and.getLeft());
-			infer(and.getRight());
-		}
-		else if (expression instanceof Equality)
-		{
-			var equality = (Equality) expression;
-			infer(equality.getLeft());
-			infer(equality.getRight());
-		}
-		else if (expression instanceof Comparison)
-		{
-			var comparison = (Comparison) expression;
-			infer(comparison.getLeft());
-			infer(comparison.getRight());
-		}
-		else if (expression instanceof Addition)
-		{
-			var addition = (Addition) expression;
-			infer(addition.getLeft());
-			infer(addition.getRight());
-		}
-		else if (expression instanceof Multiplication)
-		{
-			var multiplication = (Multiplication) expression;
-			infer(multiplication.getLeft());
-			infer(multiplication.getRight());
-		}
-		else if (expression instanceof Member)
-		{
-			var member = (Member) expression;
-			infer(member.getLeft());
-			infer(member.getRight());
+			validate(cell.getEntity());
 		}
 		else if (expression instanceof Call)
 		{
 			var call = (Call) expression;
+			var name = call.getName();
 			
-			for (var argument : call.getArguments())
+			if (!functions.containsKey(name) && !libraryFunctions.containsKey(name))
 			{
-				infer(argument);
+				error("Scoping error\nFunction undefined", call, CALL__NAME);
+				return;
 			}
+			Type[] parameters;
+			if (functions.containsKey(name))
+			{
+				parameters = functions.get(name).parameters;
+			}
+			else
+			{
+				parameters = libraryFunctions.get(name).parameters;
+			}
+			
+			if (parameters.length != call.getArguments().size() + 1)
+			{
+				error("Scoping error\nFunction undefined\nThere is a function with " + (parameters.length - 1) + " parameters", call, CALL__NAME);
+				return;
+			}
+			var returnType = parameters[parameters.length-1];
+			set (expression, returnType, call, CALL__NAME);
+			
+			for (var i = 0; i < call.getArguments().size(); i++)
+			{
+				var argument = call.getArguments().get(i);
+				set (argument, parameters[i], call, CALL__NAME);
+				if (!(parameters[i] == type && argument instanceof Variable))
+				{
+					validate(argument);
+				}
+			}
+		}
+		else if (expression instanceof Or)
+		{
+			var or = (Or) expression;
+			var left = or.getLeft();
+			var right = or.getRight();
+			
+			set(left, truthValue, or, OR__LEFT);
+			set(right, truthValue, or, OR__RIGHT);
+			set(expression, truthValue, or, OR__LEFT);
+			
+			validate(left);
+			validate(right);
+		}
+		else if (expression instanceof And)
+		{
+			var and = (And) expression;
+			var left = and.getLeft();
+			var right = and.getRight();
+			
+			set(left, truthValue, and, AND__LEFT);
+			set(right, truthValue, and, AND__RIGHT);
+			set(expression, truthValue, and, AND__LEFT);
+			
+			validate(left);
+			validate(right);
+		}
+		else if (expression instanceof Equality)
+		{
+			var equality = (Equality) expression;
+			var left = equality.getLeft();
+			var right = equality.getRight();
+			
+			group(new Expression[] {left, right});
+			set(expression, truthValue, equality, EQUALITY__KIND);
+			
+			validate(left);
+			validate(right);
+		}
+		else if (expression instanceof Comparison)
+		{
+			var comparison = (Comparison) expression;
+			var left = comparison.getLeft();
+			var right = comparison.getRight();
+			
+			set(left, number, comparison, COMPARISON__LEFT);
+			set(right, number, comparison, COMPARISON__RIGHT);
+			set(expression, truthValue, comparison, COMPARISON__KIND);
+			
+			validate(left);
+			validate(right);
+		}
+		else if (expression instanceof Addition)
+		{
+			var addition = (Addition) expression;
+			var left = addition.getLeft();
+			var right = addition.getRight();
+			
+			group(new Expression[] {expression, left, right});
+			
+			validate(left);
+			validate(right);
+		}
+		else if (expression instanceof Multiplication)
+		{
+			var multiplication = (Multiplication) expression;
+			var left = multiplication.getLeft();
+			var right = multiplication.getRight();
+			
+			set (right, number, multiplication, MULTIPLICATION__RIGHT);
+			group(new Expression[] {left, expression});
+			
+			validate(left);
+			validate(right);
+		}
+		else if (expression instanceof Member)
+		{
+			var member = (Member) expression;
+			var left = member.getLeft();
+			var right = member.getRight();
+			
+			set(expression, truthValue, member, MEMBER__LEFT);
+			
+			validate(left);
+			validate(right);
 		}
 		else if (expression instanceof Not)
 		{
 			var not = (Not) expression;
 			var e = not.getExpression();
 			
-			infer(e);
+			set(e, truthValue, not, NOT__EXPRESSION);
+			set(expression, truthValue, not, NOT__EXPRESSION);
+			
+			validate(e);
 		}
 		else if (expression instanceof Cardinal)
 		{
 			var cardinal = (Cardinal) expression;
 			var e = cardinal.getExpression();
 			
-			infer(e);
+			set(e, truthValue, cardinal, CARDINAL__EXPRESSION);
+			set(expression, number, cardinal, CARDINAL__EXPRESSION);
+			
+			validate(e);
 		}
 		else if (expression instanceof Brackets)
 		{
 			var brackets = (Brackets) expression;
 			var e = brackets.getExpression();
 			
-			infer(e);
+			validate(e);
 		}
 		else if (expression instanceof Join)
 		{
 			var join = (Join) expression;
+			
+			group(join.getEntries().toArray(new Expression[0]));
 			for (var entry : join.getEntries())
 			{
-				infer(entry);
+				validate(entry);
 			}
 		}
 		else if (expression instanceof ImplicitSet)
@@ -269,6 +481,8 @@ public class MValidator extends AbstractMValidator
 			var set = (ImplicitSet) expression;
 			var variable = set.getVariable();
 			var e = set.getPredicate();
+			
+			set(e, truthValue, set, IMPLICIT_SET__PREDICATE);
 			
 			var variableName = variable.getName();
 			if (variableNames.contains(variableName))
@@ -278,28 +492,13 @@ public class MValidator extends AbstractMValidator
 			var restore = new HashSet<String>();
 			restore.addAll(variableNames);
 			variableNames.add(variableName);
-			infer(e);
+			validate(e);
 			variableNames.clear();
 			variableNames.addAll(restore);
 		}
 	}
 	
-	private void initializeStandardLibrary()
-	{
-		if (libraryComponents.size() != 0) return;
-		
-		libraryComponents.put("mass", Type.number);
-		libraryComponents.put("velocity", Type.number2);
-		libraryComponents.put("emission", Type.number4);
-		
-		libraryFunctions.put("has", Type.entityTypeFunction);
-		libraryFunctions.put("add", Type.entityTypeFunction);
-		libraryFunctions.put("remove", Type.entityTypeFunction);
-		libraryFunctions.put("create", Type.entityFunction);
-		libraryFunctions.put("destroy", Type.entityFunction);
-	}
-	
-	private void group(Expression... expressions)
+	private void group(Expression[] expressions)
 	{
 		var found = false;
 		for (var group : groups)
@@ -321,30 +520,29 @@ public class MValidator extends AbstractMValidator
 		}
 		if (!found)
 		{
-			var list = new ArrayList<Expression>();
+			var newGroup = new HashSet<Expression>();
 			for (var e : expressions)
 			{
-				list.add(e);
+				newGroup.add(e);
 			}
-			groups.add(list);
+			groups.add(newGroup);
 		}
 	}	
 	
 	private void set(Expression expression, Type type, EObject o, EStructuralFeature feature)
 	{
-		/*
-		var currentType = expression.getType();
+		var currentType = expressions.get(expression);
 		if (currentType != null)
 		{
 			if (currentType != type)
 			{
-				error("Incompatible types: " + expression.getType().getName() + " and " + type.getName(), o, feature);
+				error("Type error\nIncompatible types: " + type.name + " and " + currentType.name, o, feature);
 			}
 		}
 		else
 		{
-			//expression.setType(type);
-		}*/
+			expressions.put(expression, type);
+		}
 	}
 	
 	//private void setComponent(String name, Type type, EObject o, EStructuralFeature feature)
@@ -770,11 +968,16 @@ class Type
 	public static final Type number = new Type("number", null);
 	public static final Type truthValue = new Type("truth value", null);
 	public static final Type tag = new Type("tag", null);
+	public static final Type none = new Type("none", null);
 	public static final Type number2 = new Type(array2, new Type[] {number});
 	public static final Type number3 = new Type(array3, new Type[] {number});
 	public static final Type number4 = new Type(array4, new Type[] {number});
-	public static final Type entityTypeFunction = new Type(function, new Type[] {type, entity});
-	public static final Type entityFunction = new Type(function, new Type[] {entity});
+	public static final Type entityTypeAction = new Type(function, new Type[] {type, entity, none});
+	public static final Type entityAction = new Type(function, new Type[] {entity, none});
+	public static final Type noneAction = new Type(function, new Type[] {none});
+	public static final Type numberToNumber = new Type(function, new Type[] {number, number});
+	public static final Type number2ToNumber = new Type(function, new Type[] {number2, number});
+	public static final Type entityTypeToTruth = new Type(function, new Type[] {type, entity, truthValue});
 	
 	public String name;
 	public Type[] parameters;
