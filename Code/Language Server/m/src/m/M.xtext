@@ -1,10 +1,15 @@
 grammar m.M hidden(WS)
 import "http://www.eclipse.org/emf/2002/Ecore"
-import "azpillaga.world/game"
+generate game "azpillaga.world/game"
 
 Game:
 	systems+=System*
-	end=End;
+	functions+=Function*;
+	
+Function:
+	name=WORD '[' parameters+=WORD* ']' '≔'
+	'['	(statements+=Statement (','? statements+=Statement)*)? ']';
+
 
 System:
 	name=WORD '≔'
@@ -30,7 +35,7 @@ Forall:
 	'['	(statements+=Statement (','? statements+=Statement)*)? ']';
 
 Assignment:
-	atom=Index
+	atom=Atom
 	'≔' expression=Expression;
 
 Subprocess:
@@ -59,24 +64,21 @@ Multipliable:
 	Setable ({Multiplication.left=current}  kind=MultiplicativeKind right=Setable)*;
 
 Setable:
-	Primary ({SetExpression.left=current} '∈' right=Primary)*;
+	Primary ({Member.left=current} '∈' right=Primary)*;
 
 
 Primary:
-	=>Call|=>Index|Collection|Cardinal|LogicalNot;
+	=>Call|Atom|Collection|Cardinal|Not;
 
 Call:
 	name=WORD
 	'[' (arguments+=Expression (','? arguments+=Expression)*)? ']';
 
-LogicalNot:
+Not:
 	'¬' expression=Primary;
 
 Cardinal:
 	'#' expression=Primary;
-
-Index:
-	Atom =>({Index.atom=current} '~' expression=Expression '~')?;
 
 Collection:
 	Brackets|Join|ImplicitSet;
@@ -100,8 +102,6 @@ Variable:
 
 Cell:
 	entity=Variable '.' component=Variable;
-
-End: {End};
 
 
 enum EqualityKind: equal='='|notEqual='≠';
