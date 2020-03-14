@@ -6,7 +6,8 @@ Game:
 	systems+=System*;
 	
 Function:
-	name=WORD '[' parameters+=WORD* ']' '≔'
+	name=WORD
+	'[' parameters+=WORD* ']'
 	'{'	(statements+=Statement (','? statements+=Statement)*)? '}';
 
 
@@ -18,19 +19,19 @@ Statement:
 	Selection|Iteration|Forall|=>Assignment|Subprocess;
 
 Selection:
-	 '→'condition=Expression
+	'if'condition=Expression
 	'{'	(positiveStatements+=Statement (','? positiveStatements+=Statement)*)? '}'
-	('*' (
+	('else' (
 	('{' (negativeStatements+=Statement (','? negativeStatements+=Statement)*)? '}')|
 	negativeStatements+=Selection)
 	)?;
 
 Iteration:
-	'↺' condition=Expression
+	'while' condition=Expression
 	'{'	(statements+=Statement (','? statements+=Statement)*)? '}';
 
 Forall:
-	'∀' variable=Variable ('|' condition=Expression)?
+	'foreach' variable=Variable ('|' condition=Expression)?
 	'{'	(statements+=Statement (','? statements+=Statement)*)? '}';
 
 Assignment:
