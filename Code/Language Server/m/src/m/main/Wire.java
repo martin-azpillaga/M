@@ -16,12 +16,16 @@ import org.eclipse.xtext.xtext.generator.model.project.BundleProjectConfig;
 import org.eclipse.xtext.xtext.generator.model.project.StandardProjectConfig;
 import org.eclipse.xtext.xtext.generator.parser.antlr.XtextAntlrGeneratorFragment2;
 import org.eclipse.xtext.xtext.generator.serializer.SerializerFragment2;
+import static org.eclipse.xtext.xtext.generator.model.GuiceModuleAccess.*;
+import static org.eclipse.xtext.xtext.generator.model.TypeReference.*;
+
+import org.eclipse.emf.ecore.impl.EPackageRegistryImpl;
 
 public class Wire 
 {
-	public static void main(String[] args)
+	public static void main(String[] arguments)
 	{
-		var rootPath = args.length > 0 ? args[0] : "..";
+		var rootPath = arguments.length > 0 ? arguments[0] : "..";
 
 		var generator = new XtextGenerator();
 
@@ -49,6 +53,8 @@ public class Wire
 		generator.addLanguage(simpleLanguage("m.CSharp","cs"));
 		
 		generator.invoke(null);
+		var registry = EPackageRegistryImpl.INSTANCE;
+		System.out.println(registry);
 	}
 	
 	static StandardLanguage fullLanguage(String name, String extensions)
@@ -79,8 +85,9 @@ class ContextualParserMessagesFragment extends AbstractXtextGeneratorFragment
 	@Override
 	public void generate()
 	{
-		var bindingFactory = new GuiceModuleAccess.BindingFactory();
-		bindingFactory.addTypeToType(TypeReference.typeRef(ISyntaxErrorMessageProvider.class), TypeReference.typeRef("m.validation.ContextualParserMessages")).contributeTo(getLanguage().getRuntimeGenModule());
+		new BindingFactory()
+		.addTypeToType(typeRef(ISyntaxErrorMessageProvider.class), typeRef("m.validation.ContextualParserMessages"))
+		.contributeTo(getLanguage().getRuntimeGenModule());
 	}
 }
 
@@ -89,12 +96,11 @@ class FormatterFragment extends AbstractXtextGeneratorFragment
 	@Override
 	public void generate()
 	{
-		var bindingFactory = new GuiceModuleAccess.BindingFactory();
-		
 		var grammarPath = getGrammar().getName();
 		var grammar = grammarPath.substring(grammarPath.lastIndexOf('.')+1);
-		
-		bindingFactory.addTypeToType(TypeReference.typeRef(IFormatter2.class), TypeReference.typeRef("m.formatting."+grammar+"Format")).contributeTo(getLanguage().getRuntimeGenModule());
+		new BindingFactory()
+		.addTypeToType(typeRef(IFormatter2.class), typeRef("m.formatting."+grammar+"Format"))
+		.contributeTo(getLanguage().getRuntimeGenModule());
 	}
 }
 

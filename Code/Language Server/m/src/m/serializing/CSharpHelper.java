@@ -1,43 +1,7 @@
 package m.serializing;
 
-import m.csharp.Argument;
-import m.csharp.AttributeSection;
-import m.csharp.BooleanLiteral;
-import m.csharp.CompilationUnit;
-import m.csharp.Creation;
-import m.csharp.CsharpFactory;
-import m.csharp.Declaration;
-import m.csharp.Declarator;
-import m.csharp.Default;
-import m.csharp.Expression;
-import m.csharp.ExpressionStatement;
-import m.csharp.Field;
-import m.csharp.FloatLiteral;
-import m.csharp.For;
-import m.csharp.Foreach;
-import m.csharp.Increment;
-import m.csharp.Index;
-import m.csharp.Interface;
-import m.csharp.Lambda;
-import m.csharp.MemberInitializer;
-import m.csharp.Method;
-import m.csharp.Modifier;
-import m.csharp.Namespace;
-import m.csharp.NamespaceUsing;
-import m.csharp.Parameter;
-import m.csharp.ParameterizedFunction;
-import m.csharp.Property;
-import m.csharp.Return;
-import m.csharp.Statement;
-import m.csharp.StaticUsing;
-import m.csharp.Struct;
-import m.csharp.TypeConstraint;
-import m.csharp.TypeParameter;
-import m.csharp.Typeof;
-import m.csharp.Using;
-import m.csharp.AccessExpression;
-import m.csharp.AssignmentKind;
-import m.csharp.ComparisonKind;
+import m.csharp.*;
+import static m.csharp.Modifier.*;
 
 public class CSharpHelper 
 {
@@ -97,9 +61,9 @@ public class CSharpHelper
 		return attributeSection;
 	}
 	
-	public static m.csharp.Class clazz(Modifier[] modifiers, String name, String[] superTypes)
+	public static ReferenceType clazz(Modifier[] modifiers, String name, String[] superTypes)
 	{
-		var clazz = csharp.createClass();
+		var clazz = csharp.createReferenceType();
 		clazz.setName(name);
 		for (var modifier : modifiers)
 		{
@@ -112,9 +76,9 @@ public class CSharpHelper
 		return clazz;
 	}
 	
-	public static m.csharp.Class clazz(Modifier[] modifiers, String name)
+	public static ReferenceType clazz(Modifier[] modifiers, String name)
 	{
-		var clazz = csharp.createClass();
+		var clazz = csharp.createReferenceType();
 		clazz.setName(name);
 		for (var modifier : modifiers)
 		{
@@ -123,9 +87,9 @@ public class CSharpHelper
 		return clazz;
 	}
 	
-	public static Struct struct(Modifier[] modifiers, String name)
+	public static DataType struct(Modifier[] modifiers, String name)
 	{
-		var struct = csharp.createStruct();
+		var struct = csharp.createDataType();
 		struct.setName(name);
 		for (var modifier : modifiers)
 		{
@@ -134,9 +98,9 @@ public class CSharpHelper
 		return struct;
 	}
 	
-	public static Struct struct(Modifier[] modifiers, String name, String[] superTypes)
+	public static DataType struct(Modifier[] modifiers, String name, String[] superTypes)
 	{
-		var struct = csharp.createStruct();
+		var struct = csharp.createDataType();
 		struct.setName(name);
 		for (var modifier : modifiers)
 		{
@@ -149,9 +113,9 @@ public class CSharpHelper
 		return struct;
 	}
 	
-	public static Struct struct(String name, String[] superTypes)
+	public static DataType struct(String name, String... superTypes)
 	{
-		var struct = csharp.createStruct();
+		var struct = csharp.createDataType();
 		struct.setName(name);
 		for (var superType : superTypes)
 		{
@@ -160,9 +124,9 @@ public class CSharpHelper
 		return struct;
 	}
 	
-	public static Struct struct(String name)
+	public static DataType struct(String name)
 	{
-		var struct = csharp.createStruct();
+		var struct = csharp.createDataType();
 		struct.setName(name);
 		return struct;
 	}
@@ -201,6 +165,11 @@ public class CSharpHelper
 		property.setGetter(getter);
 		property.setSetter(setter);
 		return property;
+	}
+	
+	public static Field field(String type, String name)
+	{
+		return field(new Modifier[] {PUBLIC}, type, declarator(name));
 	}
 	
 	public static Field field(Modifier[] modifiers, String type, Declarator...declarators)
@@ -300,7 +269,7 @@ public class CSharpHelper
 		return typeParameter;
 	}
 	
-	public static TypeConstraint typeStructConstraint(String name, String[] superTypes)
+	public static TypeConstraint typeDataTypeConstraint(String name, String[] superTypes)
 	{
 		var typeConstraint = csharp.createTypeConstraint();
 		typeConstraint.setStruct(true);
