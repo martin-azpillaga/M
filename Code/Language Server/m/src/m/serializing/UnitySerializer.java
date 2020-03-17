@@ -38,83 +38,76 @@ import m.game.Member;
 import m.game.Statement;
 import m.game.System;
 import m.game.Variable;
+import m.generator.GameProject;
 import m.game.Expression;
 import m.game.Forall;
 import m.CSharpRuntimeModule;
 import m.validation.MValidator;
 import m.serializing.GameHelper;
+import m.generator.GameProject.Type;
+import static m.generator.GameProject.Type.*;
 
 public class UnitySerializer
 {
 	CSharpRuntimeModule csharpModule;
 	IFileSystemAccess2 fsa;
 	
-	public void serialize(Game game, IFileSystemAccess2 fsa)
+	public void serialize(GameProject game, IFileSystemAccess2 fsa)
 	{
 		csharpModule = new CSharpRuntimeModule();
 		this.fsa = fsa;
-		/*
-		for (var component : game.getComponents())
+		
+		for (var component : game.components.keySet())
 		{
-			//serialize(component);
+			//serialize(component, game.components.get(component));
 		}
 		
 		for (var system : game.getSystems())
 		{
 			//serialize(system);
-		}*/
+		}
 	}
 	/*
-	private void serialize(ComponentData component)
+	private void serialize(String name, Type type)
 	{
-		var name = component.getName();
-		var type = component.getType();
-		
 		var unit = unit();
 		
 		var namespaces = new HashSet<String>();
 		namespaces.add("Unity.Entities");
-		namespaces.add(type.getNamespace());
 		
-		if (type.isValueType())
+		if (type.name == array )
 		{
-			if (type.getName().equals("DynamicBuffer"))
-			{
-				if (type.getParameters().size() == 1 && type.getParameters().get(0).getName().equals("Entity"))
-				{
-					namespaces.add("UnityEngine");
-					
-					var struct = struct(new Modifier[] {PUBLIC}, name, new String[] {"IBufferElementData", "IContain<"+type+">"});
-					struct.getMembers().add(property("Entity", "Value"));
-					
-					var clazz = clazz(new Modifier[] {PUBLIC}, name+"Authoring", new String[] {"MonoBehaviour", "IConvertGameObjectToEntity", "IDeclareReferencedPrefabs"});
-					clazz.getMembers().add(field(new Modifier[] {PUBLIC}, "List<GameObject", declarator("Value")));
-					
-					var convert = method(new Modifier[] {PUBLIC}, "void", "Convert",new Parameter[] {parameter("Entity", "entity"), parameter("EntityManager", "entityManager"), parameter("GameObjectConversionSystem", "gameObjectConversionSystem")});
-					clazz.getMembers().add(convert);
-					
-					convert.getStatements().add(declaration(declarator("buffer", access(variable("entityManager"), function("AddBuffer", new String[] {name}, argument(variable("entity")))))));
-					var foreach = foreach("v", variable("Value"));
-					var converted = access(variable("gameObjectConversionSystem"),function("GetPrimaryEntity", argument(variable("v"))));
-					foreach.getStatements().add(statement(access(variable("buffer"),function("Add", argument(creation(name, member("Value", converted)))))));
-					convert.getStatements().add(foreach);
-					
-					var declare = method(new Modifier[] {PUBLIC}, "void", "DeclareReferencedPrefabs", new Parameter[] {parameter("List<GameObject>", "prefabs")});
-					var foreach2 = foreach("v", variable("Value"));
-					foreach2.getStatements().add(statement(access(variable("prefabs"),function("Add", argument(variable("v"))))));
-					declare.getStatements().add(foreach2);
-					
-					unit.getTypes().add(struct);
-					unit.getTypes().add(clazz);
-				}
-			}
-			else
-			{
-				var struct = struct(new Modifier[] {PUBLIC}, name, new String[] {"IComponentData"});
-				struct.getAttributes().add(attribute("GenerateAuthoringComponent"));
-				struct.getMembers().add(field(new Modifier[] {PUBLIC}, type.getName(), declarator("Value")));
-				unit.getTypes().add(struct);
-			}
+			namespaces.add("UnityEngine");
+			
+			var struct = struct(new Modifier[] {PUBLIC}, name, new String[] {"IBufferElementData", "IContain<"+type+">"});
+			struct.getMembers().add(property("Entity", "Value"));
+			
+			var clazz = clazz(new Modifier[] {PUBLIC}, name+"Authoring", new String[] {"MonoBehaviour", "IConvertGameObjectToEntity", "IDeclareReferencedPrefabs"});
+			clazz.getMembers().add(field(new Modifier[] {PUBLIC}, "List<GameObject", declarator("Value")));
+			
+			var convert = method(new Modifier[] {PUBLIC}, "void", "Convert",new Parameter[] {parameter("Entity", "entity"), parameter("EntityManager", "entityManager"), parameter("GameObjectConversionSystem", "gameObjectConversionSystem")});
+			clazz.getMembers().add(convert);
+			
+			convert.getStatements().add(declaration(declarator("buffer", access(variable("entityManager"), function("AddBuffer", new String[] {name}, argument(variable("entity")))))));
+			var foreach = foreach("v", variable("Value"));
+			var converted = access(variable("gameObjectConversionSystem"),function("GetPrimaryEntity", argument(variable("v"))));
+			foreach.getStatements().add(statement(access(variable("buffer"),function("Add", argument(creation(name, member("Value", converted)))))));
+			convert.getStatements().add(foreach);
+			
+			var declare = method(new Modifier[] {PUBLIC}, "void", "DeclareReferencedPrefabs", new Parameter[] {parameter("List<GameObject>", "prefabs")});
+			var foreach2 = foreach("v", variable("Value"));
+			foreach2.getStatements().add(statement(access(variable("prefabs"),function("Add", argument(variable("v"))))));
+			declare.getStatements().add(foreach2);
+			
+			unit.getTypes().add(struct);
+			unit.getTypes().add(clazz);
+		}
+		else if (type.isNumeric())
+		{
+			var struct = struct(name, "IComponentData");
+			struct.getAttributes().add(attribute("GenerateAuthoringComponent"));
+			struct.getMembers().add(field(type.getName(), "Value"));
+			unit.getTypes().add(struct);
 		}
 		else
 		{			
@@ -790,7 +783,7 @@ public class UnitySerializer
 			}
 		}
 		return "Value";
-	}
+	}*/
 }
 
 class QuerySet
@@ -822,7 +815,7 @@ class QuerySet
 		{
 			queries.put(entity, new HashMap<String,HashSet<AccessKind>>());
 		}
-	}*/
+	}
 }
 
 enum AccessKind

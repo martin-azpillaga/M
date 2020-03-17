@@ -3,7 +3,7 @@ import "http://www.eclipse.org/emf/2002/Ecore"
 generate game "azpillaga.world/game"
 
 Game:
-	systems+=System*;
+	systems+=SystemBase*;
 	
 Function:
 	name=WORD
@@ -11,7 +11,7 @@ Function:
 	'{'	(statements+=Statement (','? statements+=Statement)*)? '}';
 
 
-System:
+SystemBase:
 	name=WORD
 	'{'	(statements+=Statement (','? statements+=Statement)*)? '}';
 
@@ -19,19 +19,15 @@ Statement:
 	Selection|Iteration|Forall|=>Assignment|Subprocess;
 
 Selection:
-	'if'condition=Expression
-	'{'	(positiveStatements+=Statement (','? positiveStatements+=Statement)*)? '}'
-	('else' (
-	('{' (negativeStatements+=Statement (','? negativeStatements+=Statement)*)? '}')|
-	negativeStatements+=Selection)
-	)?;
+	'if' condition=Expression
+	'{'	(statements+=Statement (','? statements+=Statement)*)? '}';
 
 Iteration:
 	'while' condition=Expression
 	'{'	(statements+=Statement (','? statements+=Statement)*)? '}';
 
 Forall:
-	'foreach' variable=Variable ('|' condition=Expression)?
+	'foreach' variable=Variable
 	'{'	(statements+=Statement (','? statements+=Statement)*)? '}';
 
 Assignment:
@@ -101,7 +97,7 @@ Variable:
 	name=WORD;
 
 Cell:
-	entity=Variable '.' component=Variable;
+	entity=Variable '.' component=WORD;
 
 
 enum EqualityKind: equal='='|notEqual='≠';

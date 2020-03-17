@@ -48,7 +48,7 @@ StaticUsing:
 	'using'	'static' namespace=QUALIFIEDTYPE ';';
 
 NamespaceMember:
-	=>Namespace|=>Struct|=>Class|=>Enum|=>Interface|=>Delegate;
+	=>Namespace|=>DataType|=>ReferenceType|=>Enumeration|=>Interface|=>Delegate;
 
 Namespace:
 	'namespace' name=QUALIFIEDNAME 
@@ -58,7 +58,7 @@ Namespace:
 	members+=NamespaceMember* 
 	'}' ';'?;
 
-Struct:
+DataType:
 	attributes+=AttributeSection*
 	modifiers+=Modifier*
 	'struct' name=WORD
@@ -67,7 +67,7 @@ Struct:
 	typeConstraints+=TypeConstraint*
 	'{' members+=Member* '}' ';'?;
 
-Class:
+ReferenceType:
 	attributes+=AttributeSection*
 	modifiers+=Modifier*
 	'class' name=WORD
@@ -76,7 +76,7 @@ Class:
 	typeConstraints+=TypeConstraint*
 	'{' members+=Member* '}' ';'?;
 
-Enum:
+Enumeration:
 	attributes+=AttributeSection*
 	modifiers+=Modifier*
 	'enum' name=WORD
@@ -104,7 +104,7 @@ Delegate:
 
 
 Member:
-	=>Struct|=>Class|=>Interface|=>Delegate|=>Enum|=>Field|=>Method|=>Constant|=>Property|=>Event|=>Indexer|=>Operator|=>Constructor|=>Destructor|=>StaticConstructor;
+	=>DataType|=>ReferenceType|=>Interface|=>Delegate|=>Enumeration|=>Field|=>Method|=>Constant|=>Property|=>Event|=>Indexer|=>Operator|=>Constructor|=>Destructor|=>StaticConstructor;
 
 Field:
 	attributes+=AttributeSection*
