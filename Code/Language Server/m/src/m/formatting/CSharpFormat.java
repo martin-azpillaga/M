@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
 
-import com.google.inject.Inject;
 import m.csharp.Add;
 import m.csharp.AliasUsing;
 import m.csharp.Argument;
@@ -28,7 +27,7 @@ import m.csharp.Decrement;
 import m.csharp.Delegate;
 import m.csharp.Destructor;
 import m.csharp.Do;
-import m.csharp.Enum;
+import m.csharp.Enumeration;
 import m.csharp.Event;
 import m.csharp.ExpressionStatement;
 import m.csharp.ExternAlias;
@@ -54,12 +53,13 @@ import m.csharp.Operator;
 import m.csharp.Parameter;
 import m.csharp.ParameterizedFunction;
 import m.csharp.Property;
+import m.csharp.ReferenceType;
 import m.csharp.Remove;
 import m.csharp.Return;
 import m.csharp.Setter;
 import m.csharp.StaticConstructor;
 import m.csharp.StaticUsing;
-import m.csharp.Struct;
+import m.csharp.DataType;
 import m.csharp.Switch;
 import m.csharp.Ternary;
 import m.csharp.Throw;
@@ -82,7 +82,6 @@ import m.csharp.LogicalNot;
 import m.csharp.LogicalOr;
 import m.csharp.MultiplicativeExpression;
 import m.csharp.Selection;
-import m.services.CSharpGrammarAccess;
 
 enum FormatRule
 {
@@ -100,9 +99,6 @@ enum FormatRule
 
 public class CSharpFormat extends FormattingHelper
 {
-	@Inject
-	CSharpGrammarAccess grammar;
-	
 	private void formatAll(List<? extends EObject> list)
 	{
 		for (var a : list)
@@ -265,9 +261,9 @@ public class CSharpFormat extends FormattingHelper
 			formatAll(a.getUsings());
 			formatAll(a.getMembers());
 		}
-		else if (o instanceof Struct)
+		else if (o instanceof DataType)
 		{
-			var a = (Struct) o;
+			var a = (DataType) o;
 			apply(a, curlyBrackets, angleBrackets, comma, semicolon);
 			exceptFirst(a.getAttributes());
 			if (a.getAttributes().size() > 0)
@@ -278,18 +274,18 @@ public class CSharpFormat extends FormattingHelper
 			formatAll(a.getTypeConstraints());
 			all(a.getMembers());
 		}
-		else if (o instanceof m.csharp.Class)
+		else if (o instanceof ReferenceType)
 		{
-			var a = (m.csharp.Class) o;
+			var a = (ReferenceType) o;
 			apply(a, curlyBrackets, angleBrackets, comma, semicolon);
 			exceptFirst(a.getAttributes());
 			formatAll(a.getTypeParameters());
 			formatAll(a.getTypeConstraints());
 			all(a.getMembers());
 		}
-		else if (o instanceof Enum)
+		else if (o instanceof Enumeration)
 		{
-			var a = (Enum) o;
+			var a = (Enumeration) o;
 			apply(a, curlyBrackets, comma, semicolon);
 			exceptFirst(a.getAttributes());
 		}

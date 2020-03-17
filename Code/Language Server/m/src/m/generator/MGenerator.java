@@ -15,7 +15,7 @@ public class MGenerator extends AbstractGenerator
 	{
 		if (resource.getContents().size() == 0) return;
 		
-		var game = (Game) resource.getContents().get(0);
+		var game = (GameProject) resource.getContents().get(0);
 		
 		var unitySerializer = new UnitySerializer();
 		

@@ -2,8 +2,23 @@ package m.validation;
 
 import static m.game.GamePackage.Literals.*;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
+import org.eclipse.emf.common.notify.Adapter;
+import org.eclipse.emf.common.notify.Notification;
+import org.eclipse.emf.common.util.BasicEMap;
+import org.eclipse.emf.common.util.EList;
+import org.eclipse.emf.common.util.EMap;
+import org.eclipse.emf.common.util.TreeIterator;
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EOperation;
+import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.emf.ecore.impl.BasicEObjectImpl;
+import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.EcoreEMap;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.validation.Check;
 
@@ -32,10 +47,17 @@ import m.game.Statement;
 import m.game.Subprocess;
 import m.game.System;
 import m.game.Variable;
+import m.game.impl.GameImpl;
+import m.generator.GameProject;
 
-import static m.validation.Type.*;
+import static m.generator.GameProject.Type;
+import static m.generator.GameProject.Type.*;
 
-public class MValidator extends AbstractMValidator 
+class Inference extends BasicEObjectImpl
+{
+	
+}
+public class MValidator extends AbstractMValidator
 {
 	ArrayList<HashSet<Expression>> groups = new ArrayList<>();
 	HashMap<Expression, Type> expressions = new HashMap<Expression, Type>();
@@ -46,9 +68,7 @@ public class MValidator extends AbstractMValidator
 	
 	@Check
 	public void validate(Game game)
-	{
-		var project = new GameProject();
-		
+	{		
 		var systemNames = new HashSet<String>();
 		components.clear();
 		groups.clear();
@@ -59,10 +79,22 @@ public class MValidator extends AbstractMValidator
 		
 		components.put("mass", number);
 		components.put("velocity", number3);
+		components.put("friction", number);
+		components.put("restitution", number);
+		components.put("radius", number);
+		components.put("height", number);
+		components.put("extents", number3);
+		components.put("mesh", tag);
+		components.put("convexHull", tag);
+		
+		components.put("range", number);
+		components.put("spotAngle", number);
 		components.put("emission", number4);
 		components.put("inputValue", number);
 		components.put("timeout", truthValue);
 		components.put("position", number3);
+		components.put("rotation", number4);
+		components.put("scale", number3);
 		
 		functions.put("has", entityTypeToTruth);
 		functions.put("add", entityTypeAction);
@@ -73,6 +105,7 @@ public class MValidator extends AbstractMValidator
 		functions.put("disable", typeAction);
 		functions.put("load", worldAction);
 		functions.put("unload", worldAction);
+		
 		functions.put("random", number2ToNumber);
 		functions.put("cos", numberToNumber);
 		functions.put("sin", numberToNumber);
@@ -80,7 +113,6 @@ public class MValidator extends AbstractMValidator
 		
 		for (var system : game.getSystems())
 		{
-			project.systems.add(system);
 			if (systemNames.contains(system.getName()))
 			{
 				error("Scoping error\nSystem already defined", system, SYSTEM__NAME);
@@ -203,11 +235,16 @@ public class MValidator extends AbstractMValidator
 			}
 		}
 		
+		var project = new GameProject();
+		
+		project.getSystems().addAll(game.getSystems());
 		for (var component : components.keySet())
 		{
 			var type = components.get(component);
-			project.components.add(new Component(type, component));
+			project.components.put(component, type);
 		}
+		
+		game.eResource().getContents().add(0, project);
 	}
 
 	private void validate(List<Statement> statements)
@@ -538,178 +575,3 @@ public class MValidator extends AbstractMValidator
 	}
 }
 
-class GameProject
-{
-	public List<System> systems = new ArrayList<System>();
-	public List<Function> functions = new ArrayList<Function>();
-	public List<Component> components = new ArrayList<Component>();
-}
-class Component
-{
-	public Type type;
-	public String name;
-	
-	public Component(Type type, String name)
-	{
-		this.type = type;
-		this.name = name;
-	}
-}
-class Type
-{
-	public static final String array = "array";
-	public static final String array2 = "array2";
-	public static final String array3 = "array3";
-	public static final String array4 = "array4";
-	public static final String function = "Function";
-
-	public static final Type world = new Type("World", null);
-	public static final Type type = new Type("Type",null);
-	public static final Type entity = new Type("Entity",null);
-	public static final Type number = new Type("number", null);
-	public static final Type truthValue = new Type("truth value", null);
-	public static final Type tag = new Type("tag", null);
-	public static final Type none = new Type("none", null);
-	public static final Type number2 = new Type(array2, new Type[] {number});
-	public static final Type number3 = new Type(array3, new Type[] {number});
-	public static final Type number4 = new Type(array4, new Type[] {number});
-	public static final Type entityTypeAction = new Type(function, new Type[] {type, entity, none});
-	public static final Type entityAction = new Type(function, new Type[] {entity, none});
-	public static final Type typeAction = new Type(function, new Type[] {type, none});
-	public static final Type worldAction = new Type(function, new Type[] {world, none});
-	public static final Type noneAction = new Type(function, new Type[] {none});
-	public static final Type numberToNumber = new Type(function, new Type[] {number, number});
-	public static final Type number2ToNumber = new Type(function, new Type[] {number2, number});
-	public static final Type entityTypeToTruth = new Type(function, new Type[] {type, entity, truthValue});
-	
-	public String name;
-	public Type[] parameters;
-	
-	public Type(String name, Type[] parameters)
-	{
-		this.name = name;
-		this.parameters = parameters;
-	}
-	
-	public boolean isNumeric()
-	{
-		return this == number || this == number2 || this == number3 || this == number4;
-	}
-	
-	@Override
-	public String toString()
-	{
-		if (name == function)
-		{
-			if (parameters.length == 1)
-			{
-				return "() -> " + parameters[0].toString();
-			}
-			else
-			{
-				var result = parameters[0].toString();
-				for (var i = 1; i < parameters.length - 1; i++)
-				{
-					result += "," + parameters[i].toString(); 
-				}
-				result += " -> " + parameters[parameters.length-1];
-				return result;
-			}
-		}
-		else
-		{
-			return name;
-		}
-	}
-}
-
-class StandardLibrary
-{
-	static Game game;
-	public static Type float1;
-	public static Type float2;
-	public static Type float3;
-	public static Type float4;
-	public static Type entity;
-	public static Type world;
-	public static Type entityList;
-	public static Type tag;
-	public static Type bool;
-	public static Type type;
-	public static Type any;
-	public static Type none;
-	
-	public static Function has;
-	public static Function create;
-	public static Function delete;
-	public static Function add;
-	public static Function remove;
-	public static Function enable;
-	public static Function disable;
-	public static Function load;
-	public static Function unload;
-	
-	public StandardLibrary()
-	{
-		english();
-	}
-	
-	public static Game getGame()
-	{
-		english();
-		return game;
-	}
-	
-	private static void english()
-	{
-		/*
-		tag = type("tag");
-		bool = type("bool");
-		float1 = type("float");
-		float2 = type("float2");
-		float3 = type("float3");
-		float4 = type("float4");
-		entity = type("entity");
-		world = type("SubScene");
-		entityList = type(array, new Type[] {entity});
-		type = type("Type");
-		any = type("Object");
-		none = type("void");
-		
-		game = game();
-		game.getTypes().add(float1);
-		game.getTypes().add(float2);
-		game.getTypes().add(float3);
-		game.getTypes().add(float4);
-		game.getTypes().add(entity);
-		game.getTypes().add(world);
-		game.getTypes().add(entityList);
-		game.getTypes().add(bool);
-		game.getTypes().add(tag);
-		game.getTypes().add(type);
-		game.getTypes().add(any);
-		game.getTypes().add(none);
-		
-		has = function("active", type(function, new Type[] {any,bool}));
-		add = function("activate", type(function, new Type[] {any, none}));
-		remove = function("deactivate", type(function, new Type[] {any, none}));
-		create = function("copy", type(function, new Type[] {entity, none}));
-		delete = function("delete", type(function, new Type[] {entity,none}));
-		load = function("load", type(function, new Type[] {world, none}));
-		unload = function("unload", type(function, new Type[] {world, none}));
-		enable = function("enable", type(function, new Type[] {type, none}));
-		disable = function("disable", type(function, new Type[] {type, none}));
-		
-		game.getComponents().add(component(float1, "mass"));
-		
-		game.getFunctions().add(has);
-		game.getFunctions().add(add);
-		game.getFunctions().add(remove);
-		game.getFunctions().add(create);
-		game.getFunctions().add(delete);
-		game.getFunctions().add(load);
-		game.getFunctions().add(unload);
-		game.getFunctions().add(enable);
-		game.getFunctions().add(disable);*/
-	}
-}
