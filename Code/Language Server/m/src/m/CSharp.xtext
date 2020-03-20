@@ -48,7 +48,7 @@ StaticUsing:
 	'using'	'static' namespace=QUALIFIEDTYPE ';';
 
 NamespaceMember:
-	=>Namespace|=>DataType|=>ReferenceType|=>Enumeration|=>Interface|=>Delegate;
+	=>Namespace|=>Struct|=>Class|=>Enumeration|=>Contract|=>Delegate;
 
 Namespace:
 	'namespace' name=QUALIFIEDNAME 
@@ -58,7 +58,7 @@ Namespace:
 	members+=NamespaceMember* 
 	'}' ';'?;
 
-DataType:
+Struct:
 	attributes+=AttributeSection*
 	modifiers+=Modifier*
 	'struct' name=WORD
@@ -67,7 +67,7 @@ DataType:
 	typeConstraints+=TypeConstraint*
 	'{' members+=Member* '}' ';'?;
 
-ReferenceType:
+Class:
 	attributes+=AttributeSection*
 	modifiers+=Modifier*
 	'class' name=WORD
@@ -83,7 +83,7 @@ Enumeration:
 	(':' base=WORD)?
 	'{' (values+=WORD (',' values+=WORD)*)? '}' ';'?;
 
-Interface:
+Contract:
 	attributes+=AttributeSection*
 	modifiers+=Modifier*
 	'interface' name=WORD
@@ -104,7 +104,7 @@ Delegate:
 
 
 Member:
-	=>DataType|=>ReferenceType|=>Interface|=>Delegate|=>Enumeration|=>Field|=>Method|=>Constant|=>Property|=>Event|=>Indexer|=>Operator|=>Constructor|=>Destructor|=>StaticConstructor;
+	=>Struct|=>Class|=>Contract|=>Delegate|=>Enumeration|=>Field|=>Method|=>Constant|=>Property|=>Event|=>Indexer|=>Operator|=>Constructor|=>Destructor|=>StaticConstructor;
 
 Field:
 	attributes+=AttributeSection*
@@ -197,7 +197,6 @@ Indexer:
 	attributes+=AttributeSection*
 	modifiers+=Modifier*
 	type=QUALIFIEDTYPE
-	(interface=QUALIFIEDTYPE '.')?
 	'this'
 	'[' parameters+=Parameter (',' parameters+=Parameter)* ']'
 	(
@@ -288,7 +287,7 @@ Try:
 	catches+=Catch+
 	(
 	'finally'
-	'{' finally+=Statement*	'}'
+	'{' finallyStatements+=Statement* '}'
 	)?
 ;
 
@@ -340,7 +339,7 @@ Do:
 Return:
 	'return' expression=Expression ';';
 Yield:
-	'yield' (break?='break'|'return' expression=Expression) ';'
+	'yield' (isBreak?='break'|'return' expression=Expression) ';'
 ;
 Break: {Break}
 	'break'';'
@@ -350,8 +349,8 @@ Continue: {Continue}
 ;
 Goto:
 	'goto' label=WORD|
-	'goto' 'case' case=Expression ';'|
-	'goto' default?='default' ';'
+	'goto' isCase?='case' label=WORD ';'|
+	'goto' isDefault?='default' ';'
 ;
 Throw:
 	'throw' expression=Expression ';';
@@ -540,7 +539,7 @@ Parameter:
 	params?='params'?
 	type=QUALIFIEDTYPE
 	name=WORD
-	('=' default=Expression)?;
+	('=' defaultValue=Expression)?;
 
 TypeParameter: 
 	attributes+=AttributeSection* 

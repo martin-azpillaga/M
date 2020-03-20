@@ -1,21 +1,18 @@
 package m.main;
 
+import static java.lang.String.format;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 
-import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
-
-import static java.lang.String.*;
-
-import m.game.GamePackage;
+import m.csharp.CsharpPackage;
 
 public class Model
 {	
@@ -24,103 +21,119 @@ public class Model
 	
 	public static void main(String[] arguments) throws IOException
 	{
+		model(CsharpPackage.eINSTANCE);
+	}
+	
+	private static void model(EPackage epackage) throws IOException
+	{
+		var packageName = epackage.getName();
+		
 		line("package m.main;");
 		line();
-		line("import java.util.List;");
-		line("import m.game.GameFactory;");
-		for (var e : GamePackage.eINSTANCE.eContents())
-		{
-			if (e instanceof EClassifier)
-			{
-				var eclass = (EClassifier) e;
-
-				line("import m.game.%s;", eclass.getName());
-			}
-		}
+		line("import m.%s.*;", packageName);
+		line("import m.%s.impl.*;", packageName);
 		line();
-		line("public class GameModel");
+		line("public class %sModel", camel(packageName));
 		line("{");
-		line("static GameFactory factory = GameFactory.eINSTANCE;");
+		line("static %sFactory factory = %sFactory.eINSTANCE;",camel(packageName),camel(packageName));
 		line();
-		for(var e : GamePackage.eINSTANCE.eContents())
+		for(var e : epackage.eContents())
 		{
 			if (e instanceof EClass)
 			{
 				var eclass = (EClass) e;
+				var name = eclass.getName();
 
-				constructor(eclass);
+				line("public static %sBuilder %s()", name, name(null,lower(name)));
+				line("{");
+				line("return new %sModel().new %sBuilder();", camel(packageName), name);
+				line("}");
+				
+				var attributes = eclass.getEAllStructuralFeatures();
+				
+				var requiredFeatures = new ArrayList<EStructuralFeature>();
+				for (var attribute : attributes)
+				{
+					if (attribute.getUpperBound() == 1)
+					{
+						requiredFeatures.add(attribute);
+					}
+				}
+				
+				if (requiredFeatures.size() > 0)
+				{
+					appendIndentation();
+					append("public static %sBuilder %s(", name, name(null,lower(name)));
+					var first = true;
+					
+					for (var feature : requiredFeatures)
+					{
+						var ftype = typeName(feature.getEType());
+						var originalName = feature.getName();
+						var fname = name(ftype,originalName);
+						
+						append("%s%s %s", first?"":", ", ftype, fname);
+						first = false;
+					}
+					
+					append(")");
+					line();
+					line("{");
+					line("return new %sModel().new %sBuilder();", camel(packageName), name);
+					line("}");
+				}				
+			}
+		}
+		for (var e : epackage.eContents())
+		{
+			if (e instanceof EClass)
+			{
+				var eclass = (EClass) e;
+				var className = eclass.getName();
+				
+				line("public class %sBuilder extends %sImpl", className, className);
+				line("{");
+				for (var feature : eclass.getEAllStructuralFeatures())
+				{
+					var originalName = feature.getName();
+					var type = typeName(feature.getEType());
+					var name = name(type, originalName);
+					
+					var isVariable = feature.getEType().getName().equals("Variable");
+					
+					if (feature.getUpperBound() == 1)
+					{
+						line("public %sBuilder %s(%s %s)", className, name, type, name);
+					}
+					else
+					{
+						line("public %sBuilder %s(%s... %s)", className, name, type, name);
+					}
+					
+					line("{");
+					if (feature.getUpperBound() == 1)
+					{
+						line("set%s(%s);", camel(originalName), isVariable? "GameModel.variable("+name+")" : name);
+					}
+					else
+					{
+						line("for (var each : %s)", name);
+						line("{");
+						line("get%s().add(each);", camel(name), name);
+						line("}");
+					}
+					line("return this;");
+					line("}");
+				}
+				line("}");
 			}
 		}
 		line("}");
 		
-		Files.write(Paths.get("src/m/main/GameModel.java"),builder.toString().getBytes());
+		Files.write(Paths.get("src/m/main/"+camel(packageName)+"Model.java"),builder.toString().getBytes());
 	}
 	
-	static void constructor(EClass eclass)
-	{
-		var name = eclass.getName();
-		
-		var features = eclass.getEAllStructuralFeatures();
-		var size = features.size();
-		
-		var featureSet = ImmutableSet.copyOf(features);
-		
-		for (var i = 0; i <= size; i++)
-		{
-			var combinations = Sets.combinations(featureSet, i);
-			
-			for (var set : combinations)
-			{
-				appendIndentation();
-				append("public static %s %s(", name, lower(name));
-				
-				var first = true;
-				
-				for (var feature : set)
-				{
-					var fname = feature.getName();
-					var ftype = name(feature.getEType());
-					
-					if (!first)
-					{
-						builder.append(", ");
-					}
-					first = false;
-					
-					if (feature.getUpperBound() == 1)
-					{
-						builder.append(ftype);
-					}
-					else
-					{
-						append("%s[]", ftype);
-					}
-					append(" %s", fname);
-				}
-				builder.append(")");
-				line();
-				line("{");
-				line("var result = factory.create%s();", name);
-				for (var feature : set)
-				{
-					var fname = feature.getName();
-					if (feature.getUpperBound() == 1)
-					{
-						line("result.set%s(%s);", camel(fname), fname);
-					}
-					else
-					{
-						line("for (var each : %s)", fname);
-						line("{");
-						line("result.get%s().add(each);", camel(fname));
-						line("}");
-					}
-				}
-				line("return result;");
-				line("}");
-			}
-		}
-	}
+	
 	
 	static String camel(String word)
 	{
@@ -138,7 +151,7 @@ public class Model
 		return builder.toString();
 	}
 	
-	static void append(String format, String... contents)
+	static void append(String format, Object... contents)
 	{
 		var content = format(format, contents);
 		if (content.equals("}"))
@@ -152,7 +165,7 @@ public class Model
 		}
 	}
 	
-	static void line(String format, String...contents)
+	static void line(String format, Object...contents)
 	{
 		var content = format(format, contents);
 		if (content.equals("}"))
@@ -180,12 +193,37 @@ public class Model
 		}
 	}
 	
-	static String name(EClassifier classifier)
+	static String typeName(EClassifier classifier)
 	{
 		var original = classifier.getName();
 		if (original.equals("EString"))
 		{
 			return "String";
+		}
+		else if (original.equals("Variable"))
+		{
+			return "String";
+		}
+		else if (original.equals("EBoolean"))
+		{
+			return "boolean";
+		}
+		return original;
+	}
+	
+	static String name(String type, String original)
+	{
+		if (type == "boolean")
+		{
+			return "is"+camel(original);
+		}
+		var reservedWords = new String[] {"do", "class", "default", "while", "this", "finally", "return", "try", "catch", "switch", "case", "for", "break", "throw", "goto", "continue"};
+		for (var reserved : reservedWords)
+		{
+			if (reserved.equals(original))
+			{
+				return "_"+original;
+			}
 		}
 		return original;
 	}

@@ -22,6 +22,7 @@ import org.eclipse.emf.ecore.util.EcoreEMap;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.validation.Check;
 
+import m.game.Addable;
 import m.game.Addition;
 import m.game.And;
 import m.game.Assignment;
@@ -29,7 +30,7 @@ import m.game.Brackets;
 import m.game.Call;
 import m.game.Cardinal;
 import m.game.Cell;
-import m.game.Comparison;
+import m.game.Orderable;
 import m.game.Equality;
 import m.game.Expression;
 import m.game.Forall;
@@ -38,6 +39,7 @@ import m.game.Game;
 import m.game.ImplicitSet;
 import m.game.Iteration;
 import m.game.Join;
+import m.game.Lower;
 import m.game.Member;
 import m.game.Multiplication;
 import m.game.Not;
@@ -140,7 +142,7 @@ public class MValidator extends AbstractMValidator
 				if (expression instanceof Cell)
 				{
 					var cell = (Cell) expression;
-					var component = cell.getComponent().getName();
+					var component = cell.getComponent();
 					
 					if (!components.containsKey(component))
 					{
@@ -186,7 +188,7 @@ public class MValidator extends AbstractMValidator
 					else if (expression instanceof Cell)
 					{
 						var cell = (Cell) expression;
-						var component = cell.getComponent().getName();
+						var component = cell.getComponent();
 						if (components.containsKey(component))
 						{
 							groupTypes.add(components.get(component));
@@ -260,10 +262,7 @@ public class MValidator extends AbstractMValidator
 				validate(selection.getCondition());
 				var restore = new HashSet<String>();
 				restore.addAll(variableNames);
-				validate(selection.getPositiveStatements());
-				variableNames.clear();
-				variableNames.addAll(restore);
-				validate(selection.getNegativeStatements());
+				validate(selection.getStatements());
 				variableNames.clear();
 				variableNames.addAll(restore);
 			}
@@ -285,7 +284,6 @@ public class MValidator extends AbstractMValidator
 				var forall = (Forall) statement;
 				
 				set(forall.getVariable(), entity);
-				set(forall.getCondition(), truthValue);
 				
 				var variableName = forall.getVariable().getName();
 				var restore = new HashSet<String>();
@@ -296,7 +294,6 @@ public class MValidator extends AbstractMValidator
 				}
 				variableNames.add(variableName);
 				validate(forall.getStatements());
-				validate(forall.getCondition());
 				variableNames.clear();
 				variableNames.addAll(restore);
 			}
@@ -416,9 +413,9 @@ public class MValidator extends AbstractMValidator
 			validate(left);
 			validate(right);
 		}
-		else if (expression instanceof Comparison)
+		else if (expression instanceof Lower)
 		{
-			var comparison = (Comparison) expression;
+			var comparison = (Lower) expression;
 			var left = comparison.getLeft();
 			var right = comparison.getRight();
 			

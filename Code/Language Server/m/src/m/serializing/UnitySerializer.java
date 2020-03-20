@@ -1,7 +1,6 @@
 package m.serializing;
 
 import static m.csharp.Modifier.*;
-import static m.serializing.CSharpHelper.*;
 import java.util.*;
 
 import org.eclipse.xtext.generator.IFileSystemAccess2;
@@ -24,7 +23,7 @@ import m.game.Brackets;
 import m.game.Call;
 import m.game.Cardinal;
 import m.game.Cell;
-import m.game.Comparison;
+import m.game.Orderable;
 import m.game.Equality;
 import m.game.Function;
 import m.game.Game;
@@ -43,14 +42,17 @@ import m.game.Expression;
 import m.game.Forall;
 import m.CSharpRuntimeModule;
 import m.validation.MValidator;
-import m.serializing.GameHelper;
 import m.generator.GameProject.Type;
 import static m.generator.GameProject.Type.*;
+import static m.main.CsharpModel.*;
+
+import m.main.CsharpModel;
+import m.main.CsharpModel.*;
 
 public class UnitySerializer
 {
 	CSharpRuntimeModule csharpModule;
-	IFileSystemAccess2 fsa;
+	IFileSystemAccess2 fsa;	
 	
 	public void serialize(GameProject game, IFileSystemAccess2 fsa)
 	{
@@ -59,7 +61,7 @@ public class UnitySerializer
 		
 		for (var component : game.components.keySet())
 		{
-			//serialize(component, game.components.get(component));
+			serialize(component, game.components.get(component));
 		}
 		
 		for (var system : game.getSystems())
@@ -67,26 +69,58 @@ public class UnitySerializer
 			//serialize(system);
 		}
 	}
-	/*
+	
+	private StructBuilder struct(String name, String... superTypes)
+	{
+		return struct(name).modifiers(PUBLIC).superTypes(superTypes);
+	}
+	
+	private StructBuilder _class(String name, String... superTypes)
+	{
+		return _class(name).modifiers(PUBLIC).superTypes(superTypes);
+	}
+	
+	private FieldBuilder field(String type, String name)
+	{
+		return CsharpModel.field(type).modifiers(PUBLIC).declarators(declarator(name, null));
+	}
+	
+	private AttributeSectionBuilder attribute(String name)
+	{
+		return attributeSection().attributes(CsharpModel.attribute(name));
+	}
+	
+	private PropertyBuilder property(String type, String name)
+	{
+		return CsharpModel.property(type, null, name, getter().isEmpty(true), setter().isEmpty(true), null);
+	}
+	
+	private ParameterBuilder parameter(String type, String name)
+	{
+		return CsharpModel.parameter().type(type).name(name);
+	}
+	
 	private void serialize(String name, Type type)
 	{
-		var unit = unit();
-		
-		var namespaces = new HashSet<String>();
-		namespaces.add("Unity.Entities");
+		var unit = compilationUnit().usings(namespaceUsing("Unity.Entities"));
+		var typeName = type.toString();
 		
 		if (type.name == array )
 		{
-			namespaces.add("UnityEngine");
+			unit.usings(namespaceUsing("UnityEngine"));
 			
-			var struct = struct(new Modifier[] {PUBLIC}, name, new String[] {"IBufferElementData", "IContain<"+type+">"});
-			struct.getMembers().add(property("Entity", "Value"));
+			struct(name, "IBufferElementData", "IContain<"+type+">")
+			.members(property("Entity", "Value"));
 			
-			var clazz = clazz(new Modifier[] {PUBLIC}, name+"Authoring", new String[] {"MonoBehaviour", "IConvertGameObjectToEntity", "IDeclareReferencedPrefabs"});
-			clazz.getMembers().add(field(new Modifier[] {PUBLIC}, "List<GameObject", declarator("Value")));
-			
-			var convert = method(new Modifier[] {PUBLIC}, "void", "Convert",new Parameter[] {parameter("Entity", "entity"), parameter("EntityManager", "entityManager"), parameter("GameObjectConversionSystem", "gameObjectConversionSystem")});
-			clazz.getMembers().add(convert);
+			var clazz = _class(name+"Authoring", "MonoBehaviour", "IConvertGameObjectToEntity", "IDeclareReferencedPrefabs")
+			.members(
+					field("List<GameObject", "Value"),
+					method().type("void").name("Convert").parameters(parameter("Entity", "entity"), parameter("EntityManager", "entityManager"), parameter("GameObjectConversionSystem", "gameObjectConversionSystem"))
+					.statements
+					(
+						declaration().declarators(declarator("buffer", null)).	
+					)
+			);
 			
 			convert.getStatements().add(declaration(declarator("buffer", access(variable("entityManager"), function("AddBuffer", new String[] {name}, argument(variable("entity")))))));
 			var foreach = foreach("v", variable("Value"));
@@ -104,17 +138,15 @@ public class UnitySerializer
 		}
 		else if (type.isNumeric())
 		{
-			var struct = struct(name, "IComponentData");
-			struct.getAttributes().add(attribute("GenerateAuthoringComponent"));
-			struct.getMembers().add(field(type.getName(), "Value"));
-			unit.getTypes().add(struct);
+			unit.types(struct(name, "IComponentData")
+					.attributes(attribute("GenerateAuthoringComponent"))
+					.members(field(typeName, "Value")));
 		}
 		else
-		{			
-			var clazz = clazz(new Modifier[] {PUBLIC}, name, new String[] {"IComponentData"});
-			clazz.getMembers().add(field(new Modifier[] {PUBLIC}, name, declarator("Value")));
-			clazz.getAttributes().add(attribute("GenerateAuthoringComponent"));
-			unit.getTypes().add(clazz);
+		{
+			unit.types(_class(name,"IComponentData")
+					.members(field(name, "Value"))
+					.attributes(attribute("GenerateAuthoringComponent"));
 		}
 
 		for (var namespace : namespaces)
@@ -127,6 +159,35 @@ public class UnitySerializer
 		generate(unit, "Code/Components/"+name+"Authoring.cs");
 	}
 	
+	private String unityName(String component, HashSet<String> namespaces)
+	{
+		var engineComponents = Component.values();
+		var name = component;
+		for (var engineComponent : engineComponents)
+		{
+			if (component.equals(engineComponent.toString()))
+			{
+				namespaces.add(engineComponent.namespace);
+				name = engineComponent.unityType;
+			}
+		}
+		return name;
+	}
+	
+	private String fieldName(String component)
+	{
+		var engineComponents = Component.values();
+		for (var engineComponent : engineComponents)
+		{
+			if (component.equals(engineComponent.toString()))
+			{
+				return engineComponent.unityField;
+			}
+		}
+		return "Value";
+	}
+	
+	/*
 	private void serialize(System system)
 	{
 		var unit = unit();
@@ -686,7 +747,7 @@ public class UnitySerializer
 			var selection = csharp.createSelection();
 		}
 		return null;
-	}
+	}*/
 	
 	private void generate(CompilationUnit unit, String path)
 	{
@@ -702,6 +763,7 @@ public class UnitySerializer
 		fsa.generateFile("Unity/Assets/"+path, serialized);
 	}
 	
+	/*
 	private m.csharp.ComparisonKind cs(game.ComparisonKind kind)
 	{
 		switch (kind)
