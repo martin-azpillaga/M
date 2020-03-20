@@ -7,6 +7,7 @@ import org.eclipse.xtext.generator.IGeneratorContext;
 
 import m.game.Game;
 import m.serializing.UnitySerializer;
+import m.serializing.UnityXtend;
 
 public class MGenerator extends AbstractGenerator 
 {
@@ -17,7 +18,7 @@ public class MGenerator extends AbstractGenerator
 		
 		var game = (GameProject) resource.getContents().get(0);
 		
-		var unitySerializer = new UnitySerializer();
+		var unitySerializer = new UnityXtend();
 		
 		unitySerializer.serialize(game, fsa);
 	}
