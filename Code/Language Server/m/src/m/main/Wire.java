@@ -19,6 +19,7 @@ import org.eclipse.xtext.xtext.generator.serializer.SerializerFragment2;
 import static org.eclipse.xtext.xtext.generator.model.GuiceModuleAccess.*;
 import static org.eclipse.xtext.xtext.generator.model.TypeReference.*;
 
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.impl.EPackageRegistryImpl;
 
 public class Wire 
@@ -53,8 +54,6 @@ public class Wire
 		generator.addLanguage(simpleLanguage("m.CSharp","cs"));
 		
 		generator.invoke(null);
-		var registry = EPackageRegistryImpl.INSTANCE;
-		System.out.println(registry);
 	}
 	
 	static StandardLanguage fullLanguage(String name, String extensions)

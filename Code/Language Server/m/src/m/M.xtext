@@ -3,7 +3,7 @@ import "http://www.eclipse.org/emf/2002/Ecore"
 generate game "azpillaga.world/game"
 
 Game:
-	systems+=SystemBase*;
+	systems+=System*;
 	
 Function:
 	name=WORD
@@ -11,7 +11,7 @@ Function:
 	'{'	(statements+=Statement (','? statements+=Statement)*)? '}';
 
 
-SystemBase:
+System:
 	name=WORD
 	'{'	(statements+=Statement (','? statements+=Statement)*)? '}';
 
@@ -48,16 +48,30 @@ Andable:
   Equatable ({And.left=current}  '⋀' right=Equatable)*;
 
 Equatable:
-	Comparable ({Equality.left=current}  kind=EqualityKind right=Comparable)*;
+	Orderable ({Equality.left=current}  '=' right=Orderable|{Inequality.left=current} '!=' right=Orderable)*;
 
-Comparable:
-	Addable (({Comparison.left=current}  kind=ComparisonKind right=Addable))*;
+Orderable:
+	Addable
+	(
+		 {Lower.left=current}  '<' right=Addable
+		|{LowerOrEqual.left=current} '≤' right=Addable
+		|{GreaterOrEqual.left=current} '≥' right=Addable
+		|{Greater.left=current} '>' right=Addable
+	)*;
 
 Addable:
-	Multipliable ({Addition.left=current}  kind=AdditiveKind right=Multipliable)*;
+	Multipliable
+	(
+		 {Addition.left=current} '+' right=Multipliable
+		|{Subtraction.left=current} '-' right=Multipliable
+	)*;
 
 Multipliable:
-	Setable ({Multiplication.left=current}  kind=MultiplicativeKind right=Setable)*;
+	Setable
+	(
+		 {Multiplication.left=current}  '×' right=Setable
+		|{Division.left=current} '÷' right=Setable
+	)*;
 
 Setable:
 	Primary ({Member.left=current} '∈' right=Primary)*;
@@ -98,12 +112,6 @@ Variable:
 
 Cell:
 	entity=Variable '.' component=WORD;
-
-
-enum EqualityKind: equal='='|notEqual='≠';
-enum ComparisonKind: lower='<'|lowerOrEqual='≤'|greaterOrEqual='≥'|greater='>';
-enum AdditiveKind: add='+'|subtract='-';
-enum MultiplicativeKind: multiply='×'|divide='÷';
 
 terminal WORD: (START_ID|'_') CONTINUE_ID*;
 terminal WS: (' '|'\n'|'\r'|'\t')+;
