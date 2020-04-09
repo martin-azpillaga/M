@@ -1,22 +1,20 @@
 grammar m.M hidden(WS)
 import "http://www.eclipse.org/emf/2002/Ecore"
-generate game "azpillaga.world/game"
+import "azpillaga.world/M"
 
-Game:
-	systems+=System*;
+File:
+	functions+=Function*;
 	
 Function:
 	name=WORD
-	'[' parameters+=WORD* ']'
-	'{'	(statements+=Statement (','? statements+=Statement)*)? '}';
-
-
-System:
-	name=WORD
-	'{'	(statements+=Statement (','? statements+=Statement)*)? '}';
+	('(' parameters+=Variable* ')')?
+	'{'
+	(statements+=Statement (','? statements+=Statement)*)?
+	('return' result=Expression)?
+	'}';
 
 Statement:
-	Selection|Iteration|Forall|=>Assignment|Subprocess;
+	Selection|Iteration|Foreach|=>Assignment|Delegation;
 
 Selection:
 	'if' condition=Expression
@@ -26,7 +24,7 @@ Iteration:
 	'while' condition=Expression
 	'{'	(statements+=Statement (','? statements+=Statement)*)? '}';
 
-Forall:
+Foreach:
 	'foreach' variable=Variable
 	'{'	(statements+=Statement (','? statements+=Statement)*)? '}';
 
@@ -34,7 +32,7 @@ Assignment:
 	atom=Atom
 	'=' expression=Expression;
 
-Subprocess:
+Delegation:
 	call=Call;
 
 
@@ -67,39 +65,37 @@ Addable:
 	)*;
 
 Multipliable:
-	Setable
+	Collectable
 	(
-		 {Multiplication.left=current}  '×' right=Setable
-		|{Division.left=current} '÷' right=Setable
+		 {Multiplication.left=current}  '×' right=Collectable
+		|{Division.left=current} '÷' right=Collectable
 	)*;
 
-Setable:
+Collectable:
 	Primary ({Member.left=current} '∈' right=Primary)*;
 
 
 Primary:
-	=>Call|Atom|Collection|Cardinal|Not;
+	=>Call|Atom|Priorization|Vectorization|Comprehension|Cardinality|Negation;
 
 Call:
 	name=WORD
+	('<' generics+=WORD (','? generics+=WORD)* '>')?
 	'(' (arguments+=Expression (','? arguments+=Expression)*)? ')';
 
-Not:
+Negation:
 	'¬' expression=Primary;
 
-Cardinal:
+Cardinality:
 	'#' expression=Primary;
 
-Collection:
-	Brackets|Join|ImplicitSet;
-
-Brackets:
+Priorization:
 	'(' expression=Expression ')';
 
-Join:
+Vectorization:
 	'[' entries+=Expression (','? entries+=Expression)+ ']';
 
-ImplicitSet:
+Comprehension:
 	'{' variable=Variable '|' predicate=Expression '}';
 
 
