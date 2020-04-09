@@ -42,8 +42,6 @@ public class Wire
 		
 		project.setBaseName("m");
 		project.setRootPath(rootPath);
-		
-		code.setPreferXtendStubs(false);
 		code.setEncoding("UTF-8");
 		
 		configuration.setProject(project);
@@ -51,7 +49,6 @@ public class Wire
 		generator.setConfiguration(configuration);
 		
 		generator.addLanguage(fullLanguage("m.M","m"));
-		generator.addLanguage(simpleLanguage("m.CSharp","cs"));
 		
 		generator.invoke(null);
 	}
@@ -62,6 +59,7 @@ public class Wire
 		language.setName(name);
 		language.setFileExtensions(extensions);
 		language.addFragment(new ContextualParserMessagesFragment());
+		language.addReferencedResource("platform:/resource/m/src/m/Game.xcore");
 		return language;
 	}
 	
@@ -74,7 +72,6 @@ public class Wire
 		language.addFragment(new GrammarAccessFragment2());
 		language.addFragment(new XtextAntlrGeneratorFragment2());
 		language.addFragment(new SerializerFragment2());
-		language.addFragment(new FormatterFragment());
 		return language;
 	}
 }

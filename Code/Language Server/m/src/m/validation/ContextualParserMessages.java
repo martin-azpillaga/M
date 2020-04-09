@@ -24,7 +24,6 @@ import org.eclipse.xtext.nodemodel.impl.CompositeNode;
 import org.eclipse.xtext.nodemodel.impl.RootNode;
 import org.eclipse.xtext.parser.antlr.SyntaxErrorMessageProvider;
 import org.eclipse.xtext.parser.antlr.XtextTokenStream;
-import org.eclipse.xtext.parser.antlr.ISyntaxErrorMessageProvider.IParserErrorContext;
 
 public class ContextualParserMessages extends SyntaxErrorMessageProvider
 {
@@ -617,7 +616,7 @@ class Path
 			
 			if (container instanceof ParserRule)
 			{
-				containerName = "the " + ((ParserRule) container).getName();
+				containerName = "a " + ((ParserRule) container).getName();
 			}
 			
 			if (operator.equals("="))
