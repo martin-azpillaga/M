@@ -9,13 +9,12 @@
   "bugs": {"url": "https://github.com/martin-azpillaga/M/issues"},
   "homepage": "https://azpillaga.world/M",
   "keywords": ["text editor", "data oriented", "programming language", "game development"],
-  "main": "main.js",
+  "main": "index.js",
   "dependencies": {
     "@theia/navigator": "next",
     "@theia/electron": "next",
     "@theia/file-search": "next",
-    "@theia/preferences": "next",
-    "@theia/m": "file:./Theia"
+    "@theia/preferences": "next"
   },
   "devDependencies": {
     "@theia/cli": "next"
