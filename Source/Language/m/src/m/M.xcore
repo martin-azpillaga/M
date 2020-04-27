@@ -1,0 +1,126 @@
+@Ecore(nsURI="azpillaga.world/M")
+@GenModel
+(
+	forceOverwrite="true",
+	updateClasspath="false",
+	complianceLevel="8.0",
+	publicConstructors="true",
+	adapterFactory="false",
+	modelDirectory="/m/xcore-gen",
+	suppressNotification="true")
+package m.model
+
+class Game {
+	refers Function[] functions
+	refers Component[] components
+}
+class File {
+	contains Function[] functions
+	refers Group[] groups
+}
+class Group {
+	refers GroupEntry[] entries
+	refers Type ^type
+	String[] components
+}
+class GroupEntry {
+	refers Expression expression
+	GroupingReason[] groupingReasons
+	refers Typing[] types
+}
+class Typing {
+	TypingReason reason
+	refers Type ^type
+}
+
+enum AccessKind {
+	tag, read, write
+}
+
+enum GroupingReason {
+	Assignment, SameVariable, ParameterArgument, Result, SameComponent, VectorOperation
+}
+enum TypingReason {
+	StandardComponent, StandardFunction, StandardControl, CellEntity, ControlEntity
+}
+enum Error {
+	syntax, redefinition, undefined, undecidable, incompatible, group, ^type, NoResult
+}
+
+class Component {
+	refers Type ^type
+	String name
+}
+
+class Type {}
+
+class TupleType extends Type {
+	refers Type ^type
+	int length
+}
+class ListType extends Type {
+	refers Type ^type
+}
+class FunctionType extends Type {
+	refers Type source
+	refers Type target
+}
+
+class Function {
+	String name
+	contains Value[] parameters
+	contains Statement[] statements
+	contains Expression[0..1] result
+	refers FunctionType ^type
+}
+
+class Statement {}
+
+class Block extends Statement {
+	String name
+	refers Type ^type
+	contains Expression expression
+	contains Statement[] statements
+}
+class Assignment extends Statement {
+	contains Expression atom
+	contains Expression expression
+}
+class Delegation extends Statement {
+	contains Application application
+}
+
+class Expression {}
+
+class Binary extends Expression {
+	contains Expression left
+	String operator
+	contains Expression right
+}
+class Unary extends Expression {
+	String operator
+	contains Expression expression
+}
+
+class Value extends Expression {
+	String name
+}
+class Cell extends Expression {
+	String entity
+	String component
+}
+class Application extends Expression {
+	String name
+	contains Expression[] arguments
+}
+
+class Priorization extends Expression {
+	contains Expression expression
+}
+class Vectorization extends Expression {
+	contains Expression[] entries
+}
+class Comprehension extends Expression {
+	contains Value variable
+	contains Expression expression
+}

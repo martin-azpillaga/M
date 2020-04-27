@@ -1,0 +1,139 @@
+grammar m.Blocks hidden(WS)
+
+import "azpillaga.world/M"
+import 'http://www.eclipse.org/emf/2002/Ecore'
+
+File: {File}
+	'<xml xmlns="http://www.w3.org/1999/xhtml">'
+	functions+=Function*
+	'</xml>'
+;
+
+Function:
+	'<block type="function"' ('id=' STRING 'x=' STRING 'y=' STRING)? '>'
+	'<field name="name">'name=(WORD|OPERATOR)'</field>'
+	(
+		'<value name="parameters">'
+		('<block type="parameter"' ('id='STRING)? '>'
+		'<field name="name">'parameters+=Value'</field>'
+		'<value name="next">'?)*
+		('</value>'?'</block>')*
+    	'</value>'
+    )?
+    (
+    	'<statement name="statements">'
+    	(
+			statements+=Statement
+			'<next>'?
+    	)*
+    	('</next>'? '</block>')*
+    	'</statement>'
+    )?
+    (
+    	'<value name="result">'
+    	(
+    		result=Expression
+    	)?
+    	'</value>'
+    )?
+    '</block>';
+
+Statement: Block|Delegation|Assignment;
+
+Block:
+	'<block type="control"' ('id='STRING)?'>'
+	'<field name="name">'name=(WORD|OPERATOR)'</field>'
+	'<value name="exoression">'
+	expression=Expression
+	'</value>'
+	(
+    	'<statement name="statements">'
+    	(
+			statements+=Statement
+			'<next>'?
+    	)*
+    	('</next>'? '</block>')*
+    	'</statement>'
+    )?
+;
+
+Assignment:
+	'<block type="assignment"' ('id='STRING)?'>'
+	'<value name="atom">'
+    atom=(Value|Cell)
+    '</value>'
+    '<value name="expression">'
+    expression=Expression
+    '</value>'
+;
+
+Delegation:
+	'<block type="delegation"' ('id='STRING)? '>'
+	'<value name="application">'
+	application=Application
+	'</value>'
+;
+
+Expression:	Binary|Primary;
+
+Binary: {Binary}
+	'<block type="binary"' ('id='STRING)? '>'
+	'<field name="operator">'operator=OPERATOR'</field>'
+	'<value name="left">'
+	left=Primary
+	'</value>'
+	'<value name="right">'
+	right=Primary
+	'</value>'
+	'</block>'
+;
+
+Primary returns Expression: Unary|Value|Cell|Application;
+
+Unary:
+	'<block type="unary"' ('id='STRING)? '>'
+	'<field name="operator">'operator=OPERATOR'</field>'
+	'<value name="expression">'
+	expression=Expression
+	'</value>'
+	'</block>'
+;
+Application:
+	'<block type="application"' ('id='STRING)? '>'
+	'<field name="name">'name=WORD'</field>'
+	('<value name="argument">'
+	(
+		arguments+=Expression|
+		'<block type="connector"' ('id='STRING)? '>'
+		'<value name="current">'
+		arguments+=Expression
+		'</value>'
+		'<value name="next">'
+		arguments+=Expression
+		'</value>'
+		'</block>'
+	)*
+	'</value>')?
+	'</block>'
+;
+
+Value:
+	name=WORD|
+	'<block type="value"' ('id='STRING)?'>'
+	'<field name="name">'name=WORD'</field>'
+    '</block>'
+;
+Cell:
+	'<block type="cell"' ('id='STRING)?'>'
+	'<field name="entity">'entity=WORD'</field>'
+	'<field name="component">'component=WORD'</field>'
+	'</block>'
+;
+
+terminal WS: ' '|'\t'|'\n'|'\r';
+terminal WORD: LETTER+;
+terminal STRING: '"'->'"';
+terminal OPERATOR: SYMBOL+ | '_' LETTER+ '_';
+terminal fragment LETTER: 'a'..'z'|'A'..'Z';
+terminal fragment SYMBOL: !(LETTER|WS|SEPARATOR|'<');
+terminal fragment SEPARATOR: '{'|'}'|','|'.'|'='|':'|'('|')'|'|';

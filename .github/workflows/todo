@@ -1,0 +1,7 @@
+Download Blockly
+    wget https://raw.githubusercontent.com/google/blockly/master/blockly_compressed.js --output-document Electron/Blockly/blockly.js
+Download M-dependencies
+    wget azpillaga.world/M-dependencies.zip -o outputPath
+Unzip dependencies
+    mkdir lib?
+    unzip -o M-dependencies.zip -d lib
