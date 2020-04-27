@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>M editor</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <div id="blocklyDiv"></div>
+
+  <xml xmlns="https://developers.google.com/blockly/xml" id="toolbox" style="display: none">
+    <category name="Functions">
+      <block type="function">
+        <field name="name">function</field>
+      </block>
+      <block type="parameter">
+        <field name="name">parameter</field>
+      </block>
+    </category>
+    <category name="Statements">
+      <block type="block">
+        <field name="name">block</field>
+      </block>
+      <block type="assignment"></block>
+      <block type="delegation"></block>
+    </category>
+    <category name="Expressions">
+      <block type="binary">
+        <field name="operator">operator</field>
+      </block>
+      <block type="unary">
+        <field name="operator">operator</field>
+      </block>
+      <block type="value">
+        <field name="name">name</field>
+      </block>
+      <block type="cell">
+        <field name="entity">entity</field>
+        <field name="component">component</field>
+      </block>
+      <block type="application">
+        <field name="name">function</field>
+      </block>
+      <block type="connector"></block>
+    </category>
+  </xml>
+
+  <script src="blockly.js"></script>
+  <script src="index.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+grammar m.M hidden(WS)
+
+import "azpillaga.world/M"
+import 'http://www.eclipse.org/emf/2002/Ecore'
+
+File: functions+=Function*;
+
+Function:
+	name=(WORD|OPERATOR)
+	'(' (parameters+=Value (',' parameters+=Value)*)? ')'
+	'{' statements+=Statement* (':' result=Expression)?	'}';
+
+Statement: Block|Assignment|Delegation;
+
+Block: name=(WORD|OPERATOR) expression=Expression '{' statements+=Statement* '}';
+
+Assignment: atom=(Value|Cell) '=' expression=Expression;
+
+Delegation: application=Application;
+
+Expression:	Primary =>({Binary.left=current} operator=OPERATOR right=Primary)*;
+
+Primary returns Expression: Unary|Value|Cell|Application|Priorization|Vectorization|Comprehension;
+
+Unary: operator=OPERATOR expression=Expression;
+Application: name=WORD '(' (arguments+=Expression (',' arguments+=Expression)*)? ')';
+
+Value: name=WORD;
+Cell: entity=WORD '.' component=WORD;
+
+Priorization: '{' expression=Expression '}';
+Vectorization: '[' entries+=Expression (',' entries+=Expression)+ ']';
+Comprehension: '{' variable=Value '|' expression=Expression '}';
+
+terminal WS: ' '|'\t'|'\n'|'\r';
+terminal WORD: LETTER+;
+terminal OPERATOR: SYMBOL+ | '_' LETTER+ '_';
+terminal fragment LETTER: 'a'..'z'|'A'..'Z';
+terminal fragment SYMBOL: !(LETTER|WS|SEPARATOR);
+terminal fragment SEPARATOR: '{'|'}'|','|'.'|'='|':'|'('|')'|'|';
