@@ -6,35 +6,35 @@ import 'http://www.eclipse.org/emf/2002/Ecore'
 File: functions+=Function*;
 
 Function:
-	name=(WORD|OPERATOR)
+	name=OPERATOR
 	'(' (parameters+=Value (',' parameters+=Value)*)? ')'
-	'{' statements+=Statement* (':' result=Expression)?	'}';
+	'{' statements+=Statement* (':' result=Binary)?	'}';
 
 Statement: Block|Assignment|Delegation;
 
-Block: name=(WORD|OPERATOR) expression=Expression '{' statements+=Statement* '}';
+Block: name=OPERATOR expression=Binary '{' statements+=Statement* '}';
 
-Assignment: atom=(Value|Cell) '=' expression=Expression;
+Assignment: atom=(Value|Cell) '=' expression=Binary;
 
 Delegation: application=Application;
 
-Expression:	Primary =>({Binary.left=current} operator=OPERATOR right=Primary)*;
+Expression:Binary|Unary|Value|Cell|Application;
 
-Primary returns Expression: Unary|Value|Cell|Application|Priorization|Vectorization|Comprehension;
+Binary returns Expression: (Unary|Value|Cell|Application)
+			=>(
+				{Binary.left=current} operator=OPERATOR
+				right=(Unary|Value|Cell|Application)
+			)*;
 
-Unary: operator=OPERATOR expression=Expression;
-Application: name=WORD '(' (arguments+=Expression (',' arguments+=Expression)*)? ')';
+Unary: operator=OPERATOR expression=Binary;
+Application: name=WORD '(' (arguments+=Binary (',' arguments+=Binary)*)? ')';
 
 Value: name=WORD;
 Cell: entity=WORD '.' component=WORD;
 
-Priorization: '{' expression=Expression '}';
-Vectorization: '[' entries+=Expression (',' entries+=Expression)+ ']';
-Comprehension: '{' variable=Value '|' expression=Expression '}';
-
 terminal WS: ' '|'\t'|'\n'|'\r';
 terminal WORD: LETTER+;
-terminal OPERATOR: SYMBOL+ | '_' LETTER+ '_';
+terminal OPERATOR: WORD|SYMBOL+ | '_' LETTER+ '_';
 terminal fragment LETTER: 'a'..'z'|'A'..'Z';
 terminal fragment SYMBOL: !(LETTER|WS|SEPARATOR);
 terminal fragment SEPARATOR: '{'|'}'|','|'.'|'='|':'|'('|')'|'|';
