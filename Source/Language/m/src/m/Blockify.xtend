@@ -1,10 +1,16 @@
 package m
 
 import java.util.ArrayList
-import static m.FeatureKind.*
+import java.util.HashMap
 import java.util.List
-import static java.nio.file.Paths.*
+import m.model.ModelPackage
+import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EReference
+
 import static java.nio.file.Files.*
+import static java.nio.file.Paths.*
+import static m.FeatureKind.*
 
 class Category
 {
@@ -14,61 +20,169 @@ class Category
 }
 class Block
 {
-	public String name;
-	public List<String> topConnection = new ArrayList<String>;
-	public List<String> bottomConnection = new ArrayList<String>;
-	public List<String> leftConnection = new ArrayList<String>;
-	public List<Input> inputs = new ArrayList<Input>();
+	public EClass type
+	public String name
+	public List<EClass> topConnection = new ArrayList<EClass>
+	public List<EClass> bottomConnection = new ArrayList<EClass>
+	public List<EClass> leftConnection = new ArrayList<EClass>
+	public List<Input> inputs = new ArrayList<Input>()
 }
 		
 class Input
 {
 	public FeatureKind kind;
 	public String name;
-	public List<String> acceptedTypes = new ArrayList<String>();
+	public List<EClass> types = new ArrayList<EClass>();
 	public List<String> fields = new ArrayList<String>();
 }
 enum FeatureKind
 {
-	single, multiple, mutation;
+	single, multiple, mutation, dummy
 }
 class Blockify
 {
+	static var categories = new ArrayList<Category>
+	static var left = new HashMap<EClass,Boolean>
+	
 	def static void main(String[] args)
 	{
-		var categories = #[new Category=>
-		[
-			name='Root'
-			color= 200
-			blocks = #
-			[
-				new Block=>
-				[
-					name = "Function"
-					topConnection = #[]
-					bottomConnection = #[]
-					inputs = #[new Input=>
-					[
-						kind = mutation
-						name = "parameters"
-						acceptedTypes = #["Value"]
-						fields = #['name']
-					],new Input=>
-					[
-						kind = multiple
-						name = "statements"
-						acceptedTypes = #["Block","Assignment"]
-					],new Input=>
-					[
-						kind = single
-						name = "result"
-						acceptedTypes = #["Expression"]
-					]]
-				]
-			]
-		]]
+		categories.add(new Category=>[name="Root"])
+		
+		var model = ModelPackage.eINSTANCE;
+		
+		for (eclass : model.EClassifiers.filter(EClass))
+		{
+			if (eclass.EStructuralFeatures.filter(EReference).exists[containment])
+			{
+				eclass.analyze
+			}
+			else if (eclass.EAllSuperTypes.exists[name.equals("Expression")])
+			{
+				eclass.analyze
+			}
+		}
+		
+		for (var i = 0; i < categories.size; i++)
+		{
+			var category = categories.get(i)
+			category.color = 100+50*i
+			
+			for (var b = 0; b < category.blocks.size; b++)
+			{
+				val block = category.blocks.get(b)
+				var superTypes = new ArrayList<EClass>(block.type.EAllSuperTypes)
+				superTypes.add(block.type)
+				var subTypes = block.type.EPackage.eAllContents.filter(EClass).filter[it.EAllSuperTypes.contains(block.type)].toList
+				subTypes.add(block.type)
+				
+				if (superTypes.exists[left.containsKey(it) && left.get(it)])
+				{
+					block.leftConnection.addAll(block.type)
+				}
+				else if (superTypes.exists[left.containsKey(it)])
+				{
+					block.topConnection.addAll(block.type)
+					if (block.type.ESuperTypes.empty)
+					{
+						block.bottomConnection.add(block.type)
+					}
+					else
+					{
+						val superType = block.type.ESuperTypes.head
+						var superSub = model.eAllContents.filter(EClass).filter[it.EAllSuperTypes.contains(superType)].toList
+						superSub.add(block.type)
+						block.bottomConnection.addAll(superSub)
+					}
+				}
+				
+				for (input : block.inputs)
+				{
+					if (input.kind == multiple)
+					{
+						var left = input.types.exists[left.containsKey(it) && left.get(it)]
+						if (left)
+						{
+							input.kind = mutation
+						}
+					}
+				}
+			}
+		}
 		
 		write(get("../../Application/Blockly/custom2.js"), categories.print.toString.bytes);
+	}
+	
+	private def static analyze(EClass eclass)
+	{
+		var block = new Block=>[name=eclass.name type=eclass]
+		
+		var fields = new ArrayList<String>
+		for (feature : eclass.EStructuralFeatures)
+		{
+			if (feature instanceof EAttribute)
+			{
+				fields.add(feature.name)
+			}
+			else if (feature instanceof EReference)
+			{
+				if (feature.containment)
+				{
+					val type = feature.EType as EClass
+					var subTypes = eclass.EPackage.eAllContents.filter(EClass).filter[it.EAllSuperTypes.contains(type)].toList
+					subTypes.add(type)
+					
+					var Input input = new Input=>[name=feature.name]
+					if (feature.upperBound == 1)
+					{
+						input.kind = single
+						for (subType : subTypes)
+						{
+							left.put(subType, true)
+						}
+					}
+					else
+					{
+						input.kind = multiple
+						for (subType : subTypes)
+						{
+							if (!left.containsKey(subType))
+							{
+								left.put(subType, false)
+							}
+						}
+						
+					}
+					input.types.addAll(subTypes)
+					input.fields.addAll(fields)
+					block.inputs.add(input)
+					fields = new ArrayList<String>
+				}
+			}
+		}
+		
+		if (!fields.empty)
+		{
+			var input = new Input=>[kind=dummy]
+			input.fields.addAll(fields)
+			block.inputs.add(input)
+		}
+		
+		var superTypes = eclass.ESuperTypes
+		if (superTypes.empty)
+		{
+			categories.findFirst[name=="Root"].blocks.add(block)
+		}
+		else if (superTypes.size == 1)
+		{
+			val superType = superTypes.head.name
+			var category = categories.findFirst[name==superType]
+			if (category === null)
+			{
+				category = new Category=>[name=superType]
+				categories.add(category)
+			}
+			category.blocks.add(block)
+		}
 	}
 	
 	private def static print(List<Category> categories)
@@ -84,8 +198,8 @@ class Blockify
 		<block type='«block.name»'></block>
 		«ENDFOR»
 		</category>
-		`
 		«ENDFOR»
+		`
 		Blockly.inject('blocklyDiv', {toolbox: toolbox})
 		
 		«FOR category : categories»
@@ -105,15 +219,17 @@ class Blockify
 				«ENDIF»
 				«FOR input : block.inputs»
 				«IF input.kind == single»
-				this.appendValueInput('«input.name»').setCheck(«input.acceptedTypes.s»)«FOR field : input.fields».appendField(new Blockly.FieldTextInput('«field»'),'«field»')«ENDFOR»
+				this.appendValueInput('«input.name»').setCheck(«input.types.s»)«FOR field : input.fields».appendField(new Blockly.FieldTextInput('«field»'),'«field»')«ENDFOR»
 				«ELSEIF input.kind == multiple»
-				this.appendStatementInput('«input.name»').setCheck(«input.acceptedTypes.s»)«FOR field : input.fields».appendField(new Blockly.FieldTextInput('«field»'),'«field»')«ENDFOR»
+				this.appendStatementInput('«input.name»').setCheck(«input.types.s»)«FOR field : input.fields».appendField(new Blockly.FieldTextInput('«field»'),'«field»')«ENDFOR»
 				«ELSEIF input.kind == mutation»
 				var dummy = this.appendDummyInput('«input.name»')
 				dummy«FOR field : input.fields».appendField(new Blockly.FieldTextInput('«field»'),'«field»')«ENDFOR».appendField(new Blockly.FieldNumber(0,0,null,0, function (value)
 				{
 					this.sourceBlock_?.update(dummy, value)
 				}), '«input.name»')
+				«ELSEIF input.kind == dummy»
+				this.appendDummyInput('«input.name»')«FOR field : input.fields».appendField(new Blockly.FieldTextInput('«field»'),'«field»')«ENDFOR»
 				«ENDIF»
 				«ENDFOR»
 				this.setInputsInline(true)
@@ -159,7 +275,10 @@ class Blockify
 				for (var i=0; i < value; i++)
 				{
 					this.appendValueInput('«input.name»'+i)
-					this.moveNumberedInputBefore(this.inputList.length-1, index+1)
+					if (this.inputList.length-1 != index+1)
+					{
+						this.moveNumberedInputBefore(this.inputList.length-1, index+1)
+					}
 				}
 				«ENDFOR»
 			}
@@ -170,7 +289,7 @@ class Blockify
 		'''
 	}
 	
-	private static def s(List<String> list)
+	private static def s(List<EClass> list)
 	{
 		if (list.empty)
 		{
@@ -178,11 +297,11 @@ class Blockify
 		}
 		else if (list.size == 1)
 		{
-			return "'"+list.head+"'"
+			return "'"+list.head.name+"'"
 		}
 		else
 		{
-			return "["+list.map["'"+it+"'"].join(",")+"]"
+			return "["+list.map["'"+it.name+"'"].join(",")+"]"
 		}
 	}
 }
