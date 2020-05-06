@@ -1,6 +1,9 @@
 import {ContainerModule, inject, injectable} from 'inversify'
 import {CommandContribution, CommandRegistry, MessageService, MenuContribution, MenuModelRegistry} from '@theia/core'
-import { AbstractViewContribution, CommonMenus, bindViewContribution, FrontendApplicationContribution, WidgetFactory, ReactWidget, BaseWidget, ApplicationShell, Layout } from '@theia/core/lib/browser';
+import { AbstractViewContribution, CommonMenus, bindViewContribution, FrontendApplicationContribution, WidgetFactory, BaseWidget } from '@theia/core/lib/browser';
+import { LanguageClientContribution, BaseLanguageClientContribution } from '@theia/languages/lib/browser'
+/// <reference types='@typefox/monaco-editor-core/monaco'/>
+
 
 export default new ContainerModule(bind=>
 {
@@ -14,7 +17,21 @@ export default new ContainerModule(bind=>
         id: DocumentationWidget.ID,
         createWidget: () => ctx.container.get<DocumentationWidget>(DocumentationWidget)
     })).inSingletonScope();
+
+    bind(LanguageClientContribution).to(MClient)
 });
+
+@injectable()
+class MClient extends BaseLanguageClientContribution
+{
+    id='mserver';
+    name='mserver';
+
+    protected get globPatterns()
+    {
+        return ['**/*.m']
+    }
+}
 
 @injectable()
 class DocumentationWidget extends BaseWidget
@@ -28,7 +45,7 @@ class DocumentationWidget extends BaseWidget
         this.title.label = 'Documentation';
         this.title.caption = 'Documentation for M';
         this.title.closable = true;
-        this.node.innerHTML = `<object type="text/html" data="../Blockly/index.html" style="width:100%;height:100%"/>`
+        this.node.innerHTML = `<object type="text/html" data="../../Docs/site/index.html" style="width:100%;height:100%"/>`
     }
 }
 
@@ -108,3 +125,18 @@ export class HelloWorldMenuContribution implements MenuContribution {
 
 
 console.log("Hello command contribution ok");
+
+// register language with monaco on first load
+registerM();
+
+export function registerM() {
+    // initialize monaco
+    monaco.languages.register({
+        id: 'mserver',
+        aliases: ['mserver'],
+        extensions: ['.m'],
+        mimetypes: ['text/m']
+    })
+}
+
+console.log("monaco ok")
