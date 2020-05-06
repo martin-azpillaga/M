@@ -1,0 +1,17 @@
+{
+    "name": "m",
+    "version": "1.0.0",
+    "keywords": ["theia-extension"],
+    "dependencies": 
+    {
+        "@theia/core": "next"
+    },
+    "devDependencies":
+    {
+        "typescript": "3.4.3"
+    },
+    "theiaExtensions":
+    [
+        {"frontend": "frontend"}
+    ]
+}
