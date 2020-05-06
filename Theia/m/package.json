@@ -4,7 +4,9 @@
     "keywords": ["theia-extension"],
     "dependencies": 
     {
-        "@theia/core": "next"
+        "@theia/core": "next",
+        "@theia/languages": "next",
+        "@typefox/monaco-editor-core": "0.14.6"
     },
     "devDependencies":
     {
@@ -12,6 +14,6 @@
     },
     "theiaExtensions":
     [
-        {"frontend": "frontend"}
+        {"frontend": "frontend", "backend": "backend"}
     ]
 }
