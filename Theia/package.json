@@ -6,6 +6,7 @@
     "@theia/file-search": "next",
     "@theia/git": "next",
     "@theia/json": "next",
+    "@theia/languages": "next",
     "@theia/markers": "next",
     "@theia/messages": "next",
     "@theia/mini-browser": "next",
@@ -16,6 +17,7 @@
     "@theia/preview": "next",
     "@theia/search-in-workspace": "next",
     "@theia/terminal": "next",
+    "@typefox/monaco-editor-core": "0.14.6",
     "m": "./m"
   },
   "devDependencies": {
@@ -26,6 +28,6 @@
   },
   "scripts": {
     "bs": "yarn && theia rebuild:electron && theia build --mode development && theia start",
-    "update": "cd m && tsc && cd .. && yarn add ./m && theia build --mode development && theia start"
+    "update": "yarn && theia rebuild:electron && cd m && tsc && cd .. && yarn add ./m && theia build --mode development && theia start"
   }
 }

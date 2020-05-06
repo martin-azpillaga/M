@@ -1,8 +1,18 @@
 {
-    "compilerOptions":
-    {
-        "jsx": "react",
+    "compilerOptions": {
+        "strict": true,
         "experimentalDecorators": true,
-        "target": "es5"
+        "noUnusedLocals": true,
+        "emitDecoratorMetadata": true,
+        "downlevelIteration": true,
+        "module": "commonjs",
+        "moduleResolution": "node",
+        "target": "es5",
+        "lib": [
+            "es6",
+            "dom"
+        ],
+        "sourceMap": true,
+        "skipLibCheck": true
     }
 }
