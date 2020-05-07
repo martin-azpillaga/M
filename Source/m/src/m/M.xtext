@@ -1,0 +1,9 @@
+grammar m.M with org.eclipse.xtext.common.Terminals
+
+generate m "http://www.M.m"
+
+Model:
+	greetings+=Greeting*;
+	
+Greeting:
+	'Hello' name=ID '!';
