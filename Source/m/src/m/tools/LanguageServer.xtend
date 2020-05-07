@@ -20,6 +20,7 @@ import java.io.InputStreamReader
 import java.util.ArrayList
 import java.util.List
 import java.nio.file.StandardCopyOption
+import org.eclipse.xtext.xtext.generator.serializer.SerializerFragment2
 
 class LanguageServer
 {
@@ -85,6 +86,7 @@ class LanguageServer
 					language.addFragment(new GrammarAccessFragment2)
 					language.addFragment(new XtextAntlrGeneratorFragment2)
 					language.addFragment(new EMFGeneratorFragment2)
+					language.addFragment(new SerializerFragment2=>[generateStub=false])
 					
 					var validator = it.parent.toString+"/validation/"+minor+"Validator.xtend"
 					var gen = it.parent.toString+"/generator/"+minor+"Generator.xtend"
