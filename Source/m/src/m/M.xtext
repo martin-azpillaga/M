@@ -1,9 +1,38 @@
-grammar m.M with org.eclipse.xtext.common.Terminals
+grammar m.M hidden(WS)
 
-generate m "http://www.M.m"
+import "http://www.eclipse.org/emf/2002/Ecore"
+generate m "azpillaga.world/M"
 
-Model:
-	greetings+=Greeting*;
-	
-Greeting:
-	'Hello' name=ID '!';
+File: functions+=Function*;
+
+Function:
+	name=ID
+	'(' (parameters+=Value (',' parameters+=Value)*)? ')'
+	'{' statements+=Statement* (':' result=Binary)?	'}';
+
+Statement: Block|Assignment|Delegation;
+
+Block: name=OPERATOR expression=Binary '{' statements+=Statement* '}';
+
+Assignment: atom=(Value|Cell) '=' expression=Binary;
+
+Delegation: application=Application;
+
+Expression:Binary|Unary|Value|Cell|Application;
+
+Binary returns Expression: (Unary|Value|Cell|Application)
+			=>(
+				{Binary.left=current} operator=OPERATOR
+				right=(Unary|Value|Cell|Application)
+			)*;
+
+Unary: operator=OPERATOR expression=Binary;
+Application: name=ID '(' (arguments+=Binary (',' arguments+=Binary)*)? ')';
+
+Value: name=ID;
+Cell: entity=ID '.' component=ID;
+
+terminal WS: ' '|'\n'|'\t'|'\r';
+terminal ID: LETTER+;
+terminal OPERATOR: !(LETTER|WS|'('|')'|'{'|'}'|'='|':'|','|'.')*;
+terminal fragment LETTER: 'a'..'z'|'A'..'Z';
