@@ -12,28 +12,24 @@ Function:
 
 Statement: Block|Assignment|Delegation;
 
-Block: name=OPERATOR expression=Binary '{' statements+=Statement* '}';
+Block: name=ID expression=Binary '{' statements+=Statement* '}';
 
 Assignment: atom=(Value|Cell) '=' expression=Binary;
 
 Delegation: application=Application;
 
-Expression:Binary|Unary|Value|Cell|Application;
+Binary:
+	Primary ({Binary.left=current} operator=OPERATOR right=Primary)*;
 
-Binary returns Expression:
-	(Unary|Value|Cell|Application)
-	=>(
-		{Binary.left=current} operator=OPERATOR
-		right=(Unary|Value|Cell|Application)
-	)*;
+Primary: Unary|Application|Value|Cell;
 
-Unary: operator=OPERATOR expression=Binary;
+Unary: operator=OPERATOR expression=Primary;
 Application: name=ID '(' (arguments+=Binary (',' arguments+=Binary)*)? ')';
 
 Value: name=ID;
-Cell: entity=ID '..' component=ID;
+Cell: entity=ID '.' component=ID;
 
 terminal WS: ' '|'\n'|'\t'|'\r';
 terminal ID: LETTER+;
-terminal OPERATOR: !(LETTER|WS|'('|')'|'{'|'}'|'='|':'|','|'.')*;
+terminal OPERATOR: '+'|'-';
 terminal fragment LETTER: 'a'..'z'|'A'..'Z';

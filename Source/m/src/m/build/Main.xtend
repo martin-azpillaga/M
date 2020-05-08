@@ -228,6 +228,9 @@ class Main
 	{
 		'''
 		{
+			"name": "«project»-theia",
+			"version": "0.0.0",
+			"main": "src-gen/frontend/electron-main.js",
 			"private": true,
 			"dependencies": {
 			    "@theia/callhierarchy": "next",
