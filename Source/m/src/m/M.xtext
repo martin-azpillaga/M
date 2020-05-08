@@ -20,17 +20,18 @@ Delegation: application=Application;
 
 Expression:Binary|Unary|Value|Cell|Application;
 
-Binary returns Expression: (Unary|Value|Cell|Application)
-			=>(
-				{Binary.left=current} operator=OPERATOR
-				right=(Unary|Value|Cell|Application)
-			)*;
+Binary returns Expression:
+	(Unary|Value|Cell|Application)
+	=>(
+		{Binary.left=current} operator=OPERATOR
+		right=(Unary|Value|Cell|Application)
+	)*;
 
 Unary: operator=OPERATOR expression=Binary;
 Application: name=ID '(' (arguments+=Binary (',' arguments+=Binary)*)? ')';
 
 Value: name=ID;
-Cell: entity=ID '.' component=ID;
+Cell: entity=ID '..' component=ID;
 
 terminal WS: ' '|'\n'|'\t'|'\r';
 terminal ID: LETTER+;
