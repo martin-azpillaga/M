@@ -207,7 +207,7 @@ class Main
 		'''
 	}
 	
-	private static def void execute(String command, String workingDirectory)
+	static def void execute(String command, String workingDirectory)
 	{
 		println("Executing "+command)
 		var p = Runtime.runtime.exec(command,#[],new File(workingDirectory))
