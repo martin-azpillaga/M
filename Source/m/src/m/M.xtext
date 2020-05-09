@@ -18,12 +18,15 @@ Assignment: atom=(Value|Cell) '=' expression=Binary;
 
 Delegation: application=Application;
 
-Binary:
-	Primary ({Binary.left=current} operator=OPERATOR right=Primary)*;
+Expression: Binary|Unary|Application|Value|Cell;
 
-Primary: Unary|Application|Value|Cell;
+Binary returns Expression:
+	(Unary|Application|Value|Cell)
+	({Binary.left=current} operator=OPERATOR
+		right=(Unary|Application|Value|Cell)
+	)*;
 
-Unary: operator=OPERATOR expression=Primary;
+Unary: operator=OPERATOR expression=(Unary|Application|Value|Cell);
 Application: name=ID '(' (arguments+=Binary (',' arguments+=Binary)*)? ')';
 
 Value: name=ID;
@@ -31,5 +34,5 @@ Cell: entity=ID '.' component=ID;
 
 terminal WS: ' '|'\n'|'\t'|'\r';
 terminal ID: LETTER+;
-terminal OPERATOR: '+'|'-';
+terminal OPERATOR: '+'|'-'|'*'|'/';
 terminal fragment LETTER: 'a'..'z'|'A'..'Z';
