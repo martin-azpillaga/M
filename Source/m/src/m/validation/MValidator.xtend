@@ -90,7 +90,10 @@ class MValidator extends AbstractMValidator
 		var cells = EcoreUtil2.getAllContentsOfType(file, Cell)
 		for (cell : cells)
 		{
-			userComponents.put(cell.component, null)
+			if (!standardSymbols.containsKey(cell.component))
+			{
+				userComponents.put(cell.component, null)
+			}
 		}
 		
 		userFunctions = new HashMap<String,Function>
@@ -194,7 +197,7 @@ class MValidator extends AbstractMValidator
 				}
 				game.functions.put(copy,functionType)
 			}
-			for (c : components.keySet)
+			for (c : userComponents.keySet)
 			{
 				game.components.put(c, components.get(c).type)
 			}
@@ -310,19 +313,19 @@ class MValidator extends AbstractMValidator
 		}
 		else if (expression instanceof Binary)
 		{
-			inferApplication(expression.operator, #[expression.left,expression.right], expression)
+			inferApplication(expression.operator, #[expression.left,expression.right], expression, BINARY__OPERATOR)
 		}
 		else if (expression instanceof Unary)
 		{
-			inferApplication(expression.operator, #[expression.expression], expression)
+			inferApplication(expression.operator, #[expression.expression], expression, UNARY__OPERATOR)
 		}
 		else if (expression instanceof Application)
 		{
-			inferApplication(expression.name, expression.arguments, expression)
+			inferApplication(expression.name, expression.arguments, expression, APPLICATION__NAME)
 		}
 	}
 	
-	def private inferApplication(String name, List<Expression> arguments, Expression expression)
+	def private inferApplication(String name, List<Expression> arguments, Expression expression, EStructuralFeature feature)
 	{
 		var standard = standardSymbols.get(name)
 		var user = userFunctions.get(name)
@@ -344,7 +347,7 @@ class MValidator extends AbstractMValidator
 			}
 			else
 			{
-				error(undefined, expression, null)
+				error(undefined, expression, feature)
 			}
 		}
 		else if (user !== null)
@@ -365,12 +368,12 @@ class MValidator extends AbstractMValidator
 			}
 			else
 			{
-				error(undefined, expression, null)
+				error(undefined, expression, feature)
 			}
 		}
 		else
 		{
-			error(undefined, expression, null)
+			error(undefined, expression, feature)
 		}
 		arguments.forEach[validate]
 	}
