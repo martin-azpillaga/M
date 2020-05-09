@@ -108,8 +108,11 @@ class Blockify
 				}
 			}
 		}
-		
-		write(get("../../Application/Blockly/custom2.js"), categories.print.toString.bytes);
+		var destination = get("../Theia/Blockly/custom2.js")
+		createDirectories(destination.parent)
+		write(destination, categories.print.toString.bytes);
+		write(get(destination.parent.toString, "index.html"), index.toString.bytes)
+		Main.execute("wget https://raw.githubusercontent.com/google/blockly/master/blockly_compressed.js --output-document ../Theia/Blockly/blockly.js", ".")
 	}
 	
 	private def static analyze(EClass eclass)
@@ -286,6 +289,15 @@ class Blockify
 		}
 		«ENDFOR»
 		«ENDFOR»
+		'''
+	}
+	
+	private static def index()
+	{
+		'''
+		<div id="blocklyDiv"></div>
+		<script src="blockly.js"></script>
+		<script src="custom2.js"></script>
 		'''
 	}
 	
