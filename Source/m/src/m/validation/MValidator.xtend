@@ -26,6 +26,7 @@ import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.EObject
 import m.m.Binary
 import org.eclipse.xtext.EcoreUtil2
+import m.generator.Game
 
 class Group
 {
@@ -46,10 +47,10 @@ class Typing
 }
 class MValidator extends AbstractMValidator
 {
-	public static HashMap<String, Type> game
-	
+	public static Game game
 	
 	var standardSymbols = new HashMap<String,Type>
+	var userComponents = new HashMap<String,Type>
 	var standardBlocks = new HashMap<String,Type>
 	
 	var userFunctions = new HashMap<String,Function>
@@ -85,11 +86,11 @@ class MValidator extends AbstractMValidator
 		library.symbols.forEach[standardSymbols.put(name, type)]
 		library.blocks.forEach[standardBlocks.put(name, type)]
 		
-		game = new HashMap<String,Type>
+		userComponents = new HashMap<String,Type>
 		var cells = EcoreUtil2.getAllContentsOfType(file, Cell)
 		for (cell : cells)
 		{
-			game.put(cell.component, null)
+			userComponents.put(cell.component, null)
 		}
 		
 		userFunctions = new HashMap<String,Function>
@@ -99,7 +100,7 @@ class MValidator extends AbstractMValidator
 		
 		for (f : file.functions)
 		{
-			if (standardSymbols.containsKey(f.name) || userFunctions.containsKey(f.name) || game.containsKey(f.name))
+			if (standardSymbols.containsKey(f.name) || userFunctions.containsKey(f.name) || userComponents.containsKey(f.name))
 			{
 				error(redefinition, f, FUNCTION__NAME)
 			}
@@ -175,7 +176,28 @@ class MValidator extends AbstractMValidator
 		}
 		if (!errorFound)
 		{
-			
+			game = new Game
+			for (f : userFunctions.values)
+			{
+				var copy = EcoreUtil2.copy(f)
+				var functionType = new ExponentType
+				if (f.result !== null)
+				{
+					functionType.right = expressions.get(f.result).type
+				}
+				for (var p = f.parameters.size -1; p >= 0; p--)
+				{
+					val type = expressions.get(f.parameters.get(p)).type
+					
+					functionType = new ExponentType=>[left=type]
+					functionType.right = functionType
+				}
+				game.functions.put(copy,functionType)
+			}
+			for (c : components.keySet)
+			{
+				game.components.put(c, components.get(c).type)
+			}
 		}
 	}
 	
@@ -459,7 +481,7 @@ class MValidator extends AbstractMValidator
 	
 	def private declare(Value value)
 	{
-		if (userValues.containsKey(value.name) || game.containsKey(value.name) || standardSymbols.containsKey(value.name) || userFunctions.containsKey(value.name))
+		if (userValues.containsKey(value.name) || userComponents.containsKey(value.name) || standardSymbols.containsKey(value.name) || userFunctions.containsKey(value.name))
 		{
 			error(redefinition, value, null)
 		}
