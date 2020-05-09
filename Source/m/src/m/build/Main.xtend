@@ -45,6 +45,7 @@ class Main
 		write(get(extensionFolder,"frontend.ts"),frontend.toString.bytes)
 		write(get(extensionFolder,"backend.ts"),backend.toString.bytes)
 		write(get(extensionFolder,"monaco.d.ts"),monaco.toString.bytes)
+		write(get(parent.toString, "Theia", "electron-builder.yml"), electronBuilder.toString.bytes)
 		
 		copy(get(parent.toString,"build","libs","Source-ls-ls.jar"),get(parent.toString,"Theia","ls.jar"),StandardCopyOption.REPLACE_EXISTING)
 		
@@ -250,7 +251,8 @@ class Main
 			    "@theia/preview": "next",
 			    "@theia/search-in-workspace": "next",
 			    "@theia/terminal": "next",
-			    "@typefox/monaco-editor-core": "0.14.6"
+			    "@typefox/monaco-editor-core": "0.14.6",
+			    "m" : "./m"
 		  	},
 		  	"devDependencies": {
 		    	"@theia/cli": "next"
@@ -525,4 +527,11 @@ class Main
 		/// <reference types='@typefox/monaco-editor-core/monaco'/>
 		'''
 	}
+	
+	private static def electronBuilder()
+	 {
+	 	'''
+	 	asar: false
+	 	'''
+	 }
 }
