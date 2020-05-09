@@ -71,7 +71,8 @@ class Main
 					{
 						baseName = "«project»"
 						rootPath = rootPath
-						genericIde = { enabled = true }
+						eclipsePlugin = { enabled = true }
+						createEclipseMetaData = true
 					}
 					code =
 					{

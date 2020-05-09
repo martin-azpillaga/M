@@ -37,3 +37,18 @@ class Symbol
 	public Type type
 	public String reason
 }
+
+enum Error
+{
+	redefinition,undefined, syntax, undecidable, incompatible
+}
+
+enum GroupingReason
+{
+	assignment, sameComponent, sameVariable, parameterArgument, resultReturn
+}
+
+enum TypingReason
+{
+	standardSymbol, queryEntity, cellEntity
+}
