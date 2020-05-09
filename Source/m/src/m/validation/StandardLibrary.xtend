@@ -1,9 +1,14 @@
 package m.validation
 
+import java.util.List
+import java.util.Map
+import static m.validation.Error.*
+import static m.validation.TypingReason.*
+
 class StandardLibrary
 {	
 	public static val any = new Type
-	public static val empty = new Type
+	public static val unit = new Type
 	public static val number = new Type
 	public static val proposition = new Type
 	public static val entity = new Type
@@ -34,15 +39,15 @@ class StandardLibrary
 	public static val numberNumberNumber = new ExponentType=>[left=number right=numberNumber]
 	
 	public static val constant = new ExponentType=>[right=number]
-	public static val entityEmpty = new ExponentType=>[left=entity right=empty]
+	public static val entityEmpty = new ExponentType=>[left=entity right=m.validation.StandardLibrary.unit]
 	public static val entityProposition = new ExponentType=>[left=entity right=proposition]
 	
 	public static val propositionProposition = new ExponentType=>[left=proposition right=proposition]
 	public static val propositionPropositionProposition = new ExponentType=>[left=proposition right=propositionProposition]
 	
 	public static val anyAny = new ExponentType=>[left=any right=any]
-	public static val anyEmpty = new ExponentType=>[left=any right=empty]
-	public static val emptyEmpty = new ExponentType=>[left=empty right=empty]
+	public static val anyEmpty = new ExponentType=>[left=any right=m.validation.StandardLibrary.unit]
+	public static val emptyEmpty = new ExponentType=>[left=m.validation.StandardLibrary.unit right=m.validation.StandardLibrary.unit]
 	
 	public static val numberProposition = new ExponentType=>[left=number right=proposition]
 	public static val numberNumberProposition = new ExponentType=>[left=number right=numberProposition]
@@ -88,7 +93,7 @@ class StandardLibrary
 	public static val viewAngle = new Symbol=>[type=number]
 	public static val viewDistance = new Symbol=>[type=number]
 	public static val clearColor = new Symbol=>[type=number4]
-	public static val perspective = new Symbol=>[type=empty]
+	public static val perspective = new Symbol=>[type=m.validation.StandardLibrary.unit]
 	
 	public static val emission = new Symbol=>[type=number4]
 	public static val spotAngle = new Symbol=>[type=number]
@@ -100,7 +105,7 @@ class StandardLibrary
 	public static val audioClip = new Symbol=>[type=clip]
 	public static val volume = new Symbol=>[type=number]
 	public static val pitch = new Symbol=>[type=number]
-	public static val loop = new Symbol=>[type=empty]
+	public static val loop = new Symbol=>[type=m.validation.StandardLibrary.unit]
 	
 	public static val distortion = new Symbol=>[type=number]
 	public static val echo = new Symbol=>[type=number]
@@ -112,8 +117,8 @@ class StandardLibrary
 	
 	public static val ip = new Symbol=>[type=number4]
 	public static val port = new Symbol=>[type=number]
-	public static val networkStream = new Symbol=>[type=empty]
-	public static val prediction = new Symbol=>[type=empty]
+	public static val networkStream = new Symbol=>[type=m.validation.StandardLibrary.unit]
+	public static val prediction = new Symbol=>[type=m.validation.StandardLibrary.unit]
 	public static val owner = new Symbol=>[type=number]
 	
 	public static val mass = new Symbol=>[type=number]
@@ -125,13 +130,13 @@ class StandardLibrary
 	public static val angularVelocity = new Symbol=>[type=number3]
 	public static val gravityFactor = new Symbol=>[type=number]
 	
-	public static val trigger = new Symbol=>[type=empty]
+	public static val trigger = new Symbol=>[type=m.validation.StandardLibrary.unit]
 	public static val extents = new Symbol=>[type=number3]
 	public static val radius = new Symbol=>[type=number]
 	public static val height = new Symbol=>[type=number]
 	public static val sideCount = new Symbol=>[type=number]
-	public static val convexHull = new Symbol=>[type=empty]
-	public static val geometry = new Symbol=>[type=empty]
+	public static val convexHull = new Symbol=>[type=m.validation.StandardLibrary.unit]
+	public static val geometry = new Symbol=>[type=m.validation.StandardLibrary.unit]
 	public static val restitution = new Symbol=>[type=number]
 	public static val friction = new Symbol=>[type=number]
 	
@@ -205,4 +210,61 @@ class StandardLibrary
 	
 	public static val write = new Symbol=>[type=anyEmpty]
 	public static val halt = new Symbol=>[type=emptyEmpty]
+	
+	public static val selection = new Symbol=>[type=proposition]
+	public static val iteration = new Symbol=>[type=proposition]
+	public static val query = new Symbol=>[type=declaration]
+	
+	public List<Symbol> symbols
+	public List<Symbol> blocks
+	public Map<Error,String> errors
+	public Map<Type,String> types
+	public Map<TypingReason,String> typingReason
+	
+	public static val English = new StandardLibrary=>
+	[
+		symbols = #
+		[
+			mass=>[name='mass'],
+			velocity=>[name='velocity'],
+			has=>[name='has'],
+			multiplication=>[name='*']
+		].map[it=>[reason='standard library']]
+		
+		blocks = #
+		[
+			selection=>[name='if'],
+			iteration=>[name='while'],
+			query=>[name='foreach']
+		]
+		errors = #
+		{
+			redefinition->'Symbol already defined',
+			undefined->'Symbol undefined',
+			syntax->'Syntax error'
+		}
+		types = #
+		{
+			number -> 'number',
+			proposition -> 'proposition'
+		}
+		typingReason = #
+		{
+			standardSymbol -> 'standard symbol',
+			queryEntity -> 'entity variable of foreach',
+			cellEntity -> 'entity variable of cell'
+		}
+	]
+	
+	def type(Type type)
+	{
+		if (types.containsKey(type))
+		{
+			return types.get(type)
+		}
+		else
+		{
+			return type.toString
+		}
+	}
 }
