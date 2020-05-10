@@ -51,7 +51,6 @@ class Main
 		write(get(extensionFolder,"frontend.ts"),frontend.toString.bytes)
 		write(get(extensionFolder,"backend.ts"),backend.toString.bytes)
 		write(get(extensionFolder,"monaco.d.ts"),monaco.toString.bytes)
-		write(get(parent.toString, "Theia", "electron-builder.yml"), electronBuilder.toString.bytes)
 		
 		copy(get(parent.toString,"build","libs","Source-ls-ls.jar"),get(parent.toString,"Theia","ls.jar"),StandardCopyOption.REPLACE_EXISTING)
 		
@@ -273,6 +272,11 @@ class Main
 		  	"scripts":
 		  	{
 		    	"update": "yarn && theia rebuild:electron && cd m && tsc && cd .. && yarn add ./m && theia build --mode development && theia start"
+		  	},
+		  	"build":
+		  	{
+		  		"appId": "azpillaga.world.m-theia",
+		  		"extraFiles": [ "ls.jar" ]
 		  	}
 		}'''
 	}
@@ -529,7 +533,7 @@ class Main
 		            socket.connect(socketPort)
 		        } else {
 		            console.log("java jarring");
-		            const jar = path.resolve(__dirname, '../../ls.jar');
+		            const jar = path.resolve(__dirname, '../../../../ls.jar');
 		    
 		            const command = 'java';
 		            const args: string[] = ['-jar',jar];
@@ -557,13 +561,6 @@ class Main
 		/// <reference types='@typefox/monaco-editor-core/monaco'/>
 		'''
 	}
-	
-	private static def electronBuilder()
-	 {
-	 	'''
-	 	asar: false
-	 	'''
-	 }
 	 
 	 
 	 
