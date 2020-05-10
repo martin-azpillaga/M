@@ -396,7 +396,7 @@ class Main
 		        this.title.label = 'Documentation';
 		        this.title.caption = 'Documentation for M';
 		        this.title.closable = true;
-		        this.node.innerHTML = `<object type="text/html" data="../../Docs/site/index.html" style="width:100%;height:100%"/>`
+		        this.node.innerHTML = `<object type="text/html" data="../Blockly/index.html" style="width:100%;height:100%"/>`
 		    }
 		}
 		
@@ -430,7 +430,7 @@ class Main
 		
 		    registerMenus(registry: MenuModelRegistry)
 		    {
-		        registry.registerMenuAction(CommonMenus.EDIT_FIND, {
+		        registry.registerMenuAction(CommonMenus.VIEW, {
 		            commandId: DocumentationWidgetCommand.id,
 		            label: DocumentationWidgetCommand.label
 		        });
@@ -642,7 +642,7 @@ class Main
 		createDirectories(destination.parent)
 		write(destination, categories.print.toString.bytes);
 		write(get(destination.parent.toString, "index.html"), index.toString.bytes)
-		Main.execute("wget https://raw.githubusercontent.com/google/blockly/master/blockly_compressed.js --output-document ../Theia/Blockly/blockly.js", ".")
+		execute("wget https://raw.githubusercontent.com/google/blockly/master/blockly_compressed.js --output-document ../Theia/Blockly/blockly.js", ".")
 	}
 	
 	private def static analyze(EClass eclass)
@@ -759,7 +759,10 @@ class Main
 				var dummy = this.appendDummyInput('«input.name»')
 				dummy«FOR field : input.fields».appendField(new Blockly.FieldTextInput('«field»'),'«field»')«ENDFOR».appendField(new Blockly.FieldNumber(0,0,null,0, function (value)
 				{
-					this.sourceBlock_?.update(dummy, value)
+					if (this.sourceBlock_)
+					{
+						this.sourceBlock_.update(dummy, value)
+					}
 				}), '«input.name»')
 				«ELSEIF input.kind == dummy»
 				this.appendDummyInput('«input.name»')«FOR field : input.fields».appendField(new Blockly.FieldTextInput('«field»'),'«field»')«ENDFOR»
