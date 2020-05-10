@@ -6,7 +6,7 @@ generate m "azpillaga.world/M"
 File: functions+=Function*;
 
 Function:
-	name=ID
+	name=(ID|OPERATOR)
 	'(' (parameters+=Value (',' parameters+=Value)*)? ')'
 	'{' statements+=Statement* (':' result=Binary)?	'}';
 
