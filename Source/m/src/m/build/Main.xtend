@@ -57,8 +57,10 @@ class Main
 		println("Done.")
 		
 		blocks()
-		
 		println("Blocks too.")
+		
+		write(get(parent.toString, "Theia", "mkdocs.yml"), mkdocs.toString.bytes)
+		execute("mkdocs build", "../Theia")
 	}
 	
 	private static def workflow(String[] grammars)
@@ -276,6 +278,12 @@ class Main
 		  	"build":
 		  	{
 		  		"appId": "azpillaga.world.m-theia",
+		  		"productName": "m",
+		  		"linux":
+		  		{
+		  			"target": "AppImage",
+		  			"executableName": "m"
+		  		},
 		  		"extraFiles": [ "ls.jar" ]
 		  	}
 		}'''
@@ -400,7 +408,7 @@ class Main
 		        this.title.label = 'Documentation';
 		        this.title.caption = 'Documentation for M';
 		        this.title.closable = true;
-		        this.node.innerHTML = `<object type="text/html" data="../Blockly/index.html" style="width:100%;height:100%"/>`
+		        this.node.innerHTML = `<object type="text/html" data="../Documentation/index.html" style="width:100%;height:100%"/>`
 		    }
 		}
 		
@@ -456,7 +464,7 @@ class Main
 		        this.title.label = 'Blocks';
 		        this.title.caption = 'Blocks for M';
 		        this.title.closable = true;
-		        this.node.innerHTML = `<object type="text/html" data="../../Blockly/index.html" style="width:100%;height:100%"/>`
+		        this.node.innerHTML = `<object type="text/html" data="../Blockly/index.html" style="width:100%;height:100%"/>`
 		    }
 		}
 		
@@ -845,6 +853,15 @@ class Main
 		{
 			return "["+list.map["'"+it.name+"'"].join(",")+"]"
 		}
+	}
+	
+	private static def mkdocs()
+	{
+		'''
+		site_name: M
+		docs_dir: ../../Documentation
+		site_dir: Documentation
+		'''
 	}
 }
 
