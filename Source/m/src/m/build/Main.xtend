@@ -9,6 +9,12 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.File
 import java.nio.file.StandardCopyOption
+import org.eclipse.emf.ecore.EClass
+import org.eclipse.emf.ecore.EAttribute
+import org.eclipse.emf.ecore.EReference
+import java.util.HashMap
+import m.m.MPackage
+import static m.build.FeatureKind.*
 
 class Main
 {
@@ -50,6 +56,10 @@ class Main
 		copy(get(parent.toString,"build","libs","Source-ls-ls.jar"),get(parent.toString,"Theia","ls.jar"),StandardCopyOption.REPLACE_EXISTING)
 		
 		println("Done.")
+		
+		blocks()
+		
+		println("Blocks too.")
 	}
 	
 	private static def workflow(String[] grammars)
@@ -260,8 +270,8 @@ class Main
 		  	"theia": {
 		    	"target": "electron"
 		  	},
-		  	"scripts": {
-		  		"java": "yarn && theia rebuild:electron && theia build --mode development",
+		  	"scripts":
+		  	{
 		    	"update": "yarn && theia rebuild:electron && cd m && tsc && cd .. && yarn add ./m && theia build --mode development && theia start"
 		  	}
 		}'''
@@ -319,8 +329,8 @@ class Main
 	private static def frontend()
 	{
 		'''
-		import {ContainerModule, inject, injectable} from 'inversify'
-		import {CommandContribution, CommandRegistry, MessageService, MenuContribution, MenuModelRegistry} from '@theia/core'
+		import {ContainerModule, injectable} from 'inversify'
+		import {CommandRegistry, MenuModelRegistry} from '@theia/core'
 		import { AbstractViewContribution, CommonMenus, bindViewContribution, FrontendApplicationContribution, WidgetFactory, BaseWidget } from '@theia/core/lib/browser';
 		import { LanguageClientContribution, BaseLanguageClientContribution } from '@theia/languages/lib/browser'
 		/// <reference types='@typefox/monaco-editor-core/monaco'/>
@@ -328,18 +338,23 @@ class Main
 		
 		export default new ContainerModule(bind=>
 		{
-		    bind(CommandContribution).to(FirstCommand);
-		    bind(MenuContribution).to(HelloWorldMenuContribution);
+		    bind(LanguageClientContribution).to(MClient);
 		
-		    bindViewContribution(bind, WidgetContribution);
-		    bind(FrontendApplicationContribution).toService(WidgetContribution);
+		    bindViewContribution(bind, DocumentationWidgetContribution);
+		    bind(FrontendApplicationContribution).toService(DocumentationWidgetContribution);
 		    bind(DocumentationWidget).toSelf();
 		    bind(WidgetFactory).toDynamicValue(ctx => ({
 		        id: DocumentationWidget.ID,
 		        createWidget: () => ctx.container.get<DocumentationWidget>(DocumentationWidget)
 		    })).inSingletonScope();
 		
-		    bind(LanguageClientContribution).to(MClient)
+		    bindViewContribution(bind, BlocksWidgetContribution);
+		    bind(FrontendApplicationContribution).toService(BlocksWidgetContribution);
+		    bind(BlocksWidget).toSelf();
+		    bind(WidgetFactory).toDynamicValue(ctx => ({
+		        id: BlocksWidget.ID,
+		        createWidget: () => ctx.container.get<BlocksWidget>(BlocksWidget)
+		    })).inSingletonScope();
 		});
 		
 		@injectable()
@@ -353,6 +368,21 @@ class Main
 		        return ['**/*.m']
 		    }
 		}
+		
+		registerM();
+		
+		export function registerM()
+		{
+		    monaco.languages.register
+		    ({
+		        id: 'mserver',
+		        aliases: ['mserver'],
+		        extensions: ['.m'],
+		        mimetypes: ['text/m']
+		    })
+		}
+		
+		
 		
 		@injectable()
 		class DocumentationWidget extends BaseWidget
@@ -375,9 +405,8 @@ class Main
 		    id: 'documentation.command',
 		    label: 'Documentation'
 		}
-		console.log("Container ok");
 		
-		class WidgetContribution extends AbstractViewContribution<DocumentationWidget>
+		class DocumentationWidgetContribution extends AbstractViewContribution<DocumentationWidget>
 		{
 		    constructor()
 		    {
@@ -409,58 +438,61 @@ class Main
 		    }
 		}
 		
-		console.log("Widget contribution ok");
 		
-		
-		
-		export const HelloWorldCommand = {
-		    id: 'HelloWorld.command',
-		    label: "Say hello to me",
-		    text: "Hello Martin!"
-		};
 		
 		@injectable()
-		export class FirstCommand implements CommandContribution {
+		class BlocksWidget extends BaseWidget
+		{
+		    static ID = 'blocks-widget'
 		
-		    constructor(
-		        @inject(MessageService) private readonly messageService: MessageService,
-		    ) { }
+		    constructor()
+		    {
+		        super();
+		        this.id = BlocksWidget.ID;
+		        this.title.label = 'Blocks';
+		        this.title.caption = 'Blocks for M';
+		        this.title.closable = true;
+		        this.node.innerHTML = `<object type="text/html" data="../../Blockly/index.html" style="width:100%;height:100%"/>`
+		    }
+		}
 		
-		    registerCommands(registry: CommandRegistry): void {
-		        registry.registerCommand(HelloWorldCommand, {
-		            execute: () => this.messageService.info(HelloWorldCommand.text)
+		export const BlocksWidgetCommand =
+		{
+		    id: 'blocks.command',
+		    label: 'Blocks'
+		}
+		
+		class BlocksWidgetContribution extends AbstractViewContribution<BlocksWidget>
+		{
+		    constructor()
+		    {
+		        super(
+		        {
+		            widgetId: BlocksWidget.ID,
+		            widgetName: "Blocks Widget",
+		            defaultWidgetOptions: {area: 'left'},
+		            toggleCommandId: 'fileNavigator:toggle',
+		            toggleKeybinding: 'ctrlcmd+shift+1'
+		        })
+		    }
+		
+		    registerCommands(commands: CommandRegistry)
+		    {
+		        commands.registerCommand(BlocksWidgetCommand,
+		        {
+		            execute: () => super.openView({activate: false, reveal: true})
+		        })
+		    }
+		
+		    registerMenus(registry: MenuModelRegistry)
+		    {
+		        registry.registerMenuAction(CommonMenus.VIEW, {
+		            commandId: BlocksWidgetCommand.id,
+		            label: BlocksWidgetCommand.label
 		        });
+		        super.registerMenus(registry)
 		    }
 		}
-		
-		@injectable()
-		export class HelloWorldMenuContribution implements MenuContribution {
-		
-		    registerMenus(menus: MenuModelRegistry): void {
-		        menus.registerMenuAction(CommonMenus.EDIT_FIND, {
-		                commandId: HelloWorldCommand.id,
-		                label: HelloWorldCommand.label
-		            });
-		    }
-		}
-		
-		
-		console.log("Hello command contribution ok");
-		
-		// register language with monaco on first load
-		registerM();
-		
-		export function registerM() {
-		    // initialize monaco
-		    monaco.languages.register({
-		        id: 'mserver',
-		        aliases: ['mserver'],
-		        extensions: ['.m'],
-		        mimetypes: ['text/m']
-		    })
-		}
-		
-		console.log("monaco ok")
 		'''
 	}
 	
@@ -472,8 +504,6 @@ class Main
 		import { createSocketConnection } from 'vscode-ws-jsonrpc/lib/server'
 		import * as path from 'path';
 		import * as net from 'net'
-		
-		console.log("I am backend")
 		
 		export default new ContainerModule(bind =>
 		{
@@ -509,7 +539,7 @@ class Main
 		    }
 		}
 		
-		function getPort(): number | undefined
+		function getPort()
 		{
 		    let arg = process.argv.filter(arg => arg.startsWith('--LSP_PORT='))[0]
 		    if (!arg) {
@@ -534,4 +564,315 @@ class Main
 	 	asar: false
 	 	'''
 	 }
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	static var categories = new ArrayList<Category>
+	static var left = new HashMap<EClass,Boolean>
+	
+	private def static void blocks()
+	{
+		categories.add(new Category=>[name="Root"])
+		
+		var model = MPackage.eINSTANCE;
+		
+		for (eclass : model.EClassifiers.filter(EClass))
+		{
+			if (eclass.EStructuralFeatures.filter(EReference).exists[containment])
+			{
+				eclass.analyze
+			}
+			else if (eclass.EAllSuperTypes.exists[name.equals("Expression")])
+			{
+				eclass.analyze
+			}
+		}
+		
+		for (var i = 0; i < categories.size; i++)
+		{
+			var category = categories.get(i)
+			category.color = 100+50*i
+			
+			for (var b = 0; b < category.blocks.size; b++)
+			{
+				val block = category.blocks.get(b)
+				var superTypes = new ArrayList<EClass>(block.type.EAllSuperTypes)
+				superTypes.add(block.type)
+				var subTypes = block.type.EPackage.eAllContents.filter(EClass).filter[it.EAllSuperTypes.contains(block.type)].toList
+				subTypes.add(block.type)
+				
+				if (superTypes.exists[left.containsKey(it) && left.get(it)])
+				{
+					block.leftConnection.addAll(block.type)
+				}
+				else if (superTypes.exists[left.containsKey(it)])
+				{
+					block.topConnection.addAll(block.type)
+					if (block.type.ESuperTypes.empty)
+					{
+						block.bottomConnection.add(block.type)
+					}
+					else
+					{
+						val superType = block.type.ESuperTypes.head
+						var superSub = model.eAllContents.filter(EClass).filter[it.EAllSuperTypes.contains(superType)].toList
+						superSub.add(block.type)
+						block.bottomConnection.addAll(superSub)
+					}
+				}
+				
+				for (input : block.inputs)
+				{
+					if (input.kind == multiple)
+					{
+						var left = input.types.exists[left.containsKey(it) && left.get(it)]
+						if (left)
+						{
+							input.kind = mutation
+						}
+					}
+				}
+			}
+		}
+		var destination = get("../Theia/Blockly/custom2.js")
+		createDirectories(destination.parent)
+		write(destination, categories.print.toString.bytes);
+		write(get(destination.parent.toString, "index.html"), index.toString.bytes)
+		Main.execute("wget https://raw.githubusercontent.com/google/blockly/master/blockly_compressed.js --output-document ../Theia/Blockly/blockly.js", ".")
+	}
+	
+	private def static analyze(EClass eclass)
+	{
+		var block = new Block=>[name=eclass.name type=eclass]
+		
+		var fields = new ArrayList<String>
+		for (feature : eclass.EStructuralFeatures)
+		{
+			if (feature instanceof EAttribute)
+			{
+				fields.add(feature.name)
+			}
+			else if (feature instanceof EReference)
+			{
+				if (feature.containment)
+				{
+					val type = feature.EType as EClass
+					var subTypes = eclass.EPackage.eAllContents.filter(EClass).filter[it.EAllSuperTypes.contains(type)].toList
+					subTypes.add(type)
+					
+					var Input input = new Input=>[name=feature.name]
+					if (feature.upperBound == 1)
+					{
+						input.kind = single
+						for (subType : subTypes)
+						{
+							left.put(subType, true)
+						}
+					}
+					else
+					{
+						input.kind = multiple
+						for (subType : subTypes)
+						{
+							if (!left.containsKey(subType))
+							{
+								left.put(subType, false)
+							}
+						}
+						
+					}
+					input.types.addAll(subTypes)
+					input.fields.addAll(fields)
+					block.inputs.add(input)
+					fields = new ArrayList<String>
+				}
+			}
+		}
+		
+		if (!fields.empty)
+		{
+			var input = new Input=>[kind=dummy]
+			input.fields.addAll(fields)
+			block.inputs.add(input)
+		}
+		
+		var superTypes = eclass.ESuperTypes
+		if (superTypes.empty)
+		{
+			categories.findFirst[name=="Root"].blocks.add(block)
+		}
+		else if (superTypes.size == 1)
+		{
+			val superType = superTypes.head.name
+			var category = categories.findFirst[name==superType]
+			if (category === null)
+			{
+				category = new Category=>[name=superType]
+				categories.add(category)
+			}
+			category.blocks.add(block)
+		}
+	}
+	
+	private def static print(List<Category> categories)
+	{
+		'''
+		var toolbox = document.createElement('XML')
+		toolbox.setAttribute('xmlns','https://developers.google.com/blockly/xml')
+		toolbox.innerHTML =
+		`
+		«FOR category : categories»
+		<category name='«category.name»'>
+		«FOR block : category.blocks»
+		<block type='«block.name»'></block>
+		«ENDFOR»
+		</category>
+		«ENDFOR»
+		`
+		Blockly.inject('blocklyDiv', {toolbox: toolbox})
+		
+		«FOR category : categories»
+		«FOR block : category.blocks»
+		Blockly.Blocks['«block.name»'] =
+		{
+			init: function()
+			{
+				«IF !block.topConnection.empty»
+				this.setPreviousStatement(true, «block.topConnection.s»)
+				«ENDIF»
+				«IF !block.bottomConnection.empty»
+				this.setNextStatement(true, «block.bottomConnection.s»)
+				«ENDIF»
+				«IF !block.leftConnection.empty»
+				this.setOutput(true, «block.leftConnection.s»)
+				«ENDIF»
+				«FOR input : block.inputs»
+				«IF input.kind == single»
+				this.appendValueInput('«input.name»').setCheck(«input.types.s»)«FOR field : input.fields».appendField(new Blockly.FieldTextInput('«field»'),'«field»')«ENDFOR»
+				«ELSEIF input.kind == multiple»
+				this.appendStatementInput('«input.name»').setCheck(«input.types.s»)«FOR field : input.fields».appendField(new Blockly.FieldTextInput('«field»'),'«field»')«ENDFOR»
+				«ELSEIF input.kind == mutation»
+				var dummy = this.appendDummyInput('«input.name»')
+				dummy«FOR field : input.fields».appendField(new Blockly.FieldTextInput('«field»'),'«field»')«ENDFOR».appendField(new Blockly.FieldNumber(0,0,null,0, function (value)
+				{
+					this.sourceBlock_?.update(dummy, value)
+				}), '«input.name»')
+				«ELSEIF input.kind == dummy»
+				this.appendDummyInput('«input.name»')«FOR field : input.fields».appendField(new Blockly.FieldTextInput('«field»'),'«field»')«ENDFOR»
+				«ENDIF»
+				«ENDFOR»
+				this.setInputsInline(true)
+				this.setColour(«category.color»)
+			},
+			«IF block.inputs.exists[kind==mutation]»
+			mutationToDom: function ()
+			{
+				var mutation = document.createElement('mutation')
+				«FOR input : block.inputs.filter[kind==mutation]»
+				var «input.name» = this.getFieldValue('«input.name»')
+				mutation.setAttribute('«input.name»', «input.name»)
+				«ENDFOR»
+				return mutation
+			},
+			domToMutation: function (xml)
+			{
+				«FOR input : block.inputs.filter[kind==mutation]»
+				var «input.name» = xml.getAttribute('«input.name»')
+				var input
+				for (var i=0; i<this.inputList.length;i++)
+				{
+					if (this.inputList[i].name === '«input.name»')
+					{
+						input = this.inputList[i]
+					}
+				}
+				this.update(input, «input.name»)
+				«ENDFOR»
+			},
+			update: function (input, value)
+			{
+				value = Number(value)
+				var index = this.inputList.indexOf(input)
+				for (var i=this.inputList.length-1; i > index; i--)
+				{
+					if (this.inputList[i].name.startsWith(input.name))
+					{
+						this.removeInput(this.inputList[i].name)
+					}
+				}
+				«FOR input : block.inputs.filter[kind==mutation]»
+				for (var i=0; i < value; i++)
+				{
+					this.appendValueInput('«input.name»'+i)
+					if (this.inputList.length-1 != index+1)
+					{
+						this.moveNumberedInputBefore(this.inputList.length-1, index+1)
+					}
+				}
+				«ENDFOR»
+			}
+			«ENDIF»
+		}
+		«ENDFOR»
+		«ENDFOR»
+		'''
+	}
+	
+	private static def index()
+	{
+		'''
+		<div id="blocklyDiv"></div>
+		<script src="blockly.js"></script>
+		<script src="custom2.js"></script>
+		'''
+	}
+	
+	private static def s(List<EClass> list)
+	{
+		if (list.empty)
+		{
+			return null
+		}
+		else if (list.size == 1)
+		{
+			return "'"+list.head.name+"'"
+		}
+		else
+		{
+			return "["+list.map["'"+it.name+"'"].join(",")+"]"
+		}
+	}
+}
+
+
+class Category
+{
+	public String name;
+	public int color;
+	public List<Block> blocks = new ArrayList<Block>();
+}
+class Block
+{
+	public EClass type
+	public String name
+	public List<EClass> topConnection = new ArrayList<EClass>
+	public List<EClass> bottomConnection = new ArrayList<EClass>
+	public List<EClass> leftConnection = new ArrayList<EClass>
+	public List<Input> inputs = new ArrayList<Input>()
+}
+		
+class Input
+{
+	public FeatureKind kind;
+	public String name;
+	public List<EClass> types = new ArrayList<EClass>();
+	public List<String> fields = new ArrayList<String>();
+}
+enum FeatureKind
+{
+	single, multiple, mutation, dummy
 }
