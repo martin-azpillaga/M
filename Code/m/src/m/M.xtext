@@ -34,5 +34,5 @@ Cell: entity=ID '.' component=ID;
 
 terminal WS: ' '|'\n'|'\t'|'\r';
 terminal ID: LETTER+;
-terminal OPERATOR: '+'|'-'|'*'|'/';
+terminal OPERATOR: '+'|'-'|'*'|'/'|'\u1f111';
 terminal fragment LETTER: 'a'..'z'|'A'..'Z';

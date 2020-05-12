@@ -52,7 +52,7 @@ class Main
 		write(get(extensionFolder,"backend.ts"),backend.toString.bytes)
 		write(get(extensionFolder,"monaco.d.ts"),monaco.toString.bytes)
 		
-		copy(get(parent.toString,"build","libs","Source-ls-ls.jar"),get(parent.toString,"Theia","ls.jar"),StandardCopyOption.REPLACE_EXISTING)
+		copy(get(parent.toString,"build","libs","Code-ls-ls.jar"),get(parent.toString,"Theia","ls.jar"),StandardCopyOption.REPLACE_EXISTING)
 		
 		println("Done.")
 		
