@@ -20,7 +20,7 @@ class ExponentType extends Type
 	public Type right
 }
 
-class TypeFunction
+class TypeFunction extends Type
 {
 	
 }

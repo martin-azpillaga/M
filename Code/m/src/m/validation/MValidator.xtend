@@ -162,7 +162,7 @@ class MValidator extends AbstractMValidator
 						«library.errors.get(incompatible)»
 						«entry.groupingReasons.join(', ')»
 						«FOR type : entry.types»
-						«library.types.get(type.type)»: «library.typingReason.get(type.reason)»
+						«library.name(type.type)»: «library.typingReason.get(type.reason)»
 						«ENDFOR»
 						'''
 						if (entry.types.empty)
