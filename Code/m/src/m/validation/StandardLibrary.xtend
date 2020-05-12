@@ -22,7 +22,6 @@ class StandardLibrary
 	public static val imageType = new Type
 	public static val clip = new Type
 	public static val list = new TypeFunction
-	public static val component = new TypeFunction
 	
 	public static val number2 = new ProductType=>[left = number right=number]
 	public static val number3 = new ProductType=>[left=number2 right=number]
@@ -246,7 +245,17 @@ class StandardLibrary
 		types = #
 		{
 			number -> 'number',
-			proposition -> 'proposition'
+			proposition -> 'proposition',
+			any -> 'any',
+			unit -> 'unit',
+			entity -> 'entity',
+			meshType -> 'mesh',
+			materialType -> 'material',
+			fontType -> 'font',
+			textType -> 'text',
+			imageType -> 'image',
+			clip -> 'audio clip',
+			list -> 'list'
 		}
 		typingReason = #
 		{
@@ -256,15 +265,27 @@ class StandardLibrary
 		}
 	]
 	
-	def type(Type type)
+	def String name(Type type)
 	{
 		if (types.containsKey(type))
 		{
 			return types.get(type)
 		}
-		else
+		else if (type instanceof ProductType)
 		{
-			return type.toString
+			return '''«type.left.name», «type.right.name»'''
+		}
+		else if (type instanceof SumType)
+		{
+			return '''«type.left.name» | «type.right.name»'''
+		}
+		else if (type instanceof ExponentType)
+		{
+			return '''«type.left.name» -> «type.right.name»'''
+		}
+		else if (type instanceof PolymorphicType)
+		{
+			return '''«type.function.name»<«type.type.name»>'''
 		}
 	}
 }
