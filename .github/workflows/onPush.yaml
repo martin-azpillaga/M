@@ -20,4 +20,4 @@ jobs:
         run: find . -name "*.yaml" -exec npx yaml-lint {} +
         continue-on-error: true
       - name: Not linted
-        run: find . -type f -not -name "*.md" -not -name "*.yaml" -exec echo {} \;
+        run: find . -type f -not -name ".git/*" -not -name "*.md" -not -name "*.yaml" -exec echo {} \;
