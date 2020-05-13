@@ -1,18 +1,38 @@
 on: [push, repository_dispatch]
+defaults:
+  run:
+    shell: bash
 jobs:
   lint:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 1
+    timeout-minutes: 10
     continue-on-error: true
     steps:
       - name: Checkout repository files
         uses: actions/checkout@v2
       - name: Markdown
         run: npx markdownlint-cli -i LICENSE.md "**/*.md"
+        continue-on-error: true
       - name: Yaml
         run: find . -name "*.yaml" -exec npx yaml-lint {} +
+        continue-on-error: true
       - name: Not linted
-        run: find . -type f -not -name "*.md" -not -name "*.yaml" -exec echo {} \;
+        run: find . -type f -not -wholename "./.git/*" -not -name "*.md" -not -name "*.yaml" -exec echo {} \;
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    outputs:
+      languageServer: m.jar
+      application: m.appImage
+    steps:
+      - name: Compile Xtend to Java
+        run: |
+          wget azpillaga.world/M-dependencies.zip
+          unzip M-dependencies.zip -d lib
+          java -cp "lib/*" org.eclipse.xtend.core.compiler.batch.Main -useCurrentClassLoader -d xtend-gen Code/m/src/m/build/Main.xtend
