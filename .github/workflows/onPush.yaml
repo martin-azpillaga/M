@@ -31,5 +31,7 @@ jobs:
       languageServer: m.jar
       application: m.appImage
     steps:
+      - name: Checkout repository files
+        uses: actions/checkout@v2
       - name: Build application
         run: gradle run
