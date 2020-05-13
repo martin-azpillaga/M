@@ -5,6 +5,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 1
     continue-on-error: true
     steps:
@@ -12,7 +15,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Markdown
         run: npx markdownlint-cli -i LICENSE.md "**/*.md"
+        continue-on-error: true
       - name: Yaml
         run: find . -name "*.yaml" -exec npx yaml-lint {} +
+        continue-on-error: true
       - name: Not linted
         run: find . -type f -not -name "*.md" -not -name "*.yaml" -exec echo {} \;
