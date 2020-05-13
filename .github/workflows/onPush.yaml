@@ -31,5 +31,8 @@ jobs:
       languageServer: m.jar
       application: m.appImage
     steps:
-      - name: Hello
-        run: echo Hello build
+      - name: Compile Xtend to Java
+        run: |
+          wget azpillaga.world/M-dependencies.zip
+          unzip M-dependencies.zip -d lib
+          java -cp "lib/*" org.eclipse.xtend.core.compiler.batch.Main -useCurrentClassLoader -d xtend-gen Code/m/src/m/build/Main.xtend
