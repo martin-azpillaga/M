@@ -4,17 +4,15 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-      fail-fast: true
     runs-on: ${{ matrix.os }}    
     timeout-minutes: 1
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v2
-      - name: Hello
-        run: echo Hello from ${{ matrix.os }}
+      - name: Checkout repository files
+        uses: actions/checkout@v2
       - name: Markdown
-        run: |
-          for x in *
-          do
-            echo $x
-          done
+        run: npx markdownlint-cli -c .github/workflows/configuration/markdownlint.json -i LICENSE.md "**/*.md"
+      - name: Yaml
+        run: find . -name "*.yaml" -exec npx yaml-lint {} +
+      - name: Others
+        run: find . -type f -not -name "*.md" -not -name "*.yaml" -exec echo Not linted {} \;
