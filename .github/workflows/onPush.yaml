@@ -1,0 +1,14 @@
+on: [push,repository_dispatch]
+jobs:
+  lint:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      fail-fast: true
+    runs-on: ${{ matrix.os }}    
+    timeout-minutes: 1
+    steps:
+      - continue-on-error: true
+      - uses: actions/checkout@v2
+      - name: Hello
+        run: echo Hello from ${{ matrix.os }}
