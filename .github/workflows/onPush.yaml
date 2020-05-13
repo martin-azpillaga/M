@@ -1,18 +1,18 @@
-on: [push,repository_dispatch]
+on: [push, repository_dispatch]
 jobs:
   lint:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}    
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 1
     continue-on-error: true
     steps:
       - name: Checkout repository files
         uses: actions/checkout@v2
       - name: Markdown
-        run: npx markdownlint-cli -c .github/workflows/configuration/markdownlint.json -i LICENSE.md "**/*.md"
+        run: npx markdownlint-cli -i LICENSE.md "**/*.md"
       - name: Yaml
         run: find . -name "*.yaml" -exec npx yaml-lint {} +
-      - name: Others
-        run: find . -type f -not -name "*.md" -not -name "*.yaml" -exec echo Not linted {} \;
+      - name: Not linted
+        run: find . -type f -not -name "*.md" -not -name "*.yaml" -exec echo {} \;
