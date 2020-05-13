@@ -19,6 +19,9 @@ class Main
 		var projectPath = get(arguments.get(0))
 		var parent = projectPath.parent
 		project = projectPath.fileName.toString
+
+		createDirectories(get(projectPath.toString+".ide"))
+		createDirectories(get(projectPath.toString+".ui"))
 		
 		var grammars = walk(projectPath).filter[!toString.contains("/bin/") && toString.endsWith(".xtext")].map[fileName]
 		var gs = new ArrayList<String>
