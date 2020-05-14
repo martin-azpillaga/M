@@ -34,11 +34,6 @@ jobs:
         run: gradle generateXtext
       - name: Test
         run: |
-          cd build
-          cd xtend
-          cd main
-          cd m
-          cd build
-          ls
+          gradle --version
       - name: Run gradle
         run: gradle execute
