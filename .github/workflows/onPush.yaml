@@ -29,4 +29,4 @@ jobs:
       - name: Compile Xtend
         run: gradle generateXtext
       - name: Run gradle
-        run: gradle tasks --all
+        run: gradle runMain
