@@ -53,8 +53,8 @@ class Main
 		
 		println("Language server generated.")
 		
-		write(get(parent.toString, "Theia", "mkdocs.yml"), mkdocs.toString.bytes)
-		execute("mkdocs build", get(parent.toString, "Theia").toString)
+		//write(get(parent.toString, "Theia", "mkdocs.yml"), mkdocs.toString.bytes)
+		//execute("mkdocs build", get(parent.toString, "Theia").toString)
 	}
 	
 	private static def workflow(String[] grammars)
