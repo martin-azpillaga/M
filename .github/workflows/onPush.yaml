@@ -1,3 +1,4 @@
+name: Lint, Build and Test
 on: [push, repository_dispatch]
 defaults:
   run:
@@ -29,9 +30,7 @@ jobs:
           sudo apt install openjdk-11-jdk
           sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
           java -version
-      - name: Install gradle 6.4
-        run: |
-          curl -s "https://get.sdkman.io" | bash
-          source "$HOME/.sdkman/bin/sdkman-init.sh"
-          sdk install gradle 6.4
-          gradle --version
+      - name: Download repository
+        uses: actions/checkout@v2
+      - name: Run gradle
+        run: gradle execute
