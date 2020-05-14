@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     continue-on-error: true
     steps:
       - name: Checkout repository files
@@ -34,7 +34,5 @@ jobs:
         uses: actions/checkout@v2
       - name: Compile Xtend
         run: gradle generateXtext
-      - name: Show tree
-        run: tree
       - name: Run gradle
         run: gradle run
