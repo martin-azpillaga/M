@@ -33,5 +33,9 @@ jobs:
     steps:
       - name: Checkout repository files
         uses: actions/checkout@v2
-      - name: Build application
+      - name: Compile Xtend
+        run: gradle generateXtext
+      - name: Show tree
+        run: tree
+      - name: Run gradle
         run: gradle run
