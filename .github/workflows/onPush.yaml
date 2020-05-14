@@ -24,17 +24,14 @@ jobs:
       languageServer: m.jar
       application: m.appImage
     steps:
-      - name: Download java 11
-        uses: actions/setup-java@v1
-        with:
-          java-version: 11
-      - run: java -version
-      - name: Checkout repository files
-        uses: actions/checkout@v2
-      - name: Compile Xtend
-        run: gradle generateXtext
-      - name: Test
+      - name: Install java 11
         run: |
+          sudo apt install openjdk-11-jdk
+          sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
+          java -version
+      - name: Install gradle 6.4
+        run: |
+          curl -s "https://get.sdkman.io" | bash
+          source "$HOME/.sdkman/bin/sdkman-init.sh"
+          sdk install gradle 6.4
           gradle --version
-      - name: Run gradle
-        run: gradle execute
