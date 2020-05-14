@@ -12,3 +12,8 @@ task runMain(type: JavaExec) {
     classpath = project.configurations.compile
     args "Code/m"
 }
+
+task execute (type: Exec) {
+    dependsOn generateXtext
+    commandLine "java", "-cp", project.configurations.compile.getAsPath(), "build/xtend/main/m/build/Main.java", "Code/m"
+}
