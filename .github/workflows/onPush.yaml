@@ -1,4 +1,3 @@
-name: Lint, Build and Test
 on: [push, repository_dispatch]
 defaults:
   run:
@@ -14,10 +13,10 @@ jobs:
         run: npx markdownlint-cli -i LICENSE.md "**/*.md"
         continue-on-error: true
       - name: Yaml
-        run: find . -name "*.yaml" -exec npx yaml-lint {} +
+        run: |
+          sudo apt install yamllint
+          yamllint .
         continue-on-error: true
-      - name: Not linted
-        run: find . -type f -not -wholename "./.git/*" -not -name "*.md" -not -name "*.yaml" -exec echo {} \;
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -42,6 +41,7 @@ jobs:
       - name: Install electron-builder globally
         run: npm install -g electron-builder
       - name: Create Release
+        id: create_release
         uses: actions/create-release@v1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -64,3 +64,4 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./Code/Theia/dist/m-0.0.0.AppImage
           asset_name: m.AppImage
+          asset_content_type: text/text
