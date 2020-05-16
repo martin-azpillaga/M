@@ -29,8 +29,38 @@ jobs:
         run: |
           sudo apt install openjdk-11-jdk
           sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
-          java -version
       - name: Download repository
         uses: actions/checkout@v2
       - name: Run gradle
         run: gradle execute
+      - name: Install node 10
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - name: Install yarn with node 10
+        run: npm install -g yarn
+      - name: Install electron-builder globally
+        run: npm install -g electron-builder
+      - name: Create Release
+        uses: actions/create-release@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: Tag ${{ github.ref }}
+          release_name: Prerelease ${{ github.ref }}
+          draft: true
+          prerelease: true
+      - name: Build theia
+        working-directory: Code/Theia
+        run: yarn update
+      - name: Package the application
+        working-directory: Code/Theia
+        run: electron-builder .
+      - name: Upload application to release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Code/Theia/dist/m-0.0.0.AppImage
+          asset_name: m.AppImage

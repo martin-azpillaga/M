@@ -6,13 +6,6 @@ dependencies { compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.21.0' }
 
 sourceSets { main.java.srcDirs = ['Code/m/src/m/build']}
 
-task runMain(type: JavaExec) {
-    dependsOn generateXtext
-    main = "build/xtend/main/m/build/Main.java"
-    classpath = project.configurations.compile
-    args "Code/m"
-}
-
 task execute (type: Exec) {
     dependsOn generateXtext
     commandLine "java", "-cp", project.configurations.compile.getAsPath(), "build/xtend/main/m/build/Main.java", "Code/m"
