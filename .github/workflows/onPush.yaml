@@ -9,11 +9,6 @@ jobs:
     steps:
       - name: Checkout repository files
         uses: actions/checkout@v2
-      - name: Java
-        uses: sonarsource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Markdown
         run: npx markdownlint-cli -i LICENSE.md "**/*.md"
         continue-on-error: true
