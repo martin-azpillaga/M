@@ -19,6 +19,27 @@ jobs:
           sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
       - name: Download repository
         uses: actions/checkout@v2
+      - name: Create build.gradle
+        run: >
+          cat >build.gradle <<EOL
+
+          plugins { id "org.xtext.xtend" version "2.0.8" }
+          
+          repositories.jcenter()
+          
+          dependencies { compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.21.0' }
+          
+          sourceSets { main.java.srcDirs = ['Code/m/src/m/build']}
+          
+          task execute (type: Exec) {
+          
+            dependsOn generateXtext
+          
+            commandLine "java", "-cp", project.configurations.compile.getAsPath(), "build/xtend/main/m/build/Main.java", "Code/m"
+          
+          }
+          
+          EOL
       - name: Run gradle
         run: gradle execute
       - name: Install node 10
