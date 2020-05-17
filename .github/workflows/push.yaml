@@ -6,26 +6,24 @@ defaults:
   run:
     shell: bash
 jobs:
-  release:
+  allinone:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    outputs:
-      languageServer: m.jar
-      application: m.appImage
+    timeout-minutes: 15
     steps:
-      - name: Install java 11
+      - name: Download repository
+        uses: actions/checkout@v2
+      - name: Lint Markdown
+        run: npx markdownlint-cli -i LICENSE.md "**/*.md"
+        continue-on-error: true
+      - name: Lint Yaml
+        run: |
+          sudo apt install yamllint
+          yamllint .
+        continue-on-error: true
+      - name: Build Java
         run: |
           sudo apt install openjdk-11-jdk
           sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
-      - name: Install pandoc
-        run: |
-          sudo apt remove pandoc
-          wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
-          sudo dpkg -i pandoc-2.9.1-1-amd64.deb
-      - name: Download repository
-        uses: actions/checkout@v2
-      - name: Create build.gradle
-        run: >
           cat >build.gradle <<EOL
 
           plugins { id "org.xtext.xtend" version "2.0.8" }
@@ -61,25 +59,48 @@ jobs:
           }
           
           EOL
-      - name: Run gradle
-        run: |
           gradle execute
           gradle blockify
-      - name: Pandoc create documentation index
+      - name: Lint generated Java for Xtend linting
         run: |
+          rm build.gradle
+          cat >sonar-project.properties <<EOL
+
+          sonar.organization=martin-azpillaga
+
+          sonar.projectKey=martin-azpillaga_M
+
+          sonar.sources=Code/m/src/m
+          
+          sonar.java.binaries=Code/build/classes/java/main
+          
+          EOL
+      - name: Trigger sonarcloud inspection
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Build Markdown
+        run: |
+          sudo apt remove pandoc
+          wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
+          sudo dpkg -i pandoc-2.9.1-1-amd64.deb
           mkdir Code/Theia/Documentation
           pandoc README.md -o Code/Theia/Documentation/index.html
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
           node-version: '10.x'
-      - name: Install yarn with node 10
-        run: npm install -g yarn
       - name: Build theia
         working-directory: Code/Theia
-        run: yarn update
-      - name: Install electron-builder globally
-        run: npm install -g electron-builder
+        run: |
+          npm install -g yarn
+          yarn update
+      - name: Package application
+        working-directory: Code/Theia
+        run: |
+          npm install -g electron-builder
+          electron-builder .
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.0.0
@@ -90,9 +111,6 @@ jobs:
           release_name: Prerelease ${{ github.ref }}
           draft: true
           prerelease: true
-      - name: Package the application
-        working-directory: Code/Theia
-        run: electron-builder .
       - name: Upload application to release
         uses: actions/upload-release-asset@v1.0.1
         env:
