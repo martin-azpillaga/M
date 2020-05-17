@@ -95,6 +95,11 @@ jobs:
           sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
       - name: Download repository
         uses: actions/checkout@v2
+      - name: Install pandoc
+        run: |
+          sudo apt remove pandoc
+          wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
+          sudo dpkg -i pandoc-2.9.1-1-amd64.deb
       - name: Create build.gradle
         run: >
           cat >build.gradle <<EOL
@@ -136,6 +141,10 @@ jobs:
         run: |
           gradle execute
           gradle blockify
+      - name: Pandoc create documentation index
+        run: |
+          mkdir Code/Theia/Documentation
+          pandoc README.md -o Code/Theia/Documentation/index.html
       - name: Install yarn with node 10
         run: npm install -g yarn
       - name: Build theia
