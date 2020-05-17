@@ -17,19 +17,6 @@ jobs:
           sudo apt install yamllint
           yamllint .
         continue-on-error: true
-  build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    outputs:
-      languageServer: m.jar
-      application: m.appImage
-    steps:
-      - name: Install java 11
-        run: |
-          sudo apt install openjdk-11-jdk
-          sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
-      - name: Download repository
-        uses: actions/checkout@v2
       - name: Create build.gradle
         run: >
           cat >build.gradle <<EOL
@@ -95,6 +82,60 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '10.x'
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      languageServer: m.jar
+      application: m.appImage
+    steps:
+      - name: Install java 11
+        run: |
+          sudo apt install openjdk-11-jdk
+          sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
+      - name: Download repository
+        uses: actions/checkout@v2
+      - name: Create build.gradle
+        run: >
+          cat >build.gradle <<EOL
+
+          plugins { id "org.xtext.xtend" version "2.0.8" }
+
+          repositories { mavenCentral() }
+
+          dependencies {
+
+              compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.21.0'
+
+              compile 'org.eclipse.emf:org.eclipse.emf.ecore:2.12.0'
+
+              compile 'org.eclipse.emf:org.eclipse.emf.common:2.18.0'
+
+          }
+
+          sourceSets { main.java.srcDirs = ['Code/m/src/m/build'] }
+
+          task execute (type: Exec) {
+
+              dependsOn generateXtext
+
+              commandLine "java", "-cp", project.configurations.compile.getAsPath(), "build/xtend/main/m/build/Main.java", "Code/m"
+
+          }
+
+          task blockify (type: Exec) {
+
+              dependsOn execute
+
+              commandLine "java", "-cp", project.configurations.compile.getAsPath()+":Code/build/classes/java/main", "m.extra.Blockify", "Code/m"
+
+          }
+          
+          EOL
+      - name: Run gradle
+        run: |
+          gradle execute
+          gradle blockify
       - name: Install yarn with node 10
         run: npm install -g yarn
       - name: Build theia
