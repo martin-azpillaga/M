@@ -60,26 +60,6 @@ jobs:
         run: |
           gradle execute
           gradle blockify
-      - name: Remove gradle file for sonar
-        run: rm build.gradle
-      - name: Create sonar configuration
-        run: >
-          cat >sonar-project.properties <<EOL
-
-          sonar.organization=martin-azpillaga
-
-          sonar.projectKey=martin-azpillaga_M
-
-          sonar.sources=Code/m/src/m
-          
-          sonar.java.binaries=Code/build/classes/java/main
-          
-          EOL
-      - name: Sonarcloud after xtend
-        uses: sonarsource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
