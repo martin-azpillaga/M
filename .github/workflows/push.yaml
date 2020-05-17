@@ -11,45 +11,35 @@ jobs:
       - name: Lint Yaml
         run: |
           sudo apt install yamllint
-          yamllint .
+          yamllint -d relaxed .
       - name: Build Java
         run: |
           sudo apt install openjdk-11-jdk
           sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
           cat >build.gradle <<EOL
-
           plugins { id "org.xtext.xtend" version "2.0.8" }
-
           repositories { mavenCentral() }
-
           dependencies {
-
               compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.21.0'
-
               compile 'org.eclipse.emf:org.eclipse.emf.ecore:2.12.0'
-
               compile 'org.eclipse.emf:org.eclipse.emf.common:2.18.0'
-
           }
-
           sourceSets { main.java.srcDirs = ['Code/m/src/m/build'] }
-
           task execute (type: Exec) {
-
               dependsOn generateXtext
-
-              commandLine "java", "-cp", project.configurations.compile.getAsPath(), "build/xtend/main/m/build/Main.java", "Code/m"
-
+              commandLine "java", "-cp",
+              project.configurations.compile.getAsPath(),
+              "build/xtend/main/m/build/Main.java",
+              "Code/m"
           }
-
           task blockify (type: Exec) {
-
               dependsOn execute
-
-              commandLine "java", "-cp", project.configurations.compile.getAsPath()+":Code/build/classes/java/main", "m.extra.Blockify", "Code/m"
-
+              commandLine "java", "-cp",
+              project.configurations.compile.getAsPath()+
+              ":Code/build/classes/java/main",
+              "m.extra.Blockify",
+              "Code/m"
           }
-          
           EOL
           gradle execute
           gradle blockify
@@ -57,15 +47,10 @@ jobs:
         run: |
           rm build.gradle
           cat >sonar-project.properties <<EOL
-
           sonar.organization=martin-azpillaga
-
           sonar.projectKey=martin-azpillaga_M
-
           sonar.sources=Code/xtend-gen/m
-          
           sonar.java.binaries=Code/build/classes/java/main
-          
           EOL
       - name: Trigger sonarcloud inspection
         uses: sonarsource/sonarcloud-github-action@master
