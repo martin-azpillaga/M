@@ -24,30 +24,71 @@ jobs:
           cat >build.gradle <<EOL
 
           plugins { id "org.xtext.xtend" version "2.0.8" }
-          
-          repositories.jcenter()
-          
-          dependencies { compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.21.0' }
-          
-          sourceSets { main.java.srcDirs = ['Code/m/src/m/build']}
-          
+
+          repositories { mavenCentral() }
+
+          dependencies {
+
+              compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.21.0'
+
+              compile 'org.eclipse.emf:org.eclipse.emf.ecore:2.12.0'
+
+              compile 'org.eclipse.emf:org.eclipse.emf.common:2.18.0'
+
+          }
+
+          sourceSets { main.java.srcDirs = ['Code/m/src/m/build'] }
+
           task execute (type: Exec) {
-          
-            dependsOn generateXtext
-          
-            commandLine "java", "-cp", project.configurations.compile.getAsPath(), "build/xtend/main/m/build/Main.java", "Code/m"
-          
+
+              dependsOn generateXtext
+
+              commandLine "java", "-cp", project.configurations.compile.getAsPath(), "build/xtend/main/m/build/Main.java", "Code/m"
+
+          }
+
+          task blockify (type: Exec) {
+
+              dependsOn execute
+
+              commandLine "java", "-cp", project.configurations.compile.getAsPath()+":Code/build/classes/java/main", "m.extra.Blockify", "Code/m"
+
           }
           
           EOL
       - name: Run gradle
-        run: gradle execute
+        run: |
+          gradle execute
+          gradle blockify
+      - name: Remove gradle file for sonar
+        run: rm build.gradle
+      - name: Create sonar configuration
+        run: >
+          cat >sonar-project.properties <<EOL
+
+          sonar.organization=martin-azpillaga
+
+          sonar.projectKey=martin-azpillaga_M
+
+          sonar.sources=Code/m/src/m
+          
+          sonar.java.binaries=Code/build/classes/java/main
+          
+          EOL
+      - name: Sonarcloud after xtend
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
           node-version: '10.x'
       - name: Install yarn with node 10
         run: npm install -g yarn
+      - name: Build theia
+        working-directory: Code/Theia
+        run: yarn update
       - name: Install electron-builder globally
         run: npm install -g electron-builder
       - name: Create Release
@@ -60,9 +101,6 @@ jobs:
           release_name: Prerelease ${{ github.ref }}
           draft: true
           prerelease: true
-      - name: Build theia
-        working-directory: Code/Theia
-        run: yarn update
       - name: Package the application
         working-directory: Code/Theia
         run: electron-builder .
