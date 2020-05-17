@@ -52,9 +52,6 @@ class Main
 		copy(get(parent.toString,"build","libs","Code-ls-ls.jar"),get(parent.toString,"Theia","ls.jar"),StandardCopyOption.REPLACE_EXISTING)
 		
 		println("Language server generated.")
-		
-		//write(get(parent.toString, "Theia", "mkdocs.yml"), mkdocs.toString.bytes)
-		//execute("mkdocs build", get(parent.toString, "Theia").toString)
 	}
 	
 	private static def workflow(String[] grammars)
@@ -561,23 +558,6 @@ class Main
 	{
 		'''
 		/// <reference types='@typefox/monaco-editor-core/monaco'/>
-		'''
-	}
-	 
-	 
-	 
-	 
-	 
-	 
-	 
-	
-	
-	private static def mkdocs()
-	{
-		'''
-		site_name: M
-		docs_dir: ../../Documentation
-		site_dir: Documentation
 		'''
 	}
 }

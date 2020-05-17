@@ -11,6 +11,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - name: Download repository
+        if: ${{ github.event_name == 'push' && github.event.branches == 'unassigned' }}
         uses: actions/checkout@v2
       - name: Lint Markdown
         run: npx markdownlint-cli -i LICENSE.md "**/*.md"
@@ -70,7 +71,7 @@ jobs:
 
           sonar.projectKey=martin-azpillaga_M
 
-          sonar.sources=Code/m/src/m
+          sonar.sources=Code/xtend-gen/m
           
           sonar.java.binaries=Code/build/classes/java/main
           
