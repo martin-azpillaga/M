@@ -81,7 +81,7 @@ jobs:
 
           sonar.projectKey=martin-azpillaga_M
 
-          sonar.sources=.
+          sonar.sources=Code/m/src/m
           
           sonar.java.binaries=Code/build/classes/java/main
           
