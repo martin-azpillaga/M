@@ -15,8 +15,9 @@ class Blockify {
 	static var categories = new ArrayList<Category>
 	static var left = new HashMap<EClass,Boolean>
 	
-	private def static void blocks()
+	def static void main(String[] arguments)
 	{
+		var projectPath = arguments.get(0)
 		categories.add(new Category=>[name="Root"])
 		
 		var model = MPackage.eINSTANCE;
@@ -79,11 +80,11 @@ class Blockify {
 				}
 			}
 		}
-		var destination = get("../Theia/Blockly/custom2.js")
+		var destination = get(projectPath,"..","Theia","Blockly", "custom2.js")
 		createDirectories(destination.parent)
 		write(destination, categories.print.toString.bytes);
 		write(get(destination.parent.toString, "index.html"), index.toString.bytes)
-		m.build.Main.execute("wget https://raw.githubusercontent.com/google/blockly/master/blockly_compressed.js --output-document ../Theia/Blockly/blockly.js", ".")
+		m.build.Main.execute("wget https://raw.githubusercontent.com/google/blockly/master/blockly_compressed.js --output-document ../Theia/Blockly/blockly.js", projectPath)
 	}
 	
 	private def static analyze(EClass eclass)
