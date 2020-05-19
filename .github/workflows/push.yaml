@@ -63,7 +63,7 @@ jobs:
           wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
           sudo dpkg -i pandoc-2.9.1-1-amd64.deb
           mkdir Code/Theia/Documentation
-          pandoc README.md -o Code/Theia/Documentation/index.html
+          pandoc README.md --template custom.html -o Code/Theia/Documentation/index.html
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
