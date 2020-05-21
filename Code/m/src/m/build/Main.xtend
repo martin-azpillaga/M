@@ -399,7 +399,7 @@ class Main
 		        this.title.label = 'Documentation';
 		        this.title.caption = 'Documentation for M';
 		        this.title.closable = true;
-		        this.node.innerHTML = `<object type="text/html" data="../Documentation/index.html" style="width:100%;height:100%"/>`
+		        this.node.innerHTML = `<object type="text/html" data="../Documentation/README.html" style="width:100%;height:100%"/>`
 		    }
 		}
 		
