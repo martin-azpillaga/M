@@ -19,6 +19,25 @@ class Main
 		var projectPath = get(arguments.get(0))
 		var parent = projectPath.parent
 		project = projectPath.fileName.toString
+		
+		walk(get(parent.toString,"..","Documentation")).filter[toString.endsWith('.md')].forEach
+		[
+			var relative = it.toString.replace("../../Documentation/","")
+			for (n : #[0,1,2,3,4,5,6,7,8,9])
+			{
+				relative = relative.replace(n+". ", "")
+			}
+			relative = relative.replace(".md","")
+			println(relative)
+		]
+		
+		println('''
+		«FOR f : new File("../../Documentation").listFiles»
+		<ul>«f»</ul>
+		«ENDFOR»
+		''')
+		
+		/*
 
 		createDirectories(get(projectPath.toString+".ide"))
 		createDirectories(get(projectPath.toString+".ui"))
@@ -53,6 +72,7 @@ class Main
 		
 		println("Language server generated.")
 		
+		*/
 		write(get(parent.toString,"Theia","template.html"),htmlTemplate.toString.bytes)
 	}
 	
