@@ -20,25 +20,6 @@ class Main
 		var parent = projectPath.parent
 		project = projectPath.fileName.toString
 		
-		walk(get(parent.toString,"..","Documentation")).filter[toString.endsWith('.md')].forEach
-		[
-			var relative = it.toString.replace("../../Documentation/","")
-			for (n : #[0,1,2,3,4,5,6,7,8,9])
-			{
-				relative = relative.replace(n+". ", "")
-			}
-			relative = relative.replace(".md","")
-			println(relative)
-		]
-		
-		println('''
-		«FOR f : new File("../../Documentation").listFiles»
-		<ul>«f»</ul>
-		«ENDFOR»
-		''')
-		
-		/*
-
 		createDirectories(get(projectPath.toString+".ide"))
 		createDirectories(get(projectPath.toString+".ui"))
 		
@@ -72,8 +53,7 @@ class Main
 		
 		println("Language server generated.")
 		
-		*/
-		write(get(parent.toString,"Theia","template.html"),htmlTemplate.toString.bytes)
+		write(get(parent.toString,"Theia","template.html"),htmlTemplate(get(parent.toString,"..","Documentation").toString).toString.bytes)
 	}
 	
 	private static def workflow(String[] grammars)
@@ -583,7 +563,33 @@ class Main
 		'''
 	}
 	
-	private static def htmlTemplate()
+	private static def normalize(File file, String root)
+	{
+		var path = file.name.replace(root+"/","")
+		for (n : #[0,1,2,3,4,5,6,7,8,9])
+		{
+			path = path.replace(n+". ", "")
+		}
+		return path
+	}
+	
+	private static def String convert(File file, String root)
+	{
+		'''
+		«IF !file.listFiles.empty»
+		<ul>
+		«FOR f : file.listFiles.map[toString].sort»
+		  <li>
+		    <a href="#">«new File(f).normalize(root)»</a>
+		    «IF new File(f).isDirectory»
+		    «convert(new File(f),root)»
+		    «ENDIF»
+		  </li>
+		«ENDFOR»
+		</ul>
+		«ENDIF»'''
+	}
+	private static def htmlTemplate(String root)
 	{
 		'''
 		<!DOCTYPE html>
@@ -594,12 +600,7 @@ class Main
 		</head>
 		<body>
 		  <nav>
-		    <label class="logo">M</label>
-		    <ul>
-		      <li><a href="#">Begginer Guide</a></li>
-		      <li><a href="#">User Guide</a></li>
-		      <li><a href="#">Developer Guide</a></li>
-		    </ul>
+		  	«new File(root).convert(root)»
 		  </nav>
 		$for(include-before)$
 		$include-before$
