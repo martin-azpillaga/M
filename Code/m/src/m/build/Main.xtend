@@ -16,9 +16,11 @@ class Main
 	
 	def static void main(String[] arguments)
 	{
+		
 		var projectPath = get(arguments.get(0))
 		var parent = projectPath.parent
 		project = projectPath.fileName.toString
+		
 		
 		createDirectories(get(projectPath.toString+".ide"))
 		createDirectories(get(projectPath.toString+".ui"))
@@ -565,7 +567,7 @@ class Main
 	
 	private static def normalize(File file, String root)
 	{
-		var path = file.name.replace(root+"/","")
+		var path = file.name.replace(root,"")
 		for (n : #[0,1,2,3,4,5,6,7,8,9])
 		{
 			path = path.replace(n+". ", "")
@@ -573,16 +575,18 @@ class Main
 		return path
 	}
 	
-	private static def String convert(File file, String root)
+	private static def String convert(File file, String root, String folder)
 	{
 		'''
 		«IF !file.listFiles.empty»
 		<ul>
 		«FOR f : file.listFiles.map[toString].sort»
 		  <li>
-		    <a href="#">«new File(f).normalize(root)»</a>
 		    «IF new File(f).isDirectory»
-		    «convert(new File(f),root)»
+		    <a href="#">«new File(f).normalize(root)»</a>
+		    «convert(new File(f),root, f.replace(root,"")+"/")»
+		    «ELSE»
+		    <a href="«f.replace(root,"").replace(".md",".html")»">«new File(f).normalize(root)»</a>
 		    «ENDIF»
 		  </li>
 		«ENDFOR»
@@ -600,7 +604,7 @@ class Main
 		</head>
 		<body>
 		  <nav>
-		  	«new File(root).convert(root)»
+		  	«new File(root).convert(root+"/","")»
 		  </nav>
 		$for(include-before)$
 		$include-before$
