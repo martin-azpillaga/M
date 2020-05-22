@@ -16,10 +16,12 @@ class Main
 	
 	def static void main(String[] arguments)
 	{
+		
 		var projectPath = get(arguments.get(0))
 		var parent = projectPath.parent
 		project = projectPath.fileName.toString
-
+		
+		
 		createDirectories(get(projectPath.toString+".ide"))
 		createDirectories(get(projectPath.toString+".ui"))
 		
@@ -52,6 +54,8 @@ class Main
 		copy(get(parent.toString,"build","libs","Code-ls-ls.jar"),get(parent.toString,"Theia","ls.jar"),StandardCopyOption.REPLACE_EXISTING)
 		
 		println("Language server generated.")
+		
+		write(get(parent.toString,"Theia","template.html"),htmlTemplate(get(parent.toString,"..","Documentation").toString).toString.bytes)
 	}
 	
 	private static def workflow(String[] grammars)
@@ -558,6 +562,81 @@ class Main
 	{
 		'''
 		/// <reference types='@typefox/monaco-editor-core/monaco'/>
+		'''
+	}
+	
+	private static def normalize(File file, String root)
+	{
+		var path = file.name.replace(root,"")
+		for (n : #[0,1,2,3,4,5,6,7,8,9])
+		{
+			path = path.replace(n+". ", "")
+		}
+		return path
+	}
+	
+	private static def String convert(File file, String root, String folder)
+	{
+		'''
+		«IF !file.listFiles.empty»
+		<ul>
+		«FOR f : file.listFiles.map[toString].sort»
+		  <li>
+		    «IF new File(f).isDirectory»
+		    <a href="#">«new File(f).normalize(root)»</a>
+		    «convert(new File(f),root, f.replace(root,"")+"/")»
+		    «ELSE»
+		    <a href="«f.replace(root,"").replace(".md",".html")»">«new File(f).normalize(root)»</a>
+		    «ENDIF»
+		  </li>
+		«ENDFOR»
+		</ul>
+		«ENDIF»'''
+	}
+	private static def htmlTemplate(String root)
+	{
+		'''
+		<!DOCTYPE html>
+		<html xmlns="http://www.w3.org/1999/xhtml">
+		<head>
+		  <link rel="stylesheet" href="main.css">
+		  <title>M Documentation</title>
+		</head>
+		<body>
+		  <nav>
+		  	«new File(root).convert(root+"/","")»
+		  </nav>
+		$for(include-before)$
+		$include-before$
+		$endfor$
+		$if(title)$
+		<header id="title-block-header">
+		<h1 class="title">$title$</h1>
+		$if(subtitle)$
+		<p class="subtitle">$subtitle$</p>
+		$endif$
+		$for(author)$
+		<p class="author">$author$</p>
+		$endfor$
+		$if(date)$
+		<p class="date">$date$</p>
+		$endif$
+		</header>
+		$endif$
+		$if(toc)$
+		<nav id="$idprefix$TOC" role="doc-toc">
+		$if(toc-title)$
+		<h2 id="$idprefix$toc-title">$toc-title$</h2>
+		$endif$
+		$table-of-contents$
+		</nav>
+		$endif$
+		$body$
+		$for(include-after)$
+		$include-after$
+		$endfor$
+		</body>
+		</html>
 		'''
 	}
 }
