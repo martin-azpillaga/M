@@ -65,6 +65,7 @@ jobs:
           mkdir Code/Theia/Documentation
           find . -name "*.md" | xargs -I {} sh -c 'cat "{}" | mkdir -p "Code/Theia/$(dirname "{}")" && pandoc -o "Code/Theia/$(dirname "{}")/$(basename "{}" .md).html"'
           find . -name "*.md" | xargs -I {} sh -c 'cat "{}" | mkdir -p "Code/Theia/$(dirname "{}")" && pandoc --template Code/Theia/template.html -o "Code/Theia/$(dirname "{}")/$(basename "{}" .md).html"'
+          pandoc --template Code/Theia/template.html -o Code/Theia/Documentation/README.html README.md
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
