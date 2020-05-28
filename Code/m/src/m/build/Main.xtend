@@ -262,14 +262,17 @@ class Main
 		  	},
 		  	"devDependencies": {
 		    	"@theia/cli": "next",
-				"puppeteer": "3.1.0"
+				"puppeteer": "3.1.0",
+				"mocha": "7.1.2",
+				"chai-as-promised": "7.1.1"
 		  	},
 		  	"scripts": {
 				"buildElectron": "theia rebuild:electron && theia build --app-target electron",
 				"startElectron": "theia start --app-target electron",
 				"buildBrowser": "theia rebuild:browser && theia build --app-target browser",
 				"startBrowser": "theia start --app-target browser",
-				"update-m-extension": "cd m && tsc && cd .. && yarn add ./m"
+				"update-m-extension": "cd m && tsc && cd .. && yarn add ./m",
+				"test": "mocha test.js"
 			},
 		  	"build":
 		  	{
