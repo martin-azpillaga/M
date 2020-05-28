@@ -74,13 +74,17 @@ jobs:
         working-directory: Code/Theia
         run: |
           npm install -g yarn
+          yarn
+          yarn update-m-extension
           yarn buildBrowser
       - name: Run tests
+        working-directory: Code/Theia
         run: |
           yarn startBrowser &
           Xvfb :3 &
           sleep 5 && xvfb-run node test.js
       - name: Build theia for electron
+        working-directory: Code/Theia
         run: |
           yarn buildElectron
       - name: Package application
