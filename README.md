@@ -51,7 +51,7 @@ make your own version, for free.
 
 You can also redistribute it, but make sure you do it under the same license.
 
-If you agree, you can download the latest version. No need for installation. You
+If you agree, you can [download] the latest version. No need for installation. You
 are ready to start.
 
 ## Getting started
@@ -114,3 +114,5 @@ All kind actions are welcome. Here are some ideas:
   heart button and set the amount you feel comfortable with.
 
 Thank you.
+
+[download]: https://github.com/martin-azpillaga/M/releases/latest/download/m-0.0.0.AppImage
