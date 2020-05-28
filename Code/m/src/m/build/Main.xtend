@@ -261,15 +261,16 @@ class Main
 			    "m" : "./m"
 		  	},
 		  	"devDependencies": {
-		    	"@theia/cli": "next"
+		    	"@theia/cli": "next",
+				"puppeteer": "3.1.0"
 		  	},
-		  	"theia": {
-		    	"target": "electron"
-		  	},
-		  	"scripts":
-		  	{
-		    	"update": "yarn && theia rebuild:electron && cd m && tsc && cd .. && yarn add ./m && theia build --mode development && theia start"
-		  	},
+		  	"scripts": {
+				"buildElectron": "theia rebuild:electron && theia build --app-target electron",
+				"startElectron": "theia start --app-target electron",
+				"buildBrowser": "theia rebuild:browser && theia build --app-target browser",
+				"startBrowser": "theia start --app-target browser",
+				"update-m-extension": "cd m && tsc && cd .. && yarn add ./m"
+			},
 		  	"build":
 		  	{
 		  		"appId": "azpillaga.world.m-theia",
