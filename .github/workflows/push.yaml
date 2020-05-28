@@ -80,9 +80,10 @@ jobs:
       - name: Run tests
         working-directory: Code/Theia
         run: |
-          yarn startBrowser &
+          mkdir workspace
+          yarn startBrowser workspace &
           Xvfb :3 &
-          sleep 5 && xvfb-run node test.js
+          sleep 5 && xvfb-run yarn test
       - name: Build theia for electron
         if: ${{ github.ref == 'refs/heads/master' }}
         working-directory: Code/Theia
