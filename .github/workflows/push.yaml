@@ -43,7 +43,7 @@ jobs:
           EOL
           gradle execute
           gradle blockify
-      - name: Lint generated Java for Xtend linting
+      - name: Lint Java
         run: |
           rm build.gradle
           cat >sonar-project.properties <<EOL
@@ -70,11 +70,19 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '10.x'
-      - name: Build theia
+      - name: Build theia for browser
         working-directory: Code/Theia
         run: |
           npm install -g yarn
-          yarn update
+          yarn buildBrowser
+      - name: Run tests
+        run: |
+          yarn startBrowser &
+          Xvfb :3 &
+          sleep 5 && xvfb-run node test.js
+      - name: Build theia for electron
+        run: |
+          yarn buildElectron
       - name: Package application
         if: ${{ github.ref == 'refs/heads/master' }}
         working-directory: Code/Theia
