@@ -7,11 +7,11 @@ let context;
 
 describe('The application', function()
 {
-    this.timeout(10000);
+    this.timeout(20000);
 
     before(async function ()
     {
-        browser = await puppeteer.launch({headless: false, slowMo: 500});
+        browser = await puppeteer.launch({headless: false});
     })
     after(async function ()
     {
@@ -26,7 +26,10 @@ describe('The application', function()
     })
     afterEach(async function()
     {
-        await context.close();
+        if (!!context)
+        {
+            await context.close();
+        }
     })
     it('Opens a page', async function ()
     {
@@ -34,15 +37,15 @@ describe('The application', function()
         {
             const page = await context.newPage();
             await page.goto('localhost:3000');
-            await page.click('#shell-tab-explorer-view-container')
+            var explorer = await page.waitForSelector('#shell-tab-explorer-view-containe')
+            await explorer.click()
             await page.screenshot({path: 'example.png'});
             
             (2+2).should.equal(4)
         }
         catch (err)
         {
-            console.log("\n\n"+err+"\n\n");
-            context.close();
+            console.error("\n\n"+err+"\n\n");
             process.exit(111);
         }
     })
