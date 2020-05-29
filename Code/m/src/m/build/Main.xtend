@@ -272,7 +272,8 @@ class Main
 				"buildBrowser": "theia rebuild:browser && theia build --app-target browser",
 				"startBrowser": "theia start --app-target browser",
 				"update-m-extension": "cd m && tsc && cd .. && yarn add ./m",
-				"test": "mocha test.js"
+				"test": "mocha test.js",,
+				"testSlow": "mocha test.js slow"
 			},
 		  	"build":
 		  	{

@@ -64,6 +64,8 @@ describe('The application', function()
             var ok = oks[0];
             console.log("ok")
             await ok.click();
+            await page.waitForSelector(".view-line");
+            await page.keyboard.type("world()\n{\n\n}\n")
             await page.screenshot({path: 'example.png'});
             
             (2+2).should.equal(4)
