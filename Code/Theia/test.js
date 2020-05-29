@@ -45,18 +45,24 @@ describe('The application', function()
     {
         try
         {
+            // Start using waitForXPath instead of $x
+            // And create functions for common operations like click
             await page.goto('localhost:3000');
             var explorer = await page.waitForSelector('#shell-tab-explorer-view-container')
+            console.log(1);
             await explorer.click();
             var files = await page.$x('//div[text()="File"]')
             var file = files[0];
+            console.log(1);
             await file.click();
             var newFiles = await page.$x('//div[text()="New File"]')
             var newFile = newFiles[0];
+            console.log(1);
             await newFile.click();
             await page.keyboard.type("Hello.m");
             var oks = await page.$x('//button[text()="OK"]');
             var ok = oks[0];
+            console.log("ok")
             await ok.click();
             await page.screenshot({path: 'example.png'});
             
