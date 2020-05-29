@@ -83,7 +83,7 @@ jobs:
           mkdir workspace
           yarn startBrowser workspace &
           Xvfb :3 &
-          sleep 5 && xvfb-run yarn test
+          sleep 5 && xvfb-run yarn testSlow
       - name: Build theia for electron
         if: ${{ github.ref == 'refs/heads/master' }}
         working-directory: Code/Theia
