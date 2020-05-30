@@ -1,15 +1,7 @@
 on: push
-defaults:
-  run:
-    shell: bash  
-jobs:     
+jobs:
   allinone:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-      fail-fast: false
-      max-parallel: 0
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Download repository
@@ -18,7 +10,7 @@ jobs:
         run: npx markdownlint-cli -i LICENSE.md "**/*.md"
       - name: Lint Yaml
         run: |
-          apt install yamllint
+          sudo apt install yamllint
           yamllint -d relaxed .
       - name: Build Java
         run: |
@@ -51,20 +43,6 @@ jobs:
           EOL
           gradle execute
           gradle blockify
-      - name: Lint Java
-        run: |
-          rm build.gradle
-          cat >sonar-project.properties <<EOL
-          sonar.organization=martin-azpillaga
-          sonar.projectKey=martin-azpillaga_M
-          sonar.sources=Code/xtend-gen/m
-          sonar.java.binaries=Code/build/classes/java/main
-          EOL
-      - name: Trigger sonarcloud inspection
-        uses: sonarsource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Build Markdown
         run: |
           sudo apt remove pandoc
@@ -74,6 +52,14 @@ jobs:
           find . -name "*.md" | xargs -I {} sh -c 'cat "{}" | mkdir -p "Code/Theia/$(dirname "{}")" && pandoc -o "Code/Theia/$(dirname "{}")/$(basename "{}" .md).html"'
           find . -name "*.md" | xargs -I {} sh -c 'cat "{}" | mkdir -p "Code/Theia/$(dirname "{}")" && pandoc --template Code/Theia/template.html -o "Code/Theia/$(dirname "{}")/$(basename "{}" .md).html"'
           pandoc --template Code/Theia/template.html -o Code/Theia/Documentation/README.html README.md
+      - name: Zip theia folder
+        working-directory: Code/Theia
+        run: zip -r theia.zip .
+      - name: Upload theia zip
+        uses: actions/upload-artifact@v1
+        with:
+          name: theia
+          path: Code/Theia/theia.zip
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
