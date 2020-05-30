@@ -284,6 +284,10 @@ class Main
 		  			"target": "AppImage",
 		  			"executableName": "m"
 		  		},
+				"windows":
+				{
+					"target": ["nsis", "portable"],
+				},
 		  		"extraFiles": [ "ls.jar" ]
 		  	}
 		}'''
