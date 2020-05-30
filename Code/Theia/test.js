@@ -84,13 +84,15 @@ describe('The application', function()
             // Use puppeteer-recorder https://www.npmjs.com/package/puppeteer-recorder
             // to record animations of tests
             await page.goto('localhost:3000');
-            await clickSelector('#shell-tab-explorer-view-container')
             await clickPath('//div[text()="File"]')
             await clickPath('//div[text()="New File"]')
             await type("Hello.m");
             await clickPath('//button[text()="OK"]');
             await page.waitForSelector(".view-line");
-            await type("control()\n{\nforeach a\n{\na.velocity = a.base*a.inputValue\n}\n}\n");
+            await type("control()\n{}\n");
+            await clickPath('//div[text()="View"]');
+            await clickPath('//div[text()="Problems"]');
+            await page.waitForXPath('//div[text()="No problems have been detected in the workspace so far."]');
             await page.waitFor(5000);
         }
         catch (err)
