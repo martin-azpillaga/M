@@ -58,7 +58,7 @@ jobs:
       - name: Upload theia zip
         uses: actions/upload-artifact@v1
         with:
-          name: theia
+          name: theia.zip
           path: Code/Theia/theia.zip
       - name: Install node 10
         uses: actions/setup-node@v1
@@ -110,3 +110,34 @@ jobs:
           asset_path: ./Code/Theia/dist/m-0.0.0.AppImage
           asset_name: m.AppImage
           asset_content_type: text/text
+  win:
+    needs: allinone
+    runs-on: windows-latest
+    steps:
+      - name: Download theia folder
+        uses: actions/download-artifact@v2
+        with:
+          name: theia.zip
+      - name: Unzip theia
+        run: |
+          unzip theia.zip
+          ls
+      - name: Install node 10
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - name: Build theia for electron
+        run: |
+          npm install -g yarn
+          yarn
+          yarn update-m-extension
+          yarn buildElectron
+      - name: Package application
+        run: |
+          npm install -g electron-builder
+          electron-builder .
+      - name: Upload theia zip
+        uses: actions/upload-artifact@v1
+        with:
+          name: theia.zip
+          path: Code/Theia/theia.zip
