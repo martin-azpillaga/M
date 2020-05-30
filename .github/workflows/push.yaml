@@ -56,7 +56,7 @@ jobs:
         working-directory: Code/Theia
         run: zip -r theia.zip .
       - name: Upload theia zip
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2
         with:
           name: theia.zip
           path: Code/Theia/theia.zip
@@ -136,8 +136,7 @@ jobs:
         run: |
           npm install -g electron-builder
           electron-builder .
-      - name: Upload theia zip
-        uses: actions/upload-artifact@v1
+      - name: Upload dist zip
+        uses: actions/upload-artifact@v2
         with:
-          name: theia.zip
-          path: Code/Theia/theia.zip
+          path: dist/
