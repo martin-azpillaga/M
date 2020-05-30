@@ -6,6 +6,40 @@ let browser;
 let context;
 let page;
 
+async function clickSelector(selector)
+{
+    var selected = await page.waitForSelector(selector);
+    await selected.click();
+}
+
+async function clickPath(path)
+{
+    await page.waitForXPath(path);
+    var elements = await page.$x(path);
+    if (elements.length == 1)
+    {
+        const element = elements[0];
+        await element.click();
+    }
+    else
+    {
+        throw new Error(elements.length + " elements found with path "+path);
+    }
+}
+
+async function type(text)
+{
+    var lines = text.split("\n");
+    for (line of lines)
+    {
+        await page.keyboard.type(line);
+        if (line !== lines[lines.length-1])
+        {
+            await page.keyboard.press("Escape");
+            await page.keyboard.type("\n");
+        }
+    }
+}
 describe('The application', function()
 {
     this.timeout(100000);
@@ -45,30 +79,19 @@ describe('The application', function()
     {
         try
         {
-            // Start using waitForXPath instead of $x
-            // And create functions for common operations like click
-            await page.goto('localhost:3000');
-            var explorer = await page.waitForSelector('#shell-tab-explorer-view-container')
-            console.log(1);
-            await explorer.click();
-            var files = await page.$x('//div[text()="File"]')
-            var file = files[0];
-            console.log(1);
-            await file.click();
-            var newFiles = await page.$x('//div[text()="New File"]')
-            var newFile = newFiles[0];
-            console.log(1);
-            await newFile.click();
-            await page.keyboard.type("Hello.m");
-            var oks = await page.$x('//button[text()="OK"]');
-            var ok = oks[0];
-            console.log("ok")
-            await ok.click();
-            await page.waitForSelector(".view-line");
-            await page.keyboard.type("world()\n{\n\n}\n")
-            await page.screenshot({path: 'example.png'});
             
-            (2+2).should.equal(4)
+            // Connect to localhost:3000/#/workspace-path?
+            // Use puppeteer-recorder https://www.npmjs.com/package/puppeteer-recorder
+            // to record animations of tests
+            await page.goto('localhost:3000');
+            await clickSelector('#shell-tab-explorer-view-container')
+            await clickPath('//div[text()="File"]')
+            await clickPath('//div[text()="New File"]')
+            await type("Hello.m");
+            await clickPath('//button[text()="OK"]');
+            await page.waitForSelector(".view-line");
+            await type("control()\n{\nforeach a\n{\na.velocity = a.base*a.inputValue\n}\n}\n");
+            await page.waitFor(5000);
         }
         catch (err)
         {
