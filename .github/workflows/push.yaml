@@ -64,7 +64,7 @@ jobs:
       - name: Upload theia zip
         uses: actions/upload-artifact@v2
         with:
-          name: theia.zip
+          name: theia
           path: Code/Theia/theia.zip
       - name: Install node 10
         uses: actions/setup-node@v1
@@ -96,7 +96,7 @@ jobs:
       - name: Download theia folder
         uses: actions/download-artifact@v2
         with:
-          name: theia.zip
+          name: theia
       - name: Unzip theia
         run: |
           unzip theia.zip
@@ -115,28 +115,31 @@ jobs:
         run: |
           npm install -g electron-builder
           electron-builder .
-      - name: Upload dist zip
+      - name: Upload AppImage
+        if: ${{ matrix.os }} == 'ubuntu-latest'
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.os }}
-          path: dist/
+          name: linux
+          path: dist/m-0.0.0.AppImage
+      - name: Upload Exe
+        if: ${{ matrix.os }} == 'windows-latest'
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows
+          path: "dist/m 0.0.0.exe"
   release:
     needs: package
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
-      - name: Download ubuntu-latest
+      - name: Download AppImage
         uses: actions/download-artifact@v2
         with:
-          name: ubuntu-latest.zip
-      - name: Download windows-latest
+          name: linux
+      - name: Download Exe
         uses: actions/download-artifact@v2
         with:
-          name: windows-latest.zip
-      - name: Unzip all
-        run: |
-          unzip ubuntu-latest.zip
-          unzip windows-latest.zip
+          name: windows
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.0.0
@@ -162,6 +165,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: "./m 0.0.0.exe"
+          asset_path: ./m 0.0.0.exe
           asset_name: m.exe
           asset_content_type: text/text
