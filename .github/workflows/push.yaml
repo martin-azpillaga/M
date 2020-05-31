@@ -1,8 +1,8 @@
 on: push
 jobs:
-  allinone:
+  lint:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
       - name: Download repository
         uses: actions/checkout@v2
@@ -12,7 +12,13 @@ jobs:
         run: |
           sudo apt install yamllint
           yamllint -d relaxed .
-      - name: Build Java
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v2
+      - name: Build Xtend
         run: |
           sudo apt install openjdk-11-jdk
           sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
@@ -78,41 +84,14 @@ jobs:
           yarn startBrowser workspace &
           Xvfb :3 &
           sleep 5 && xvfb-run yarn testSlow
-      - name: Build theia for electron
-        if: ${{ github.ref == 'refs/heads/master' }}
-        working-directory: Code/Theia
-        run: |
-          yarn buildElectron
-      - name: Package application
-        if: ${{ github.ref == 'refs/heads/master' }}
-        working-directory: Code/Theia
-        run: |
-          npm install -g electron-builder
-          electron-builder .
-      - name: Create Release
-        if: ${{ github.ref == 'refs/heads/master' }}
-        id: create_release
-        uses: actions/create-release@v1.0.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: Tag ${{ github.ref }}
-          release_name: Prerelease ${{ github.ref }}
-          draft: true
-          prerelease: true
-      - name: Upload application to release
-        if: ${{ github.ref == 'refs/heads/master' }}
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Code/Theia/dist/m-0.0.0.AppImage
-          asset_name: m.AppImage
-          asset_content_type: text/text
-  win:
-    needs: allinone
-    runs-on: windows-latest
+  package:
+    needs: build
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+      fail-fast: true
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 100
     steps:
       - name: Download theia folder
         uses: actions/download-artifact@v2
@@ -139,4 +118,50 @@ jobs:
       - name: Upload dist zip
         uses: actions/upload-artifact@v2
         with:
+          name: ${{ matrix.os }}
           path: dist/
+  release:
+    needs: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Download ubuntu-latest
+        uses: actions/download-artifact@v2
+        with:
+          name: ubuntu-latest.zip
+      - name: Download windows-latest
+        uses: actions/download-artifact@v2
+        with:
+          name: windows-latest.zip
+      - name: Unzip all
+        run: |
+          unzip ubuntu-latest.zip
+          unzip windows-latest.zip
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: Tag ${{ github.ref }}
+          release_name: Prerelease ${{ github.ref }}
+          draft: true
+          prerelease: true
+      - name: Upload appimage to release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./m-0.0.0.AppImage
+          asset_name: m.AppImage
+          asset_content_type: text/text
+      - name: Upload exe to release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: "./m 0.0.0.exe"
+          asset_name: m.exe
+          asset_content_type: text/text

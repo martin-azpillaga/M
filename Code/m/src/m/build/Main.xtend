@@ -286,7 +286,7 @@ class Main
 		  		},
 				"win":
 				{
-					"target": ["nsis", "portable"]
+					"target": ["portable"]
 				},
 		  		"extraFiles": [ "ls.jar" ]
 		  	}
