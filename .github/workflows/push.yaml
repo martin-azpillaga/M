@@ -1,8 +1,8 @@
 on: push
 jobs:
-  allinone:
+  lint:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     steps:
       - name: Download repository
         uses: actions/checkout@v2
@@ -12,7 +12,13 @@ jobs:
         run: |
           sudo apt install yamllint
           yamllint -d relaxed .
-      - name: Build Java
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v2
+      - name: Build Xtend
         run: |
           sudo apt install openjdk-11-jdk
           sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
@@ -43,20 +49,6 @@ jobs:
           EOL
           gradle execute
           gradle blockify
-      - name: Lint Java
-        run: |
-          rm build.gradle
-          cat >sonar-project.properties <<EOL
-          sonar.organization=martin-azpillaga
-          sonar.projectKey=martin-azpillaga_M
-          sonar.sources=Code/xtend-gen/m
-          sonar.java.binaries=Code/build/classes/java/main
-          EOL
-      - name: Trigger sonarcloud inspection
-        uses: sonarsource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - name: Build Markdown
         run: |
           sudo apt remove pandoc
@@ -66,6 +58,14 @@ jobs:
           find . -name "*.md" | xargs -I {} sh -c 'cat "{}" | mkdir -p "Code/Theia/$(dirname "{}")" && pandoc -o "Code/Theia/$(dirname "{}")/$(basename "{}" .md).html"'
           find . -name "*.md" | xargs -I {} sh -c 'cat "{}" | mkdir -p "Code/Theia/$(dirname "{}")" && pandoc --template Code/Theia/template.html -o "Code/Theia/$(dirname "{}")/$(basename "{}" .md).html"'
           pandoc --template Code/Theia/template.html -o Code/Theia/Documentation/README.html README.md
+      - name: Zip theia folder
+        working-directory: Code/Theia
+        run: zip -r theia.zip .
+      - name: Upload theia zip
+        uses: actions/upload-artifact@v2
+        with:
+          name: theia
+          path: Code/Theia/theia.zip
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
@@ -80,22 +80,69 @@ jobs:
       - name: Run tests
         working-directory: Code/Theia
         run: |
-          yarn startBrowser &
+          mkdir workspace
+          yarn startBrowser workspace &
           Xvfb :3 &
-          sleep 5 && xvfb-run node test.js
-      - name: Build theia for electron
-        if: ${{ github.ref == 'refs/heads/master' }}
-        working-directory: Code/Theia
+          sleep 5 && xvfb-run yarn testSlow
+  package:
+    needs: build
+    if: ${{ github.ref == 'refs/heads/master' }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+      fail-fast: true
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 100
+    steps:
+      - name: Download theia folder
+        uses: actions/download-artifact@v2
+        with:
+          name: theia
+      - name: Unzip theia
         run: |
+          unzip theia.zip
+          ls
+      - name: Install node 10
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - name: Build theia for electron
+        run: |
+          npm install -g yarn
+          yarn
+          yarn update-m-extension
           yarn buildElectron
       - name: Package application
-        if: ${{ github.ref == 'refs/heads/master' }}
-        working-directory: Code/Theia
         run: |
           npm install -g electron-builder
           electron-builder .
+      - name: Upload AppImage
+        if: ${{ matrix.os }} == 'ubuntu-latest'
+        uses: actions/upload-artifact@v2
+        with:
+          name: linux
+          path: dist/m-0.0.0.AppImage
+      - name: Upload Exe
+        if: ${{ matrix.os }} == 'windows-latest'
+        uses: actions/upload-artifact@v2
+        with:
+          name: windows
+          path: "dist/m 0.0.0.exe"
+  release:
+    needs: package
+    if: ${{ github.ref == 'refs/heads/master' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Download AppImage
+        uses: actions/download-artifact@v2
+        with:
+          name: linux
+      - name: Download Exe
+        uses: actions/download-artifact@v2
+        with:
+          name: windows
       - name: Create Release
-        if: ${{ github.ref == 'refs/heads/master' }}
         id: create_release
         uses: actions/create-release@v1.0.0
         env:
@@ -105,13 +152,21 @@ jobs:
           release_name: Prerelease ${{ github.ref }}
           draft: true
           prerelease: true
-      - name: Upload application to release
-        if: ${{ github.ref == 'refs/heads/master' }}
+      - name: Upload appimage to release
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Code/Theia/dist/m-0.0.0.AppImage
+          asset_path: ./m-0.0.0.AppImage
           asset_name: m.AppImage
+          asset_content_type: text/text
+      - name: Upload exe to release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./m 0.0.0.exe
+          asset_name: m.exe
           asset_content_type: text/text
