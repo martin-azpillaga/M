@@ -23,6 +23,10 @@ async function clickPath(path)
     }
     else
     {
+        for (element of elements)
+        {
+            console.log(element)
+        }
         throw new Error(elements.length + " elements found with path "+path);
     }
 }
@@ -91,7 +95,7 @@ describe('The application', function()
             await page.waitForSelector(".view-line");
             await type("control()\n{}\n");
             await clickPath('//div[text()="View"]');
-            await clickPath('//div[text()="Problems"]');
+            await clickPath('//div[@class="p-Menu-itemLabel" and text()="Problems"]');
             await page.waitForXPath('//div[text()="No problems have been detected in the workspace so far."]');
             await page.waitFor(5000);
         }
