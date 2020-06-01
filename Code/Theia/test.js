@@ -1,5 +1,7 @@
 const puppeteer = require('puppeteer');
 const chai = require('chai');
+const rimraf = require('rimraf');
+
 chai.should();
 
 let browser;
@@ -71,6 +73,7 @@ describe('The application', function()
     {
         context = await browser.createIncognitoBrowserContext();
         page = await context.newPage();
+        rimraf.sync('workspace/*');
     })
     afterEach(async function()
     {
@@ -79,6 +82,7 @@ describe('The application', function()
             await context.close();
         }
     })
+    /*
     it('Opens a page', async function ()
     {
         try
@@ -97,7 +101,34 @@ describe('The application', function()
             await clickPath('//div[text()="View"]');
             await clickPath('//div[@class="p-Menu-itemLabel" and text()="Problems"]');
             await page.waitForXPath('//div[text()="No problems have been detected in the workspace so far."]');
-            await page.waitFor(5000);
+        }
+        catch (err)
+        {
+            console.error("\n\n"+err+"\n\n");
+            process.exit(111);
+        }
+    })*/
+
+    it('Creates a workspace', async function ()
+    {
+        try
+        {
+            await page.goto('localhost:3000');
+            await clickPath('//div[text()="File"]')
+            await clickPath('//div[text()="New Folder"]')
+            await type("Hello");
+            await clickPath('//button[text()="OK"]');
+
+            await clickPath('//div[text()="File"]');
+            await clickPath('//div[text()="Open Workspace..."]');
+            await clickPath('//div[text()="Hello"]');
+            await clickPath('//button[text()="Open"]');
+
+            await page.waitForSelector(".view-line");
+            await type("control()\n{}\n");
+            await clickPath('//div[text()="View"]');
+            await clickPath('//div[@class="p-Menu-itemLabel" and text()="Problems"]');
+            await page.waitForXPath('//div[text()="No problems have been detected in the workspace so far."]');
         }
         catch (err)
         {
