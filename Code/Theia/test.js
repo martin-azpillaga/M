@@ -117,15 +117,18 @@ describe('The application', function()
 
             const workspace = "Hello"
 
-            await click("File")
-            await click("New Folder")
-            await type(workspace);
-            await click("OK");
-
             await click("File");
-            await click("Open Workspace...");
-            await click(workspace);
-            await click("Open");
+            if (await isVisible("New Folder"))
+            {
+                await click("New Folder");
+                await type(workspace);
+                await click("OK");
+    
+                await click("File");
+                await click("Open Workspace...");
+                await click(workspace);
+                await click("Open");
+            }
 
             /*
             await page.waitFor(5000);
@@ -165,4 +168,11 @@ async function click(path)
     {
         throw new Error(elements.length + " elements found with path "+path);
     }
+}
+
+async function isVisible(path)
+{
+    const fullPath = '//*[text()="'+path+'"]'
+    var element = await page.waitForXPath(fullPath, {timeout: 5000});
+    return !!element
 }
