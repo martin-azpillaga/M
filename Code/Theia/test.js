@@ -114,21 +114,31 @@ describe('The application', function()
         try
         {
             await page.goto('localhost:3000');
-            await clickPath('//div[text()="File"]')
-            await clickPath('//div[text()="New Folder"]')
+            await clickPath('//*[text()="File"]')
+            await clickPath('//*[text()="New Folder"]')
             await type("Hello");
-            await clickPath('//button[text()="OK"]');
+            await clickPath('//*[text()="OK"]');
 
-            await clickPath('//div[text()="File"]');
-            await clickPath('//div[text()="Open Workspace..."]');
-            await clickPath('//div[text()="Hello"]');
-            await clickPath('//button[text()="Open"]');
+            await clickPath('//*[text()="File"]');
+            await clickPath('//*[text()="Open Workspace..."]');
+            await clickPath('//*[text()="Hello"]');
+            await clickPath('//*[text()="Open"]');
+
+            /*
+            await page.waitFor(5000);
+            const pages = await browser.pages()
+            page = pages[1];
+            await clickPath('//*[text()="File"]')
+            await clickPath('//*[text()="New File"]')
+            await type("Hello.m");
+            await clickPath('//*[text()="OK"]');
 
             await page.waitForSelector(".view-line");
             await type("control()\n{}\n");
             await clickPath('//div[text()="View"]');
             await clickPath('//div[@class="p-Menu-itemLabel" and text()="Problems"]');
             await page.waitForXPath('//div[text()="No problems have been detected in the workspace so far."]');
+            */
         }
         catch (err)
         {

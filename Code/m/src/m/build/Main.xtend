@@ -546,7 +546,10 @@ class Main
 		        } else {
 		            console.log("java jarring");
 		            const jar = path.resolve(__dirname, '../../../../ls.jar');
-		    
+		    		console.log("\n\n");
+					console.log(jar);
+					console.log("\n\n");
+					
 		            const command = 'java';
 		            const args: string[] = ['-jar',jar];
 		            const serverConnection = this.createProcessStreamConnection(command, args);

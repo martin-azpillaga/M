@@ -130,7 +130,6 @@ jobs:
           path: "dist/m 0.0.0.exe"
   release:
     needs: package
-    if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
