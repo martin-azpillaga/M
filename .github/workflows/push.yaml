@@ -86,7 +86,6 @@ jobs:
           sleep 5 && xvfb-run yarn testSlow
   package:
     needs: build
-    if: ${{ github.ref == 'refs/heads/master' }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
