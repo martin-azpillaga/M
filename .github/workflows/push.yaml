@@ -88,7 +88,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
       fail-fast: true
     runs-on: ${{ matrix.os }}
     timeout-minutes: 100
