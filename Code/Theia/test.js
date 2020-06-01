@@ -114,15 +114,18 @@ describe('The application', function()
         try
         {
             await page.goto('localhost:3000');
-            await clickPath('//*[text()="File"]')
-            await clickPath('//*[text()="New Folder"]')
-            await type("Hello");
-            await clickPath('//*[text()="OK"]');
 
-            await clickPath('//*[text()="File"]');
-            await clickPath('//*[text()="Open Workspace..."]');
-            await clickPath('//*[text()="Hello"]');
-            await clickPath('//*[text()="Open"]');
+            const workspace = "Hello"
+
+            await click("File")
+            await click("New Folder")
+            await type(workspace);
+            await click("OK");
+
+            await click("File");
+            await click("Open Workspace...");
+            await click(workspace);
+            await click("Open");
 
             /*
             await page.waitFor(5000);
@@ -147,3 +150,19 @@ describe('The application', function()
         }
     })
 })
+
+async function click(path)
+{
+    const fullPath = '//*[text()="'+path+'"]'
+    await page.waitForXPath(fullPath);
+    var elements = await page.$x(fullPath);
+    if (elements.length == 1)
+    {
+        const element = elements[0];
+        await element.click();
+    }
+    else
+    {
+        throw new Error(elements.length + " elements found with path "+path);
+    }
+}
