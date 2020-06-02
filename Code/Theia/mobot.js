@@ -21,7 +21,7 @@ async function type(text)
         }
     }
 }
-before(async function ()
+const openBrowser = async function ()
 {
     var slow = process.argv[3] == "slow";
     if (slow)
@@ -32,27 +32,28 @@ before(async function ()
     {
         browser = await puppeteer.launch({headless: false});
     }  
-})
-after(async function ()
+}
+const closeBrowser = async function ()
 {
     if (!!browser)
     {
         browser.close();
     }
-})
-beforeEach(async function()
+}
+const connectToServer = async function()
 {
+    rimraf.sync('workspace/*');
     context = await browser.createIncognitoBrowserContext();
     page = await context.newPage();
-    rimraf.sync('workspace/*');
-})
-afterEach(async function()
+    await page.goto('localhost:3000')
+}
+const closeContext = async function()
 {
     if (!!context)
     {
         await context.close();
     }
-})
+}
 
 async function click(path)
 {
@@ -77,4 +78,4 @@ async function isVisible(path)
     return !!element
 }
 
-module.exports = {click, isVisible, type, browser, page, context}
+module.exports = {click, isVisible, type, browser, page, context, openBrowser, closeBrowser, connectToServer, closeContext}
