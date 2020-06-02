@@ -1,24 +1,35 @@
 function BulletList(list)
+
+    os.remove('test.js')
+    file = io.open('test.js','w')
+    io.output(file)
+    io.write("it('Tests', async function()\n")
+    io.write("{\n")
+
     for k,v in pairs(list.content) do
         for a,b in pairs(v) do
             process(b.content)
         end
     end
+
+    io.write("})\n")
+    io.close(file)
 end
 
 function process(order)
-    print(#order)
     if (order[1].text == "Click") then
-        print("await click('"..order[3].tag.."');")
-
+        
+        io.write("await click('"..order[3].tag.."');\n")
+    
     elseif (order[1].text == "Type") then
-        print("await type('"..order[3].text.."');")
+
+        io.write("await type('"..order[3].text.."');\n")
 
     elseif (order[1].text == "isVisible") then
-        print("await isVisible('"..order[3].text.."');")
-    end
 
-    print(order[1].text)
+        io.write("await type('"..order[3].text.."');\n")
+
+    end
 end
 
 function CodeBlock(block)
