@@ -77,6 +77,10 @@ jobs:
           yarn
           yarn update-m-extension
           yarn buildBrowser
+      - name: Infer tests from documentation
+        run: |
+          pandoc *.md --lua-filter filter.lua
+          echo "})" >> Code/Theia/test.js
       - name: Run tests
         working-directory: Code/Theia
         run: |
