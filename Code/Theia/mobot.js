@@ -70,4 +70,25 @@ async function isVisible(path)
     return !!element
 }
 
-module.exports = {click, isVisible, type, browser, page, context, openBrowser, closeBrowser, connectToServer, closeContext}
+async function press(hotkey)
+{
+    var keys = hotkey.split("+");
+    for (key of keys)
+    {
+        await page.keyboard.down(key);
+    }
+    for (key of keys)
+    {
+        await page.keyboard.up(key);
+    }
+}
+
+async function noProblems()
+{
+    await press("Control+Shift+P");
+    await type("Problems");
+    await press("Enter");
+    await isVisible("No problems have been detected in the workspace so far.")
+}
+
+module.exports = {click, isVisible, type, press, browser, page, context, openBrowser, closeBrowser, connectToServer, closeContext, noProblems}
