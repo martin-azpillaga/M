@@ -2,7 +2,7 @@ firstHeader = true
 os.remove('Code/Theia/test.js')
 file = io.open('Code/Theia/test.js','a')
 io.output(file)
-io.write("const { click, type, isVisible, openBrowser, closeBrowser, connectToServer, closeContext} = require('./mobot.js')\n")
+io.write("const { click, type, press, isVisible, noProblems, openBrowser, closeBrowser, connectToServer, closeContext} = require('./mobot.js')\n")
 io.write("\n")
 
 lastParagraph = ""
@@ -49,6 +49,8 @@ function BulletList(list)
                 process(b.content)
             end
         end
+
+        io.write("await noProblems();\n")
 
         io.write("})\n")
     end
