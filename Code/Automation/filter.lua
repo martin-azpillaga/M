@@ -43,6 +43,9 @@ function BulletList(list)
         
         io.write("it('"..lastParagraph.."', async function()\n")
         io.write("{\n")
+        
+        io.write("await click('Help');\n")
+        io.write("await click('Help');\n")
 
         for k,v in pairs(list.content) do
             for a,b in pairs(v) do
@@ -58,6 +61,7 @@ end
 
 function fullLine(inline, start)
     result = ""
+    
     for i=start,#inline do
         if inline[i].tag == "Str" then
             result = result .. inline[i].text
@@ -71,17 +75,23 @@ end
 function process(order)
     text = fullLine(order,3)
 
-    if (order[1].text == "Click") then
+    command = order[1].text
+
+    if (command == "Click") then
         
         io.write("await click('"..text.."');\n")
     
-    elseif (order[1].text == "Type") then
+    elseif (command == "Type") then
 
         io.write("await type('"..text.."');\n")
 
-    elseif (order[1].text == "isVisible") then
+    elseif (command == "isVisible") then
 
         io.write("await isVisible('"..text.."');\n")
+    
+    elseif (command == "Press") then
 
+        io.write("await press('"..text.."');\n")
+    
     end
 end
