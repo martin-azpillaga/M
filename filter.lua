@@ -2,6 +2,7 @@
 -- pandoc test.md --lua-filter filter.lua && 
 -- echo "})" >> Code/Theia/test.js
 
+firstHeader = true
 os.remove('Code/Theia/test.js')
 file = io.open('Code/Theia/test.js','a')
 io.output(file)
@@ -12,6 +13,11 @@ lastParagraph = ""
 
 function Header(h)
     if h.level == 1 then
+        if not firstHeader then
+            io.write('})\n')
+        end
+        firstHeader = false
+        
         title = fullLine(h.content, 1)
         io.write("describe('"..title.."', function()\n");
         io.write("{\n");
