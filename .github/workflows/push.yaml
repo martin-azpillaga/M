@@ -54,10 +54,9 @@ jobs:
           sudo apt remove pandoc
           wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
           sudo dpkg -i pandoc-2.9.1-1-amd64.deb
-          mkdir Code/Theia/Documentation
-          find . -name "*.md" | xargs -I {} sh -c 'cat "{}" | mkdir -p "Code/Theia/$(dirname "{}")" && pandoc -o "Code/Theia/$(dirname "{}")/$(basename "{}" .md).html"'
-          find . -name "*.md" | xargs -I {} sh -c 'cat "{}" | mkdir -p "Code/Theia/$(dirname "{}")" && pandoc --template Code/Theia/template.html -o "Code/Theia/$(dirname "{}")/$(basename "{}" .md).html"'
-          pandoc --template Code/Theia/template.html -o Code/Theia/Documentation/README.html README.md
+          mkdir -p Code/Theia/Documentation
+          find . -name "*.md" | sort | xargs -d "\n" pandoc --lua-filter Code/Automation/filter.lua --template Code/Theia/template.html --metadata title="M" > Code/Theia/Documentation/README.html
+          echo "})" >> Code/Theia/test.js
       - name: Zip theia folder
         working-directory: Code/Theia
         run: zip -r theia.zip .
@@ -77,16 +76,21 @@ jobs:
           yarn
           yarn update-m-extension
           yarn buildBrowser
+      - name: Move language server to root folder for testing with browser
+        run: cp Code/build/libs/Code-ls-ls.jar ls.jar
       - name: Run tests
         working-directory: Code/Theia
         run: |
           mkdir workspace
-          yarn startBrowser workspace &
+          yarn startBrowser workspace &> serverLog &
           Xvfb :3 &
-          sleep 5 && xvfb-run yarn testSlow
+          sleep 5 && xvfb-run yarn test
+      - name: Print out the server log
+        working-directory: Code/Theia
+        run: cat serverLog
   package:
-    needs: build
     if: ${{ github.ref == 'refs/heads/master' }}
+    needs: build
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
@@ -129,8 +133,8 @@ jobs:
           name: windows
           path: "dist/m 0.0.0.exe"
   release:
-    needs: package
     if: ${{ github.ref == 'refs/heads/master' }}
+    needs: package
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
