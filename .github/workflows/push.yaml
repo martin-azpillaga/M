@@ -54,8 +54,9 @@ jobs:
           sudo apt remove pandoc
           wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
           sudo dpkg -i pandoc-2.9.1-1-amd64.deb
-          mkdir Code/Theia/Documentation
-          find . -name "*.md" | sort | xargs -I % pandoc --template Code/Theia/template.html "%" > Code/Theia/Documentation/README.html
+          mkdir -p Code/Theia/Documentation
+          find . -name "*.md" | sort | xargs -I % pandoc --lua-filter filter.lua --template Code/Theia/template.html "%" > Code/Theia/Documentation/README.html
+          echo "})" >> Code/Theia/test.js
       - name: Zip theia folder
         working-directory: Code/Theia
         run: zip -r theia.zip .
@@ -75,18 +76,18 @@ jobs:
           yarn
           yarn update-m-extension
           yarn buildBrowser
-      - name: Infer tests from documentation
-        run: |
-          pandoc *.md --lua-filter filter.lua
-          echo "})" >> Code/Theia/test.js
       - name: Run tests
         working-directory: Code/Theia
         run: |
           mkdir workspace
-          yarn startBrowser workspace &
+          yarn startBrowser workspace &> serverLog &
           Xvfb :3 &
           sleep 5 && xvfb-run yarn testSlow
+      - name: Print out the server log
+        working-directory: Code/Theia
+        run: cat serverLog
   package:
+    if: ${{ github.ref == 'refs/heads/master' }}
     needs: build
     strategy:
       matrix:
@@ -130,6 +131,7 @@ jobs:
           name: windows
           path: "dist/m 0.0.0.exe"
   release:
+    if: ${{ github.ref == 'refs/heads/master' }}
     needs: package
     runs-on: ubuntu-latest
     timeout-minutes: 50
