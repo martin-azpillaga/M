@@ -55,7 +55,7 @@ jobs:
           wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
           sudo dpkg -i pandoc-2.9.1-1-amd64.deb
           mkdir -p Code/Theia/Documentation
-          find . -name "*.md" | sort | xargs -I % pandoc --lua-filter filter.lua --template Code/Theia/template.html "%" > Code/Theia/Documentation/README.html
+          find . -name "*.md" | sort | xargs -d "\n" pandoc --lua-filter filter.lua --template Code/Theia/template.html --metadata title="M" > Code/Theia/Documentation/README.html
           echo "})" >> Code/Theia/test.js
       - name: Zip theia folder
         working-directory: Code/Theia
