@@ -1,9 +1,36 @@
+-- Run as 
+-- pandoc test.md --lua-filter filter.lua && 
+-- echo "})" >> Code/Theia/test.js
+
+os.remove('Code/Theia/test.js')
+file = io.open('Code/Theia/test.js','a')
+io.output(file)
+io.write("const { click, type, isVisible, openBrowser, closeBrowser, connectToServer, closeContext} = require('./mobot.js')\n")
+io.write("\n")
+
+lastParagraph = ""
+
+function Header(h)
+    if h.level == 1 then
+        title = fullLine(h.content, 1)
+        io.write("describe('"..title.."', function()\n");
+        io.write("{\n");
+        io.write("this.timeout(100000)\n")
+        io.write("before(openBrowser)\n")
+        io.write("beforeEach(connectToServer)\n")
+        io.write("afterEach(closeContext)\n")
+        io.write("after(closeBrowser)\n")
+        io.write("\n")
+    end
+end
+
+function Para(paragraph)
+    lastParagraph = fullLine(paragraph.content, 1)
+end
+
 function BulletList(list)
 
-    os.remove('test.js')
-    file = io.open('test.js','w')
-    io.output(file)
-    io.write("it('Tests', async function()\n")
+    io.write("it('"..lastParagraph.."', async function()\n")
     io.write("{\n")
 
     for k,v in pairs(list.content) do
@@ -13,21 +40,34 @@ function BulletList(list)
     end
 
     io.write("})\n")
-    io.close(file)
+end
+
+function fullLine(inline, start)
+    result = ""
+    for i=start,#inline do
+        if inline[i].tag == "Str" then
+            result = result .. inline[i].text
+        elseif inline[i].tag == "Space" then
+            result = result .. " "
+        end
+    end
+    return result
 end
 
 function process(order)
+    text = fullLine(order,3)
+
     if (order[1].text == "Click") then
         
-        io.write("await click('"..order[3].tag.."');\n")
+        io.write("await click('"..text.."');\n")
     
     elseif (order[1].text == "Type") then
 
-        io.write("await type('"..order[3].text.."');\n")
+        io.write("await type('"..text.."');\n")
 
     elseif (order[1].text == "isVisible") then
 
-        io.write("await type('"..order[3].text.."');\n")
+        io.write("await isVisible('"..text.."');\n")
 
     end
 end
