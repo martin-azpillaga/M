@@ -91,4 +91,4 @@ async function noProblems()
     await isVisible("No problems have been detected in the workspace so far.")
 }
 
-module.exports = {click, isVisible, type, press, browser, page, context, openBrowser, closeBrowser, connectToServer, closeContext, noProblems}
+module.exports = {click, isVisible, type, press, context, openBrowser, closeBrowser, connectToServer, closeContext, noProblems}
