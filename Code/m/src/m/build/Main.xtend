@@ -272,8 +272,7 @@ class Main
 				"buildBrowser": "theia rebuild:browser && theia build --app-target browser",
 				"startBrowser": "theia start --app-target browser",
 				"update-m-extension": "cd m && tsc && cd .. && yarn add ./m",
-				"test": "mocha test.js",
-				"testSlow": "mocha test.js slow"
+				"test": "mocha test.js"
 			},
 		  	"build":
 		  	{
@@ -546,7 +545,10 @@ class Main
 		        } else {
 		            console.log("java jarring");
 		            const jar = path.resolve(__dirname, '../../../../ls.jar');
-		    
+		    		console.log("\n\n");
+					console.log(jar);
+					console.log("\n\n");
+					
 		            const command = 'java';
 		            const args: string[] = ['-jar',jar];
 		            const serverConnection = this.createProcessStreamConnection(command, args);
@@ -608,7 +610,6 @@ class Main
 		<!DOCTYPE html>
 		<html xmlns="http://www.w3.org/1999/xhtml">
 		<head>
-		  <link rel="stylesheet" href="main.css">
 		  <title>M Documentation</title>
 		</head>
 		<body>
