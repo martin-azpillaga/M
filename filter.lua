@@ -6,23 +6,13 @@ io.write("const { click, type, isVisible, openBrowser, closeBrowser, connectToSe
 io.write("\n")
 
 lastParagraph = ""
+lastTitle = ""
+insideDescribe = false
 
 function Header(h)
     if h.level == 1 then
-        if not firstHeader then
-            io.write('})\n')
-        end
-        firstHeader = false
-        
-        title = fullLine(h.content, 1)
-        io.write("describe('"..title.."', function()\n");
-        io.write("{\n");
-        io.write("this.timeout(100000)\n")
-        io.write("before(openBrowser)\n")
-        io.write("beforeEach(connectToServer)\n")
-        io.write("afterEach(closeContext)\n")
-        io.write("after(closeBrowser)\n")
-        io.write("\n")
+        lastTitle = fullLine(h.content, 1)
+        insideDescribe = false
     end
 end
 
@@ -34,6 +24,23 @@ function BulletList(list)
 
     first = list.content[1][1].content[1].text
     if (first == 'Click' or first == 'Press' or first == "Type" or first == "isVisible") then
+        
+        if not insideDescribe then
+            insideDescribe = true
+            if not firstHeader then
+                firstHeader = false
+                io.write('})\n')
+            end
+            io.write("describe('"..lastTitle.."', function()\n");
+            io.write("{\n");
+            io.write("this.timeout(100000)\n")
+            io.write("before(openBrowser)\n")
+            io.write("beforeEach(connectToServer)\n")
+            io.write("afterEach(closeContext)\n")
+            io.write("after(closeBrowser)\n")
+            io.write("\n")
+        end
+        
         io.write("it('"..lastParagraph.."', async function()\n")
         io.write("{\n")
 
