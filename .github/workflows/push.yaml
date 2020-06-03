@@ -82,7 +82,7 @@ jobs:
           mkdir workspace
           yarn startBrowser workspace &> serverLog &
           Xvfb :3 &
-          sleep 5 && xvfb-run yarn testSlow
+          sleep 5 && xvfb-run yarn test
       - name: Print out the server log
         working-directory: Code/Theia
         run: cat serverLog

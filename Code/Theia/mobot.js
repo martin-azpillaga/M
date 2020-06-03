@@ -23,15 +23,7 @@ async function type(text)
 }
 const openBrowser = async function ()
 {
-    var slow = process.argv[3] == "slow";
-    if (slow)
-    {
-        browser = await puppeteer.launch({headless: false, slowMo: 100, defaultViewport: null, args: ['--start-maximized']});
-    }
-    else
-    {
-        browser = await puppeteer.launch({headless: false});
-    }  
+    browser = await puppeteer.launch({headless: false, slowMo: 100, defaultViewport: null, args: ['--start-maximized']});
 }
 const closeBrowser = async function ()
 {
