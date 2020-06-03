@@ -76,6 +76,8 @@ jobs:
           yarn
           yarn update-m-extension
           yarn buildBrowser
+      - name: Move language server to root folder for testing with browser
+        run: cp Code/build/libs/Code-ls-ls.jar ls.jar
       - name: Run tests
         working-directory: Code/Theia
         run: |
