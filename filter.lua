@@ -1,7 +1,3 @@
--- Run as 
--- pandoc test.md --lua-filter filter.lua && 
--- echo "})" >> Code/Theia/test.js
-
 firstHeader = true
 os.remove('Code/Theia/test.js')
 file = io.open('Code/Theia/test.js','a')
@@ -36,16 +32,19 @@ end
 
 function BulletList(list)
 
-    io.write("it('"..lastParagraph.."', async function()\n")
-    io.write("{\n")
+    first = list.content[1][1].content[1].text
+    if (first == 'Click' or first == 'Press' or first == "Type" or first == "isVisible") then
+        io.write("it('"..lastParagraph.."', async function()\n")
+        io.write("{\n")
 
-    for k,v in pairs(list.content) do
-        for a,b in pairs(v) do
-            process(b.content)
+        for k,v in pairs(list.content) do
+            for a,b in pairs(v) do
+                process(b.content)
+            end
         end
-    end
 
-    io.write("})\n")
+        io.write("})\n")
+    end
 end
 
 function fullLine(inline, start)
@@ -76,52 +75,4 @@ function process(order)
         io.write("await isVisible('"..text.."');\n")
 
     end
-end
-
-function CodeBlock(block)
-
-    if block.classes[3] == nil then return end
-
-    local action = block.classes[1]
-    local workspace = block.classes[2]
-    local file = block.classes[3]
-    local path = "GeneratedTests/" .. workspace .. "/" .. file
-
-    if not Directory("GeneratedTests") then
-        os.execute("mkdir GeneratedTests")
-    end
-    if not Directory("GeneratedTests/" .. workspace) then
-        os.execute("mkdir " .. "GeneratedTests/" .. workspace)
-    end
-
-    if action == "set" then
-        file = io.open(path, "w")
-        io.output(file)
-        io.write(block.text)
-        io.close(file)
-    elseif action == "append" then
-        file = io.open(path, "a")
-        io.output(file)
-        io.write("\n"..block.text)
-        io.close(file)
-    elseif action == "check" then
-        file = io.open(path, "w")
-        io.output(file)
-        io.write(block.text)
-        io.close(file)
-    end
-end
-
-function Exists(file)
-    local ok, err, code = os.rename(file, file)
-    if not ok then
-       if code == 13 then
-          return true
-       end
-    end
-    return ok, err
- end
-
-function Directory(path)
-    return Exists(path.."/")
 end
