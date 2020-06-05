@@ -10,6 +10,7 @@ let page;
 
 async function type(text)
 {
+    text = text.split("    ").join("");
     var lines = text.split("\n");
     for (line of lines)
     {
@@ -23,7 +24,7 @@ async function type(text)
 }
 const openBrowser = async function ()
 {
-    browser = await puppeteer.launch({headless: false, slowMo: 100, defaultViewport: null, args: ['--start-maximized']});
+    browser = await puppeteer.launch({headless: false, slowMo: 50, defaultViewport: null, args: ['--start-maximized']});
 }
 const closeBrowser = async function ()
 {
@@ -83,6 +84,14 @@ async function press(hotkey)
     }
 }
 
+async function command(text)
+{
+    await press("Control+Shift+P");
+    //await isVisible(text);
+    await type(text);
+    await click(text);
+}
+
 async function noProblems()
 {
     await press("Control+Shift+P");
@@ -91,4 +100,4 @@ async function noProblems()
     await isVisible("No problems have been detected in the workspace so far.")
 }
 
-module.exports = {click, isVisible, type, press, context, openBrowser, closeBrowser, connectToServer, closeContext, noProblems}
+module.exports = {click, isVisible, type, press, context, openBrowser, closeBrowser, connectToServer, closeContext, command, noProblems}
