@@ -10,6 +10,8 @@ The following quote represents the philosophy behind the project:
 
 > Everything should be as simple as it can be, but no simpler
 
+Simple does not mean easy. Minimalism and the power of composition.
+
 ## Why do I care
 
 * M is data oriented
