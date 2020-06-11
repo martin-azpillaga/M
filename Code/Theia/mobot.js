@@ -24,7 +24,7 @@ async function type(text)
 }
 const openBrowser = async function ()
 {
-    browser = await puppeteer.launch({headless: false, slowMo: 50, defaultViewport: null, args: ['--start-maximized']});
+    browser = await puppeteer.launch({headless: false, slowMo: 50, defaultViewport: null, args: ['--start-maximized', '--no-sandbox']});
 }
 const closeBrowser = async function ()
 {
