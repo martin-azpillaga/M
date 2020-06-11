@@ -57,6 +57,7 @@ jobs:
           mkdir -p Code/Theia/Documentation
           find . -name "*.md" | sort | xargs -d "\n" pandoc --lua-filter Code/Automation/filter.lua --template Code/Theia/template.html --metadata title="M" > Code/Theia/Documentation/README.html
           echo "})})" >> Code/Theia/test.js
+          echo "" > Code/Theia/test.js
       - name: Zip theia folder
         working-directory: Code/Theia
         run: zip -r theia.zip .
@@ -73,7 +74,9 @@ jobs:
         working-directory: Code/Theia
         run: |
           npm install -g yarn
+          sudo apt install libx11-dev libxkbfile-dev libxkbfile-dev
           yarn
+          yarn add typescript
           yarn update-m-extension
           yarn buildBrowser
       - name: Move language server to root folder for testing with browser
