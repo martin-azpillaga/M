@@ -100,4 +100,36 @@ async function noProblems()
     await isVisible("No problems have been detected in the workspace so far.")
 }
 
-module.exports = {click, isVisible, type, press, context, openBrowser, closeBrowser, connectToServer, closeContext, command, noProblems}
+
+async function createFolder(path)
+{
+
+}
+
+async function openFolder(path)
+{
+
+}
+
+
+async function createFile(path)
+{
+
+}
+
+async function openFile(path)
+{
+
+}
+
+async function typeIn(path, code)
+{
+
+}
+
+async function newFiles(directory, file1, file2)
+{
+
+}
+
+module.exports = {click, isVisible, type, press, context, openBrowser, closeBrowser, connectToServer, closeContext, command, noProblems, createFolder, openFolder, createFile, openFile, typeIn, newFiles}
