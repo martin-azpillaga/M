@@ -8,6 +8,9 @@ let browser;
 let context;
 let page;
 
+let workspace = {folders: {}, files: []}
+let problems = {}
+
 async function type(text)
 {
     text = text.split("    ").join("");
@@ -87,7 +90,6 @@ async function press(hotkey)
 async function command(text)
 {
     await press("Control+Shift+P");
-    //await isVisible(text);
     await type(text);
     await click(text);
 }
@@ -109,15 +111,21 @@ async function createFolder(name)
     await press("Enter")
 }
 
-async function openFolder(path)
+async function openFolder(name)
 {
-
+    await command("File: Open Workspace...")
+    await click(name)
+    await click("Open")
 }
 
 
 async function createFile(path)
 {
-
+    await command("File: New File")
+    await isVisible("New File")
+    await page.keyboard.type(path)
+    await press("Enter")
+    await newFile(path)
 }
 
 async function openFile(path)
@@ -125,19 +133,69 @@ async function openFile(path)
 
 }
 
-async function typeIn(path, code)
+async function append(path, code)
 {
-
+    await type(code)
 }
 
-async function newFiles(directory, file1, file2)
+async function newFile(path)
 {
+    const names = path.split('/')
+    let directory = workspace
+    for (name of names)
+    {
+        if (name === names[names.length-1])
+        {
+            if (!(name in directory.files))
+            {
+                directory.files.push(name)
+            }
+        }
+        else
+        {
+            if (name in directory.folders)
+            {
+                directory = directory.folders[name]
+            }
+            else
+            {
+                directory.folders[name] = {folders: {}, files: []}
+                directory = directory.folders[name]
+            }
+        }
+    }
+}
 
+async function wait(time)
+{
+    await page.waitFor(time)
 }
 
 async function checkWorkspace()
 {
-
+    try
+    {
+        for (folder of Object.keys(workspace.folders))
+        {
+            await isVisible(folder)
+        }
+        for (file of workspace.files)
+        {
+            await isVisible(file)
+        }
+    }
+    catch (err)
+    {
+        await command('Toggle Explorer View')
+        for (folder of Object.keys(workspace.folders))
+        {
+            await isVisible(folder)
+        }
+        for (file of workspace.files)
+        {
+            await isVisible(file)
+        }
+    }
 }
 
 async function checkProblems()
@@ -145,4 +203,14 @@ async function checkProblems()
     
 }
 
-module.exports = {checkWorkspace, checkProblems, click, isVisible, type, press, context, openBrowser, closeBrowser, connectToServer, closeContext, command, noProblems, createFolder, openFolder, createFile, openFile, typeIn, newFiles}
+async function expectWarning(message)
+{
+
+}
+
+async function expectError(message)
+{
+
+}
+
+module.exports = {expectWarning, expectError, problems, workspace, checkWorkspace, checkProblems, click, isVisible, type, press, context, openBrowser, closeBrowser, connectToServer, closeContext, command, noProblems, createFolder, openFolder, createFile, openFile, append, newFile}
