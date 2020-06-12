@@ -11,10 +11,10 @@ reader.on('line', function(line)
     const blocks = JSON.parse(line).blocks
     const out = console.log
 
-    out('const {click, checkWorkspace, checkProblems, createFolder, openFolder, createFile, openFile, type, newFiles, openBrowser, connectToServer, closeContext, closeBrowser} = require("./mobot.js")')
+    out('const mobot = require("./mobot.js")')
     out('describe(\'tests\', function()')
     out('{')
-    out('this.timeout(100000)')
+    out('this.timeout(1000000)')
     out('before(openBrowser)')
     out('beforeEach(connectToServer)')
     out('afterEach(closeContext)')
@@ -27,8 +27,8 @@ reader.on('line', function(line)
             const title = text(block.c[1])
             out(`it('${title}', async function()`)
             out('{')
-            out('await click("Help")')
-            out('await click("Help")')
+            out('await mobot.click("Help")')
+            out('await mobot.click("Help")')
         }
         else if (block.t == 'BulletList')
         {
@@ -38,14 +38,14 @@ reader.on('line', function(line)
                 if (command.startsWith("Create and open folder"))
                 {
                     const folder = command.replace("Create and open folder ", "")
-                    out(`await createFolder('${folder}')`)
-                    out(`await openFolder('${folder}')`)
+                    out(`await mobot.createFolder('${folder}')`)
+                    out(`await mobot.openFolder('${folder}')`)
                 }
                 else if (command.startsWith("Create and open file"))
                 {
                     const file = command.replace("Create and open file ", "")
-                    out(`await createFile('${file}')`)
-                    out(`await openFile('${file}')`)
+                    out(`await mobot.createFile('${file}')`)
+                    out(`await mobot.openFile('${file}')`)
                 }
                 else if (command.startsWith("Expect new files"))
                 {
@@ -53,12 +53,15 @@ reader.on('line', function(line)
                     const folder = arguments.substring(0, arguments.indexOf(":"))
                     const filesWithComma = arguments.substring(arguments.indexOf(":")+2)
                     const files = filesWithComma.split(", ")
-                    out(`await newFiles('${folder}', ${files.map(x => `'${x}'`).join(", ")})`)
+                    for (file of files)
+                    {
+                        out(`await mobot.newFile('${folder}/${file}')`)
+                    }
                 }
                 else if (command.startsWith("Append to"))
                 {
                     const file = command.replace("Append to ", "");
-                    out(`await type('${file}',`)
+                    out(`await mobot.append('${file}',`)
                 }
             }
         }
@@ -68,8 +71,8 @@ reader.on('line', function(line)
             out(`\`${code}\`)`)
         }
     }
-    out('await checkWorkspace()')
-    out('await checkProblems()')
+    out('await mobot.checkWorkspace()')
+    out('await mobot.checkProblems()')
     out('})')
     out('})')
 })
