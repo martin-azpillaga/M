@@ -11,7 +11,7 @@ reader.on('line', function(line)
     const blocks = JSON.parse(line).blocks
     const out = console.log
 
-    out('const {checkWorkspace, checkProblems, createFolder, openFolder, createFile, openFile, type, newFiles, openBrowser, connectToServer, closeContext, closeBrowser} = require("./mobot.js")')
+    out('const {click, checkWorkspace, checkProblems, createFolder, openFolder, createFile, openFile, type, newFiles, openBrowser, connectToServer, closeContext, closeBrowser} = require("./mobot.js")')
     out('describe(\'tests\', function()')
     out('{')
     out('this.timeout(100000)')
@@ -27,6 +27,8 @@ reader.on('line', function(line)
             const title = text(block.c[1])
             out(`it('${title}', async function()`)
             out('{')
+            out('await click("Help")')
+            out('await click("Help")')
         }
         else if (block.t == 'BulletList')
         {
@@ -43,7 +45,7 @@ reader.on('line', function(line)
                 {
                     const file = command.replace("Create and open file ", "")
                     out(`await createFile('${file}')`)
-                    out(`await openFile(${file})`)
+                    out(`await openFile('${file}')`)
                 }
                 else if (command.startsWith("Expect new files"))
                 {

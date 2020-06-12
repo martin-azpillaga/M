@@ -101,9 +101,12 @@ async function noProblems()
 }
 
 
-async function createFolder(path)
+async function createFolder(name)
 {
-
+    await command("File: New Folder")
+    await isVisible("OK")
+    await type(name)
+    await press("Enter")
 }
 
 async function openFolder(path)
