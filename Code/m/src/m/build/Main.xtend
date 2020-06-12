@@ -259,9 +259,7 @@ class Main
 			    "@theia/terminal": "next",
 			    "@typefox/monaco-editor-core": "0.14.6",
 			    "m" : "./m",
-				"typescript": "^3.9.5",
-				"@theia/plugin-ext": "latest",
-				“@theia/plugin-ext-vscode”: “latest”
+				"typescript": "^3.9.5"
 		  	},
 		  	"devDependencies": {
 		    	"@theia/cli": "next",
