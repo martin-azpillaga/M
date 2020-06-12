@@ -47,7 +47,6 @@ jobs:
               "Code/m"
           }
           EOL
-          gradle execute
           gradle blockify
       - name: Build Markdown
         run: |
@@ -73,9 +72,8 @@ jobs:
         working-directory: Code/Theia
         run: |
           npm install -g yarn
-          sudo apt install libx11-dev libxkbfile-dev libxkbfile-dev
+          sudo apt install libx11-dev libxkbfile-dev
           yarn
-          yarn add typescript
           yarn update-m-extension
           yarn buildBrowser
       - name: Move language server to root folder for testing with browser
