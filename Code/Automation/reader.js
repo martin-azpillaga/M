@@ -11,7 +11,7 @@ reader.on('line', function(line)
     const blocks = JSON.parse(line).blocks
     const out = console.log
 
-    out('const {createFolder, openFolder, createFile, openFile, type, newFiles, openBrowser, connectToServer, closeContext, closeBrowser} = require("./mobot.js")')
+    out('const {checkWorkspace, checkProblems, createFolder, openFolder, createFile, openFile, type, newFiles, openBrowser, connectToServer, closeContext, closeBrowser} = require("./mobot.js")')
     out('describe(\'tests\', function()')
     out('{')
     out('this.timeout(100000)')
