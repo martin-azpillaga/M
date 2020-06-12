@@ -132,4 +132,14 @@ async function newFiles(directory, file1, file2)
 
 }
 
-module.exports = {click, isVisible, type, press, context, openBrowser, closeBrowser, connectToServer, closeContext, command, noProblems, createFolder, openFolder, createFile, openFile, typeIn, newFiles}
+async function checkWorkspace()
+{
+
+}
+
+async function checkProblems()
+{
+    
+}
+
+module.exports = {checkWorkspace, checkProblems, click, isVisible, type, press, context, openBrowser, closeBrowser, connectToServer, closeContext, command, noProblems, createFolder, openFolder, createFile, openFile, typeIn, newFiles}
