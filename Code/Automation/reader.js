@@ -25,7 +25,7 @@ reader.on('line', function(line)
         if (block.t === 'Header' && block.c[0] == 1)
         {
             const title = text(block.c[1])
-            out(`it('${title}', function()`)
+            out(`it('${title}', async function()`)
             out('{')
         }
         else if (block.t == 'BulletList')
