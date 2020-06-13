@@ -9,7 +9,7 @@ public class Unicode
 {
 	public static void main(String[] arguments) throws IOException, InterruptedException
 	{
-		var result = "grammar m.Unicode\nimport \"http://www.eclipse.org/emf/2002/Ecore\"\n";
+		var result = "";
 		
 		var categories = new HashMap<String, ArrayList<String>>();
 		
@@ -39,22 +39,33 @@ public class Unicode
 				}
 				if (rangeSplit.length == 1)
 				{
-					categories.get(category).add("'\\u"+range+"'");
+					if (range.length() == 4)
+					{
+						categories.get(category).add("'\\u"+range+"'");
+					}
 				}
 				else
 				{
-					categories.get(category).add("'\\u"+rangeSplit[0]+"'..'\\u"+rangeSplit[1]+"'");
+					if (range.length() == 10)
+					{
+						categories.get(category).add("'\\u"+rangeSplit[0]+"'..'\\u"+rangeSplit[1]+"'");
+					}
 				}
 			}
 		}
 		
 		for (var category : categories.keySet())
 		{
-			result += "terminal " + category.toUpperCase() + ": ";
+			result += "terminal fragment " + category.toUpperCase() + ": ";
 			result += String.join("|", categories.get(category));
 			result += ";\n";
 		}
 		
-		Files.write(Paths.get("Unicode.xtext"), result.getBytes());
+		var m = Files.readAllLines(Paths.get("../M.xtext"));
+		if (!m.get(m.size()-2).startsWith("terminal fragment"))
+		{
+			result = String.join("\n", m) + "\n" + result;
+			Files.write(Paths.get("../M.xtext"), result.getBytes());
+		}
 	}
 }
