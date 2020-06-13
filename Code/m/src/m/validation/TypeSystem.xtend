@@ -38,7 +38,7 @@ class Symbol
 	public String reason
 }
 
-enum Error
+enum MError
 {
 	redefinition,undefined, syntax, undecidable, incompatible
 }
