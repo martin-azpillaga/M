@@ -55,7 +55,6 @@ jobs:
           sudo dpkg -i pandoc-2.9.1-1-amd64.deb
           mkdir -p Code/Theia/Documentation
           find . -name "*.md" | sort | xargs -d "\n" pandoc --template Code/Theia/template.html --metadata title="M" > Code/Theia/Documentation/README.html
-          pandoc README.md -t json | node Code/Automation/reader.js > Code/Theia/test.js
       - name: Zip theia folder
         working-directory: Code/Theia
         run: zip -r theia.zip .
@@ -76,6 +75,10 @@ jobs:
           yarn
           yarn update-m-extension
           yarn buildBrowser
+      - name: Infer tests from documentation
+        working-directory: Code/Theia
+        run: |
+          pandoc Pong.md -t json | node reader.js > test.js
       - name: Move language server to root folder for testing with browser
         run: cp Code/build/libs/Code-ls-ls.jar ls.jar
       - name: Run tests
@@ -89,6 +92,7 @@ jobs:
         working-directory: Code/Theia
         run: cat serverLog
   package:
+    if: ${{ github.ref == 'refs/heads/master' }}
     needs: build
     strategy:
       matrix:
@@ -132,6 +136,7 @@ jobs:
           name: windows
           path: "dist/m 0.0.0.exe"
   release:
+    if: ${{ github.ref == 'refs/heads/master' }}
     needs: package
     runs-on: ubuntu-latest
     timeout-minutes: 50
