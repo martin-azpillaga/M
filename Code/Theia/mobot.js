@@ -171,6 +171,35 @@ async function wait(time)
     await page.waitFor(time)
 }
 
+async function checkFolder(folder, name)
+{
+    try
+    {
+        for (subfolder of Object.keys(folder.folders))
+        {
+            await isVisible(subfolder)
+            await checkFolder(folder.folders[subfolder], subfolder)
+        }
+        for (file of folder.files)
+        {
+            await isVisible(file)
+        }
+    }
+    catch (err)
+    {
+        await click(name)
+        for (subfolder of Object.keys(folder.folders))
+        {
+            await isVisible(subfolder)
+            await checkFolder(folder.folders[subfolder], subfolder)
+        }
+        for (file of folder.files)
+        {
+            await isVisible(file)
+        }
+    }
+}
+
 async function checkWorkspace()
 {
     try
@@ -178,6 +207,7 @@ async function checkWorkspace()
         for (folder of Object.keys(workspace.folders))
         {
             await isVisible(folder)
+            await checkFolder(workspace.folders[folder], folder)
         }
         for (file of workspace.files)
         {
@@ -190,6 +220,7 @@ async function checkWorkspace()
         for (folder of Object.keys(workspace.folders))
         {
             await isVisible(folder)
+            await checkFolder(workspace.folders[folder], folder)
         }
         for (file of workspace.files)
         {
