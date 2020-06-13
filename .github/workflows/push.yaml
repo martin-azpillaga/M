@@ -47,7 +47,6 @@ jobs:
               "Code/m"
           }
           EOL
-          gradle execute
           gradle blockify
       - name: Build Markdown
         run: |
@@ -55,8 +54,7 @@ jobs:
           wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
           sudo dpkg -i pandoc-2.9.1-1-amd64.deb
           mkdir -p Code/Theia/Documentation
-          find . -name "*.md" | sort | xargs -d "\n" pandoc --lua-filter Code/Automation/filter.lua --template Code/Theia/template.html --metadata title="M" > Code/Theia/Documentation/README.html
-          echo "})" >> Code/Theia/test.js
+          find . -name "*.md" | sort | xargs -d "\n" pandoc --template Code/Theia/template.html --metadata title="M" > Code/Theia/Documentation/README.html
       - name: Zip theia folder
         working-directory: Code/Theia
         run: zip -r theia.zip .
@@ -73,9 +71,14 @@ jobs:
         working-directory: Code/Theia
         run: |
           npm install -g yarn
+          sudo apt install libx11-dev libxkbfile-dev
           yarn
           yarn update-m-extension
           yarn buildBrowser
+      - name: Infer tests from documentation
+        working-directory: Code/Theia
+        run: |
+          pandoc Pong.md -t json | node reader.js > test.js
       - name: Move language server to root folder for testing with browser
         run: cp Code/build/libs/Code-ls-ls.jar ls.jar
       - name: Run tests
