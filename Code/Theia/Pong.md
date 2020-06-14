@@ -14,5 +14,3 @@ control()
     }
 }
 ~~~
-
-* Expect new files in src-gen/Unity/Assets/Code: Systems/control.cs, Components/base.cs
