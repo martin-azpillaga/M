@@ -16,7 +16,7 @@ import m.m.Value
 import org.eclipse.xtext.validation.Check
 
 import static m.m.MPackage.Literals.*
-import static m.validation.Error.*
+import static m.validation.MError.*
 import static m.validation.GroupingReason.*
 import static m.validation.TypingReason.*
 import static m.validation.StandardLibrary.*
@@ -76,9 +76,9 @@ class MValidator extends AbstractMValidator
 		}
 	}
 	
-	def private error(Error error, EObject o, EStructuralFeature feature)
+	def private void MError(MError err, EObject o, EStructuralFeature feature)
 	{
-		error(library.errors.get(error), o, feature)
+		error(library.errors.get(err), o, feature)
 	}
 	
 	def private initialize(File file)
@@ -105,7 +105,7 @@ class MValidator extends AbstractMValidator
 		{
 			if (standardSymbols.containsKey(f.name) || userFunctions.containsKey(f.name) || userComponents.containsKey(f.name))
 			{
-				error(redefinition, f, FUNCTION__NAME)
+				MError(redefinition, f, FUNCTION__NAME)
 			}
 			else
 			{
@@ -117,10 +117,10 @@ class MValidator extends AbstractMValidator
 	def private void solve(File myFile)
 	{
 		var groups = new HashSet<Group>(expressions.values)
-		var errorFound = false
+		var MErrorFound = false
 		for (group : groups)
 		{
-			if (!errorFound)
+			if (!MErrorFound)
 			{
 				val types = new HashSet<Type>
 				for (entry : group.entries)
@@ -137,15 +137,15 @@ class MValidator extends AbstractMValidator
 				}
 				if (types.size == 0)
 				{
-					errorFound = true
+					MErrorFound = true
 					for (entry : group.entries)
 					{
-						var error =
+						var MError =
 						'''
 						«library.errors.get(undecidable)»
 						«entry.groupingReasons.join(', ')»
 						'''
-						warning(error, entry.expression, null)
+						warning(MError, entry.expression, null)
 					}
 				}
 				else if (types.size == 1)
@@ -154,10 +154,10 @@ class MValidator extends AbstractMValidator
 				}
 				else
 				{
-					errorFound = true
+					MErrorFound = true
 					for (entry : group.entries)
 					{
-						var error =
+						var MError =
 						'''
 						«library.errors.get(incompatible)»
 						«entry.groupingReasons.join(', ')»
@@ -167,17 +167,17 @@ class MValidator extends AbstractMValidator
 						'''
 						if (entry.types.empty)
 						{
-							warning(error, entry.expression, null)
+							warning(MError, entry.expression, null)
 						}
 						else
 						{
-							error(error, entry.expression, null)
+							error(MError, entry.expression, null)
 						}
 					}
 				}
 			}
 		}
-		if (!errorFound)
+		if (!MErrorFound)
 		{
 			game = new Game
 			for (f : userFunctions.values)
@@ -240,7 +240,7 @@ class MValidator extends AbstractMValidator
 					}
 					else
 					{
-						error(syntax, statement, BLOCK__EXPRESSION)
+						MError(syntax, statement, BLOCK__EXPRESSION)
 					}
 				}
 				else if (standard !== null)
@@ -251,7 +251,7 @@ class MValidator extends AbstractMValidator
 				}
 				else
 				{
-					error(undefined, statement, BLOCK__NAME)
+					MError(undefined, statement, BLOCK__NAME)
 				}
 			}
 			else if (statement instanceof Delegation)
@@ -292,7 +292,7 @@ class MValidator extends AbstractMValidator
 			}
 			else
 			{
-				error(undefined, expression, null)
+				MError(undefined, expression, null)
 			}
 		}
 		else if (expression instanceof Cell)
@@ -303,7 +303,7 @@ class MValidator extends AbstractMValidator
 			}
 			else
 			{
-				error(undefined, expression, CELL__ENTITY)
+				MError(undefined, expression, CELL__ENTITY)
 			}
 			var standard = standardSymbols.get(expression.component)
 			if (standard !== null)
@@ -347,7 +347,7 @@ class MValidator extends AbstractMValidator
 			}
 			else
 			{
-				error(undefined, expression, feature)
+				MError(undefined, expression, feature)
 			}
 		}
 		else if (user !== null)
@@ -368,12 +368,12 @@ class MValidator extends AbstractMValidator
 			}
 			else
 			{
-				error(undefined, expression, feature)
+				MError(undefined, expression, feature)
 			}
 		}
 		else
 		{
-			error(undefined, expression, feature)
+			MError(undefined, expression, feature)
 		}
 		arguments.forEach[validate]
 	}
@@ -486,7 +486,7 @@ class MValidator extends AbstractMValidator
 	{
 		if (userValues.containsKey(value.name) || userComponents.containsKey(value.name) || standardSymbols.containsKey(value.name) || userFunctions.containsKey(value.name))
 		{
-			error(redefinition, value, null)
+			MError(redefinition, value, null)
 		}
 		else
 		{
