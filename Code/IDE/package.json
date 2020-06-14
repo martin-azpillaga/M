@@ -31,11 +31,10 @@
 		"chai-as-promised": "7.1.1"
   	},
   	"scripts": {
-		"buildElectron": "theia rebuild:electron && theia build --app-target electron",
+		"buildElectron": "yarn && theia rebuild:electron && theia build --app-target electron",
 		"startElectron": "theia start --app-target electron",
-		"buildBrowser": "theia rebuild:browser && theia build --app-target browser",
+		"buildBrowser": "yarn && theia rebuild:browser && theia build --app-target browser",
 		"startBrowser": "theia start --app-target browser",
-		"update-m-extension": "cd m && tsc && cd .. && yarn add ./m",
 		"test": "mocha test.js"
 	},
   	"build":
