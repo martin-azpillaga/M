@@ -2,7 +2,7 @@ package m.validation
 
 import java.util.List
 import java.util.Map
-import static m.validation.Error.*
+import static m.validation.MError.*
 import static m.validation.TypingReason.*
 
 class StandardLibrary
@@ -216,7 +216,7 @@ class StandardLibrary
 	
 	public List<Symbol> symbols
 	public List<Symbol> blocks
-	public Map<Error,String> errors
+	public Map<MError,String> errors
 	public Map<Type,String> types
 	public Map<TypingReason,String> typingReason
 	

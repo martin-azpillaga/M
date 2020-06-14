@@ -25,7 +25,7 @@ class Main
 		createDirectories(get(projectPath.toString+".ide"))
 		createDirectories(get(projectPath.toString+".ui"))
 		
-		var grammars = walk(projectPath).filter[!toString.contains("/bin/") && toString.endsWith(".xtext")].map[fileName]
+		var grammars = walk(projectPath).filter[!toString.contains("/bin/") && toString.endsWith(".xtext") && !toString.endsWith("Unicode.xtext")].map[fileName]
 		var gs = new ArrayList<String>
 		for (grammar : grammars.toArray)
 		{
