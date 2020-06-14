@@ -18,19 +18,19 @@ Assignment: atom=(Value|Cell) '=' expression=Binary;
 
 Delegation: application=Application;
 
-Expression: Binary|Unary|Application|Value|Cell;
 
 Binary returns Expression:
 	(Unary|Application|Value|Cell)
 	({Binary.left=current} operator=OPERATOR
 		right=(Unary|Application|Value|Cell)
 	)*;
-
 Unary: operator=OPERATOR expression=(Unary|Application|Value|Cell);
 Application: name=IDENTIFIER '(' (arguments+=Binary (',' arguments+=Binary)*)? ')';
 
 Value: name=IDENTIFIER;
 Cell: entity=IDENTIFIER '.' component=IDENTIFIER;
+
+Expression: Binary|Unary|Application|Value|Cell;
 
 terminal BLANKS: BLANK+;
 terminal IDENTIFIER: LETTER+;
