@@ -20,27 +20,15 @@ class ExponentType extends Type
 	public Type right
 }
 
-class TypeFunction extends Type
-{
-	
-}
-
 class PolymorphicType extends Type
 {
-	public TypeFunction function
+	public Type function
 	public Type type
-}
-
-class Symbol
-{
-	public String name
-	public Type type
-	public String reason
 }
 
 enum MError
 {
-	redefinition,undefined, syntax, undecidable, incompatible
+	redefinition, undefined, syntax, undecidable, incompatible
 }
 
 enum GroupingReason
