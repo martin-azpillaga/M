@@ -28,6 +28,7 @@ import m.m.Binary
 import org.eclipse.xtext.EcoreUtil2
 import m.generator.Game
 
+
 class Group
 {
 	public var entries = new ArrayList<GroupEntry>

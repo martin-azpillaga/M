@@ -5,6 +5,12 @@ import java.util.Map
 import static m.validation.MError.*
 import static m.validation.TypingReason.*
 
+class Symbol
+{
+	public String name
+	public Type type
+}
+
 class StandardLibrary
 {	
 	public static val any = new Type
@@ -21,7 +27,7 @@ class StandardLibrary
 	public static val textType = new Type
 	public static val imageType = new Type
 	public static val clip = new Type
-	public static val list = new TypeFunction
+	public static val list = new Type
 	
 	public static val number2 = new ProductType=>[left = number right=number]
 	public static val number3 = new ProductType=>[left=number2 right=number]
@@ -33,20 +39,21 @@ class StandardLibrary
 	public static val numericNumeric = new ExponentType=>[left=numeric right=numeric]
 	public static val numericNumericNumeric = new ExponentType=>[left=numeric right=numericNumeric]
 	
-	public static val numericNumberNumeric = new ExponentType=>[left=numeric right=new ExponentType=>[left=number right=numeric]]
+	public static val numberNumeric = new ExponentType=>[left=number right=numeric]
+	public static val numericNumberNumeric = new ExponentType=>[left=numeric right=numberNumeric]
 	public static val numberNumber = new ExponentType=>[left=number right=number]
 	public static val numberNumberNumber = new ExponentType=>[left=number right=numberNumber]
 	
 	public static val constant = new ExponentType=>[right=number]
-	public static val entityEmpty = new ExponentType=>[left=entity right=m.validation.StandardLibrary.unit]
+	public static val entityEmpty = new ExponentType=>[left=entity right=unit]
 	public static val entityProposition = new ExponentType=>[left=entity right=proposition]
 	
 	public static val propositionProposition = new ExponentType=>[left=proposition right=proposition]
 	public static val propositionPropositionProposition = new ExponentType=>[left=proposition right=propositionProposition]
 	
 	public static val anyAny = new ExponentType=>[left=any right=any]
-	public static val anyEmpty = new ExponentType=>[left=any right=m.validation.StandardLibrary.unit]
-	public static val emptyEmpty = new ExponentType=>[left=m.validation.StandardLibrary.unit right=m.validation.StandardLibrary.unit]
+	public static val anyEmpty = new ExponentType=>[left=any right=unit]
+	public static val emptyEmpty = new ExponentType=>[left=unit right=unit]
 	
 	public static val numberProposition = new ExponentType=>[left=number right=proposition]
 	public static val numberNumberProposition = new ExponentType=>[left=number right=numberProposition]
@@ -61,6 +68,7 @@ class StandardLibrary
 	public static val numberNumber2Number = new ExponentType=>[left=number right=number2Number]
 	public static val number2Number2Number = new ExponentType=>[left=number2 right=number2Number]
 	public static val numberNumber2Number2Number = new ExponentType=>[left=number right=number2Number2Number]
+	
 	
 	
 	public static val inputTriggered = new Symbol=>[type=proposition]
@@ -92,7 +100,7 @@ class StandardLibrary
 	public static val viewAngle = new Symbol=>[type=number]
 	public static val viewDistance = new Symbol=>[type=number]
 	public static val clearColor = new Symbol=>[type=number4]
-	public static val perspective = new Symbol=>[type=m.validation.StandardLibrary.unit]
+	public static val perspective = new Symbol=>[type=unit]
 	
 	public static val emission = new Symbol=>[type=number4]
 	public static val spotAngle = new Symbol=>[type=number]
@@ -104,7 +112,7 @@ class StandardLibrary
 	public static val audioClip = new Symbol=>[type=clip]
 	public static val volume = new Symbol=>[type=number]
 	public static val pitch = new Symbol=>[type=number]
-	public static val loop = new Symbol=>[type=m.validation.StandardLibrary.unit]
+	public static val loop = new Symbol=>[type=unit]
 	
 	public static val distortion = new Symbol=>[type=number]
 	public static val echo = new Symbol=>[type=number]
@@ -116,8 +124,8 @@ class StandardLibrary
 	
 	public static val ip = new Symbol=>[type=number4]
 	public static val port = new Symbol=>[type=number]
-	public static val networkStream = new Symbol=>[type=m.validation.StandardLibrary.unit]
-	public static val prediction = new Symbol=>[type=m.validation.StandardLibrary.unit]
+	public static val networkStream = new Symbol=>[type=unit]
+	public static val prediction = new Symbol=>[type=unit]
 	public static val owner = new Symbol=>[type=number]
 	
 	public static val mass = new Symbol=>[type=number]
@@ -129,13 +137,13 @@ class StandardLibrary
 	public static val angularVelocity = new Symbol=>[type=number3]
 	public static val gravityFactor = new Symbol=>[type=number]
 	
-	public static val trigger = new Symbol=>[type=m.validation.StandardLibrary.unit]
+	public static val trigger = new Symbol=>[type=unit]
 	public static val extents = new Symbol=>[type=number3]
 	public static val radius = new Symbol=>[type=number]
 	public static val height = new Symbol=>[type=number]
 	public static val sideCount = new Symbol=>[type=number]
-	public static val convexHull = new Symbol=>[type=m.validation.StandardLibrary.unit]
-	public static val geometry = new Symbol=>[type=m.validation.StandardLibrary.unit]
+	public static val convexHull = new Symbol=>[type=unit]
+	public static val geometry = new Symbol=>[type=unit]
 	public static val restitution = new Symbol=>[type=number]
 	public static val friction = new Symbol=>[type=number]
 	
@@ -208,6 +216,7 @@ class StandardLibrary
 	public static val has = new Symbol=>[type=entityProposition]
 	
 	public static val write = new Symbol=>[type=anyEmpty]
+	public static val writeError = new Symbol=>[type=anyEmpty]
 	public static val halt = new Symbol=>[type=emptyEmpty]
 	
 	public static val selection = new Symbol=>[type=proposition]
@@ -224,11 +233,154 @@ class StandardLibrary
 	[
 		symbols = #
 		[
-			mass=>[name='mass'],
-			velocity=>[name='velocity'],
-			has=>[name='has'],
-			multiplication=>[name='*']
-		].map[it=>[reason='standard library']]
+			inputTriggered=>[name="inputTriggered"],
+            inputValue=>[name="inputValue"],
+            inputVector=>[name="inputVector"],
+	
+            timer=>[name="timer"],
+            elapsed=>[name="elapsed"],
+            timeout=>[name="timeout"],
+	
+            position=>[name="position"],
+            rotation=>[name="rotation"],
+            scale=>[name="scale"],
+            worldPosition=>[name="worldPosition"],
+            worldRotation=>[name="worldRotation"],
+            worldScale=>[name="worldScale"],
+            parent=>[name="parent"],
+            children=>[name="children"],
+	
+            mesh=>[name="mesh"],
+            material=>[name="material"],
+	
+            font=>[name="font"],
+            text=>[name="text"],
+            image=>[name="image"],
+            button=>[name="button"],
+            numberLabel=>[name="numberLabel"],
+	
+            viewAngle=>[name="viewAngle"],
+            viewDistance=>[name="viewDistance"],
+            clearColor=>[name="clearColor"],
+            perspective=>[name="perspective"],
+	
+            emission=>[name="emission"],
+            spotAngle=>[name="spotAngle"],
+            range=>[name="range"],
+            intensity=>[name="intensity"],
+            shadows=>[name="shadows"],
+            cookie=>[name="cookie"],
+	
+            audioClip=>[name="audioClip"],
+            volume=>[name="volume"],
+            pitch=>[name="pitch"],
+            loop=>[name="loop"],
+	
+            distortion=>[name="distortion"],
+            echo=>[name="echo"],
+            highPass=>[name="highPass"],
+            lowPass=>[name="lowPass"],
+            reverb=>[name="reverb"],
+            chorus=>[name="chorus"],
+            doppler=>[name="doppler"],
+	
+            ip=>[name="ip"],
+            port=>[name="port"],
+            networkStream=>[name="networkStream"],
+            prediction=>[name="prediction"],
+            owner=>[name="owner"],
+	
+            mass=>[name="mass"],
+            velocity=>[name="velocity"],
+            acceleration=>[name="acceleration"],
+            force=>[name="force"],
+            damping=>[name="damping"],
+            angularDamping=>[name="angularDamping"],
+            angularVelocity=>[name="angularVelocity"],
+            gravityFactor=>[name="gravityFactor"],
+	
+            trigger=>[name="trigger"],
+            extents=>[name="extents"],
+            radius=>[name="radius"],
+            height=>[name="height"],
+            sideCount=>[name="sideCount"],
+            convexHull=>[name="convexHull"],
+            geometry=>[name="geometry"],
+            restitution=>[name="restitution"],
+            friction=>[name="friction"],
+	
+	
+            epsilon=>[name="epsilon"],
+            pi=>[name="pi"],
+            e=>[name="e"],
+	
+            abs=>[name="abs"],
+            sign=>[name="sign"],
+            ceil=>[name="ceil"],
+            floor=>[name="floor"],
+            round=>[name="round"],
+            clamp=>[name="clamp"],
+            integerPart=>[name="integerPart"],
+            fractionalPart=>[name="fractionalPart"],
+            inverse=>[name="inverse"],
+            reciprocal=>[name="reciprocal"],
+	
+            lerp=>[name="lerp"],
+            unlerp=>[name="unlerp"],
+            proportional=>[name="proportional"],
+	
+            cross=>[name="cross"],
+            dot=>[name="dot"],
+            norm=>[name="norm"],
+            normalize=>[name="normalize"],
+            distance=>[name="distance"],
+            reflect=>[name="reflect"],
+            refract=>[name="refract"],
+	
+            or=>[name="or"],
+            and=>[name="and"],
+            not=>[name="not"],
+	
+            addition=>[name="addition"],
+            subtraction=>[name="subtraction"],
+            multiplication=>[name="multiplication"],
+            division=>[name="division"],
+	
+            equal=>[name="equal"],
+            inequal=>[name="inequal"],
+	
+            lower=>[name="lower"],
+            lowerOrEqual=>[name="lowerOrEqual"],
+            greaterOrEqual=>[name="greaterOrEqual"],
+            greater=>[name="greater"],
+	
+            size=>[name="size"],
+            in=>[name="in"],
+	
+            sin=>[name="sin"],
+            cos=>[name="cos"],
+            tan=>[name="tan"],
+            asin=>[name="asin"],
+            acos=>[name="acos"],
+            atan=>[name="atan"],
+            exp=>[name="exp"],
+            log=>[name="log"],
+            exp10=>[name="exp10"],
+            log10=>[name="log10"],
+            pow=>[name="pow"],
+            sqrt=>[name="sqrt"],
+            random=>[name="random"],
+	
+            create=>[name="create"],
+            destroy=>[name="destroy"],
+            add=>[name="add"],
+            remove=>[name="remove"],
+            has=>[name="has"],
+	
+            write=>[name="write"],
+            writeError=>[name="writeError"],
+            halt=>[name="halt"]
+		]
 		
 		blocks = #
 		[
@@ -240,10 +392,13 @@ class StandardLibrary
 		{
 			redefinition->'Symbol already defined',
 			undefined->'Symbol undefined',
-			syntax->'Syntax error'
+			syntax->'Syntax error',
+			undecidable -> 'Undecidable type',
+			incompatible -> 'Incompatible types'
 		}
 		types = #
 		{
+			numeric -> 'numeric',
 			number -> 'number',
 			proposition -> 'proposition',
 			any -> 'any',
