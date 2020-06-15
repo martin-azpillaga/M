@@ -28,11 +28,6 @@ enum AccessKind
 {
 	read, write, tag
 }
-class Game
-{
-	public var functions = new HashMap<Function,Type>
-	public var components = new HashMap<String,Type>
-}
 
 class Unity
 {
