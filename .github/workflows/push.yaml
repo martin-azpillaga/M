@@ -65,7 +65,6 @@ jobs:
           Xvfb :3 &
           sleep 5 && xvfb-run yarn test
   package:
-    if: ${{ github.ref == 'refs/heads/master' }}
     needs: build
     strategy:
       matrix:
@@ -78,9 +77,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: ide
-      - name: Unzip IDE folder
-        run: |
-          unzip ide.zip
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
