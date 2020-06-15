@@ -34,10 +34,11 @@ Expression: Binary|Unary|Application|Value|Cell;
 
 terminal BLANKS: BLANK+;
 terminal IDENTIFIER: LETTER+;
-terminal OPERATOR: SYMBOL+;
-terminal UNRECOGNIZED: CONTROL|NUMBER|PUNCTUATION;
+terminal OPERATOR: !(BLANK|LETTER|CONTROL|NUMBER|KEYWORD)+;
+terminal UNRECOGNIZED: CONTROL|NUMBER;
 
-terminal fragment BLANK: (ZL|ZP|ZS|'\n'|'\r'|'\t')+;
+terminal fragment KEYWORD: '('|')'|'{'|'}'|'='|',';
+terminal fragment BLANK: ZL|ZP|ZS|'\n'|'\r'|'\t';
 terminal fragment CONTROL: CC|CF|CO|CS;
 terminal fragment LETTER: LL|LM|LO|LT|LU;
 terminal fragment NUMBER: ND|NL|NO;
