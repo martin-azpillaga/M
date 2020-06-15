@@ -35,7 +35,7 @@ jobs:
       - name: Build documentation
         run: |
           find . -name "*.md" | sort | xargs -d "\n" pandoc > Code/IDE/Documentation.html
-      - name: Upload IDE folder as github artifact
+      - name: Upload IDE folder to github artifacts
         uses: actions/upload-artifact@v2
         with:
           name: ide
@@ -74,22 +74,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 100
     steps:
-      - name: Download theia folder
+      - name: Download IDE folder
         uses: actions/download-artifact@v2
         with:
           name: ide
-      - name: Unzip theia
+      - name: Unzip IDE folder
         run: |
           unzip ide.zip
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
           node-version: '10.x'
-      - name: Build theia for electron
+      - name: Build IDE for electron
         run: |
           npm install -g yarn
-          yarn
-          yarn update-m-extension
           yarn buildElectron
       - name: Package application
         run: |
