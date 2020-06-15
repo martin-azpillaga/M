@@ -123,24 +123,24 @@ class StandardLibrary
             reflect=>[name="reflect"],
             refract=>[name="refract"],
 	
-            or=>[name="or"],
-            and=>[name="and"],
-            not=>[name="not"],
+            or=>[name="||"],
+            and=>[name="&&"],
+            not=>[name="!"],
 	
-            addition=>[name="addition"],
-            subtraction=>[name="subtraction"],
-            multiplication=>[name="multiplication"],
-            division=>[name="division"],
+            addition=>[name="+"],
+            subtraction=>[name="-"],
+            multiplication=>[name="*"],
+            division=>[name="/"],
 	
-            equal=>[name="equal"],
-            inequal=>[name="inequal"],
+            equal=>[name="="],
+            inequal=>[name="!="],
 	
-            lower=>[name="lower"],
-            lowerOrEqual=>[name="lowerOrEqual"],
-            greaterOrEqual=>[name="greaterOrEqual"],
-            greater=>[name="greater"],
+            lower=>[name="<"],
+            lowerOrEqual=>[name="<="],
+            greaterOrEqual=>[name=">="],
+            greater=>[name=">"],
 	
-            size=>[name="size"],
+            size=>[name="#"],
             in=>[name="in"],
 	
             sin=>[name="sin"],
