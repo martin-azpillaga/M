@@ -5,6 +5,9 @@ import org.eclipse.xtext.generator.AbstractGenerator
 import org.eclipse.xtext.generator.IFileSystemAccess2
 import org.eclipse.xtext.generator.IGeneratorContext
 import m.validation.MValidator
+import java.util.HashMap
+import m.m.Function
+import m.validation.Type
 
 class MGenerator extends AbstractGenerator
 {
@@ -16,4 +19,10 @@ class MGenerator extends AbstractGenerator
 			new Unity().generate(game,fsa)
 		}
 	}
+}
+
+class Game
+{
+	public var functions = new HashMap<Function,Type>
+	public var components = new HashMap<String,Type>
 }
