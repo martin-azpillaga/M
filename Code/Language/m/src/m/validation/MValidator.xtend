@@ -18,8 +18,6 @@ import org.eclipse.xtext.validation.Check
 import static m.m.MPackage.Literals.*
 import static m.validation.MError.*
 import static m.validation.GroupingReason.*
-import static m.validation.TypingReason.*
-import static m.validation.StandardLibrary.*
 import m.m.Application
 import java.util.ArrayList
 import org.eclipse.emf.ecore.EStructuralFeature
@@ -27,7 +25,9 @@ import org.eclipse.emf.ecore.EObject
 import m.m.Binary
 import org.eclipse.xtext.EcoreUtil2
 import m.generator.Game
-
+import static m.validation.Type.*
+import static m.validation.SumType.*
+import static m.validation.ProductType.*
 
 class Group
 {
@@ -39,12 +39,7 @@ class GroupEntry
 {
 	public Expression expression
 	public ArrayList<GroupingReason> groupingReasons = new ArrayList<GroupingReason>
-	public ArrayList<Typing> types = new ArrayList<Typing>
-}
-class Typing
-{
-	public Type type
-	public TypingReason reason
+	public ArrayList<Type> types = new ArrayList<Type>
 }
 class MValidator extends AbstractMValidator
 {
@@ -126,7 +121,7 @@ class MValidator extends AbstractMValidator
 				val types = new HashSet<Type>
 				for (entry : group.entries)
 				{
-					types.addAll(entry.types.map[type])
+					types.addAll(entry.types)
 				}
 				if (types.contains(numeric) && #[number,number2,number3,number4].exists[types.contains(it)])
 				{
@@ -163,7 +158,7 @@ class MValidator extends AbstractMValidator
 						«library.errors.get(incompatible)»
 						«entry.groupingReasons.join(', ')»
 						«FOR type : entry.types»
-						«library.name(type.type)»: «library.typingReason.get(type.reason)»
+						«library.name(type)»: Standard symbol
 						«ENDFOR»
 						'''
 						if (entry.types.empty)
@@ -235,7 +230,7 @@ class MValidator extends AbstractMValidator
 					{
 						var innerRestore = new HashMap<String,Expression>(userValues)
 						declare(expression)
-						set(expression,entity, queryEntity)
+						set(expression,entity)
 						statement.statements.validate(null)
 						userValues = innerRestore
 					}
@@ -246,7 +241,7 @@ class MValidator extends AbstractMValidator
 				}
 				else if (standard !== null)
 				{
-					statement.expression.set(standard, standardSymbol)
+					statement.expression.set(standard)
 					statement.expression.validate
 					statement.statements.validate(null)
 				}
@@ -300,7 +295,7 @@ class MValidator extends AbstractMValidator
 		{
 			if (userValues.containsKey(expression.entity))
 			{
-				userValues.get(expression.entity).set(entity, cellEntity)
+				userValues.get(expression.entity).set(entity)
 			}
 			else
 			{
@@ -309,7 +304,7 @@ class MValidator extends AbstractMValidator
 			var standard = standardSymbols.get(expression.component)
 			if (standard !== null)
 			{
-				expression.set(standard, standardSymbol)
+				expression.set(standard)
 			}
 		}
 		else if (expression instanceof Binary)
@@ -339,11 +334,11 @@ class MValidator extends AbstractMValidator
 			{
 				for (var i = 0; i < arguments.size; i++)
 				{
-					arguments.get(i).set(standard.parameters.get(i), standardSymbol)
+					arguments.get(i).set(standard.parameters.get(i))
 				}
 				if (result !== null)
 				{
-					expression.set(result, standardSymbol)
+					expression.set(result)
 				}
 			}
 			else
@@ -458,7 +453,7 @@ class MValidator extends AbstractMValidator
 		}
 	}
 	
-	def private void set(Expression expression, Type type, TypingReason reason)
+	def private void set(Expression expression, Type type)
 	{
 		if (expression instanceof Cell)
 		{
@@ -470,16 +465,16 @@ class MValidator extends AbstractMValidator
 			{
 				group(expression,components.get(expression.component).entries.head.expression, sameComponent)
 			}
-			components.get(expression.component).entries.findFirst[it.expression==expression].types.add(new Typing=>[it.type=type it.reason=reason])
+			components.get(expression.component).entries.findFirst[it.expression==expression].types.add(type)
 		}
 		else if (!expressions.containsKey(expression))
 		{
 			group(expression,expression,null)
-			expressions.get(expression).entries.findFirst[it.expression==expression].types.add(new Typing=>[it.type=type it.reason=reason])
+			expressions.get(expression).entries.findFirst[it.expression==expression].types.add(type)
 		}
 		else
 		{
-			expressions.get(expression).entries.findFirst[it.expression==expression].types.add(new Typing=>[it.type=type it.reason=reason])
+			expressions.get(expression).entries.findFirst[it.expression==expression].types.add(type)
 		}
 	}
 	
