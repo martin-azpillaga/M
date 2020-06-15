@@ -17,9 +17,12 @@ import m.m.Value
 import org.eclipse.xtext.EcoreUtil2
 import org.eclipse.xtext.generator.IFileSystemAccess2
 
-import static m.validation.StandardLibrary.*
 import java.util.HashSet
 import m.validation.ExponentType
+import static m.validation.Symbols.*
+import static m.validation.Type.*
+import static m.validation.ProductType.*
+import static m.validation.PolymorphicType.*
 
 enum AccessKind
 {
