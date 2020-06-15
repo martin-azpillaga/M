@@ -18,79 +18,52 @@ jobs:
     steps:
       - name: Download repository
         uses: actions/checkout@v2
-      - name: Build Xtend
+      - name: Install java 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+      - name: Build language server
+        working-directory: Code/Language
         run: |
-          sudo apt install openjdk-11-jdk
-          sudo update-java-alternatives --set java-1.11.0-openjdk-amd64
-          cat >build.gradle <<EOL
-          plugins { id "org.xtext.xtend" version "2.0.8" }
-          repositories { mavenCentral() }
-          dependencies {
-              compile 'org.eclipse.xtend:org.eclipse.xtend.lib:2.21.0'
-              compile 'org.eclipse.emf:org.eclipse.emf.ecore:2.12.0'
-              compile 'org.eclipse.emf:org.eclipse.emf.common:2.18.0'
-          }
-          sourceSets { main.java.srcDirs = ['Code/m/src/m/build'] }
-          task execute (type: Exec) {
-              dependsOn generateXtext
-              commandLine "java", "-cp",
-              project.configurations.compile.getAsPath(),
-              "build/xtend/main/m/build/Main.java",
-              "Code/m"
-          }
-          task blockify (type: Exec) {
-              dependsOn execute
-              commandLine "java", "-cp",
-              project.configurations.compile.getAsPath()+
-              ":Code/build/classes/java/main",
-              "m.extra.Blockify",
-              "Code/m"
-          }
-          EOL
-          gradle blockify
-      - name: Build Markdown
+          mkdir m.ide m.ui
+          gradle shadowJar
+      - name: Install pandoc 2.9
         run: |
           sudo apt remove pandoc
           wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
           sudo dpkg -i pandoc-2.9.1-1-amd64.deb
-          mkdir -p Code/Theia/Documentation
-          find . -name "*.md" | sort | xargs -d "\n" pandoc --template Code/Theia/template.html --metadata title="M" > Code/Theia/Documentation/README.html
-      - name: Zip theia folder
-        working-directory: Code/Theia
-        run: zip -r theia.zip .
-      - name: Upload theia zip
+      - name: Build documentation
+        run: |
+          find . -name "*.md" | sort | xargs -d "\n" pandoc > Code/IDE/Documentation.html
+      - name: Upload IDE folder to github artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: theia
-          path: Code/Theia/theia.zip
+          name: ide
+          path: Code/IDE
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
           node-version: '10.x'
-      - name: Build theia for browser
-        working-directory: Code/Theia
+      - name: Install yarn and libx11
         run: |
           npm install -g yarn
           sudo apt install libx11-dev libxkbfile-dev
-          yarn
-          yarn update-m-extension
+      - name: Build ide for browser
+        working-directory: Code/IDE
+        run: |
           yarn buildBrowser
-      - name: Infer tests from documentation
-        working-directory: Code/Theia
+      - name: Build tests
         run: |
-          pandoc Pong.md -t json | node reader.js > test.js
-      - name: Move language server to root folder for testing with browser
-        run: cp Code/build/libs/Code-ls-ls.jar ls.jar
+          pandoc README.md -t json | node Automation/reader.js > Code/IDE/test.js
       - name: Run tests
-        working-directory: Code/Theia
+        working-directory: Code/IDE
         run: |
+          cp ../Language/build/libs/Language-ls-ls.jar ls.jar
+          cp ../../Automation/mobot.js mobot.js
           mkdir workspace
           yarn startBrowser workspace &> serverLog &
           Xvfb :3 &
           sleep 5 && xvfb-run yarn test
-      - name: Print out the server log
-        working-directory: Code/Theia
-        run: cat serverLog
   package:
     if: ${{ github.ref == 'refs/heads/master' }}
     needs: build
@@ -101,23 +74,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 100
     steps:
-      - name: Download theia folder
+      - name: Download IDE folder
         uses: actions/download-artifact@v2
         with:
-          name: theia
-      - name: Unzip theia
+          name: ide
+      - name: Unzip IDE folder
         run: |
-          unzip theia.zip
-          ls
+          unzip ide.zip
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
           node-version: '10.x'
-      - name: Build theia for electron
+      - name: Build IDE for electron
         run: |
           npm install -g yarn
-          yarn
-          yarn update-m-extension
           yarn buildElectron
       - name: Package application
         run: |
