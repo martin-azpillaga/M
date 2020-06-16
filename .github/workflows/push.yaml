@@ -63,7 +63,7 @@ jobs:
       - name: Run tests
         working-directory: Code/IDE
         run: |
-          cp ../Language/build/libs/Language-ls-ls.jar ls.jar
+          cp ../Language/build/libs/Language-ls-ls.jar ../../ls.jar
           cp ../../Automation/mobot.js mobot.js
           mkdir workspace
           yarn startBrowser workspace &> serverLog &
