@@ -139,7 +139,7 @@ class Unity
 		
 		if (isTag) return "";
 		
-		'''var «component»s_«entity» = «entity».ToComponentDataArray<«component»>(TempJob);'''
+		'''var «component»s_«entity» = GetArchetypeChunkComponentType<«component»>(«entry.value==AccessKind.read»)'''
 	}
 	
 	def private dispose(Entry<String,AccessKind> entry, String entity)
@@ -168,8 +168,10 @@ class Unity
 				var query = queries.get(a)
 				
 				'''
-				var entities_«a» = «a».ToEntityArray(TempJob);
+				var chunks_«a» = «a».CreateArchetypeChunkArray(TempJob);
+				var entities_«a» = GetArchetypeChunkEntityType();
 				«query.entrySet.join('\n',[toArray(a)])»
+				
 				for (var «a»_i = 0; «a»_i < «a».CalculateEntityCount(); «a»_i++)
 				{
 					var entity_«a» = entities_«a»[«a»_i];
