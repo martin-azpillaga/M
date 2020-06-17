@@ -86,6 +86,8 @@ class Symbols
 	public static val restitution = new Symbols=>[type=number]
 	public static val friction = new Symbols=>[type=number]
 	
+	public static val collisions = new Symbols=>[type=entityList]
+	
 	
 	public static val epsilon = new Symbols=>[type=constant]
 	public static val pi = new Symbols=>[type=constant]
