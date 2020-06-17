@@ -25,19 +25,23 @@ Binary returns Expression:
 		right=(Unary|Application|Value|Cell)
 	)*;
 Unary: operator=OPERATOR expression=(Unary|Application|Value|Cell);
-Application: name=IDENTIFIER '(' (arguments+=Binary (',' arguments+=Binary)*)? ')';
 
 Value: name=IDENTIFIER;
+Application: 
+	name=IDENTIFIER
+	 ('[' generic=IDENTIFIER ']')?
+	'(' (arguments+=Binary (',' arguments+=Binary)*)? ')';
+
 Cell: entity=IDENTIFIER '.' component=IDENTIFIER;
 
 Expression: Binary|Unary|Application|Value|Cell;
 
 terminal BLANKS: BLANK+;
 terminal IDENTIFIER: LETTER+;
-terminal OPERATOR: !(BLANK|LETTER|CONTROL|NUMBER|KEYWORD)+;
+terminal OPERATOR: !(BLANK|LETTER|CONTROL|NUMBER|KEYWORD)+|'<='|'>=';
 terminal UNRECOGNIZED: CONTROL|NUMBER;
 
-terminal fragment KEYWORD: '('|')'|'{'|'}'|'='|',';
+terminal fragment KEYWORD: '('|')'|'{'|'}'|'='|','|'['|']';
 terminal fragment BLANK: ZL|ZP|ZS|'\n'|'\r'|'\t';
 terminal fragment CONTROL: CC|CF|CO|CS;
 terminal fragment LETTER: LL|LM|LO|LT|LU;

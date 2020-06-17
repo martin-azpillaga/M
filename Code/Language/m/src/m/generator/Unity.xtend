@@ -335,6 +335,14 @@ class Unity
 			{
 				'''«e.arguments.get(1).code».Contains(entity_«e.arguments.get(0).code»)'''
 			}
+			else if (e.name == remove.name)
+			{
+				'''EntityManager.RemoveComponent<«e.generic»>(entity_«e.arguments.get(0).code»)'''
+			}
+			else if (e.name == add.name)
+			{
+				'''EntityManager.AddComponentData(entity_«e.arguments.get(0).code», new «e.generic»())'''
+			}
 			else
 			{
 				'''«application(e.name)»(«e.arguments.map[code].join(', ')»)'''
