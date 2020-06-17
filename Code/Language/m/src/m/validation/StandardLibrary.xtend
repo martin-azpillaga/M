@@ -94,6 +94,8 @@ class StandardLibrary
             geometry=>[name="geometry"],
             restitution=>[name="restitution"],
             friction=>[name="friction"],
+            
+            collisions=>[name="collisions"],
 	
 	
             epsilon=>[name="epsilon"],
