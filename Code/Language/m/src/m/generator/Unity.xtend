@@ -23,6 +23,7 @@ import static m.validation.Symbols.*
 import static m.validation.Type.*
 import static m.validation.ProductType.*
 import static m.validation.PolymorphicType.*
+import m.validation.StandardLibrary
 
 enum AccessKind
 {
@@ -31,14 +32,16 @@ enum AccessKind
 
 class Unity
 {
-	IFileSystemAccess2 fileSystem;
+	IFileSystemAccess2 fileSystem
+	StandardLibrary library
 	
 	var queries = new HashMap<String,HashMap<String,AccessKind>>
 	var namespaces = new HashSet<String>
 	
 	def void generate(Game game, IFileSystemAccess2 fileSystem)
 	{		
-		this.fileSystem = fileSystem;
+		this.fileSystem = fileSystem
+		this.library = StandardLibrary.English
 		
 		for (component : game.components.entrySet)
 		{
@@ -92,6 +95,8 @@ class Unity
 		
 		var name = function.name
 		
+		var statements = function.statements.map[code].n
+		
 		fileSystem.generateFile('''Unity/Assets/Code/Systems/«name».cs''',
 		
 		'''
@@ -112,7 +117,7 @@ class Unity
 				
 				protected override void OnUpdate()
 				{
-					«function.statements.map[code].n»
+					«statements»
 				}
 			}
 		}
@@ -129,7 +134,7 @@ class Unity
 	{
 		var write = entry.value==AccessKind.write?'Write':'Only'
 		
-		'''Read«write»<«entry.key»>()'''
+		'''Read«write»<«component(entry.key)»>()'''
 	}
 	
 	def private toArray(Entry<String,AccessKind> entry, String entity)
@@ -139,7 +144,7 @@ class Unity
 		
 		if (isTag) return "";
 		
-		'''var «component»s_«entity» = GetArchetypeChunkComponentType<«component»>(«entry.value==AccessKind.read»)'''
+		'''var «component»s_«entity» = «entity».ToComponentDataArray<«component(component)»>(TempJob);'''
 	}
 	
 	def private dispose(Entry<String,AccessKind> entry, String entity)
@@ -168,8 +173,7 @@ class Unity
 				var query = queries.get(a)
 				
 				'''
-				var chunks_«a» = «a».CreateArchetypeChunkArray(TempJob);
-				var entities_«a» = GetArchetypeChunkEntityType();
+				var entities_«a» = «a».ToEntityArray(TempJob);
 				«query.entrySet.join('\n',[toArray(a)])»
 				
 				for (var «a»_i = 0; «a»_i < «a».CalculateEntityCount(); «a»_i++)
@@ -230,11 +234,11 @@ class Unity
 	
 	def private String code(Expression e)
 	{
-		if (e instanceof Binary) '''(«e.left.code» «e.operator» «e.right.code»)'''
-		else if (e instanceof Unary) '''(«e.operator» «e.expression.code»)'''
+		if (e instanceof Binary) '''«e.left.code» «e.operator» «e.right.code»'''
+		else if (e instanceof Unary) '''«e.operator» «e.expression.code»'''
 		else if (e instanceof Value) '''«e.name»'''
-		else if (e instanceof Cell) '''«e.component»_«e.entity».Value'''
-		else if (e instanceof Application) '''«e.name»(«e.arguments.map[code].join(', ')»)'''
+		else if (e instanceof Cell) '''«e.component»_«e.entity».«field(e.component)»'''
+		else if (e instanceof Application) '''«application(e.name)»(«e.arguments.map[code].join(', ')»)'''
 	}
 	
 	def private String unity(Type type)
@@ -248,15 +252,79 @@ class Unity
 				return "Entity"
 			}
 			case number: "float"
-			case number2: "float2"
+			case number2:
+			{
+				namespaces.add("Unity.Mathematics");
+				return "float2"
+			}
 			case number3:
 			{
 				namespaces.add("Unity.Mathematics")
 				"float3"	
 			}
-			case number4: "float4"
+			case number4:
+			{
+				namespaces.add("Unity.Mathematics")
+				"float4"
+			}
 			case proposition: "bool"
 			case entityList: "SubScene"
+		}
+	}
+	
+	def private String component(String name)
+	{
+		var found = library.symbols.findFirst[it.name == name]
+		if (found === null)
+		{
+			return name
+		}
+		else
+		{
+			switch found
+			{
+				case velocity: {namespaces.add("Unity.Physics") return "PhysicsVelocity"}
+				case inputValue: return "inputValue"
+				case timeout: return "timeout"
+			}
+		}
+		
+	}
+	
+	def private String field(String name)
+	{
+		var found = library.symbols.findFirst[it.name == name]
+		if (found === null)
+		{
+			return "Value"
+		}
+		else
+		{
+			switch found
+			{
+				case velocity: {namespaces.add("Unity.Physics") return "Linear"}
+				case inputValue: return "Value"
+				case timeout: return "Value"
+			}
+		}
+	}
+	
+	def private String application(String name)
+	{
+		var found = library.symbols.findFirst[it.name==name]
+		if (found === null)
+		{
+			return "userDefinedFunction"
+		}
+		else
+		{
+			switch found
+			{
+				case cos: { namespaces.add("static Unity.Mathematics.math") return "cos" }
+				case sin: { namespaces.add("static Unity.Mathematics.math") return "sin" }
+				case random: { namespaces.add("static M.Library") return "random"}
+				case xyz: { namespaces.add("static M.Library") return "xyz"}
+			}
 		}
 	}
 	

@@ -6,6 +6,15 @@ import static m.validation.PolymorphicType.*
 
 class Type
 {
+	override toString()
+	{
+		if (this == number) { return "number" }
+		else if ( this == entity ) { return "entity" }
+		else if (this == unit) { return "unit"}
+		else if (this == proposition) {return "proposition"}
+		else if (this == numeric){return "numeric"}
+		else return "unknown"
+	}
 	public static val any = new Type
 	public static val unit = new Type
 	public static val number = new Type
@@ -27,6 +36,11 @@ class ProductType extends Type
 	public Type left
 	public Type right
 	
+	override toString()
+	{
+		return '''«left.toString», «right.toString»'''
+	}
+	
 	public static val number2 = new ProductType=>[left = number right=number]
 	public static val number3 = new ProductType=>[left=number2 right=number]
 	public static val number4 = new ProductType=>[left=number3 right=number]
@@ -37,6 +51,11 @@ class SumType extends Type
 	public Type left
 	public Type right
 	
+	override toString()
+	{
+		return '''«left.toString»|«right.toString»'''
+	}
+	
 	public static val numeric = new Type
 }
 
@@ -44,6 +63,11 @@ class ExponentType extends Type
 {
 	public Type left
 	public Type right
+	
+	override toString()
+	{
+		return '''«left.toString»->«right.toString»'''
+	}
 	
 	public static val numericNumeric = new ExponentType=>[left=numeric right=numeric]
 	public static val numericNumericNumeric = new ExponentType=>[left=numeric right=numericNumeric]
@@ -77,6 +101,9 @@ class ExponentType extends Type
 	public static val numberNumber2Number = new ExponentType=>[left=number right=number2Number]
 	public static val number2Number2Number = new ExponentType=>[left=number2 right=number2Number]
 	public static val numberNumber2Number2Number = new ExponentType=>[left=number right=number2Number2Number]
+	public static val numberNumber3 = new ExponentType=>[left=number right=number3]
+	public static val numberNumberNumber3 = new ExponentType=>[left=number right=numberNumber3]
+	public static val numberNumberNumberNumber3 = new ExponentType=>[left=number right=numberNumberNumber3]
 }
 
 class PolymorphicType extends Type
