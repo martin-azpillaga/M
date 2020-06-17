@@ -34,6 +34,7 @@ class Unity
 {
 	IFileSystemAccess2 fileSystem
 	StandardLibrary library
+	Game game
 	
 	var queries = new HashMap<String,HashMap<String,AccessKind>>
 	var namespaces = new HashSet<String>
@@ -42,6 +43,7 @@ class Unity
 	{		
 		this.fileSystem = fileSystem
 		this.library = StandardLibrary.English
+		this.game = game
 		
 		for (component : game.components.entrySet)
 		{
@@ -112,7 +114,7 @@ class Unity
 				«['''EntityQuery «it»;'''].foreach(queryName)»
 				protected override void OnCreate()
 				{
-					«['''«it» = GetEntityQuery(«queries.get(it).entrySet.map[access].join(', ')»)'''].foreach(queryName)»;
+					«['''«it» = GetEntityQuery(«queries.get(it).entrySet.map[access].join(', ')»);'''].foreach(queryName)»
 				}
 				
 				protected override void OnUpdate()
@@ -139,27 +141,46 @@ class Unity
 	
 	def private toArray(Entry<String,AccessKind> entry, String entity)
 	{
-		var component = entry.key
-		var isTag = entry.value == AccessKind.tag
-		
-		if (isTag) return "";
+		val component = entry.key
+		if (entry.value == AccessKind.tag)
+		{
+			return ""
+		}
+		if (component.isBuffer)
+		{
+			return ""
+		}
 		
 		'''var «component»s_«entity» = «entity».ToComponentDataArray<«component(component)»>(TempJob);'''
 	}
 	
 	def private dispose(Entry<String,AccessKind> entry, String entity)
 	{
-		var component = entry.key
-		var isTag = entry.value == AccessKind.tag
-		
-		if (isTag) return "";
-		
+		val component = entry.key
+		if (entry.value == AccessKind.tag)
+		{
+			return ""
+		}
+		if (component.isBuffer)
+		{
+			return ""
+		}
+				
 		'''«component»s_«entity».Dispose();'''
 	}
 	
 	def private toComponent(Entry<String,AccessKind> entry, String entity)
 	{
-		var component = entry.key
+		val component = entry.key
+		if (entry.value == AccessKind.tag)
+		{
+			return ""
+		}
+		if (component.isBuffer)
+		{
+			return '''var «component»_«entity» = EntityManager.GetBuffer<«component(component)»>(entity_«entity»);'''
+		}
+		
 		'''var «component»_«entity» = «component»s_«entity»[«entity»_i];'''
 	}
 	
@@ -232,13 +253,47 @@ class Unity
 		}
 	}
 	
+	def private isBuffer(String component)
+	{
+		var found = library.symbols.findFirst[it.name==component]
+		if (found !== null && found.type == entityList)
+		{
+			return true
+		}
+		else if (game.components.get(component) == entityList)
+		{
+			return true		
+		}
+		return false
+	}
+	
 	def private String code(Expression e)
 	{
 		if (e instanceof Binary) '''«e.left.code» «e.operator» «e.right.code»'''
 		else if (e instanceof Unary) '''«e.operator» «e.expression.code»'''
 		else if (e instanceof Value) '''«e.name»'''
-		else if (e instanceof Cell) '''«e.component»_«e.entity».«field(e.component)»'''
-		else if (e instanceof Application) '''«application(e.name)»(«e.arguments.map[code].join(', ')»)'''
+		else if (e instanceof Cell)
+		{
+			if (e.component.isBuffer)
+			{
+				'''«e.component»_«e.entity»'''
+			}
+			else
+			{
+				'''«e.component»_«e.entity».«field(e.component)»'''
+			}
+		}
+		else if (e instanceof Application)
+		{
+			if (e.name == in.name)
+			{
+				'''«e.arguments.get(1).code».Contains(entity_«e.arguments.get(0).code»)'''
+			}
+			else
+			{
+				'''«application(e.name)»(«e.arguments.map[code].join(', ')»)'''
+			}
+		}
 	}
 	
 	def private String unity(Type type)
@@ -286,6 +341,8 @@ class Unity
 				case velocity: {namespaces.add("Unity.Physics") return "PhysicsVelocity"}
 				case inputValue: return "inputValue"
 				case timeout: return "timeout"
+				case position: {namespaces.add("Unity.Transforms") return "Translation"}
+				case collisions: {return "Collisions"}
 			}
 		}
 		
@@ -305,6 +362,8 @@ class Unity
 				case velocity: {namespaces.add("Unity.Physics") return "Linear"}
 				case inputValue: return "Value"
 				case timeout: return "Value"
+				case position: return "Value"
+				case collisions: return "Value"
 			}
 		}
 	}
@@ -324,6 +383,7 @@ class Unity
 				case sin: { namespaces.add("static Unity.Mathematics.math") return "sin" }
 				case random: { namespaces.add("static M.Library") return "random"}
 				case xyz: { namespaces.add("static M.Library") return "xyz"}
+				case in: { namespaces.add("static M.Library") return "contains"}
 			}
 		}
 	}
