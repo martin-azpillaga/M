@@ -134,7 +134,7 @@ class StandardLibrary
             multiplication=>[name="*"],
             division=>[name="/"],
 	
-            equal=>[name="="],
+            equal=>[name="=="],
             inequal=>[name="!="],
 	
             lower=>[name="<"],
