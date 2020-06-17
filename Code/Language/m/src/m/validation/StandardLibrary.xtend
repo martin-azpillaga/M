@@ -142,6 +142,7 @@ class StandardLibrary
 	
             size=>[name="#"],
             in=>[name="in"],
+            xyz=>[name="xyz"],
 	
             sin=>[name="sin"],
             cos=>[name="cos"],

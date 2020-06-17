@@ -391,7 +391,7 @@ class MValidator extends AbstractMValidator
 		while (t.right instanceof ExponentType)
 		{
 			result.add(t.left)
-			t = type.right as ExponentType
+			t = t.right as ExponentType
 		}
 		result.add(t.left)
 		result.add(t.right)
