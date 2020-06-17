@@ -43,7 +43,7 @@ class StandardLibrary
             text=>[name="text"],
             image=>[name="image"],
             button=>[name="button"],
-            numberLabel=>[name="numberLabel"],
+            numberLabel=>[name="number"],
 	
             viewAngle=>[name="viewAngle"],
             viewDistance=>[name="viewDistance"],
