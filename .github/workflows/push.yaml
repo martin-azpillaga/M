@@ -74,8 +74,8 @@ jobs:
     needs: build
     strategy:
       matrix:
-        os: [ubuntu-latest]
-      fail-fast: true
+        os: [ubuntu-latest, windows-latest]
+      fail-fast: false
     runs-on: ${{ matrix.os }}
     timeout-minutes: 100
     steps:
@@ -92,6 +92,7 @@ jobs:
           node-version: '10.x'
       - name: Build IDE for electron
         run: |
+          npm config set python python2.7
           npm install -g yarn
           yarn buildElectron
       - name: Package application
