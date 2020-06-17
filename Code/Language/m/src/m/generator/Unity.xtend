@@ -40,7 +40,7 @@ class Unity
 	var namespaces = new HashSet<String>
 	
 	def void generate(Game game, IFileSystemAccess2 fileSystem)
-	{		
+	{
 		this.fileSystem = fileSystem
 		this.library = StandardLibrary.English
 		this.game = game
@@ -68,22 +68,68 @@ class Unity
 		
 		var classifier = type.valueType ? "struct" : "class"
 		var field = type != unit? '''public «type.unity» Value;''' : ""
+		var superInterface = type != entityList? 'IComponentData' : 'IBufferElementData, IEntity'
 		
-		fileSystem.generateFile('''Unity/Assets/Code/Components/«name».cs''',
-		
-		'''
-		«['''using «it»;'''].foreach(namespaces)»
-		
-		namespace M
+		if (type == entityList)
 		{
-			[GenerateAuthoringComponent]
-			public «classifier» «name» : IComponentData
+			fileSystem.generateFile('''Unity/Assets/Code/Components/«name»Authoring.cs''',
+			
+			'''
+			using UnityEngine;
+			using Unity.Entities;
+			using System.Collections.Generic;
+			
+			namespace M
 			{
-				«field»
+				public struct «name» : IBufferElementData, IEntity
+				{
+					public Entity Value
+					{
+						get;
+						set;
+					}
+				}
+				public class «name»Authoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
+				{
+					public List<GameObject> Value;
+					public void Convert (Entity entity, EntityManager entityManager, GameObjectConversionSystem gameObjectConversionSystem)
+					{
+						var buffer = entityManager.AddBuffer<«name»>(entity);
+						foreach (var v in Value)
+						{
+							buffer.Add(new «name» { Value = gameObjectConversionSystem.GetPrimaryEntity(v) });
+						}
+					}
+					public void DeclareReferencedPrefabs (List<GameObject> referencedPrefabs)
+					{
+						foreach (var v in Value)
+						{
+							referencedPrefabs.Add(v);
+						}
+					}
+				}
 			}
+			'''
+			)
 		}
-		'''
-		)
+		else
+		{
+			fileSystem.generateFile('''Unity/Assets/Code/Components/«name».cs''',
+			
+			'''
+			«['''using «it»;'''].foreach(namespaces)»
+			
+			namespace M
+			{
+				[GenerateAuthoringComponent]
+				public «classifier» «name» : «superInterface»
+				{
+					«field»
+				}
+			}
+			'''
+			)
+		}
 	}
 	
 	def private generate(Function function)
@@ -323,7 +369,7 @@ class Unity
 				"float4"
 			}
 			case proposition: "bool"
-			case entityList: "SubScene"
+			case entityList: "Entity"
 		}
 	}
 	
@@ -343,6 +389,7 @@ class Unity
 				case timeout: return "timeout"
 				case position: {namespaces.add("Unity.Transforms") return "Translation"}
 				case collisions: {return "Collisions"}
+				case numberLabel: {return "number"}
 			}
 		}
 		
@@ -364,6 +411,7 @@ class Unity
 				case timeout: return "Value"
 				case position: return "Value"
 				case collisions: return "Value"
+				case numberLabel: return "Value"
 			}
 		}
 	}
