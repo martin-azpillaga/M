@@ -86,6 +86,8 @@ class Symbols
 	public static val restitution = new Symbols=>[type=number]
 	public static val friction = new Symbols=>[type=number]
 	
+	public static val collisions = new Symbols=>[type=entityList]
+	
 	
 	public static val epsilon = new Symbols=>[type=constant]
 	public static val pi = new Symbols=>[type=constant]
@@ -133,6 +135,7 @@ class Symbols
 	
 	public static val size = new Symbols=>[type=entityListNumber]
 	public static val in = new Symbols=>[type=entityEntityListProposition]
+	public static val xyz = new Symbols=>[type=numberNumberNumberNumber3]
 	
 	public static val sin = new Symbols=>[type=numberNumber]
 	public static val cos = new Symbols=>[type=numberNumber]
@@ -146,7 +149,7 @@ class Symbols
 	public static val log10 = new Symbols=>[type=numberNumber]
 	public static val pow = new Symbols=>[type=numberNumber]
 	public static val sqrt = new Symbols=>[type=numberNumber]
-	public static val random = new Symbols=>[type=numberNumber]
+	public static val random = new Symbols=>[type=number2Number]
 	
 	public static val create = new Symbols=>[type=entityEmpty]
 	public static val destroy = new Symbols=>[type=entityEmpty]

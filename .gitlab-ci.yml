@@ -1,4 +1,0 @@
-lint:
-  script:
-    - echo "Hello World"
-    - echo "Bye"
