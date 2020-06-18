@@ -7,5 +7,5 @@ enum MError
 
 enum GroupingReason
 {
-	assignment, sameComponent, sameVariable, parameterArgument, resultReturn
+	assignment, sameComponent, sameVariable, parameterArgument, resultReturn, vectorArithmetic
 }

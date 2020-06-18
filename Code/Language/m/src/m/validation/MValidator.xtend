@@ -28,6 +28,7 @@ import m.generator.Game
 import static m.validation.Type.*
 import static m.validation.SumType.*
 import static m.validation.ProductType.*
+import static m.validation.ExponentType.*
 
 class Group
 {
@@ -339,6 +340,15 @@ class MValidator extends AbstractMValidator
 				if (result !== null)
 				{
 					expression.set(result)
+					if (standard == numericNumberNumeric)
+					{
+						group(arguments.get(0), expression, vectorArithmetic)
+					}
+					else if (standard == numericNumericNumeric)
+					{
+						group(arguments.get(0), arguments.get(1), vectorArithmetic)
+						group(arguments.get(0), expression, vectorArithmetic)
+					}
 				}
 			}
 			else
@@ -381,7 +391,7 @@ class MValidator extends AbstractMValidator
 		while (t.right instanceof ExponentType)
 		{
 			result.add(t.left)
-			t = type.right as ExponentType
+			t = t.right as ExponentType
 		}
 		result.add(t.left)
 		result.add(t.right)

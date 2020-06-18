@@ -23,27 +23,27 @@ import static m.validation.Symbols.*
 import static m.validation.Type.*
 import static m.validation.ProductType.*
 import static m.validation.PolymorphicType.*
+import m.validation.StandardLibrary
 
 enum AccessKind
 {
 	read, write, tag
 }
-class Game
-{
-	public var functions = new HashMap<Function,Type>
-	public var components = new HashMap<String,Type>
-}
 
 class Unity
 {
-	IFileSystemAccess2 fileSystem;
+	IFileSystemAccess2 fileSystem
+	StandardLibrary library
+	Game game
 	
 	var queries = new HashMap<String,HashMap<String,AccessKind>>
 	var namespaces = new HashSet<String>
 	
 	def void generate(Game game, IFileSystemAccess2 fileSystem)
-	{		
-		this.fileSystem = fileSystem;
+	{
+		this.fileSystem = fileSystem
+		this.library = StandardLibrary.English
+		this.game = game
 		
 		for (component : game.components.entrySet)
 		{
@@ -68,22 +68,68 @@ class Unity
 		
 		var classifier = type.valueType ? "struct" : "class"
 		var field = type != unit? '''public «type.unity» Value;''' : ""
+		var superInterface = type != entityList? 'IComponentData' : 'IBufferElementData, IEntity'
 		
-		fileSystem.generateFile('''Unity/Assets/Code/Components/«name».cs''',
-		
-		'''
-		«['''using «it»;'''].foreach(namespaces)»
-		
-		namespace M
+		if (type == entityList)
 		{
-			[GenerateAuthoringComponent]
-			public «classifier» «name» : IComponentData
+			fileSystem.generateFile('''Unity/Assets/Code/Components/«name»Authoring.cs''',
+			
+			'''
+			using UnityEngine;
+			using Unity.Entities;
+			using System.Collections.Generic;
+			
+			namespace M
 			{
-				«field»
+				public struct «name» : IBufferElementData, IEntity
+				{
+					public Entity Value
+					{
+						get;
+						set;
+					}
+				}
+				public class «name»Authoring : MonoBehaviour, IConvertGameObjectToEntity, IDeclareReferencedPrefabs
+				{
+					public List<GameObject> Value;
+					public void Convert (Entity entity, EntityManager entityManager, GameObjectConversionSystem gameObjectConversionSystem)
+					{
+						var buffer = entityManager.AddBuffer<«name»>(entity);
+						foreach (var v in Value)
+						{
+							buffer.Add(new «name» { Value = gameObjectConversionSystem.GetPrimaryEntity(v) });
+						}
+					}
+					public void DeclareReferencedPrefabs (List<GameObject> referencedPrefabs)
+					{
+						foreach (var v in Value)
+						{
+							referencedPrefabs.Add(v);
+						}
+					}
+				}
 			}
+			'''
+			)
 		}
-		'''
-		)
+		else
+		{
+			fileSystem.generateFile('''Unity/Assets/Code/Components/«name».cs''',
+			
+			'''
+			«['''using «it»;'''].foreach(namespaces)»
+			
+			namespace M
+			{
+				[GenerateAuthoringComponent]
+				public «classifier» «name» : «superInterface»
+				{
+					«field»
+				}
+			}
+			'''
+			)
+		}
 	}
 	
 	def private generate(Function function)
@@ -96,6 +142,8 @@ class Unity
 		var queryName = queries.keySet
 		
 		var name = function.name
+		
+		var statements = function.statements.map[code].n
 		
 		fileSystem.generateFile('''Unity/Assets/Code/Systems/«name».cs''',
 		
@@ -112,12 +160,12 @@ class Unity
 				«['''EntityQuery «it»;'''].foreach(queryName)»
 				protected override void OnCreate()
 				{
-					«['''«it» = GetEntityQuery(«queries.get(it).entrySet.map[access].join(', ')»)'''].foreach(queryName)»;
+					«['''«it» = GetEntityQuery(«queries.get(it).entrySet.map[access].join(', ')»);'''].foreach(queryName)»
 				}
 				
 				protected override void OnUpdate()
 				{
-					«function.statements.map[code].n»
+					«statements»
 				}
 			}
 		}
@@ -134,32 +182,51 @@ class Unity
 	{
 		var write = entry.value==AccessKind.write?'Write':'Only'
 		
-		'''Read«write»<«entry.key»>()'''
+		'''Read«write»<«component(entry.key)»>()'''
 	}
 	
 	def private toArray(Entry<String,AccessKind> entry, String entity)
 	{
-		var component = entry.key
-		var isTag = entry.value == AccessKind.tag
+		val component = entry.key
+		if (entry.value == AccessKind.tag)
+		{
+			return ""
+		}
+		if (component.isBuffer)
+		{
+			return ""
+		}
 		
-		if (isTag) return "";
-		
-		'''var «component»s_«entity» = «entity».ToComponentDataArray<«component»>(TempJob);'''
+		'''var «component»s_«entity» = «entity».ToComponentDataArray<«component(component)»>(TempJob);'''
 	}
 	
 	def private dispose(Entry<String,AccessKind> entry, String entity)
 	{
-		var component = entry.key
-		var isTag = entry.value == AccessKind.tag
-		
-		if (isTag) return "";
-		
+		val component = entry.key
+		if (entry.value == AccessKind.tag)
+		{
+			return ""
+		}
+		if (component.isBuffer)
+		{
+			return ""
+		}
+				
 		'''«component»s_«entity».Dispose();'''
 	}
 	
 	def private toComponent(Entry<String,AccessKind> entry, String entity)
 	{
-		var component = entry.key
+		val component = entry.key
+		if (entry.value == AccessKind.tag)
+		{
+			return ""
+		}
+		if (component.isBuffer)
+		{
+			return '''var «component»_«entity» = EntityManager.GetBuffer<«component(component)»>(entity_«entity»);'''
+		}
+		
 		'''var «component»_«entity» = «component»s_«entity»[«entity»_i];'''
 	}
 	
@@ -175,6 +242,7 @@ class Unity
 				'''
 				var entities_«a» = «a».ToEntityArray(TempJob);
 				«query.entrySet.join('\n',[toArray(a)])»
+				
 				for (var «a»_i = 0; «a»_i < «a».CalculateEntityCount(); «a»_i++)
 				{
 					var entity_«a» = entities_«a»[«a»_i];
@@ -231,13 +299,55 @@ class Unity
 		}
 	}
 	
+	def private isBuffer(String component)
+	{
+		var found = library.symbols.findFirst[it.name==component]
+		if (found !== null && found.type == entityList)
+		{
+			return true
+		}
+		else if (game.components.get(component) == entityList)
+		{
+			return true		
+		}
+		return false
+	}
+	
 	def private String code(Expression e)
 	{
-		if (e instanceof Binary) '''(«e.left.code» «e.operator» «e.right.code»)'''
-		else if (e instanceof Unary) '''(«e.operator» «e.expression.code»)'''
+		if (e instanceof Binary) '''«e.left.code» «e.operator» «e.right.code»'''
+		else if (e instanceof Unary) '''«e.operator» «e.expression.code»'''
 		else if (e instanceof Value) '''«e.name»'''
-		else if (e instanceof Cell) '''«e.component»_«e.entity».Value'''
-		else if (e instanceof Application) '''«e.name»(«e.arguments.map[code].join(', ')»)'''
+		else if (e instanceof Cell)
+		{
+			if (e.component.isBuffer)
+			{
+				'''«e.component»_«e.entity»'''
+			}
+			else
+			{
+				'''«e.component»_«e.entity».«field(e.component)»'''
+			}
+		}
+		else if (e instanceof Application)
+		{
+			if (e.name == in.name)
+			{
+				'''«e.arguments.get(1).code».Contains(entity_«e.arguments.get(0).code»)'''
+			}
+			else if (e.name == remove.name)
+			{
+				'''EntityManager.RemoveComponent<«e.generic»>(entity_«e.arguments.get(0).code»)'''
+			}
+			else if (e.name == add.name)
+			{
+				'''EntityManager.AddComponentData(entity_«e.arguments.get(0).code», new «e.generic»())'''
+			}
+			else
+			{
+				'''«application(e.name)»(«e.arguments.map[code].join(', ')»)'''
+			}
+		}
 	}
 	
 	def private String unity(Type type)
@@ -251,15 +361,86 @@ class Unity
 				return "Entity"
 			}
 			case number: "float"
-			case number2: "float2"
+			case number2:
+			{
+				namespaces.add("Unity.Mathematics");
+				return "float2"
+			}
 			case number3:
 			{
 				namespaces.add("Unity.Mathematics")
 				"float3"	
 			}
-			case number4: "float4"
+			case number4:
+			{
+				namespaces.add("Unity.Mathematics")
+				"float4"
+			}
 			case proposition: "bool"
-			case entityList: "SubScene"
+			case entityList: "Entity"
+		}
+	}
+	
+	def private String component(String name)
+	{
+		var found = library.symbols.findFirst[it.name == name]
+		if (found === null)
+		{
+			return name
+		}
+		else
+		{
+			switch found
+			{
+				case velocity: {namespaces.add("Unity.Physics") return "PhysicsVelocity"}
+				case inputValue: return "inputValue"
+				case timeout: return "timeout"
+				case position: {namespaces.add("Unity.Transforms") return "Translation"}
+				case collisions: {return "Collisions"}
+				case numberLabel: {return "number"}
+			}
+		}
+		
+	}
+	
+	def private String field(String name)
+	{
+		var found = library.symbols.findFirst[it.name == name]
+		if (found === null)
+		{
+			return "Value"
+		}
+		else
+		{
+			switch found
+			{
+				case velocity: {namespaces.add("Unity.Physics") return "Linear"}
+				case inputValue: return "Value"
+				case timeout: return "Value"
+				case position: return "Value"
+				case collisions: return "Value"
+				case numberLabel: return "Value"
+			}
+		}
+	}
+	
+	def private String application(String name)
+	{
+		var found = library.symbols.findFirst[it.name==name]
+		if (found === null)
+		{
+			return "userDefinedFunction"
+		}
+		else
+		{
+			switch found
+			{
+				case cos: { namespaces.add("static Unity.Mathematics.math") return "cos" }
+				case sin: { namespaces.add("static Unity.Mathematics.math") return "sin" }
+				case random: { namespaces.add("static M.Library") return "random"}
+				case xyz: { namespaces.add("static M.Library") return "xyz"}
+				case in: { namespaces.add("static M.Library") return "contains"}
+			}
 		}
 	}
 	

@@ -43,7 +43,7 @@ class StandardLibrary
             text=>[name="text"],
             image=>[name="image"],
             button=>[name="button"],
-            numberLabel=>[name="numberLabel"],
+            numberLabel=>[name="number"],
 	
             viewAngle=>[name="viewAngle"],
             viewDistance=>[name="viewDistance"],
@@ -94,6 +94,8 @@ class StandardLibrary
             geometry=>[name="geometry"],
             restitution=>[name="restitution"],
             friction=>[name="friction"],
+            
+            collisions=>[name="collisions"],
 	
 	
             epsilon=>[name="epsilon"],
@@ -132,7 +134,7 @@ class StandardLibrary
             multiplication=>[name="*"],
             division=>[name="/"],
 	
-            equal=>[name="="],
+            equal=>[name="=="],
             inequal=>[name="!="],
 	
             lower=>[name="<"],
@@ -142,6 +144,7 @@ class StandardLibrary
 	
             size=>[name="#"],
             in=>[name="in"],
+            xyz=>[name="xyz"],
 	
             sin=>[name="sin"],
             cos=>[name="cos"],
