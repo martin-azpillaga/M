@@ -17,6 +17,7 @@ class MGenerator extends AbstractGenerator
 		if (game !== null)
 		{
 			new Unity().generate(game,fsa)
+			new Godot().generate(game,fsa)
 		}
 	}
 }
