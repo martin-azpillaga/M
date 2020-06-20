@@ -51,3 +51,11 @@ func _process(delta):
 			var minus = actions[1]
 			
 			inputValue.Value = Input.get_action_strength(plus) - Input.get_action_strength(minus)
+	
+	for entity in entities(["RigidBody","collisions"]):
+		var body = entity["RigidBody"]
+		var collisions = entity["collisions"]
+		
+		collisions.Value = body.get_colliding_bodies()
+		if (collisions.Value.size() > 0):
+			print(collisions.Value)
