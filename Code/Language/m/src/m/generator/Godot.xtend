@@ -89,6 +89,7 @@ class Godot
 				
 				'''
 				for «a» in root.entities([«query.keySet.map['''"«it.component»"'''].join(",")»]):
+					var entity_«a» = «a»["entity"]
 					«FOR component : query.keySet»
 					var «component»_«a» = «a»["«component.component»"];
 					«ENDFOR»
@@ -100,18 +101,15 @@ class Godot
 				var condition = code(statement.expression)
 				'''
 				if «condition»:
-				{
 					«statement.statements.join('\n',[code])»
-				}
 				'''
 			}
 			else if (statement.name == iteration.name)
 			{
 				'''
 				while «statement.expression.code»:
-				{
 					«statement.statements.join('\n', [code])»
-				}
+				
 				'''
 			}
 			
