@@ -24,3 +24,15 @@ func entities(archetype):
 			result.append(current)
 	
 	return result
+
+func _process(delta):
+	for entity in entities(["timer","elapsed","timeout"]):
+		var timer = entity["timer"]
+		var elapsed = entity["elapsed"]
+		var timeout = entity["timeout"]
+		
+		var next = elapsed.Value + delta
+		elapsed.Value = fmod(next, timer.Value)
+		
+		timeout.Value = next >= timer.Value
+		print(elapsed.Value)
