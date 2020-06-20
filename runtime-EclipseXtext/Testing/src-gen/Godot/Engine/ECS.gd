@@ -35,4 +35,19 @@ func _process(delta):
 		elapsed.Value = fmod(next, timer.Value)
 		
 		timeout.Value = next >= timer.Value
-		print(elapsed.Value)
+	
+	for entity in entities(["input","inputValue"]):
+		var input = entity["input"]
+		var inputValue = entity["inputValue"]
+		
+		var actions = input.Value.split("-")
+		
+		var n = actions.size()
+		
+		if n == 1:
+			inputValue.Value = Input.get_action_strength(input.Value)
+		elif n == 2:
+			var plus = actions[0]
+			var minus = actions[1]
+			
+			inputValue.Value = Input.get_action_strength(plus) - Input.get_action_strength(minus)
