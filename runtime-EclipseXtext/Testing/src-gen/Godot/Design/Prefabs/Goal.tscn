@@ -1,0 +1,52 @@
+[gd_scene load_steps=10 format=2]
+
+[ext_resource path="res://Engine/Collisions.gd" type="Script" id=1]
+[ext_resource path="res://Code/Components/respawnPoint.gd" type="Script" id=2]
+[ext_resource path="res://Code/Components/respawnVelocity.gd" type="Script" id=3]
+[ext_resource path="res://Engine/label.gd" type="Script" id=4]
+[ext_resource path="res://Engine/number.gd" type="Script" id=5]
+[ext_resource path="res://Code/Components/maxNumber.gd" type="Script" id=6]
+[ext_resource path="res://Code/Components/resetNumber.gd" type="Script" id=7]
+
+[sub_resource type="BoxShape" id=1]
+extents = Vector3( 1, 5, 1 )
+
+[sub_resource type="CubeMesh" id=2]
+
+[node name="Goal right" type="RigidBody"]
+transform = Transform( 1, 0, 0, 0, 2.10592, 0, 0, 0, 1, 13.9476, 0, 0 )
+mode = 3
+gravity_scale = 0.0
+contacts_reported = 10
+contact_monitor = true
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+shape = SubResource( 1 )
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+transform = Transform( 1, 0, 0, 0, 5, 0, 0, 0, 1, 0, 0, 0 )
+mesh = SubResource( 2 )
+material/0 = null
+
+[node name="Collisions" type="Node" parent="."]
+script = ExtResource( 1 )
+
+[node name="Respawn point" type="Node" parent="."]
+script = ExtResource( 2 )
+
+[node name="Respawn velocity" type="Node" parent="."]
+script = ExtResource( 3 )
+
+[node name="number" type="Node" parent="."]
+script = ExtResource( 5 )
+
+[node name="label" type="Node" parent="."]
+script = ExtResource( 4 )
+Value = "Right board"
+
+[node name="max number" type="Node" parent="."]
+script = ExtResource( 6 )
+Value = 3.0
+
+[node name="reset number" type="Node" parent="."]
+script = ExtResource( 7 )
