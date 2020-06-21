@@ -32,7 +32,7 @@ class Godot
 	{
 		this.fileSystem = fileSystem
 		
-		fileSystem.generateFile('Godot/project.godot', '')
+		//fileSystem.generateFile('Godot/project.godot', '')
 		for (component : game.components.entrySet)
 		{
 			generate(component.key, component.value)
@@ -53,9 +53,10 @@ class Godot
 			'''
 			extends Node
 			
-			«IF type != unit»export var Value: «type.name» «ENDIF»
+			«IF type != unit»export var Value: «type.name»«ENDIF»
 			
 			func get_class(): return "«component»"
+			func is_class(type): return type == get_class() || .is_class(type)
 			'''
 		)
 	}
@@ -150,15 +151,32 @@ class Godot
 		{
 			if (e.name == in.name)
 			{
-				'''«e.arguments.get(1).code».Contains(entity_«e.arguments.get(0).code»)'''
+				'''entity_«e.arguments.get(0).code» in «e.arguments.get(1).code»'''
+			}
+			else if (e.name == create.name)
+			{
+				var path = e.arguments.get(0).code
+				'''root.get_node("Entities").add_child(load(«path»).instance())'''
+			}
+			else if (e.name == destroy.name)
+			{
+				var entity = e.arguments.get(0).code
+				'''entity_«entity».queue_free()'''
 			}
 			else if (e.name == remove.name)
 			{
-				'''EntityManager.RemoveComponent<«e.generic»>(entity_«e.arguments.get(0).code»)'''
+				var entity = e.arguments.get(0).code
+				'''«e.generic»_«entity».queue_free()'''
 			}
 			else if (e.name == add.name)
 			{
-				'''EntityManager.AddComponentData(entity_«e.arguments.get(0).code», new «e.generic»())'''
+				var entity = e.arguments.get(0).code
+				'''entity_«entity».add_child(preload("res://Engine/«e.generic».gd").new())'''
+			}
+			else if (e.name == random.name)
+			{
+				var range = e.arguments.get(0).code
+				'''rand_range(«range».x,«range».y)'''
 			}
 			else
 			{
@@ -181,8 +199,8 @@ class Godot
 				case velocity: return "RigidBody"
 				case inputValue: return "inputValue"
 				case timeout: return "timeout"
-				case position: return "Node2D"
-				case collisions: return "Collisions"
+				case position: return "Spatial"
+				case collisions: return "collisions"
 				case numberLabel: return "number"
 			}
 		}
@@ -202,7 +220,7 @@ class Godot
 				case velocity: return "linear_velocity"
 				case inputValue: return "Value"
 				case timeout: return "Value"
-				case position: return "position"
+				case position: return "translation"
 				case collisions: return "Value"
 				case numberLabel: return "Value"
 			}
@@ -211,7 +229,22 @@ class Godot
 	
 	def private String application(String name)
 	{
-		
+		var found = library.symbols.findFirst[it.name == name]
+		if (found === null)
+		{
+			return "Value"
+		}
+		else
+		{
+			switch found
+			{
+				case random: return "rand_range"
+				case cos: return "cos"
+				case sin: return "sin"
+				case xyz: return "Vector3"
+				case in: "contains"
+			}
+		}
 	}
 	
 	def private String name(Type type)
@@ -222,6 +255,7 @@ class Godot
 			case number2: 'Vector2'
 			case number3: 'Vector3'
 			case proposition: 'bool'
+			case entity: 'String'
 			default: 'not present in name(Type) in Godot.xtend'
 		}
 	}

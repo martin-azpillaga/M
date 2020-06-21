@@ -13,16 +13,17 @@ func entities(archetype):
 		
 		var current = {}
 		
-		for component in entity.get_children()+[entity]:
+		for component in [entity]+entity.get_children():
+			var found = []
 			for type in left:
-				if component.get_class() == type:
+				if component.is_class(type):
 					current[type] = component
-					left.erase(type)
-	
+					found.append(type)
+			for f in found:
+				left.erase(f)
 		if current.size() == archetype.size():
 			current["entity"] = entity
 			result.append(current)
-	
 	return result
 
 func _process(delta):
@@ -51,11 +52,19 @@ func _process(delta):
 			var minus = actions[1]
 			
 			inputValue.Value = Input.get_action_strength(plus) - Input.get_action_strength(minus)
-	
+
 	for entity in entities(["RigidBody","collisions"]):
 		var body = entity["RigidBody"]
 		var collisions = entity["collisions"]
 		
 		collisions.Value = body.get_colliding_bodies()
-		if (collisions.Value.size() > 0):
+		if not collisions.Value.empty():
 			print(collisions.Value)
+	
+	for a in entities(["number", "label"]):
+		var number = a["number"]
+		var label = a["label"]
+		for b in entities(["Label"]):
+			var ui = b["Label"]
+			if ui.name == label.Value:
+				ui.text = str(number.Value)
