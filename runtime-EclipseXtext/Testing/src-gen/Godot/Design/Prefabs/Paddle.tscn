@@ -1,0 +1,43 @@
+[gd_scene load_steps=8 format=2]
+
+[ext_resource path="res://Code/Components/baseVelocity.gd" type="Script" id=1]
+[ext_resource path="res://Engine/Input.gd" type="Script" id=2]
+[ext_resource path="res://Engine/InputValue.gd" type="Script" id=3]
+
+[sub_resource type="PhysicsMaterial" id=1]
+friction = 0.0
+bounce = 1.0
+
+[sub_resource type="BoxShape" id=2]
+
+[sub_resource type="CubeMesh" id=3]
+
+[sub_resource type="SpatialMaterial" id=4]
+albedo_color = Color( 0.607843, 0.905882, 0.945098, 1 )
+
+[node name="Paddle left" type="RigidBody"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -8.41795, 0, 0 )
+mode = 2
+physics_material_override = SubResource( 1 )
+gravity_scale = 0.0
+contacts_reported = 1
+contact_monitor = true
+
+[node name="Collider" type="CollisionShape" parent="."]
+transform = Transform( 1.00994, 0, 0, 0, 1.00994, 0, 0, 0, 1.00994, 0, 0, 0 )
+shape = SubResource( 2 )
+
+[node name="BaseVelocity" type="Node" parent="."]
+script = ExtResource( 1 )
+Value = Vector3( 0, 10, 0 )
+
+[node name="Input" type="Node" parent="."]
+script = ExtResource( 2 )
+Value = "leftUp-leftDown"
+
+[node name="InputValue" type="Node" parent="."]
+script = ExtResource( 3 )
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+mesh = SubResource( 3 )
+material/0 = SubResource( 4 )
