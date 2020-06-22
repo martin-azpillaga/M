@@ -1,4 +1,4 @@
-grammar m.M hidden(BLANKS) 
+grammar m.M hidden(BLANKS)
 
 import "http://www.eclipse.org/emf/2002/Ecore"
 generate m "azpillaga.world/M"
@@ -36,9 +36,9 @@ Cell: entity=IDENTIFIER '.' component=IDENTIFIER;
 
 
 
-BlankFunction returns Function hidden():
+BlankFunction returns Function:
 	name=(IDENTIFIER|OPERATOR)
-	'(' (parameters+=Value (',' parameters+=Value)*)? ')'
+	'(' (parameters+=BlankValue (',' parameters+=BlankValue)*)? ')'
 	BEGIN statements+=BlankStatement* END
 ;
 BlankStatement returns Statement: =>BlankBlock|=>BlankBinary;
@@ -47,7 +47,7 @@ BlankBlock returns Block: name=IDENTIFIER expression=BlankBinary BEGIN statement
 
 BlankBinary returns Expression:
 	(BlankUnary|BlankApplication|BlankValue)
-	=>({Binary.left=current} operator=OPERATOR
+	=>({Binary.left=current} operator=(OPERATOR|'.'|'=')
 		right=(BlankUnary|BlankApplication|BlankValue)
 	)*;
 BlankUnary returns Unary: operator=OPERATOR expression=(BlankUnary|BlankApplication|BlankValue);
@@ -61,11 +61,10 @@ BlankApplication returns Application:
 
 
 
-
+terminal BLANKS: BLANK+;
 Expression: Binary|Unary|Application|Value|Cell;
 terminal BEGIN: 'synthetic:BEGIN';
 terminal END: 'synthetic:END';
-terminal BLANKS: BLANK+;
 terminal IDENTIFIER: LETTER+;
 terminal OPERATOR: !(BLANK|LETTER|CONTROL|NUMBER|KEYWORD)+|'<='|'>=';
 terminal UNRECOGNIZED: CONTROL|NUMBER;
