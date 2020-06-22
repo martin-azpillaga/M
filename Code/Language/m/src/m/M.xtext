@@ -38,12 +38,12 @@ Cell: entity=IDENTIFIER '.' component=IDENTIFIER;
 
 BlankFunction returns Function hidden():
 	name=(IDENTIFIER|OPERATOR)
-	'(' (parameters+=Value (',' parameters+=Value)*)? ')' ':'
-	statements+=BlankStatement*
+	'(' (parameters+=Value (',' parameters+=Value)*)? ')'
+	BEGIN statements+=BlankStatement* END
 ;
 BlankStatement returns Statement: =>BlankBlock|=>BlankBinary;
 
-BlankBlock returns Block: name=IDENTIFIER expression=BlankBinary '{' statements+=BlankStatement* '}';
+BlankBlock returns Block: name=IDENTIFIER expression=BlankBinary BEGIN statements+=BlankStatement* END;
 
 BlankBinary returns Expression:
 	(BlankUnary|BlankApplication|BlankValue)
@@ -63,6 +63,8 @@ BlankApplication returns Application:
 
 
 Expression: Binary|Unary|Application|Value|Cell;
+terminal BEGIN: 'synthetic:BEGIN';
+terminal END: 'synthetic:END';
 terminal BLANKS: BLANK+;
 terminal IDENTIFIER: LETTER+;
 terminal OPERATOR: !(BLANK|LETTER|CONTROL|NUMBER|KEYWORD)+|'<='|'>=';
