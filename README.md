@@ -19,7 +19,7 @@ Simple does not mean easy. Minimalism and the power of composition.
   M encourages data oriented design by default, a programming paradigm proven to
   be specially well suited for game development.
 
-  This improves the performance and flexibility of the project.
+  It provides flexibility while developing the game and performance at runtime.
 
 * M involves all your team
 
