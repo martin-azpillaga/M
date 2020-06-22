@@ -1,0 +1,96 @@
+[gd_scene load_steps=11 format=2]
+
+[ext_resource path="res://Engine/ECS.gd" type="Script" id=2]
+[ext_resource path="res://Code/Systems/control.gd" type="Script" id=5]
+[ext_resource path="res://Design/Prefabs/Ball.tscn" type="PackedScene" id=6]
+[ext_resource path="res://Design/Prefabs/Paddle.tscn" type="PackedScene" id=7]
+[ext_resource path="res://Design/Prefabs/Wall.tscn" type="PackedScene" id=8]
+[ext_resource path="res://Code/Systems/score.gd" type="Script" id=12]
+[ext_resource path="res://Code/Systems/serve.gd" type="Script" id=13]
+[ext_resource path="res://Code/Systems/respawn.gd" type="Script" id=14]
+[ext_resource path="res://Code/Systems/restart.gd" type="Script" id=17]
+[ext_resource path="res://Design/Prefabs/Goal.tscn" type="PackedScene" id=18]
+
+[node name="Root" type="Node"]
+script = ExtResource( 2 )
+
+[node name="Entities" type="Node" parent="."]
+
+[node name="Camera" type="Camera" parent="Entities"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 15 )
+
+[node name="DirectionalLight" type="DirectionalLight" parent="Entities"]
+transform = Transform( 0.728397, 0.364422, -0.580203, -0.285045, 0.931234, 0.227052, 0.623047, 6.95036e-09, 0.782184, -11.0748, 0, 7.87759 )
+
+[node name="Left board" type="Label" parent="Entities"]
+anchor_left = 0.301
+anchor_right = 0.343
+anchor_bottom = 0.066
+margin_left = -0.223999
+margin_right = 0.767975
+margin_bottom = 1.4
+text = "0"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Right board" type="Label" parent="Entities"]
+anchor_left = 0.677
+anchor_right = 0.677
+margin_right = 40.0
+margin_bottom = 14.0
+text = "0"
+align = 1
+valign = 1
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Paddle left" parent="Entities" instance=ExtResource( 7 )]
+
+[node name="Paddle right" parent="Entities" instance=ExtResource( 7 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 9.64701, 0, 0 )
+
+[node name="Input" parent="Entities/Paddle right" index="2"]
+Value = "rightUp-rightDown"
+
+[node name="Goal right" parent="Entities" instance=ExtResource( 18 )]
+
+[node name="label" parent="Entities/Goal right" index="6"]
+Value = "Left board"
+
+[node name="Goal left" parent="Entities" instance=ExtResource( 18 )]
+transform = Transform( 1, 0, 0, 0, 2.10592, 0, 0, 0, 1, -12.655, 0, 0 )
+
+[node name="Ball" parent="Entities" instance=ExtResource( 6 )]
+contacts_reported = 10
+
+[node name="Wall" parent="Entities" instance=ExtResource( 8 )]
+
+[node name="Wall top" parent="Entities" instance=ExtResource( 8 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 7.65223, 0 )
+
+[node name="Systems" type="Node" parent="."]
+
+[node name="Control" type="Node" parent="Systems"]
+script = ExtResource( 5 )
+
+[node name="Serve" type="Node" parent="Systems"]
+script = ExtResource( 13 )
+
+[node name="Respawn" type="Node" parent="Systems"]
+script = ExtResource( 14 )
+
+[node name="Score" type="Node" parent="Systems"]
+script = ExtResource( 12 )
+
+[node name="Restart" type="Node" parent="Systems"]
+script = ExtResource( 17 )
+
+[editable path="Entities/Paddle right"]
+
+[editable path="Entities/Goal right"]
+
+[editable path="Entities/Goal left"]
+
+[editable path="Entities/Ball"]
