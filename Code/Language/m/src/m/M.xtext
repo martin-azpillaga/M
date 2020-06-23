@@ -3,12 +3,12 @@ grammar m.M hidden(BLANKS)
 import "http://www.eclipse.org/emf/2002/Ecore"
 generate m "azpillaga.world/M"
 
-File: functions+=(Function|BlankFunction)*;
+File: language=IDENTIFIER? functions+=(Function|BlankFunction)*;
 
 Function returns Function:
 	name=(IDENTIFIER|OPERATOR)
-	'(' (parameters+=Value (',' parameters+=Value)*)? ')'
-	'{' statements+=Statement* ('=' result=Binary)?	'}';
+	'(' (parameters+=Value (',' parameters+=Value)*)? ')' BEGIN?
+	'{' statements+=Statement* ('=' result=Binary)?	'}' END?;
 
 Statement: Block|Assignment|Delegation;
 
