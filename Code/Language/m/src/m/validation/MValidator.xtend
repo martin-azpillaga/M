@@ -42,6 +42,13 @@ class GroupEntry
 	public ArrayList<GroupingReason> groupingReasons = new ArrayList<GroupingReason>
 	public ArrayList<Type> types = new ArrayList<Type>
 }
+class Problem
+{
+	public boolean isError
+	public String message
+	public EObject o
+	public EStructuralFeature feature
+}
 class MValidator extends AbstractMValidator
 {
 	public static Game game
@@ -58,24 +65,45 @@ class MValidator extends AbstractMValidator
 	var expressions = new HashMap<Expression,Group>
 	var components = new HashMap<String,Group>
 	
+	var problems = new ArrayList<Problem>
+	
 	@Check
 	def validate(File file)
 	{
 		if (file.eResource.errors.empty)
 		{
-			library = StandardLibrary.English
-			initialize(file)
-			for (function : file.functions)
+			var map = new HashMap<StandardLibrary,ArrayList<Problem>>
+			for (lib : #[StandardLibrary.English])
 			{
-				function.validate
+				problems = new ArrayList<Problem>
+				library = lib
+				initialize(file)
+				for (function : file.functions)
+				{
+					function.validate
+				}
+				solve(file)
+				map.put(library, problems)
 			}
-			solve(file)
+			println(map)
+			var report = map.get(StandardLibrary.English)
+			for (problem : report)
+			{
+				if (problem.isError)
+				{
+					error(problem.message, problem.o, problem.feature)
+				}
+				else
+				{
+					warning(problem.message, problem.o, problem.feature)
+				}
+			}
 		}
 	}
 	
 	def private void MError(MError err, EObject o, EStructuralFeature feature)
 	{
-		error(library.errors.get(err), o, feature)
+		problems.add(new Problem=>[isError=true message=library.errors.get(err) it.o=o it.feature=feature])
 	}
 	
 	def private initialize(File file)
@@ -137,12 +165,12 @@ class MValidator extends AbstractMValidator
 					MErrorFound = true
 					for (entry : group.entries)
 					{
-						var MError =
+						val MError =
 						'''
 						«library.errors.get(undecidable)»
 						«entry.groupingReasons.join(', ')»
 						'''
-						warning(MError, entry.expression, null)
+						problems.add(new Problem=>[message=MError o=entry.expression feature=null])
 					}
 				}
 				else if (types.size == 1)
@@ -154,7 +182,7 @@ class MValidator extends AbstractMValidator
 					MErrorFound = true
 					for (entry : group.entries)
 					{
-						var MError =
+						val message =
 						'''
 						«library.errors.get(incompatible)»
 						«entry.groupingReasons.join(', ')»
@@ -164,11 +192,11 @@ class MValidator extends AbstractMValidator
 						'''
 						if (entry.types.empty)
 						{
-							warning(MError, entry.expression, null)
+							problems.add(new Problem=>[it.message=message o=entry.expression feature=null])
 						}
 						else
 						{
-							error(MError, entry.expression, null)
+							MError(incompatible, entry.expression, null)
 						}
 					}
 				}
