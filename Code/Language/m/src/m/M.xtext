@@ -1,41 +1,25 @@
-grammar m.M hidden(BLANKS)
+grammar m.M hidden(WS)
 
 import "http://www.eclipse.org/emf/2002/Ecore"
 generate m "azpillaga.world/M"
 
-File: language=IDENTIFIER? functions+=(Function|BlankFunction)*;
+File: functions+=Function*;
 
-Function returns Function:
-	name=(IDENTIFIER|OPERATOR)
-	'(' (parameters+=Value (',' parameters+=Value)*)? ')' BEGIN?
-	'{' statements+=Statement* ('=' result=Binary)?	'}' END?;
+Function:name=(IDENTIFIER|OPERATOR)
+	'(' (parameters+=Value (',' parameters+=Value)*)? ')'
+	BEGIN? body=Statement END?;
 
-Statement: Block|Assignment|Delegation;
-
-Block: name=IDENTIFIER expression=Binary '{' statements+=Statement* '}';
-
-Assignment: atom=(Value|Cell) '=' expression=Binary;
-
-Delegation: application=Application;
-
-
-Binary returns Expression:
-	(Unary|Application|Value|Cell)
-	({Binary.left=current} operator=OPERATOR
-		right=(Unary|Application|Value|Cell)
-	)*;
-Unary: operator=OPERATOR expression=(Unary|Application|Value|Cell);
-
+Statement: ControlFlow|Block|Binary;
+Block: {Block} '{' statements+=Statement (LINE statements+=Statement)* LINE*'}';
+ControlFlow: name=IDENTIFIER ':' expression=Binary body=Statement;
+Binary:	Primary	=>({Binary.left=current} operator=OPERATOR right=Primary)*;
+Primary: Unary|Application|Value;
+Unary: operator=OPERATOR expression=Primary;
+Application: name=IDENTIFIER '(' (arguments+=Binary (',' arguments+=Binary)*)? ')';
 Value: name=IDENTIFIER;
-Application: 
-	name=IDENTIFIER
-	 ('[' generic=IDENTIFIER ']')?
-	'(' (arguments+=Binary (',' arguments+=Binary)*)? ')';
-
-Cell: entity=IDENTIFIER '.' component=IDENTIFIER;
 
 
-
+/*
 BlankFunction returns Function:
 	name=(IDENTIFIER|OPERATOR)
 	'(' (parameters+=BlankValue (',' parameters+=BlankValue)*)? ')'
@@ -60,17 +44,22 @@ BlankApplication returns Application:
 
 
 
+*/
 
-terminal BLANKS: BLANK+;
-Expression: Binary|Unary|Application|Value|Cell;
+Expression: Binary|Unary|Application|Value;
+
 terminal BEGIN: 'synthetic:BEGIN';
 terminal END: 'synthetic:END';
-terminal IDENTIFIER: LETTER+;
-terminal OPERATOR: !(BLANK|LETTER|CONTROL|NUMBER|KEYWORD)+|'<='|'>=';
-terminal UNRECOGNIZED: CONTROL|NUMBER;
+terminal WS: BLANK+;
+terminal LINE: '\n'|'\n\r'|';';
+terminal IDENTIFIER: LETTER (LETTER|NUMBER|'_')*;
+terminal OPERATOR: !(BLANK|LETTER|CONTROL|NUMBER|KEYWORD)+;
 
-terminal fragment KEYWORD: '('|')'|'{'|'}'|'='|','|'['|']';
-terminal fragment BLANK: ZL|ZP|ZS|'\n'|'\r'|'\t';
+terminal UNRECOGNIZED: .;
+
+
+terminal fragment KEYWORD: '('|')'|'{'|'}'|','|':';
+terminal fragment BLANK: ZL|ZP|ZS|'\t';
 terminal fragment CONTROL: CC|CF|CO|CS;
 terminal fragment LETTER: LL|LM|LO|LT|LU;
 terminal fragment NUMBER: ND|NL|NO;
