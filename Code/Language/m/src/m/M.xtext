@@ -1,67 +1,33 @@
-grammar m.M hidden(WS)
+grammar m.M hidden(BLANKS)
 
 import "http://www.eclipse.org/emf/2002/Ecore"
 generate m "azpillaga.world/M"
 
 File: functions+=Function*;
+Function: name=(IDENTIFIER|OPERATOR) '(' (parameters+=Value (',' parameters+=Value)*)? ')' '{' statements+=Statement* '}';
 
-Function:name=(IDENTIFIER|OPERATOR)
-	'(' (parameters+=Value (',' parameters+=Value)*)? ')'
-	BEGIN? body=Statement END?;
+Statement: Block|Assignment|Application;
+Assignment: atom=(Value|Cell) '=' expression=Expression;
+Block: name=IDENTIFIER expression=Expression '{' statements+=Statement* '}';
 
-Statement: ControlFlow|Block|Binary;
-Block: {Block} '{' statements+=Statement (LINE statements+=Statement)* LINE*'}';
-ControlFlow: name=IDENTIFIER ':' expression=Binary body=Statement;
-Binary:	Primary	=>({Binary.left=current} operator=OPERATOR right=Primary)*;
-Primary: Unary|Application|Value;
+Expression:	Primary	({Binary.left=current} operator=OPERATOR right=Primary)*;
+Primary: Unary|Application|Value|Cell;
 Unary: operator=OPERATOR expression=Primary;
-Application: name=IDENTIFIER '(' (arguments+=Binary (',' arguments+=Binary)*)? ')';
+Application: name=IDENTIFIER '(' (arguments+=Expression (',' arguments+=Expression)*)? ')';
+
 Value: name=IDENTIFIER;
+Cell: entity=IDENTIFIER '.' component=IDENTIFIER;
 
-
-/*
-BlankFunction returns Function:
-	name=(IDENTIFIER|OPERATOR)
-	'(' (parameters+=BlankValue (',' parameters+=BlankValue)*)? ')'
-	BEGIN statements+=BlankStatement* END
-;
-BlankStatement returns Statement: =>BlankBlock|=>BlankBinary;
-
-BlankBlock returns Block: name=IDENTIFIER expression=BlankBinary BEGIN statements+=BlankStatement* END;
-
-BlankBinary returns Expression:
-	(BlankUnary|BlankApplication|BlankValue)
-	=>({Binary.left=current} operator=(OPERATOR|'.'|'=')
-		right=(BlankUnary|BlankApplication|BlankValue)
-	)*;
-BlankUnary returns Unary: operator=OPERATOR expression=(BlankUnary|BlankApplication|BlankValue);
-
-BlankValue returns Value: name=IDENTIFIER;
-BlankApplication returns Application: 
-	name=IDENTIFIER
-	 ('[' generic=IDENTIFIER ']')?
-	'(' (arguments+=BlankBinary (',' arguments+=BlankBinary)*)? ')';
-
-
-
-*/
-
-Expression: Binary|Unary|Application|Value;
-
-terminal BEGIN: 'synthetic:BEGIN';
-terminal END: 'synthetic:END';
-terminal WS: BLANK+;
-terminal LINE: '\n'|'\n\r'|';';
-terminal IDENTIFIER: LETTER (LETTER|NUMBER|'_')*;
-terminal OPERATOR: !(BLANK|LETTER|CONTROL|NUMBER|KEYWORD)+;
-
+terminal BLANKS: (BLANK|CONTROL)+;
+terminal IDENTIFIER: LETTER+;
+terminal OPERATOR: !(KEYWORD|BLANK|CONTROL|LETTER|NUMBER|MARK) (PUNCTUATION|SYMBOL)*;
 terminal UNRECOGNIZED: .;
 
-
-terminal fragment KEYWORD: '('|')'|'{'|'}'|','|':';
-terminal fragment BLANK: ZL|ZP|ZS|'\t';
-terminal fragment CONTROL: CC|CF|CO|CS;
+terminal fragment KEYWORD: '('|')'|'='|','|'.'|'{'|'}';
+terminal fragment BLANK: ZL|ZP|ZS;
+terminal fragment CONTROL: CC|CF|CO|CS|CN;
 terminal fragment LETTER: LL|LM|LO|LT|LU;
+terminal fragment MARK: MN|MC|ME;
 terminal fragment NUMBER: ND|NL|NO;
 terminal fragment PUNCTUATION: PC|PD|PE|PF|PI|PO|PS;
 terminal fragment SYMBOL: SC|SK|SM|SO;
