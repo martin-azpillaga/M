@@ -7,7 +7,6 @@ import m.m.Assignment
 import m.m.Expression
 import m.m.Cell
 import m.m.Block
-import m.m.Delegation
 import m.m.File
 import m.m.Function
 import m.m.Statement
@@ -22,13 +21,14 @@ import m.m.Application
 import java.util.ArrayList
 import org.eclipse.emf.ecore.EStructuralFeature
 import org.eclipse.emf.ecore.EObject
-import m.m.Binary
+import m.m.Expression
 import org.eclipse.xtext.EcoreUtil2
 import m.generator.Game
 import static m.validation.Type.*
 import static m.validation.SumType.*
 import static m.validation.ProductType.*
 import static m.validation.ExponentType.*
+import m.m.Binary
 
 class Group
 {
@@ -279,9 +279,9 @@ class MValidator extends AbstractMValidator
 					MError(undefined, statement, BLOCK__NAME)
 				}
 			}
-			else if (statement instanceof Delegation)
+			else if (statement instanceof Application)
 			{
-				statement.application.validate
+				statement.validate
 			}
 			else if (statement instanceof Assignment)
 			{
@@ -338,11 +338,11 @@ class MValidator extends AbstractMValidator
 		}
 		else if (expression instanceof Binary)
 		{
-			inferApplication(expression.operator, #[expression.left,expression.right], expression, BINARY__OPERATOR)
+			inferApplication(expression.operator, #[expression.left,expression.right], expression, EXPRESSION__OPERATOR)
 		}
 		else if (expression instanceof Unary)
 		{
-			inferApplication(expression.operator, #[expression.expression], expression, UNARY__OPERATOR)
+			inferApplication(expression.operator, #[expression.expression], expression, EXPRESSION__OPERATOR)
 		}
 		else if (expression instanceof Application)
 		{
