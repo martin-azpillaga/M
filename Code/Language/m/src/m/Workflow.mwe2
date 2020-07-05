@@ -22,7 +22,7 @@ Workflow
 			{
 				encoding = "UTF-8"
 				lineDelimiter = "\n"
-				preferXtendStubs = true
+				preferXtendStubs = false
 			}
 		}
 		language = StandardLanguage
