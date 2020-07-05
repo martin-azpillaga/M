@@ -1,50 +1,33 @@
-grammar m.M hidden(BLANKS) 
+grammar m.M hidden(BLANKS)
 
 import "http://www.eclipse.org/emf/2002/Ecore"
 generate m "azpillaga.world/M"
 
 File: functions+=Function*;
+Function: name=(IDENTIFIER|OPERATOR) '(' (parameters+=Value (',' parameters+=Value)*)? ')' '{' statements+=Statement* '}';
 
-Function:
-	name=(IDENTIFIER|OPERATOR)
-	'(' (parameters+=Value (',' parameters+=Value)*)? ')'
-	'{' statements+=Statement* ('=' result=Binary)?	'}';
+Statement: Block|Assignment|Application;
+Assignment: atom=(Value|Cell) '=' expression=Expression;
+Block: name=IDENTIFIER expression=Expression '{' statements+=Statement* '}';
 
-Statement: Block|Assignment|Delegation;
-
-Block: name=IDENTIFIER expression=Binary '{' statements+=Statement* '}';
-
-Assignment: atom=(Value|Cell) '=' expression=Binary;
-
-Delegation: application=Application;
-
-
-Binary returns Expression:
-	(Unary|Application|Value|Cell)
-	({Binary.left=current} operator=OPERATOR
-		right=(Unary|Application|Value|Cell)
-	)*;
-Unary: operator=OPERATOR expression=(Unary|Application|Value|Cell);
+Expression:	Primary	({Binary.left=current} operator=OPERATOR right=Primary)*;
+Primary: Unary|Application|Value|Cell;
+Unary: operator=OPERATOR expression=Primary;
+Application: name=IDENTIFIER '(' (arguments+=Expression (',' arguments+=Expression)*)? ')';
 
 Value: name=IDENTIFIER;
-Application: 
-	name=IDENTIFIER
-	 ('[' generic=IDENTIFIER ']')?
-	'(' (arguments+=Binary (',' arguments+=Binary)*)? ')';
-
 Cell: entity=IDENTIFIER '.' component=IDENTIFIER;
 
-Expression: Binary|Unary|Application|Value|Cell;
-
-terminal BLANKS: BLANK+;
+terminal BLANKS: (BLANK|CONTROL)+;
 terminal IDENTIFIER: LETTER+;
-terminal OPERATOR: !(BLANK|LETTER|CONTROL|NUMBER|KEYWORD)+|'<='|'>=';
-terminal UNRECOGNIZED: CONTROL|NUMBER;
+terminal OPERATOR: !(KEYWORD|BLANK|CONTROL|LETTER|NUMBER|MARK) (PUNCTUATION|SYMBOL)*;
+terminal UNRECOGNIZED: .;
 
-terminal fragment KEYWORD: '('|')'|'{'|'}'|'='|','|'['|']';
-terminal fragment BLANK: ZL|ZP|ZS|'\n'|'\r'|'\t';
-terminal fragment CONTROL: CC|CF|CO|CS;
+terminal fragment KEYWORD: '('|')'|'='|','|'.'|'{'|'}';
+terminal fragment BLANK: ZL|ZP|ZS;
+terminal fragment CONTROL: CC|CF|CO|CS|CN;
 terminal fragment LETTER: LL|LM|LO|LT|LU;
+terminal fragment MARK: MN|MC|ME;
 terminal fragment NUMBER: ND|NL|NO;
 terminal fragment PUNCTUATION: PC|PD|PE|PF|PI|PO|PS;
 terminal fragment SYMBOL: SC|SK|SM|SO;
