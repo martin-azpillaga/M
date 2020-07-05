@@ -9,7 +9,7 @@ Workflow
 {
 	component = XtextGenerator
 	{
-		configuration =
+		configuration = DefaultGeneratorModule
 		{
 			project = StandardProjectConfig
 			{
@@ -18,11 +18,11 @@ Workflow
 				eclipsePlugin = { enabled = true }
 				createEclipseMetaData = true
 			}
-			code =
+			code = CodeConfig
 			{
 				encoding = "UTF-8"
 				lineDelimiter = "\n"
-				preferXtendStubs = true
+				preferXtendStubs = false
 			}
 		}
 		language = StandardLanguage
