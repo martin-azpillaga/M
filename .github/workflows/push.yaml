@@ -15,19 +15,19 @@ jobs:
       - name: Lint Groovy
         run: |
           nvm use 12
-          npx npm-groovy-lint Code/Language/build.gradle
+          npx npm-groovy-lint .
+      - name: Lint Json
+        run: |
+          npx jsonlint
       - name: Lint Java
         run: |
           echo need sonar
       - name: Lint Javascript
         run: |
           echo needs jslint eslint
-      - name: Lint json
-        run: |
-          echo needs jsonlint
       - name: Check other files
         run: |
-          no files with extension != java, js, gradle, json, yaml, md, xtext, mwe2
+          echo no files with extension != java, js, gradle, json, yaml, md, xtext, mwe2
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -60,7 +60,7 @@ jobs:
       - name: Upload Code/Editor folder to github artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ide
+          name: editor
           path: Code/Editor 
   test:
     needs: build
@@ -70,7 +70,7 @@ jobs:
       - name: Download IDE folder
         uses: actions/download-artifact@v2
         with:
-          name: ide
+          name: editor
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
@@ -106,7 +106,7 @@ jobs:
       - name: Download IDE folder
         uses: actions/download-artifact@v2
         with:
-          name: ide
+          name: editor
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
@@ -136,10 +136,10 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '2.x'
-      - name: Download IDE folder
+      - name: Download the editor folder
         uses: actions/download-artifact@v2
         with:
-          name: ide
+          name: editor
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
