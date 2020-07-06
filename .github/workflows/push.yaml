@@ -21,7 +21,7 @@ jobs:
           npx npm-groovy-lint .
       - name: Lint Json
         run: |
-          npx jsonlint
+          find . -name "*.json" -exec npx jsonlint {} \;
       - name: Lint Java
         run: |
           echo need sonar
