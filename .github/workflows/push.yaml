@@ -12,9 +12,12 @@ jobs:
         run: |
           sudo apt install yamllint
           yamllint -d relaxed .
+      - name: Install node 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
       - name: Lint Groovy
         run: |
-          nvm use 12
           npx npm-groovy-lint .
       - name: Lint Json
         run: |
