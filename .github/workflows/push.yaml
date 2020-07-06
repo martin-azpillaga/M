@@ -61,7 +61,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: editor
-          path: Code/Editor 
+          path: Code/Editor
   test:
     needs: build
     runs-on: ubuntu-latest
