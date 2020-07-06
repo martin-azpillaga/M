@@ -12,6 +12,22 @@ jobs:
         run: |
           sudo apt install yamllint
           yamllint -d relaxed .
+      - name: Lint Groovy
+        run: |
+          nvm use 12
+          npx npm-groovy-lint Code/Language/build.gradle
+      - name: Lint Java
+        run: |
+          echo need sonar
+      - name: Lint Javascript
+        run: |
+          echo needs jslint eslint
+      - name: Lint json
+        run: |
+          echo needs jsonlint
+      - name: Check other files
+        run: |
+          no files with extension != java, js, gradle, json, yaml, md, xtext, mwe2
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -41,11 +57,20 @@ jobs:
       - name: Build documentation
         run: |
           find . -name "*.md" | sort | xargs -d "\n" pandoc > Code/IDE/Documentation.html
-      - name: Upload IDE folder to github artifacts
+      - name: Upload Code/Editor folder to github artifacts
         uses: actions/upload-artifact@v2
         with:
           name: ide
-          path: Code/IDE
+          path: Code/Editor 
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - name: Download IDE folder
+        uses: actions/download-artifact@v2
+        with:
+          name: ide
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
