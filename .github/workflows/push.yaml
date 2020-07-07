@@ -37,8 +37,7 @@ jobs:
           cat >sonar-project.properties <<EOL
           sonar.organization=martin-azpillaga
           sonar.projectKey=martin-azpillaga_M
-          sonar.sources=.
-          sonar.language=java
+          sonar.sources=Code/Language/m/src
           sonar.java.binaries=Code/Language/build/classes
           EOL
       - name: Trigger sonarcloud inspection
@@ -46,12 +45,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      - name: Lint Javascript
-        run: |
-          npx eslint -c .github/workflows/.eslintrc.json .
       - name: Check other files
         run: |
-          find . -name -type f -not -name "*.md" -and \
+          find . -type f \
+          -not -name "*.md" -and \
           -not -name "*.yaml" -and \
           -not -name "*.java" -and \
           -not -name "*.json" -and \
