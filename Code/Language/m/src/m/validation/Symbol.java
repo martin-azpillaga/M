@@ -1,5 +1,9 @@
 package m.validation;
-import static m.validation.T.*;
+import static m.validation.Type.*;
+import static m.validation.SumType.*;
+import static m.validation.ProductType.*;
+import static m.validation.PolymorphicType.*;
+import static m.validation.ExponentType.*;
 
 public enum Symbol
 {
@@ -86,8 +90,8 @@ public enum Symbol
 	iteration(proposition),
 	query(declaration);
 	
-	public T type;
-	Symbol(T type) {this.type = type;}
+	public Type type;
+	Symbol(Type type) {this.type = type;}
 }
 
 enum F
