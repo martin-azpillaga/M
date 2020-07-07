@@ -12,7 +12,7 @@ public class Language
 		this.symbols = symbols;
 	}
 	
-	public T type(String component)
+	public Type type(String component)
 	{
 		return symbols.get(component).type;
 	}

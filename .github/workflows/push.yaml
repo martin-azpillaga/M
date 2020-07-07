@@ -126,7 +126,7 @@ jobs:
           Xvfb :3 &
           sleep 5 && xvfb-run yarn test
   packageWindows:
-    needs: build
+    needs: test
     runs-on: windows-latest
     timeout-minutes: 100
     steps:
@@ -159,7 +159,7 @@ jobs:
           name: windows
           path: "dist/m 0.0.0.exe"
   packageUbuntu:
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 100
     steps:

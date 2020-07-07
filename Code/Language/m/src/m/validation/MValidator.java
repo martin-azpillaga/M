@@ -1,78 +1,61 @@
-/*package m.validation
+package m.validation;
 
-import java.util.HashMap
-import java.util.HashSet
-import java.util.List
-import m.m.Assignment
-import m.m.Expression
-import m.m.Cell
-import m.m.Block
-import m.m.File
-import m.m.Function
-import m.m.Statement
-import m.m.Unary
-import m.m.Value
-import org.eclipse.xtext.validation.Check
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-import static m.m.MPackage.Literals.*
-import static m.validation.MError.*
-import static m.validation.GroupingReason.*
-import m.m.Application
-import java.util.ArrayList
-import org.eclipse.emf.ecore.EStructuralFeature
-import org.eclipse.emf.ecore.EObject
-import m.m.Expression
-import org.eclipse.xtext.EcoreUtil2
-import m.generator.Game
-import static m.validation.Type.*
-import static m.validation.SumType.*
-import static m.validation.ProductType.*
-import static m.validation.ExponentType.*
-import m.m.Binary
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.emf.ecore.EStructuralFeature;
 
-class Group
+import m.generator.Game;
+import m.m.Expression;
+
+
+public class MValidator extends AbstractMValidator
 {
-	public var entries = new ArrayList<GroupEntry>
-	public var components = new ArrayList<String>
-	public Type type
-}
-class GroupEntry
-{
-	public Expression expression
-	public ArrayList<GroupingReason> groupingReasons = new ArrayList<GroupingReason>
-	public ArrayList<Type> types = new ArrayList<Type>
-}
-class Problem
-{
-	public boolean isError
-	public String message
-	public EObject o
-	public EStructuralFeature feature
-}
-class MValidatorOld extends AbstractMValidator
-{
-	public static Game game
+	class Group
+	{
+		public ArrayList<GroupEntry> entries = new ArrayList<GroupEntry>();
+		public ArrayList<String> components = new ArrayList<String>();
+		public Type type;
+	}
+	class GroupEntry
+	{
+		public Expression expression;
+		public ArrayList<GroupingReason> groupingReasons = new ArrayList<GroupingReason>();
+		public ArrayList<Type> types = new ArrayList<Type>();
+	}
+	class Problem
+	{
+		public boolean isError;
+		public String message;
+		public EObject o;
+		public EStructuralFeature feature;
+	}
 	
-	var standardSymbols = new HashMap<String,Type>
-	var userComponents = new HashMap<String,Type>
-	var standardBlocks = new HashMap<String,Type>
+	public static Game game;
 	
-	var userFunctions = new HashMap<String,Function>
-	var userValues = new HashMap<String,Expression>
+	Map<String,Type> standardSymbols = new HashMap<String,Type>();
+	Map<String,Type> userComponents = new HashMap<String,Type>();
+	Map<String,Type> standardBlocks = new HashMap<String,Type>();
+	
+	/*
+	var userFunctions = new HashMap<String,Function>();
+	var userValues = new HashMap<String,Expression>();
 	
 	StandardLibrary library
 	
-	var expressions = new HashMap<Expression,Group>
-	var components = new HashMap<String,Group>
+	var expressions = new HashMap<Expression,Group>();
+	var components = new HashMap<String,Group>();
 	
-	var problems = new ArrayList<Problem>
+	var problems = new ArrayList<Problem>();
 	
 	@Check
 	def validate(File file)
 	{
 		if (file.eResource.errors.empty)
 		{
-			var map = new HashMap<StandardLibrary,ArrayList<Problem>>
+			var map = new HashMap<StandardLibrary,ArrayList<Problem>>();
 			for (lib : #[StandardLibrary.English])
 			{
 				problems = new ArrayList<Problem>
@@ -209,10 +192,10 @@ class MValidatorOld extends AbstractMValidator
 			{
 				var copy = EcoreUtil2.copy(f)
 				var functionType = new ExponentType
-				//if (f.result !== null)
-				//{
-				//	functionType.right = expressions.get(f.result).type
-				//}
+				if (f.result !== null)
+				{
+					functionType.right = expressions.get(f.result).type
+				}
 				for (var p = f.parameters.size -1; p >= 0; p--)
 				{
 					val type = expressions.get(f.parameters.get(p)).type
@@ -240,7 +223,7 @@ class MValidatorOld extends AbstractMValidator
 				expressions.put(parameter,new Group=>[entries.add(new GroupEntry=>[it.expression=parameter])])
 			}
 		}
-		//function.statements.validate(function.result)
+		function.statements.validate(function.result)
 	}
 	
 	def private void validate(List<Statement> statements, Expression extra)
@@ -338,11 +321,11 @@ class MValidatorOld extends AbstractMValidator
 		}
 		else if (expression instanceof Binary)
 		{
-			//inferApplication(expression.operator, #[expression.left,expression.right], expression, EXPRESSION__OPERATOR)
+			inferApplication(expression.operator, #[expression.left,expression.right], expression, EXPRESSION__OPERATOR)
 		}
 		else if (expression instanceof Unary)
 		{
-			//inferApplication(expression.operator, #[expression.expression], expression, EXPRESSION__OPERATOR)
+			inferApplication(expression.operator, #[expression.expression], expression, EXPRESSION__OPERATOR)
 		}
 		else if (expression instanceof Application)
 		{
@@ -387,7 +370,7 @@ class MValidatorOld extends AbstractMValidator
 		else if (user !== null)
 		{
 			var parameters = user.parameters
-			//var result = user.result
+			var result = user.result
 			
 			if (parameters.size == arguments.size + 1)
 			{
@@ -395,10 +378,10 @@ class MValidatorOld extends AbstractMValidator
 				{
 					group(parameters.get(i), arguments.get(i), parameterArgument)
 				}
-				//if (result !== null)
-				//{
-				//	group(result, expression, parameterArgument)
-				//}
+				if (result !== null)
+				{
+					group(result, expression, parameterArgument)
+				}
 			}
 			else
 			{
@@ -526,5 +509,5 @@ class MValidatorOld extends AbstractMValidator
 		{
 			userValues.put(value.name, value)
 		}
-	}
-}*/
+	}*/
+}
