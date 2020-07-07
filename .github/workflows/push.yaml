@@ -31,7 +31,7 @@ jobs:
         run: |
           mkdir m.ide m.ui
           gradle shadowJar
-          cp build/libs/Language-ls-ls.jar ../IDE/ls.jar
+          cp build/libs/Language-ls-ls.jar ../Editor/ls.jar
       - name: Lint Java
         run: |
           cat >sonar-project.properties <<EOL
@@ -78,7 +78,7 @@ jobs:
         run: |
           mkdir m.ide m.ui
           gradle shadowJar
-          cp build/libs/Language-ls-ls.jar ../IDE/ls.jar
+          cp build/libs/Language-ls-ls.jar ../Editor/ls.jar
       - name: Install pandoc 2.9
         run: |
           sudo apt remove pandoc
@@ -86,7 +86,7 @@ jobs:
           sudo dpkg -i pandoc-2.9.1-1-amd64.deb
       - name: Build documentation
         run: |
-          find . -name "*.md" | sort | xargs -d "\n" pandoc > Code/IDE/Documentation.html
+          find . -name "*.md" | sort | xargs -d "\n" pandoc > Code/Editor/Documentation.html
       - name: Upload Code/Editor folder to github artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -110,14 +110,14 @@ jobs:
           npm install -g yarn
           sudo apt install libx11-dev libxkbfile-dev
       - name: Build ide for browser
-        working-directory: Code/IDE
+        working-directory: Code/Editor
         run: |
           yarn buildBrowser
       - name: Build tests
         run: |
-          pandoc README.md -t json | node Automation/reader.js > Code/IDE/test.js
+          pandoc README.md -t json | node Automation/reader.js > Code/Editor/test.js
       - name: Run tests
-        working-directory: Code/IDE
+        working-directory: Code/Editor
         run: |
           cp ../Language/build/libs/Language-ls-ls.jar ../../ls.jar
           cp ../../Automation/mobot.js mobot.js
@@ -133,7 +133,7 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '2.x'
-      - name: Download IDE folder
+      - name: Download Editor folder
         uses: actions/download-artifact@v2
         with:
           name: editor
@@ -143,7 +143,7 @@ jobs:
           node-version: '10.x'
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.0
-      - name: Build IDE for electron
+      - name: Build Editor for electron
         run: |
           npm config set python python2.7
           npm install -g yarn
@@ -174,7 +174,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '10.x'
-      - name: Build IDE for electron
+      - name: Build Editor for electron
         run: |
           npm config set python python2.7
           npm install -g yarn
