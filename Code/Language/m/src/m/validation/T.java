@@ -24,5 +24,7 @@ public enum T
 	numeric,
 	
 	entityList,
-	numberList;
+	numberList,
+	
+	constant;
 }

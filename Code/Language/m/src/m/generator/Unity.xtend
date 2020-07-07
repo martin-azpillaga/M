@@ -337,11 +337,11 @@ class Unity
 			}
 			else if (e.name == remove.name)
 			{
-				'''EntityManager.RemoveComponent<«e.generic»>(entity_«e.arguments.get(0).code»)'''
+				'''EntityManager.RemoveComponent<>(entity_«e.arguments.get(0).code»)'''
 			}
 			else if (e.name == add.name)
 			{
-				'''EntityManager.AddComponentData(entity_«e.arguments.get(0).code», new «e.generic»())'''
+				'''EntityManager.AddComponentData(entity_«e.arguments.get(0).code», new ())'''
 			}
 			else
 			{
