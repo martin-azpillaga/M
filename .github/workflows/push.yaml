@@ -94,6 +94,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 100
     steps:
+      - name: Download repository
+        uses: actions/checkout@v2
       - name: Download IDE folder
         uses: actions/download-artifact@v2
         with:
@@ -107,7 +109,6 @@ jobs:
           npm install -g yarn
           sudo apt install libx11-dev libxkbfile-dev
       - name: Build ide for browser
-        working-directory: Code/Editor
         run: |
           yarn buildBrowser
       - name: Build tests
