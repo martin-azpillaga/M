@@ -47,7 +47,8 @@ jobs:
           -Dsonar.projectKey=martin-azpillaga_M \
           -Dsonar.sources=Code/Editor \
           -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.login=c1285d7b6c459b50e7eee08102a94f4b68bd70f9
+          -Dsonar.login=c1285d7b6c459b50e7eee08102a94f4b68bd70f9 \
+          -Dsonar.branch.name=feature
       - name: Check other files
         run: |
           find . -type f \
@@ -66,9 +67,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Install python 2.7
         run: |
-          python --version
           sudo apt install python2.7
-          python --version
       - name: Install java 11
         uses: actions/setup-java@v1
         with:
