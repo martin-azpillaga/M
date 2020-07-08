@@ -13,7 +13,6 @@ import m.m.Cell
 import m.m.Statement
 import m.m.Block
 import m.m.Value
-import m.m.Delegation
 import m.m.Expression
 import m.m.Binary
 import m.m.Unary
@@ -132,9 +131,48 @@ class Godot
 				'''
 			}
 		}
-		else if (statement instanceof Delegation)
+		else if (statement instanceof Application)
 		{
-			'''«statement.application.code»;'''
+			'''«(statement as Application).codeStatement»;'''
+		}
+	}
+	
+	def private String codeStatement(Application e)
+	{
+		if (e.name == in.name)
+		{
+			'''entity_«e.arguments.get(0).code» in «e.arguments.get(1).code»;'''
+		}
+		else if (e.name == create.name)
+		{
+			var path = e.arguments.get(0).code
+			'''root.get_node("Entities").add_child(load(«path»).instance());'''
+		}
+		else if (e.name == destroy.name)
+		{
+			var entity = e.arguments.get(0).code
+			'''entity_«entity».queue_free();'''
+		}
+		else if (e.name == remove.name)
+		{
+			var entity = e.arguments.get(0).code
+			''''''
+			//'''«e.generic»_«entity».queue_free()'''
+		}
+		else if (e.name == add.name)
+		{
+			var entity = e.arguments.get(0).code
+			''''''
+			//'''entity_«entity».add_child(preload("res://Engine/«e.generic».gd").new())'''
+		}
+		else if (e.name == random.name)
+		{
+			var range = e.arguments.get(0).code
+			'''rand_range(«range».x,«range».y);'''
+		}
+		else
+		{
+			'''«application(e.name)»(«e.arguments.map[code].join(', ')»);'''
 		}
 	}
 	
@@ -166,12 +204,14 @@ class Godot
 			else if (e.name == remove.name)
 			{
 				var entity = e.arguments.get(0).code
-				'''«e.generic»_«entity».queue_free()'''
+				''''''
+				//'''«e.generic»_«entity».queue_free()'''
 			}
 			else if (e.name == add.name)
 			{
 				var entity = e.arguments.get(0).code
-				'''entity_«entity».add_child(preload("res://Engine/«e.generic».gd").new())'''
+				''''''
+				//'''entity_«entity».add_child(preload("res://Engine/«e.generic».gd").new())'''
 			}
 			else if (e.name == random.name)
 			{

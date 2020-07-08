@@ -12,6 +12,52 @@ jobs:
         run: |
           sudo apt install yamllint
           yamllint -d relaxed .
+      - name: Install node 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Lint Groovy
+        run: |
+          npx npm-groovy-lint .
+      - name: Lint Json
+        run: |
+          find . -name "*.json" -exec npx jsonlint {} \;
+      - name: Install java 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
+      - name: Build language server
+        working-directory: Code/Language
+        run: |
+          mkdir m.ide m.ui
+          gradle shadowJar
+          cp build/libs/Language-ls-ls.jar ../Editor/ls.jar
+      - name: Lint Java
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          export SONAR_SCANNER_VERSION=4.2.0.1873
+          export SONAR_SCANNER_HOME=$HOME/.sonar/sonar-scanner-$SONAR_SCANNER_VERSION-linux
+          curl --create-dirs -sSLo $HOME/.sonar/sonar-scanner.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_SCANNER_VERSION-linux.zip
+          unzip -o $HOME/.sonar/sonar-scanner.zip -d $HOME/.sonar/
+          export PATH=$SONAR_SCANNER_HOME/bin:$PATH
+          export SONAR_SCANNER_OPTS="-server"
+          sonar-scanner \
+          -Dsonar.organization=martin-azpillaga \
+          -Dsonar.projectKey=martin-azpillaga_M \
+          -Dsonar.sources=Code/Editor \
+          -Dsonar.host.url=https://sonarcloud.io \
+          -Dsonar.login=c1285d7b6c459b50e7eee08102a94f4b68bd70f9
+      - name: Check other files
+        run: |
+          find . -type f \
+          -not -name "*.md" -and \
+          -not -name "*.yaml" -and \
+          -not -name "*.java" -and \
+          -not -name "*.json" -and \
+          -not -name "*.js" -and \
+          -not -name "*.xtext" -and \
+          -not -name "*.mwe2"
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -32,7 +78,7 @@ jobs:
         run: |
           mkdir m.ide m.ui
           gradle shadowJar
-          cp build/libs/Language-ls-ls.jar ../IDE/ls.jar
+          cp build/libs/Language-ls-ls.jar ../Editor/ls.jar
       - name: Install pandoc 2.9
         run: |
           sudo apt remove pandoc
@@ -40,12 +86,23 @@ jobs:
           sudo dpkg -i pandoc-2.9.1-1-amd64.deb
       - name: Build documentation
         run: |
-          find . -name "*.md" | sort | xargs -d "\n" pandoc > Code/IDE/Documentation.html
-      - name: Upload IDE folder to github artifacts
+          find . -name "*.md" | sort | xargs -d "\n" pandoc > Code/Editor/Documentation.html
+      - name: Upload Code/Editor folder to github artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ide
-          path: Code/IDE
+          name: editor
+          path: Code/Editor
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v2
+      - name: Download IDE folder
+        uses: actions/download-artifact@v2
+        with:
+          name: editor
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
@@ -55,14 +112,13 @@ jobs:
           npm install -g yarn
           sudo apt install libx11-dev libxkbfile-dev
       - name: Build ide for browser
-        working-directory: Code/IDE
         run: |
           yarn buildBrowser
       - name: Build tests
         run: |
-          pandoc README.md -t json | node Automation/reader.js > Code/IDE/test.js
+          pandoc README.md -t json | node Automation/reader.js > Code/Editor/test.js
       - name: Run tests
-        working-directory: Code/IDE
+        working-directory: Code/Editor
         run: |
           cp ../Language/build/libs/Language-ls-ls.jar ../../ls.jar
           cp ../../Automation/mobot.js mobot.js
@@ -71,24 +127,24 @@ jobs:
           Xvfb :3 &
           sleep 5 && xvfb-run yarn test
   packageWindows:
-    needs: build
+    needs: test
     runs-on: windows-latest
     timeout-minutes: 100
     steps:
       - uses: actions/setup-python@v2
         with:
           python-version: '2.x'
-      - name: Download IDE folder
+      - name: Download Editor folder
         uses: actions/download-artifact@v2
         with:
-          name: ide
+          name: editor
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
           node-version: '10.x'
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.0.0
-      - name: Build IDE for electron
+      - name: Build Editor for electron
         run: |
           npm config set python python2.7
           npm install -g yarn
@@ -104,22 +160,22 @@ jobs:
           name: windows
           path: "dist/m 0.0.0.exe"
   packageUbuntu:
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 100
     steps:
       - uses: actions/setup-python@v2
         with:
           python-version: '2.x'
-      - name: Download IDE folder
+      - name: Download the editor folder
         uses: actions/download-artifact@v2
         with:
-          name: ide
+          name: editor
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
           node-version: '10.x'
-      - name: Build IDE for electron
+      - name: Build Editor for electron
         run: |
           npm config set python python2.7
           npm install -g yarn
