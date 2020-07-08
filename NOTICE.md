@@ -10,15 +10,20 @@ Aldalur distributes this repository under the [AGPL 3 license].
 
 The packaged binaries include the following frameworks and their dependencies:
 
-* The [ANTLR] framework by Terence Parr, distributed under the [BSD 3-clause] license.
+* The [ANTLR] framework by Terence Parr, distributed under the
+  [BSD 3-clause] license.
 
-* The [Xtext] framework by The Eclipse foundation, distributed under the [Eclipse Public License 2.0].
+* The [Xtext] framework by The Eclipse foundation, distributed under the
+  [Eclipse Public License 2.0].
 
-* The [Theia] framework by The Eclipse foundation, distributed under the [Eclipse Public License 2.0].
+* The [Theia] framework by The Eclipse foundation, distributed under the
+  [Eclipse Public License 2.0].
 
-* The [Blockly] framework by Google, distributed under the [Apache 2.0] license.
+* The [Blockly] framework by Google, distributed under the
+  [Apache 2.0] license.
 
-* The [Electron] framework by Github Inc, distributed under the [MIT] license.
+* The [Electron] framework by Github Inc, distributed under the
+  [MIT] license.
 
 Please check their repositories for further details.
 
@@ -35,4 +40,3 @@ Please check their repositories for further details.
 [Eclipse Public License 2.0]: https://opensource.org/licenses/EPL-2.0
 [MIT]: https://opensource.org/licenses/MIT
 [Apache 2.0]: https://opensource.org/licenses/Apache-2.0
-
