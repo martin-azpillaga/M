@@ -21,10 +21,10 @@ jobs:
           npx npm-groovy-lint .
       - name: Lint Json
         run: |
-          find . -name "*.json" -and -not -name "*local-storage.json" -exec sh -c 'npx jsonlint {} > current && cmp current {}' \; | grep differ && exit 1
+          find . -name "*.json" -and -not -name "*local-storage.json" -exec sh -c 'npx jsonlint {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
       - name: Lint Javascript
         run: |
-          find . -name "*.js" -exec sh -c 'npx js-beautify {} > current && cmp current {}' \; | grep differ && exit 1
+          find . -name "*.js" -exec sh -c 'npx js-beautify {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
       - name: Checkstyle
         run: |
           wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.34/checkstyle-8.34-all.jar
@@ -39,7 +39,7 @@ jobs:
           -not -name "*.js" -and \
           -not -name "*.xtext" -and \
           -not -name "*.mwe2" \
-          | grep "."
+          | grep "." && exit 1 || exit 0
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 15
