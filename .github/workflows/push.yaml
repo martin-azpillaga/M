@@ -26,6 +26,10 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '11'
+      - name: Checkstyle
+        run: |
+          wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.34/checkstyle-8.34-all.jar
+          java -jar checkstyle-8.34-all.jar -c /sun_checks.xml Code/Language/m/src
       - name: Build language server
         working-directory: Code/Language
         run: |
