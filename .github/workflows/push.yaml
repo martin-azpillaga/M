@@ -21,15 +21,33 @@ jobs:
           npx npm-groovy-lint .
       - name: Lint Json
         run: |
-          find . -name "*.json" -exec sh -c 'cmp {} $(npx jsonlint {})' \;
-      - name: Install java 11
-        uses: actions/setup-java@v1
-        with:
-          java-version: '11'
+          find . -name "*.json" -exec sh -c 'npx jsonlint {} > current && cmp current {}' \;
+      - name: Lint Javascript
+        run: |
+          find . -name "*.js" -exec sh -c 'npx js-beautify {} > current && cmp current {}' \;
       - name: Checkstyle
         run: |
           wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.34/checkstyle-8.34-all.jar
           java -jar checkstyle-8.34-all.jar -c /sun_checks.xml Code/Language/m/src
+      - name: Check other files
+        run: |
+          find . -type f \
+          -not -name "*.md" -and \
+          -not -name "*.yaml" -and \
+          -not -name "*.java" -and \
+          -not -name "*.json" -and \
+          -not -name "*.js" -and \
+          -not -name "*.xtext" -and \
+          -not -name "*.mwe2" \
+          | grep "."
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install java 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: '11'
       - name: Build language server
         working-directory: Code/Language
         run: |
@@ -54,17 +72,6 @@ jobs:
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.login=c1285d7b6c459b50e7eee08102a94f4b68bd70f9 \
           -Dsonar.branch.name=feature
-      - name: Check other files
-        run: |
-          find . -type f \
-          -not -name "*.md" -and \
-          -not -name "*.yaml" -and \
-          -not -name "*.java" -and \
-          -not -name "*.json" -and \
-          -not -name "*.js" -and \
-          -not -name "*.xtext" -and \
-          -not -name "*.mwe2" \
-          | grep "."
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
