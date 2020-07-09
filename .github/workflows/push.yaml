@@ -21,7 +21,7 @@ jobs:
           npx npm-groovy-lint .
       - name: Lint Json
         run: |
-          find . -name "*.json" -exec sh -c 'npx jsonlint {} > current && cmp current {}' \; | grep differ && exit 1
+          find . -name "*.json" -and -not -name "*local-storage.json" -exec sh -c 'npx jsonlint {} > current && cmp current {}' \; | grep differ && exit 1
       - name: Lint Javascript
         run: |
           find . -name "*.js" -exec sh -c 'npx js-beautify {} > current && cmp current {}' \; | grep differ && exit 1
