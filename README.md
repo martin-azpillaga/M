@@ -119,20 +119,3 @@ Thank you.
 
 [download]: https://github.com/martin-azpillaga/M/releases/latest/download/m-0.0.0.AppImage
 
-## Test
-
-* ,Create and open file main.m
-* ,Append to main.m
-
-~~~ m
-control()
-{
-  foreach a
-  {
-    a.velocity = a.baseVelocity * a.inputValue
-  }
-}
-~~~
-
-* ,Expect new files in src-gen/Unity/Assets/Code: Components/baseVelocity.cs, Systems/control.cs
-* ,End
