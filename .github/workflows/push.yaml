@@ -23,33 +23,33 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: format
       - name: Install node packages
         run: |
           npm install markdownlint-cli
           npm install npm-groovy-lint
           npm install jsonlint
           npm install js-beautify
-      - name: Cache node modules
-        uses: actions/cache@v2
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          npm install yaml-lint
       - name: Lint Markdown
         run: |
           npx markdownlint-cli -i LICENSE.md -i node_modules "**/*.md"
       - name: Lint Yaml
         run: |
-          sudo apt-get install yamllint
-          yamllint -d relaxed .
+          find . -not -wholename "*node_modules*" -name "*.yaml" -exec sh -c 'npx yamllint {}' \;
       - name: Lint Groovy
         run: |
-          npx npm-groovy-lint
+          npx npm-groovy-lint -i node_modules
       - name: Lint Json
         run: |
-          find . -name "*.json" -and -not -name "*local-storage.json" -exec sh -c 'npx jsonlint {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
+          find . -not -wholename "*node_modules*" -name "*.json" -not -name "*local-storage.json" -exec sh -c 'npx jsonlint {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
       - name: Lint Javascript
         run: |
-          find . -name "*.js" -exec sh -c 'npx js-beautify {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
+          find . -not -wholename "*node_modules*" -name "*.js" -exec sh -c 'npx js-beautify {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
       - name: Lint java
         run: |
           wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.34/checkstyle-8.34-all.jar
