@@ -1,49 +1,49 @@
 buildscript {
-	repositories {
-		mavenCentral()
-	}
-	dependencies {
-		classpath 'org.xtext:xtext-gradle-plugin:2.0.8'
-	}
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.xtext:xtext-gradle-plugin:2.0.8'
+    }
 }
 plugins {
-	id 'com.github.johnrengelman.shadow' version '5.1.0'
+    id 'com.github.johnrengelman.shadow' version '5.1.0'
 }
 
 ext.xtextVersion = '2.20.0'
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
-apply plugin: 'java'
+apply plugin : 'java'
 dependencies {
-	compile platform("org.eclipse.xtext:xtext-dev-bom:${xtextVersion}")
+    compile platform("org.eclipse.xtext:xtext-dev-bom:${xtextVersion}")
 }
 
-apply plugin: 'org.xtext.xtend'
+apply plugin : 'org.xtext.xtend'
 sourceSets {
-	main {
-		java.srcDirs = ['m/src', 'm/src-gen', 'm.ide/src', 'm.ide/src-gen']
-		resources.srcDirs = ['m/src', 'm/src-gen', 'm.ide/src', 'm.ide/src-gen']
-		xtendOutputDir = 'xtend-gen'
-	}
+    main {
+        java.srcDirs = ['m/src', 'm/src-gen', 'm.ide/src', 'm.ide/src-gen']
+        resources.srcDirs = ['m/src', 'm/src-gen', 'm.ide/src', 'm.ide/src-gen']
+        xtendOutputDir = 'xtend-gen'
+    }
 }
 sourceSets.all {
-	resources.exclude '**/*.g', '**/*.mwe2', '**/*.xtend', '**/*._trace'
+    resources.exclude '**/*.g', '**/*.mwe2', '**/*.xtend', '**/*._trace'
 }
 jar {
-	from('model') {
-		into('model')
-	}
-	manifest {
-		attributes 'Bundle-SymbolicName': project.name
-	}
+    from('model') {
+        into('model')
+    }
+    manifest {
+        attributes 'Bundle-SymbolicName' : project.name
+    }
 }
 
 plugins.withId('war') {
-	webAppDirName = "WebRoot"
+    webAppDirName = 'WebRoot'
 }
-apply plugin: 'eclipse'
+apply plugin : 'eclipse'
 
 group = 'm'
 version = 'ls'
@@ -52,33 +52,33 @@ sourceCompatibility = '11'
 targetCompatibility = '11'
 
 configurations.all {
-	exclude group: 'asm'
+    exclude group : 'asm'
 }
 
 dependencies {
-	compile "org.eclipse.xtext:org.eclipse.xtext:${xtextVersion}"
-	compile "org.eclipse.xtext:org.eclipse.xtext.xbase:${xtextVersion}"
+    compile "org.eclipse.xtext:org.eclipse.xtext:${xtextVersion}"
+    compile "org.eclipse.xtext:org.eclipse.xtext.xbase:${xtextVersion}"
 }
 configurations {
-	mwe2 {
-		extendsFrom compile
-	}
+    mwe2 {
+        extendsFrom compile
+    }
 }
 
 dependencies {
-	mwe2 'org.eclipse.emf:org.eclipse.emf.mwe2.launch'
-	mwe2 "org.eclipse.xtext:org.eclipse.xtext.common.types:${xtextVersion}"
-	mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:${xtextVersion}"
-	mwe2 'org.eclipse.xtext:xtext-antlr-generator'
+    mwe2 'org.eclipse.emf:org.eclipse.emf.mwe2.launch'
+    mwe2 "org.eclipse.xtext:org.eclipse.xtext.common.types:${xtextVersion}"
+    mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:${xtextVersion}"
+    mwe2 'org.eclipse.xtext:xtext-antlr-generator'
 }
 
 task generateXtextLanguage(type: JavaExec) {
-	main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
-	classpath = configurations.mwe2
-	inputs.file("m/src/m/M.xtext")
-	args += "m/src/m/Workflow.mwe2"
-	args += "-p"
-	args += "rootPath=/${projectDir}"
+    main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
+    classpath = configurations.mwe2
+    inputs.file('m/src/m/M.xtext')
+    args += 'm/src/m/Workflow.mwe2'
+    args += '-p'
+    args += "rootPath=/${projectDir}"
 }
 
 generateXtext.dependsOn(generateXtextLanguage)
@@ -86,20 +86,20 @@ clean.dependsOn(cleanGenerateXtextLanguage)
 eclipse.classpath.plusConfigurations += [configurations.mwe2]
 
 dependencies {
-	compile "org.eclipse.xtext:org.eclipse.xtext.ide:${xtextVersion}"
-	compile "org.eclipse.xtext:org.eclipse.xtext.xbase.ide:${xtextVersion}"
+    compile "org.eclipse.xtext:org.eclipse.xtext.ide:${xtextVersion}"
+    compile "org.eclipse.xtext:org.eclipse.xtext.xbase.ide:${xtextVersion}"
 }
 
-apply plugin: 'application'
-apply plugin: 'com.github.johnrengelman.shadow'
-mainClassName = "org.eclipse.xtext.ide.server.ServerLauncher"
+apply plugin : 'application'
+apply plugin : 'com.github.johnrengelman.shadow'
+mainClassName = 'org.eclipse.xtext.ide.server.ServerLauncher'
 
 shadowJar {
-	from(project.convention.getPlugin(JavaPluginConvention).sourceSets.main.output)
-	configurations = [project.configurations.runtime]
-	exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA','schema/*',
-		'.options', '.api_description', '*.profile', '*.html', 'about.*', 'about_files/*',
-		'plugin.xml', 'systembundle.properties', 'profile.list')
-	classifier = 'ls'
-	append('plugin.properties')
+    from(project.convention.getPlugin(JavaPluginConvention).sourceSets.main.output)
+    configurations = [project.configurations.runtime]
+    exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'schema/*',
+        '.options', '.api_description', '*.profile', '*.html', 'about.*', 'about_files/*',
+        'plugin.xml', 'systembundle.properties', 'profile.list')
+    classifier = 'ls'
+    append('plugin.properties')
 }
