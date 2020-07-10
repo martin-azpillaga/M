@@ -6,10 +6,6 @@ jobs:
     steps:
       - name: Download repository
         uses: actions/checkout@v2
-      - name: Install node 12
-        uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
       - name: Accepted formats
         run: |
           find . -type f \
@@ -23,9 +19,24 @@ jobs:
           -not -name "*.xtext" -and \
           -not -name "*.mwe2" \
           | grep "."
+      - name: Install node 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Install node packages
+        run: |
+          npm install markdownlint-cli
+          npm install npm-groovy-lint
+          npm install jsonlint
+          npm install js-beautify
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - name: Lint Markdown
         run: |
-          npx markdownlint-cli -i LICENSE.md "**/*.md"
+          npx markdownlint-cli -i LICENSE.md -i node_modules "**/*.md"
       - name: Lint Yaml
         run: |
           sudo apt-get install yamllint
