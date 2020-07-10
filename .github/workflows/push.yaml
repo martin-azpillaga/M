@@ -26,7 +26,9 @@ jobs:
       - name: Cache node modules
         uses: actions/cache@v2
         with:
-          path: node_modules
+          path: |
+            node_modules
+            checkstyle-8.34-all.jar
           key: format
       - name: Install node packages
         run: |
@@ -35,6 +37,7 @@ jobs:
           npm install jsonlint
           npm install js-beautify
           npm install yaml-lint
+          wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.34/checkstyle-8.34-all.jar
       - name: Lint Markdown
         run: |
           npx markdownlint-cli -i LICENSE.md -i node_modules "**/*.md"
@@ -43,7 +46,7 @@ jobs:
           find . -not -wholename "*node_modules*" -name "*.yaml" -exec sh -c 'npx yamllint {}' \;
       - name: Lint Groovy
         run: |
-          npx npm-groovy-lint -i node_modules
+          npx npm-groovy-lint -i "**/node_modules/**/*"
       - name: Lint Json
         run: |
           find . -not -wholename "*node_modules*" -name "*.json" -not -name "*local-storage.json" -exec sh -c 'npx jsonlint {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
@@ -52,7 +55,6 @@ jobs:
           find . -not -wholename "*node_modules*" -name "*.js" -exec sh -c 'npx js-beautify {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
       - name: Lint java
         run: |
-          wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.34/checkstyle-8.34-all.jar
           java -jar checkstyle-8.34-all.jar -c /sun_checks.xml Code/Language/m/src || exit 0
   structure:
     runs-on: ubuntu-latest
