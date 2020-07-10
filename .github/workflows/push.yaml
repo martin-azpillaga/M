@@ -1,37 +1,86 @@
 on: push
 jobs:
-  lint:
+  format:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - name: Download repository
         uses: actions/checkout@v2
-      - name: Lint Markdown
-        run: npx markdownlint-cli -i LICENSE.md "**/*.md"
-      - name: Lint Yaml
+      - name: Accepted formats
         run: |
-          sudo apt install yamllint
-          yamllint -d relaxed .
+          find . -type f \
+          -not -wholename "*.git*" \
+          -not -name "*.md" -and \
+          -not -name "*.yaml" -and \
+          -not -name "*.gradle" -and \
+          -not -name "*.java" -and \
+          -not -name "*.json" -and \
+          -not -name "*.js" -and \
+          -not -name "*.xtext" -and \
+          -not -name "*.mwe2" \
+          | grep "."
       - name: Install node 12
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
+      - name: Cache node modules
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+            checkstyle-8.34-all.jar
+          key: format
+      - name: Install node packages
+        run: |
+          npm install markdownlint-cli
+          npm install npm-groovy-lint
+          npm install jsonlint
+          npm install js-beautify
+          npm install yaml-lint
+          [ -f checkstyle-8.34-all.jar ] || wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.34/checkstyle-8.34-all.jar
+      - name: Lint Markdown
+        run: |
+          npx markdownlint-cli -i LICENSE.md -i node_modules "**/*.md"
+      - name: Lint Yaml
+        run: |
+          find . -not -wholename "*node_modules*" -name "*.yaml" -exec sh -c 'npx yamllint {}' \;
       - name: Lint Groovy
         run: |
-          npx npm-groovy-lint .
+          npx npm-groovy-lint -i "**/node_modules/**/*"
       - name: Lint Json
         run: |
-          find . -name "*.json" -exec npx jsonlint {} \;
+          find . -not -wholename "*node_modules*" -name "*.json" -not -name "*local-storage.json" -exec sh -c 'npx jsonlint {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
+      - name: Lint Javascript
+        run: |
+          find . -not -wholename "*node_modules*" -name "*.js" -exec sh -c 'npx js-beautify {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
+      - name: Lint java
+        run: |
+          java -jar checkstyle-8.34-all.jar -c /sun_checks.xml Code/Language/m/src || exit 0
+  structure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v2
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle
+            node_modules
+          key: structure
       - name: Install java 11
         uses: actions/setup-java@v1
         with:
           java-version: '11'
+      - name: Install eslint
+        run: |
+          npm install eslint
       - name: Build language server
         working-directory: Code/Language
         run: |
           mkdir m.ide m.ui
           gradle shadowJar
-          cp build/libs/Language-ls-ls.jar ../Editor/ls.jar
       - name: Lint Java
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -45,95 +94,92 @@ jobs:
           sonar-scanner \
           -Dsonar.organization=martin-azpillaga \
           -Dsonar.projectKey=martin-azpillaga_M \
-          -Dsonar.sources=Code/Editor \
+          -Dsonar.sources=Code/Editor,Code/Language/m/src \
+          -Dsonar.java.binaries=Code/Language/build/classes \
           -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.login=c1285d7b6c459b50e7eee08102a94f4b68bd70f9
-      - name: Check other files
+          -Dsonar.login=c1285d7b6c459b50e7eee08102a94f4b68bd70f9 \
+          -Dsonar.branch.name=feature
+      - name: Lint Javascript
         run: |
-          find . -type f \
-          -not -name "*.md" -and \
-          -not -name "*.yaml" -and \
-          -not -name "*.java" -and \
-          -not -name "*.json" -and \
-          -not -name "*.js" -and \
-          -not -name "*.xtext" -and \
-          -not -name "*.mwe2"
-  build:
+          npx eslint --init
+          find . -not -wholename "*node_modules*" -name "*.js" -exec sh -c 'npx eslint {}' \;
+  functionality:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Download repository
         uses: actions/checkout@v2
-      - name: Install python 2.7
-        run: |
-          python --version
-          sudo apt install python2.7
-          python --version
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle
+            Code/Editor/node_modules
+            pandoc-2.9.1-1-amd64.deb
+          key: functionality
       - name: Install java 11
         uses: actions/setup-java@v1
         with:
           java-version: '11'
+      - name: Install python 2.7
+        run: |
+          sudo apt-get install python2.7
+      - name: Install node 10
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - name: Install pandoc
+        run: |
+          sudo apt-get remove pandoc
+          [ -f pandoc-2.9.1-1-amd64.deb ] || wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
+          sudo dpkg -i pandoc-2.9.1-1-amd64.deb
+      - name: Install yarn and libx11
+        run: |
+          npm install -g yarn
+          sudo apt-get install libx11-dev libxkbfile-dev
       - name: Build language server
         working-directory: Code/Language
         run: |
           mkdir m.ide m.ui
           gradle shadowJar
           cp build/libs/Language-ls-ls.jar ../Editor/ls.jar
-      - name: Install pandoc 2.9
-        run: |
-          sudo apt remove pandoc
-          wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
-          sudo dpkg -i pandoc-2.9.1-1-amd64.deb
       - name: Build documentation
         run: |
           find . -name "*.md" | sort | xargs -d "\n" pandoc > Code/Editor/Documentation.html
+      - name: Build editor in browser mode
+        working-directory: Code/Editor
+        run: |
+          yarn buildBrowser
+      - name: Build tests
+        run: |
+          pandoc README.md -t json | node Quality/reader.js > Code/Editor/test.js
+      - name: Run tests
+        working-directory: Code/Editor
+        run: |
+          cp ../../Quality/mobot.js mobot.js
+          mkdir workspace
+          yarn startBrowser workspace &> serverLog &
+          Xvfb :3 &
+          sleep 5 && xvfb-run yarn test
       - name: Upload Code/Editor folder to github artifacts
         uses: actions/upload-artifact@v2
         with:
           name: editor
           path: Code/Editor
-  test:
-    needs: build
-    runs-on: ubuntu-latest
-    timeout-minutes: 100
-    steps:
-      - name: Download repository
-        uses: actions/checkout@v2
-      - name: Download IDE folder
-        uses: actions/download-artifact@v2
-        with:
-          name: editor
-      - name: Install node 10
-        uses: actions/setup-node@v1
-        with:
-          node-version: '10.x'
-      - name: Install yarn and libx11
-        run: |
-          npm install -g yarn
-          sudo apt install libx11-dev libxkbfile-dev
-      - name: Build ide for browser
-        run: |
-          yarn buildBrowser
-      - name: Build tests
-        run: |
-          pandoc README.md -t json | node Automation/reader.js > Code/Editor/test.js
-      - name: Run tests
-        working-directory: Code/Editor
-        run: |
-          cp ../Language/build/libs/Language-ls-ls.jar ../../ls.jar
-          cp ../../Automation/mobot.js mobot.js
-          mkdir workspace
-          yarn startBrowser workspace &> serverLog &
-          Xvfb :3 &
-          sleep 5 && xvfb-run yarn test
-  packageWindows:
-    needs: test
+  packagingWindows:
+    needs: functionality
     runs-on: windows-latest
     timeout-minutes: 100
     steps:
       - uses: actions/setup-python@v2
         with:
           python-version: '2.x'
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+          key: windowsPackaging
       - name: Download Editor folder
         uses: actions/download-artifact@v2
         with:
@@ -159,14 +205,20 @@ jobs:
         with:
           name: windows
           path: "dist/m 0.0.0.exe"
-  packageUbuntu:
-    needs: test
+  packagingUbuntu:
+    needs: functionality
     runs-on: ubuntu-latest
     timeout-minutes: 100
     steps:
       - uses: actions/setup-python@v2
         with:
           python-version: '2.x'
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+          key: ubuntuPackaging
       - name: Download the editor folder
         uses: actions/download-artifact@v2
         with:
@@ -192,7 +244,7 @@ jobs:
           path: dist/m-0.0.0.AppImage
   release:
     if: ${{ github.ref == 'refs/heads/master' }}
-    needs: [packageUbuntu, packageWindows]
+    needs: [packagingUbuntu, packagingWindows]
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
