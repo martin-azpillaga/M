@@ -118,4 +118,3 @@ All kind actions are welcome. Here are some ideas:
 Thank you.
 
 [download]: https://github.com/martin-azpillaga/M/releases/latest/download/m-0.0.0.AppImage
-
