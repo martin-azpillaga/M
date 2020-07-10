@@ -1,9 +1,41 @@
 package m.validation;
-import static m.validation.Type.*;
-import static m.validation.SumType.*;
-import static m.validation.ProductType.*;
-import static m.validation.PolymorphicType.*;
-import static m.validation.ExponentType.*;
+import static m.validation.ExponentType.anyAny;
+import static m.validation.ExponentType.anyEmpty;
+import static m.validation.ExponentType.constant;
+import static m.validation.ExponentType.emptyEmpty;
+import static m.validation.ExponentType.entityEmpty;
+import static m.validation.ExponentType.entityEntityListProposition;
+import static m.validation.ExponentType.entityListNumber;
+import static m.validation.ExponentType.entityProposition;
+import static m.validation.ExponentType.number2Number;
+import static m.validation.ExponentType.number3Number;
+import static m.validation.ExponentType.number3Number3;
+import static m.validation.ExponentType.number3Number3Number;
+import static m.validation.ExponentType.number3Number3Number3;
+import static m.validation.ExponentType.numberNumber;
+import static m.validation.ExponentType.numberNumber2Number;
+import static m.validation.ExponentType.numberNumber2Number2Number;
+import static m.validation.ExponentType.numberNumberNumberNumber3;
+import static m.validation.ExponentType.numberNumberProposition;
+import static m.validation.ExponentType.numericNumberNumeric;
+import static m.validation.ExponentType.numericNumericNumeric;
+import static m.validation.ExponentType.propositionProposition;
+import static m.validation.ExponentType.propositionPropositionProposition;
+import static m.validation.PolymorphicType.entityList;
+import static m.validation.ProductType.number2;
+import static m.validation.ProductType.number3;
+import static m.validation.ProductType.number4;
+import static m.validation.Type.clip;
+import static m.validation.Type.declaration;
+import static m.validation.Type.entity;
+import static m.validation.Type.fontType;
+import static m.validation.Type.imageType;
+import static m.validation.Type.materialType;
+import static m.validation.Type.meshType;
+import static m.validation.Type.number;
+import static m.validation.Type.proposition;
+import static m.validation.Type.textType;
+import static m.validation.Type.unit;
 
 public enum Symbol
 {
