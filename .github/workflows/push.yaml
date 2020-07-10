@@ -10,6 +10,19 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
+      - name: Accepted formats
+        run: |
+          find . -type f \
+          -not -wholename "*.git*" \
+          -not -name "*.md" -and \
+          -not -name "*.yaml" -and \
+          -not -name "*.gradle" -and \
+          -not -name "*.java" -and \
+          -not -name "*.json" -and \
+          -not -name "*.js" -and \
+          -not -name "*.xtext" -and \
+          -not -name "*.mwe2" \
+          | grep "."
       - name: Lint Markdown
         run: |
           npx markdownlint-cli -i LICENSE.md "**/*.md"
@@ -30,17 +43,6 @@ jobs:
         run: |
           wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.34/checkstyle-8.34-all.jar
           java -jar checkstyle-8.34-all.jar -c /sun_checks.xml Code/Language/m/src || exit 0
-      - name: No more unformatted files
-        run: |
-          find . -type f \
-          -not -name "*.md" -and \
-          -not -name "*.yaml" -and \
-          -not -name "*.java" -and \
-          -not -name "*.json" -and \
-          -not -name "*.js" -and \
-          -not -name "*.xtext" -and \
-          -not -name "*.mwe2" \
-          | grep "." && exit 1 || exit 0
   structure:
     runs-on: ubuntu-latest
     timeout-minutes: 15
