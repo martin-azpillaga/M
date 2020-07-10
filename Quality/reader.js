@@ -81,5 +81,3 @@ function inline(inline) {
     }
     return result
 }
-// execute by piping pandoc's json output to node
-// pandoc file -t json | node reader.js
