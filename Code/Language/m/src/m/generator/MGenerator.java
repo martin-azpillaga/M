@@ -4,12 +4,8 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.generator.AbstractGenerator;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.generator.IGeneratorContext;
-import m.validation.MValidator;
-import java.util.HashMap;
-import java.util.Map;
 
-import m.m.Function;
-import m.validation.Type;
+import m.validation.MValidator;
 
 public class MGenerator extends AbstractGenerator
 {
