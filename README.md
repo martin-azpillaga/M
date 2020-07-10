@@ -121,8 +121,8 @@ Thank you.
 
 ## Test
 
-* Create and open file main.m
-* Append to main.m
+* ,Create and open file main.m
+* ,Append to main.m
 
 ~~~ m
 control()
@@ -134,5 +134,5 @@ control()
 }
 ~~~
 
-* Expect new files in src-gen/Unity/Assets/Code: Components/baseVelocity.cs, Systems/control.cs
-* End
+* ,Expect new files in src-gen/Unity/Assets/Code: Components/baseVelocity.cs, Systems/control.cs
+* ,End
