@@ -116,7 +116,7 @@ jobs:
             ~/.gradle
             Code/Editor/node_modules
             pandoc-2.9.1-1-amd64.deb
-          key: structure
+          key: functionality
       - name: Install java 11
         uses: actions/setup-java@v1
         with:
@@ -174,6 +174,12 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '2.x'
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+          key: windowsPackaging
       - name: Download Editor folder
         uses: actions/download-artifact@v2
         with:
@@ -207,6 +213,12 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '2.x'
+      - name: Cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            node_modules
+          key: ubuntuPackaging
       - name: Download the editor folder
         uses: actions/download-artifact@v2
         with:
