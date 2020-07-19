@@ -155,13 +155,11 @@ class Godot
 		}
 		else if (e.name == remove.name)
 		{
-			var entity = e.arguments.get(0).code
 			''''''
 			//'''«e.generic»_«entity».queue_free()'''
 		}
 		else if (e.name == add.name)
 		{
-			var entity = e.arguments.get(0).code
 			''''''
 			//'''entity_«entity».add_child(preload("res://Engine/«e.generic».gd").new())'''
 		}
@@ -203,13 +201,11 @@ class Godot
 			}
 			else if (e.name == remove.name)
 			{
-				var entity = e.arguments.get(0).code
 				''''''
 				//'''«e.generic»_«entity».queue_free()'''
 			}
 			else if (e.name == add.name)
 			{
-				var entity = e.arguments.get(0).code
 				''''''
 				//'''entity_«entity».add_child(preload("res://Engine/«e.generic».gd").new())'''
 			}
