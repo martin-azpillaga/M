@@ -1,0 +1,28 @@
+package m.validation;
+
+public enum AtomicType
+{
+	STRING,
+	PROPOSITION,
+	NUMBER,
+	NUMBER2,
+	NUMBER3,
+	UNIT,
+	ANY,
+	
+	MATRIX3,
+	COLOR,
+	NUMERIC,
+	
+	INPUT,
+	MESH,
+	MATERIAL,
+	FONT,
+	TEXT,
+	IMAGE,
+	AUDIOCLIP,
+	ANIMATOR,
+	
+	ENTITY,
+	ENTITY_LIST;
+}
