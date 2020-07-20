@@ -1,6 +1,6 @@
-package m.validation;
+package m.validation.types;
 
-public enum AtomicType
+public enum AtomicType implements Type
 {
 	STRING,
 	PROPOSITION,
@@ -23,6 +23,7 @@ public enum AtomicType
 	AUDIOCLIP,
 	ANIMATOR,
 	
+	DECLARATION,
 	ENTITY,
 	ENTITY_LIST;
 }
