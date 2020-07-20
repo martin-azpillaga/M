@@ -46,7 +46,7 @@ public class Context {
 	
 	public void push()
 	{
-		stack.push(map);
+		stack.push(new HashMap<>(map));
 	}
 	
 	public void pop()
