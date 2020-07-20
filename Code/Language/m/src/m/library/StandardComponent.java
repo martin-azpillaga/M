@@ -1,4 +1,4 @@
-package m.validation;
+package m.library;
 import static m.types.AtomicType.*;
 
 import m.types.AtomicType;
@@ -82,7 +82,7 @@ public enum StandardComponent
 		this.type = type;
 	}
 	
-	public String getName() {
-		return this.name().toLowerCase();
+	public Type getType() {
+		return type;
 	}
 }

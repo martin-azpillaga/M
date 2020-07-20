@@ -1,4 +1,4 @@
-package m.validation;
+package m.library;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,9 +10,9 @@ public enum Language {
 	EUSKARA(new HashMap<>(), new HashMap<>(), new HashMap<>())
 	;
 	
-	Map<String, StandardComponent> components;
-	Map<String, StandardFunction> functions;
-	Map<String, StandardBlock> blocks;
+	public Map<String, StandardComponent> components;
+	public Map<String, StandardFunction> functions;
+	public Map<String, StandardBlock> blocks;
 	
 	Language(Map<String, StandardComponent> components, Map<String, StandardFunction> functions, Map<String, StandardBlock> blocks)
 	{
