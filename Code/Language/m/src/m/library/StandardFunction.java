@@ -1,4 +1,4 @@
-package m.validation;
+package m.library;
 
 import static m.types.AtomicType.*;
 import static m.types.TypeVariable.*;
