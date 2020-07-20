@@ -1,23 +1,20 @@
 package m.validation;
 
+import static m.library.StandardBlock.QUERY;
 import static m.m.MPackage.Literals.APPLICATION__NAME;
 import static m.m.MPackage.Literals.BINARY__OPERATOR;
 import static m.m.MPackage.Literals.BLOCK__NAME;
 import static m.m.MPackage.Literals.UNARY__OPERATOR;
-import static m.validation.StandardBlock.QUERY;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.validation.Check;
 
 import m.generator.Game;
+import m.library.Language;
 import m.m.Application;
 import m.m.Assignment;
 import m.m.Binary;
@@ -30,7 +27,6 @@ import m.m.Function;
 import m.m.Statement;
 import m.m.Unary;
 import m.m.Value;
-import m.types.Type;
 import m.types.TypeVariable;
 
 enum MError
@@ -38,54 +34,14 @@ enum MError
 	redefinition, undefined, syntax, undecidable, incompatible
 }
 
-enum GroupingReason
-{
-	assignment, sameComponent, sameVariable, parameterArgument, resultReturn, vectorArithmetic
-}
+
 
 public class MValidator extends AbstractMValidator
 {
 	Language language;
+	ExpressionForest expressionForest;
+	Context context;
 	
-	Map<String, Expression> userValues;
-	Map<String, Group> groupOfComponent;
-	Map<Expression, Group> groupOfExpression;
-	
-	class Group
-	{
-		public List<GroupEntry> entries = new ArrayList<GroupEntry>();
-		public Type type;
-		public HashMap<Expression, GroupInfo> expressions = new HashMap<>();
-		
-		public void addEntry(Expression expression, Type type, String reason)
-		{
-			if (!expressions.containsKey(expression))
-			{
-				expressions.put(expression, new GroupInfo());
-			}
-			expressions.get(expression).types.put(type, reason);
-		}
-		
-		public void addEntry(Expression expression, String groupingReason)
-		{
-			if (!expressions.containsKey(expression))
-			{
-				expressions.put(expression, new GroupInfo());
-			}
-			expressions.get(expression).groupingReasons.add(groupingReason);
-		}
-	}
-	
-	class GroupInfo {
-		public HashMap<Type, String> types = new HashMap<>();
-		public List<String> groupingReasons = new ArrayList<>();
-	}
-	class GroupEntry
-	{
-		public Expression expression;
-		public ArrayList<GroupingReason> groupingReasons = new ArrayList<GroupingReason>();
-		public ArrayList<Type> types = new ArrayList<Type>();
-	}
 	class Problem
 	{
 		public boolean isError;
@@ -95,10 +51,6 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	public static Game game;
-	
-	Map<String,Type> standardSymbols = new HashMap<String,Type>();
-	Map<String,Type> userComponents = new HashMap<String,Type>();
-	Map<String,Type> standardBlocks = new HashMap<String,Type>();
 	
 	@Check
 	public void validate(File file)
@@ -114,7 +66,7 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	void initialize(File file) {
-		
+		expressionForest = new ExpressionForest();
 	}
 	
 	void validate(Function function) {
@@ -138,13 +90,13 @@ public class MValidator extends AbstractMValidator
 				if (expression instanceof Value)
 				{
 					var value = (Value) expression;
-					var innerRestore = new HashMap<String,Expression>(userValues);
-					declare(value);
+					context.push();
+					context.declare(value);
 					for (var s : block.getStatements())
 					{
 						validate(s);
 					}
-					userValues = innerRestore;
+					context.pop();
 				}
 				else
 				{
@@ -181,7 +133,7 @@ public class MValidator extends AbstractMValidator
 			
 			if (atom instanceof Value)
 			{
-				declare((Value)atom);
+				context.declare((Value)atom);
 			}
 			else
 			{
@@ -195,7 +147,7 @@ public class MValidator extends AbstractMValidator
 		{
 			var value = (Value) expression;
 			
-			checkDeclared(value);
+			context.checkDeclared(value);
 		}
 		else if (expression instanceof Cell)
 		{
@@ -203,7 +155,7 @@ public class MValidator extends AbstractMValidator
 			var entity = cell.getEntity();
 			var component = cell.getComponent();
 			
-			checkDeclared(entity);
+			context.checkDeclared(entity);
 			
 			infer(component.getName(), cell, null, entity, component);
 		}
@@ -229,8 +181,9 @@ public class MValidator extends AbstractMValidator
 		var standard = language.functions.get(name);
 		if (standard != null)
 		{
-			var parameters = standard.type.getParameters();
-			var result = standard.type.getReturnType();
+			var type = standard.getType();
+			var parameters = type.getParameters();
+			var result = type.getReturnType();
 			
 			var variables = new HashMap<String, ArrayList<Expression>>();
 			
@@ -250,7 +203,7 @@ public class MValidator extends AbstractMValidator
 					}
 					else
 					{
-						set(arguments[i], parameters[i], "argument " + i + " of standard symbol " + name);
+						expressionForest.set(arguments[i], parameters[i], new TypingReason(name, i));
 					}
 				}
 				if (expression instanceof Expression)
@@ -267,7 +220,7 @@ public class MValidator extends AbstractMValidator
 					}
 					else
 					{
-						set ((Expression)expression, result, "result of standard symbol " + name);
+						expressionForest.set ((Expression)expression, result, new TypingReason(name, true));
 					}
 				}
 				// Check for type variables
@@ -276,7 +229,7 @@ public class MValidator extends AbstractMValidator
 					var expressions = variables.get(typeName);
 					for (var i = 1; i < expressions.size(); i++)
 					{
-						group(expressions.get(0), expressions.get(i), GroupingReason.assignment);
+						expressionForest.group(expressions.get(0), expressions.get(i), BindingReason.assignment);
 					}
 				}
 			}
@@ -296,100 +249,6 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	void solve(File file) {
-		
-	}
-	
-	void set(Expression expression, Type type, String reason) {
-		if (expression instanceof Cell)
-		{
-			var cell = (Cell) expression;
-			var component = cell.getComponent().getName();
-			
-			var group = groupOfComponent.get(component);
-			
-			if (group == null)
-			{
-				group = new Group();
-				groupOfComponent.put(component, group);
-				groupOfExpression.put(expression, group);
-			}
-			group.addEntry(expression, type, reason);
-		}
-		else
-		{
-			var group = groupOfExpression.get(expression);
-			
-			if (group == null)
-			{
-				group = new Group();
-				groupOfExpression.put(expression, group);
-			}
-			
-			group.addEntry(expression, type, reason);
-		}
-	}
-	
-	void group(Expression a, Expression b, GroupingReason reason) {
-		var involvedGroups = new HashSet<Group>();
-		involvedGroups.add(groupOfExpression.get(a));
-		involvedGroups.add(groupOfExpression.get(b));
-		
-		if (a instanceof Cell)
-		{
-			involvedGroups.add(groupOfComponent.get(((Cell) a).getComponent().getName()));
-		}
-		if (b instanceof Cell)
-		{
-			involvedGroups.add(groupOfComponent.get(((Cell) b).getComponent().getName()));
-		}
-		if (involvedGroups.contains(null))
-		{
-			involvedGroups.remove(null);
-		}
-		
-		var extra = new Group();
-		extra.addEntry(a, reason.toString());
-		extra.addEntry(b, reason.toString());
-		involvedGroups.add(extra);
-		
-		var g = new Group();
-		for (var group : involvedGroups)
-		{
-			for (var expression : group.expressions.keySet())
-			{
-				groupOfExpression.put(expression,g);
-				if (expression instanceof Cell)
-				{
-					groupOfComponent.put(((Cell) expression).getComponent().getName(), g);
-				}
-			}
-			g.expressions.putAll(group.expressions);
-			g.expressions.putAll(group.expressions);
-		}
-	}
-	
-	void declare(Value value)
-	{
-		if (userValues.containsKey(value.getName()) || userComponents.containsKey(value.getName()) || standardSymbols.containsKey(value.getName()))
-		{
-			
-		}
-		else
-		{
-			userValues.put(value.getName(), value);
-		}
-	}
-	
-	void checkDeclared(Value value)
-	{
-		var name = value.getName();
-		if (!userValues.containsKey(name))
-		{
-			// error
-		}
-		else
-		{
-			group(value, userValues.get(name), GroupingReason.sameVariable);
-		}
+		System.out.println("Solve");
 	}
 }

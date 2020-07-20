@@ -1,8 +1,8 @@
-package m.validation;
+package m.library;
 
+import m.types.Type;
 import static m.types.AtomicType.*;
 
-import m.types.AtomicType;
 
 public enum StandardBlock {
 	QUERY(ENTITY),
@@ -10,9 +10,13 @@ public enum StandardBlock {
 	ITERATION(PROPOSITION)
 	;
 	
-	AtomicType type;
+	Type type;
 	
-	StandardBlock(AtomicType type) {
+	StandardBlock(Type type) {
 		this.type = type;
+	}
+	
+	public Type getType() {
+		return type;
 	}
 }
