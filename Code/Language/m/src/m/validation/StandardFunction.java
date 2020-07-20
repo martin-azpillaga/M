@@ -1,10 +1,10 @@
 package m.validation;
 
-import static m.validation.types.AtomicType.*;
+import static m.types.AtomicType.*;
+import static m.types.TypeVariable.*;
 
-import m.validation.types.FunctionType;
-import m.validation.types.Type;
-import static m.validation.types.TypeVariable.*;
+import m.types.FunctionType;
+import m.types.Type;
 
 public enum StandardFunction
 {

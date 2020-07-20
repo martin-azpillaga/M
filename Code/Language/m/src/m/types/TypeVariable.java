@@ -1,6 +1,6 @@
-package m.validation.types;
+package m.types;
 
-import static m.validation.types.AtomicType.*;
+import static m.types.AtomicType.*;
 
 public class TypeVariable implements Type {
 	
