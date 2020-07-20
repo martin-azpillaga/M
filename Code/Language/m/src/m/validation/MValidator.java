@@ -1,23 +1,84 @@
 package m.validation;
 
+import static m.m.MPackage.Literals.APPLICATION__NAME;
+import static m.m.MPackage.Literals.BINARY__OPERATOR;
+import static m.m.MPackage.Literals.BLOCK__NAME;
+import static m.m.MPackage.Literals.UNARY__OPERATOR;
+import static m.validation.StandardBlock.QUERY;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.xtext.validation.Check;
 
 import m.generator.Game;
+import m.m.Application;
+import m.m.Assignment;
+import m.m.Binary;
+import m.m.Block;
+import m.m.Cell;
+import m.m.Delegation;
 import m.m.Expression;
+import m.m.File;
+import m.m.Function;
+import m.m.Statement;
+import m.m.Unary;
+import m.m.Value;
+import m.validation.types.Type;
+import m.validation.types.TypeVariable;
 
+enum MError
+{
+	redefinition, undefined, syntax, undecidable, incompatible
+}
+
+enum GroupingReason
+{
+	assignment, sameComponent, sameVariable, parameterArgument, resultReturn, vectorArithmetic
+}
 
 public class MValidator extends AbstractMValidator
 {
+	Language language;
+	
+	Map<String, Expression> userValues;
+	Map<String, Group> groupOfComponent;
+	Map<Expression, Group> groupOfExpression;
+	
 	class Group
 	{
-		public ArrayList<GroupEntry> entries = new ArrayList<GroupEntry>();
-		public ArrayList<String> components = new ArrayList<String>();
+		public List<GroupEntry> entries = new ArrayList<GroupEntry>();
 		public Type type;
+		public HashMap<Expression, GroupInfo> expressions = new HashMap<>();
+		
+		public void addEntry(Expression expression, Type type, String reason)
+		{
+			if (!expressions.containsKey(expression))
+			{
+				expressions.put(expression, new GroupInfo());
+			}
+			expressions.get(expression).types.put(type, reason);
+		}
+		
+		public void addEntry(Expression expression, String groupingReason)
+		{
+			if (!expressions.containsKey(expression))
+			{
+				expressions.put(expression, new GroupInfo());
+			}
+			expressions.get(expression).groupingReasons.add(groupingReason);
+		}
+	}
+	
+	class GroupInfo {
+		public HashMap<Type, String> types = new HashMap<>();
+		public List<String> groupingReasons = new ArrayList<>();
 	}
 	class GroupEntry
 	{
@@ -39,475 +100,296 @@ public class MValidator extends AbstractMValidator
 	Map<String,Type> userComponents = new HashMap<String,Type>();
 	Map<String,Type> standardBlocks = new HashMap<String,Type>();
 	
-	/*
-	var userFunctions = new HashMap<String,Function>();
-	var userValues = new HashMap<String,Expression>();
-	
-	StandardLibrary library
-	
-	var expressions = new HashMap<Expression,Group>();
-	var components = new HashMap<String,Group>();
-	
-	var problems = new ArrayList<Problem>();
-	
 	@Check
-	def validate(File file)
+	public void validate(File file)
 	{
-		if (file.eResource.errors.empty)
+		if (!file.eResource().getErrors().isEmpty()) return;
+		
+		initialize(file);
+		for (var function : file.getFunctions())
 		{
-			var map = new HashMap<StandardLibrary,ArrayList<Problem>>();
-			for (lib : #[StandardLibrary.English])
+			validate(function);
+		}
+		solve(file);
+	}
+	
+	void initialize(File file) {
+		
+	}
+	
+	void validate(Function function) {
+		for (var statement : function.getStatements()) {
+			validate(statement);
+		}
+	}
+	
+	void validate(Statement statement) {
+		if (statement instanceof Block) {
+			var block = (Block) statement;
+			var name = block.getName();
+			var expression = block.getExpression();
+			
+			infer(name, block, BLOCK__NAME, block.getExpression());
+			
+
+			var standard = language.blocks.get(name);
+			if (standard == QUERY)
 			{
-				problems = new ArrayList<Problem>
-				library = lib
-				initialize(file)
-				for (function : file.functions)
+				if (expression instanceof Value)
 				{
-					function.validate
-				}
-				solve(file)
-				map.put(library, problems)
-			}
-			println(map)
-			var report = map.get(StandardLibrary.English)
-			for (problem : report)
-			{
-				if (problem.isError)
-				{
-					error(problem.message, problem.o, problem.feature)
+					var value = (Value) expression;
+					var innerRestore = new HashMap<String,Expression>(userValues);
+					declare(value);
+					for (var s : block.getStatements())
+					{
+						validate(s);
+					}
+					userValues = innerRestore;
 				}
 				else
 				{
-					warning(problem.message, problem.o, problem.feature)
+					//MError(syntax, statement, BLOCK__EXPRESSION)
 				}
 			}
-		}
-	}
-	
-	def private void MError(MError err, EObject o, EStructuralFeature feature)
-	{
-		problems.add(new Problem=>[isError=true message=library.errors.get(err) it.o=o it.feature=feature])
-	}
-	
-	def private initialize(File file)
-	{
-		library.symbols.forEach[standardSymbols.put(name, type)]
-		library.blocks.forEach[standardBlocks.put(name, type)]
-		
-		userComponents = new HashMap<String,Type>
-		var cells = EcoreUtil2.getAllContentsOfType(file, Cell)
-		for (cell : cells)
-		{
-			if (!standardSymbols.containsKey(cell.component))
+			else if (standard != null)
 			{
-				userComponents.put(cell.component, null)
-			}
-		}
-		
-		userFunctions = new HashMap<String,Function>
-		userValues = new HashMap<String,Expression>
-		expressions = new HashMap<Expression,Group>
-		components = new HashMap<String,Group>
-		
-		for (f : file.functions)
-		{
-			if (standardSymbols.containsKey(f.name) || userFunctions.containsKey(f.name) || userComponents.containsKey(f.name))
-			{
-				MError(redefinition, f, FUNCTION__NAME)
+				validate(expression);
+				for (var s : block.getStatements())
+				{
+					validate(s);
+				}
 			}
 			else
 			{
-				userFunctions.put(f.name, f)
+				//MError(undefined, statement, BLOCK__NAME)
 			}
 		}
-	}
-
-	def private void solve(File myFile)
-	{
-		var groups = new HashSet<Group>(expressions.values)
-		var MErrorFound = false
-		for (group : groups)
+		else if (statement instanceof Delegation)
 		{
-			if (!MErrorFound)
-			{
-				val types = new HashSet<Type>
-				for (entry : group.entries)
-				{
-					types.addAll(entry.types)
-				}
-				if (types.contains(numeric) && #[number,number2,number3,number4].exists[types.contains(it)])
-				{
-					types.remove(numeric)
-				}
-				if (types.size == 1 && types.head == numeric)
-				{
-					types.remove(numeric)
-				}
-				if (types.size == 0)
-				{
-					MErrorFound = true
-					for (entry : group.entries)
-					{
-						val MError =
-						'''
-						«library.errors.get(undecidable)»
-						«entry.groupingReasons.join(', ')»
-						'''
-						problems.add(new Problem=>[message=MError o=entry.expression feature=null])
-					}
-				}
-				else if (types.size == 1)
-				{
-					group.type = types.head
-				}
-				else
-				{
-					MErrorFound = true
-					for (entry : group.entries)
-					{
-						val message =
-						'''
-						«library.errors.get(incompatible)»
-						«entry.groupingReasons.join(', ')»
-						«FOR type : entry.types»
-						«library.name(type)»: Standard symbol
-						«ENDFOR»
-						'''
-						if (entry.types.empty)
-						{
-							problems.add(new Problem=>[it.message=message o=entry.expression feature=null])
-						}
-						else
-						{
-							MError(incompatible, entry.expression, null)
-						}
-					}
-				}
-			}
+			var delegation = (Delegation) statement;
+			validate(delegation.getApplication());
 		}
-		if (!MErrorFound)
+		else if (statement instanceof Assignment)
 		{
-			game = new Game
-			for (f : userFunctions.values)
+			var assignment = (Assignment) statement;
+			var atom = assignment.getAtom();
+			var expression = assignment.getExpression();
+			
+			infer("=", assignment, null, atom, expression);
+			
+			validate(expression);
+			
+			if (atom instanceof Value)
 			{
-				var copy = EcoreUtil2.copy(f)
-				var functionType = new ExponentType
-				if (f.result !== null)
-				{
-					functionType.right = expressions.get(f.result).type
-				}
-				for (var p = f.parameters.size -1; p >= 0; p--)
-				{
-					val type = expressions.get(f.parameters.get(p)).type
-					
-					functionType = new ExponentType=>[left=type]
-					functionType.right = functionType
-				}
-				game.functions.put(copy,functionType)
+				declare((Value)atom);
 			}
-			for (c : userComponents.keySet)
+			else
 			{
-				game.components.put(c, components.get(c).type)
+				validate(atom);
 			}
 		}
 	}
 	
-	def private void validate(Function function)
-	{
-		userValues = new HashMap<String, Expression>
-		for (parameter : function.parameters)
-		{
-			userValues.put(parameter.name, parameter)
-			if (!expressions.containsKey(parameter))
-			{
-				expressions.put(parameter,new Group=>[entries.add(new GroupEntry=>[it.expression=parameter])])
-			}
-		}
-		function.statements.validate(function.result)
-	}
-	
-	def private void validate(List<Statement> statements, Expression extra)
-	{
-		var restore = new HashMap(userValues)
-		
-		for (statement : statements)
-		{
-			if (statement instanceof Block)
-			{
-				var expression = statement.expression
-				var standard = standardBlocks.get(statement.name)
-				if (standard == declaration)
-				{
-					if (expression instanceof Value)
-					{
-						var innerRestore = new HashMap<String,Expression>(userValues)
-						declare(expression)
-						set(expression,entity)
-						statement.statements.validate(null)
-						userValues = innerRestore
-					}
-					else
-					{
-						MError(syntax, statement, BLOCK__EXPRESSION)
-					}
-				}
-				else if (standard !== null)
-				{
-					statement.expression.set(standard)
-					statement.expression.validate
-					statement.statements.validate(null)
-				}
-				else
-				{
-					MError(undefined, statement, BLOCK__NAME)
-				}
-			}
-			else if (statement instanceof Application)
-			{
-				statement.validate
-			}
-			else if (statement instanceof Assignment)
-			{
-				var atom = statement.atom
-				
-				group(statement.atom,statement.expression,assignment)
-				statement.expression.validate
-				if (atom instanceof Value)
-				{
-					atom.declare
-				}
-				else
-				{
-					atom.validate
-				}
-			}
-		}
-		
-		extra?.validate
-		
-		userValues = restore
-	}
-	
-	def private void validate(Expression expression)
-	{
+	void validate(Expression expression) {
 		if (expression instanceof Value)
 		{
-			var name = expression.name
+			var value = (Value) expression;
 			
-			if (userValues.containsKey(name))
-			{
-				group(expression,userValues.get(name), sameVariable)
-			}
-			else
-			{
-				MError(undefined, expression, null)
-			}
+			checkDeclared(value);
 		}
 		else if (expression instanceof Cell)
 		{
-			if (userValues.containsKey(expression.entity))
-			{
-				userValues.get(expression.entity).set(entity)
-			}
-			else
-			{
-				MError(undefined, expression, CELL__ENTITY)
-			}
-			var standard = standardSymbols.get(expression.component)
-			if (standard !== null)
-			{
-				expression.set(standard)
-			}
+			var cell = (Cell) expression;
+			var entity = cell.getEntity();
+			var component = cell.getComponent();
+			
+			checkDeclared(entity);
+			
+			infer(component.getName(), cell, null, entity, component);
 		}
 		else if (expression instanceof Binary)
 		{
-			inferApplication(expression.operator, #[expression.left,expression.right], expression, EXPRESSION__OPERATOR)
+			var binary = (Binary) expression;
+			infer(binary.getOperator(), binary, BINARY__OPERATOR, binary.getLeft(), binary.getRight());
 		}
 		else if (expression instanceof Unary)
 		{
-			inferApplication(expression.operator, #[expression.expression], expression, EXPRESSION__OPERATOR)
+			var unary = (Unary) expression;
+			infer(unary.getOperator(), expression, UNARY__OPERATOR, unary.getExpression());
 		}
 		else if (expression instanceof Application)
 		{
-			inferApplication(expression.name, expression.arguments, expression, APPLICATION__NAME)
+			var application = (Application) expression;
+			infer(application.getName(), application, APPLICATION__NAME, (Expression[]) application.getArguments().toArray());
 		}
 	}
 	
-	def private inferApplication(String name, List<Expression> arguments, Expression expression, EStructuralFeature feature)
+	void infer(String name, EObject expression, EStructuralFeature feature, Expression... arguments)
 	{
-		var standard = standardSymbols.get(name)
-		var user = userFunctions.get(name)
-		if (standard instanceof ExponentType)
+		var standard = language.functions.get(name);
+		if (standard != null)
 		{
-			var parameters = standard.parameters
-			var result = parameters.last
+			var parameters = standard.type.getParameters();
+			var result = standard.type.getReturnType();
 			
-			if (parameters.size == arguments.size + 1)
+			var variables = new HashMap<String, ArrayList<Expression>>();
+			
+			if (parameters.length == arguments.length)
 			{
-				for (var i = 0; i < arguments.size; i++)
+				for (var i = 0; i < arguments.length; i++)
 				{
-					arguments.get(i).set(standard.parameters.get(i))
-				}
-				if (result !== null)
-				{
-					expression.set(result)
-					if (standard == numericNumberNumeric)
+					if (parameters[i] instanceof TypeVariable)
 					{
-						group(arguments.get(0), expression, vectorArithmetic)
+						var typeVariable = (TypeVariable) parameters[i];
+						var typeName = typeVariable.getName();
+						if (!variables.containsKey(typeName))
+						{
+							variables.put(typeName, new ArrayList<>());
+						}
+						variables.get(typeName).add(arguments[i]);
 					}
-					else if (standard == numericNumericNumeric)
+					else
 					{
-						group(arguments.get(0), arguments.get(1), vectorArithmetic)
-						group(arguments.get(0), expression, vectorArithmetic)
+						set(arguments[i], parameters[i], "argument " + i + " of standard symbol " + name);
+					}
+				}
+				if (expression instanceof Expression)
+				{
+					if (result instanceof TypeVariable)
+					{
+						var typeVariable = (TypeVariable) result;
+						var typeName = typeVariable.getName();
+						if (!variables.containsKey(typeName))
+						{
+							variables.put(typeName, new ArrayList<>());
+						}
+						variables.get(typeName).add((Expression)expression);
+					}
+					else
+					{
+						set ((Expression)expression, result, "result of standard symbol " + name);
+					}
+				}
+				// Check for type variables
+				for (var typeName : variables.keySet())
+				{
+					var expressions = variables.get(typeName);
+					for (var i = 1; i < expressions.size(); i++)
+					{
+						group(expressions.get(0), expressions.get(i), GroupingReason.assignment);
 					}
 				}
 			}
 			else
 			{
-				MError(undefined, expression, feature)
-			}
-		}
-		else if (user !== null)
-		{
-			var parameters = user.parameters
-			var result = user.result
-			
-			if (parameters.size == arguments.size + 1)
-			{
-				for (var i = 0; i < arguments.size; i++)
-				{
-					group(parameters.get(i), arguments.get(i), parameterArgument)
-				}
-				if (result !== null)
-				{
-					group(result, expression, parameterArgument)
-				}
-			}
-			else
-			{
-				MError(undefined, expression, feature)
+				//MError(undefined, expression, feature)
 			}
 		}
 		else
 		{
-			MError(undefined, expression, feature)
+			//MError(undefined, expression, feature)
 		}
-		arguments.forEach[validate]
-	}
-	
-	def private parameters(ExponentType type)
-	{
-		var result = new ArrayList<Type>
-		var t = type
-		while (t.right instanceof ExponentType)
+		for (var argument : arguments)
 		{
-			result.add(t.left)
-			t = t.right as ExponentType
+			validate(argument);
 		}
-		result.add(t.left)
-		result.add(t.right)
-		return result
 	}
 	
-	def private group(Expression a, Expression b, GroupingReason reason)
-	{
-		var involvedGroups = new HashSet<Group>
-		involvedGroups.add(expressions.get(a))
-		involvedGroups.add(expressions.get(b))
+	void solve(File file) {
+		
+	}
+	
+	void set(Expression expression, Type type, String reason) {
+		if (expression instanceof Cell)
+		{
+			var cell = (Cell) expression;
+			var component = cell.getComponent().getName();
+			
+			var group = groupOfComponent.get(component);
+			
+			if (group == null)
+			{
+				group = new Group();
+				groupOfComponent.put(component, group);
+				groupOfExpression.put(expression, group);
+			}
+			group.addEntry(expression, type, reason);
+		}
+		else
+		{
+			var group = groupOfExpression.get(expression);
+			
+			if (group == null)
+			{
+				group = new Group();
+				groupOfExpression.put(expression, group);
+			}
+			
+			group.addEntry(expression, type, reason);
+		}
+	}
+	
+	void group(Expression a, Expression b, GroupingReason reason) {
+		var involvedGroups = new HashSet<Group>();
+		involvedGroups.add(groupOfExpression.get(a));
+		involvedGroups.add(groupOfExpression.get(b));
 		
 		if (a instanceof Cell)
 		{
-			involvedGroups.add(components.get(a.component))
+			involvedGroups.add(groupOfComponent.get(((Cell) a).getComponent().getName()));
 		}
 		if (b instanceof Cell)
 		{
-			involvedGroups.add(components.get(b.component))
+			involvedGroups.add(groupOfComponent.get(((Cell) b).getComponent().getName()));
 		}
 		if (involvedGroups.contains(null))
 		{
-			involvedGroups.remove(null)
+			involvedGroups.remove(null);
 		}
 		
-		var g = new Group
-		for (group : involvedGroups)
+		var extra = new Group();
+		extra.addEntry(a, reason.toString());
+		extra.addEntry(b, reason.toString());
+		involvedGroups.add(extra);
+		
+		var g = new Group();
+		for (var group : involvedGroups)
 		{
-			for (entry : group.entries)
+			for (var expression : group.expressions.keySet())
 			{
-				expressions.put(entry.expression,g)
+				groupOfExpression.put(expression,g);
+				if (expression instanceof Cell)
+				{
+					groupOfComponent.put(((Cell) expression).getComponent().getName(), g);
+				}
 			}
-			for (component : group.components)
-			{
-				components.put(component, g)
-			}
-			g.entries.addAll(group.entries)
-			g.components.addAll(group.components)
-		}
-		if (!g.entries.map[expression].contains(a))
-		{
-			var entry = new GroupEntry=>[expression=a]
-			if (reason !== null)
-			{
-				entry.groupingReasons.add(reason)
-			}
-			g.entries.add(entry)
-			expressions.put(a,g)
-			if (a instanceof Cell)
-			{
-				components.put(a.component,g)
-				g.components.add(a.component)
-			}
-		}
-		if (!g.entries.map[expression].contains(b))
-		{
-			var entry = new GroupEntry=>[expression=b]
-			if (reason !== null)
-			{
-				entry.groupingReasons.add(reason)
-			}
-			g.entries.add(entry)
-			expressions.put(b,g)
-			if (b instanceof Cell)
-			{
-				components.put(b.component,g)
-				g.components.add(b.component)
-			}
+			g.expressions.putAll(group.expressions);
+			g.expressions.putAll(group.expressions);
 		}
 	}
 	
-	def private void set(Expression expression, Type type)
+	void declare(Value value)
 	{
-		if (expression instanceof Cell)
+		if (userValues.containsKey(value.getName()) || userComponents.containsKey(value.getName()) || standardSymbols.containsKey(value.getName()))
 		{
-			if (!components.containsKey(expression.component))
-			{
-				group(expression,expression,null)
-			}
-			else
-			{
-				group(expression,components.get(expression.component).entries.head.expression, sameComponent)
-			}
-			components.get(expression.component).entries.findFirst[it.expression==expression].types.add(type)
-		}
-		else if (!expressions.containsKey(expression))
-		{
-			group(expression,expression,null)
-			expressions.get(expression).entries.findFirst[it.expression==expression].types.add(type)
+			
 		}
 		else
 		{
-			expressions.get(expression).entries.findFirst[it.expression==expression].types.add(type)
+			userValues.put(value.getName(), value);
 		}
 	}
 	
-	def private declare(Value value)
+	void checkDeclared(Value value)
 	{
-		if (userValues.containsKey(value.name) || userComponents.containsKey(value.name) || standardSymbols.containsKey(value.name) || userFunctions.containsKey(value.name))
+		var name = value.getName();
+		if (!userValues.containsKey(name))
 		{
-			MError(redefinition, value, null)
+			// error
 		}
 		else
 		{
-			userValues.put(value.name, value)
+			group(value, userValues.get(name), GroupingReason.sameVariable);
 		}
-	}*/
+	}
 }

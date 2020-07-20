@@ -1,9 +1,9 @@
 package m.generator
 
 import org.eclipse.xtext.generator.IFileSystemAccess2
-import m.validation.Type
-import static m.validation.Type.*
-import static m.validation.ProductType.*
+import m.validation.types.Type
+import static m.validation.types.AtomicType.*
+import static m.validation.types.ProductType.*
 import m.validation.ExponentType
 import m.m.Function
 import java.util.HashMap
@@ -242,8 +242,9 @@ class Godot
 		}
 	}
 	
-	def private String field(String component)
+	def private String field(Value value)
 	{
+		val component = value.getName();
 		var found = library.symbols.findFirst[it.name == component]
 		if (found === null)
 		{
@@ -307,16 +308,16 @@ class Godot
 			{
 				if (cell == container.atom)
 				{
-					cell.entity.setComponentAccess(cell.component,AccessKind.write)
+					cell.entity.name.setComponentAccess(cell.component.name,AccessKind.write)
 				}
 				else
 				{
-					cell.entity.setComponentAccess(cell.component,AccessKind.read)
+					cell.entity.name.setComponentAccess(cell.component.name,AccessKind.read)
 				}
 			}
 			else
 			{
-					cell.entity.setComponentAccess(cell.component,AccessKind.read)
+					cell.entity.name.setComponentAccess(cell.component.name,AccessKind.read)
 			}
 		}
 	}

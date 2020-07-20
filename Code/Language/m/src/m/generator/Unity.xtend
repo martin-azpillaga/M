@@ -289,7 +289,7 @@ class Unity
 			{
 				'''
 				«atom.code» = «statement.expression.code»;
-				EntityManager.SetComponentData(entity_«atom.entity», «atom.component»_«atom.entity»);
+				EntityManager.SetComponentData(entity_«atom.entity.name», «atom.component.name»_«atom.entity.name»);
 				'''
 			}
 		}
@@ -320,13 +320,13 @@ class Unity
 		else if (e instanceof Value) '''«e.name»'''
 		else if (e instanceof Cell)
 		{
-			if (e.component.isBuffer)
+			if (e.component.name.isBuffer)
 			{
 				'''«e.component»_«e.entity»'''
 			}
 			else
 			{
-				'''«e.component»_«e.entity».«field(e.component)»'''
+				'''«e.component»_«e.entity».«field(e.component.name)»'''
 			}
 		}
 		else if (e instanceof Application)
@@ -478,16 +478,16 @@ class Unity
 			{
 				if (cell == container.atom)
 				{
-					cell.entity.setComponentAccess(cell.component,AccessKind.write)
+					cell.entity.name.setComponentAccess(cell.component.name,AccessKind.write)
 				}
 				else
 				{
-					cell.entity.setComponentAccess(cell.component,AccessKind.read)
+					cell.entity.name.setComponentAccess(cell.component.name,AccessKind.read)
 				}
 			}
 			else
 			{
-					cell.entity.setComponentAccess(cell.component,AccessKind.read)
+					cell.entity.name.setComponentAccess(cell.component.name,AccessKind.read)
 			}
 		}
 	}

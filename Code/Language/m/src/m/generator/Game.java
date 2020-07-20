@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import m.m.Function;
-import m.validation.Type;
+import m.validation.types.Type;
 
 public class Game
 {
