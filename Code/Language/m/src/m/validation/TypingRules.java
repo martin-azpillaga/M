@@ -1,27 +1,38 @@
 package m.validation;
 
-public class TypingRules {
-
-}
+import m.library.Symbol;
 
 enum BindingReason
 {
-	assignment, sameComponent, sameVariable, parameterArgument, resultReturn, vectorArithmetic
+	assignment, sameComponent, sameVariable, parameterArgument, resultReturn, vectorArithmetic, polymorphism
 }
 
 class TypingReason
 {
-	String symbol;
+	Symbol symbol;
 	int parameter;
 	boolean returnType;
 	
-	public TypingReason(String symbol, boolean returnType) {
+	public TypingReason(Symbol symbol, boolean returnType) {
 		this.symbol = symbol;
 		this.returnType = returnType;
 	}
 	
-	public TypingReason(String symbol, int parameter) {
+	public TypingReason(Symbol symbol, int parameter) {
 		this.symbol = symbol;
 		this.parameter = parameter;
+	}
+	
+	@Override
+	public String toString()
+	{
+		if (returnType)
+		{
+			return "return value of " + symbol;
+		}
+		else
+		{
+			return "parameter " + parameter + " of " + symbol;
+		}
 	}
 }

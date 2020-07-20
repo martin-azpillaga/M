@@ -19,13 +19,14 @@ import m.m.Unary
 import m.m.Application
 import static m.validation.Symbols.*
 import m.validation.StandardLibrary
+import m.library.Language
 
 class Godot
 {
 	IFileSystemAccess2 fileSystem
 	
 	var queries = new HashMap<String,HashMap<String,AccessKind>>
-	var library = StandardLibrary.English
+	var library = Language.ENGLISH;
 	
 	def void generate(Game game, IFileSystemAccess2 fileSystem)
 	{
