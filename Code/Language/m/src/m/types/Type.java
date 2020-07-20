@@ -1,4 +1,4 @@
-package m.validation.types;
+package m.types;
 
 public interface Type {
 

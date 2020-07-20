@@ -1,8 +1,8 @@
 package m.validation;
-import static m.validation.types.AtomicType.*;
+import static m.types.AtomicType.*;
 
-import m.validation.types.AtomicType;
-import m.validation.types.Type;
+import m.types.AtomicType;
+import m.types.Type;
 
 public enum StandardComponent
 {

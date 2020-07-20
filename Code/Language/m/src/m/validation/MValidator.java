@@ -30,8 +30,8 @@ import m.m.Function;
 import m.m.Statement;
 import m.m.Unary;
 import m.m.Value;
-import m.validation.types.Type;
-import m.validation.types.TypeVariable;
+import m.types.Type;
+import m.types.TypeVariable;
 
 enum MError
 {
