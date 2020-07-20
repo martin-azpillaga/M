@@ -1,6 +1,10 @@
 package m.validation;
 
-import static m.validation.AtomicType.*;
+import static m.validation.types.AtomicType.*;
+
+import m.validation.types.FunctionType;
+import m.validation.types.Type;
+import static m.validation.types.TypeVariable.*;
 
 public enum StandardFunction
 {
@@ -35,12 +39,12 @@ public enum StandardFunction
 	AND(PROPOSITION, PROPOSITION),
 	NOT(PROPOSITION, PROPOSITION),
 	
-	ADDITION(NUMERIC, NUMERIC, NUMERIC),
-	SUBTRACTION(NUMERIC, NUMERIC, NUMERIC),
-	MULTIPLICATION(NUMERIC, NUMERIC, NUMBER),
-	DIVISION(NUMERIC, NUMERIC, NUMBER),
+	ADDITION(A_SUB_NUMERIC, A_SUB_NUMERIC, A_SUB_NUMERIC),
+	SUBTRACTION(A_SUB_NUMERIC, A_SUB_NUMERIC, A_SUB_NUMERIC),
+	MULTIPLICATION(A_SUB_NUMERIC, A_SUB_NUMERIC, NUMBER),
+	DIVISION(A_SUB_NUMERIC, A_SUB_NUMERIC, NUMBER),
 	
-	EQUAL(ANY,ANY),
+	EQUAL(PROPOSITION, A, A),
 	INEQUAL(ANY,ANY),
 	
 	LOWER(PROPOSITION, NUMBER, NUMBER),
@@ -83,11 +87,18 @@ public enum StandardFunction
 	
 	SET_TRIGGER(UNIT, ANIMATOR, STRING),
 	STATE_NAME(STRING, ANIMATOR),
+	
+	READ_TRIGGERED(PROPOSITION, INPUT),
+	READ_NUMBER(NUMBER, INPUT),
+	
+	RANDOM_DIRECTION_2D(NUMBER2, NUMBER),
+	
+	ASSIGNMENT(UNIT, A, A)
 	;
 	
 	FunctionType type;
 	
-	StandardFunction(AtomicType returnType, AtomicType... parameters) {
+	StandardFunction(Type returnType, Type... parameters) {
 		this.type = new FunctionType(parameters, returnType);
 	}
 	

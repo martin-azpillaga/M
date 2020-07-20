@@ -17,7 +17,7 @@ Unary: operator=OPERATOR expression=Primary;
 Application: name=IDENTIFIER '(' (arguments+=Expression (',' arguments+=Expression)*)? ')';
 
 Value: name=IDENTIFIER;
-Cell: entity=IDENTIFIER '.' component=IDENTIFIER;
+Cell: entity=Value '.' component=Value;
 
 terminal BLANKS: (BLANK|CONTROL)+;
 terminal IDENTIFIER: LETTER+;

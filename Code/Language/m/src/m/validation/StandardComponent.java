@@ -1,5 +1,8 @@
 package m.validation;
-import static m.validation.AtomicType.*;
+import static m.validation.types.AtomicType.*;
+
+import m.validation.types.AtomicType;
+import m.validation.types.Type;
 
 public enum StandardComponent
 {
@@ -73,17 +76,13 @@ public enum StandardComponent
 	LOOP(PROPOSITION),	
 	;
 	
-	private AtomicType type;
-	public AtomicType getType()
-	{
-		return type;
-	}
-	public String getName()
-	{
-		return this.name().toLowerCase();
-	}
-	StandardComponent (AtomicType type)
-	{
+	Type type;
+	
+	StandardComponent (Type type) {
 		this.type = type;
+	}
+	
+	public String getName() {
+		return this.name().toLowerCase();
 	}
 }
