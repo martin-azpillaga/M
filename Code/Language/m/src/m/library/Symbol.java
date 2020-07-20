@@ -1,13 +1,87 @@
 package m.library;
 
-import static m.types.AtomicType.*;
-import static m.types.TypeVariable.*;
-
-import m.types.FunctionType;
 import m.types.Type;
+import static m.types.AtomicType.*;
+import static m.types.TypeVariable.A;
+import static m.types.TypeVariable.A_SUB_NUMERIC;
 
-public enum StandardFunction
-{
+import m.types.AtomicType;
+import m.types.FunctionType;
+
+public enum Symbol {
+	QUERY(ENTITY),
+	SELECTION(PROPOSITION),
+	ITERATION(PROPOSITION),
+	
+	POSITION(NUMBER3),
+	ROTATION(NUMBER3),
+	SCALE(NUMBER3),
+	PARENT(ENTITY),
+	CHILDREN(ENTITY_LIST),
+	
+	
+	MASS(NUMBER),
+	INERTIA(MATRIX3),
+	KINEMATIC(PROPOSITION),
+	
+	VELOCITY(NUMBER3),
+	ACCELERATION(NUMBER3),
+	FORCE(NUMBER3),
+	ANGULAR_VELOCITY(NUMBER3),
+	ANGULAR_ACCELERATION(NUMBER3),
+	ANGULAR_FORCE(NUMBER3),
+	
+	COLLISIONS(ENTITY_LIST),
+	COLLISION_LAYER(NUMBER),
+	COLLISION_MASK(NUMBER),
+	RESTITUTION(NUMBER),
+	FRICTION(NUMBER),
+	COLLISION_EVENTS(PROPOSITION),
+	NO_COLLISION_RESPONSE(PROPOSITION),
+	
+	RADIUS(NUMBER),
+	EXTENTS(NUMBER3),
+	MESH_COLLIDER(PROPOSITION),
+	CONVEX_HULL(PROPOSITION),
+	
+	BOND(ENTITY),
+	ANCHOR(NUMBER3),
+	BREAK_FORCE(NUMBER),
+	BREAK_ANGULAR_FORCE(NUMBER),
+	
+	LOCKED_POSITION_X(PROPOSITION),
+	LOCKED_POSITION_Y(PROPOSITION),
+	LOCKED_POSITION_Z(PROPOSITION),
+	LOCKED_ROTATION(PROPOSITION),
+	
+	
+	MESH(AtomicType.MESH),
+	MATERIAL(AtomicType.MATERIAL),
+	
+	NEAR(NUMBER),
+	FAR(NUMBER),
+	FOV(NUMBER),
+	PERSPECTIVE(PROPOSITION),
+	BACKGROUND(COLOR),
+	SKYBOX(AtomicType.MATERIAL),
+	VIEWPORT(NUMBER2),
+	RENDER_TEXTURE(IMAGE),
+	
+	EMISSION(COLOR),
+	SPOT_ANGLE(NUMBER),
+	RANGE(NUMBER),
+	INTENSITY(NUMBER),
+	
+	TIMER(NUMBER),
+	ELAPSED(NUMBER),
+	TIMEOUT(PROPOSITION),
+	
+	
+	AUDIOCLIP(AtomicType.AUDIOCLIP),
+	VOLUME(NUMBER),
+	PITCH(NUMBER),
+	LOOP(PROPOSITION),
+	
 	EPSILON(NUMBER),
 	PI(NUMBER),
 	E(NUMBER),
@@ -81,9 +155,9 @@ public enum StandardFunction
 	HALT(UNIT),
 	
 	
-	SET_NUMBER(UNIT, MATERIAL, NUMBER),
-	SET_COLOR(UNIT, MATERIAL, COLOR),
-	SET_STRING(UNIT, MATERIAL, STRING),
+	SET_NUMBER(UNIT, AtomicType.MATERIAL, NUMBER),
+	SET_COLOR(UNIT, AtomicType.MATERIAL, COLOR),
+	SET_STRING(UNIT, AtomicType.MATERIAL, STRING),
 	
 	SET_TRIGGER(UNIT, ANIMATOR, STRING),
 	STATE_NAME(STRING, ANIMATOR),
@@ -92,20 +166,19 @@ public enum StandardFunction
 	READ_NUMBER(NUMBER, INPUT),
 	
 	ASSIGNMENT(UNIT, A, A)
-	
 	;
 	
-	FunctionType type;
+	Type type;
 	
-	StandardFunction(Type returnType, Type... parameters) {
+	Symbol (Type type) {
+		this.type = type;
+	}
+	
+	Symbol (Type returnType, Type... parameters) {
 		this.type = new FunctionType(parameters, returnType);
 	}
 	
-	public FunctionType getType() {
+	public Type getType() {
 		return type;
-	}
-	
-	public String getName() {
-		return this.getName().toLowerCase();
 	}
 }

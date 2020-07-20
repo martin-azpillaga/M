@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import m.library.Language;
 import m.m.Cell;
 import m.m.Expression;
 import m.types.Type;
@@ -33,18 +34,13 @@ public class ExpressionForest {
 	
 	public void set(Expression expression, Type type, TypingReason reason) {
 		
-		var node = nodeOfExpression.get(expression);
+		// IF the node already has a type and the given is different, throw incompatible types error
 		
-		if (node == null && expression instanceof Cell)
-		{
-			var cell = (Cell) expression;
-			var component = cell.getComponent().getName();
-			node = nodeOfComponent.get(component);
-		}
+		var node = find(expression);
+		
 		if (node == null)
 		{
-			node = new ExpressionNode();
-			node.expression = expression;
+			node = checkIn(expression);
 		}
 		else
 		{
@@ -59,53 +55,34 @@ public class ExpressionForest {
 		}
 		node.type = type;
 		node.typingReason = reason;
-		nodeOfExpression.put(expression, node);
 		criticalNodes.add(node);
-		if (expression instanceof Cell)
-		{
-			nodeOfComponent.put(((Cell) expression).getComponent().getName(), node);
-		}
 	}
 	
 	void group(Expression a, Expression b, BindingReason reason) {
 		
-		var nodeA = nodeOfExpression.get(a);
-		if (nodeA == null && a instanceof Cell)
-		{
-			nodeA = nodeOfComponent.get(((Cell) a).getComponent().getName());
-		}
-		
-		var nodeB = nodeOfExpression.get(b);
-		if (nodeB == null && b instanceof Cell)
-		{
-			nodeB = nodeOfComponent.get(((Cell) b).getComponent().getName());
-		}
+		var nodeA = find(a);
+		var nodeB = find(b);
 		
 		if (nodeA == null && nodeB == null)
 		{
-			var root = new ExpressionNode();
-			nodeOfExpression.put(a, root);
-			root.expression = a;
-			var child = new ExpressionNode();
-			nodeOfExpression.put(b, child);
-			child.expression = b;
+			var root = checkIn(a);
+			var child = checkIn(b);
+			
 			child.reason = reason;
 			child.parent = root;
 			criticalNodes.add(root);
 		}
 		else if (nodeA == null && nodeB != null)
 		{
-			var newNode = new ExpressionNode();
-			nodeOfExpression.put(a, newNode);
-			newNode.expression = a;
+			var newNode = checkIn(a);
+			
 			newNode.parent = nodeB;
 			newNode.reason = reason;
 		}
 		else if (nodeA != null && nodeB == null)
 		{
-			var newNode = new ExpressionNode();
-			nodeOfExpression.put(b, newNode);
-			newNode.expression = b;
+			var newNode = checkIn(b);
+			
 			newNode.parent = nodeA;
 			newNode.reason = reason;
 		}
@@ -119,6 +96,41 @@ public class ExpressionForest {
 				nextParent = tmp;
 				rootA = rootA.parent;
 			}
+			
+			nodeA.parent = nodeB;
 		}
+	}
+	
+	public void note(Expression expression)
+	{
+		var node = find(expression);
+		if (node == null)
+		{
+			node = checkIn(expression);
+			criticalNodes.add(node);
+		}
+	}
+	
+	private ExpressionNode find(Expression expression)
+	{
+		var node = nodeOfExpression.get(expression);
+		if (node == null && expression instanceof Cell)
+		{
+			node = nodeOfComponent.get(((Cell) expression).getComponent().getName());
+		}
+		return node;
+	}
+	
+	private ExpressionNode checkIn(Expression expression)
+	{
+		var node = new ExpressionNode();
+		node.expression = expression;
+		nodeOfExpression.put(expression, node);
+		if (expression instanceof Cell)
+		{
+			var component = ((Cell)expression).getComponent().getName();
+			nodeOfComponent.put(component, node);
+		}
+		return node;
 	}
 }

@@ -1,6 +1,6 @@
 package m.validation;
 
-import static m.library.StandardBlock.QUERY;
+import static m.library.Symbol.QUERY;
 import static m.m.MPackage.Literals.APPLICATION__NAME;
 import static m.m.MPackage.Literals.BINARY__OPERATOR;
 import static m.m.MPackage.Literals.BLOCK__NAME;
@@ -27,6 +27,8 @@ import m.m.Function;
 import m.m.Statement;
 import m.m.Unary;
 import m.m.Value;
+import m.types.AtomicType;
+import m.types.FunctionType;
 import m.types.TypeVariable;
 
 enum MError
@@ -66,7 +68,9 @@ public class MValidator extends AbstractMValidator
 	}
 	
 	void initialize(File file) {
+		language = Language.ENGLISH;
 		expressionForest = new ExpressionForest();
+		context = new Context(expressionForest);
 	}
 	
 	void validate(Function function) {
@@ -157,79 +161,116 @@ public class MValidator extends AbstractMValidator
 			
 			context.checkDeclared(entity);
 			
-			infer(component.getName(), cell, null, entity, component);
+			infer(component.getName(), cell, null, entity);
 		}
 		else if (expression instanceof Binary)
 		{
 			var binary = (Binary) expression;
 			infer(binary.getOperator(), binary, BINARY__OPERATOR, binary.getLeft(), binary.getRight());
+			validate(binary.getLeft());
+			validate(binary.getRight());
 		}
 		else if (expression instanceof Unary)
 		{
 			var unary = (Unary) expression;
 			infer(unary.getOperator(), expression, UNARY__OPERATOR, unary.getExpression());
+			validate(unary.getExpression());
 		}
 		else if (expression instanceof Application)
 		{
 			var application = (Application) expression;
 			infer(application.getName(), application, APPLICATION__NAME, (Expression[]) application.getArguments().toArray());
+
+			for (var argument : application.getArguments())
+			{
+				validate(argument);
+			}
 		}
 	}
 	
 	void infer(String name, EObject expression, EStructuralFeature feature, Expression... arguments)
 	{
 		var standard = language.functions.get(name);
+		if (standard == null)
+		{
+			standard = language.components.get(name);
+		}
+		if (standard == null)
+		{
+			standard = language.blocks.get(name);
+		}
 		if (standard != null)
 		{
 			var type = standard.getType();
-			var parameters = type.getParameters();
-			var result = type.getReturnType();
-			
-			var variables = new HashMap<String, ArrayList<Expression>>();
-			
-			if (parameters.length == arguments.length)
+			if (type instanceof AtomicType) {
+				if (arguments.length == 1)
+				{
+					if (language.blocks.containsKey(name))
+					{
+						expressionForest.set(arguments[0], type, new TypingReason(standard, 1));
+					}
+					else if (language.components.containsKey(name))
+					{
+						expressionForest.set((Expression)expression, type, new TypingReason(standard, true));
+					}
+				}
+				else
+				{
+					// error
+				}
+			}
+			else if (type instanceof FunctionType)
 			{
-				for (var i = 0; i < arguments.length; i++)
+				var f = (FunctionType) type;
+				var parameters = f.getParameters();
+				var result = f.getReturnType();
+				
+				var variables = new HashMap<String, ArrayList<Expression>>();
+				
+				if (parameters.length == arguments.length)
 				{
-					if (parameters[i] instanceof TypeVariable)
+					for (var i = 0; i < arguments.length; i++)
 					{
-						var typeVariable = (TypeVariable) parameters[i];
-						var typeName = typeVariable.getName();
-						if (!variables.containsKey(typeName))
+						if (parameters[i] instanceof TypeVariable)
 						{
-							variables.put(typeName, new ArrayList<>());
+							var typeVariable = (TypeVariable) parameters[i];
+							var typeName = typeVariable.getName();
+							if (!variables.containsKey(typeName))
+							{
+								variables.put(typeName, new ArrayList<>());
+							}
+							variables.get(typeName).add(arguments[i]);
 						}
-						variables.get(typeName).add(arguments[i]);
-					}
-					else
-					{
-						expressionForest.set(arguments[i], parameters[i], new TypingReason(name, i));
-					}
-				}
-				if (expression instanceof Expression)
-				{
-					if (result instanceof TypeVariable)
-					{
-						var typeVariable = (TypeVariable) result;
-						var typeName = typeVariable.getName();
-						if (!variables.containsKey(typeName))
+						else
 						{
-							variables.put(typeName, new ArrayList<>());
+							expressionForest.set(arguments[i], parameters[i], new TypingReason(standard, i+1));
 						}
-						variables.get(typeName).add((Expression)expression);
 					}
-					else
+					if (expression instanceof Expression)
 					{
-						expressionForest.set ((Expression)expression, result, new TypingReason(name, true));
+						if (result instanceof TypeVariable)
+						{
+							var typeVariable = (TypeVariable) result;
+							var typeName = typeVariable.getName();
+							if (!variables.containsKey(typeName))
+							{
+								variables.put(typeName, new ArrayList<>());
+							}
+							variables.get(typeName).add((Expression)expression);
+						}
+						else
+						{
+							expressionForest.set ((Expression)expression, result, new TypingReason(standard, true));
+						}
 					}
-				}
-				// Check for type variables
-				for (var typeName : variables.keySet())
-				{
-					var expressions = variables.get(typeName);
-					for (var i = 1; i < expressions.size(); i++)
+					// Check for type variables
+					for (var typeName : variables.keySet())
 					{
-						expressionForest.group(expressions.get(0), expressions.get(i), BindingReason.assignment);
+						var expressions = variables.get(typeName);
+						for (var i = 1; i < expressions.size(); i++)
+						{
+							expressionForest.group(expressions.get(0), expressions.get(i), BindingReason.polymorphism);
+						}
 					}
 				}
 			}
@@ -238,17 +279,49 @@ public class MValidator extends AbstractMValidator
 				//MError(undefined, expression, feature)
 			}
 		}
+		else if (expression instanceof Cell)
+		{
+			expressionForest.note((Cell)expression);
+		}
 		else
 		{
 			//MError(undefined, expression, feature)
 		}
-		for (var argument : arguments)
-		{
-			validate(argument);
-		}
 	}
 	
 	void solve(File file) {
-		System.out.println("Solve");
+		for (var criticalNode : expressionForest.criticalNodes)
+		{
+			var originalType = criticalNode.type;
+			
+			var root = criticalNode;
+			while (root.parent != null) {
+				root = root.parent;
+			}
+			
+			var rootType = root.type;
+			
+			if (originalType == null && root.type == null)
+			{
+				System.out.println(criticalNode.expression + " is indetermined");
+			}
+			else if (originalType != root.type)
+			{
+				System.out.println(criticalNode.expression + " is incompatible: " + originalType + " " + rootType);
+			}
+		}
+		for (var component : expressionForest.nodeOfComponent.keySet())
+		{
+			var root = expressionForest.nodeOfComponent.get(component);
+			while (root.parent != null)
+			{
+				if (root.parent != null)
+				{
+					System.out.println("Linked to " + root.parent.expression + " because " + root.reason);
+				}
+				root = root.parent;
+			}
+			System.out.println(component + " has type " + root.type + " because " + root.typingReason);
+		}
 	}
 }
