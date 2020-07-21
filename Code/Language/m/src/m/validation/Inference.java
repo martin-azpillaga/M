@@ -72,7 +72,7 @@ public class Inference {
 		criticalNodes.add(node);
 	}
 	
-	void group(Expression a, Expression b, BindingReason reason) {
+	public void group(Expression a, Expression b, BindingReason reason) {
 		
 		var nodeA = find(a);
 		var nodeB = find(b);
@@ -84,7 +84,7 @@ public class Inference {
 			
 			child.reason = reason;
 			child.parent = root;
-			criticalNodes.add(root);
+			criticalNodes.add(child);
 		}
 		else if (nodeA == null && nodeB != null)
 		{
@@ -106,16 +106,6 @@ public class Inference {
 			
 			nodeA.parent = nodeB;
 			nodeA.reason = reason;
-		}
-	}
-	
-	public void note(Expression expression)
-	{
-		var node = find(expression);
-		if (node == null)
-		{
-			node = checkIn(expression);
-			criticalNodes.add(node);
 		}
 	}
 	
@@ -151,7 +141,7 @@ public class Inference {
 		
 		while (parent != null) {
 			// Possibly slower because of contains search but worth benchmarking
-			if (removeRedundant && criticalNodes.contains(parent))
+			if (removeRedundant && parent.type == null && criticalNodes.contains(parent))
 			{
 				criticalNodes.remove(parent);
 			}
