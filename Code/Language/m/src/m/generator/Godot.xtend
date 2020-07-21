@@ -1,27 +1,7 @@
 package m.generator
 
-import org.eclipse.xtext.generator.IFileSystemAccess2
-import m.validation.types.Type
-import static m.validation.types.AtomicType.*
-import static m.validation.types.ProductType.*
-import m.validation.ExponentType
-import m.m.Function
-import java.util.HashMap
-import org.eclipse.xtext.EcoreUtil2
-import m.m.Assignment
-import m.m.Cell
-import m.m.Statement
-import m.m.Block
-import m.m.Value
-import m.m.Expression
-import m.m.Binary
-import m.m.Unary
-import m.m.Application
-import static m.validation.Symbols.*
-import m.validation.StandardLibrary
-import m.library.Language
-
-class Godot
+/*
+ * class Godot
 {
 	IFileSystemAccess2 fileSystem
 	
@@ -335,4 +315,4 @@ class Godot
 			queries.get(entity).put(component,kind)
 		}
 	}
-}
+}*/

@@ -1,82 +1,53 @@
 package m.validation;
 
-import static m.library.Symbol.QUERY;
-import static m.m.MPackage.Literals.APPLICATION__NAME;
-import static m.m.MPackage.Literals.BINARY__OPERATOR;
-import static m.m.MPackage.Literals.BLOCK__NAME;
-import static m.m.MPackage.Literals.UNARY__OPERATOR;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
 
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.validation.Check;
 
 import m.generator.Game;
-import m.library.Language;
-import m.m.Application;
-import m.m.Assignment;
-import m.m.Binary;
-import m.m.Block;
-import m.m.Cell;
-import m.m.Delegation;
-import m.m.Expression;
-import m.m.File;
-import m.m.Function;
-import m.m.Statement;
-import m.m.Unary;
-import m.m.Value;
-import m.types.AtomicType;
-import m.types.FunctionType;
-import m.types.TypeVariable;
-
-enum MError
-{
-	redefinition, undefined, syntax, undecidable, incompatible
-}
-
-
+import m.library.Library;
+import m.m.*;
+import static m.m.MPackage.Literals.*;
 
 public class MValidator extends AbstractMValidator
 {
-	Language language;
-	ExpressionForest expressionForest;
+	Library library;
 	Context context;
+	List<Problem> problems;
+	Game game;
 	
-	class Problem
+	public Game getGame()
 	{
-		public boolean isError;
-		public String message;
-		public EObject o;
-		public EStructuralFeature feature;
+		return game;
 	}
-	
-	public static Game game;
 	
 	@Check
 	public void validate(File file)
 	{
 		if (!file.eResource().getErrors().isEmpty()) return;
+
+		library = Library.ENGLISH;
+		context = new Context(problems, library);
 		
-		initialize(file);
+		for (var function : file.getFunctions())
+		{
+			context.declareFunction(function);
+		}
 		for (var function : file.getFunctions())
 		{
 			validate(function);
 		}
-		solve(file);
-	}
-	
-	void initialize(File file) {
-		language = Language.ENGLISH;
-		expressionForest = new ExpressionForest();
-		context = new Context(expressionForest);
+		game = context.infer();
+		reportProblems();
 	}
 	
 	void validate(Function function) {
+		context.push();
 		for (var statement : function.getStatements()) {
 			validate(statement);
 		}
+		context.pop();
 	}
 	
 	void validate(Statement statement) {
@@ -85,45 +56,34 @@ public class MValidator extends AbstractMValidator
 			var name = block.getName();
 			var expression = block.getExpression();
 			
-			infer(name, block, BLOCK__NAME, block.getExpression());
+			context.checkBlock(name, expression, block, BLOCK__NAME);
+			validate(expression);
+			for (var s : block.getStatements())
+			{
+				validate(s);
+			}
+		}
+		else if (statement instanceof BindingBlock)
+		{
+			var block = (BindingBlock) statement;
+			var name = block.getName();
+			var value = block.getExpression();
 			
-
-			var standard = language.blocks.get(name);
-			if (standard == QUERY)
+			context.push();
+			context.declareVariable(value);
+			context.checkBlock(name, value, block, BLOCK__NAME);
+			for (var s : block.getStatements())
 			{
-				if (expression instanceof Value)
-				{
-					var value = (Value) expression;
-					context.push();
-					context.declare(value);
-					for (var s : block.getStatements())
-					{
-						validate(s);
-					}
-					context.pop();
-				}
-				else
-				{
-					//MError(syntax, statement, BLOCK__EXPRESSION)
-				}
+				validate(s);
 			}
-			else if (standard != null)
-			{
-				validate(expression);
-				for (var s : block.getStatements())
-				{
-					validate(s);
-				}
-			}
-			else
-			{
-				//MError(undefined, statement, BLOCK__NAME)
-			}
+			context.pop();
 		}
 		else if (statement instanceof Delegation)
 		{
 			var delegation = (Delegation) statement;
-			validate(delegation.getApplication());
+			var application = delegation.getApplication();
+			
+			validate(application);
 		}
 		else if (statement instanceof Assignment)
 		{
@@ -131,13 +91,12 @@ public class MValidator extends AbstractMValidator
 			var atom = assignment.getAtom();
 			var expression = assignment.getExpression();
 			
-			infer("=", assignment, null, atom, expression);
-			
+			context.checkFunction("=", new Expression[] {atom, expression}, null, ASSIGNMENT__ATOM);
 			validate(expression);
 			
 			if (atom instanceof Value)
 			{
-				context.declare((Value)atom);
+				context.declareVariable((Value)atom);
 			}
 			else
 			{
@@ -151,7 +110,7 @@ public class MValidator extends AbstractMValidator
 		{
 			var value = (Value) expression;
 			
-			context.checkDeclared(value);
+			context.checkVariable(value);
 		}
 		else if (expression instanceof Cell)
 		{
@@ -159,27 +118,38 @@ public class MValidator extends AbstractMValidator
 			var entity = cell.getEntity();
 			var component = cell.getComponent();
 			
-			context.checkDeclared(entity);
+			context.declareComponent(cell);
+			context.checkVariable(entity);
 			
-			infer(component.getName(), cell, null, entity);
+			context.checkFunction(component.getName(), new Expression[] {entity}, cell, CELL__COMPONENT);
 		}
 		else if (expression instanceof Binary)
 		{
 			var binary = (Binary) expression;
-			infer(binary.getOperator(), binary, BINARY__OPERATOR, binary.getLeft(), binary.getRight());
-			validate(binary.getLeft());
-			validate(binary.getRight());
+			var left = binary.getLeft();
+			var right = binary.getRight();
+			var operator = binary.getOperator();
+			
+			context.checkFunction(operator, new Expression[] {left, right}, binary, BINARY__OPERATOR);
+			validate(left);
+			validate(right);
 		}
 		else if (expression instanceof Unary)
 		{
 			var unary = (Unary) expression;
-			infer(unary.getOperator(), expression, UNARY__OPERATOR, unary.getExpression());
-			validate(unary.getExpression());
+			var e =  unary.getExpression();
+			var operator = unary.getOperator();
+			
+			context.checkFunction(operator, new Expression[] {e}, unary, UNARY__OPERATOR);
+			validate(e);
 		}
 		else if (expression instanceof Application)
 		{
 			var application = (Application) expression;
-			infer(application.getName(), application, APPLICATION__NAME, (Expression[]) application.getArguments().toArray());
+			var name = application.getName();
+			var arguments = application.getArguments().toArray(new Expression[0]);
+			
+			context.checkFunction(name, arguments, application, APPLICATION__NAME);
 
 			for (var argument : application.getArguments())
 			{
@@ -188,140 +158,22 @@ public class MValidator extends AbstractMValidator
 		}
 	}
 	
-	void infer(String name, EObject expression, EStructuralFeature feature, Expression... arguments)
+	void reportProblems()
 	{
-		var standard = language.functions.get(name);
-		if (standard == null)
+		for (var problem : problems)
 		{
-			standard = language.components.get(name);
-		}
-		if (standard == null)
-		{
-			standard = language.blocks.get(name);
-		}
-		if (standard != null)
-		{
-			var type = standard.getType();
-			if (type instanceof AtomicType) {
-				if (arguments.length == 1)
-				{
-					if (language.blocks.containsKey(name))
-					{
-						expressionForest.set(arguments[0], type, new TypingReason(standard, 1));
-					}
-					else if (language.components.containsKey(name))
-					{
-						expressionForest.set((Expression)expression, type, new TypingReason(standard, true));
-					}
-				}
-				else
-				{
-					// error
-				}
-			}
-			else if (type instanceof FunctionType)
+			switch (problem.severity)
 			{
-				var f = (FunctionType) type;
-				var parameters = f.getParameters();
-				var result = f.getReturnType();
-				
-				var variables = new HashMap<String, ArrayList<Expression>>();
-				
-				if (parameters.length == arguments.length)
-				{
-					for (var i = 0; i < arguments.length; i++)
-					{
-						if (parameters[i] instanceof TypeVariable)
-						{
-							var typeVariable = (TypeVariable) parameters[i];
-							var typeName = typeVariable.getName();
-							if (!variables.containsKey(typeName))
-							{
-								variables.put(typeName, new ArrayList<>());
-							}
-							variables.get(typeName).add(arguments[i]);
-						}
-						else
-						{
-							expressionForest.set(arguments[i], parameters[i], new TypingReason(standard, i+1));
-						}
-					}
-					if (expression instanceof Expression)
-					{
-						if (result instanceof TypeVariable)
-						{
-							var typeVariable = (TypeVariable) result;
-							var typeName = typeVariable.getName();
-							if (!variables.containsKey(typeName))
-							{
-								variables.put(typeName, new ArrayList<>());
-							}
-							variables.get(typeName).add((Expression)expression);
-						}
-						else
-						{
-							expressionForest.set ((Expression)expression, result, new TypingReason(standard, true));
-						}
-					}
-					// Check for type variables
-					for (var typeName : variables.keySet())
-					{
-						var expressions = variables.get(typeName);
-						for (var i = 1; i < expressions.size(); i++)
-						{
-							expressionForest.group(expressions.get(0), expressions.get(i), BindingReason.polymorphism);
-						}
-					}
-				}
+			case INFO:
+				info(library.message(problem), problem.source, problem.feature);
+				break;
+			case WARNING:
+				warning(library.message(problem), problem.source, problem.feature);
+				break;
+			case ERROR:
+				error(library.message(problem), problem.source, problem.feature);
+				break;
 			}
-			else
-			{
-				//MError(undefined, expression, feature)
-			}
-		}
-		else if (expression instanceof Cell)
-		{
-			expressionForest.note((Cell)expression);
-		}
-		else
-		{
-			//MError(undefined, expression, feature)
-		}
-	}
-	
-	void solve(File file) {
-		for (var criticalNode : expressionForest.criticalNodes)
-		{
-			var originalType = criticalNode.type;
-			
-			var root = criticalNode;
-			while (root.parent != null) {
-				root = root.parent;
-			}
-			
-			var rootType = root.type;
-			
-			if (originalType == null && root.type == null)
-			{
-				System.out.println(criticalNode.expression + " is indetermined");
-			}
-			else if (originalType != null && originalType != root.type)
-			{
-				System.out.println(criticalNode.expression + " is incompatible: " + originalType + " " + rootType);
-			}
-		}
-		for (var component : expressionForest.nodeOfComponent.keySet())
-		{
-			var root = expressionForest.nodeOfComponent.get(component);
-			while (root.parent != null)
-			{
-				if (root.parent != null)
-				{
-					System.out.println("Linked to " + root.parent.expression + " because " + root.reason);
-				}
-				root = root.parent;
-			}
-			System.out.println(component + " has type " + root.type + " because " + root.typingReason);
 		}
 	}
 }

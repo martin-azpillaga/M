@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import m.generator.Game;
 import m.m.Cell;
 import m.m.Expression;
 import m.types.Type;
@@ -18,13 +19,13 @@ class ExpressionNode
 	public TypingReason typingReason;
 }
 
-public class ExpressionForest {
+public class Inference {
 	
 	Set<ExpressionNode> criticalNodes;
 	Map<Expression, ExpressionNode> nodeOfExpression;
 	Map<String, ExpressionNode> nodeOfComponent;
 	
-	public ExpressionForest ()
+	public Inference ()
 	{
 		criticalNodes = new HashSet<>();
 		nodeOfExpression = new HashMap<>();
@@ -148,5 +149,45 @@ public class ExpressionForest {
 			nextReason = parentReason;
 			parent = parentParent;
 		}
+	}
+	
+	public Game infer() {
+		var game = new Game();
+		for (var criticalNode : criticalNodes)
+		{
+			var originalType = criticalNode.type;
+			
+			var root = criticalNode;
+			while (root.parent != null) {
+				root = root.parent;
+			}
+			
+			var rootType = root.type;
+			
+			if (originalType == null && root.type == null)
+			{
+				System.out.println(criticalNode.expression + " is indetermined");
+			}
+			else if (originalType != null && originalType != root.type)
+			{
+				System.out.println(criticalNode.expression + " is incompatible: " + originalType + " " + rootType);
+			}
+		}
+		for (var component : nodeOfComponent.keySet())
+		{
+			var root = nodeOfComponent.get(component);
+			while (root.parent != null)
+			{
+				if (root.parent != null)
+				{
+					System.out.println("Linked to " + root.parent.expression + " because " + root.reason);
+				}
+				root = root.parent;
+			}
+			game.components.put(component, root.type);
+			System.out.println(component + " has type " + root.type + " because " + root.typingReason);
+		}
+		
+		return game;
 	}
 }
