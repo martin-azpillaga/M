@@ -305,7 +305,7 @@ public class MValidator extends AbstractMValidator
 			{
 				System.out.println(criticalNode.expression + " is indetermined");
 			}
-			else if (originalType != root.type)
+			else if (originalType != null && originalType != root.type)
 			{
 				System.out.println(criticalNode.expression + " is incompatible: " + originalType + " " + rootType);
 			}
