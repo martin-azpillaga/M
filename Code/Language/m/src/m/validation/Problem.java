@@ -1,10 +1,14 @@
 package m.validation;
 
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.xtext.ParserRule;
+
+import m.m.Expression;
+import m.types.Type;
 
 public abstract class Problem {
 	protected EObject source;
@@ -72,17 +76,19 @@ class SymbolRedefinition extends Problem {
 }
 
 class UndecidableType extends Problem {
-	Map<EObject, BindingReason> links;
+	List<Link> links;
 	
-	public UndecidableType(EObject source, EStructuralFeature feature, Map<EObject, BindingReason> links)
+	public UndecidableType(EObject source, EStructuralFeature feature, List<Link> links)
 	{
 		this.source = source;
 		this.feature = feature;
+		this.severity = Severity.WARNING;
 		this.links = links;
 	}
 	
-	public Map<EObject, BindingReason> getLinks()
+	public List<Link> getLinks()
 	{
 		return links;
 	}
 }
+

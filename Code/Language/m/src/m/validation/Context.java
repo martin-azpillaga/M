@@ -15,15 +15,6 @@ import m.m.*;
 import m.types.*;
 import static m.validation.BindingReason.*;
 
-enum BindingReason
-{
-	SAME_COMPONENT,
-	SAME_VARIABLE,
-	PARAMETER_ARGUMENT,
-	RESULT_RETURN,
-	POLYMORPHISM
-}
-
 public class Context {
 	
 	Map<String, Value> userVariables;
@@ -36,7 +27,7 @@ public class Context {
 	Library language;
 	
 	public Context(List<Problem> problems, Library language) {
-		this.inference = new Inference();
+		this.inference = new Inference(problems);
 		this.problems = problems;
 		this.language = language;
 		
@@ -64,9 +55,9 @@ public class Context {
 	{
 		var name = function.getName();
 		
-		if (userVariables.containsKey(name))
+		if (userFunctions.containsKey(name))
 		{
-			problems.add(new SymbolRedefinition(function, userVariables.get(name)));
+			problems.add(new SymbolRedefinition(function, userFunctions.get(name)));
 		}
 		else
 		{
@@ -196,14 +187,15 @@ public class Context {
 		}
 	}
 	
-	public void checkComponent(String name, Cell cell)
+	public void checkComponent(Cell cell)
 	{
+		var name = cell.getComponent().getName();
 		var component = language.components.get(name);
 		if (component == null)
 		{
 			var userComponent = userComponents.get(name);
 			
-			if (userComponent != null)
+			if (userComponent != null && userComponent != cell)
 			{
 				inference.group(cell, userComponent, SAME_COMPONENT);
 			}
@@ -228,8 +220,13 @@ public class Context {
 		userVariables = stack.pop();
 	}
 	
+	public void checkConsistency()
+	{
+		inference.check();
+	}
+	
 	public Game infer()
 	{
-		return inference.infer();
+		return inference.infer(userComponents, userFunctions);
 	}
 }
