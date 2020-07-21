@@ -35,37 +35,66 @@ public enum Library {
 	}}, new HashMap<>() {{
 		put(NUMBER, "number");
 		put(NUMBER3, "number3");
+	}}, new HashMap<>() {{
+		put(IncompatibleTypes.class, "Incompatible types");
+		put(UndefinedSymbol.class, "Undefined symbol");
 	}}),
-	CASTELLANO(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>()),
-	EUSKARA(new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>())
+	EUSKARA(new HashMap<>() {{
+		put("abiadura", VELOCITY);
+		put("masa", MASS);
+		put("igarotakoa", ELAPSED);
+	}}, new HashMap<>() {{
+		put("=", ASSIGNMENT);
+		put("*", MULTIPLICATION);
+		put("irakurri", READ_NUMBER);
+		put("zorizko", RANDOM);
+		put("xyz", XYZ);
+		put("cos", COS);
+		put("sin", SIN);
+		put("kendu", REMOVE);
+	}}, new HashMap<>() {{
+		put("hartu", QUERY);
+		put("baldin", SELECTION);
+		put("bitartean", ITERATION);
+	}}, new HashMap<>() {{
+		put(NUMBER, "zenbakia");
+		put(NUMBER3, "zenbakia3");
+	}}, new HashMap<>() {{
+		put(IncompatibleTypes.class, "izaera bateraezinak");
+		put(UndefinedSymbol.class, "definizio gabeko zeinua");
+	}}),
 	;
 	
 	public Map<String, Symbol> components;
 	public Map<String, Symbol> functions;
 	public Map<String, Symbol> blocks;
 	public Map<Type, String> atomicTypes;
+	public Map<Class, String> problems;
 	
-	Library(Map<String, Symbol> components, Map<String, Symbol> functions, Map<String, Symbol> blocks, Map<Type,String> atomicTypes)
+	Library(Map<String, Symbol> components, Map<String, Symbol> functions, Map<String, Symbol> blocks, Map<Type,String> atomicTypes, Map<Class,String> problems)
 	{
 		this.components = components;
 		this.functions = functions;
 		this.blocks = blocks;
 		this.atomicTypes = atomicTypes;
+		this.problems = problems;
 	}
 	
 	public String message(Problem problem)
 	{
+		var result = problems.get(problem.getClass());
+		
 		if (problem instanceof IncompatibleTypes)
 		{
 			var p = (IncompatibleTypes) problem;
 			
-			return "Incompatible types\n"+
-			name(p.t1) + " because " + name(p.t1Reason) + "\n" + 
-			name(p.t2) + " because " + name(p.t2Reason) + "\n";
+			return result + "\n"+
+			name(p.t1) + " -- " + name(p.t1Reason) + "\n" + 
+			name(p.t2) + " -- " + name(p.t2Reason) + "\n";
 		}
 		else if (problem instanceof UndefinedSymbol)
 		{
-			return "undefined symbol";
+			return result;
 		}
 		return "problem message";
 	}
