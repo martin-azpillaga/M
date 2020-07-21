@@ -2,7 +2,14 @@ package m.validation;
 
 import m.library.Symbol;
 
-
+enum BindingReason
+{
+	SAME_COMPONENT,
+	SAME_VARIABLE,
+	PARAMETER_ARGUMENT,
+	RESULT_RETURN,
+	POLYMORPHISM
+}
 
 class TypingReason
 {

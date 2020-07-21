@@ -1,13 +1,18 @@
 package m.validation;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import m.generator.Game;
 import m.m.Cell;
 import m.m.Expression;
+import m.m.Function;
+import m.types.AtomicType;
+import m.types.FunctionType;
 import m.types.Type;
 
 class ExpressionNode
@@ -19,14 +24,22 @@ class ExpressionNode
 	public TypingReason typingReason;
 }
 
+class Link
+{
+	public Expression expression;
+	public BindingReason reason;
+}
+
 public class Inference {
 	
 	Set<ExpressionNode> criticalNodes;
 	Map<Expression, ExpressionNode> nodeOfExpression;
 	Map<String, ExpressionNode> nodeOfComponent;
+	List<Problem> problems;
 	
-	public Inference ()
+	public Inference (List<Problem> problems)
 	{
+		this.problems = problems;
 		criticalNodes = new HashSet<>();
 		nodeOfExpression = new HashMap<>();
 		nodeOfComponent = new HashMap<>();
@@ -46,6 +59,7 @@ public class Inference {
 			// IF the node already has a type and the given is different, throw incompatible types error
 			if (node.type != null && node.type != type)
 			{
+				problems.add(new IncompatibleTypes(expression, null, node.type, node.typingReason, type, reason, null));
 				// error
 			}
 			reroot(node, true); // remove redundant critical nodes
@@ -151,14 +165,20 @@ public class Inference {
 		}
 	}
 	
-	public Game infer() {
-		var game = new Game();
+	public void check()
+	{	
 		for (var criticalNode : criticalNodes)
 		{
 			var originalType = criticalNode.type;
 			
+			var links = new ArrayList<Link>();
+			
 			var root = criticalNode;
 			while (root.parent != null) {
+				var link = new Link();
+				link.expression = root.parent.expression;
+				link.reason = root.reason;
+				links.add(link);
 				root = root.parent;
 			}
 			
@@ -166,26 +186,44 @@ public class Inference {
 			
 			if (originalType == null && root.type == null)
 			{
-				System.out.println(criticalNode.expression + " is indetermined");
+				problems.add(new UndecidableType(criticalNode.expression, null, links));
 			}
 			else if (originalType != null && originalType != root.type)
 			{
-				System.out.println(criticalNode.expression + " is incompatible: " + originalType + " " + rootType);
+				problems.add(new IncompatibleTypes(criticalNode.expression, null, originalType, criticalNode.typingReason, rootType, root.typingReason, links));
 			}
 		}
-		for (var component : nodeOfComponent.keySet())
+	}
+	
+	public Game infer(Map<String,Cell> userComponents, Map<String, Function> userFunctions)
+	{
+		var game = new Game();
+		
+		for (var component : userComponents.keySet())
 		{
-			var root = nodeOfComponent.get(component);
+			var node = nodeOfComponent.get(component);
+			var root = node;
 			while (root.parent != null)
 			{
-				if (root.parent != null)
-				{
-					System.out.println("Linked to " + root.parent.expression + " because " + root.reason);
-				}
 				root = root.parent;
 			}
 			game.components.put(component, root.type);
 			System.out.println(component + " has type " + root.type + " because " + root.typingReason);
+		}
+		
+		for (var userFunction : userFunctions.entrySet())
+		{
+			var name = userFunction.getKey();
+			var function = userFunction.getValue();
+			
+			var parameters = new Type[function.getParameters().size()];
+			var returnType = AtomicType.UNIT;
+			
+			var type = new FunctionType(parameters, returnType);
+			
+			System.out.println(name + " is a function of type " + parameters + " -> " + returnType);
+			
+			game.functions.put(userFunction.getValue(), type);
 		}
 		
 		return game;
