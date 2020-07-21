@@ -23,7 +23,7 @@ public class Context {
 	{
 		if (map.containsKey(value.getName()))
 		{
-			
+			forest.group(value, map.get(value.getName()), BindingReason.sameVariable);
 		}
 		else
 		{

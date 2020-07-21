@@ -8,6 +8,7 @@ public enum Language {
 	
 	ENGLISH(new HashMap<>() {{
 		put("velocity", VELOCITY);
+		put("mass", MASS);
 	}}, new HashMap<>() {{
 		put("=", ASSIGNMENT);
 		put("*", MULTIPLICATION);
