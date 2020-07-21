@@ -4,6 +4,7 @@ package m.validation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.validation.Check;
 
 import m.generator.Game;
@@ -36,6 +37,10 @@ public class MValidator extends AbstractMValidator
 		for (var function : file.getFunctions())
 		{
 			context.declareFunction(function);
+		}
+		for (var cell : EcoreUtil2.getAllContentsOfType(file, Cell.class))
+		{
+			context.declareComponent(cell);
 		}
 		for (var function : file.getFunctions())
 		{
@@ -177,6 +182,15 @@ public class MValidator extends AbstractMValidator
 				info(library.message(problem), problem.source, problem.feature);
 				break;
 			case WARNING:
+				if (problem instanceof UndecidableType)
+				{
+					var p = (UndecidableType) problem;
+					var message = library.message(problem);
+					for (var link : p.links)
+					{
+						warning(message, link.expression, null);
+					}
+				}
 				warning(library.message(problem), problem.source, problem.feature);
 				break;
 			case ERROR:
@@ -184,7 +198,6 @@ public class MValidator extends AbstractMValidator
 				{
 					var p = (IncompatibleTypes) problem;
 					var message = library.message(problem);
-					error(message, problem.source, problem.feature);
 					for (var link : p.links)
 					{
 						if (link == p.links.get(p.links.size()-1))
@@ -197,10 +210,7 @@ public class MValidator extends AbstractMValidator
 						}
 					}
 				}
-				else
-				{
-					error(library.message(problem), problem.source, problem.feature);
-				}
+				error(library.message(problem), problem.source, problem.feature);
 				break;
 			}
 		}

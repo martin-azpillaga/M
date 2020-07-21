@@ -24,26 +24,37 @@ public class Context {
 	Inference inference;
 	Stack<Map<String,Value>> stack;
 	List<Problem> problems;
-	Library language;
+	Library library;
 	
-	public Context(List<Problem> problems, Library language) {
+	public Context(List<Problem> problems, Library library) {
 		this.inference = new Inference(problems);
 		this.problems = problems;
-		this.language = language;
+		this.library = library;
 		
 		this.userVariables = new HashMap<>();
 		this.userFunctions = new HashMap<>();
 		this.userComponents = new HashMap<>();
 		
 		this.stack = new Stack<>();
+		
+		for (var component : library.components.keySet())
+		{
+			userVariables.put(component, null);
+		}
 	}
 	
 	public void declareVariable(Value value)
 	{
 		var name = value.getName();
-		if (userVariables.containsKey(name))
+		var set = userVariables.containsKey(name);
+		var v = userVariables.get(name);
+		if (v != null)
 		{
 			inference.group(value, userVariables.get(name), SAME_VARIABLE);
+		}
+		else if (set)
+		{
+			problems.add(new SymbolRedefinition(value, null));
 		}
 		else
 		{
@@ -68,9 +79,10 @@ public class Context {
 	public void declareComponent(Cell cell)
 	{
 		var name = cell.getComponent().getName();
-		if (!language.components.containsKey(name))
+		if (!library.components.containsKey(name))
 		{
 			userComponents.put(name, cell);
+			userVariables.put(name, null);
 		}
 	}
 	
@@ -89,7 +101,7 @@ public class Context {
 	
 	public void checkBlock(String name, Expression expression, EObject source, EStructuralFeature feature)
 	{
-		var block = language.blocks.get(name);
+		var block = library.blocks.get(name);
 		if (block != null)
 		{
 			inference.set(expression, block.getType(), new TypingReason(block, 1));
@@ -102,7 +114,7 @@ public class Context {
 	
 	public void checkFunction(String name, Expression[] arguments, Expression source, EStructuralFeature feature)
 	{
-		var function = language.functions.get(name);
+		var function = library.functions.get(name);
 		if (function == null)
 		{
 			var userFunction = userFunctions.get(name);
@@ -171,7 +183,7 @@ public class Context {
 					}
 					else
 					{
-						inference.set ((Expression)source, result, new TypingReason(function, true));
+						inference.set ((Expression)source, result, new TypingReason(function, -1));
 					}
 				}
 				// Check for type variables
@@ -190,7 +202,7 @@ public class Context {
 	public void checkComponent(Cell cell)
 	{
 		var name = cell.getComponent().getName();
-		var component = language.components.get(name);
+		var component = library.components.get(name);
 		if (component == null)
 		{
 			var userComponent = userComponents.get(name);

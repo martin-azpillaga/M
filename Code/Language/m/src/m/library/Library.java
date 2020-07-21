@@ -6,6 +6,8 @@ import java.util.Map;
 
 import m.validation.IncompatibleTypes;
 import m.validation.Problem;
+import m.validation.TypingReason;
+import m.validation.UndefinedSymbol;
 
 import static m.library.Symbol.*;
 import m.types.*;
@@ -16,12 +18,20 @@ public enum Library {
 	ENGLISH(new HashMap<>() {{
 		put("velocity", VELOCITY);
 		put("mass", MASS);
+		put("elapsed", ELAPSED);
 	}}, new HashMap<>() {{
 		put("=", ASSIGNMENT);
 		put("*", MULTIPLICATION);
 		put("readNumber", READ_NUMBER);
+		put("random", RANDOM);
+		put("xyz", XYZ);
+		put("cos", COS);
+		put("sin", SIN);
+		put("remove", REMOVE);
 	}}, new HashMap<>() {{
 		put("foreach", QUERY);
+		put("if", SELECTION);
+		put("while", ITERATION);
 	}}, new HashMap<>() {{
 		put(NUMBER, "number");
 		put(NUMBER3, "number3");
@@ -50,8 +60,12 @@ public enum Library {
 			var p = (IncompatibleTypes) problem;
 			
 			return "Incompatible types\n"+
-			name(p.t1) + " because " + p.t1Reason + "\n" + 
-			name(p.t2) + " because " + p.t2Reason + "\n";
+			name(p.t1) + " because " + name(p.t1Reason) + "\n" + 
+			name(p.t2) + " because " + name(p.t2Reason) + "\n";
+		}
+		else if (problem instanceof UndefinedSymbol)
+		{
+			return "undefined symbol";
 		}
 		return "problem message";
 	}
@@ -82,5 +96,29 @@ public enum Library {
 		{
 			return "unrecognized type";
 		}
+	}
+	
+	public String name(TypingReason reason)
+	{
+		var symbol = reason.getSymbol();
+		
+		var symbolName = symbol.name();
+		
+		for (var f : functions.entrySet())
+		{
+			if (f.getValue() == symbol)
+			{
+				symbolName = f.getKey();
+			}
+		}
+		for (var f : components.entrySet())
+		{
+			if (f.getValue() == symbol)
+			{
+				symbolName = f.getKey();
+			}
+		}
+		
+		return symbolName + " : " + name(symbol.getType());
 	}
 }

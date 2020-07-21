@@ -10,6 +10,8 @@ public enum AtomicType implements Type
 	UNIT,
 	ANY,
 	
+	COMPONENT,
+	
 	MATRIX3,
 	COLOR,
 	NUMERIC,
