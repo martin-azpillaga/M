@@ -2,9 +2,12 @@ package m.library;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import m.validation.Problem;
+
 import static m.library.Symbol.*;
 
-public enum Language {
+public enum Library {
 	
 	ENGLISH(new HashMap<>() {{
 		put("velocity", VELOCITY);
@@ -24,10 +27,15 @@ public enum Language {
 	public Map<String, Symbol> functions;
 	public Map<String, Symbol> blocks;
 	
-	Language(Map<String, Symbol> components, Map<String, Symbol> functions, Map<String, Symbol> blocks)
+	Library(Map<String, Symbol> components, Map<String, Symbol> functions, Map<String, Symbol> blocks)
 	{
 		this.components = components;
 		this.functions = functions;
 		this.blocks = blocks;
+	}
+	
+	public String message(Problem problem)
+	{
+		return "problem message";
 	}
 }

@@ -6,9 +6,10 @@ generate m "azpillaga.world/M"
 File: functions+=Function*;
 Function: name=(IDENTIFIER|OPERATOR) '(' (parameters+=Value (',' parameters+=Value)*)? ')' '{' statements+=Statement* '}';
 
-Statement: Block|Assignment|Delegation;
+Statement: BindingBlock|Block|Assignment|Delegation;
 Assignment: atom=(Value|Cell) '=' expression=Expression;
 Block: name=IDENTIFIER expression=Expression '{' statements+=Statement* '}';
+BindingBlock: name=IDENTIFIER expression=Value ':' '{' statements+=Statement* '}';
 Delegation: application=Application;
 
 Expression:	Primary	({Binary.left=current} operator=OPERATOR right=Primary)*;
