@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import m.library.Language;
 import m.m.Cell;
 import m.m.Expression;
 import m.types.Type;
@@ -34,7 +33,6 @@ public class ExpressionForest {
 	
 	public void set(Expression expression, Type type, TypingReason reason) {
 		
-		// IF the node already has a type and the given is different, throw incompatible types error
 		
 		var node = find(expression);
 		
@@ -44,14 +42,15 @@ public class ExpressionForest {
 		}
 		else
 		{
-			var root = node;
-			var nextParent = root.parent;
-			while (root.parent != null) {
-				var tmp = root.parent;
-				root.parent = nextParent;
-				nextParent = tmp;
-				root = root.parent;
+			// IF the node already has a type and the given is different, throw incompatible types error
+			if (node.type != null && node.type != type)
+			{
+				// error
 			}
+			reroot(node, true); // remove redundant critical nodes
+			
+			node.parent = null;
+			node.reason = null;
 		}
 		node.type = type;
 		node.typingReason = reason;
@@ -88,16 +87,10 @@ public class ExpressionForest {
 		}
 		else
 		{
-			var rootA = nodeA;
-			var nextParent = nodeA;
-			while (rootA.parent != null) {
-				var tmp = rootA.parent;
-				rootA.parent = nextParent;
-				nextParent = tmp;
-				rootA = rootA.parent;
-			}
+			reroot(nodeA, false);
 			
 			nodeA.parent = nodeB;
+			nodeA.reason = reason;
 		}
 	}
 	
@@ -132,5 +125,28 @@ public class ExpressionForest {
 			nodeOfComponent.put(component, node);
 		}
 		return node;
+	}
+	
+	private void reroot(ExpressionNode node, boolean removeRedundant)
+	{
+		var parent = node.parent;
+		
+		var nextParent = node;
+		var nextReason = node.reason;
+		
+		while (parent != null) {
+			// Possibly slower because of contains search but worth benchmarking
+			if (removeRedundant && criticalNodes.contains(parent))
+			{
+				criticalNodes.remove(parent);
+			}
+			var parentParent = parent.parent;
+			var parentReason = parent.reason;
+			parent.parent = nextParent;
+			parent.reason = nextReason;
+			nextParent = parent;
+			nextReason = parentReason;
+			parent = parentParent;
+		}
 	}
 }
