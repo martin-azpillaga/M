@@ -46,21 +46,6 @@ class SyntaxError extends Problem {
 	}
 }
 
-class UndefinedSymbol extends Problem {
-	String hint;
-	
-	public UndefinedSymbol(EObject source, EStructuralFeature feature, String hint) {
-		this.source = source;
-		this.feature = feature;
-		this.severity = Severity.ERROR;
-		this.hint = hint;
-	}
-	
-	public String getHint() {
-		return hint;
-	}
-}
-
 class SymbolRedefinition extends Problem {
 	EObject definition;
 	
