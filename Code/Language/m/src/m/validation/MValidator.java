@@ -1,6 +1,7 @@
 package m.validation;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.xtext.validation.Check;
@@ -8,6 +9,7 @@ import org.eclipse.xtext.validation.Check;
 import m.generator.Game;
 import m.library.Library;
 import m.m.*;
+
 import static m.m.MPackage.Literals.*;
 
 public class MValidator extends AbstractMValidator
@@ -28,6 +30,7 @@ public class MValidator extends AbstractMValidator
 		if (!file.eResource().getErrors().isEmpty()) return;
 
 		library = Library.ENGLISH;
+		problems = new ArrayList<Problem>();
 		context = new Context(problems, library);
 		
 		for (var function : file.getFunctions())
@@ -38,8 +41,16 @@ public class MValidator extends AbstractMValidator
 		{
 			validate(function);
 		}
-		game = context.infer();
-		reportProblems();
+		
+		context.checkConsistency();
+		if (problems.isEmpty())
+		{
+			game = context.infer();
+		}
+		else
+		{
+			reportProblems();
+		}
 	}
 	
 	void validate(Function function) {
@@ -116,12 +127,10 @@ public class MValidator extends AbstractMValidator
 		{
 			var cell = (Cell) expression;
 			var entity = cell.getEntity();
-			var component = cell.getComponent();
 			
 			context.declareComponent(cell);
 			context.checkVariable(entity);
-			
-			context.checkFunction(component.getName(), new Expression[] {entity}, cell, CELL__COMPONENT);
+			context.checkComponent(cell);
 		}
 		else if (expression instanceof Binary)
 		{
@@ -171,7 +180,27 @@ public class MValidator extends AbstractMValidator
 				warning(library.message(problem), problem.source, problem.feature);
 				break;
 			case ERROR:
-				error(library.message(problem), problem.source, problem.feature);
+				if (problem instanceof IncompatibleTypes)
+				{
+					var p = (IncompatibleTypes) problem;
+					var message = library.message(problem);
+					error(message, problem.source, problem.feature);
+					for (var link : p.links)
+					{
+						if (link == p.links.get(p.links.size()-1))
+						{
+							error(message, link.expression, null);
+						}
+						else
+						{
+							warning(message, link.expression, null);
+						}
+					}
+				}
+				else
+				{
+					error(library.message(problem), problem.source, problem.feature);
+				}
 				break;
 			}
 		}
