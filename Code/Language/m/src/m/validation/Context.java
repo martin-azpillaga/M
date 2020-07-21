@@ -196,6 +196,10 @@ public class Context {
 					}
 				}
 			}
+			else
+			{
+				problems.add(new UndefinedSymbol(source, feature, ""));
+			}
 		}
 	}
 	

@@ -2,7 +2,9 @@ package m.validation;
 
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.validation.Check;
@@ -15,9 +17,9 @@ import static m.m.MPackage.Literals.*;
 
 public class MValidator extends AbstractMValidator
 {
-	Library library;
 	Context context;
-	List<Problem> problems;
+	Map<Library,List<Problem>> map;
+	Map<Library, Context> contexts;
 	Game game;
 	
 	public Game getGame()
@@ -29,32 +31,54 @@ public class MValidator extends AbstractMValidator
 	public void validate(File file)
 	{
 		if (!file.eResource().getErrors().isEmpty()) return;
-
-		library = Library.ENGLISH;
-		problems = new ArrayList<Problem>();
-		context = new Context(problems, library);
 		
-		for (var function : file.getFunctions())
+		map = new HashMap<>();
+		contexts = new HashMap<>();
+		
+		for (var library : Library.values())
 		{
-			context.declareFunction(function);
-		}
-		for (var cell : EcoreUtil2.getAllContentsOfType(file, Cell.class))
-		{
-			context.declareComponent(cell);
-		}
-		for (var function : file.getFunctions())
-		{
-			validate(function);
+			var problems = new ArrayList<Problem>();
+			context = new Context(problems, library);
+			map.put(library, problems);
+			contexts.put(library, context);
+			
+			for (var function : file.getFunctions())
+			{
+				context.declareFunction(function);
+			}
+			// Can become a single pass if done with delayed checking
+			for (var cell : EcoreUtil2.getAllContentsOfType(file, Cell.class))
+			{
+				context.declareComponent(cell);
+			}
+			for (var function : file.getFunctions())
+			{
+				validate(function);
+			}
+			
+			context.checkConsistency();
 		}
 		
-		context.checkConsistency();
-		if (problems.isEmpty())
+		var minProblems = Integer.MAX_VALUE;
+		List<Problem> list = null;
+		Library library = null;
+		
+		for (var entry : map.entrySet())
 		{
-			game = context.infer();
+			if (entry.getValue().size() < minProblems)
+			{
+				minProblems = entry.getValue().size();
+				list = entry.getValue();
+				library = entry.getKey();
+			}
+		}
+		if (list != null && list.isEmpty())
+		{
+			game = contexts.get(library).infer();
 		}
 		else
 		{
-			reportProblems();
+			reportProblems(list, library);
 		}
 	}
 	
@@ -172,7 +196,7 @@ public class MValidator extends AbstractMValidator
 		}
 	}
 	
-	void reportProblems()
+	void reportProblems(List<Problem> problems, Library library)
 	{
 		for (var problem : problems)
 		{
