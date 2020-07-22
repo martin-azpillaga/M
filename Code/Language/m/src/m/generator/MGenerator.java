@@ -19,9 +19,7 @@ public class MGenerator extends AbstractGenerator
 		var game = validator.getGame();
 		if (game != null)
 		{
-			
+			new Unity().generate(game, fsa);
 		}
 	}
 }
-
-

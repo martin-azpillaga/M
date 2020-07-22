@@ -243,6 +243,8 @@ public class Context {
 	
 	public Game infer()
 	{
-		return inference.infer(userComponents, userFunctions);
+		var game = inference.infer(userComponents, userFunctions);
+		game.library = library;
+		return game;
 	}
 }
