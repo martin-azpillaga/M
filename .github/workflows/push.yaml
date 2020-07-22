@@ -114,14 +114,23 @@ jobs:
       - name: Build ide for browser
         run: |
           yarn buildBrowser
+      - name: Install python 2.7
+        run: |
+          python --version
+          sudo apt install python2.7
+          python --version
+      - name: Install pandoc 2.9
+        run: |
+          sudo apt remove pandoc
+          wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
+          sudo dpkg -i pandoc-2.9.1-1-amd64.deb
       - name: Build tests
         run: |
-          pandoc README.md -t json | node Automation/reader.js > Code/Editor/test.js
+          pandoc README.md -t json | node Quality/reader.js > Code/Editor/test.js
       - name: Run tests
         working-directory: Code/Editor
         run: |
-          cp ../Language/build/libs/Language-ls-ls.jar ../../ls.jar
-          cp ../../Automation/mobot.js mobot.js
+          cp ../../Quality/mobot.js mobot.js
           mkdir workspace
           yarn startBrowser workspace &> serverLog &
           Xvfb :3 &
