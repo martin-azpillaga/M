@@ -3,6 +3,7 @@ package m.generator;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 
 import m.library.Library;
@@ -21,15 +22,16 @@ public class Unity
 	IFileSystemAccess2 fileSystem;
 	Library library;
 	Game game;
+	HashMap<Function, HashMap<String, HashMap<String, AccessKind>>> queries;
 	
-	Map<String,Map<String,Map<String,AccessKind>>> queries = new HashMap<>();
 	Set<String> namespaces = new HashSet<>();
 	
-	public void generate(Game game, IFileSystemAccess2 fileSystem)
+	public void generate(Game game, HashMap<Function, HashMap<String, HashMap<String, AccessKind>>> queries, IFileSystemAccess2 fileSystem)
 	{
 		this.game = game;
 		this.library = game.library;
 		this.fileSystem = fileSystem;
+		this.queries = queries;
 		
 		for (var component : game.components.entrySet())
 		{
@@ -152,4 +154,6 @@ public class Unity
 		return type == NUMBER || type == NUMBER2 || type == NUMBER3 ||
 				type == ENTITY || type == ENTITY_LIST || type == PROPOSITION;
 	}
+	
+	
 }
