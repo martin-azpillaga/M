@@ -12,6 +12,7 @@ import m.types.*;
 
 import static m.types.AtomicType.*;
 import static m.generator.AccessKind.*;
+import static m.library.Symbol.*;
 
 enum AccessKind
 {
@@ -112,9 +113,14 @@ public class Unity
 		}
 	}
 	
+	private String lines(String indentation, String... lines)
+	{
+		return String.join("\n"+indentation, lines);
+	}
+	
 	private String getComponents(Map<String,AccessKind> components)
 	{
-		return all(components.entrySet(),x -> "Read"+(x.getValue()==WRITE?"Write":"Only")+"<"+x.getKey()+">", ",");
+		return all(components.entrySet(),x -> "Read"+(x.getValue()==AccessKind.WRITE?"Write":"Only")+"<"+x.getKey()+">", ",");
 	}
 	
 	private void generate(Function function)
@@ -212,7 +218,8 @@ public class Unity
 		if (statement instanceof BindingBlock)
 		{
 			var block = (BindingBlock) statement;
-			if (block.getName() == "foreach")
+			var name = block.getName();
+			if (library.blocks.get(name) == QUERY)
 			{
 				var a = ((Value)block.getExpression()).getName();
 				var query = queries.get(currentFunction).get(a);
@@ -237,8 +244,9 @@ public class Unity
 		else if (statement instanceof Block)
 		{
 			var block = (Block) statement;
+			var name = block.getName();
 			
-			if (block.getName() == "if")
+			if (library.blocks.get(name) == SELECTION)
 			{
 				var condition = code(block.getExpression());
 				return 
@@ -248,7 +256,7 @@ public class Unity
 					"	"+all(block.getStatements(),x->code(x), "\n")+"\n"+
 					"}\n";
 			}
-			else if (block.getName() == "while")
+			else if (library.blocks.get(name) == ITERATION)
 			{
 				var condition = code(block.getExpression());
 				return 

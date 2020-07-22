@@ -58,6 +58,8 @@ public enum Symbol {
 	MESH(AtomicType.MESH),
 	MATERIAL(AtomicType.MATERIAL),
 	
+	NUMBER_LABEL(NUMBER),
+	
 	NEAR(NUMBER),
 	FAR(NUMBER),
 	FOV(NUMBER),
