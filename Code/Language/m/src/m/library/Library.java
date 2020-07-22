@@ -22,6 +22,8 @@ public enum Library {
 	}}, new HashMap<>() {{
 		put("=", ASSIGNMENT);
 		put("*", MULTIPLICATION);
+		put("+", ADDITION);
+		put("<=", LOWEROREQUAL);
 		put("readNumber", READ_NUMBER);
 		put("random", RANDOM);
 		put("xyz", XYZ);
@@ -43,15 +45,22 @@ public enum Library {
 		put("abiadura", VELOCITY);
 		put("masa", MASS);
 		put("igarotakoa", ELAPSED);
+		put("kokapena", POSITION);
+		put("kolisioak", COLLISIONS);
+		put("zenbakia", NUMBER_LABEL);
 	}}, new HashMap<>() {{
 		put("=", ASSIGNMENT);
 		put("*", MULTIPLICATION);
+		put("+", ADDITION);
+		put("<=", LOWEROREQUAL);
+		put(">=", GREATEROREQUAL);
 		put("irakurri", READ_NUMBER);
 		put("zorizko", RANDOM);
 		put("xyz", XYZ);
 		put("cos", COS);
 		put("sin", SIN);
 		put("kendu", REMOVE);
+		put("barne", IN);
 	}}, new HashMap<>() {{
 		put("hartu", QUERY);
 		put("baldin", SELECTION);
