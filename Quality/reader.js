@@ -27,8 +27,6 @@ reader.on('line', function(line)
             const title = text(block.c[1])
             out(`it('${title}', async function()`)
             out('{')
-            out('await mobot.click("Help")')
-            out('await mobot.click("Help")')
         }
         else if (block.t == 'BulletList')
         {
