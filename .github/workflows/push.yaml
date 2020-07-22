@@ -87,6 +87,10 @@ jobs:
       - name: Build documentation
         run: |
           find . -name "*.md" | sort | xargs -d "\n" pandoc > Code/Editor/Documentation.html
+      - name: Build tests
+        run: |
+          pandoc README.md -t json | node Quality/reader.js > Code/Editor/test.js
+          cp Quality/mobot.js Code/Editor/mobot.js
       - name: Upload Code/Editor folder to github artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -114,23 +118,8 @@ jobs:
       - name: Build ide for browser
         run: |
           yarn buildBrowser
-      - name: Install python 2.7
-        run: |
-          python --version
-          sudo apt install python2.7
-          python --version
-      - name: Install pandoc 2.9
-        run: |
-          sudo apt remove pandoc
-          wget https://github.com/jgm/pandoc/releases/download/2.9.1/pandoc-2.9.1-1-amd64.deb
-          sudo dpkg -i pandoc-2.9.1-1-amd64.deb
-      - name: Build tests
-        run: |
-          pandoc README.md -t json | node Quality/reader.js > Code/Editor/test.js
       - name: Run tests
-        working-directory: Code/Editor
         run: |
-          cp ../../Quality/mobot.js mobot.js
           mkdir workspace
           yarn startBrowser workspace &> serverLog &
           Xvfb :3 &
