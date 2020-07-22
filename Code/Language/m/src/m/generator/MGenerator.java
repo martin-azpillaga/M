@@ -15,6 +15,7 @@ import m.m.Assignment;
 import m.m.Cell;
 import m.m.Function;
 import m.validation.MValidator;
+import static m.generator.AccessKind.*;
 
 public class MGenerator extends AbstractGenerator
 {
@@ -50,16 +51,16 @@ public class MGenerator extends AbstractGenerator
 				var assignment = (Assignment) container;
 				if (cell == assignment.getAtom())
 				{
-					setComponentAccess(queries, name, component, AccessKind.write);
+					setComponentAccess(queries, name, component, WRITE);
 				}
 				else
 				{
-					setComponentAccess(queries, name, component, AccessKind.read);
+					setComponentAccess(queries, name, component, READ);
 				}
 			}
 			else
 			{
-				setComponentAccess(queries, name, component, AccessKind.read);
+				setComponentAccess(queries, name, component, READ);
 			}
 		}
 		
@@ -73,7 +74,7 @@ public class MGenerator extends AbstractGenerator
 			queries.put(entity, new HashMap<>());
 		}
 		var components = queries.get(entity);
-		if (!components.containsKey(component) || components.get(component) != AccessKind.write)
+		if (!components.containsKey(component) || components.get(component) != WRITE)
 		{
 			queries.get(entity).put(component,kind);
 		}
