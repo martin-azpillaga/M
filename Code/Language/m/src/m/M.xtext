@@ -9,7 +9,7 @@ Function: name=(IDENTIFIER|OPERATOR) '(' (parameters+=Value (',' parameters+=Val
 Statement: BindingBlock|Block|Assignment|Delegation;
 Assignment: atom=(Value|Cell) '=' expression=Expression;
 Block: name=IDENTIFIER expression=Expression '{' statements+=Statement* '}';
-BindingBlock: name=IDENTIFIER expression=Value ':' '{' statements+=Statement* '}';
+BindingBlock: name=IDENTIFIER expression=Value ':' condition=Expression? '{' statements+=Statement* '}';
 Delegation: application=Application;
 
 Expression:	Primary	({Binary.left=current} operator=OPERATOR right=Primary)*;
