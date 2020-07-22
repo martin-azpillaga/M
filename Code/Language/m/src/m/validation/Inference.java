@@ -100,12 +100,27 @@ public class Inference {
 			newNode.parent = nodeA;
 			newNode.reason = reason;
 		}
+		else if (nodeA == nodeB)
+		{
+			
+		}
 		else
 		{
 			reroot(nodeA, false);
 			
-			nodeA.parent = nodeB;
-			nodeA.reason = reason;
+			// if nodeB is already linked with nodeA do nothing (otherwise there is a cycle)
+			var parent = nodeB.parent;
+			var found = false;
+			while (parent != null && !found)
+			{
+				found = parent == nodeA;
+				parent = parent.parent;
+			}
+			if (!found)
+			{
+				nodeA.parent = nodeB;
+				nodeA.reason = reason;
+			}
 		}
 	}
 	
