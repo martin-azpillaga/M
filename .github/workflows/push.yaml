@@ -160,7 +160,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: windows
-          path: "dist\\m-editor Setup 0.2.0.exe"
+          path: dist
   packageUbuntu:
     needs: test
     runs-on: ubuntu-latest
@@ -192,18 +192,18 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: linux
-          path: dist/m-editor-0.2.0.AppImage
+          path: dist
   release:
     if: ${{ github.ref == 'refs/heads/master' }}
     needs: [packageUbuntu, packageWindows]
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
-      - name: Download AppImage
+      - name: Download Linux
         uses: actions/download-artifact@v2
         with:
           name: linux
-      - name: Download Exe
+      - name: Download Windows
         uses: actions/download-artifact@v2
         with:
           name: windows
