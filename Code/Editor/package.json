@@ -26,5 +26,21 @@
       "mocha": "7.1.2",
       "puppeteer": "3.1.0",
       "electron-builder": "22.7.0"
+    },
+    "build": {
+      "appId": "azpillaga.world.m-theia",
+      "productName": "m",
+      "linux": {
+        "target": "AppImage",
+        "executableName": "m"
+      },
+      "win": {
+        "target": [
+          "portable"
+        ]
+      },
+      "extraFiles": [
+        "ls.jar"
+      ]
     }
   }
