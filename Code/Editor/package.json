@@ -1,57 +1,30 @@
 {
-	"name": "m-theia",
-	"version": "0.0.0",
+    "name": "m-editor",
+    "version": "0.2.0",
 	"main": "src-gen/frontend/electron-main.js",
-	"private": true,
-	"dependencies": {
-		"@theia/callhierarchy": "next",
-		"@theia/electron": "1.1.0",
-		"@theia/file-search": "next",
-		"@theia/git": "next",
-		"@theia/json": "next",
-		"@theia/languages": "next",
-		"@theia/markers": "next",
-		"@theia/messages": "next",
-		"@theia/mini-browser": "next",
-		"@theia/navigator": "next",
-		"@theia/outline-view": "next",
-		"@theia/plugin-ext-vscode": "next",
-		"@theia/preferences": "next",
-		"@theia/preview": "next",
-		"@theia/search-in-workspace": "next",
-		"@theia/terminal": "next",
-		"@typefox/monaco-editor-core": "0.14.6",
-		"m": "./m",
-		"typescript": "^3.9.5"
-	},
-	"devDependencies": {
-		"@theia/cli": "next",
-		"chai-as-promised": "7.1.1",
-		"mocha": "7.1.2",
-		"puppeteer": "3.1.0",
-		"electron-builder": "^22.7.0"
-	},
-	"scripts": {
-		"buildElectron": "yarn && theia rebuild:electron && theia build --app-target electron",
-		"startElectron": "theia start --app-target electron",
-		"buildBrowser": "yarn && theia rebuild:browser && theia build --app-target browser",
-		"startBrowser": "theia start --app-target browser",
-		"test": "mocha test.js"
-	},
-	"build": {
-		"appId": "azpillaga.world.m-theia",
-		"productName": "m",
-		"linux": {
-			"target": "AppImage",
-			"executableName": "m"
-		},
-		"win": {
-			"target": [
-				"portable"
-			]
-		},
-		"extraFiles": [
-			"ls.jar"
-		]
-	}
-}
+    "private": true,
+    "dependencies": {
+      "@theia/callhierarchy": "next",
+      "@theia/file-search": "next",
+      "@theia/git": "next",
+      "@theia/markers": "next",
+      "@theia/messages": "next",
+      "@theia/mini-browser": "next",
+      "@theia/navigator": "next",
+      "@theia/outline-view": "next",
+      "@theia/plugin-ext-vscode": "next",
+      "@theia/preferences": "next",
+      "@theia/preview": "next",
+      "@theia/search-in-workspace": "next",
+      "@theia/terminal": "next",
+      "@theia/electron": "next",
+      "m": "./m"
+    },
+    "devDependencies": {
+      "@theia/cli": "next",
+      "chai-as-promised": "7.1.1",
+      "mocha": "7.1.2",
+      "puppeteer": "3.1.0",
+      "electron-builder": "22.7.0"
+    }
+  }
