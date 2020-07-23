@@ -9,6 +9,7 @@ jobs:
       - name: Check other files
         run: |
           find . -type f \
+          -not -wholename "*.git*" -and \
           -not -name "*.md" -and \
           -not -name "*.yaml" -and \
           -not -name "*.gradle" -and \
@@ -118,13 +119,14 @@ jobs:
           sudo apt install libx11-dev libxkbfile-dev
       - name: Build ide for browser
         run: |
-          yarn buildBrowser
+          yarn
+          yarn theia build
       - name: Run tests
         run: |
           mkdir workspace
-          yarn startBrowser workspace &> serverLog &
+          yarn theia start --app-target browser workspace &
           Xvfb :3 &
-          sleep 5 && xvfb-run yarn test
+          sleep 5 && xvfb-run yarn mocha test.js
   packageWindows:
     needs: test
     runs-on: windows-latest
@@ -147,17 +149,18 @@ jobs:
         run: |
           npm config set python python2.7
           npm install -g yarn
-          yarn buildElectron
+          yarn
+          yarn theia rebuild:electron
+          yarn theia build --app-target electron
       - name: Package application
         run: |
-          npm install -g electron-builder
-          electron-builder .
+          yarn electron-builder
       - name: Upload Exe
         if: ${{ matrix.os }} == 'windows-latest'
         uses: actions/upload-artifact@v2
         with:
           name: windows
-          path: "dist/m 0.0.0.exe"
+          path: "dist/m-editor_0.2.0.exe"
   packageUbuntu:
     needs: test
     runs-on: ubuntu-latest
@@ -178,7 +181,9 @@ jobs:
         run: |
           npm config set python python2.7
           npm install -g yarn
-          yarn buildElectron
+          yarn
+          yarn theia rebuild:electron
+          yarn theia build --app-target electron
       - name: Package application
         run: |
           yarn electron-builder
@@ -187,7 +192,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: linux
-          path: dist/m-0.0.0.AppImage
+          path: dist/m-editor_0.2.0.AppImage
   release:
     if: ${{ github.ref == 'refs/heads/master' }}
     needs: [packageUbuntu, packageWindows]
