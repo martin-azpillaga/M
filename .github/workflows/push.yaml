@@ -6,6 +6,17 @@ jobs:
     steps:
       - name: Download repository
         uses: actions/checkout@v2
+      - name: Check other files
+        run: |
+          find . -type f \
+          -not -name "*.md" -and \
+          -not -name "*.yaml" -and \
+          -not -name "*.gradle" -and \
+          -not -name "*.java" -and \
+          -not -name "*.json" -and \
+          -not -name "*.js" -and \
+          -not -name "*.xtext" -and \
+          -not -name "*.mwe2"
       - name: Lint Markdown
         run: npx markdownlint-cli -i LICENSE.md "**/*.md"
       - name: Lint Yaml
@@ -48,16 +59,6 @@ jobs:
           -Dsonar.sources=Code/Editor \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.login=c1285d7b6c459b50e7eee08102a94f4b68bd70f9
-      - name: Check other files
-        run: |
-          find . -type f \
-          -not -name "*.md" -and \
-          -not -name "*.yaml" -and \
-          -not -name "*.java" -and \
-          -not -name "*.json" -and \
-          -not -name "*.js" -and \
-          -not -name "*.xtext" -and \
-          -not -name "*.mwe2"
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -180,8 +181,7 @@ jobs:
           yarn buildElectron
       - name: Package application
         run: |
-          npm install -g electron-builder
-          electron-builder .
+          yarn electron-builder
       - name: Upload AppImage
         if: ${{ matrix.os }} == 'ubuntu-latest'
         uses: actions/upload-artifact@v2
