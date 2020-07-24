@@ -7,6 +7,7 @@ import static m.validation.rules.Problem.ProblemKind.*;
 import java.util.ArrayList;
 import java.util.Map;
 
+import m.validation.rules.Problem;
 import m.validation.rules.Problem.ProblemKind;
 import m.library.types.AtomicType;
 import m.library.types.FunctionType;
@@ -72,6 +73,11 @@ public enum Library {
 	public String message(ProblemKind kind)
 	{
 		return problemKind.get(kind);
+	}
+	
+	public String message(Problem problem)
+	{
+		return "this is a problem";
 	}
 	
 	public String name(Type type)
