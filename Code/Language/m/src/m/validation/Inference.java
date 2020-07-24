@@ -1,5 +1,7 @@
 package m.validation;
 
+import static m.validation.rules.Problem.ProblemKind.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,34 +9,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.emf.ecore.EObject;
+
 import m.generator.Game;
+import m.library.types.AtomicType;
+import m.library.types.FunctionType;
+import m.library.types.Type;
 import m.m.Cell;
 import m.m.Expression;
 import m.m.Function;
-import m.types.AtomicType;
-import m.types.FunctionType;
-import m.types.Type;
+import m.validation.rules.Binding;
+import m.validation.rules.Binding.BindingReason;
+import m.validation.rules.Problem;
+import m.validation.rules.Typing;
 
-class ExpressionNode
-{
-	public Expression expression;
-	public ExpressionNode parent;
-	public BindingReason reason;
-	public Type type;
-	public TypingReason typingReason;
-}
-
-class Link
-{
-	public Expression expression;
-	public BindingReason reason;
-}
 
 public class Inference {
 	
 	Set<ExpressionNode> criticalNodes;
-	Map<Expression, ExpressionNode> nodeOfExpression;
+	public Map<Expression, ExpressionNode> nodeOfExpression;
 	Map<String, ExpressionNode> nodeOfComponent;
+	public Map<EObject, ExpressionNode> nodeOf;
 	List<Problem> problems;
 	
 	public Inference (List<Problem> problems)
@@ -45,7 +40,7 @@ public class Inference {
 		nodeOfComponent = new HashMap<>();
 	}
 	
-	public void set(Expression expression, Type type, TypingReason reason) {
+	public void type(Expression expression, Typing typing) {
 		
 		
 		var node = find(expression);
@@ -57,22 +52,20 @@ public class Inference {
 		else
 		{
 			// IF the node already has a type and the given is different, throw incompatible types error
-			if (node.type != null && node.type != type)
+			if (node.typing != null && node.typing.getType() != typing.getType())
 			{
-				problems.add(new IncompatibleTypes(expression, null, node.type, node.typingReason, type, reason, null));
+				problems.add(new Problem(nodeOf.get(expression), INCOMPATIBLE));
 				// error
 			}
 			reroot(node, true); // remove redundant critical nodes
 			
-			node.parent = null;
-			node.reason = null;
+			node.binding = null;
 		}
-		node.type = type;
-		node.typingReason = reason;
+		node.typing = typing;
 		criticalNodes.add(node);
 	}
 	
-	public void group(Expression a, Expression b, BindingReason reason) {
+	public void bind(Expression a, Expression b, BindingReason reason) {
 		
 		var nodeA = find(a);
 		var nodeB = find(b);
@@ -82,23 +75,19 @@ public class Inference {
 			var root = checkIn(a);
 			var child = checkIn(b);
 			
-			child.reason = reason;
-			child.parent = root;
+			child.binding = new Binding(root, reason);
 			criticalNodes.add(child);
 		}
 		else if (nodeA == null && nodeB != null)
 		{
 			var newNode = checkIn(a);
 			
-			newNode.parent = nodeB;
-			newNode.reason = reason;
+			newNode.binding = new Binding(nodeB, reason);
 		}
 		else if (nodeA != null && nodeB == null)
 		{
 			var newNode = checkIn(b);
-			
-			newNode.parent = nodeA;
-			newNode.reason = reason;
+			newNode.binding = new Binding(nodeA, reason);
 		}
 		else if (nodeA == nodeB)
 		{
@@ -109,17 +98,16 @@ public class Inference {
 			reroot(nodeA, false);
 			
 			// if nodeB is already linked with nodeA do nothing (otherwise there is a cycle)
-			var parent = nodeB.parent;
+			var parent = nodeB.binding;
 			var found = false;
 			while (parent != null && !found)
 			{
-				found = parent == nodeA;
-				parent = parent.parent;
+				found = parent.node == nodeA;
+				parent = parent.node.binding;
 			}
 			if (!found)
 			{
-				nodeA.parent = nodeB;
-				nodeA.reason = reason;
+				nodeA.binding = new Binding(nodeB, reason);
 			}
 		}
 	}
@@ -149,23 +137,19 @@ public class Inference {
 	
 	private void reroot(ExpressionNode node, boolean removeRedundant)
 	{
-		var parent = node.parent;
+		var parent = node.binding;
 		
-		var nextParent = node;
-		var nextReason = node.reason;
+		var nextParent = node.binding;
 		
 		while (parent != null) {
 			// Possibly slower because of contains search but worth benchmarking
-			if (removeRedundant && parent.type == null && criticalNodes.contains(parent))
+			if (removeRedundant && parent.node.typing == null && criticalNodes.contains(parent))
 			{
-				criticalNodes.remove(parent);
+				criticalNodes.remove(parent.node);
 			}
-			var parentParent = parent.parent;
-			var parentReason = parent.reason;
-			parent.parent = nextParent;
-			parent.reason = nextReason;
+			var parentParent = parent.node.binding;
+			parent.node.binding = nextParent;
 			nextParent = parent;
-			nextReason = parentReason;
 			parent = parentParent;
 		}
 	}
@@ -174,28 +158,22 @@ public class Inference {
 	{	
 		for (var criticalNode : criticalNodes)
 		{
-			var originalType = criticalNode.type;
-			
-			var links = new ArrayList<Link>();
+			var originalType = criticalNode.typing;
 			
 			var root = criticalNode;
-			while (root.parent != null) {
-				var link = new Link();
-				link.expression = root.parent.expression;
-				link.reason = root.reason;
-				links.add(link);
-				root = root.parent;
+			while (root.binding != null) {
+				root = root.binding.node;
 			}
 			
-			var rootType = root.type;
+			var rootType = root.typing;
 			
-			if (originalType == null && root.type == null)
+			if (originalType == null && root.typing == null)
 			{
-				problems.add(new UndecidableType(criticalNode.expression, null, links));
+				problems.add(new Problem(nodeOf.get(criticalNode.expression), INDETERMINATE));
 			}
-			else if (originalType != null && originalType != root.type)
+			else if (originalType != null && originalType != root.typing.getType())
 			{
-				problems.add(new IncompatibleTypes(criticalNode.expression, null, originalType, criticalNode.typingReason, rootType, root.typingReason, links));
+				problems.add(new Problem(nodeOf.get(criticalNode.expression), INDETERMINATE));
 			}
 		}
 	}
@@ -208,12 +186,11 @@ public class Inference {
 		{
 			var node = nodeOfComponent.get(component);
 			var root = node;
-			while (root.parent != null)
+			while (root.binding != null)
 			{
-				root = root.parent;
+				root = root.binding.node;
 			}
-			game.components.put(component, root.type);
-			System.out.println(component + " has type " + root.type + " because " + root.typingReason);
+			game.components.put(component, root.typing.getType());
 		}
 		
 		for (var userFunction : userFunctions.entrySet())
@@ -226,7 +203,6 @@ public class Inference {
 			
 			var type = new FunctionType(parameters, returnType);
 			
-			System.out.println(name + " is a function of type " + parameters + " -> " + returnType);
 			
 			game.functions.put(userFunction.getValue(), type);
 		}

@@ -1,4 +1,4 @@
-package m.types;
+package m.library.types;
 
 public enum AtomicType implements Type
 {

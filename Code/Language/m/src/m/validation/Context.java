@@ -1,5 +1,8 @@
 package m.validation;
 
+import static m.validation.rules.Binding.BindingReason.*;
+import static m.validation.rules.Problem.ProblemKind.*;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,20 +14,22 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 
 import m.generator.Game;
 import m.library.Library;
+import m.library.types.*;
 import m.m.*;
-import m.types.*;
-import static m.validation.BindingReason.*;
+import m.validation.rules.Problem;
+import m.validation.rules.Problem.ProblemKind;
+import m.validation.rules.Typing;
 
 public class Context {
-	
+
+	Stack<Map<String,Value>> stack;
 	Map<String, Value> userVariables;
-	Map<String, Function> userFunctions;
 	Map<String, Cell> userComponents;
+	Map<String, Function> userFunctions;
+	Library library;
 	
 	Inference inference;
-	Stack<Map<String,Value>> stack;
 	List<Problem> problems;
-	Library library;
 	
 	public Context(List<Problem> problems, Library library) {
 		this.inference = new Inference(problems);
@@ -36,11 +41,6 @@ public class Context {
 		this.userComponents = new HashMap<>();
 		
 		this.stack = new Stack<>();
-		
-		for (var component : library.components.keySet())
-		{
-			userVariables.put(component, null);
-		}
 	}
 	
 	public void declareVariable(Value value)
@@ -50,29 +50,15 @@ public class Context {
 		var v = userVariables.get(name);
 		if (v != null)
 		{
-			inference.group(value, userVariables.get(name), SAME_VARIABLE);
+			inference.bind(value, userVariables.get(name), SAME_VARIABLE);
 		}
 		else if (set)
 		{
-			problems.add(new SymbolRedefinition(value, null));
+			problems.add(new Problem(inference.nodeOf.get(value), REDEFINED));
 		}
 		else
 		{
 			userVariables.put(name, value);
-		}
-	}
-	
-	public void declareFunction(Function function)
-	{
-		var name = function.getName();
-		
-		if (userFunctions.containsKey(name))
-		{
-			problems.add(new SymbolRedefinition(function, userFunctions.get(name)));
-		}
-		else
-		{
-			userFunctions.put(name, function);
 		}
 	}
 	
@@ -86,16 +72,55 @@ public class Context {
 		}
 	}
 	
+	public void declareFunction(Function function)
+	{
+		var name = function.getName();
+		
+		if (userFunctions.containsKey(name))
+		{
+			problems.add(new Problem(inference.nodeOf.get(function), REDEFINED));
+		}
+		else
+		{
+			userFunctions.put(name, function);
+		}
+	}
+	
+	
+	
 	public void checkVariable(Value value)
 	{
 		var name = value.getName();
 		if (!userVariables.containsKey(name))
 		{
-			problems.add(new UndefinedSymbol(value, null, ""));
+			problems.add(new Problem(inference.nodeOf.get(value), UNDEFINED));
 		}
 		else
 		{
-			inference.group(value, userVariables.get(name), SAME_VARIABLE);
+			inference.bind(value, userVariables.get(name), SAME_VARIABLE);
+		}
+	}
+	
+	public void checkComponent(Cell cell)
+	{
+		var name = cell.getComponent().getName();
+		var component = library.components.get(name);
+		if (component == null)
+		{
+			var userComponent = userComponents.get(name);
+			
+			if (userComponent != null && userComponent != cell)
+			{
+				inference.bind(cell, userComponent, SAME_COMPONENT);
+			}
+			else
+			{
+				declareComponent(cell);
+			}
+		}
+		else
+		{
+			inference.type(cell, new Typing(component.getType(), component, 1));
 		}
 	}
 	
@@ -104,11 +129,11 @@ public class Context {
 		var block = library.blocks.get(name);
 		if (block != null)
 		{
-			inference.set(expression, block.getType(), new TypingReason(block, 1));
+			inference.type(expression, new Typing(block.getType(), block, 1));
 		}
 		else
 		{
-			problems.add(new UndefinedSymbol(source, feature, ""));
+			problems.add(new Problem(inference.nodeOf.get(expression), UNDEFINED));
 		}
 	}
 	
@@ -126,18 +151,18 @@ public class Context {
 				{
 					for (var i = 0; i < arguments.length; i++)
 					{
-						inference.group(arguments[i], parameters.get(i), PARAMETER_ARGUMENT);
+						inference.bind(arguments[i], parameters.get(i), PARAMETER_ARGUMENT);
 					}
 					// Bind result with all the return statements
 				}
 				else
 				{
-					problems.add(new UndefinedSymbol(source, feature, ""));
+					problems.add(new Problem(inference.nodeOf.get(source), UNDEFINED));
 				}
 			}
 			else
 			{
-				problems.add(new UndefinedSymbol(source, feature, ""));
+				problems.add(new Problem(inference.nodeOf.get(source), UNDEFINED));
 			}
 		}
 		else
@@ -166,7 +191,7 @@ public class Context {
 					}
 					else
 					{
-						inference.set(arguments[i], parameters[i], new TypingReason(function, i+1));
+						inference.type(arguments[i], new Typing(parameters[i], function, i+1));
 					}
 				}
 				if (source instanceof Expression)
@@ -183,7 +208,7 @@ public class Context {
 					}
 					else
 					{
-						inference.set ((Expression)source, result, new TypingReason(function, -1));
+						inference.type ((Expression)source, new Typing(result, function, -1));
 					}
 				}
 				// Check for type variables
@@ -192,39 +217,18 @@ public class Context {
 					var expressions = variables.get(typeName.getKey());
 					for (var i = 1; i < expressions.size(); i++)
 					{
-						inference.group(expressions.get(0), expressions.get(i), POLYMORPHISM);
+						inference.bind(expressions.get(0), expressions.get(i), POLYMORPHISM);
 					}
 				}
 			}
 			else
 			{
-				problems.add(new UndefinedSymbol(source, feature, ""));
+				problems.add(new Problem(inference.nodeOf.get(source), UNDEFINED));
 			}
 		}
 	}
 	
-	public void checkComponent(Cell cell)
-	{
-		var name = cell.getComponent().getName();
-		var component = library.components.get(name);
-		if (component == null)
-		{
-			var userComponent = userComponents.get(name);
-			
-			if (userComponent != null && userComponent != cell)
-			{
-				inference.group(cell, userComponent, SAME_COMPONENT);
-			}
-			else
-			{
-				declareComponent(cell);
-			}
-		}
-		else
-		{
-			inference.set(cell, component.getType(), new TypingReason(component, 1));
-		}
-	}
+	
 	
 	public void push()
 	{

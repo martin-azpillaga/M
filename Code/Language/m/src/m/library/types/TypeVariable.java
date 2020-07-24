@@ -1,6 +1,6 @@
-package m.types;
+package m.library.types;
 
-import static m.types.AtomicType.*;
+import static m.library.types.AtomicType.*;
 
 public class TypeVariable implements Type {
 	
