@@ -7,12 +7,12 @@ import java.util.stream.Collectors;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 
 import m.library.Library;
+import m.library.types.*;
 import m.m.*;
-import m.types.*;
 
-import static m.types.AtomicType.*;
 import static m.generator.AccessKind.*;
 import static m.library.Symbol.*;
+import static m.library.types.AtomicType.*;
 
 enum AccessKind
 {

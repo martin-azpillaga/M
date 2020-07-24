@@ -1,111 +1,77 @@
 package m.library;
 
+import static java.util.Map.entry;
+import static m.library.Symbol.*;
+import static m.library.types.AtomicType.*;
+import static m.validation.rules.Problem.ProblemKind.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
-import m.validation.IncompatibleTypes;
-import m.validation.Problem;
-import m.validation.TypingReason;
-import m.validation.UndefinedSymbol;
-
-import static m.library.Symbol.*;
-import m.types.*;
-import static m.types.AtomicType.*;
+import m.validation.rules.Problem.ProblemKind;
+import m.library.types.AtomicType;
+import m.library.types.FunctionType;
+import m.library.types.Type;
+import m.library.types.TypeVariable;
+import m.validation.rules.Typing;
 
 public enum Library {
 	
-	ENGLISH(new HashMap<>() {{
-		put("velocity", VELOCITY);
-		put("mass", MASS);
-		put("elapsed", ELAPSED);
-	}}, new HashMap<>() {{
-		put("=", ASSIGNMENT);
-		put("*", MULTIPLICATION);
-		put("+", ADDITION);
-		put("<=", LOWEROREQUAL);
-		put("readNumber", READ_NUMBER);
-		put("random", RANDOM);
-		put("xyz", XYZ);
-		put("cos", COS);
-		put("sin", SIN);
-		put("remove", REMOVE);
-	}}, new HashMap<>() {{
-		put("foreach", QUERY);
-		put("if", SELECTION);
-		put("while", ITERATION);
-	}}, new HashMap<>() {{
-		put(NUMBER, "number");
-		put(NUMBER3, "number3");
-	}}, new HashMap<>() {{
-		put(IncompatibleTypes.class, "Incompatible types");
-		put(UndefinedSymbol.class, "Undefined symbol");
-	}}),
-	EUSKARA(new HashMap<>() {{
-		put("abiadura", VELOCITY);
-		put("masa", MASS);
-		put("igarotakoa", ELAPSED);
-		put("kokapena", POSITION);
-		put("kolisioak", COLLISIONS);
-		put("zenbakia", NUMBER_LABEL);
-	}}, new HashMap<>() {{
-		put("=", ASSIGNMENT);
-		put("*", MULTIPLICATION);
-		put("+", ADDITION);
-		put("<=", LOWEROREQUAL);
-		put(">=", GREATEROREQUAL);
-		put("irakurri", READ_NUMBER);
-		put("zorizko", RANDOM);
-		put("xyz", XYZ);
-		put("cos", COS);
-		put("sin", SIN);
-		put("kendu", REMOVE);
-		put("barne", IN);
-	}}, new HashMap<>() {{
-		put("hartu", QUERY);
-		put("baldin", SELECTION);
-		put("bitartean", ITERATION);
-	}}, new HashMap<>() {{
-		put(NUMBER, "zenbakia");
-		put(NUMBER3, "zenbakia3");
-	}}, new HashMap<>() {{
-		put(IncompatibleTypes.class, "izaera bateraezinak");
-		put(UndefinedSymbol.class, "definizio gabeko zeinua");
-	}}),
+	ENGLISH(
+	Map.ofEntries(
+		entry("pi", PI),
+		entry("e", E)
+	),
+	Map.ofEntries(
+		entry("velocity", VELOCITY),
+		entry("mass", MASS),
+		entry("elapsed", ELAPSED)),
+	Map.ofEntries(
+		entry("=", ASSIGNMENT),
+		entry("*", MULTIPLICATION),
+		entry("+", ADDITION),
+		entry("<=", LOWEROREQUAL),
+		entry("readNumber", READ_NUMBER),
+		entry("random", RANDOM),
+		entry("xyz", XYZ),
+		entry("cos", COS),
+		entry("sin", SIN),
+		entry("remove", REMOVE)),
+	Map.ofEntries(
+		entry("foreach", QUERY),
+		entry("if", SELECTION),
+		entry("while", ITERATION)
+	), Map.of(
+		NUMBER, "number",
+		NUMBER3, "number3"
+	), Map.of(
+		INCOMPATIBLE, "Incompatible types",
+		UNDEFINED, "Undefined symbol",
+		REDEFINED, "Redefined symbol",
+		INDETERMINATE, "Indeterminate type"
+	))
 	;
-	
+
+	public Map<String, Symbol> variables;
 	public Map<String, Symbol> components;
 	public Map<String, Symbol> functions;
 	public Map<String, Symbol> blocks;
-	public Map<Type, String> atomicTypes;
-	public Map<Class, String> problems;
 	
-	Library(Map<String, Symbol> components, Map<String, Symbol> functions, Map<String, Symbol> blocks, Map<Type,String> atomicTypes, Map<Class,String> problems)
+	Map<Type, String> atomicTypes;
+	Map<ProblemKind, String> problemKind;
+	
+	Library(Map<String, Symbol> variables, Map<String, Symbol> components, Map<String, Symbol> functions, Map<String, Symbol> blocks, Map<Type, String> atomicTypes, Map<ProblemKind, String> problemKind)
 	{
+		this.variables = variables;
 		this.components = components;
 		this.functions = functions;
 		this.blocks = blocks;
 		this.atomicTypes = atomicTypes;
-		this.problems = problems;
+		this.problemKind = problemKind;
 	}
 	
-	public String message(Problem problem)
+	public String message(ProblemKind kind)
 	{
-		var result = problems.get(problem.getClass());
-		
-		if (problem instanceof IncompatibleTypes)
-		{
-			var p = (IncompatibleTypes) problem;
-			
-			return result + "\n"+
-			name(p.t1) + " -- " + name(p.t1Reason) + "\n" + 
-			name(p.t2) + " -- " + name(p.t2Reason) + "\n";
-		}
-		else if (problem instanceof UndefinedSymbol)
-		{
-			return result;
-		}
-		return "problem message";
+		return problemKind.get(kind);
 	}
 	
 	public String name(Type type)
@@ -134,29 +100,5 @@ public enum Library {
 		{
 			return "unrecognized type";
 		}
-	}
-	
-	public String name(TypingReason reason)
-	{
-		var symbol = reason.getSymbol();
-		
-		var symbolName = symbol.name();
-		
-		for (var f : functions.entrySet())
-		{
-			if (f.getValue() == symbol)
-			{
-				symbolName = f.getKey();
-			}
-		}
-		for (var f : components.entrySet())
-		{
-			if (f.getValue() == symbol)
-			{
-				symbolName = f.getKey();
-			}
-		}
-		
-		return symbolName + " : " + name(symbol.getType());
 	}
 }
