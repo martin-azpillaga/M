@@ -99,10 +99,12 @@ public class MValidator extends AbstractMValidator
 			
 			context.checkBlock(name, expression, block, BLOCK__NAME);
 			validate(expression);
+			context.push();
 			for (var s : block.getStatements())
 			{
 				validate(s);
 			}
+			context.pop();
 		}
 		else if (statement instanceof BindingBlock)
 		{
@@ -132,7 +134,7 @@ public class MValidator extends AbstractMValidator
 			var atom = assignment.getAtom();
 			var expression = assignment.getExpression();
 			
-			context.checkFunction("=", new Expression[] {atom, expression}, null, ASSIGNMENT__ATOM);
+			context.checkFunction("=", new Expression[] {atom, expression}, null, null);
 			validate(expression);
 			
 			if (atom instanceof Value)
@@ -158,7 +160,6 @@ public class MValidator extends AbstractMValidator
 			var cell = (Cell) expression;
 			var entity = cell.getEntity();
 			
-			context.declareComponent(cell);
 			context.checkVariable(entity);
 			context.checkComponent(cell);
 		}
@@ -210,6 +211,14 @@ public class MValidator extends AbstractMValidator
 			}
 			case REDEFINED:
 			case INDETERMINATE:
+				var message = library.message(problem);
+				var node = problem.node;
+				error(message, node.expression, null);
+				while (node.binding != null)
+				{
+					node = node.binding.node;
+					error(message, node.expression, null);
+				}
 			case INCOMPATIBLE:
 			}
 		}

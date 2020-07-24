@@ -1,7 +1,5 @@
 package m.validation.rules;
 
-import m.validation.ExpressionNode;
-
 public class Problem
 {
 	public ExpressionNode node;

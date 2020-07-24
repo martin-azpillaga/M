@@ -10,6 +10,7 @@ public class Typing
 	int parameter;
 	
 	public Typing(Type type, Symbol symbol, int parameter) {
+		this.type = type;
 		this.symbol = symbol;
 		this.parameter = parameter;
 	}

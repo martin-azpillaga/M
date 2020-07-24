@@ -17,7 +17,6 @@ import m.library.Library;
 import m.library.types.*;
 import m.m.*;
 import m.validation.rules.Problem;
-import m.validation.rules.Problem.ProblemKind;
 import m.validation.rules.Typing;
 
 public class Context {
@@ -46,29 +45,43 @@ public class Context {
 	public void declareVariable(Value value)
 	{
 		var name = value.getName();
-		var set = userVariables.containsKey(name);
-		var v = userVariables.get(name);
-		if (v != null)
-		{
-			inference.bind(value, userVariables.get(name), SAME_VARIABLE);
-		}
-		else if (set)
+		if (library.variables.containsKey(name) || library.components.containsKey(name) || library.functions.containsKey(name))
 		{
 			problems.add(new Problem(inference.nodeOf.get(value), REDEFINED));
 		}
+		else if (userComponents.containsKey(name) || userFunctions.containsKey(name))
+		{
+			problems.add(new Problem(inference.nodeOf.get(value), REDEFINED));			
+		}
 		else
 		{
-			userVariables.put(name, value);
+			var v = userVariables.get(name);
+			if (v != null)
+			{
+				inference.bind(value, userVariables.get(name), SAME_VARIABLE);				
+			}
+			else
+			{
+				userVariables.put(name, value);
+			}
 		}
 	}
 	
 	public void declareComponent(Cell cell)
 	{
 		var name = cell.getComponent().getName();
-		if (!library.components.containsKey(name))
+
+		if (library.variables.containsKey(name) || library.functions.containsKey(name))
+		{
+			problems.add(new Problem(inference.nodeOf.get(cell), REDEFINED));
+		}
+		else if (userFunctions.containsKey(name))
+		{
+			problems.add(new Problem(inference.nodeOf.get(cell), REDEFINED));
+		}
+		else if (!userComponents.containsKey(name))
 		{
 			userComponents.put(name, cell);
-			userVariables.put(name, null);
 		}
 	}
 	
@@ -76,7 +89,11 @@ public class Context {
 	{
 		var name = function.getName();
 		
-		if (userFunctions.containsKey(name))
+		if (library.components.containsKey(name) || library.components.containsKey(name) || library.functions.containsKey(name))
+		{
+			problems.add(new Problem(inference.nodeOf.get(function), REDEFINED));
+		}
+		else if (userComponents.containsKey(name) || userFunctions.containsKey(name))
 		{
 			problems.add(new Problem(inference.nodeOf.get(function), REDEFINED));
 		}
@@ -112,10 +129,6 @@ public class Context {
 			if (userComponent != null && userComponent != cell)
 			{
 				inference.bind(cell, userComponent, SAME_COMPONENT);
-			}
-			else
-			{
-				declareComponent(cell);
 			}
 		}
 		else
