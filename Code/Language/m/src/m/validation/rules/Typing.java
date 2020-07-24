@@ -1,13 +1,15 @@
-package m.validation;
+package m.validation.rules;
 
 import m.library.Symbol;
+import m.library.types.*;
 
-public class TypingReason
+public class Typing
 {
+	Type type;
 	Symbol symbol;
 	int parameter;
 	
-	public TypingReason(Symbol symbol, int parameter) {
+	public Typing(Type type, Symbol symbol, int parameter) {
 		this.symbol = symbol;
 		this.parameter = parameter;
 	}
@@ -18,5 +20,10 @@ public class TypingReason
 	
 	public int getParameter() {
 		return parameter;
+	}
+	
+	public Type getType()
+	{
+		return type;
 	}
 }

@@ -1,4 +1,4 @@
-package m.types;
+package m.library.types;
 
 public interface Type {
 

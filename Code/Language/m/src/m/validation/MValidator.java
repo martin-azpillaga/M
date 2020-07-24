@@ -12,6 +12,7 @@ import org.eclipse.xtext.validation.Check;
 import m.generator.Game;
 import m.library.Library;
 import m.m.*;
+import m.validation.rules.Problem;
 
 import static m.m.MPackage.Literals.*;
 
@@ -200,42 +201,16 @@ public class MValidator extends AbstractMValidator
 	{
 		for (var problem : problems)
 		{
-			switch (problem.severity)
+			switch (problem.kind)
 			{
-			case INFO:
-				info(library.message(problem), problem.source, problem.feature);
-				break;
-			case WARNING:
-				if (problem instanceof UndecidableType)
-				{
-					var p = (UndecidableType) problem;
-					var message = library.message(problem);
-					for (var link : p.links)
-					{
-						warning(message, link.expression, null);
-					}
-				}
-				warning(library.message(problem), problem.source, problem.feature);
-				break;
-			case ERROR:
-				if (problem instanceof IncompatibleTypes)
-				{
-					var p = (IncompatibleTypes) problem;
-					var message = library.message(problem);
-					for (var link : p.links)
-					{
-						if (link == p.links.get(p.links.size()-1))
-						{
-							error(message, link.expression, null);
-						}
-						else
-						{
-							warning(message, link.expression, null);
-						}
-					}
-				}
-				error(library.message(problem), problem.source, problem.feature);
-				break;
+			case UNDEFINED:
+			{
+				var message = library.message(problem.kind);
+				error(message, problem.node.expression, null);
+			}
+			case REDEFINED:
+			case INDETERMINATE:
+			case INCOMPATIBLE:
 			}
 		}
 	}

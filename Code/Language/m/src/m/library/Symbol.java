@@ -1,12 +1,12 @@
 package m.library;
 
-import m.types.Type;
-import static m.types.AtomicType.*;
-import static m.types.TypeVariable.A;
-import static m.types.TypeVariable.A_SUB_NUMERIC;
+import static m.library.types.AtomicType.*;
+import static m.library.types.TypeVariable.A;
+import static m.library.types.TypeVariable.A_SUB_NUMERIC;
 
-import m.types.AtomicType;
-import m.types.FunctionType;
+import m.library.types.AtomicType;
+import m.library.types.FunctionType;
+import m.library.types.Type;
 
 public enum Symbol {
 	QUERY(ENTITY),
