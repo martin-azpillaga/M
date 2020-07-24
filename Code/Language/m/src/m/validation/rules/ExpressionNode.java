@@ -1,8 +1,6 @@
-package m.validation;
+package m.validation.rules;
 
 import m.m.Expression;
-import m.validation.rules.Binding;
-import m.validation.rules.Typing;
 
 public class ExpressionNode
 {

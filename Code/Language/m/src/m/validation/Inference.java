@@ -19,6 +19,7 @@ import m.m.Cell;
 import m.m.Expression;
 import m.m.Function;
 import m.validation.rules.Binding;
+import m.validation.rules.ExpressionNode;
 import m.validation.rules.Binding.BindingReason;
 import m.validation.rules.Problem;
 import m.validation.rules.Typing;
@@ -167,11 +168,11 @@ public class Inference {
 			
 			var rootType = root.typing;
 			
-			if (originalType == null && root.typing == null)
+			if (originalType == null && rootType == null)
 			{
-				problems.add(new Problem(nodeOf.get(criticalNode.expression), INDETERMINATE));
+				problems.add(new Problem(criticalNode, INDETERMINATE));
 			}
-			else if (originalType != null && originalType != root.typing.getType())
+			else if (originalType != null && originalType.getType() != rootType.getType())
 			{
 				problems.add(new Problem(nodeOf.get(criticalNode.expression), INDETERMINATE));
 			}
