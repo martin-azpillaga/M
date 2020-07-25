@@ -24,23 +24,31 @@ public enum Library {
 	ENGLISH(
 	Map.ofEntries(
 		entry("pi", PI),
-		entry("e", E)
+		entry("e", E),
+		entry("time", TIME_SINCE_START),
+		entry("deltaTime", DELTA_TIME)
 	),
 	Map.ofEntries(
 		entry("velocity", VELOCITY),
 		entry("mass", MASS),
+		entry("position", POSITION),
+		entry("number", NUMBER_LABEL),
+		entry("collisions", COLLISIONS),
 		entry("elapsed", ELAPSED)),
 	Map.ofEntries(
 		entry("=", ASSIGNMENT),
 		entry("*", MULTIPLICATION),
 		entry("+", ADDITION),
+		entry(">", GREATER),
 		entry("<=", LOWEROREQUAL),
 		entry("readNumber", READ_NUMBER),
 		entry("random", RANDOM),
 		entry("xyz", XYZ),
 		entry("cos", COS),
 		entry("sin", SIN),
-		entry("remove", REMOVE)),
+		entry("remove", REMOVE),
+		entry("add", ADD),
+		entry("in", IN)),
 	Map.ofEntries(
 		entry("foreach", QUERY),
 		entry("if", SELECTION),
@@ -89,11 +97,15 @@ public enum Library {
 			var base = typingProblem.get(((TypingProblem) problem).getKind());
 			var node = ((TypingProblem) problem).getNode();
 			var root = node;
-			while (root.binding != null)
+			
+			if (((TypingProblem) problem).getKind() == INCOMPATIBLE)
 			{
-				root = root.binding.node;
+				while (root.binding != null)
+				{
+					root = root.binding.node;
+				}
+				base += "\n" + name(node.typing.getType()) + " - " + name(root.typing.getType());
 			}
-			base += "\n" + name(node.typing.getType()) + " - " + name(root.typing.getType());
 			return base;
 		}
 		return "error";
