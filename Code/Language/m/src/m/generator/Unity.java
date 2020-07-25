@@ -143,7 +143,7 @@ public class Unity
 		
 		var statements = all(function.getStatements(), x->code(x), "\n");
 		
-		var declareQueries = all(queryName, x -> "EntityQuery "+x+";", "\n");
+		var declareQueries = all(queryName, x -> "EntityQuery "+x+";", "\n		");
 		var getQueries = all(queryName, x-> x+" = GetEntityQuery("+getComponents(map.get(x))+");", "\n");
 		
 		generate("Unity/Assets/Code/Systems/"+name+".cs",
@@ -217,7 +217,7 @@ public class Unity
 		{
 			return "";
 		}
-		else if (!valueType(type))
+		else if (isBuffer(component) || !valueType(type))
 		{
 			return "";
 		}
@@ -325,7 +325,15 @@ public class Unity
 	
 	private boolean isBuffer(String component)
 	{
-		return false;
+		var standard = library.components.get(component);
+		if (standard != null)
+		{
+			return standard.getType() == ENTITY_LIST;
+		}
+		else
+		{
+			return game.components.get(component) == ENTITY_LIST;
+		}
 	}
 	
 	private String code(Expression e)
@@ -343,7 +351,7 @@ public class Unity
 		else if (e instanceof Value)
 		{
 			var value = (Value) e;
-			return value.getName();
+			return variable(value.getName());
 		}
 		else if (e instanceof Cell)
 		{
@@ -365,18 +373,18 @@ public class Unity
 			var application = (Application) e;
 			var name = application.getName();
 			var args = application.getArguments();
-			
-			if (name == "in")
+			var standard = library.functions.get(name);
+			if (standard == IN)
 			{
 				return code(args.get(1))+".Contains(entity_"+code(args.get(0))+")";
 			}
-			else if (name == "remove")
+			else if (standard == REMOVE)
 			{
-				return "EntityManager.RemoveComponent<>(entity_"+code(args.get(0))+")";
+				return "EntityManager.RemoveComponent<"+code(args.get(0))+">(entity_"+code(args.get(1))+")";
 			}
-			else if (name == "add")
+			else if (standard == ADD)
 			{
-				return "EntityManager.AddComponentData(entity_"+code(args.get(0))+", new ())";
+				return "EntityManager.AddComponentData(entity_"+code(args.get(1))+", new "+code(args.get(0))+"())";
 			}
 			else
 			{
@@ -384,6 +392,43 @@ public class Unity
 			}
 		}
 		return "undefined";
+	}
+	
+
+	private String variable(String name)
+	{
+		var found = library.variables.get(name);
+		if (found != null)
+		{
+			switch (found)
+			{
+			case EPSILON:
+				return "Float.Epsilon";
+			case PI:
+				namespaces.add("Unity.Mathematics");
+				return "math.PI";
+			case E:
+				namespaces.add("Unity.Mathematics");
+				return "math.E";
+			case TIME_SINCE_START:
+				namespaces.add("UnityEngine");
+				return "UnityEngine.Time.deltaTime";
+			case FIXED_DELTA_TIME:
+				namespaces.add("UnityEngine");
+				return "UnityEngine.Time.time";
+			case DELTA_TIME:
+				namespaces.add("UnityEngine");
+				return "UnityEngine.Time.deltaTime";
+			case TIME_SCALE:
+				namespaces.add("UnityEngine");
+				return "UnityEngine.Time.timeScale";
+			}
+			return "undefinedVariable";
+		}
+		else
+		{
+			return name;
+		}
 	}
 	
 	private String component(String name)
@@ -408,6 +453,7 @@ public class Unity
 				case TIMEOUT: return "timeout";
 				case POSITION: {namespaces.add("Unity.Transforms"); return "Translation";}
 				case COLLISIONS: {return "Collisions";}
+				case NUMBER_LABEL: {return "number";}
 			}
 		}
 		return "undefined";
@@ -428,6 +474,7 @@ public class Unity
 				case TIMEOUT: return "Value";
 				case POSITION: return "Value";
 				case COLLISIONS: return "Value";
+				case NUMBER_LABEL: return "Value";
 			}
 		}
 		return "undefined";
