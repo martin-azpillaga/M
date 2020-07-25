@@ -185,9 +185,30 @@ public enum Library {
 		entry("foreach", QUERY),
 		entry("if", SELECTION),
 		entry("while", ITERATION)
-	), Map.of(
-		NUMBER, "number",
-		NUMBER3, "number3"
+	), Map.ofEntries(
+		entry(STRING, "string"),
+		entry(PROPOSITION, "proposition"),
+		entry(NUMBER, "number"),
+		entry(NUMBER2, "number2"),
+		entry(NUMBER3, "number3"),
+		entry(UNIT, "unit"),
+		
+		entry(COMPONENT, "component"),
+		
+		entry(COLOR, "color"),
+		entry(NUMERIC, "numeric"),
+		
+		entry(INPUT, "input"),
+		entry(AtomicType.MESH, "mesh"),
+		entry(AtomicType.MATERIAL, "material"),
+		entry(FONT, "font"),
+		entry(TEXT, "text"),
+		entry(IMAGE, "image"),
+		entry(AtomicType.AUDIOCLIP, "audioClip"),
+		entry(ANIMATOR, "animator"),
+		
+		entry(ENTITY, "entity"),
+		entry(ENTITY_LIST, "entityList")
 	), Map.of(
 		REDEFINED, "Redefined symbol",
 		UNDEFINED, "Undefined symbol"
@@ -195,7 +216,201 @@ public enum Library {
 	Map.of(
 		INCOMPATIBLE, "Incompatible types",
 		INDETERMINATE, "Indeterminate type"
-	))
+	)),
+	EUSKARA(
+			Map.ofEntries(
+				entry("epsilon", EPSILON),
+				entry("pi", PI),
+				entry("e", E),
+				entry("deltaDenbora", DELTA_TIME),
+				entry("deltaDenboraZehaztua", FIXED_DELTA_TIME),
+				entry("denbora", TIME_SINCE_START),
+				entry("denboraEskala", TIME_SCALE)
+			),
+			Map.ofEntries(
+				entry("kokapena", POSITION),
+				entry("biraketa", ROTATION),
+				entry("eskala", SCALE),
+				entry("gurasoa", PARENT),
+				entry("umeak", CHILDREN),
+				
+				
+				entry("masa", MASS),
+				entry("inertzia", INERTIA),
+				entry("kinematikoa",KINEMATIC),
+				
+				entry("abiadura",VELOCITY),
+				entry("azelerazioa", ACCELERATION),
+				entry("indarra", FORCE),
+				entry("abiaduraAngeluarra", ANGULAR_VELOCITY),
+				entry("azelerazioAngeluarra", ANGULAR_ACCELERATION),
+				entry("indarAngeluarra", ANGULAR_FORCE),
+				
+				entry("kolisioak", COLLISIONS),
+				entry("kolisioGeruza", COLLISION_LAYER),
+				entry("kolisioMaskara", COLLISION_MASK),
+				entry("restituzioa", RESTITUTION),
+				entry("marruskadura", FRICTION),
+				entry("kolisioAdierazleak", COLLISION_EVENTS),
+				entry("kolisioReakzioEza", NO_COLLISION_RESPONSE),
+				
+				entry("erradioa", RADIUS),
+				entry("dimentsioak", EXTENTS),
+				entry("mallaItxura", MESH_COLLIDER),
+				entry("ahurra", CONVEX_HULL),
+				
+				entry("lotura", BOND),
+				entry("loturaPuntua", ANCHOR),
+				entry("hausteIndarra", BREAK_FORCE),
+				entry("hausteIndarAngeluarra", BREAK_ANGULAR_FORCE),
+				
+				entry("mugiezinaX", LOCKED_POSITION_X),
+				entry("mugiezinaY", LOCKED_POSITION_Y),
+				entry("mugiezinaZ", LOCKED_POSITION_Z),
+				entry("biraezina", LOCKED_ROTATION),
+				
+				
+				entry("malla", Symbol.MESH),
+				entry("materiala", Symbol.MATERIAL),
+				
+				entry("zenbakia", NUMBER_LABEL),
+				
+				entry("gertu", NEAR),
+				entry("urruti", FAR),
+				entry("ikusmenAngelua", FOV),
+				entry("perspektiba", PERSPECTIVE),
+				entry("atzealdea", BACKGROUND),
+				entry("zerua", SKYBOX),
+				entry("viewport", VIEWPORT),
+				entry("renderizazioEhundura", RENDER_TEXTURE),
+				
+				entry("emisioa", EMISSION),
+				entry("fokoAngelua", SPOT_ANGLE),
+				entry("irismena", RANGE),
+				entry("intentsitatea", INTENSITY),
+				
+				
+				entry("audioKlipa", Symbol.AUDIOCLIP),
+				entry("bolumena", VOLUME),
+				entry("tonua", PITCH),
+				entry("errepikapena", LOOP)),
+			Map.ofEntries(
+				entry("abs", ABS),
+				entry("sign", SIGN),
+				entry("ceil", CEIL),
+				entry("floor", FLOOR),
+				entry("round", ROUND),
+				entry("clamp", CLAMP),
+				entry("integerPart", INTEGERPART),
+				entry("fractionalPart", FRACTIONALPART),
+				entry("inverse", INVERSE),
+				entry("reciprocal", RECIPROCAL),
+				
+				entry("lerp", LERP),
+				entry("unlerp", UNLERP),
+				entry("proportional", PROPORTIONAL),
+				
+				entry("cross", CROSS),
+				entry("dot", DOT),
+				entry("norm", NORM),
+				entry("normalize", NORMALIZE),
+				entry("distance", DISTANCE),
+				entry("reflect", REFLECT),
+				entry("refract", REFRACT),
+				
+				entry("||", OR),
+				entry("&&", AND),
+				entry("!", NOT),
+				
+				entry("+", ADDITION),
+				entry("-", SUBTRACTION),
+				entry("*", MULTIPLICATION),
+				entry("/", DIVISION),
+				
+				entry("==", EQUAL),
+				entry("!=", INEQUAL),
+				
+				entry("<", LOWER),
+				entry("<=", LOWEROREQUAL),
+				entry(">=", GREATEROREQUAL),
+				entry(">", GREATER),
+				
+				entry("#", SIZE),
+				entry("barne", IN),
+				entry("xyz", XYZ),
+				
+				entry("sin", SIN),
+				entry("cos", COS),
+				entry("tan", TAN),
+				entry("asin", ASIN),
+				entry("acos", ACOS),
+				entry("atan", ATAN),
+				entry("exp", EXP),
+				entry("log", LOG),
+				entry("exp10", EXP10),
+				entry("log10", LOG10),
+				entry("pow", POW),
+				entry("sqrt", SQRT),
+				entry("ausazko", RANDOM),
+				
+				entry("sortu", CREATE),
+				entry("desegin", DESTROY),
+				entry("gehitu", ADD),
+				entry("kendu", REMOVE),
+				entry("badu", HAS),
+				
+				entry("idatzi", WRITE),
+				entry("idatziAkatsa", WRITEERROR),
+				entry("gelditu", HALT),
+				
+				
+				entry("ezarriZenbakia", SET_NUMBER),
+				entry("ezarriKolorea", SET_COLOR),
+				entry("ezarriKatea", SET_STRING),
+				
+				entry("ezarriKakoa", SET_TRIGGER),
+				entry("egoeraIzena", STATE_NAME),
+				
+				entry("irakurriKakoa", READ_TRIGGERED),
+				entry("irakurriZenbakia", READ_NUMBER),
+				
+				entry("=", ASSIGNMENT)),
+			Map.ofEntries(
+				entry("hartu", QUERY),
+				entry("baldin", SELECTION),
+				entry("bitartean", ITERATION)
+			), Map.ofEntries(
+					entry(STRING, "katea"),
+					entry(PROPOSITION, "proposizioa"),
+					entry(NUMBER, "zenbakia"),
+					entry(NUMBER2, "zenbakia2"),
+					entry(NUMBER3, "zenbakia3"),
+					entry(UNIT, "hutsa"),
+					
+					entry(COMPONENT, "komponentea"),
+					
+					entry(COLOR, "kolorea"),
+					entry(NUMERIC, "zenbagarria"),
+					
+					entry(INPUT, "inputa"),
+					entry(AtomicType.MESH, "malla"),
+					entry(AtomicType.MATERIAL, "materiala"),
+					entry(FONT, "letraEstiloa"),
+					entry(TEXT, "testua"),
+					entry(IMAGE, "irudia"),
+					entry(AtomicType.AUDIOCLIP, "audioKlipa"),
+					entry(ANIMATOR, "animatzailea"),
+					
+					entry(ENTITY, "entitatea"),
+					entry(ENTITY_LIST, "entitateLista")
+			), Map.of(
+				REDEFINED, "Simbolo hau dagoeneko definitua dago",
+				UNDEFINED, "Simbolo honek ez du definiziorik"
+			),
+			Map.of(
+				INCOMPATIBLE, "Izaera bateraezinak",
+				INDETERMINATE, "Izaera indeterminatua"
+			))
 	;
 
 	public Map<String, Symbol> variables;
@@ -217,7 +432,7 @@ public enum Library {
 		this.bindingProblem = bindingProblem;
 		this.typingProblem = typingProblem;
 	}
-	
+
 	public String message(Problem problem)
 	{
 		if (problem instanceof BindingProblem)
