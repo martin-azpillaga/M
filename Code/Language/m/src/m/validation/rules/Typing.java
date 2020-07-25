@@ -6,25 +6,30 @@ import m.library.types.*;
 public class Typing
 {
 	Type type;
+	TypingReason reason;
 	Symbol symbol;
-	int parameter;
 	
-	public Typing(Type type, Symbol symbol, int parameter) {
+	public Typing(Type type, TypingReason reason, Symbol symbol) {
 		this.type = type;
 		this.symbol = symbol;
-		this.parameter = parameter;
+		this.reason = reason;
 	}
 	
 	public Symbol getSymbol() {
 		return symbol;
 	}
 	
-	public int getParameter() {
-		return parameter;
+	public TypingReason getReason() {
+		return reason;
 	}
 	
 	public Type getType()
 	{
 		return type;
+	}
+	
+	public enum TypingReason
+	{
+		LIBRARY_VARIABLE, LIBRARY_COMPONENT, LIBRARY_FUNCTION, LIBRARY_BLOCK
 	}
 }

@@ -3,17 +3,21 @@ package m.library;
 import static java.util.Map.entry;
 import static m.library.Symbol.*;
 import static m.library.types.AtomicType.*;
-import static m.validation.rules.Problem.ProblemKind.*;
+import static m.validation.problems.BindingProblem.BindingProblemKind.*;
+import static m.validation.problems.TypingProblem.TypingProblemKind.*;
+
 import java.util.ArrayList;
 import java.util.Map;
 
-import m.validation.rules.Problem;
-import m.validation.rules.Problem.ProblemKind;
 import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.library.types.TypeVariable;
-import m.validation.rules.Typing;
+import m.validation.problems.BindingProblem;
+import m.validation.problems.Problem;
+import m.validation.problems.TypingProblem;
+import m.validation.problems.BindingProblem.BindingProblemKind;
+import m.validation.problems.TypingProblem.TypingProblemKind;
 
 public enum Library {
 	
@@ -45,9 +49,11 @@ public enum Library {
 		NUMBER, "number",
 		NUMBER3, "number3"
 	), Map.of(
-		INCOMPATIBLE, "Incompatible types",
-		UNDEFINED, "Undefined symbol",
 		REDEFINED, "Redefined symbol",
+		UNDEFINED, "Undefined symbol"
+	),
+	Map.of(
+		INCOMPATIBLE, "Incompatible types",
 		INDETERMINATE, "Indeterminate type"
 	))
 	;
@@ -58,29 +64,42 @@ public enum Library {
 	public Map<String, Symbol> blocks;
 	
 	Map<Type, String> atomicTypes;
-	Map<ProblemKind, String> problemKind;
+	Map<BindingProblemKind, String> bindingProblem;
+	Map<TypingProblemKind, String> typingProblem;
 	
-	Library(Map<String, Symbol> variables, Map<String, Symbol> components, Map<String, Symbol> functions, Map<String, Symbol> blocks, Map<Type, String> atomicTypes, Map<ProblemKind, String> problemKind)
+	Library(Map<String, Symbol> variables, Map<String, Symbol> components, Map<String, Symbol> functions, Map<String, Symbol> blocks, Map<Type, String> atomicTypes, Map<BindingProblemKind, String> bindingProblem, Map<TypingProblemKind, String> typingProblem)
 	{
 		this.variables = variables;
 		this.components = components;
 		this.functions = functions;
 		this.blocks = blocks;
 		this.atomicTypes = atomicTypes;
-		this.problemKind = problemKind;
-	}
-	
-	public String message(ProblemKind kind)
-	{
-		return problemKind.get(kind);
+		this.bindingProblem = bindingProblem;
+		this.typingProblem = typingProblem;
 	}
 	
 	public String message(Problem problem)
 	{
-		return "this is a problem";
+		if (problem instanceof BindingProblem)
+		{
+			return bindingProblem.get(((BindingProblem) problem).getKind());
+		}
+		else if (problem instanceof TypingProblem)
+		{
+			var base = typingProblem.get(((TypingProblem) problem).getKind());
+			var node = ((TypingProblem) problem).getNode();
+			var root = node;
+			while (root.binding != null)
+			{
+				root = root.binding.node;
+			}
+			base += "\n" + name(node.typing.getType()) + " - " + name(root.typing.getType());
+			return base;
+		}
+		return "error";
 	}
 	
-	public String name(Type type)
+	private String name(Type type)
 	{
 		if (type instanceof AtomicType)
 		{

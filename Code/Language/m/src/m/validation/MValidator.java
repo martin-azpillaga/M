@@ -1,10 +1,7 @@
 package m.validation;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.validation.Check;
@@ -12,9 +9,12 @@ import org.eclipse.xtext.validation.Check;
 import m.generator.Game;
 import m.library.Library;
 import m.m.*;
-import m.validation.rules.Problem;
+import m.validation.problems.BindingProblem;
+import m.validation.problems.Problem;
+import m.validation.problems.TypingProblem;
 
 import static m.m.MPackage.Literals.*;
+
 
 public class MValidator extends AbstractMValidator
 {
@@ -33,8 +33,8 @@ public class MValidator extends AbstractMValidator
 	{
 		if (!file.eResource().getErrors().isEmpty()) return;
 		
-		map = new HashMap<>();
-		contexts = new HashMap<>();
+		map = new EnumMap<>(Library.class);
+		contexts = new EnumMap<>(Library.class);
 		
 		for (var library : Library.values())
 		{
@@ -97,7 +97,7 @@ public class MValidator extends AbstractMValidator
 			var name = block.getName();
 			var expression = block.getExpression();
 			
-			context.checkBlock(name, expression, block, BLOCK__NAME);
+			context.accessBlock(name, expression, block, BLOCK__NAME);
 			validate(expression);
 			context.push();
 			for (var s : block.getStatements())
@@ -114,7 +114,7 @@ public class MValidator extends AbstractMValidator
 			
 			context.push();
 			context.declareVariable(value);
-			context.checkBlock(name, value, block, BLOCK__NAME);
+			context.accessBlock(name, value, block, BLOCK__NAME);
 			for (var s : block.getStatements())
 			{
 				validate(s);
@@ -134,7 +134,7 @@ public class MValidator extends AbstractMValidator
 			var atom = assignment.getAtom();
 			var expression = assignment.getExpression();
 			
-			context.checkFunction("=", new Expression[] {atom, expression}, null, null);
+			context.accessFunction("=", new Expression[] {atom, expression}, null, null);
 			validate(expression);
 			
 			if (atom instanceof Value)
@@ -153,15 +153,15 @@ public class MValidator extends AbstractMValidator
 		{
 			var value = (Value) expression;
 			
-			context.checkVariable(value);
+			context.accessVariable(value);
 		}
 		else if (expression instanceof Cell)
 		{
 			var cell = (Cell) expression;
 			var entity = cell.getEntity();
 			
-			context.checkVariable(entity);
-			context.checkComponent(cell);
+			context.accessVariable(entity);
+			context.accessComponent(cell);
 		}
 		else if (expression instanceof Binary)
 		{
@@ -170,7 +170,7 @@ public class MValidator extends AbstractMValidator
 			var right = binary.getRight();
 			var operator = binary.getOperator();
 			
-			context.checkFunction(operator, new Expression[] {left, right}, binary, BINARY__OPERATOR);
+			context.accessFunction(operator, new Expression[] {left, right}, binary, BINARY__OPERATOR);
 			validate(left);
 			validate(right);
 		}
@@ -180,7 +180,7 @@ public class MValidator extends AbstractMValidator
 			var e =  unary.getExpression();
 			var operator = unary.getOperator();
 			
-			context.checkFunction(operator, new Expression[] {e}, unary, UNARY__OPERATOR);
+			context.accessFunction(operator, new Expression[] {e}, unary, UNARY__OPERATOR);
 			validate(e);
 		}
 		else if (expression instanceof Application)
@@ -189,7 +189,7 @@ public class MValidator extends AbstractMValidator
 			var name = application.getName();
 			var arguments = application.getArguments().toArray(new Expression[0]);
 			
-			context.checkFunction(name, arguments, application, APPLICATION__NAME);
+			context.accessFunction(name, arguments, application, APPLICATION__NAME);
 
 			for (var argument : application.getArguments())
 			{
@@ -202,24 +202,26 @@ public class MValidator extends AbstractMValidator
 	{
 		for (var problem : problems)
 		{
-			switch (problem.kind)
+			var message = library.message(problem);
+			
+			if (problem instanceof BindingProblem)
 			{
-			case UNDEFINED:
-			{
-				var message = library.message(problem.kind);
-				error(message, problem.node.expression, null);
+				var bindingProblem = (BindingProblem) problem;
+				var source = bindingProblem.getSource();
+				var feature = bindingProblem.getFeature();
+				
+				error(message, source, feature);
 			}
-			case REDEFINED:
-			case INDETERMINATE:
-				var message = library.message(problem);
-				var node = problem.node;
+			else if (problem instanceof TypingProblem)
+			{
+				var typingProblem = (TypingProblem) problem;
+				var node = typingProblem.getNode();
 				error(message, node.expression, null);
 				while (node.binding != null)
 				{
 					node = node.binding.node;
 					error(message, node.expression, null);
 				}
-			case INCOMPATIBLE:
 			}
 		}
 	}
