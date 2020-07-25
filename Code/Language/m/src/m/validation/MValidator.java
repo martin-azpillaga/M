@@ -33,8 +33,8 @@ public class MValidator extends AbstractMValidator
 	{
 		if (!file.eResource().getErrors().isEmpty()) return;
 		
-		map = new EnumMap<>(Library.class);
-		contexts = new EnumMap<>(Library.class);
+		map = new HashMap<>();
+		contexts = new HashMap<>();
 		
 		for (var library : Library.values())
 		{
@@ -114,7 +114,7 @@ public class MValidator extends AbstractMValidator
 			
 			context.push();
 			context.declareVariable(value);
-			context.accessBlock(name, value, block, BLOCK__NAME);
+			context.accessBlock(name, value, block, BINDING_BLOCK__NAME);
 			for (var s : block.getStatements())
 			{
 				validate(s);

@@ -8,7 +8,6 @@ public enum AtomicType implements Type
 	NUMBER2,
 	NUMBER3,
 	UNIT,
-	ANY,
 	
 	COMPONENT,
 	
@@ -25,7 +24,6 @@ public enum AtomicType implements Type
 	AUDIOCLIP,
 	ANIMATOR,
 	
-	DECLARATION,
 	ENTITY,
 	ENTITY_LIST;
 }
