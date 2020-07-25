@@ -83,7 +83,7 @@ public class Context {
 		{
 			problems.add(new BindingProblem(cell, CELL__COMPONENT, REDEFINED));
 		}
-		else if (!userComponents.containsKey(name))
+		else if (!userComponents.containsKey(name) && !library.components.containsKey(name))
 		{
 			userComponents.put(name, cell);
 		}
@@ -121,6 +121,10 @@ public class Context {
 		else if (userVariables.containsKey(name) && userVariables.get(name) != value)
 		{
 			inference.bind(value, userVariables.get(name), SAME_VARIABLE);
+		}
+		else if (userComponents.containsKey(name))
+		{
+			
 		}
 		else
 		{

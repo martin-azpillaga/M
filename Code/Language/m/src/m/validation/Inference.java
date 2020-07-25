@@ -31,7 +31,6 @@ public class Inference {
 	Set<ExpressionNode> criticalNodes;
 	public Map<Expression, ExpressionNode> nodeOfExpression;
 	Map<String, ExpressionNode> nodeOfComponent;
-	public Map<EObject, ExpressionNode> nodeOf;
 	List<Problem> problems;
 	
 	public Inference (List<Problem> problems)
@@ -56,7 +55,7 @@ public class Inference {
 			// IF the node already has a type and the given is different, throw incompatible types error
 			if (node.typing != null && node.typing.getType() != typing.getType())
 			{
-				problems.add(new TypingProblem(nodeOf.get(expression), INCOMPATIBLE));
+				problems.add(new TypingProblem(node, INCOMPATIBLE));
 				// error
 			}
 			reroot(node, true); // remove redundant critical nodes
@@ -131,7 +130,7 @@ public class Inference {
 				}
 				if (!found)
 				{
-					nodeA.binding = new Binding(nodeA, reason);
+					nodeB.binding = new Binding(nodeA, reason);
 				}
 			}
 		}
@@ -195,7 +194,7 @@ public class Inference {
 			}
 			else if (originalType != null && originalType.getType() != rootType.getType())
 			{
-				problems.add(new TypingProblem(nodeOf.get(criticalNode.expression), INDETERMINATE));
+				problems.add(new TypingProblem(criticalNode, INCOMPATIBLE));
 			}
 		}
 	}
