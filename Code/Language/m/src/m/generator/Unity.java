@@ -29,6 +29,8 @@ public class Unity
 	Set<String> namespaces = new HashSet<>();
 	Function currentFunction;
 	
+	String[] csharpReserved = new String[] {"base", "class", "struct", "if", "else", "for", "while", "foreach"};
+	
 	public void generate(Game game, HashMap<Function, HashMap<String, HashMap<String, AccessKind>>> queries, IFileSystemAccess2 fileSystem)
 	{
 		this.game = game;
@@ -64,6 +66,9 @@ public class Unity
 		
 		if (type == ENTITY_LIST)
 		{
+			namespaces.add("UnityEngine");
+			namespaces.add("System.Collections.Generic");
+			
 			generate("Unity/Assets/Code/Components/"+name+"Authoring.cs",
 			all(namespaces,x->"using "+x+";", "\n"),
 			"",
@@ -97,14 +102,14 @@ public class Unity
 		}
 		else
 		{
-			generate("Unity/Assets/Code/Components/"+name+".cs",
+			generate("Unity/Assets/Code/Components/"+component(name)+".cs",
 			
-			"using Unity.Entities;",
+			all(namespaces,x->"using "+x+";", "\n"),
 			"",
 			"namespace M",
 			"{",
 			"    [GenerateAuthoringComponent]",
-			"    public "+classifier+" "+name+" : "+superInterface,
+			"    public "+classifier+" "+component(name)+" : "+superInterface,
 			"    {",
 			"        "+field,
 			"    }",
@@ -120,7 +125,7 @@ public class Unity
 	
 	private String getComponents(Map<String,AccessKind> components)
 	{
-		return all(components.entrySet(),x -> "Read"+(x.getValue()==AccessKind.WRITE?"Write":"Only")+"<"+x.getKey()+">", ",");
+		return all(components.entrySet(),x -> "Read"+(x.getValue()==AccessKind.WRITE?"Write":"Only")+"<"+component(x.getKey())+">()", ",");
 	}
 	
 	private void generate(Function function)
@@ -168,6 +173,15 @@ public class Unity
 	private String toArray(Entry<String,AccessKind> entry, String entity)
 	{
 		var component = entry.getKey();
+		Type type;
+		if (library.components.containsKey(component))
+		{
+			type = library.components.get(component).getType();
+		}
+		else
+		{
+			type = game.components.get(component);
+		}
 		if (entry.getValue() == TAG)
 		{
 			return "";
@@ -175,6 +189,10 @@ public class Unity
 		if (isBuffer(component))
 		{
 			return "";
+		}
+		else if (!valueType(type))
+		{
+			return "var "+component+"s_"+entity+" = "+entity+".ToComponentDataArray<"+component(component)+">();";
 		}
 		else
 		{
@@ -186,7 +204,20 @@ public class Unity
 	private String dispose(Entry<String,AccessKind> entry, String entity)
 	{
 		var component = entry.getKey();
+		Type type;
+		if (library.components.containsKey(component))
+		{
+			type = library.components.get(component).getType();
+		}
+		else
+		{
+			type = game.components.get(component);
+		}
 		if (entry.getValue() == TAG || isBuffer(component))
+		{
+			return "";
+		}
+		else if (!valueType(type))
 		{
 			return "";
 		}
@@ -360,6 +391,13 @@ public class Unity
 		var found = library.components.get(name);
 		if (found == null)
 		{
+			for (var i = 0; i < csharpReserved.length; i++)
+			{
+				if (csharpReserved[i].equals(name))
+				{
+					return "_"+name;
+				}
+			}
 			return name;
 		}
 		else
@@ -411,6 +449,7 @@ public class Unity
 				case RANDOM: { namespaces.add("static M.Library"); return "random";}
 				case XYZ: { namespaces.add("static M.Library"); return "xyz";}
 				case IN: { namespaces.add("static M.Library"); return "contains";}
+				case READ_NUMBER: {namespaces.add("static M.Library"); return "readNumber";}
 			}
 		}
 		return "undefined";
@@ -448,6 +487,25 @@ public class Unity
 					return "bool";
 				case ENTITY_LIST:
 					return "Entity";
+				case INPUT:
+					namespaces.add("UnityEngine.InputSystem");
+					return "InputAction";
+				case STRING:
+					return "string";
+				case UNIT:
+					return "void";
+				case COLOR:
+					namespaces.add("UnityEngine");
+					return "Color";
+				case MESH:
+					namespaces.add("UnityEngine");
+					return "Mesh";
+				case MATERIAL:
+					namespaces.add("UnityEngine");
+					return "Material";
+				case ANIMATOR:
+					namespaces.add("UnityEngine");
+					return "Animator";
 			}
 		}
 		return "Undefined";
