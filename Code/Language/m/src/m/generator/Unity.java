@@ -102,14 +102,14 @@ public class Unity
 		}
 		else
 		{
-			generate("Unity/Assets/Code/Components/"+component(name)+".cs",
+			generate("Unity/Assets/Code/Components/"+simpleComponent(name)+".cs",
 			
 			all(namespaces,x->"using "+x+";", "\n"),
 			"",
 			"namespace M",
 			"{",
 			"    [GenerateAuthoringComponent]",
-			"    public "+classifier+" "+component(name)+" : "+superInterface,
+			"    public "+classifier+" "+simpleComponent(name)+" : "+superInterface,
 			"    {",
 			"        "+field,
 			"    }",
@@ -431,6 +431,18 @@ public class Unity
 		}
 	}
 	
+	private String simpleComponent(String name)
+	{
+		for (var i = 0; i < csharpReserved.length; i++)
+		{
+			if (csharpReserved[i].equals(name))
+			{
+				return "@"+name;
+			}
+		}
+		return name;
+	}
+	
 	private String component(String name)
 	{
 		var found = library.components.get(name);
@@ -440,10 +452,10 @@ public class Unity
 			{
 				if (csharpReserved[i].equals(name))
 				{
-					return "_"+name;
+					return "@"+name;
 				}
 			}
-			return name;
+			return "M."+name;
 		}
 		else
 		{
@@ -493,10 +505,10 @@ public class Unity
 			{
 				case COS: { namespaces.add("static Unity.Mathematics.math"); return "cos"; }
 				case SIN: { namespaces.add("static Unity.Mathematics.math"); return "sin"; }
-				case RANDOM: { namespaces.add("static M.Library"); return "random";}
-				case XYZ: { namespaces.add("static M.Library"); return "xyz";}
-				case IN: { namespaces.add("static M.Library"); return "contains";}
-				case READ_NUMBER: {namespaces.add("static M.Library"); return "readNumber";}
+				case RANDOM: { return "M.Library.random";}
+				case XYZ: { return "M.Library.xyz";}
+				case IN: { return "M.Library.contains";}
+				case READ_NUMBER: { return "M.Library.readNumber";}
 			}
 		}
 		return "undefined";
