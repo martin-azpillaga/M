@@ -1,6 +1,6 @@
 package m.validation;
 
-import static m.validation.rules.Problem.ProblemKind.*;
+import static m.validation.problems.TypingProblem.TypingProblemKind.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,10 +18,11 @@ import m.library.types.Type;
 import m.m.Cell;
 import m.m.Expression;
 import m.m.Function;
+import m.validation.problems.Problem;
+import m.validation.problems.TypingProblem;
 import m.validation.rules.Binding;
 import m.validation.rules.ExpressionNode;
 import m.validation.rules.Binding.BindingReason;
-import m.validation.rules.Problem;
 import m.validation.rules.Typing;
 
 
@@ -55,12 +56,11 @@ public class Inference {
 			// IF the node already has a type and the given is different, throw incompatible types error
 			if (node.typing != null && node.typing.getType() != typing.getType())
 			{
-				problems.add(new Problem(nodeOf.get(expression), INCOMPATIBLE));
+				problems.add(new TypingProblem(nodeOf.get(expression), INCOMPATIBLE));
 				// error
 			}
 			reroot(node, true); // remove redundant critical nodes
 			
-			node.binding = null;
 		}
 		node.typing = typing;
 		criticalNodes.add(node);
@@ -96,19 +96,43 @@ public class Inference {
 		}
 		else
 		{
-			reroot(nodeA, false);
-			
-			// if nodeB is already linked with nodeA do nothing (otherwise there is a cycle)
-			var parent = nodeB.binding;
-			var found = false;
-			while (parent != null && !found)
+			var rootA = nodeA;
+			while (rootA.binding != null)
 			{
-				found = parent.node == nodeA;
-				parent = parent.node.binding;
+				rootA = rootA.binding.node;
 			}
-			if (!found)
+			
+			if (rootA.typing == null)
 			{
-				nodeA.binding = new Binding(nodeB, reason);
+				reroot(nodeA, false);
+				
+				// if nodeB is already linked with nodeA do nothing (otherwise there is a cycle)
+				var parent = nodeB.binding;
+				var found = false;
+				while (parent != null && !found)
+				{
+					found = parent.node == nodeA;
+					parent = parent.node.binding;
+				}
+				if (!found)
+				{
+					nodeA.binding = new Binding(nodeB, reason);
+				}
+			}
+			else
+			{
+				reroot(nodeB, false);
+				var parent = nodeA.binding;
+				var found = false;
+				while (parent != null && !found)
+				{
+					found = parent.node == nodeB;
+					parent = parent.node.binding;
+				}
+				if (!found)
+				{
+					nodeA.binding = new Binding(nodeA, reason);
+				}
 			}
 		}
 	}
@@ -138,21 +162,18 @@ public class Inference {
 	
 	private void reroot(ExpressionNode node, boolean removeRedundant)
 	{
-		var parent = node.binding;
-		
-		var nextParent = node.binding;
-		
-		while (parent != null) {
-			// Possibly slower because of contains search but worth benchmarking
-			if (removeRedundant && parent.node.typing == null && criticalNodes.contains(parent))
-			{
-				criticalNodes.remove(parent.node);
-			}
-			var parentParent = parent.node.binding;
-			parent.node.binding = nextParent;
-			nextParent = parent;
-			parent = parentParent;
+		var current = node;
+		var currentBinding = node.binding;
+
+		while (currentBinding != null)
+		{
+			var tmp = currentBinding.node.binding;
+			var tmpNode = currentBinding.node;
+			currentBinding.node.binding = new Binding(current, current.binding.reason);
+			current = tmpNode;
+			currentBinding = tmp;
 		}
+		node.binding = null;
 	}
 	
 	public void check()
@@ -170,11 +191,11 @@ public class Inference {
 			
 			if (originalType == null && rootType == null)
 			{
-				problems.add(new Problem(criticalNode, INDETERMINATE));
+				problems.add(new TypingProblem(criticalNode, INDETERMINATE));
 			}
 			else if (originalType != null && originalType.getType() != rootType.getType())
 			{
-				problems.add(new Problem(nodeOf.get(criticalNode.expression), INDETERMINATE));
+				problems.add(new TypingProblem(nodeOf.get(criticalNode.expression), INDETERMINATE));
 			}
 		}
 	}

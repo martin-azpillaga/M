@@ -1,7 +1,8 @@
 package m.validation;
 
+import static m.validation.problems.BindingProblem.BindingProblemKind.*;
+import static m.validation.problems.TypingProblem.TypingProblemKind.*;
 import static m.validation.rules.Binding.BindingReason.*;
-import static m.validation.rules.Problem.ProblemKind.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,8 +17,11 @@ import m.generator.Game;
 import m.library.Library;
 import m.library.types.*;
 import m.m.*;
-import m.validation.rules.Problem;
+import m.validation.problems.BindingProblem;
+import m.validation.problems.Problem;
 import m.validation.rules.Typing;
+import static m.validation.rules.Typing.TypingReason.*;
+import static m.m.MPackage.Literals.*;
 
 public class Context {
 
@@ -47,11 +51,11 @@ public class Context {
 		var name = value.getName();
 		if (library.variables.containsKey(name) || library.components.containsKey(name) || library.functions.containsKey(name))
 		{
-			problems.add(new Problem(inference.nodeOf.get(value), REDEFINED));
+			problems.add(new BindingProblem(value, VALUE__NAME, REDEFINED));
 		}
 		else if (userComponents.containsKey(name) || userFunctions.containsKey(name))
 		{
-			problems.add(new Problem(inference.nodeOf.get(value), REDEFINED));			
+			problems.add(new BindingProblem(value, VALUE__NAME, REDEFINED));			
 		}
 		else
 		{
@@ -73,11 +77,11 @@ public class Context {
 
 		if (library.variables.containsKey(name) || library.functions.containsKey(name))
 		{
-			problems.add(new Problem(inference.nodeOf.get(cell), REDEFINED));
+			problems.add(new BindingProblem(cell, CELL__COMPONENT, REDEFINED));
 		}
 		else if (userFunctions.containsKey(name))
 		{
-			problems.add(new Problem(inference.nodeOf.get(cell), REDEFINED));
+			problems.add(new BindingProblem(cell, CELL__COMPONENT, REDEFINED));
 		}
 		else if (!userComponents.containsKey(name))
 		{
@@ -91,11 +95,11 @@ public class Context {
 		
 		if (library.components.containsKey(name) || library.components.containsKey(name) || library.functions.containsKey(name))
 		{
-			problems.add(new Problem(inference.nodeOf.get(function), REDEFINED));
+			problems.add(new BindingProblem(function, FUNCTION__NAME, REDEFINED));
 		}
 		else if (userComponents.containsKey(name) || userFunctions.containsKey(name))
 		{
-			problems.add(new Problem(inference.nodeOf.get(function), REDEFINED));
+			problems.add(new BindingProblem(function, FUNCTION__NAME, REDEFINED));
 		}
 		else
 		{
@@ -105,24 +109,34 @@ public class Context {
 	
 	
 	
-	public void checkVariable(Value value)
+	public void accessVariable(Value value)
 	{
 		var name = value.getName();
-		if (!userVariables.containsKey(name))
+		
+		var standard = library.variables.get(name);
+		if (standard != null)
 		{
-			problems.add(new Problem(inference.nodeOf.get(value), UNDEFINED));
+			inference.type(value, new Typing(standard.getType(), LIBRARY_VARIABLE, standard));
 		}
-		else
+		else if (userVariables.containsKey(name) && userVariables.get(name) != value)
 		{
 			inference.bind(value, userVariables.get(name), SAME_VARIABLE);
 		}
+		else
+		{
+			problems.add(new BindingProblem(value, VALUE__NAME, UNDEFINED));
+		}
 	}
 	
-	public void checkComponent(Cell cell)
+	public void accessComponent(Cell cell)
 	{
 		var name = cell.getComponent().getName();
-		var component = library.components.get(name);
-		if (component == null)
+		var standard = library.components.get(name);
+		if (standard != null)
+		{
+			inference.type(cell, new Typing(standard.getType(), LIBRARY_COMPONENT, standard));
+		}
+		else
 		{
 			var userComponent = userComponents.get(name);
 			
@@ -131,26 +145,22 @@ public class Context {
 				inference.bind(cell, userComponent, SAME_COMPONENT);
 			}
 		}
-		else
-		{
-			inference.type(cell, new Typing(component.getType(), component, 1));
-		}
 	}
 	
-	public void checkBlock(String name, Expression expression, EObject source, EStructuralFeature feature)
+	public void accessBlock(String name, Expression expression, EObject source, EStructuralFeature feature)
 	{
 		var block = library.blocks.get(name);
 		if (block != null)
 		{
-			inference.type(expression, new Typing(block.getType(), block, 1));
+			inference.type(expression, new Typing(block.getType(), LIBRARY_BLOCK, block));
 		}
 		else
 		{
-			problems.add(new Problem(inference.nodeOf.get(expression), UNDEFINED));
+			problems.add(new BindingProblem(source, feature, UNDEFINED));
 		}
 	}
 	
-	public void checkFunction(String name, Expression[] arguments, Expression source, EStructuralFeature feature)
+	public void accessFunction(String name, Expression[] arguments, Expression source, EStructuralFeature feature)
 	{
 		var function = library.functions.get(name);
 		if (function == null)
@@ -170,12 +180,12 @@ public class Context {
 				}
 				else
 				{
-					problems.add(new Problem(inference.nodeOf.get(source), UNDEFINED));
+					problems.add(new BindingProblem(source, feature, UNDEFINED));
 				}
 			}
 			else
 			{
-				problems.add(new Problem(inference.nodeOf.get(source), UNDEFINED));
+				problems.add(new BindingProblem(source, feature, UNDEFINED));
 			}
 		}
 		else
@@ -204,7 +214,7 @@ public class Context {
 					}
 					else
 					{
-						inference.type(arguments[i], new Typing(parameters[i], function, i+1));
+						inference.type(arguments[i], new Typing(parameters[i], LIBRARY_FUNCTION, function));
 					}
 				}
 				if (source instanceof Expression)
@@ -217,11 +227,11 @@ public class Context {
 						{
 							variables.put(typeName, new ArrayList<>());
 						}
-						variables.get(typeName).add((Expression)source);
+						variables.get(typeName).add(source);
 					}
 					else
 					{
-						inference.type ((Expression)source, new Typing(result, function, -1));
+						inference.type (source, new Typing(result, LIBRARY_FUNCTION, function));
 					}
 				}
 				// Check for type variables
@@ -236,7 +246,7 @@ public class Context {
 			}
 			else
 			{
-				problems.add(new Problem(inference.nodeOf.get(source), UNDEFINED));
+				problems.add(new BindingProblem(source, feature, UNDEFINED));
 			}
 		}
 	}
