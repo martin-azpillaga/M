@@ -107,7 +107,7 @@ public class ClassicUnity
 		"{",
 		"	public class "+name+" : MonoBehaviour",
 		"	{",
-		"		void Update()",
+		"		void FixedUpdate()",
 		"		{",
 		"			"+statements,
 		"		}",
@@ -425,8 +425,8 @@ public class ClassicUnity
 		{
 			switch (found)
 			{
-				case COS: { namespaces.add("static Unity.Mathematics.math"); return "cos"; }
-				case SIN: { namespaces.add("static Unity.Mathematics.math"); return "sin"; }
+				case COS: { return "Mathf.Cos"; }
+				case SIN: { return "Mathf.Sin"; }
 				case RANDOM: { return "M.Library.random";}
 				case XYZ: { return "M.Library.xyz";}
 				case IN: { return "M.Library.contains";}
