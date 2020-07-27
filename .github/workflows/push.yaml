@@ -6,7 +6,21 @@ jobs:
     steps:
       - name: Download repository
         uses: actions/checkout@v2
-      - name: Accepted formats
+      - name: Check other files
+        run: |
+          find . -type f \
+          -not -wholename "*.git*" -and \
+          -not -name "*.md" -and \
+          -not -name "*.yaml" -and \
+          -not -name "*.gradle" -and \
+          -not -name "*.java" -and \
+          -not -name "*.json" -and \
+          -not -name "*.js" -and \
+          -not -name "*.xtext" -and \
+          -not -name "*.mwe2"
+      - name: Lint Markdown
+        run: npx markdownlint-cli -i LICENSE.md "**/*.md"
+      - name: Lint Yaml
         run: |
           find . -type f \
           -not -wholename "*.git*" \
@@ -97,13 +111,8 @@ jobs:
           -Dsonar.sources=Code/Editor,Code/Language/m/src \
           -Dsonar.java.binaries=Code/Language/build/classes \
           -Dsonar.host.url=https://sonarcloud.io \
-          -Dsonar.login=c1285d7b6c459b50e7eee08102a94f4b68bd70f9 \
-          -Dsonar.branch.name=feature
-      - name: Lint Javascript
-        run: |
-          npx eslint --init
-          find . -not -wholename "*node_modules*" -name "*.js" -exec sh -c 'npx eslint {}' \;
-  functionality:
+          -Dsonar.login=c1285d7b6c459b50e7eee08102a94f4b68bd70f9
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -146,28 +155,46 @@ jobs:
       - name: Build documentation
         run: |
           find . -name "*.md" | sort | xargs -d "\n" pandoc > Code/Editor/Documentation.html
-      - name: Build editor in browser mode
-        working-directory: Code/Editor
-        run: |
-          yarn buildBrowser
       - name: Build tests
         run: |
           pandoc README.md -t json | node Quality/reader.js > Code/Editor/test.js
-      - name: Run tests
-        working-directory: Code/Editor
-        run: |
-          cp ../../Quality/mobot.js mobot.js
-          mkdir workspace
-          yarn startBrowser workspace &> serverLog &
-          Xvfb :3 &
-          sleep 5 && xvfb-run yarn test
+          cp Quality/mobot.js Code/Editor/mobot.js
       - name: Upload Code/Editor folder to github artifacts
         uses: actions/upload-artifact@v2
         with:
           name: editor
           path: Code/Editor
-  packagingWindows:
-    needs: functionality
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v2
+      - name: Download IDE folder
+        uses: actions/download-artifact@v2
+        with:
+          name: editor
+      - name: Install node 10
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - name: Install yarn and libx11
+        run: |
+          npm install -g yarn
+          sudo apt install libx11-dev libxkbfile-dev
+      - name: Build ide for browser
+        run: |
+          yarn
+          yarn theia build
+      - name: Run tests
+        run: |
+          mkdir workspace
+          yarn theia start --app-target browser workspace &
+          Xvfb :3 &
+          sleep 5 && xvfb-run yarn mocha test.js
+  packageWindows:
+    needs: test
     runs-on: windows-latest
     timeout-minutes: 100
     steps:
@@ -194,19 +221,20 @@ jobs:
         run: |
           npm config set python python2.7
           npm install -g yarn
-          yarn buildElectron
+          yarn
+          yarn theia rebuild:electron
+          yarn theia build --app-target electron
       - name: Package application
         run: |
-          npm install -g electron-builder
-          electron-builder .
+          yarn electron-builder
       - name: Upload Exe
         if: ${{ matrix.os }} == 'windows-latest'
         uses: actions/upload-artifact@v2
         with:
           name: windows
-          path: "dist/m 0.0.0.exe"
-  packagingUbuntu:
-    needs: functionality
+          path: dist
+  packageUbuntu:
+    needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 100
     steps:
@@ -231,28 +259,29 @@ jobs:
         run: |
           npm config set python python2.7
           npm install -g yarn
-          yarn buildElectron
+          yarn
+          yarn theia rebuild:electron
+          yarn theia build --app-target electron
       - name: Package application
         run: |
-          npm install -g electron-builder
-          electron-builder .
+          yarn electron-builder
       - name: Upload AppImage
         if: ${{ matrix.os }} == 'ubuntu-latest'
         uses: actions/upload-artifact@v2
         with:
           name: linux
-          path: dist/m-0.0.0.AppImage
+          path: dist
   release:
     if: ${{ github.ref == 'refs/heads/master' }}
     needs: [packagingUbuntu, packagingWindows]
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
-      - name: Download AppImage
+      - name: Download Linux
         uses: actions/download-artifact@v2
         with:
           name: linux
-      - name: Download Exe
+      - name: Download Windows
         uses: actions/download-artifact@v2
         with:
           name: windows
