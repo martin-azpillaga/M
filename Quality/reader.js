@@ -23,10 +23,11 @@ reader.on('line', function(line) {
             const title = text(block.c[1])
             out(`it('${title}', async function()`)
             out('{')
-            out('await mobot.click("Help")')
-            out('await mobot.click("Help")')
-        } else if (block.t == 'BulletList') {
-            for (entry of block.c) {
+        }
+        else if (block.t == 'BulletList')
+        {
+            for (entry of block.c)
+            {
                 const command = inline(entry[0].c)
                 if (command.startsWith("Create and open folder")) {
                     const folder = command.replace("Create and open folder ", "")
