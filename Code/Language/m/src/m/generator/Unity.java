@@ -141,10 +141,10 @@ public class Unity
 		
 		var name = function.getName();
 		
-		var statements = all(function.getStatements(), x->code(x), "\n");
+		var statements = all(function.getStatements(), x->code(x), "\n			");
 		
 		var declareQueries = all(queryName, x -> "EntityQuery "+x+";", "\n		");
-		var getQueries = all(queryName, x-> x+" = GetEntityQuery("+getComponents(map.get(x))+");", "\n");
+		var getQueries = all(queryName, x-> x+" = GetEntityQuery("+getComponents(map.get(x))+");", "\n			");
 		
 		generate("Unity/Assets/Code/Systems/"+name+".cs",
 		
@@ -255,19 +255,19 @@ public class Unity
 				var a = ((Value)block.getExpression()).getName();
 				var query = queries.get(currentFunction).get(a);
 				
-				return 
-				"var entities_"+a+" = "+a+".ToEntityArray(TempJob);\n"+
-				all(query.entrySet(), x->toArray(x,a), "\n")+"\n"+
-				"\n"+
-				"for (var "+a+"_i = 0; "+a+"_i < "+a+".CalculateEntityCount(); "+a+"_i++)\n"+
-				"{\n"+
-				"	var entity_"+a+" = entities_"+a+"["+a+"_i];\n"+
-				"	"+all(query.entrySet(),x->toComponent(x,a), "\n")+"\n"+
-				""+	
-					all(block.getStatements(), x->code(x), "\n")+"\n"+
-				"}\n"+
-				"entities_"+a+".Dispose();\n"+
-				all(query.entrySet(), x->dispose(x,a), "\n")+"\n";
+				return lines("			",
+				"var entities_"+a+" = "+a+".ToEntityArray(TempJob);",
+				all(query.entrySet(), x->toArray(x,a), "\n			"),
+				"",
+				"for (var "+a+"_i = 0; "+a+"_i < "+a+".CalculateEntityCount(); "+a+"_i++)",
+				"{",
+				"	var entity_"+a+" = entities_"+a+"["+a+"_i];",
+				"	"+all(query.entrySet(),x->toComponent(x,a), "\n				"),
+				"",
+				"	"+all(block.getStatements(), x->code(x), "\n				"),
+				"}",
+				"entities_"+a+".Dispose();",
+				all(query.entrySet(), x->dispose(x,a), "\n			"));
 			}
 			
 			return "undefined";
@@ -437,7 +437,7 @@ public class Unity
 		{
 			if (csharpReserved[i].equals(name))
 			{
-				return "@"+name;
+				return "_"+name;
 			}
 		}
 		return name;
@@ -452,7 +452,7 @@ public class Unity
 			{
 				if (csharpReserved[i].equals(name))
 				{
-					return "@"+name;
+					return "_"+name;
 				}
 			}
 			return "M."+name;
