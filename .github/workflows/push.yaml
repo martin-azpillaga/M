@@ -193,7 +193,7 @@ jobs:
           yarn theia start --app-target browser workspace &
           Xvfb :3 &
           sleep 5 && xvfb-run yarn mocha test.js
-  packageWindows:
+  packagingWindows:
     needs: test
     runs-on: windows-latest
     timeout-minutes: 100
@@ -233,7 +233,7 @@ jobs:
         with:
           name: windows
           path: dist
-  packageUbuntu:
+  packagingUbuntu:
     needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 100
