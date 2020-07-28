@@ -18,6 +18,7 @@ jobs:
           -not -name "*.js" -and \
           -not -name "*.xtext" -and \
           -not -name "*.mwe2" \
+          -not -name "*.lock" \
           | grep "." && exit 1 || exit 0
       - name: Install node 12
         uses: actions/setup-node@v1
