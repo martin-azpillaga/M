@@ -22,7 +22,7 @@ public class MGenerator extends AbstractGenerator
 	@Inject
 	MValidator validator;
 	
-	public void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context)
+	public void doGenerate(Resource resource, IFileSystemAccess2 fileSystem, IGeneratorContext context)
 	{
 		var game = validator.getGame();
 		if (game != null)
@@ -32,7 +32,7 @@ public class MGenerator extends AbstractGenerator
 			{
 				queries.put(function, collectQueries(function));
 			}
-			new Unity().generate(game, queries, fsa);
+			new ClassicUnity().generate(game, queries, fileSystem);
 		}
 	}
 	
