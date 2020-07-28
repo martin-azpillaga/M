@@ -17,22 +17,8 @@ jobs:
           -not -name "*.json" -and \
           -not -name "*.js" -and \
           -not -name "*.xtext" -and \
-          -not -name "*.mwe2"
-      - name: Lint Markdown
-        run: npx markdownlint-cli -i LICENSE.md "**/*.md"
-      - name: Lint Yaml
-        run: |
-          find . -type f \
-          -not -wholename "*.git*" \
-          -not -name "*.md" -and \
-          -not -name "*.yaml" -and \
-          -not -name "*.gradle" -and \
-          -not -name "*.java" -and \
-          -not -name "*.json" -and \
-          -not -name "*.js" -and \
-          -not -name "*.xtext" -and \
           -not -name "*.mwe2" \
-          | grep "."
+          | grep "." && exit 1 || exit 0
       - name: Install node 12
         uses: actions/setup-node@v1
         with:
@@ -157,8 +143,8 @@ jobs:
           find . -name "*.md" | sort | xargs -d "\n" pandoc > Code/Editor/Documentation.html
       - name: Build tests
         run: |
-          pandoc README.md -t json | node Quality/reader.js > Code/Editor/test.js
-          cp Quality/mobot.js Code/Editor/mobot.js
+          pandoc README.md -t json | node Automation/reader.js > Code/Editor/test.js
+          cp Automation/mobot.js Code/Editor/mobot.js
       - name: Upload Code/Editor folder to github artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -193,7 +179,7 @@ jobs:
           yarn theia start --app-target browser workspace &
           Xvfb :3 &
           sleep 5 && xvfb-run yarn mocha test.js
-  packageWindows:
+  packagingWindows:
     needs: test
     runs-on: windows-latest
     timeout-minutes: 100
@@ -233,7 +219,7 @@ jobs:
         with:
           name: windows
           path: dist
-  packageUbuntu:
+  packagingUbuntu:
     needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 100
