@@ -10,8 +10,10 @@ import m.library.Library;
 import m.library.types.*;
 import m.m.*;
 
+import static java.util.Map.entry;
 import static m.generator.AccessKind.*;
 import static m.library.Symbol.*;
+import static m.library.Symbol.WRITE;
 import static m.library.types.AtomicType.*;
 
 public class ClassicUnity
@@ -404,7 +406,7 @@ public class ClassicUnity
 		{
 			switch (found)
 			{
-				case VELOCITY: { return "velocity";}
+				case VELOCITY: return "velocity";
 				case TIMEOUT: return "Value";
 				case POSITION: return "position";
 				case COLLISIONS: return "Value";
@@ -425,12 +427,67 @@ public class ClassicUnity
 		{
 			switch (found)
 			{
-				case COS: { return "Mathf.Cos"; }
-				case SIN: { return "Mathf.Sin"; }
-				case RANDOM: { return "M.Library.random";}
-				case XYZ: { return "M.Library.xyz";}
-				case IN: { return "M.Library.contains";}
-				case READ_NUMBER: { return "M.Library.readNumber";}
+				case ABS: return "Mathf.Abs";
+				case SIGN: return "Mathf.Sign";
+				case CEIL: return "";
+				case FLOOR: return "";
+				case ROUND: return "";
+				case CLAMP: return "";
+				case INTEGERPART: return "";
+				case FRACTIONALPART: return "";
+				case INVERSE: return "";
+				case RECIPROCAL: return "";
+				
+				case LERP: return "";
+				case UNLERP: return "";
+				case PROPORTIONAL: return "";
+				
+				case CROSS: return "";
+				case DOT: return "";
+				case NORM: return "";
+				case NORMALIZE: return "";
+				case DISTANCE: return "";
+				case REFLECT: return "";
+				case REFRACT: return "";
+						
+				case IN: return "";
+				case XYZ: return "";
+				
+				case SIN: return "Mathf.Sin";
+				case COS: return "Mathf.Cos";
+				case TAN: return "";
+				case ASIN: return "";
+				case ACOS: return "";
+				case ATAN: return "";
+				case EXP: return "";
+				case LOG: return "";
+				case EXP10: return "";
+				case LOG10: return "";
+				case POW: return "";
+				case SQRT: return "";
+				case RANDOM: return "";
+				
+				case CREATE: return "";
+				case DESTROY: return "";
+				case ADD: return "";
+				case REMOVE: return "";
+				case HAS: return "";
+				
+				case WRITE: return "";
+				case WRITEERROR: return "";
+				case HALT: return "";
+				
+				
+				case SET_NUMBER: return "";
+				case SET_COLOR: return "";
+				case SET_STRING: return "";
+				
+				case SET_TRIGGER: return "";
+				case STATE_NAME: return "";
+				
+				case READ_TRIGGERED: return "";
+				case READ_NUMBER: return "";
+				
 			}
 		}
 		return "undefined";
@@ -484,6 +541,19 @@ public class ClassicUnity
 				case ANIMATOR:
 					namespaces.add("UnityEngine");
 					return "Animator";
+				case COMPONENT:
+					return "Error (type component shouldnt be)";
+				case FONT:
+					namespaces.add("UnityEngine.UI");
+					return "Font";
+				case TEXT:
+					namespaces.add("UnityEngine.UI");
+					return "Text";
+				case IMAGE:
+					namespaces.add("UnityEngine.UI");
+					return "Image";
+				case AUDIOCLIP:
+					return "AudioSource";
 			}
 		}
 		return "Undefined";
