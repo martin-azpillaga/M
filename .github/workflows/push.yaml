@@ -188,12 +188,6 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '2.x'
-      - name: Cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            node_modules
-          key: windowsPackaging
       - name: Download Editor folder
         uses: actions/download-artifact@v2
         with:
@@ -228,12 +222,6 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '2.x'
-      - name: Cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            node_modules
-          key: ubuntuPackaging
       - name: Download the editor folder
         uses: actions/download-artifact@v2
         with:
