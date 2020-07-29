@@ -4,6 +4,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Versions
+        run: |
+          node --version
+          yarn --version
+          python --version
       - name: Download repository
         uses: actions/checkout@v2
       - name: Check other files
@@ -18,6 +23,7 @@ jobs:
           -not -name "*.js" -and \
           -not -name "*.xtext" -and \
           -not -name "*.mwe2" \
+          -not -name "*.lock" \
           | grep "." && exit 1 || exit 0
       - name: Install node 12
         uses: actions/setup-node@v1
@@ -187,12 +193,6 @@ jobs:
       - uses: actions/setup-python@v2
         with:
           python-version: '2.x'
-      - name: Cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            node_modules
-          key: windowsPackaging
       - name: Download Editor folder
         uses: actions/download-artifact@v2
         with:
@@ -224,15 +224,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 100
     steps:
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '2.x'
-      - name: Cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            node_modules
-          key: ubuntuPackaging
       - name: Download the editor folder
         uses: actions/download-artifact@v2
         with:
@@ -241,10 +232,14 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '10.x'
+      - name: Install yarn
+        run: |
+          npm install -g yarn
+          node --version
+          yarn --version
+          python --version
       - name: Build Editor for electron
         run: |
-          npm config set python python2.7
-          npm install -g yarn
           yarn
           yarn theia rebuild:electron
           yarn theia build --app-target electron
