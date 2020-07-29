@@ -2,8 +2,6 @@ package m.library;
 
 import static m.library.types.AtomicType.*;
 import static m.library.types.TypeVariable.A;
-import static m.library.types.TypeVariable.A_SUB_NUMERIC;
-
 import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
@@ -21,7 +19,7 @@ public enum Symbol {
 	
 	
 	MASS(NUMBER),
-	INERTIA(MATRIX3),
+	INERTIA(NUMBER),
 	KINEMATIC(PROPOSITION),
 	
 	VELOCITY(NUMBER3),
@@ -119,10 +117,10 @@ public enum Symbol {
 	AND(PROPOSITION, PROPOSITION),
 	NOT(PROPOSITION, PROPOSITION),
 	
-	ADDITION(A_SUB_NUMERIC, A_SUB_NUMERIC, A_SUB_NUMERIC),
-	SUBTRACTION(A_SUB_NUMERIC, A_SUB_NUMERIC, A_SUB_NUMERIC),
-	MULTIPLICATION(A_SUB_NUMERIC, A_SUB_NUMERIC, NUMBER),
-	DIVISION(A_SUB_NUMERIC, A_SUB_NUMERIC, NUMBER),
+	ADDITION(A, A, A),
+	SUBTRACTION(A, A, A),
+	MULTIPLICATION(A, A, NUMBER),
+	DIVISION(A, A, NUMBER),
 	
 	EQUAL(PROPOSITION, A, A),
 	INEQUAL(A,A),

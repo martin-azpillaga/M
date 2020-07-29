@@ -11,9 +11,7 @@ public enum AtomicType implements Type
 	
 	COMPONENT,
 	
-	MATRIX3,
 	COLOR,
-	NUMERIC,
 	
 	INPUT,
 	MESH,

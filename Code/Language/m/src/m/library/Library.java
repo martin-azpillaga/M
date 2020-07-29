@@ -4,7 +4,6 @@ import static java.util.Map.entry;
 import static m.library.Symbol.*;
 import static m.library.types.AtomicType.*;
 import static m.library.types.TypeVariable.A;
-import static m.library.types.TypeVariable.A_SUB_NUMERIC;
 import static m.validation.problems.BindingProblem.BindingProblemKind.*;
 import static m.validation.problems.TypingProblem.TypingProblemKind.*;
 
@@ -196,7 +195,6 @@ public enum Library {
 		entry(COMPONENT, "component"),
 		
 		entry(COLOR, "color"),
-		entry(NUMERIC, "numeric"),
 		
 		entry(INPUT, "input"),
 		entry(AtomicType.MESH, "mesh"),
@@ -390,7 +388,6 @@ public enum Library {
 					entry(COMPONENT, "komponentea"),
 					
 					entry(COLOR, "kolorea"),
-					entry(NUMERIC, "zenbagarria"),
 					
 					entry(INPUT, "inputa"),
 					entry(AtomicType.MESH, "malla"),
