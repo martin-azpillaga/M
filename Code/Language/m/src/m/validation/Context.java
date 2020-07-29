@@ -49,7 +49,7 @@ public class Context {
 	public void declareVariable(Value value)
 	{
 		var name = value.getName();
-		if (library.variables.containsKey(name) || library.components.containsKey(name) || library.functions.containsKey(name))
+		if (library.getValue(name) != null || library.getComponent(name) != null || library.getFunction(name) != null)
 		{
 			problems.add(new BindingProblem(value, VALUE__NAME, REDEFINED));
 		}
@@ -75,7 +75,7 @@ public class Context {
 	{
 		var name = cell.getComponent().getName();
 
-		if (library.variables.containsKey(name) || library.functions.containsKey(name))
+		if (library.getValue(name) != null || library.getFunction(name) != null)
 		{
 			problems.add(new BindingProblem(cell, CELL__COMPONENT, REDEFINED));
 		}
@@ -83,7 +83,7 @@ public class Context {
 		{
 			problems.add(new BindingProblem(cell, CELL__COMPONENT, REDEFINED));
 		}
-		else if (!userComponents.containsKey(name) && !library.components.containsKey(name))
+		else if (!userComponents.containsKey(name) && library.getComponent(name) == null)
 		{
 			userComponents.put(name, cell);
 		}
@@ -93,7 +93,7 @@ public class Context {
 	{
 		var name = function.getName();
 		
-		if (library.components.containsKey(name) || library.components.containsKey(name) || library.functions.containsKey(name))
+		if (library.getValue(name) != null || library.getComponent(name) != null || library.getFunction(name) != null)
 		{
 			problems.add(new BindingProblem(function, FUNCTION__NAME, REDEFINED));
 		}
@@ -113,7 +113,7 @@ public class Context {
 	{
 		var name = value.getName();
 		
-		var standard = library.variables.get(name);
+		var standard = library.getValue(name);
 		if (standard != null)
 		{
 			inference.type(value, new Typing(standard.getType(), LIBRARY_VARIABLE, standard));
@@ -135,7 +135,7 @@ public class Context {
 	public void accessComponent(Cell cell)
 	{
 		var name = cell.getComponent().getName();
-		var standard = library.components.get(name);
+		var standard = library.getComponent(name);
 		if (standard != null)
 		{
 			inference.type(cell, new Typing(standard.getType(), LIBRARY_COMPONENT, standard));
@@ -153,7 +153,7 @@ public class Context {
 	
 	public void accessBlock(String name, Expression expression, EObject source, EStructuralFeature feature)
 	{
-		var block = library.blocks.get(name);
+		var block = library.getBlock(name);
 		if (block != null)
 		{
 			inference.type(expression, new Typing(block.getType(), LIBRARY_BLOCK, block));
@@ -166,7 +166,7 @@ public class Context {
 	
 	public void accessFunction(String name, Expression[] arguments, Expression source, EStructuralFeature feature)
 	{
-		var function = library.functions.get(name);
+		var function = library.getFunction(name);
 		if (function == null)
 		{
 			var userFunction = userFunctions.get(name);
