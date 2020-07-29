@@ -1,15 +1,21 @@
 package m.library;
 
 import static java.util.Map.entry;
-import static m.library.Symbol.*;
+import static m.library.symbols.Value.*;
+import static m.library.symbols.Component.*;
+import static m.library.symbols.Function.*;
+import static m.library.symbols.Block.*;
 import static m.library.types.AtomicType.*;
-import static m.library.types.TypeVariable.A;
 import static m.validation.problems.BindingProblem.BindingProblemKind.*;
 import static m.validation.problems.TypingProblem.TypingProblemKind.*;
 
 import java.util.ArrayList;
 import java.util.Map;
 
+import m.library.symbols.Block;
+import m.library.symbols.Component;
+import m.library.symbols.Function;
+import m.library.symbols.Value;
 import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
@@ -75,8 +81,8 @@ public enum Library {
 		entry("lockedRotation", LOCKED_ROTATION),
 		
 		
-		entry("mesh", Symbol.MESH),
-		entry("material", Symbol.MATERIAL),
+		entry("mesh", Component.MESH),
+		entry("material", Component.MATERIAL),
 		
 		entry("number", NUMBER_LABEL),
 		
@@ -95,7 +101,7 @@ public enum Library {
 		entry("intensity", INTENSITY),
 		
 		
-		entry("audioClip", Symbol.AUDIOCLIP),
+		entry("audioClip", Component.AUDIOCLIP),
 		entry("volume", VOLUME),
 		entry("pitch", PITCH),
 		entry("loop", LOOP)),
@@ -268,8 +274,8 @@ public enum Library {
 				entry("biraezina", LOCKED_ROTATION),
 				
 				
-				entry("malla", Symbol.MESH),
-				entry("materiala", Symbol.MATERIAL),
+				entry("malla", Component.MESH),
+				entry("materiala", Component.MATERIAL),
 				
 				entry("zenbakia", NUMBER_LABEL),
 				
@@ -288,7 +294,7 @@ public enum Library {
 				entry("intentsitatea", INTENSITY),
 				
 				
-				entry("audioKlipa", Symbol.AUDIOCLIP),
+				entry("audioKlipa", Component.AUDIOCLIP),
 				entry("bolumena", VOLUME),
 				entry("tonua", PITCH),
 				entry("errepikapena", LOOP)),
@@ -410,16 +416,16 @@ public enum Library {
 			))
 	;
 
-	public Map<String, Symbol> variables;
-	public Map<String, Symbol> components;
-	public Map<String, Symbol> functions;
-	public Map<String, Symbol> blocks;
+	Map<String, Value> variables;
+	Map<String, Component> components;
+	Map<String, Function> functions;
+	Map<String, Block> blocks;
 	
 	Map<Type, String> atomicTypes;
 	Map<BindingProblemKind, String> bindingProblem;
 	Map<TypingProblemKind, String> typingProblem;
 	
-	Library(Map<String, Symbol> variables, Map<String, Symbol> components, Map<String, Symbol> functions, Map<String, Symbol> blocks, Map<Type, String> atomicTypes, Map<BindingProblemKind, String> bindingProblem, Map<TypingProblemKind, String> typingProblem)
+	Library(Map<String, Value> variables, Map<String, Component> components, Map<String, Function> functions, Map<String, Block> blocks, Map<Type, String> atomicTypes, Map<BindingProblemKind, String> bindingProblem, Map<TypingProblemKind, String> typingProblem)
 	{
 		this.variables = variables;
 		this.components = components;
@@ -428,6 +434,22 @@ public enum Library {
 		this.atomicTypes = atomicTypes;
 		this.bindingProblem = bindingProblem;
 		this.typingProblem = typingProblem;
+	}
+	
+	public Value getValue(String name) {
+		return variables.get(name);
+	}
+	
+	public Component getComponent(String name) {
+		return components.get(name);
+	}
+	
+	public Function getFunction(String name) {
+		return functions.get(name);
+	}
+	
+	public Block getBlock(String name) {
+		return blocks.get(name);
 	}
 
 	public String message(Problem problem)
