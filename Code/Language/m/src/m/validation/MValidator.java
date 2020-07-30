@@ -1,6 +1,5 @@
 package m.validation;
 
-
 import java.util.*;
 
 import org.eclipse.xtext.EcoreUtil2;
@@ -9,12 +8,9 @@ import org.eclipse.xtext.validation.Check;
 import m.generator.Game;
 import m.library.Library;
 import m.m.*;
-import m.validation.problems.BindingProblem;
 import m.validation.problems.Problem;
-import m.validation.problems.TypingProblem;
 
 import static m.m.MPackage.Literals.*;
-
 
 public class MValidator extends AbstractMValidator
 {
@@ -202,25 +198,19 @@ public class MValidator extends AbstractMValidator
 	{
 		for (var problem : problems)
 		{
-			var message = library.message(problem);
-			
-			if (problem instanceof BindingProblem)
+			for (var message : problem.messages(library))
 			{
-				var bindingProblem = (BindingProblem) problem;
-				var source = bindingProblem.getSource();
-				var feature = bindingProblem.getFeature();
-				
-				error(message, source, feature);
-			}
-			else if (problem instanceof TypingProblem)
-			{
-				var typingProblem = (TypingProblem) problem;
-				var node = typingProblem.getNode();
-				error(message, node.expression, null);
-				while (node.binding != null)
+				switch (message.severity)
 				{
-					node = node.binding.node;
-					error(message, node.expression, null);
+				case INFO:
+					info(message.message, message.source, message.feature);
+					break;
+				case WARNING:
+					warning(message.message, message.source, message.feature);
+					break;
+				case ERROR:
+					error(message.message, message.source, message.feature);
+					break;
 				}
 			}
 		}

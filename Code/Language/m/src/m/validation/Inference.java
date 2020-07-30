@@ -1,15 +1,11 @@
 package m.validation;
 
-import static m.validation.problems.TypingProblem.TypingProblemKind.*;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.emf.ecore.EObject;
 
 import m.generator.Game;
 import m.library.types.AtomicType;
@@ -19,7 +15,8 @@ import m.m.Cell;
 import m.m.Expression;
 import m.m.Function;
 import m.validation.problems.Problem;
-import m.validation.problems.TypingProblem;
+import m.validation.problems.errors.IncompatibleTypes;
+import m.validation.problems.errors.UndecidableType;
 import m.validation.rules.Binding;
 import m.validation.rules.ExpressionNode;
 import m.validation.rules.Binding.BindingReason;
@@ -55,7 +52,7 @@ public class Inference {
 			// IF the node already has a type and the given is different, throw incompatible types error
 			if (node.typing != null && node.typing.getType() != typing.getType())
 			{
-				problems.add(new TypingProblem(node, INCOMPATIBLE));
+				problems.add(new IncompatibleTypes(node));
 				// error
 			}
 			reroot(node, true); // remove redundant critical nodes
@@ -190,11 +187,11 @@ public class Inference {
 			
 			if (originalType == null && rootType == null)
 			{
-				problems.add(new TypingProblem(criticalNode, INDETERMINATE));
+				problems.add(new UndecidableType(criticalNode));
 			}
 			else if (originalType != null && originalType.getType() != rootType.getType())
 			{
-				problems.add(new TypingProblem(criticalNode, INCOMPATIBLE));
+				problems.add(new IncompatibleTypes(criticalNode));
 			}
 		}
 	}
@@ -216,7 +213,6 @@ public class Inference {
 		
 		for (var userFunction : userFunctions.entrySet())
 		{
-			var name = userFunction.getKey();
 			var function = userFunction.getValue();
 			
 			var parameters = new Type[function.getParameters().size()];
