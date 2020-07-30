@@ -85,6 +85,8 @@ public enum Component implements Symbol{
 	VOLUME(NUMBER),
 	PITCH(NUMBER),
 	LOOP(PROPOSITION),
+	
+	ANIMATOR(AtomicType.ANIMATOR)
 	;
 	
 	Type type;
