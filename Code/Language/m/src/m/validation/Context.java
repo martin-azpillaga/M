@@ -4,8 +4,10 @@ import static m.validation.rules.Binding.BindingReason.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import org.eclipse.emf.ecore.EObject;
@@ -18,6 +20,7 @@ import m.m.*;
 import m.validation.problems.Problem;
 import m.validation.problems.errors.RedefinedSymbol;
 import m.validation.problems.errors.UndefinedSymbol;
+import m.validation.problems.warnings.UnusedValue;
 import m.validation.rules.Typing;
 import static m.validation.rules.Typing.TypingReason.*;
 import static m.m.MPackage.Literals.*;
@@ -29,6 +32,8 @@ public class Context {
 	Map<String, Cell> userComponents;
 	Map<String, Function> userFunctions;
 	Library library;
+	
+	Set<Value> accessedValues;
 	
 	Inference inference;
 	List<Problem> problems;
@@ -43,6 +48,7 @@ public class Context {
 		this.userComponents = new HashMap<>();
 		
 		this.stack = new Stack<>();
+		this.accessedValues = new HashSet<Value>();
 	}
 	
 	public void declareVariable(Value value)
@@ -120,6 +126,7 @@ public class Context {
 		else if (userVariables.containsKey(name) && userVariables.get(name) != value)
 		{
 			inference.bind(value, userVariables.get(name), SAME_VARIABLE);
+			accessedValues.add(userVariables.get(name));
 		}
 		else if (userComponents.containsKey(name))
 		{
@@ -255,7 +262,6 @@ public class Context {
 	}
 	
 	
-	
 	public void push()
 	{
 		stack.push(new HashMap<>(userVariables));
@@ -263,7 +269,18 @@ public class Context {
 	
 	public void pop()
 	{
-		userVariables = stack.pop();
+		var popped = stack.pop();
+		for (var value : userVariables.keySet())
+		{
+			if (!popped.containsKey(value))
+			{
+				if (!accessedValues.contains(userVariables.get(value)))
+				{
+					problems.add(new UnusedValue(userVariables.get(value)));
+				}	
+			}
+		}
+		userVariables = popped;
 	}
 	
 	public void checkConsistency()
