@@ -1,7 +1,5 @@
 package m.validation;
 
-import static m.validation.problems.BindingProblem.BindingProblemKind.*;
-import static m.validation.problems.TypingProblem.TypingProblemKind.*;
 import static m.validation.rules.Binding.BindingReason.*;
 
 import java.util.ArrayList;
@@ -17,8 +15,9 @@ import m.generator.Game;
 import m.library.Library;
 import m.library.types.*;
 import m.m.*;
-import m.validation.problems.BindingProblem;
 import m.validation.problems.Problem;
+import m.validation.problems.errors.RedefinedSymbol;
+import m.validation.problems.errors.UndefinedSymbol;
 import m.validation.rules.Typing;
 import static m.validation.rules.Typing.TypingReason.*;
 import static m.m.MPackage.Literals.*;
@@ -51,11 +50,11 @@ public class Context {
 		var name = value.getName();
 		if (library.getValue(name) != null || library.getComponent(name) != null || library.getFunction(name) != null)
 		{
-			problems.add(new BindingProblem(value, VALUE__NAME, REDEFINED));
+			problems.add(new RedefinedSymbol(value, VALUE__NAME));
 		}
 		else if (userComponents.containsKey(name) || userFunctions.containsKey(name))
 		{
-			problems.add(new BindingProblem(value, VALUE__NAME, REDEFINED));			
+			problems.add(new RedefinedSymbol(value, VALUE__NAME));			
 		}
 		else
 		{
@@ -77,11 +76,11 @@ public class Context {
 
 		if (library.getValue(name) != null || library.getFunction(name) != null)
 		{
-			problems.add(new BindingProblem(cell, CELL__COMPONENT, REDEFINED));
+			problems.add(new RedefinedSymbol(cell, CELL__COMPONENT));
 		}
 		else if (userFunctions.containsKey(name))
 		{
-			problems.add(new BindingProblem(cell, CELL__COMPONENT, REDEFINED));
+			problems.add(new RedefinedSymbol(cell, CELL__COMPONENT));
 		}
 		else if (!userComponents.containsKey(name) && library.getComponent(name) == null)
 		{
@@ -95,11 +94,11 @@ public class Context {
 		
 		if (library.getValue(name) != null || library.getComponent(name) != null || library.getFunction(name) != null)
 		{
-			problems.add(new BindingProblem(function, FUNCTION__NAME, REDEFINED));
+			problems.add(new RedefinedSymbol(function, FUNCTION__NAME));
 		}
 		else if (userComponents.containsKey(name) || userFunctions.containsKey(name))
 		{
-			problems.add(new BindingProblem(function, FUNCTION__NAME, REDEFINED));
+			problems.add(new RedefinedSymbol(function, FUNCTION__NAME));
 		}
 		else
 		{
@@ -128,7 +127,7 @@ public class Context {
 		}
 		else
 		{
-			problems.add(new BindingProblem(value, VALUE__NAME, UNDEFINED));
+			problems.add(new UndefinedSymbol(value, VALUE__NAME));
 		}
 	}
 	
@@ -160,7 +159,7 @@ public class Context {
 		}
 		else
 		{
-			problems.add(new BindingProblem(source, feature, UNDEFINED));
+			problems.add(new UndefinedSymbol(source, feature));
 		}
 	}
 	
@@ -184,12 +183,12 @@ public class Context {
 				}
 				else
 				{
-					problems.add(new BindingProblem(source, feature, UNDEFINED));
+					problems.add(new UndefinedSymbol(source, feature));
 				}
 			}
 			else
 			{
-				problems.add(new BindingProblem(source, feature, UNDEFINED));
+				problems.add(new UndefinedSymbol(source, feature));
 			}
 		}
 		else
@@ -250,7 +249,7 @@ public class Context {
 			}
 			else
 			{
-				problems.add(new BindingProblem(source, feature, UNDEFINED));
+				problems.add(new UndefinedSymbol(source, feature));
 			}
 		}
 	}

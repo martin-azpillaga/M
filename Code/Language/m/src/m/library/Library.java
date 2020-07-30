@@ -6,8 +6,6 @@ import static m.library.symbols.Component.*;
 import static m.library.symbols.Function.*;
 import static m.library.symbols.Block.*;
 import static m.library.types.AtomicType.*;
-import static m.validation.problems.BindingProblem.BindingProblemKind.*;
-import static m.validation.problems.TypingProblem.TypingProblemKind.*;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -20,11 +18,8 @@ import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.library.types.TypeVariable;
-import m.validation.problems.BindingProblem;
 import m.validation.problems.Problem;
-import m.validation.problems.TypingProblem;
-import m.validation.problems.BindingProblem.BindingProblemKind;
-import m.validation.problems.TypingProblem.TypingProblemKind;
+import m.validation.problems.errors.*;
 
 public enum Library {
 	
@@ -215,12 +210,10 @@ public enum Library {
 		entry(ENTITY, "entity"),
 		entry(ENTITY_LIST, "entityList")
 	), Map.of(
-		REDEFINED, "Redefined symbol",
-		UNDEFINED, "Undefined symbol"
-	),
-	Map.of(
-		INCOMPATIBLE, "Incompatible types",
-		INDETERMINATE, "Indeterminate type"
+		RedefinedSymbol.class, "Redefined symbol",
+		UndefinedSymbol.class, "Undefined symbol",
+		IncompatibleTypes.class, "Incompatible types",
+		UndecidableType.class, "Undecidable type"
 	)),
 	EUSKARA(
 			Map.ofEntries(
@@ -408,12 +401,10 @@ public enum Library {
 					entry(ENTITY, "entitatea"),
 					entry(ENTITY_LIST, "entitateLista")
 			), Map.of(
-				REDEFINED, "Simbolo hau dagoeneko definitua dago",
-				UNDEFINED, "Simbolo honek ez du definiziorik"
-			),
-			Map.of(
-				INCOMPATIBLE, "Izaera bateraezinak",
-				INDETERMINATE, "Izaera indeterminatua"
+				RedefinedSymbol.class, "Simbolo hau dagoeneko definitua dago",
+				UndefinedSymbol.class, "Simbolo honek ez du definiziorik",
+				IncompatibleTypes.class, "Izaera bateraezinak",
+				UndecidableType.class, "Izaera ezarriezina"
 			))
 	;
 
@@ -423,18 +414,16 @@ public enum Library {
 	Map<String, Block> blocks;
 	
 	Map<Type, String> atomicTypes;
-	Map<BindingProblemKind, String> bindingProblem;
-	Map<TypingProblemKind, String> typingProblem;
+	Map<Class<? extends Problem>, String> problems;
 	
-	Library(Map<String, Value> variables, Map<String, Component> components, Map<String, Function> functions, Map<String, Block> blocks, Map<Type, String> atomicTypes, Map<BindingProblemKind, String> bindingProblem, Map<TypingProblemKind, String> typingProblem)
+	Library(Map<String, Value> variables, Map<String, Component> components, Map<String, Function> functions, Map<String, Block> blocks, Map<Type, String> atomicTypes, Map<Class<? extends Problem>, String> problems)
 	{
 		this.variables = variables;
 		this.components = components;
 		this.functions = functions;
 		this.blocks = blocks;
 		this.atomicTypes = atomicTypes;
-		this.bindingProblem = bindingProblem;
-		this.typingProblem = typingProblem;
+		this.problems = problems;
 	}
 	
 	public Value getValue(String name) {
@@ -452,33 +441,13 @@ public enum Library {
 	public Block getBlock(String name) {
 		return blocks.get(name);
 	}
-
-	public String message(Problem problem)
+	
+	public String getProblem(Class<? extends Problem> problem)
 	{
-		if (problem instanceof BindingProblem)
-		{
-			return bindingProblem.get(((BindingProblem) problem).getKind());
-		}
-		else if (problem instanceof TypingProblem)
-		{
-			var base = typingProblem.get(((TypingProblem) problem).getKind());
-			var node = ((TypingProblem) problem).getNode();
-			var root = node;
-			
-			if (((TypingProblem) problem).getKind() == INCOMPATIBLE)
-			{
-				while (root.binding != null)
-				{
-					root = root.binding.node;
-				}
-				base += "\n" + name(node.typing.getType()) + " - " + name(root.typing.getType());
-			}
-			return base;
-		}
-		return "error";
+		return problems.get(problem);
 	}
 	
-	private String name(Type type)
+	public String name(Type type)
 	{
 		if (type instanceof AtomicType)
 		{
