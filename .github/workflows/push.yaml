@@ -218,7 +218,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: windows
-          path: dist
+          path: "dist\\m 0.2.0.exe"
   packagingUbuntu:
     needs: test
     runs-on: ubuntu-latest
@@ -251,9 +251,8 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: linux
-          path: dist
+          path: dist/m-0.2.0.AppImage
   release:
-    if: ${{ github.ref == 'refs/heads/master' }}
     needs: [packagingUbuntu, packagingWindows]
     runs-on: ubuntu-latest
     timeout-minutes: 50
@@ -282,7 +281,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./m-0.0.0.AppImage
+          asset_path: ./m-0.2.0.AppImage
           asset_name: m.AppImage
           asset_content_type: text/text
       - name: Upload exe to release
@@ -291,6 +290,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./m 0.0.0.exe
+          asset_path: ./m 0.2.0.exe
           asset_name: m.exe
           asset_content_type: text/text
