@@ -20,6 +20,7 @@ import m.library.types.Type;
 import m.library.types.TypeVariable;
 import m.validation.problems.Problem;
 import m.validation.problems.errors.*;
+import m.validation.problems.warnings.*;
 
 public enum Library {
 	
@@ -213,7 +214,8 @@ public enum Library {
 		RedefinedSymbol.class, "Redefined symbol",
 		UndefinedSymbol.class, "Undefined symbol",
 		IncompatibleTypes.class, "Incompatible types",
-		UndecidableType.class, "Undecidable type"
+		UndecidableType.class, "Undecidable type",
+		UnusedValue.class, "Unused value"
 	)),
 	EUSKARA(
 			Map.ofEntries(
@@ -404,7 +406,8 @@ public enum Library {
 				RedefinedSymbol.class, "Simbolo hau dagoeneko definitua dago",
 				UndefinedSymbol.class, "Simbolo honek ez du definiziorik",
 				IncompatibleTypes.class, "Izaera bateraezinak",
-				UndecidableType.class, "Izaera ezarriezina"
+				UndecidableType.class, "Izaera ezarriezina",
+				UnusedValue.class, "Erabilerarik gabeko balioa"
 			))
 	;
 
