@@ -104,7 +104,8 @@ public enum Library {
 		entry("audioClip", Component.AUDIOCLIP),
 		entry("volume", VOLUME),
 		entry("pitch", PITCH),
-		entry("loop", LOOP)),
+		entry("loop", LOOP),
+		entry("animator", Component.ANIMATOR)),
 	Map.ofEntries(
 		entry("abs", ABS),
 		entry("sign", SIGN),
@@ -209,7 +210,7 @@ public enum Library {
 		entry(TEXT, "text"),
 		entry(IMAGE, "image"),
 		entry(AtomicType.AUDIOCLIP, "audioClip"),
-		entry(ANIMATOR, "animator"),
+		entry(AtomicType.ANIMATOR, "animator"),
 		
 		entry(ENTITY, "entity"),
 		entry(ENTITY_LIST, "entityList")
@@ -402,7 +403,7 @@ public enum Library {
 					entry(TEXT, "testua"),
 					entry(IMAGE, "irudia"),
 					entry(AtomicType.AUDIOCLIP, "audioKlipa"),
-					entry(ANIMATOR, "animatzailea"),
+					entry(AtomicType.ANIMATOR, "animatzailea"),
 					
 					entry(ENTITY, "entitatea"),
 					entry(ENTITY_LIST, "entitateLista")
