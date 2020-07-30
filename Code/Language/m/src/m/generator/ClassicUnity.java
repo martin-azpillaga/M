@@ -68,7 +68,9 @@ public class ClassicUnity
 		{
 			for (var query : game.queries.get(function).keySet())
 			{
-				systems += "public List<GameObject> " + function.getName() + "_" + query + ";\n";
+				systems += lines("",
+					"[Tooltip(\""+all(game.queries.get(function).get(query).keySet(), x->simpleComponent(x), ", ")+"\")]",
+					"public List<GameObject> " + function.getName() + "_" + query + ";\n");
 			}
 		}
 
@@ -299,6 +301,11 @@ public class ClassicUnity
 	
 	private String simpleComponent(String name)
 	{
+		var standard = library.getComponent(name);
+		if (standard != null)
+		{
+			return component(name);
+		}
 		for (var i = 0; i < csharpReserved.length; i++)
 		{
 			if (csharpReserved[i].equals(name))
