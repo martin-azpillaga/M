@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import m.library.Library;
+import m.m.Value;
 import m.validation.problems.Problem;
 import m.validation.problems.ProblemMessage;
 import m.validation.problems.ProblemMessage.Severity;
-import m.validation.rules.ExpressionNode;
 
-public class UndecidableType implements Problem
+public class ReadOnly implements Problem
 {
-	ExpressionNode node;
+	Value value;
 	
-	public UndecidableType(ExpressionNode node)
+	public ReadOnly(Value value)
 	{
-		this.node = node;
+		this.value = value;
 	}
 	
 	@Override
@@ -23,13 +23,7 @@ public class UndecidableType implements Problem
 	{
 		var list = new ArrayList<ProblemMessage>();
 		var message = library.getProblem(this.getClass());
-		var root = node;
-		while (root.binding != null)
-		{
-			list.add(new ProblemMessage(Severity.ERROR, message, root.expression, null));
-			root = root.binding.node;
-		}
-
+		list.add(new ProblemMessage(Severity.ERROR, message, value, null));
 		return list;
 	}
 

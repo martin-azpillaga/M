@@ -9,6 +9,7 @@ import m.generator.Game;
 import m.library.Library;
 import m.m.*;
 import m.validation.problems.Problem;
+import m.validation.problems.errors.ReadOnly;
 
 import static m.m.MPackage.Literals.*;
 
@@ -18,6 +19,8 @@ public class MValidator extends AbstractMValidator
 	Map<Library,List<Problem>> map;
 	Map<Library, Context> contexts;
 	Game game;
+	Library currentLibrary;
+	List<Problem> currentProblems;
 	
 	public Game getGame()
 	{
@@ -34,10 +37,11 @@ public class MValidator extends AbstractMValidator
 		
 		for (var library : Library.values())
 		{
-			var problems = new ArrayList<Problem>();
-			context = new Context(problems, library);
-			map.put(library, problems);
+			currentProblems = new ArrayList<Problem>();
+			context = new Context(currentProblems, library);
+			map.put(library, currentProblems);
 			contexts.put(library, context);
+			this.currentLibrary = library;
 			
 			for (var function : file.getFunctions())
 			{
@@ -135,7 +139,13 @@ public class MValidator extends AbstractMValidator
 			
 			if (atom instanceof Value)
 			{
-				context.declareVariable((Value)atom);
+				var value = (Value) atom;
+				
+				if (currentLibrary.getValue(value.getName()) != null)
+				{
+					currentProblems.add(new ReadOnly(value));
+				}
+				context.declareVariable(value);
 			}
 			else
 			{

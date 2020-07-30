@@ -246,13 +246,25 @@ public class ClassicUnity
 			{
 				return code(args.get(1))+".Contains("+code(args.get(0))+".gameObject)";
 			}
+			else if (standard == CREATE)
+			{
+				return "Instantiate("+code(args.get(0))+")";
+			}
+			else if (standard == DESTROY)
+			{
+				return "Destroy("+code(args.get(0))+")";
+			}
+			else if (standard == HAS)
+			{
+				return code(args.get(0))+".GetComponent<"+code(args.get(1))+">() != null";
+			}
 			else if (standard == REMOVE)
 			{
-				return "Destroy("+code(args.get(1))+".gameObject.GetComponent<"+code(args.get(0))+">());";
+				return "Destroy("+code(args.get(1))+".gameObject.GetComponent<"+code(args.get(0))+">())";
 			}
 			else if (standard == ADD)
 			{
-				return code(args.get(1))+".gameObject.AddComponent<"+code(args.get(0))+">();";
+				return code(args.get(1))+".gameObject.AddComponent<"+code(args.get(0))+">()";
 			}
 			else
 			{
