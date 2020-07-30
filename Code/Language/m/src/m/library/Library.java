@@ -215,7 +215,8 @@ public enum Library {
 		UndefinedSymbol.class, "Undefined symbol",
 		IncompatibleTypes.class, "Incompatible types",
 		UndecidableType.class, "Undecidable type",
-		UnusedValue.class, "Unused value"
+		UnusedValue.class, "Unused value",
+		ReadOnly.class, "Cannot assign new value to read only constant"
 	)),
 	EUSKARA(
 			Map.ofEntries(
@@ -407,7 +408,8 @@ public enum Library {
 				UndefinedSymbol.class, "Simbolo honek ez du definiziorik",
 				IncompatibleTypes.class, "Izaera bateraezinak",
 				UndecidableType.class, "Izaera ezarriezina",
-				UnusedValue.class, "Erabilerarik gabeko balioa"
+				UnusedValue.class, "Erabilerarik gabeko balioa",
+				ReadOnly.class, "Ezin konstante baten balioa berrezarri"
 			))
 	;
 
