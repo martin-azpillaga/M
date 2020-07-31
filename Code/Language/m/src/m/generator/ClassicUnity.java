@@ -411,10 +411,8 @@ public class ClassicUnity
 				break;
 			case MASS:
 				break;
-			case MATERIAL:
-				break;
-			case MESH:
-				break;
+			case MATERIAL: return "MeshRenderer";
+			case MESH: return "MeshFilter";
 			case MESH_COLLIDER:
 				break;
 			case NEAR:
@@ -525,10 +523,8 @@ public class ClassicUnity
 				break;
 			case MASS:
 				break;
-			case MATERIAL:
-				break;
-			case MESH:
-				break;
+			case MATERIAL: return "material";
+			case MESH: return "mesh";
 			case MESH_COLLIDER:
 				break;
 			case NEAR:
@@ -633,9 +629,8 @@ public class ClassicUnity
 				case HALT: return "";
 				
 				
-				case SET_NUMBER: return "M.Library.setNumber";
+				case SET_NUMBER: return "M.Library.setFloat";
 				case SET_COLOR: return "M.Library.setColor";
-				case SET_STRING: return "M.Library.setString";
 				
 				case SET_TRIGGER: return "M.Library.setTrigger";
 				case STATE_NAME: return "M.Library.stateName";
