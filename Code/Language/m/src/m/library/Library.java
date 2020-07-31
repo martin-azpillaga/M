@@ -182,6 +182,8 @@ public enum Library {
 		entry("readTriggered", READ_TRIGGERED),
 		entry("readNumber", READ_NUMBER),
 		
+		entry("play", PLAY),
+		
 		entry("=", ASSIGNMENT)),
 	Map.ofEntries(
 		entry("foreach", QUERY),
@@ -374,6 +376,8 @@ public enum Library {
 				
 				entry("irakurriKakoa", READ_TRIGGERED),
 				entry("irakurriZenbakia", READ_NUMBER),
+				
+				entry("hasi", PLAY),
 				
 				entry("=", ASSIGNMENT)),
 			Map.ofEntries(

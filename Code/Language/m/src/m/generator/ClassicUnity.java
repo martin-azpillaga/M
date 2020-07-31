@@ -129,8 +129,6 @@ public class ClassicUnity
 		namespaces.clear();
 		namespaces.add(UNITY_ENGINE);
 		
-		var name = function.getName();
-		
 		var statements = all(function.getStatements(), x->code(x), "\n			");
 		
 		return statements;
@@ -635,15 +633,18 @@ public class ClassicUnity
 				case HALT: return "";
 				
 				
-				case SET_NUMBER: return "";
-				case SET_COLOR: return "";
-				case SET_STRING: return "";
+				case SET_NUMBER: return "M.Library.setNumber";
+				case SET_COLOR: return "M.Library.setColor";
+				case SET_STRING: return "M.Library.setString";
 				
 				case SET_TRIGGER: return "M.Library.setTrigger";
-				case STATE_NAME: return "";
+				case STATE_NAME: return "M.Library.stateName";
 				
-				case READ_TRIGGERED: return "";
+				case READ_TRIGGERED: return "M.Library.readTriggered";
 				case READ_NUMBER: return "M.Library.readNumber";
+				
+				case PLAY: return "M.Library.play";
+				
 			case ADDITION: return "";
 			case AND:
 				break;
@@ -733,7 +734,7 @@ public class ClassicUnity
 					namespaces.add("UnityEngine.UI");
 					return "Image";
 				case AUDIOCLIP:
-					return "AudioSource";
+					return "AudioClip";
 			}
 		}
 		return "Undefined";

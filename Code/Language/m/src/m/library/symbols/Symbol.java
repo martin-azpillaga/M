@@ -1,5 +1,7 @@
 package m.library.symbols;
 
-public interface Symbol {
+import m.library.types.*;
 
+public interface Symbol {
+	public Type getType();
 }
