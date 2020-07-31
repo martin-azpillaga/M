@@ -30,7 +30,8 @@ public class IncompatibleTypes implements Problem
 			list.add(new ProblemMessage(Severity.WARNING, base, root.expression, null));
 			root = root.binding.node;
 		}
-		base += "\n" + library.name(node.typing.getType()) + " - " + library.name(root.typing.getType());
+		base += "\n" + library.name(node.typing.getType()) + " - " + library.name(node.typing.getSymbol().getType()) + "\n" +
+		library.name(root.typing.getType()) + " - " + library.name(root.typing.getSymbol().getType());
 		
 		var me = new ProblemMessage(Severity.ERROR, base, node.expression, null);
 		var last = new ProblemMessage(Severity.ERROR, base, root.expression, null);
@@ -38,5 +39,4 @@ public class IncompatibleTypes implements Problem
 		list.add(last);
 		return list;
 	}
-
 }
