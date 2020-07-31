@@ -49,11 +49,23 @@ public class Inference {
 		}
 		else
 		{
-			// IF the node already has a type and the given is different, throw incompatible types error
 			if (node.typing != null && node.typing.getType() != typing.getType())
 			{
-				problems.add(new IncompatibleTypes(node));
-				// error
+				if (node.expression == expression)
+				{
+					problems.add(new IncompatibleTypes(node));
+				}
+				else
+				{
+					var newNode = checkIn(expression);
+					newNode.binding = new Binding(node, BindingReason.SAME_COMPONENT);
+					newNode.typing = typing;
+					criticalNodes.add(newNode);
+					if (criticalNodes.contains(node))
+					{
+						criticalNodes.remove(node);
+					}
+				}
 			}
 			reroot(node, true); // remove redundant critical nodes
 			
@@ -64,6 +76,7 @@ public class Inference {
 	
 	public void bind(Expression a, Expression b, BindingReason reason) {
 		
+		// if both are cells and they refer to a standard component, dont bind them
 		var nodeA = find(a);
 		var nodeB = find(b);
 		

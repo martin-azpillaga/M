@@ -98,6 +98,8 @@ public enum Function implements Symbol{
 	READ_TRIGGERED(PROPOSITION, INPUT),
 	READ_NUMBER(NUMBER, INPUT),
 	
+	PLAY(UNIT, ENTITY, AtomicType.AUDIOCLIP),
+	
 	ASSIGNMENT(UNIT, A, A),
 	;
 	
