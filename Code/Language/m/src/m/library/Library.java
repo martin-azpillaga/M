@@ -174,7 +174,6 @@ public enum Library {
 		
 		entry("setNumber", SET_NUMBER),
 		entry("setColor", SET_COLOR),
-		entry("setString", SET_STRING),
 		
 		entry("setTrigger", SET_TRIGGER),
 		entry("stateName", STATE_NAME),
@@ -369,7 +368,6 @@ public enum Library {
 				
 				entry("ezarriZenbakia", SET_NUMBER),
 				entry("ezarriKolorea", SET_COLOR),
-				entry("ezarriKatea", SET_STRING),
 				
 				entry("ezarriKakoa", SET_TRIGGER),
 				entry("egoeraIzena", STATE_NAME),
