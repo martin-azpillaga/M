@@ -253,6 +253,7 @@ jobs:
           name: linux
           path: dist/m-0.2.0.AppImage
   release:
+    if: ${{ github.ref == 'refs/heads/master' }}
     needs: [packagingUbuntu, packagingWindows]
     runs-on: ubuntu-latest
     timeout-minutes: 50
