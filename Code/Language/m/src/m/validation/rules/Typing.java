@@ -1,6 +1,6 @@
 package m.validation.rules;
 
-import m.library.Symbol;
+import m.library.symbols.Symbol;
 import m.library.types.*;
 
 public class Typing

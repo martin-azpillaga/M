@@ -1,20 +1,31 @@
 package m.generator;
 
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
+import static m.generator.Writer.*;
+import static m.library.symbols.Function.*;
+import static m.library.symbols.Block.*;
+import static m.library.types.AtomicType.*;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 
 import m.library.Library;
-import m.library.types.*;
-import m.m.*;
-
-import static java.util.Map.entry;
-import static m.generator.AccessKind.*;
-import static m.library.Symbol.*;
-import static m.library.Symbol.WRITE;
-import static m.library.types.AtomicType.*;
+import m.library.types.AtomicType;
+import m.library.types.Type;
+import m.m.Application;
+import m.m.Assignment;
+import m.m.Binary;
+import m.m.BindingBlock;
+import m.m.Block;
+import m.m.Cell;
+import m.m.Delegation;
+import m.m.Expression;
+import m.m.Function;
+import m.m.Statement;
+import m.m.Unary;
+import m.m.Value;
 
 public class ClassicUnity
 {
@@ -28,41 +39,77 @@ public class ClassicUnity
 	
 	String[] csharpReserved = new String[] {"base", "class", "struct", "if", "else", "for", "while", "foreach"};
 	
-	public void generate(Game game, HashMap<Function, HashMap<String, HashMap<String, AccessKind>>> queries, IFileSystemAccess2 fileSystem)
+	private static final String UNITY_ENGINE = "UnityEngine";
+	private static final String UNITY_ENGINE_UI = "UnityEngine.UI";
+	public void generate(Game game, IFileSystemAccess2 fileSystem)
 	{
 		this.game = game;
 		this.library = game.library;
 		this.fileSystem = fileSystem;
-		this.queries = queries;
+		this.queries = game.queries;
 		
 		for (var component : game.components.entrySet())
 		{
-			generate(component.getKey(), component.getValue());
+			fileSystem.generateFile("UnityClassic/Assets/Code/Components/"+simpleComponent(component.getKey())+".cs",
+					generate(component.getKey(), component.getValue()));
 		}
+		var systems = lines("",
+		"using UnityEngine;",
+		"using UnityEngine.UI;",
+		"using UnityEngine.InputSystem;",
+		"using System.Collections.Generic;",
+		"",
+		"namespace M",
+		"{",
+		"   public class Systems : MonoBehaviour",
+		"   {",
+		"      "+all(game.functions.keySet(), x->"public bool "+x.getName()+" = true;", "\n      "));		
+		for (var function : game.functions.keySet())
+		{
+			for (var query : game.queries.get(function).keySet())
+			{
+				systems += lines("",
+					"[Tooltip(\""+all(game.queries.get(function).get(query).keySet(), x->simpleComponent(x), ", ")+"\")]",
+					"public List<GameObject> " + function.getName() + "_" + query + ";\n");
+			}
+		}
+
+		systems += "void FixedUpdate()\n{\n";
+		
+		for (var function : game.functions.keySet())
+		{
+			for (var query : game.queries.get(function).keySet())
+			{
+				systems += function.getName() + "_" + query + " = new List<GameObject>();\n";
+			}
+		}
+		
 		for (var function : game.functions.entrySet())
 		{
 			var type = function.getValue();
 			if (type.getParameters().length == 0 && type.getReturnType() == UNIT)
 			{
 				currentFunction = function.getKey();
-				generate(function.getKey());
+				systems += "if ("+function.getKey().getName()+")\n{"+generate(function.getKey())+"\n}";
 			}
 		}
+		
+		systems += "}\n}\n}\n";
+		
+		fileSystem.generateFile("UnityClassic/Assets/Code/Systems/Systems.cs", systems);
 	}
 	
 	
 	
-	private void generate(String name, Type type)
+	private String generate(String name, Type type)
 	{
 		namespaces.clear();
-		namespaces.add("UnityEngine");
+		namespaces.add(UNITY_ENGINE);
 		
-		var classifier = valueType(type) ? "struct" : "class";
 		var field = type != UNIT? "public "+ unity(type) + " Value;" : "";
-		var superInterface = type != ENTITY_LIST? "IComponentData" : "IBufferElementData, IEntity";
 		
-		generate("Unity/Assets/Code/Components/"+simpleComponent(name)+".cs",
-				
+		return
+				lines("",
 				all(namespaces,x->"using "+x+";", "\n"),
 				"",
 				"namespace M",
@@ -75,102 +122,16 @@ public class ClassicUnity
 				);
 	}
 	
-	private String lines(String indentation, String... lines)
-	{
-		return String.join("\n"+indentation, lines);
-	}
 	
-	private String getComponents(Map<String,AccessKind> components)
-	{
-		return all(components.entrySet(),x -> "Read"+(x.getValue()==AccessKind.WRITE?"Write":"Only")+"<"+component(x.getKey())+">()", ",");
-	}
 	
-	private void generate(Function function)
+	private String generate(Function function)
 	{
 		namespaces.clear();
-		namespaces.add("UnityEngine");
-		
-		var map = queries.get(function);
-		
-		var queryName = map.keySet();
-		
-		var name = function.getName();
+		namespaces.add(UNITY_ENGINE);
 		
 		var statements = all(function.getStatements(), x->code(x), "\n			");
 		
-		var declareQueries = all(queryName, x -> "EntityQuery "+x+";", "\n		");
-		var getQueries = all(queryName, x-> x+" = GetEntityQuery("+getComponents(map.get(x))+");", "\n			");
-		
-		generate("Unity/Assets/Code/Systems/"+name+".cs",
-		
-		all(namespaces,x->"using "+x+";", "\n"),
-		"",
-		"namespace M",
-		"{",
-		"	public class "+name+" : MonoBehaviour",
-		"	{",
-		"		void FixedUpdate()",
-		"		{",
-		"			"+statements,
-		"		}",
-		"	}",
-		"}"
-		);
-	}
-	
-	private String checkPresent(Entry<String,AccessKind> entry, String entity)
-	{
-		var component = entry.getKey();
-		return component+"_"+entity+" == null ";
-	}
-	
-	private String toArray(Entry<String,AccessKind> entry, String entity)
-	{
-		var component = entry.getKey();
-		return "var "+component+"_"+entity+" = "+entity+".GetComponent<"+component(component)+">();";		
-	}
-	
-	private String dispose(Entry<String,AccessKind> entry, String entity)
-	{
-		var component = entry.getKey();
-		Type type;
-		if (library.components.containsKey(component))
-		{
-			type = library.components.get(component).getType();
-		}
-		else
-		{
-			type = game.components.get(component);
-		}
-		if (entry.getValue() == TAG || isBuffer(component))
-		{
-			return "";
-		}
-		else if (isBuffer(component) || !valueType(type))
-		{
-			return "";
-		}
-		else
-		{
-			return component+"s_"+entity+".Dispose();";
-		}
-	}
-	
-	private String toComponent(Entry<String,AccessKind> entry, String entity)
-	{
-		var component = entry.getKey();
-		if (entry.getValue() == TAG)
-		{
-			return "";
-		}
-		if (isBuffer(component))
-		{
-			return "var "+component+"_"+entity+" = EntityManager.GetBuffer<"+component(component)+">(entity_"+entity+");";
-		}
-		else
-		{
-			return "var "+component+"_"+entity+" = "+component+"s_"+entity+"["+entity+"_i];";
-		}
+		return statements;
 	}
 	
 	private String code(Statement statement)
@@ -179,7 +140,7 @@ public class ClassicUnity
 		{
 			var block = (BindingBlock) statement;
 			var name = block.getName();
-			if (library.blocks.get(name) == QUERY)
+			if (library.getBlock(name) == QUERY)
 			{
 				var a = ((Value)block.getExpression()).getName();
 				var query = queries.get(currentFunction).get(a);
@@ -188,10 +149,12 @@ public class ClassicUnity
 				"var transforms_"+a+" = Object.FindObjectsOfType<Transform>();",
 				"foreach (var "+a+" in transforms_"+a+")",
 				"{",
-				"	"+all(query.entrySet(), x->toArray(x,a), "\n				"),
-				"	if ("+all(query.entrySet(), x->checkPresent(x,a), " || ")+"){ continue; }",
+				"	"+all(query.keySet(), x->"var "+x+"_"+a+" = "+a+".GetComponent<"+component(x)+">();", "\n				"),
+				"	if ("+all(query.keySet(), x->x+"_"+a+" != null ", " && ")+"){",
 					"",
+				"   "+currentFunction.getName()+"_"+a+".Add("+a+".gameObject);",
 				"	"+all(block.getStatements(), x->code(x), "\n				"),
+				"   }",
 				"}");
 			}
 			
@@ -202,7 +165,7 @@ public class ClassicUnity
 			var block = (Block) statement;
 			var name = block.getName();
 			
-			if (library.blocks.get(name) == SELECTION)
+			if (library.getBlock(name) == SELECTION)
 			{
 				var condition = code(block.getExpression());
 				return 
@@ -212,7 +175,7 @@ public class ClassicUnity
 					"	"+all(block.getStatements(),x->code(x), "\n")+"\n"+
 					"}\n";
 			}
-			else if (library.blocks.get(name) == ITERATION)
+			else if (library.getBlock(name) == ITERATION)
 			{
 				var condition = code(block.getExpression());
 				return 
@@ -236,7 +199,6 @@ public class ClassicUnity
 			}
 			else if (atom instanceof Cell)
 			{
-				var cell = (Cell) atom;
 				return code(atom)+" = "+code(expression)+";";
 			}
 		}
@@ -245,19 +207,6 @@ public class ClassicUnity
 			return code(((Delegation) statement).getApplication())+";";
 		}
 		return "undefined";
-	}
-	
-	private boolean isBuffer(String component)
-	{
-		var standard = library.components.get(component);
-		if (standard != null)
-		{
-			return standard.getType() == ENTITY_LIST;
-		}
-		else
-		{
-			return game.components.get(component) == ENTITY_LIST;
-		}
 	}
 	
 	private String code(Expression e)
@@ -283,32 +232,37 @@ public class ClassicUnity
 			var component = cell.getComponent().getName();
 			var entity = cell.getEntity().getName();
 			
-			if (isBuffer(component))
-			{
-				return component+"_"+entity;
-			}
-			else
-			{
-				return component+"_"+entity+"."+field(component);
-			}
+			return component+"_"+entity+"."+field(component);
 		}
 		else if (e instanceof Application)
 		{
 			var application = (Application) e;
 			var name = application.getName();
 			var args = application.getArguments();
-			var standard = library.functions.get(name);
+			var standard = library.getFunction(name);
 			if (standard == IN)
 			{
-				return code(args.get(1))+".Value.Contains("+code(args.get(0))+".gameObject)";
+				return code(args.get(1))+".Contains("+code(args.get(0))+".gameObject)";
+			}
+			else if (standard == CREATE)
+			{
+				return "Instantiate("+code(args.get(0))+")";
+			}
+			else if (standard == DESTROY)
+			{
+				return "Destroy("+code(args.get(0))+")";
+			}
+			else if (standard == HAS)
+			{
+				return code(args.get(0))+".GetComponent<"+code(args.get(1))+">() != null";
 			}
 			else if (standard == REMOVE)
 			{
-				return "Destroy("+code(args.get(1))+".gameObject.GetComponent<"+code(args.get(0))+">());";
+				return "Destroy("+code(args.get(1))+".gameObject.GetComponent<"+code(args.get(0))+">())";
 			}
 			else if (standard == ADD)
 			{
-				return code(args.get(1))+".gameObject.AddComponent<"+code(args.get(0))+">();";
+				return code(args.get(1))+".gameObject.AddComponent<"+code(args.get(0))+">()";
 			}
 			else
 			{
@@ -321,7 +275,7 @@ public class ClassicUnity
 
 	private String variable(String name)
 	{
-		var found = library.variables.get(name);
+		var found = library.getValue(name);
 		if (found != null)
 		{
 			switch (found)
@@ -335,16 +289,16 @@ public class ClassicUnity
 				namespaces.add("Unity.Mathematics");
 				return "math.E";
 			case TIME_SINCE_START:
-				namespaces.add("UnityEngine");
-				return "UnityEngine.Time.deltaTime";
-			case FIXED_DELTA_TIME:
-				namespaces.add("UnityEngine");
+				namespaces.add(UNITY_ENGINE);
 				return "UnityEngine.Time.time";
+			case FIXED_DELTA_TIME:
+				namespaces.add(UNITY_ENGINE);
+				return "UnityEngine.Time.fixedDeltaTime";
 			case DELTA_TIME:
-				namespaces.add("UnityEngine");
+				namespaces.add(UNITY_ENGINE);
 				return "UnityEngine.Time.deltaTime";
 			case TIME_SCALE:
-				namespaces.add("UnityEngine");
+				namespaces.add(UNITY_ENGINE);
 				return "UnityEngine.Time.timeScale";
 			}
 			return "undefinedVariable";
@@ -357,6 +311,11 @@ public class ClassicUnity
 	
 	private String simpleComponent(String name)
 	{
+		var standard = library.getComponent(name);
+		if (standard != null)
+		{
+			return component(name);
+		}
 		for (var i = 0; i < csharpReserved.length; i++)
 		{
 			if (csharpReserved[i].equals(name))
@@ -369,7 +328,7 @@ public class ClassicUnity
 	
 	private String component(String name)
 	{
-		var found = library.components.get(name);
+		var found = library.getComponent(name);
 		if (found == null)
 		{
 			for (var i = 0; i < csharpReserved.length; i++)
@@ -385,11 +344,110 @@ public class ClassicUnity
 		{
 			switch (found)
 			{
-				case VELOCITY: { return "Rigidbody";}
-				case TIMEOUT: return "timeout";
-				case POSITION: { return "Transform";}
-				case COLLISIONS: {return "ClassicCollisions";}
-				case NUMBER_LABEL: {return "ClassicNumber";}
+			case VELOCITY: { return "Rigidbody";}
+			case TIMEOUT: return "timeout";
+			case POSITION: { return "Transform";}
+			case COLLISIONS: {return "ClassicCollisions";}
+			case NUMBER_LABEL: {return "ClassicNumber";}
+			case ACCELERATION:
+				break;
+			case ANCHOR:
+				break;
+			case ANGULAR_ACCELERATION:
+				break;
+			case ANGULAR_FORCE:
+				break;
+			case ANGULAR_VELOCITY:
+				break;
+			case AUDIOCLIP:
+				break;
+			case BACKGROUND:
+				break;
+			case BOND:
+				break;
+			case BREAK_ANGULAR_FORCE:
+				break;
+			case BREAK_FORCE:
+				break;
+			case CHILDREN:
+				break;
+			case COLLISION_EVENTS:
+				break;
+			case COLLISION_LAYER:
+				break;
+			case COLLISION_MASK:
+				break;
+			case CONVEX_HULL:
+				break;
+			case ELAPSED:
+				break;
+			case EMISSION:
+				break;
+			case EXTENTS:
+				break;
+			case FAR:
+				break;
+			case FORCE:
+				break;
+			case FOV:
+				break;
+			case FRICTION:
+				break;
+			case INERTIA:
+				break;
+			case INTENSITY:
+				break;
+			case KINEMATIC:
+				break;
+			case LOCKED_POSITION_X:
+				break;
+			case LOCKED_POSITION_Y:
+				break;
+			case LOCKED_POSITION_Z:
+				break;
+			case LOCKED_ROTATION:
+				break;
+			case LOOP:
+				break;
+			case MASS:
+				break;
+			case MATERIAL: return "MeshRenderer";
+			case MESH: return "MeshFilter";
+			case MESH_COLLIDER:
+				break;
+			case NEAR:
+				break;
+			case NO_COLLISION_RESPONSE:
+				break;
+			case PARENT:
+				break;
+			case PERSPECTIVE:
+				break;
+			case PITCH:
+				break;
+			case RADIUS:
+				break;
+			case RANGE:
+				break;
+			case RENDER_TEXTURE:
+				break;
+			case RESTITUTION:
+				break;
+			case ROTATION:
+				break;
+			case SCALE:
+				break;
+			case SKYBOX:
+				break;
+			case SPOT_ANGLE:
+				break;
+			case TIMER:
+				break;
+			case VIEWPORT:
+				break;
+			case VOLUME:
+				break;
+			case ANIMATOR: return "Animator";
 			}
 		}
 		return "undefined";
@@ -397,7 +455,7 @@ public class ClassicUnity
 	
 	private String field(String name)
 	{
-		var found = library.components.get(name);
+		var found = library.getComponent(name);
 		if (found == null)
 		{
 			return "Value";
@@ -406,11 +464,104 @@ public class ClassicUnity
 		{
 			switch (found)
 			{
-				case VELOCITY: return "velocity";
-				case TIMEOUT: return "Value";
-				case POSITION: return "position";
-				case COLLISIONS: return "Value";
-				case NUMBER_LABEL: return "Value";
+			case VELOCITY: return "velocity";
+			case TIMEOUT: return "Value";
+			case POSITION: return "position";
+			case COLLISIONS: return "Value";
+			case NUMBER_LABEL: return "Value";
+			case ACCELERATION: return "acceleration";
+			case ANCHOR: return "anchorPoint";
+			case ANGULAR_ACCELERATION: return "angularAcceleration";
+			case ANGULAR_FORCE: return "torque";
+			case ANGULAR_VELOCITY: return "angularVelocity";
+			case AUDIOCLIP: return "audioClip";
+			case BACKGROUND: return "backgroundColor";
+			case BOND: return "";
+			case BREAK_ANGULAR_FORCE:
+				break;
+			case BREAK_FORCE:
+				break;
+			case CHILDREN:
+				break;
+			case COLLISION_EVENTS:
+				break;
+			case COLLISION_LAYER:
+				break;
+			case COLLISION_MASK:
+				break;
+			case CONVEX_HULL:
+				break;
+			case ELAPSED:
+				break;
+			case EMISSION:
+				break;
+			case EXTENTS:
+				break;
+			case FAR:
+				break;
+			case FORCE:
+				break;
+			case FOV:
+				break;
+			case FRICTION:
+				break;
+			case INERTIA:
+				break;
+			case INTENSITY:
+				break;
+			case KINEMATIC:
+				break;
+			case LOCKED_POSITION_X:
+				break;
+			case LOCKED_POSITION_Y:
+				break;
+			case LOCKED_POSITION_Z:
+				break;
+			case LOCKED_ROTATION:
+				break;
+			case LOOP:
+				break;
+			case MASS:
+				break;
+			case MATERIAL: return "material";
+			case MESH: return "mesh";
+			case MESH_COLLIDER:
+				break;
+			case NEAR:
+				break;
+			case NO_COLLISION_RESPONSE:
+				break;
+			case PARENT:
+				break;
+			case PERSPECTIVE:
+				break;
+			case PITCH:
+				break;
+			case RADIUS:
+				break;
+			case RANGE:
+				break;
+			case RENDER_TEXTURE:
+				break;
+			case RESTITUTION:
+				break;
+			case ROTATION:
+				break;
+			case SCALE:
+				break;
+			case SKYBOX:
+				break;
+			case SPOT_ANGLE:
+				break;
+			case TIMER:
+				break;
+			case VIEWPORT:
+				break;
+			case VOLUME:
+				break;
+			case ANIMATOR: return "GetComponent<Animator>()";
+			default:
+				break;
 			}
 		}
 		return "undefined";
@@ -418,7 +569,7 @@ public class ClassicUnity
 	
 	private String application(String name)
 	{
-		var found = library.functions.get(name);
+		var found = library.getFunction(name);
 		if (found == null)
 		{
 			return "userDefinedFunction";
@@ -429,12 +580,12 @@ public class ClassicUnity
 			{
 				case ABS: return "Mathf.Abs";
 				case SIGN: return "Mathf.Sign";
-				case CEIL: return "";
-				case FLOOR: return "";
-				case ROUND: return "";
-				case CLAMP: return "";
-				case INTEGERPART: return "";
-				case FRACTIONALPART: return "";
+				case CEIL: return "Mathf.Ceil";
+				case FLOOR: return "Mathf.Floor";
+				case ROUND: return "Mathf.Round";
+				case CLAMP: return "Mathf.Clamp";
+				case INTEGERPART: return "M.Library.integerPart";
+				case FRACTIONALPART: return "M.Library.fractionalPart";
 				case INVERSE: return "";
 				case RECIPROCAL: return "";
 				
@@ -444,18 +595,18 @@ public class ClassicUnity
 				
 				case CROSS: return "";
 				case DOT: return "";
-				case NORM: return "";
+				case NORM: return "M.Library.norm";
 				case NORMALIZE: return "";
 				case DISTANCE: return "";
 				case REFLECT: return "";
 				case REFRACT: return "";
 						
-				case IN: return "";
-				case XYZ: return "";
+				case IN: return "M.Library.in";
+				case XYZ: return "M.Library.xyz";
 				
 				case SIN: return "Mathf.Sin";
 				case COS: return "Mathf.Cos";
-				case TAN: return "";
+				case TAN: return "Mathf.Tan";
 				case ASIN: return "";
 				case ACOS: return "";
 				case ATAN: return "";
@@ -465,7 +616,7 @@ public class ClassicUnity
 				case LOG10: return "";
 				case POW: return "";
 				case SQRT: return "";
-				case RANDOM: return "";
+				case RANDOM: return "M.Library.random";
 				
 				case CREATE: return "";
 				case DESTROY: return "";
@@ -478,30 +629,55 @@ public class ClassicUnity
 				case HALT: return "";
 				
 				
-				case SET_NUMBER: return "";
-				case SET_COLOR: return "";
-				case SET_STRING: return "";
+				case SET_NUMBER: return "M.Library.setFloat";
+				case SET_COLOR: return "M.Library.setColor";
 				
-				case SET_TRIGGER: return "";
-				case STATE_NAME: return "";
+				case SET_TRIGGER: return "M.Library.setTrigger";
+				case STATE_NAME: return "M.Library.stateName";
 				
-				case READ_TRIGGERED: return "";
-				case READ_NUMBER: return "";
+				case READ_TRIGGERED: return "M.Library.readTriggered";
+				case READ_NUMBER: return "M.Library.readNumber";
+				
+				case PLAY: return "M.Library.play";
+				
+			case ADDITION: return "";
+			case AND:
+				break;
+			case ASSIGNMENT:
+				break;
+			case DIVISION:
+				break;
+			case EQUAL:
+				break;
+			case GREATER:
+				break;
+			case GREATEROREQUAL:
+				break;
+			case INEQUAL:
+				break;
+			case LOWER:
+				break;
+			case LOWEROREQUAL:
+				break;
+			case MULTIPLICATION:
+				break;
+			case NOT:
+				break;
+			case OR:
+				break;
+			case SIZE:
+				break;
+			case SUBTRACTION:
+				break;
+			default:
+				break;
 				
 			}
 		}
 		return "undefined";
 	}
 	
-	private <T> String all(Collection<T> set, java.util.function.Function<T,String> f, String separator)
-	{
-		return String.join(separator, set.stream().map(f).collect(Collectors.toList()));
-	}
 	
-	private void generate(String path, String... lines)
-	{
-		fileSystem.generateFile(path, String.join("\n", lines));
-	}
 	
 	private String unity(Type type)
 	{
@@ -530,16 +706,16 @@ public class ClassicUnity
 				case UNIT:
 					return "void";
 				case COLOR:
-					namespaces.add("UnityEngine");
+					namespaces.add(UNITY_ENGINE);
 					return "Color";
 				case MESH:
-					namespaces.add("UnityEngine");
+					namespaces.add(UNITY_ENGINE);
 					return "Mesh";
 				case MATERIAL:
-					namespaces.add("UnityEngine");
+					namespaces.add(UNITY_ENGINE);
 					return "Material";
 				case ANIMATOR:
-					namespaces.add("UnityEngine");
+					namespaces.add(UNITY_ENGINE);
 					return "Animator";
 				case COMPONENT:
 					return "Error (type component shouldnt be)";
@@ -547,23 +723,15 @@ public class ClassicUnity
 					namespaces.add("UnityEngine.UI");
 					return "Font";
 				case TEXT:
-					namespaces.add("UnityEngine.UI");
+					namespaces.add(UNITY_ENGINE_UI);
 					return "Text";
 				case IMAGE:
 					namespaces.add("UnityEngine.UI");
 					return "Image";
 				case AUDIOCLIP:
-					return "AudioSource";
+					return "AudioClip";
 			}
 		}
 		return "Undefined";
-	}
-	
-	private boolean valueType(Type type)
-	{
-		return type == NUMBER || type == NUMBER2 || type == NUMBER3 ||
-				type == ENTITY || type == ENTITY_LIST || type == PROPOSITION;
-	}
-	
-	
+	}	
 }

@@ -1,24 +1,26 @@
 package m.library;
 
 import static java.util.Map.entry;
-import static m.library.Symbol.*;
+import static m.library.symbols.Value.*;
+import static m.library.symbols.Component.*;
+import static m.library.symbols.Function.*;
+import static m.library.symbols.Block.*;
 import static m.library.types.AtomicType.*;
-import static m.library.types.TypeVariable.A;
-import static m.validation.problems.BindingProblem.BindingProblemKind.*;
-import static m.validation.problems.TypingProblem.TypingProblemKind.*;
 
 import java.util.ArrayList;
 import java.util.Map;
 
+import m.library.symbols.Block;
+import m.library.symbols.Component;
+import m.library.symbols.Function;
+import m.library.symbols.Value;
 import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.library.types.TypeVariable;
-import m.validation.problems.BindingProblem;
 import m.validation.problems.Problem;
-import m.validation.problems.TypingProblem;
-import m.validation.problems.BindingProblem.BindingProblemKind;
-import m.validation.problems.TypingProblem.TypingProblemKind;
+import m.validation.problems.errors.*;
+import m.validation.problems.warnings.*;
 
 public enum Library {
 	
@@ -75,8 +77,8 @@ public enum Library {
 		entry("lockedRotation", LOCKED_ROTATION),
 		
 		
-		entry("mesh", Symbol.MESH),
-		entry("material", Symbol.MATERIAL),
+		entry("mesh", Component.MESH),
+		entry("material", Component.MATERIAL),
 		
 		entry("number", NUMBER_LABEL),
 		
@@ -95,10 +97,11 @@ public enum Library {
 		entry("intensity", INTENSITY),
 		
 		
-		entry("audioClip", Symbol.AUDIOCLIP),
+		entry("audioClip", Component.AUDIOCLIP),
 		entry("volume", VOLUME),
 		entry("pitch", PITCH),
-		entry("loop", LOOP)),
+		entry("loop", LOOP),
+		entry("animator", Component.ANIMATOR)),
 	Map.ofEntries(
 		entry("abs", ABS),
 		entry("sign", SIGN),
@@ -171,13 +174,14 @@ public enum Library {
 		
 		entry("setNumber", SET_NUMBER),
 		entry("setColor", SET_COLOR),
-		entry("setString", SET_STRING),
 		
 		entry("setTrigger", SET_TRIGGER),
 		entry("stateName", STATE_NAME),
 		
 		entry("readTriggered", READ_TRIGGERED),
 		entry("readNumber", READ_NUMBER),
+		
+		entry("play", PLAY),
 		
 		entry("=", ASSIGNMENT)),
 	Map.ofEntries(
@@ -203,17 +207,17 @@ public enum Library {
 		entry(TEXT, "text"),
 		entry(IMAGE, "image"),
 		entry(AtomicType.AUDIOCLIP, "audioClip"),
-		entry(ANIMATOR, "animator"),
+		entry(AtomicType.ANIMATOR, "animator"),
 		
 		entry(ENTITY, "entity"),
 		entry(ENTITY_LIST, "entityList")
 	), Map.of(
-		REDEFINED, "Redefined symbol",
-		UNDEFINED, "Undefined symbol"
-	),
-	Map.of(
-		INCOMPATIBLE, "Incompatible types",
-		INDETERMINATE, "Indeterminate type"
+		RedefinedSymbol.class, "Redefined symbol",
+		UndefinedSymbol.class, "Undefined symbol",
+		IncompatibleTypes.class, "Incompatible types",
+		UndecidableType.class, "Undecidable type",
+		UnusedValue.class, "Unused value",
+		ReadOnly.class, "Cannot assign new value to read only constant"
 	)),
 	EUSKARA(
 			Map.ofEntries(
@@ -268,8 +272,8 @@ public enum Library {
 				entry("biraezina", LOCKED_ROTATION),
 				
 				
-				entry("malla", Symbol.MESH),
-				entry("materiala", Symbol.MATERIAL),
+				entry("malla", Component.MESH),
+				entry("materiala", Component.MATERIAL),
 				
 				entry("zenbakia", NUMBER_LABEL),
 				
@@ -288,7 +292,7 @@ public enum Library {
 				entry("intentsitatea", INTENSITY),
 				
 				
-				entry("audioKlipa", Symbol.AUDIOCLIP),
+				entry("audioKlipa", Component.AUDIOCLIP),
 				entry("bolumena", VOLUME),
 				entry("tonua", PITCH),
 				entry("errepikapena", LOOP)),
@@ -364,13 +368,14 @@ public enum Library {
 				
 				entry("ezarriZenbakia", SET_NUMBER),
 				entry("ezarriKolorea", SET_COLOR),
-				entry("ezarriKatea", SET_STRING),
 				
 				entry("ezarriKakoa", SET_TRIGGER),
 				entry("egoeraIzena", STATE_NAME),
 				
 				entry("irakurriKakoa", READ_TRIGGERED),
 				entry("irakurriZenbakia", READ_NUMBER),
+				
+				entry("hasi", PLAY),
 				
 				entry("=", ASSIGNMENT)),
 			Map.ofEntries(
@@ -396,66 +401,60 @@ public enum Library {
 					entry(TEXT, "testua"),
 					entry(IMAGE, "irudia"),
 					entry(AtomicType.AUDIOCLIP, "audioKlipa"),
-					entry(ANIMATOR, "animatzailea"),
+					entry(AtomicType.ANIMATOR, "animatzailea"),
 					
 					entry(ENTITY, "entitatea"),
 					entry(ENTITY_LIST, "entitateLista")
 			), Map.of(
-				REDEFINED, "Simbolo hau dagoeneko definitua dago",
-				UNDEFINED, "Simbolo honek ez du definiziorik"
-			),
-			Map.of(
-				INCOMPATIBLE, "Izaera bateraezinak",
-				INDETERMINATE, "Izaera indeterminatua"
+				RedefinedSymbol.class, "Simbolo hau dagoeneko definitua dago",
+				UndefinedSymbol.class, "Simbolo honek ez du definiziorik",
+				IncompatibleTypes.class, "Izaera bateraezinak",
+				UndecidableType.class, "Izaera ezarriezina",
+				UnusedValue.class, "Erabilerarik gabeko balioa",
+				ReadOnly.class, "Ezin konstante baten balioa berrezarri"
 			))
 	;
 
-	public Map<String, Symbol> variables;
-	public Map<String, Symbol> components;
-	public Map<String, Symbol> functions;
-	public Map<String, Symbol> blocks;
+	Map<String, Value> variables;
+	Map<String, Component> components;
+	Map<String, Function> functions;
+	Map<String, Block> blocks;
 	
 	Map<Type, String> atomicTypes;
-	Map<BindingProblemKind, String> bindingProblem;
-	Map<TypingProblemKind, String> typingProblem;
+	Map<Class<? extends Problem>, String> problems;
 	
-	Library(Map<String, Symbol> variables, Map<String, Symbol> components, Map<String, Symbol> functions, Map<String, Symbol> blocks, Map<Type, String> atomicTypes, Map<BindingProblemKind, String> bindingProblem, Map<TypingProblemKind, String> typingProblem)
+	Library(Map<String, Value> variables, Map<String, Component> components, Map<String, Function> functions, Map<String, Block> blocks, Map<Type, String> atomicTypes, Map<Class<? extends Problem>, String> problems)
 	{
 		this.variables = variables;
 		this.components = components;
 		this.functions = functions;
 		this.blocks = blocks;
 		this.atomicTypes = atomicTypes;
-		this.bindingProblem = bindingProblem;
-		this.typingProblem = typingProblem;
-	}
-
-	public String message(Problem problem)
-	{
-		if (problem instanceof BindingProblem)
-		{
-			return bindingProblem.get(((BindingProblem) problem).getKind());
-		}
-		else if (problem instanceof TypingProblem)
-		{
-			var base = typingProblem.get(((TypingProblem) problem).getKind());
-			var node = ((TypingProblem) problem).getNode();
-			var root = node;
-			
-			if (((TypingProblem) problem).getKind() == INCOMPATIBLE)
-			{
-				while (root.binding != null)
-				{
-					root = root.binding.node;
-				}
-				base += "\n" + name(node.typing.getType()) + " - " + name(root.typing.getType());
-			}
-			return base;
-		}
-		return "error";
+		this.problems = problems;
 	}
 	
-	private String name(Type type)
+	public Value getValue(String name) {
+		return variables.get(name);
+	}
+	
+	public Component getComponent(String name) {
+		return components.get(name);
+	}
+	
+	public Function getFunction(String name) {
+		return functions.get(name);
+	}
+	
+	public Block getBlock(String name) {
+		return blocks.get(name);
+	}
+	
+	public String getProblem(Class<? extends Problem> problem)
+	{
+		return problems.get(problem);
+	}
+	
+	public String name(Type type)
 	{
 		if (type instanceof AtomicType)
 		{
