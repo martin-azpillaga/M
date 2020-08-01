@@ -27,12 +27,11 @@ public class MGenerator extends AbstractGenerator
 		var game = validator.getGame();
 		if (game != null)
 		{
-			var queries = new HashMap<Function, HashMap<String, HashMap<String, AccessKind>>>();
 			for (var function : game.functions.keySet())
 			{
-				queries.put(function, collectQueries(function));
+				game.queries.put(function, collectQueries(function));
 			}
-			new ClassicUnity().generate(game, queries, fileSystem);
+			new ClassicUnity().generate(game, fileSystem);
 		}
 	}
 	

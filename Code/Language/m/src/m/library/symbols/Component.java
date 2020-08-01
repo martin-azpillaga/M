@@ -1,0 +1,101 @@
+package m.library.symbols;
+
+import static m.library.types.AtomicType.COLOR;
+import static m.library.types.AtomicType.ENTITY;
+import static m.library.types.AtomicType.ENTITY_LIST;
+import static m.library.types.AtomicType.IMAGE;
+import static m.library.types.AtomicType.NUMBER;
+import static m.library.types.AtomicType.NUMBER2;
+import static m.library.types.AtomicType.NUMBER3;
+import static m.library.types.AtomicType.PROPOSITION;
+
+import m.library.types.AtomicType;
+import m.library.types.Type;
+
+public enum Component implements Symbol{
+	
+	POSITION(NUMBER3),
+	ROTATION(NUMBER3),
+	SCALE(NUMBER3),
+	PARENT(ENTITY),
+	CHILDREN(ENTITY_LIST),
+	
+	
+	MASS(NUMBER),
+	INERTIA(NUMBER),
+	KINEMATIC(PROPOSITION),
+	
+	VELOCITY(NUMBER3),
+	ACCELERATION(NUMBER3),
+	FORCE(NUMBER3),
+	ANGULAR_VELOCITY(NUMBER3),
+	ANGULAR_ACCELERATION(NUMBER3),
+	ANGULAR_FORCE(NUMBER3),
+	
+	COLLISIONS(ENTITY_LIST),
+	COLLISION_LAYER(NUMBER),
+	COLLISION_MASK(NUMBER),
+	RESTITUTION(NUMBER),
+	FRICTION(NUMBER),
+	COLLISION_EVENTS(PROPOSITION),
+	NO_COLLISION_RESPONSE(PROPOSITION),
+	
+	RADIUS(NUMBER),
+	EXTENTS(NUMBER3),
+	MESH_COLLIDER(PROPOSITION),
+	CONVEX_HULL(PROPOSITION),
+	
+	BOND(ENTITY),
+	ANCHOR(NUMBER3),
+	BREAK_FORCE(NUMBER),
+	BREAK_ANGULAR_FORCE(NUMBER),
+	
+	LOCKED_POSITION_X(PROPOSITION),
+	LOCKED_POSITION_Y(PROPOSITION),
+	LOCKED_POSITION_Z(PROPOSITION),
+	LOCKED_ROTATION(PROPOSITION),
+	
+	
+	MESH(AtomicType.MESH),
+	MATERIAL(AtomicType.MATERIAL),
+	
+	NUMBER_LABEL(NUMBER),
+	
+	NEAR(NUMBER),
+	FAR(NUMBER),
+	FOV(NUMBER),
+	PERSPECTIVE(PROPOSITION),
+	BACKGROUND(COLOR),
+	SKYBOX(AtomicType.MATERIAL),
+	VIEWPORT(NUMBER2),
+	RENDER_TEXTURE(IMAGE),
+	
+	EMISSION(COLOR),
+	SPOT_ANGLE(NUMBER),
+	RANGE(NUMBER),
+	INTENSITY(NUMBER),
+	
+	
+	TIMER(NUMBER),
+	ELAPSED(NUMBER),
+	TIMEOUT(PROPOSITION),
+	
+	
+	AUDIOCLIP(AtomicType.AUDIOCLIP),
+	VOLUME(NUMBER),
+	PITCH(NUMBER),
+	LOOP(PROPOSITION),
+	
+	ANIMATOR(AtomicType.ANIMATOR)
+	;
+	
+	Type type;
+	
+	Component (Type type) {
+		this.type = type;
+	}
+	
+	public Type getType() {
+		return type;
+	}
+}

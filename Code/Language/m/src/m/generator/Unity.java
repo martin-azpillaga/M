@@ -11,7 +11,10 @@ import m.library.types.*;
 import m.m.*;
 
 import static m.generator.AccessKind.*;
-import static m.library.Symbol.*;
+import static m.library.symbols.Value.*;
+import static m.library.symbols.Component.*;
+import static m.library.symbols.Function.*;
+import static m.library.symbols.Block.*;
 import static m.library.types.AtomicType.*;
 
 enum AccessKind
@@ -174,9 +177,11 @@ public class Unity
 	{
 		var component = entry.getKey();
 		Type type;
-		if (library.components.containsKey(component))
+		
+		var standard = library.getComponent(component);
+		if (standard != null)
 		{
-			type = library.components.get(component).getType();
+			type = standard.getType();
 		}
 		else
 		{
@@ -205,9 +210,10 @@ public class Unity
 	{
 		var component = entry.getKey();
 		Type type;
-		if (library.components.containsKey(component))
+		var standard = library.getComponent(component);
+		if (standard != null)
 		{
-			type = library.components.get(component).getType();
+			type = standard.getType();
 		}
 		else
 		{
@@ -250,7 +256,7 @@ public class Unity
 		{
 			var block = (BindingBlock) statement;
 			var name = block.getName();
-			if (library.blocks.get(name) == QUERY)
+			if (library.getBlock(name) == QUERY)
 			{
 				var a = ((Value)block.getExpression()).getName();
 				var query = queries.get(currentFunction).get(a);
@@ -277,7 +283,7 @@ public class Unity
 			var block = (Block) statement;
 			var name = block.getName();
 			
-			if (library.blocks.get(name) == SELECTION)
+			if (library.getBlock(name) == SELECTION)
 			{
 				var condition = code(block.getExpression());
 				return 
@@ -287,7 +293,7 @@ public class Unity
 					"	"+all(block.getStatements(),x->code(x), "\n")+"\n"+
 					"}\n";
 			}
-			else if (library.blocks.get(name) == ITERATION)
+			else if (library.getBlock(name) == ITERATION)
 			{
 				var condition = code(block.getExpression());
 				return 
@@ -325,7 +331,7 @@ public class Unity
 	
 	private boolean isBuffer(String component)
 	{
-		var standard = library.components.get(component);
+		var standard = library.getComponent(component);
 		if (standard != null)
 		{
 			return standard.getType() == ENTITY_LIST;
@@ -373,7 +379,7 @@ public class Unity
 			var application = (Application) e;
 			var name = application.getName();
 			var args = application.getArguments();
-			var standard = library.functions.get(name);
+			var standard = library.getFunction(name);
 			if (standard == IN)
 			{
 				return code(args.get(1))+".Contains(entity_"+code(args.get(0))+")";
@@ -397,7 +403,7 @@ public class Unity
 
 	private String variable(String name)
 	{
-		var found = library.variables.get(name);
+		var found = library.getValue(name);
 		if (found != null)
 		{
 			switch (found)
@@ -412,10 +418,10 @@ public class Unity
 				return "math.E";
 			case TIME_SINCE_START:
 				namespaces.add("UnityEngine");
-				return "UnityEngine.Time.deltaTime";
+				return "UnityEngine.Time.time";
 			case FIXED_DELTA_TIME:
 				namespaces.add("UnityEngine");
-				return "UnityEngine.Time.time";
+				return "UnityEngine.Time.fixedDeltaTime";
 			case DELTA_TIME:
 				namespaces.add("UnityEngine");
 				return "UnityEngine.Time.deltaTime";
@@ -445,7 +451,7 @@ public class Unity
 	
 	private String component(String name)
 	{
-		var found = library.components.get(name);
+		var found = library.getComponent(name);
 		if (found == null)
 		{
 			for (var i = 0; i < csharpReserved.length; i++)
@@ -473,7 +479,7 @@ public class Unity
 	
 	private String field(String name)
 	{
-		var found = library.components.get(name);
+		var found = library.getComponent(name);
 		if (found == null)
 		{
 			return "Value";
@@ -494,7 +500,7 @@ public class Unity
 	
 	private String application(String name)
 	{
-		var found = library.functions.get(name);
+		var found = library.getFunction(name);
 		if (found == null)
 		{
 			return "userDefinedFunction";

@@ -11,4 +11,5 @@ public class Game {
 	public Map<String, Type> components = new HashMap<>();
 	public Map<Function, FunctionType> functions = new HashMap<>();
 	public Library library;
+	public HashMap<Function, HashMap<String, HashMap<String, AccessKind>>> queries = new HashMap<>();
 }

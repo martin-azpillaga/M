@@ -1,6 +1,5 @@
 package m.validation;
 
-
 import java.util.*;
 
 import org.eclipse.xtext.EcoreUtil2;
@@ -9,12 +8,10 @@ import org.eclipse.xtext.validation.Check;
 import m.generator.Game;
 import m.library.Library;
 import m.m.*;
-import m.validation.problems.BindingProblem;
 import m.validation.problems.Problem;
-import m.validation.problems.TypingProblem;
+import m.validation.problems.errors.ReadOnly;
 
 import static m.m.MPackage.Literals.*;
-
 
 public class MValidator extends AbstractMValidator
 {
@@ -22,6 +19,8 @@ public class MValidator extends AbstractMValidator
 	Map<Library,List<Problem>> map;
 	Map<Library, Context> contexts;
 	Game game;
+	Library currentLibrary;
+	List<Problem> currentProblems;
 	
 	public Game getGame()
 	{
@@ -38,10 +37,11 @@ public class MValidator extends AbstractMValidator
 		
 		for (var library : Library.values())
 		{
-			var problems = new ArrayList<Problem>();
-			context = new Context(problems, library);
-			map.put(library, problems);
+			currentProblems = new ArrayList<Problem>();
+			context = new Context(currentProblems, library);
+			map.put(library, currentProblems);
 			contexts.put(library, context);
+			this.currentLibrary = library;
 			
 			for (var function : file.getFunctions())
 			{
@@ -139,7 +139,13 @@ public class MValidator extends AbstractMValidator
 			
 			if (atom instanceof Value)
 			{
-				context.declareVariable((Value)atom);
+				var value = (Value) atom;
+				
+				if (currentLibrary.getValue(value.getName()) != null)
+				{
+					currentProblems.add(new ReadOnly(value));
+				}
+				context.declareVariable(value);
 			}
 			else
 			{
@@ -202,25 +208,19 @@ public class MValidator extends AbstractMValidator
 	{
 		for (var problem : problems)
 		{
-			var message = library.message(problem);
-			
-			if (problem instanceof BindingProblem)
+			for (var message : problem.messages(library))
 			{
-				var bindingProblem = (BindingProblem) problem;
-				var source = bindingProblem.getSource();
-				var feature = bindingProblem.getFeature();
-				
-				error(message, source, feature);
-			}
-			else if (problem instanceof TypingProblem)
-			{
-				var typingProblem = (TypingProblem) problem;
-				var node = typingProblem.getNode();
-				error(message, node.expression, null);
-				while (node.binding != null)
+				switch (message.severity)
 				{
-					node = node.binding.node;
-					error(message, node.expression, null);
+				case INFO:
+					info(message.message, message.source, message.feature);
+					break;
+				case WARNING:
+					warning(message.message, message.source, message.feature);
+					break;
+				case ERROR:
+					error(message.message, message.source, message.feature);
+					break;
 				}
 			}
 		}
