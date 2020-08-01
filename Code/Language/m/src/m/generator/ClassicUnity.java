@@ -1,12 +1,13 @@
 package m.generator;
 
 import static m.generator.Writer.*;
-import static m.library.symbols.Function.*;
 import static m.library.symbols.Block.*;
 import static m.library.types.AtomicType.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.xtext.generator.IFileSystemAccess2;
@@ -58,6 +59,7 @@ public class ClassicUnity
 		"using UnityEngine.UI;",
 		"using UnityEngine.InputSystem;",
 		"using System.Collections.Generic;",
+		"using Unity.Mathematics;",
 		"",
 		"namespace M",
 		"{",
@@ -107,7 +109,11 @@ public class ClassicUnity
 		namespaces.add(UNITY_ENGINE);
 		
 		var field = type != UNIT? "public "+ unity(type) + " Value;" : "";
-		
+		var extra = "";
+		if (type == INPUT)
+		{
+			extra = "void Start() {Value.Enable();}";
+		}
 		return
 				lines("",
 				all(namespaces,x->"using "+x+";", "\n"),
@@ -117,6 +123,7 @@ public class ClassicUnity
 				"    public class "+simpleComponent(name)+" : MonoBehaviour",
 				"    {",
 				"        "+field,
+				"        "+extra,
 				"    }",
 				"}"
 				);
@@ -214,12 +221,17 @@ public class ClassicUnity
 		if (e instanceof Binary)
 		{
 			var binary = (Binary) e;
-			return code(binary.getLeft())+" "+binary.getOperator()+" "+code(binary.getRight());
+			var list = new ArrayList<Expression>();
+			list.add(binary.getLeft());
+			list.add(binary.getRight());
+			return application(library.getFunction(binary.getOperator()), list);
 		}
 		else if (e instanceof Unary)
 		{
 			var unary = (Unary) e;
-			return unary.getOperator()+" "+code(unary.getExpression());
+			var list = new ArrayList<Expression>();
+			list.add(unary.getExpression());
+			return application(library.getFunction(unary.getOperator()), list);
 		}
 		else if (e instanceof Value)
 		{
@@ -240,34 +252,94 @@ public class ClassicUnity
 			var name = application.getName();
 			var args = application.getArguments();
 			var standard = library.getFunction(name);
-			if (standard == IN)
-			{
-				return code(args.get(1))+".Contains("+code(args.get(0))+".gameObject)";
-			}
-			else if (standard == CREATE)
-			{
-				return "Instantiate("+code(args.get(0))+")";
-			}
-			else if (standard == DESTROY)
-			{
-				return "Destroy("+code(args.get(0))+")";
-			}
-			else if (standard == HAS)
-			{
-				return code(args.get(0))+".GetComponent<"+code(args.get(1))+">() != null";
-			}
-			else if (standard == REMOVE)
-			{
-				return "Destroy("+code(args.get(1))+".gameObject.GetComponent<"+code(args.get(0))+">())";
-			}
-			else if (standard == ADD)
-			{
-				return code(args.get(1))+".gameObject.AddComponent<"+code(args.get(0))+">()";
-			}
-			else
-			{
-				return application(name)+"("+all(args,x->code(x), ", ")+")";
-			}
+			return application(standard, args);
+		}
+		return "undefined";
+	}
+	
+	private String application(m.library.symbols.Function standard, List<Expression> args)
+	{
+		String x = "",y = "",z = "";
+		if (!args.isEmpty())
+		{
+			x = code(args.get(0));
+		}
+		if (args.size() >= 2)
+		{
+			y = code(args.get(1));
+		}
+		if (args.size() >= 3)
+		{
+			z = code(args.get(2));
+		}
+		
+		switch (standard)
+		{
+		case ABS: return "math.abs("+x+")";
+		case ACOS: return "math.acos("+x+")";
+		case ADD: return y+".gameObject.AddComponent<"+x+">()";
+		case ADDITION: return x+"+"+y;
+		case AND: return x+"&&"+y;
+		case ASIN: return "math.asin("+x+")";
+		case ASSIGNMENT: return x+"="+y;
+		case ATAN: return "math.atan("+x+")";
+		case CEIL: return "math.ceil("+x+")";
+		case CLAMP: return "math.clamp("+x+","+y+","+z+")";
+		case COS: return "math.cos("+x+")";
+		case CREATE: return "Instantiate("+x+")";
+		case CROSS: return "math.cross("+x+","+y+")";
+		case DESTROY: return "Destroy("+x+".gameObject)";
+		case DISTANCE: return "math.distance("+x+","+y+")";
+		case DIVISION: return x+"/"+y;
+		case DOT: return "math.dot("+x+","+y+")";
+		case EQUAL: return x+"=="+y;
+		case EXP: return "math.exp("+x+")";
+		case EXP10: return "math.exp10("+x+")";
+		case FLOOR: return "math.floor("+x+")";
+		case FRACTIONALPART: return "math.frac("+x+")";
+		case GREATER: return x+">"+y;
+		case GREATEROREQUAL: return x+">="+y;
+		case HALT: return "Application.Quit()";
+		case HAS: return "("+y+".gameObject.GetComponent<"+x+">() != null)";
+		case IN: return y+".Contains("+x+".gameObject)";
+		case INEQUAL: return x+"!="+y;
+		case INTEGERPART: return "((int) "+x+")";
+		case INVERSE: return "(1/"+x+")";
+		case LERP: return "math.lerp("+x+","+y+","+z+")";
+		case LOG: return "math.log("+x+")";
+		case LOG10: return "math.log10("+x+")";
+		case LOWER: return x+"<"+y;
+		case LOWEROREQUAL: return x+"<="+y;
+		case MULTIPLICATION: return x+"*"+y;
+		case NORM: return "math.length("+x+")";
+		case NORMALIZE: return "math.normalize("+x+")";
+		case NOT: return "!"+x;
+		case OR: return x+"||"+y;
+		case PLAY: return x+".GetComponent<AudioSource>().PlayOneShot("+y+")";
+		case POW: return "math.pow("+x+","+y+")";
+		case PROPORTIONAL: return "undefined";
+		case RANDOM: return "UnityEngine.Random.Range("+x+".x,"+x+".y)";
+		case READ_NUMBER: return x+".ReadValue<float>()";
+		case READ_TRIGGERED: return x+".triggered";
+		case RECIPROCAL: return "-"+x;
+		case REFLECT: return "math.reflect("+x+","+y+")";
+		case REFRACT: return "math.refract("+x+","+y+")";
+		case REMOVE: return "Destroy("+y+".gameObject.GetComponent<"+x+">())";
+		case ROUND: return "math.round("+x+")";
+		case SET_COLOR: return x+".SetColor("+y+","+z+")";
+		case SET_NUMBER: return x+".SetFloat("+y+","+z+")";
+		case SET_TRIGGER: return x+".SetTrigger("+y+")";
+		case SIGN: return "math.sign("+x+")";
+		case SIN: return "math.sin("+x+")";
+		case SIZE: return x+".Count()";
+		case SQRT: return "math.sqrt("+x+")";
+		case STATE_NAME: return "undefined";
+		case SUBTRACTION: return x+"-"+y;
+		case TAN: return "math.tan("+x+")";
+		case UNLERP: return "math.unlerp("+x+","+y+","+z+")";
+		case WRITE: return "Debug.Log("+x+")";
+		case WRITEERROR: return "Debug.Error("+x+")";
+		case XYZ: return "new Vector3("+x+","+y+","+z+")";
 		}
 		return "undefined";
 	}
@@ -347,8 +419,6 @@ public class ClassicUnity
 			case VELOCITY: { return "Rigidbody";}
 			case TIMEOUT: return "timeout";
 			case POSITION: { return "Transform";}
-			case COLLISIONS: {return "ClassicCollisions";}
-			case NUMBER_LABEL: {return "ClassicNumber";}
 			case ACCELERATION:
 				break;
 			case ANCHOR:
@@ -467,8 +537,6 @@ public class ClassicUnity
 			case VELOCITY: return "velocity";
 			case TIMEOUT: return "Value";
 			case POSITION: return "position";
-			case COLLISIONS: return "Value";
-			case NUMBER_LABEL: return "Value";
 			case ACCELERATION: return "acceleration";
 			case ANCHOR: return "anchorPoint";
 			case ANGULAR_ACCELERATION: return "angularAcceleration";
@@ -565,119 +633,7 @@ public class ClassicUnity
 			}
 		}
 		return "undefined";
-	}
-	
-	private String application(String name)
-	{
-		var found = library.getFunction(name);
-		if (found == null)
-		{
-			return "userDefinedFunction";
-		}
-		else
-		{
-			switch (found)
-			{
-				case ABS: return "Mathf.Abs";
-				case SIGN: return "Mathf.Sign";
-				case CEIL: return "Mathf.Ceil";
-				case FLOOR: return "Mathf.Floor";
-				case ROUND: return "Mathf.Round";
-				case CLAMP: return "Mathf.Clamp";
-				case INTEGERPART: return "M.Library.integerPart";
-				case FRACTIONALPART: return "M.Library.fractionalPart";
-				case INVERSE: return "";
-				case RECIPROCAL: return "";
-				
-				case LERP: return "";
-				case UNLERP: return "";
-				case PROPORTIONAL: return "";
-				
-				case CROSS: return "";
-				case DOT: return "";
-				case NORM: return "M.Library.norm";
-				case NORMALIZE: return "";
-				case DISTANCE: return "";
-				case REFLECT: return "";
-				case REFRACT: return "";
-						
-				case IN: return "M.Library.in";
-				case XYZ: return "M.Library.xyz";
-				
-				case SIN: return "Mathf.Sin";
-				case COS: return "Mathf.Cos";
-				case TAN: return "Mathf.Tan";
-				case ASIN: return "";
-				case ACOS: return "";
-				case ATAN: return "";
-				case EXP: return "";
-				case LOG: return "";
-				case EXP10: return "";
-				case LOG10: return "";
-				case POW: return "";
-				case SQRT: return "";
-				case RANDOM: return "M.Library.random";
-				
-				case CREATE: return "";
-				case DESTROY: return "";
-				case ADD: return "";
-				case REMOVE: return "";
-				case HAS: return "";
-				
-				case WRITE: return "";
-				case WRITEERROR: return "";
-				case HALT: return "";
-				
-				
-				case SET_NUMBER: return "M.Library.setFloat";
-				case SET_COLOR: return "M.Library.setColor";
-				
-				case SET_TRIGGER: return "M.Library.setTrigger";
-				case STATE_NAME: return "M.Library.stateName";
-				
-				case READ_TRIGGERED: return "M.Library.readTriggered";
-				case READ_NUMBER: return "M.Library.readNumber";
-				
-				case PLAY: return "M.Library.play";
-				
-			case ADDITION: return "";
-			case AND:
-				break;
-			case ASSIGNMENT:
-				break;
-			case DIVISION:
-				break;
-			case EQUAL:
-				break;
-			case GREATER:
-				break;
-			case GREATEROREQUAL:
-				break;
-			case INEQUAL:
-				break;
-			case LOWER:
-				break;
-			case LOWEROREQUAL:
-				break;
-			case MULTIPLICATION:
-				break;
-			case NOT:
-				break;
-			case OR:
-				break;
-			case SIZE:
-				break;
-			case SUBTRACTION:
-				break;
-			default:
-				break;
-				
-			}
-		}
-		return "undefined";
-	}
-	
-	
+	}	
 	
 	private String unity(Type type)
 	{
@@ -697,6 +653,7 @@ public class ClassicUnity
 				case PROPOSITION:
 					return "bool";
 				case ENTITY_LIST:
+					namespaces.add("System.Collections.Generic");
 					return "List<GameObject>";
 				case INPUT:
 					namespaces.add("UnityEngine.InputSystem");
