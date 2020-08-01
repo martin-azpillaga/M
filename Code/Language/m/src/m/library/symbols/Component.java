@@ -32,7 +32,6 @@ public enum Component implements Symbol{
 	ANGULAR_ACCELERATION(NUMBER3),
 	ANGULAR_FORCE(NUMBER3),
 	
-	COLLISIONS(ENTITY_LIST),
 	COLLISION_LAYER(NUMBER),
 	COLLISION_MASK(NUMBER),
 	RESTITUTION(NUMBER),
@@ -58,8 +57,6 @@ public enum Component implements Symbol{
 	
 	MESH(AtomicType.MESH),
 	MATERIAL(AtomicType.MATERIAL),
-	
-	NUMBER_LABEL(NUMBER),
 	
 	NEAR(NUMBER),
 	FAR(NUMBER),

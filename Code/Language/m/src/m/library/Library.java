@@ -53,7 +53,6 @@ public enum Library {
 		entry("angularAcceleration", ANGULAR_ACCELERATION),
 		entry("angularForce", ANGULAR_FORCE),
 		
-		entry("collisions", COLLISIONS),
 		entry("collisionLayer", COLLISION_LAYER),
 		entry("collisionMask", COLLISION_MASK),
 		entry("restitution", RESTITUTION),
@@ -79,8 +78,6 @@ public enum Library {
 		
 		entry("mesh", Component.MESH),
 		entry("material", Component.MATERIAL),
-		
-		entry("number", NUMBER_LABEL),
 		
 		entry("near", NEAR),
 		entry("far", FAR),
@@ -248,7 +245,6 @@ public enum Library {
 				entry("azelerazioAngeluarra", ANGULAR_ACCELERATION),
 				entry("indarAngeluarra", ANGULAR_FORCE),
 				
-				entry("kolisioak", COLLISIONS),
 				entry("kolisioGeruza", COLLISION_LAYER),
 				entry("kolisioMaskara", COLLISION_MASK),
 				entry("restituzioa", RESTITUTION),
@@ -274,8 +270,6 @@ public enum Library {
 				
 				entry("malla", Component.MESH),
 				entry("materiala", Component.MATERIAL),
-				
-				entry("zenbakia", NUMBER_LABEL),
 				
 				entry("gertu", NEAR),
 				entry("urruti", FAR),

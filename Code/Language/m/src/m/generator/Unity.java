@@ -470,8 +470,6 @@ public class Unity
 				case VELOCITY: {namespaces.add("Unity.Physics"); return "PhysicsVelocity";}
 				case TIMEOUT: return "timeout";
 				case POSITION: {namespaces.add("Unity.Transforms"); return "Translation";}
-				case COLLISIONS: {return "Collisions";}
-				case NUMBER_LABEL: {return "number";}
 			}
 		}
 		return "undefined";
@@ -491,8 +489,6 @@ public class Unity
 				case VELOCITY: {namespaces.add("Unity.Physics"); return "Linear";}
 				case TIMEOUT: return "Value";
 				case POSITION: return "Value";
-				case COLLISIONS: return "Value";
-				case NUMBER_LABEL: return "Value";
 			}
 		}
 		return "undefined";
