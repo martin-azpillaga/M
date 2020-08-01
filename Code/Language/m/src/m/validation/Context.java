@@ -1,13 +1,13 @@
 package m.validation;
 
-import static m.validation.problems.BindingProblem.BindingProblemKind.*;
-import static m.validation.problems.TypingProblem.TypingProblemKind.*;
 import static m.validation.rules.Binding.BindingReason.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
 
 import org.eclipse.emf.ecore.EObject;
@@ -17,8 +17,10 @@ import m.generator.Game;
 import m.library.Library;
 import m.library.types.*;
 import m.m.*;
-import m.validation.problems.BindingProblem;
 import m.validation.problems.Problem;
+import m.validation.problems.errors.RedefinedSymbol;
+import m.validation.problems.errors.UndefinedSymbol;
+import m.validation.problems.warnings.UnusedValue;
 import m.validation.rules.Typing;
 import static m.validation.rules.Typing.TypingReason.*;
 import static m.m.MPackage.Literals.*;
@@ -30,6 +32,8 @@ public class Context {
 	Map<String, Cell> userComponents;
 	Map<String, Function> userFunctions;
 	Library library;
+	
+	Set<Value> accessedValues;
 	
 	Inference inference;
 	List<Problem> problems;
@@ -44,18 +48,19 @@ public class Context {
 		this.userComponents = new HashMap<>();
 		
 		this.stack = new Stack<>();
+		this.accessedValues = new HashSet<Value>();
 	}
 	
 	public void declareVariable(Value value)
 	{
 		var name = value.getName();
-		if (library.variables.containsKey(name) || library.components.containsKey(name) || library.functions.containsKey(name))
+		if (library.getValue(name) != null || library.getComponent(name) != null || library.getFunction(name) != null)
 		{
-			problems.add(new BindingProblem(value, VALUE__NAME, REDEFINED));
+			problems.add(new RedefinedSymbol(value, VALUE__NAME));
 		}
 		else if (userComponents.containsKey(name) || userFunctions.containsKey(name))
 		{
-			problems.add(new BindingProblem(value, VALUE__NAME, REDEFINED));			
+			problems.add(new RedefinedSymbol(value, VALUE__NAME));			
 		}
 		else
 		{
@@ -75,15 +80,15 @@ public class Context {
 	{
 		var name = cell.getComponent().getName();
 
-		if (library.variables.containsKey(name) || library.functions.containsKey(name))
+		if (library.getValue(name) != null || library.getFunction(name) != null)
 		{
-			problems.add(new BindingProblem(cell, CELL__COMPONENT, REDEFINED));
+			problems.add(new RedefinedSymbol(cell, CELL__COMPONENT));
 		}
 		else if (userFunctions.containsKey(name))
 		{
-			problems.add(new BindingProblem(cell, CELL__COMPONENT, REDEFINED));
+			problems.add(new RedefinedSymbol(cell, CELL__COMPONENT));
 		}
-		else if (!userComponents.containsKey(name) && !library.components.containsKey(name))
+		else if (!userComponents.containsKey(name) && library.getComponent(name) == null)
 		{
 			userComponents.put(name, cell);
 		}
@@ -93,13 +98,13 @@ public class Context {
 	{
 		var name = function.getName();
 		
-		if (library.components.containsKey(name) || library.components.containsKey(name) || library.functions.containsKey(name))
+		if (library.getValue(name) != null || library.getComponent(name) != null || library.getFunction(name) != null)
 		{
-			problems.add(new BindingProblem(function, FUNCTION__NAME, REDEFINED));
+			problems.add(new RedefinedSymbol(function, FUNCTION__NAME));
 		}
 		else if (userComponents.containsKey(name) || userFunctions.containsKey(name))
 		{
-			problems.add(new BindingProblem(function, FUNCTION__NAME, REDEFINED));
+			problems.add(new RedefinedSymbol(function, FUNCTION__NAME));
 		}
 		else
 		{
@@ -113,7 +118,7 @@ public class Context {
 	{
 		var name = value.getName();
 		
-		var standard = library.variables.get(name);
+		var standard = library.getValue(name);
 		if (standard != null)
 		{
 			inference.type(value, new Typing(standard.getType(), LIBRARY_VARIABLE, standard));
@@ -121,6 +126,7 @@ public class Context {
 		else if (userVariables.containsKey(name) && userVariables.get(name) != value)
 		{
 			inference.bind(value, userVariables.get(name), SAME_VARIABLE);
+			accessedValues.add(userVariables.get(name));
 		}
 		else if (userComponents.containsKey(name))
 		{
@@ -128,14 +134,14 @@ public class Context {
 		}
 		else
 		{
-			problems.add(new BindingProblem(value, VALUE__NAME, UNDEFINED));
+			problems.add(new UndefinedSymbol(value, VALUE__NAME));
 		}
 	}
 	
 	public void accessComponent(Cell cell)
 	{
 		var name = cell.getComponent().getName();
-		var standard = library.components.get(name);
+		var standard = library.getComponent(name);
 		if (standard != null)
 		{
 			inference.type(cell, new Typing(standard.getType(), LIBRARY_COMPONENT, standard));
@@ -153,20 +159,20 @@ public class Context {
 	
 	public void accessBlock(String name, Expression expression, EObject source, EStructuralFeature feature)
 	{
-		var block = library.blocks.get(name);
+		var block = library.getBlock(name);
 		if (block != null)
 		{
 			inference.type(expression, new Typing(block.getType(), LIBRARY_BLOCK, block));
 		}
 		else
 		{
-			problems.add(new BindingProblem(source, feature, UNDEFINED));
+			problems.add(new UndefinedSymbol(source, feature));
 		}
 	}
 	
 	public void accessFunction(String name, Expression[] arguments, Expression source, EStructuralFeature feature)
 	{
-		var function = library.functions.get(name);
+		var function = library.getFunction(name);
 		if (function == null)
 		{
 			var userFunction = userFunctions.get(name);
@@ -184,12 +190,12 @@ public class Context {
 				}
 				else
 				{
-					problems.add(new BindingProblem(source, feature, UNDEFINED));
+					problems.add(new UndefinedSymbol(source, feature));
 				}
 			}
 			else
 			{
-				problems.add(new BindingProblem(source, feature, UNDEFINED));
+				problems.add(new UndefinedSymbol(source, feature));
 			}
 		}
 		else
@@ -250,11 +256,10 @@ public class Context {
 			}
 			else
 			{
-				problems.add(new BindingProblem(source, feature, UNDEFINED));
+				problems.add(new UndefinedSymbol(source, feature));
 			}
 		}
 	}
-	
 	
 	
 	public void push()
@@ -264,7 +269,18 @@ public class Context {
 	
 	public void pop()
 	{
-		userVariables = stack.pop();
+		var popped = stack.pop();
+		for (var value : userVariables.keySet())
+		{
+			if (!popped.containsKey(value))
+			{
+				if (!accessedValues.contains(userVariables.get(value)))
+				{
+					problems.add(new UnusedValue(userVariables.get(value)));
+				}	
+			}
+		}
+		userVariables = popped;
 	}
 	
 	public void checkConsistency()

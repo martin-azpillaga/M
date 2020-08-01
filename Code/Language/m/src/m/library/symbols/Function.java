@@ -1,95 +1,24 @@
-package m.library;
+package m.library.symbols;
 
-import static m.library.types.AtomicType.*;
+import static m.library.types.AtomicType.ANIMATOR;
+import static m.library.types.AtomicType.COLOR;
+import static m.library.types.AtomicType.COMPONENT;
+import static m.library.types.AtomicType.ENTITY;
+import static m.library.types.AtomicType.ENTITY_LIST;
+import static m.library.types.AtomicType.INPUT;
+import static m.library.types.AtomicType.NUMBER;
+import static m.library.types.AtomicType.NUMBER2;
+import static m.library.types.AtomicType.NUMBER3;
+import static m.library.types.AtomicType.PROPOSITION;
+import static m.library.types.AtomicType.STRING;
+import static m.library.types.AtomicType.UNIT;
 import static m.library.types.TypeVariable.A;
+
 import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
 
-public enum Symbol {
-	QUERY(ENTITY),
-	SELECTION(PROPOSITION),
-	ITERATION(PROPOSITION),
-	
-	POSITION(NUMBER3),
-	ROTATION(NUMBER3),
-	SCALE(NUMBER3),
-	PARENT(ENTITY),
-	CHILDREN(ENTITY_LIST),
-	
-	
-	MASS(NUMBER),
-	INERTIA(NUMBER),
-	KINEMATIC(PROPOSITION),
-	
-	VELOCITY(NUMBER3),
-	ACCELERATION(NUMBER3),
-	FORCE(NUMBER3),
-	ANGULAR_VELOCITY(NUMBER3),
-	ANGULAR_ACCELERATION(NUMBER3),
-	ANGULAR_FORCE(NUMBER3),
-	
-	COLLISIONS(ENTITY_LIST),
-	COLLISION_LAYER(NUMBER),
-	COLLISION_MASK(NUMBER),
-	RESTITUTION(NUMBER),
-	FRICTION(NUMBER),
-	COLLISION_EVENTS(PROPOSITION),
-	NO_COLLISION_RESPONSE(PROPOSITION),
-	
-	RADIUS(NUMBER),
-	EXTENTS(NUMBER3),
-	MESH_COLLIDER(PROPOSITION),
-	CONVEX_HULL(PROPOSITION),
-	
-	BOND(ENTITY),
-	ANCHOR(NUMBER3),
-	BREAK_FORCE(NUMBER),
-	BREAK_ANGULAR_FORCE(NUMBER),
-	
-	LOCKED_POSITION_X(PROPOSITION),
-	LOCKED_POSITION_Y(PROPOSITION),
-	LOCKED_POSITION_Z(PROPOSITION),
-	LOCKED_ROTATION(PROPOSITION),
-	
-	
-	MESH(AtomicType.MESH),
-	MATERIAL(AtomicType.MATERIAL),
-	
-	NUMBER_LABEL(NUMBER),
-	
-	NEAR(NUMBER),
-	FAR(NUMBER),
-	FOV(NUMBER),
-	PERSPECTIVE(PROPOSITION),
-	BACKGROUND(COLOR),
-	SKYBOX(AtomicType.MATERIAL),
-	VIEWPORT(NUMBER2),
-	RENDER_TEXTURE(IMAGE),
-	
-	EMISSION(COLOR),
-	SPOT_ANGLE(NUMBER),
-	RANGE(NUMBER),
-	INTENSITY(NUMBER),
-	
-	DELTA_TIME(NUMBER),
-	FIXED_DELTA_TIME(NUMBER),
-	TIME_SINCE_START(NUMBER),
-	TIME_SCALE(NUMBER),
-	TIMER(NUMBER),
-	ELAPSED(NUMBER),
-	TIMEOUT(PROPOSITION),
-	
-	
-	AUDIOCLIP(AtomicType.AUDIOCLIP),
-	VOLUME(NUMBER),
-	PITCH(NUMBER),
-	LOOP(PROPOSITION),
-	
-	EPSILON(NUMBER),
-	PI(NUMBER),
-	E(NUMBER),
-	
+public enum Function implements Symbol{
 	ABS(NUMBER, NUMBER),
 	SIGN(NUMBER, NUMBER),
 	CEIL(NUMBER, NUMBER),
@@ -159,9 +88,8 @@ public enum Symbol {
 	HALT(UNIT),
 	
 	
-	SET_NUMBER(UNIT, AtomicType.MATERIAL, NUMBER),
-	SET_COLOR(UNIT, AtomicType.MATERIAL, COLOR),
-	SET_STRING(UNIT, AtomicType.MATERIAL, STRING),
+	SET_NUMBER(UNIT, AtomicType.MATERIAL, STRING, NUMBER),
+	SET_COLOR(UNIT, AtomicType.MATERIAL, STRING, COLOR),
 	
 	SET_TRIGGER(UNIT, ANIMATOR, STRING),
 	STATE_NAME(STRING, ANIMATOR),
@@ -169,16 +97,14 @@ public enum Symbol {
 	READ_TRIGGERED(PROPOSITION, INPUT),
 	READ_NUMBER(NUMBER, INPUT),
 	
-	ASSIGNMENT(UNIT, A, A)
+	PLAY(UNIT, ENTITY, AtomicType.AUDIOCLIP),
+	
+	ASSIGNMENT(UNIT, A, A),
 	;
 	
 	Type type;
 	
-	Symbol (Type type) {
-		this.type = type;
-	}
-	
-	Symbol (Type returnType, Type... parameters) {
+	Function (Type returnType, Type... parameters) {
 		this.type = new FunctionType(parameters, returnType);
 	}
 	
