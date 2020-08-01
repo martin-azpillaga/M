@@ -416,107 +416,59 @@ public class ClassicUnity
 		{
 			switch (found)
 			{
-			case VELOCITY: { return "Rigidbody";}
+			case VELOCITY: return "Rigidbody";
 			case TIMEOUT: return "timeout";
-			case POSITION: { return "Transform";}
-			case ACCELERATION:
-				break;
-			case ANCHOR:
-				break;
-			case ANGULAR_ACCELERATION:
-				break;
-			case ANGULAR_FORCE:
-				break;
-			case ANGULAR_VELOCITY:
-				break;
-			case AUDIOCLIP:
-				break;
-			case BACKGROUND:
-				break;
-			case BOND:
-				break;
-			case BREAK_ANGULAR_FORCE:
-				break;
-			case BREAK_FORCE:
-				break;
-			case CHILDREN:
-				break;
-			case COLLISION_EVENTS:
-				break;
-			case COLLISION_LAYER:
-				break;
-			case COLLISION_MASK:
-				break;
-			case CONVEX_HULL:
-				break;
-			case ELAPSED:
-				break;
-			case EMISSION:
-				break;
-			case EXTENTS:
-				break;
-			case FAR:
-				break;
-			case FORCE:
-				break;
-			case FOV:
-				break;
-			case FRICTION:
-				break;
-			case INERTIA:
-				break;
-			case INTENSITY:
-				break;
-			case KINEMATIC:
-				break;
-			case LOCKED_POSITION_X:
-				break;
-			case LOCKED_POSITION_Y:
-				break;
-			case LOCKED_POSITION_Z:
-				break;
-			case LOCKED_ROTATION:
-				break;
-			case LOOP:
-				break;
-			case MASS:
-				break;
+			case POSITION: return "Transform";
+			case ACCELERATION: return "Rigidbody";
+			case ANCHOR: return "ConfigurableJoint";
+			case ANGULAR_ACCELERATION: return "Rigidbody";
+			case ANGULAR_FORCE: return "Rigidbody";
+			case ANGULAR_VELOCITY: return "Rigidbody";
+			case AUDIOCLIP: return "AudioSource";
+			case BACKGROUND: return "Camera";
+			case BOND: return "ConfigurableJoint";
+			case BREAK_ANGULAR_FORCE: return "ConfigurableJoint";
+			case BREAK_FORCE: return "ConfigurableJoint";
+			case CHILDREN: return "Transform";
+			case COLLISION_EVENTS: return "Collider";
+			case COLLISION_LAYER: return "Collider";
+			case COLLISION_MASK: return "Collider";
+			case CONVEX_HULL: return "Collider";
+			case ELAPSED: return "Elapsed";
+			case EMISSION: return "Light";
+			case EXTENTS: return "BoxCollider";
+			case FAR: return "Camera";
+			case FORCE: return "Rigidbody";
+			case FOV: return "Camera";
+			case FRICTION: return "Collider";
+			case INERTIA: return "Rigidbody";
+			case INTENSITY: return "Light";
+			case KINEMATIC: return "Rigidbody";
+			case LOCKED_POSITION_X: return "Rigidbody";
+			case LOCKED_POSITION_Y: return "Rigidbody";
+			case LOCKED_POSITION_Z: return "Rigidbody";
+			case LOCKED_ROTATION: return "Rigidbody";
+			case LOOP: return "AudioSource";
+			case MASS: return "Rigidbody";
 			case MATERIAL: return "MeshRenderer";
 			case MESH: return "MeshFilter";
-			case MESH_COLLIDER:
-				break;
-			case NEAR:
-				break;
-			case NO_COLLISION_RESPONSE:
-				break;
-			case PARENT:
-				break;
-			case PERSPECTIVE:
-				break;
-			case PITCH:
-				break;
-			case RADIUS:
-				break;
-			case RANGE:
-				break;
-			case RENDER_TEXTURE:
-				break;
-			case RESTITUTION:
-				break;
-			case ROTATION:
-				break;
-			case SCALE:
-				break;
-			case SKYBOX:
-				break;
-			case SPOT_ANGLE:
-				break;
-			case TIMER:
-				break;
-			case VIEWPORT:
-				break;
-			case VOLUME:
-				break;
+			case MESH_COLLIDER: return "MeshCollider";
+			case NEAR: return "Camera";
+			case NO_COLLISION_RESPONSE: return "Collider";
+			case PARENT: return "Transform";
+			case PERSPECTIVE: return "Camera";
+			case PITCH: return "AudioSource";
+			case RADIUS: return "SphereCollider";
+			case RANGE: return "Light";
+			case RENDER_TEXTURE: return "Camera";
+			case RESTITUTION: return "Collider";
+			case ROTATION: return "Transform";
+			case SCALE: return "Transform";
+			case SKYBOX: return "Camera";
+			case SPOT_ANGLE: return "Light";
+			case TIMER: return "Timer";
+			case VIEWPORT: return "Camera";
+			case VOLUME: return "AudioSource";
 			case ANIMATOR: return "Animator";
 			}
 		}
@@ -545,91 +497,49 @@ public class ClassicUnity
 			case AUDIOCLIP: return "audioClip";
 			case BACKGROUND: return "backgroundColor";
 			case BOND: return "";
-			case BREAK_ANGULAR_FORCE:
-				break;
-			case BREAK_FORCE:
-				break;
-			case CHILDREN:
-				break;
-			case COLLISION_EVENTS:
-				break;
-			case COLLISION_LAYER:
-				break;
-			case COLLISION_MASK:
-				break;
-			case CONVEX_HULL:
-				break;
-			case ELAPSED:
-				break;
-			case EMISSION:
-				break;
-			case EXTENTS:
-				break;
-			case FAR:
-				break;
-			case FORCE:
-				break;
-			case FOV:
-				break;
-			case FRICTION:
-				break;
-			case INERTIA:
-				break;
-			case INTENSITY:
-				break;
-			case KINEMATIC:
-				break;
-			case LOCKED_POSITION_X:
-				break;
-			case LOCKED_POSITION_Y:
-				break;
-			case LOCKED_POSITION_Z:
-				break;
-			case LOCKED_ROTATION:
-				break;
-			case LOOP:
-				break;
-			case MASS:
-				break;
+			case BREAK_ANGULAR_FORCE: return "";
+			case BREAK_FORCE: return "";
+			case CHILDREN: return "";
+			case COLLISION_EVENTS: return "";
+			case COLLISION_LAYER: return "";
+			case COLLISION_MASK: return "";
+			case CONVEX_HULL: return "";
+			case ELAPSED: return "";
+			case EMISSION: return "";
+			case EXTENTS: return "";
+			case FAR: return "";
+			case FORCE: return "";
+			case FOV: return "";
+			case FRICTION: return "";
+			case INERTIA: return "";
+			case INTENSITY: return "";
+			case KINEMATIC: return "";
+			case LOCKED_POSITION_X: return "";
+			case LOCKED_POSITION_Y: return "";
+			case LOCKED_POSITION_Z: return "";
+			case LOCKED_ROTATION: return "";
+			case LOOP: return "";
+			case MASS: return "mass";
 			case MATERIAL: return "material";
 			case MESH: return "mesh";
-			case MESH_COLLIDER:
-				break;
-			case NEAR:
-				break;
-			case NO_COLLISION_RESPONSE:
-				break;
-			case PARENT:
-				break;
-			case PERSPECTIVE:
-				break;
-			case PITCH:
-				break;
-			case RADIUS:
-				break;
-			case RANGE:
-				break;
-			case RENDER_TEXTURE:
-				break;
-			case RESTITUTION:
-				break;
-			case ROTATION:
-				break;
-			case SCALE:
-				break;
-			case SKYBOX:
-				break;
-			case SPOT_ANGLE:
-				break;
-			case TIMER:
-				break;
-			case VIEWPORT:
-				break;
-			case VOLUME:
-				break;
+			case MESH_COLLIDER: return "";
+			case NEAR: return "";
+			case NO_COLLISION_RESPONSE: return "";
+			case PARENT: return "";
+			case PERSPECTIVE: return "";
+			case PITCH: return "";
+			case RADIUS: return "";
+			case RANGE: return "";
+			case RENDER_TEXTURE: return "";
+			case RESTITUTION: return "";
+			case ROTATION: return "";
+			case SCALE: return "";
+			case SKYBOX: return "";
+			case SPOT_ANGLE: return "";
+			case TIMER: return "";
+			case VIEWPORT: return "";
+			case VOLUME: return "";
 			case ANIMATOR: return "GetComponent<Animator>()";
-			default:
-				break;
 			}
 		}
 		return "undefined";
