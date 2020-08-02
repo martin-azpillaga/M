@@ -202,7 +202,7 @@ public class Inference {
 			{
 				problems.add(new UndecidableType(criticalNode));
 			}
-			else if (originalType != null && originalType.getType() != rootType.getType())
+			else if (originalType != null && rootType != null && originalType.getType() != rootType.getType())
 			{
 				problems.add(new IncompatibleTypes(criticalNode));
 			}
@@ -217,11 +217,20 @@ public class Inference {
 		{
 			var node = nodeOfComponent.get(component);
 			var root = node;
+			Type type = null;
 			while (root.binding != null)
 			{
+				if (root.typing != null)
+				{
+					type = root.typing.getType();
+				}
 				root = root.binding.node;
 			}
-			game.components.put(component, root.typing.getType());
+			if (root.typing != null)
+			{
+				type = root.typing.getType();
+			}
+			game.components.put(component, type);
 		}
 		
 		for (var userFunction : userFunctions.entrySet())
