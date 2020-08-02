@@ -43,37 +43,17 @@ public enum Library {
 		
 		entry("mass", MASS),
 		entry("inertia", INERTIA),
-		entry("kinematic",KINEMATIC),
 		
 		entry("velocity",VELOCITY),
-		entry("acceleration", ACCELERATION),
-		entry("force", FORCE),
 		entry("angularVelocity", ANGULAR_VELOCITY),
-		entry("angularAcceleration", ANGULAR_ACCELERATION),
-		entry("angularForce", ANGULAR_FORCE),
-		
-		entry("collisionLayer", COLLISION_LAYER),
-		entry("collisionMask", COLLISION_MASK),
 		entry("restitution", RESTITUTION),
 		entry("friction", FRICTION),
-		entry("collisionEvents", COLLISION_EVENTS),
-		entry("noCollisionResponse", NO_COLLISION_RESPONSE),
 		
+		entry("crossable", NO_COLLISION_RESPONSE),
 		entry("radius", RADIUS),
 		entry("extents", EXTENTS),
-		entry("meshCollider", MESH_COLLIDER),
-		entry("convexHull", CONVEX_HULL),
-		
-		entry("bond", BOND),
-		entry("anchor", ANCHOR),
-		entry("breakForce", BREAK_FORCE),
-		entry("breakAngularForce", BREAK_ANGULAR_FORCE),
-		
-		entry("lockedPositionX", LOCKED_POSITION_X),
-		entry("lockedPositionY", LOCKED_POSITION_Y),
-		entry("lockedPositionZ", LOCKED_POSITION_Z),
-		entry("lockedRotation", LOCKED_ROTATION),
-		
+		entry("boxCenter", BOX_CENTER),
+		entry("sphereCenter", SPHERE_CENTER),
 		
 		entry("mesh", Component.MESH),
 		entry("material", Component.MATERIAL),
@@ -182,6 +162,9 @@ public enum Library {
 		
 		entry("play", PLAY),
 		entry("overlaps", OVERLAPS),
+		entry("addForce", ADD_FORCE),
+		entry("addTorque", ADD_TORQUE),
+		entry("closestPoint", CLOSEST_POINT),
 		
 		entry("=", ASSIGNMENT)),
 	Map.ofEntries(
@@ -239,36 +222,16 @@ public enum Library {
 				
 				entry("masa", MASS),
 				entry("inertzia", INERTIA),
-				entry("kinematikoa",KINEMATIC),
-				
 				entry("abiadura",VELOCITY),
-				entry("azelerazioa", ACCELERATION),
-				entry("indarra", FORCE),
 				entry("abiaduraAngeluarra", ANGULAR_VELOCITY),
-				entry("azelerazioAngeluarra", ANGULAR_ACCELERATION),
-				entry("indarAngeluarra", ANGULAR_FORCE),
-				
-				entry("kolisioGeruza", COLLISION_LAYER),
-				entry("kolisioMaskara", COLLISION_MASK),
 				entry("restituzioa", RESTITUTION),
 				entry("marruskadura", FRICTION),
-				entry("kolisioAdierazleak", COLLISION_EVENTS),
-				entry("kolisioReakzioEza", NO_COLLISION_RESPONSE),
 				
+				entry("gurutzagarria", NO_COLLISION_RESPONSE),
 				entry("erradioa", RADIUS),
 				entry("dimentsioak", EXTENTS),
-				entry("mallaItxura", MESH_COLLIDER),
-				entry("ahurra", CONVEX_HULL),
-				
-				entry("lotura", BOND),
-				entry("loturaPuntua", ANCHOR),
-				entry("hausteIndarra", BREAK_FORCE),
-				entry("hausteIndarAngeluarra", BREAK_ANGULAR_FORCE),
-				
-				entry("mugiezinaX", LOCKED_POSITION_X),
-				entry("mugiezinaY", LOCKED_POSITION_Y),
-				entry("mugiezinaZ", LOCKED_POSITION_Z),
-				entry("biraezina", LOCKED_ROTATION),
+				entry("kaixaZentrua", BOX_CENTER),
+				entry("esferaZentrua", SPHERE_CENTER),
 				
 				
 				entry("malla", Component.MESH),
@@ -377,6 +340,9 @@ public enum Library {
 				
 				entry("hasi", PLAY),
 				entry("gainean", OVERLAPS),
+				entry("gehituIndarra", ADD_FORCE),
+				entry("gehituIndarAngeluarra", ADD_TORQUE),
+				entry("puntuGertukoena", CLOSEST_POINT),
 				
 				entry("=", ASSIGNMENT)),
 			Map.ofEntries(
