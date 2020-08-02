@@ -94,8 +94,13 @@ public class ClassicUnity
 		{
 			for (var query : game.queries.get(function).keySet())
 			{
+				var tooltip = new HashSet<String>();
+				for (var component : game.queries.get(function).get(query).keySet())
+				{
+					tooltip.add(simpleComponent(component));
+				}
 				systems += lines("",
-					"[Tooltip(\""+all(game.queries.get(function).get(query).keySet(), x->simpleComponent(x), ", ")+"\")]",
+					"[Tooltip(\""+all(tooltip, x->x, ", ")+"\")]",
 					"public List<GameObject> " + function.getName() + "_" + query + ";\n");
 			}
 		}
@@ -365,6 +370,8 @@ public class ClassicUnity
 		case WRITEERROR: return "Debug.Error("+x+")";
 		case XYZ: return "new Vector3("+x+","+y+","+z+")";
 		case OVERLAPS: return x+".GetComponents<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".position+(x as BoxCollider).center, (x as BoxCollider).size, "+x+".rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".position+(x as SphereCollider).center, (x as SphereCollider).radius, Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
+		case TO_NUMBER3: return x+".eulerAngles";
+		case TO_QUATERNION: return "Quaternion.Euler("+x+".x, "+x+".y, "+x+".z)";
 		}
 		return "undefined";
 	}
@@ -454,7 +461,6 @@ public class ClassicUnity
 			case BOND: return "ConfigurableJoint";
 			case BREAK_ANGULAR_FORCE: return "ConfigurableJoint";
 			case BREAK_FORCE: return "ConfigurableJoint";
-			case CHILDREN: return "Transform";
 			case COLLISION_EVENTS: return "Collider";
 			case COLLISION_LAYER: return "Collider";
 			case COLLISION_MASK: return "Collider";
@@ -513,7 +519,7 @@ public class ClassicUnity
 			{
 			case VELOCITY: return "velocity";
 			case TIMEOUT: return "Value";
-			case POSITION: return "position";
+			case POSITION: return "localPosition";
 			case ACCELERATION: return "acceleration";
 			case ANCHOR: return "anchorPoint";
 			case ANGULAR_ACCELERATION: return "angularAcceleration";
@@ -524,7 +530,6 @@ public class ClassicUnity
 			case BOND: return "connectedBody";
 			case BREAK_ANGULAR_FORCE: return "breakTorque";
 			case BREAK_FORCE: return "breakForce";
-			case CHILDREN: return "GetComponent<Transform>()";
 			case COLLISION_EVENTS: return "isTrigger";
 			case COLLISION_LAYER: return "collisionLayer";
 			case COLLISION_MASK: return "collisionMask";
@@ -550,15 +555,15 @@ public class ClassicUnity
 			case MESH_COLLIDER: return "";
 			case NEAR: return "nearPlane";
 			case NO_COLLISION_RESPONSE: return "isTrigger";
-			case PARENT: return "GetParent()";
+			case PARENT: return "parent";
 			case PERSPECTIVE: return "";
 			case PITCH: return "pitch";
 			case RADIUS: return "radius";
 			case RANGE: return "range";
 			case RENDER_TEXTURE: return "renderTexture";
 			case RESTITUTION: return "restitution";
-			case ROTATION: return "rotation";
-			case SCALE: return "scale";
+			case ROTATION: return "localEulerAngles";
+			case SCALE: return "localScale";
 			case SKYBOX: return "";
 			case SPOT_ANGLE: return "spotAngle";
 			case TIMER: return "Value";
@@ -622,6 +627,8 @@ public class ClassicUnity
 					return "Image";
 				case AUDIOCLIP:
 					return "AudioClip";
+				case QUATERNION:
+					return "Quaternion";
 			}
 		}
 		return "Undefined";
