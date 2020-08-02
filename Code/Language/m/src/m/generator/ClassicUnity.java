@@ -562,7 +562,7 @@ public class ClassicUnity
 			case RANGE: return "range";
 			case RENDER_TEXTURE: return "renderTexture";
 			case RESTITUTION: return "restitution";
-			case ROTATION: return "localEulerAngles";
+			case ROTATION: return "localRotation";
 			case SCALE: return "localScale";
 			case SKYBOX: return "";
 			case SPOT_ANGLE: return "spotAngle";
