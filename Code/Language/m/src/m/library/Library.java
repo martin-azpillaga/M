@@ -178,6 +178,7 @@ public enum Library {
 		entry("readNumber", READ_NUMBER),
 		
 		entry("quaternion", TO_QUATERNION),
+		entry("angles", TO_NUMBER3),
 		
 		entry("play", PLAY),
 		entry("overlaps", OVERLAPS),
@@ -209,7 +210,8 @@ public enum Library {
 		entry(AtomicType.ANIMATOR, "animator"),
 		
 		entry(ENTITY, "entity"),
-		entry(ENTITY_LIST, "entityList")
+		entry(ENTITY_LIST, "entityList"),
+		entry(QUATERNION, "quaternion")
 	), Map.of(
 		RedefinedSymbol.class, "Redefined symbol",
 		UndefinedSymbol.class, "Undefined symbol",
@@ -371,6 +373,7 @@ public enum Library {
 				entry("irakurriZenbakia", READ_NUMBER),
 				
 				entry("kuaternioia", TO_QUATERNION),
+				entry("angeluak", TO_NUMBER3),
 				
 				entry("hasi", PLAY),
 				entry("gainean", OVERLAPS),
@@ -402,7 +405,8 @@ public enum Library {
 					entry(AtomicType.ANIMATOR, "animatzailea"),
 					
 					entry(ENTITY, "entitatea"),
-					entry(ENTITY_LIST, "entitateLista")
+					entry(ENTITY_LIST, "entitateLista"),
+					entry(QUATERNION, "kuaternioia")
 			), Map.of(
 				RedefinedSymbol.class, "Simbolo hau dagoeneko definitua dago",
 				UndefinedSymbol.class, "Simbolo honek ez du definiziorik",
