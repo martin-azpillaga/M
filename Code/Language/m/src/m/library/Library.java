@@ -179,6 +179,7 @@ public enum Library {
 		entry("readNumber", READ_NUMBER),
 		
 		entry("play", PLAY),
+		entry("overlaps", OVERLAPS),
 		
 		entry("=", ASSIGNMENT)),
 	Map.ofEntries(
@@ -370,6 +371,7 @@ public enum Library {
 				entry("irakurriZenbakia", READ_NUMBER),
 				
 				entry("hasi", PLAY),
+				entry("gainean", OVERLAPS),
 				
 				entry("=", ASSIGNMENT)),
 			Map.ofEntries(

@@ -87,6 +87,8 @@ public enum Function implements Symbol{
 	WRITEERROR(UNIT, A),
 	HALT(UNIT),
 	
+	OVERLAPS(ENTITY_LIST, ENTITY),
+	
 	
 	SET_NUMBER(UNIT, AtomicType.MATERIAL, STRING, NUMBER),
 	SET_COLOR(UNIT, AtomicType.MATERIAL, STRING, COLOR),
