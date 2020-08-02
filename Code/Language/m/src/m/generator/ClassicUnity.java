@@ -60,6 +60,8 @@ public class ClassicUnity
 		"using UnityEngine.InputSystem;",
 		"using System.Collections.Generic;",
 		"using Unity.Mathematics;",
+		"using System;",
+		"using System.Linq;",
 		"",
 		"namespace M",
 		"{",
@@ -153,7 +155,7 @@ public class ClassicUnity
 				var query = queries.get(currentFunction).get(a);
 				
 				return lines("			",
-				"var transforms_"+a+" = Object.FindObjectsOfType<Transform>();",
+				"var transforms_"+a+" = FindObjectsOfType<Transform>();",
 				"foreach (var "+a+" in transforms_"+a+")",
 				"{",
 				"	"+all(query.keySet(), x->"var "+x+"_"+a+" = "+a+".GetComponent<"+component(x)+">();", "\n				"),
@@ -277,7 +279,7 @@ public class ClassicUnity
 		{
 		case ABS: return "math.abs("+x+")";
 		case ACOS: return "math.acos("+x+")";
-		case ADD: return y+".gameObject.AddComponent<"+x+">()";
+		case ADD: return "if ("+y+".GetComponent<"+x+">() == null){"+y+".gameObject.AddComponent<"+x+">();"+"}";
 		case ADDITION: return x+"+"+y;
 		case AND: return x+"&&"+y;
 		case ASIN: return "math.asin("+x+")";
@@ -340,6 +342,7 @@ public class ClassicUnity
 		case WRITE: return "Debug.Log("+x+")";
 		case WRITEERROR: return "Debug.Error("+x+")";
 		case XYZ: return "new Vector3("+x+","+y+","+z+")";
+		case OVERLAPS: return x+".GetComponents<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".position+(x as BoxCollider).center, (x as BoxCollider).size, "+x+".rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".position+(x as SphereCollider).center, (x as SphereCollider).radius, Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
 		}
 		return "undefined";
 	}
@@ -496,49 +499,49 @@ public class ClassicUnity
 			case ANGULAR_VELOCITY: return "angularVelocity";
 			case AUDIOCLIP: return "audioClip";
 			case BACKGROUND: return "backgroundColor";
-			case BOND: return "";
-			case BREAK_ANGULAR_FORCE: return "";
-			case BREAK_FORCE: return "";
-			case CHILDREN: return "";
-			case COLLISION_EVENTS: return "";
-			case COLLISION_LAYER: return "";
-			case COLLISION_MASK: return "";
+			case BOND: return "connectedBody";
+			case BREAK_ANGULAR_FORCE: return "breakTorque";
+			case BREAK_FORCE: return "breakForce";
+			case CHILDREN: return "GetComponent<Transform>()";
+			case COLLISION_EVENTS: return "isTrigger";
+			case COLLISION_LAYER: return "collisionLayer";
+			case COLLISION_MASK: return "collisionMask";
 			case CONVEX_HULL: return "";
 			case ELAPSED: return "";
-			case EMISSION: return "";
-			case EXTENTS: return "";
-			case FAR: return "";
-			case FORCE: return "";
-			case FOV: return "";
-			case FRICTION: return "";
-			case INERTIA: return "";
-			case INTENSITY: return "";
-			case KINEMATIC: return "";
+			case EMISSION: return "emission";
+			case EXTENTS: return "extents";
+			case FAR: return "farPlane";
+			case FORCE: return "force";
+			case FOV: return "fieldOfView";
+			case FRICTION: return "friction";
+			case INERTIA: return "inertia";
+			case INTENSITY: return "intensity";
+			case KINEMATIC: return "isKinematic";
 			case LOCKED_POSITION_X: return "";
 			case LOCKED_POSITION_Y: return "";
 			case LOCKED_POSITION_Z: return "";
 			case LOCKED_ROTATION: return "";
-			case LOOP: return "";
+			case LOOP: return "loop";
 			case MASS: return "mass";
 			case MATERIAL: return "material";
 			case MESH: return "mesh";
 			case MESH_COLLIDER: return "";
-			case NEAR: return "";
-			case NO_COLLISION_RESPONSE: return "";
-			case PARENT: return "";
+			case NEAR: return "nearPlane";
+			case NO_COLLISION_RESPONSE: return "isTrigger";
+			case PARENT: return "GetParent()";
 			case PERSPECTIVE: return "";
-			case PITCH: return "";
-			case RADIUS: return "";
-			case RANGE: return "";
-			case RENDER_TEXTURE: return "";
-			case RESTITUTION: return "";
-			case ROTATION: return "";
-			case SCALE: return "";
+			case PITCH: return "pitch";
+			case RADIUS: return "radius";
+			case RANGE: return "range";
+			case RENDER_TEXTURE: return "renderTexture";
+			case RESTITUTION: return "restitution";
+			case ROTATION: return "rotation";
+			case SCALE: return "scale";
 			case SKYBOX: return "";
-			case SPOT_ANGLE: return "";
-			case TIMER: return "";
-			case VIEWPORT: return "";
-			case VOLUME: return "";
+			case SPOT_ANGLE: return "spotAngle";
+			case TIMER: return "Value";
+			case VIEWPORT: return "viewport";
+			case VOLUME: return "volume";
 			case ANIMATOR: return "GetComponent<Animator>()";
 			}
 		}
