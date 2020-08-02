@@ -1,17 +1,6 @@
 package m.library.symbols;
 
-import static m.library.types.AtomicType.ANIMATOR;
-import static m.library.types.AtomicType.COLOR;
-import static m.library.types.AtomicType.COMPONENT;
-import static m.library.types.AtomicType.ENTITY;
-import static m.library.types.AtomicType.ENTITY_LIST;
-import static m.library.types.AtomicType.INPUT;
-import static m.library.types.AtomicType.NUMBER;
-import static m.library.types.AtomicType.NUMBER2;
-import static m.library.types.AtomicType.NUMBER3;
-import static m.library.types.AtomicType.PROPOSITION;
-import static m.library.types.AtomicType.STRING;
-import static m.library.types.AtomicType.UNIT;
+import static m.library.types.AtomicType.*;
 import static m.library.types.TypeVariable.A;
 
 import m.library.types.AtomicType;
@@ -100,6 +89,8 @@ public enum Function implements Symbol{
 	READ_NUMBER(NUMBER, INPUT),
 	
 	PLAY(UNIT, ENTITY, AtomicType.AUDIOCLIP),
+	TO_QUATERNION(QUATERNION, NUMBER3),
+	TO_NUMBER3(NUMBER3, QUATERNION),
 	
 	ASSIGNMENT(UNIT, A, A),
 	;

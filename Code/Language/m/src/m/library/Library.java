@@ -39,7 +39,6 @@ public enum Library {
 		entry("rotation", ROTATION),
 		entry("scale", SCALE),
 		entry("parent", PARENT),
-		entry("children", CHILDREN),
 		
 		
 		entry("mass", MASS),
@@ -178,6 +177,8 @@ public enum Library {
 		entry("readTriggered", READ_TRIGGERED),
 		entry("readNumber", READ_NUMBER),
 		
+		entry("quaternion", TO_QUATERNION),
+		
 		entry("play", PLAY),
 		entry("overlaps", OVERLAPS),
 		
@@ -232,7 +233,6 @@ public enum Library {
 				entry("biraketa", ROTATION),
 				entry("eskala", SCALE),
 				entry("gurasoa", PARENT),
-				entry("umeak", CHILDREN),
 				
 				
 				entry("masa", MASS),
@@ -369,6 +369,8 @@ public enum Library {
 				
 				entry("irakurriKakoa", READ_TRIGGERED),
 				entry("irakurriZenbakia", READ_NUMBER),
+				
+				entry("kuaternioia", TO_QUATERNION),
 				
 				entry("hasi", PLAY),
 				entry("gainean", OVERLAPS),
