@@ -369,7 +369,7 @@ public class ClassicUnity
 		case WRITE: return "Debug.Log("+x+")";
 		case WRITEERROR: return "Debug.Error("+x+")";
 		case XYZ: return "new Vector3("+x+","+y+","+z+")";
-		case OVERLAPS: return x+".GetComponents<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".position+(x as BoxCollider).center, (x as BoxCollider).size, "+x+".rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".position+(x as SphereCollider).center, (x as SphereCollider).radius, Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
+		case OVERLAPS: return x+".GetComponentsInChildren<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".position+(x as BoxCollider).center, (x as BoxCollider).size, "+x+".rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".position+(x as SphereCollider).center, (x as SphereCollider).radius, Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
 		case TO_NUMBER3: return x+".eulerAngles";
 		case TO_QUATERNION: return "Quaternion.Euler("+x+".x, "+x+".y, "+x+".z)";
 		}
@@ -540,7 +540,7 @@ public class ClassicUnity
 			case FAR: return "farPlane";
 			case FORCE: return "force";
 			case FOV: return "fieldOfView";
-			case FRICTION: return "friction";
+			case FRICTION: return "material.dynamicFriction";
 			case INERTIA: return "inertia";
 			case INTENSITY: return "intensity";
 			case KINEMATIC: return "isKinematic";
@@ -561,7 +561,7 @@ public class ClassicUnity
 			case RADIUS: return "radius";
 			case RANGE: return "range";
 			case RENDER_TEXTURE: return "renderTexture";
-			case RESTITUTION: return "restitution";
+			case RESTITUTION: return "material.bounciness";
 			case ROTATION: return "localRotation";
 			case SCALE: return "localScale";
 			case SKYBOX: return "";

@@ -8,6 +8,7 @@ public enum AtomicType implements Type
 	NUMBER2,
 	NUMBER3,
 	QUATERNION,
+	COLLIDER,
 	UNIT,
 	
 	COMPONENT,
