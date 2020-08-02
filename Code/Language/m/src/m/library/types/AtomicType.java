@@ -7,6 +7,7 @@ public enum AtomicType implements Type
 	NUMBER,
 	NUMBER2,
 	NUMBER3,
+	QUATERNION,
 	UNIT,
 	
 	COMPONENT,

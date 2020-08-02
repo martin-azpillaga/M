@@ -1,24 +1,15 @@
 package m.library.symbols;
 
-import static m.library.types.AtomicType.COLOR;
-import static m.library.types.AtomicType.ENTITY;
-import static m.library.types.AtomicType.ENTITY_LIST;
-import static m.library.types.AtomicType.IMAGE;
-import static m.library.types.AtomicType.NUMBER;
-import static m.library.types.AtomicType.NUMBER2;
-import static m.library.types.AtomicType.NUMBER3;
-import static m.library.types.AtomicType.PROPOSITION;
-
+import static m.library.types.AtomicType.*;
 import m.library.types.AtomicType;
 import m.library.types.Type;
 
 public enum Component implements Symbol{
 	
 	POSITION(NUMBER3),
-	ROTATION(NUMBER3),
+	ROTATION(QUATERNION),
 	SCALE(NUMBER3),
 	PARENT(ENTITY),
-	CHILDREN(ENTITY_LIST),
 	
 	
 	MASS(NUMBER),
