@@ -27,6 +27,7 @@ public enum Component implements Symbol{
 	
 	MESH(AtomicType.MESH),
 	MATERIAL(AtomicType.MATERIAL),
+	SHADOW_RECEIVER(PROPOSITION),
 	
 	NEAR(NUMBER),
 	FAR(NUMBER),

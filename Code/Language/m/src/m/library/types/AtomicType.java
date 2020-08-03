@@ -13,6 +13,7 @@ public enum AtomicType implements Type
 	COMPONENT,
 	
 	COLOR,
+	TEXTURE,
 	
 	INPUT,
 	MESH,
