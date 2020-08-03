@@ -73,7 +73,7 @@ public class ClassicUnity
 		
 		for (var component : game.components.entrySet())
 		{
-			fileSystem.generateFile("UnityClassic/Assets/Code/Components/"+simpleComponent(component.getKey())+".cs",
+			fileSystem.generateFile("UnityClassic/Assets/Code/Components/"+unreserved(component.getKey())+".cs",
 					generate(component.getKey(), component.getValue()));
 		}
 		var systems = lines("",
@@ -125,9 +125,69 @@ public class ClassicUnity
 			}
 		}
 		
+		for (var function : game.functions.keySet())
+		{
+			for (var query : game.queries.get(function).keySet())
+			{
+				fileSystem.generateFile("UnityClassic/Assets/Code/MultiComponents/"+function.getName()+"_"+query+".cs", generateMultiComponent(function, query));
+			}
+		}
+		
 		systems += "}\n}\n}\n";
 		
 		fileSystem.generateFile("UnityClassic/Assets/Code/Systems/Systems.cs", systems);
+	}
+	
+	private String typeOf(String component)
+	{
+		var standard = library.getComponent(component);
+		if (standard != null)
+		{
+			return unity(standard.getType());
+		}
+		else
+		{
+			var user = game.components.get(component);
+			return unity(user);
+		}
+	}
+	
+	private String generateMultiComponent(Function function, String query)
+	{
+		var map = game.queries.get(function).get(query);
+		return lines("",
+		"using UnityEngine;",
+		"using UnityEngine.UI;",
+		"using UnityEngine.InputSystem;",
+		"using System.Collections.Generic;",
+		"using Unity.Mathematics;",
+		"using System;",
+		"using System.Linq;",
+		"",
+		"namespace M",
+		"{",
+		"   public class "+function.getName()+"_"+query+" : MonoBehaviour",
+		"   {",
+		"       "+all(map.keySet(), x->"public "+typeOf(x)+" "+unreserved(x)+";", "\n       "),
+		"       "+all(map.keySet(), x->simpleComponent(x)+" " + unreserved(x)+"Component;", "\n       "),
+		"       void Start()",
+		"       {",
+		"           "+all(map.keySet(), x->unreserved(x)+"Component = GetComponent<"+simpleComponent(x)+">();", "\n           "),
+		"           "+all(map.keySet(), x->"if ("+unreserved(x)+"Component == null){ "+unreserved(x)+"Component = gameObject.AddComponent<"+simpleComponent(x)+">();}", "\n           "),
+		"           "+all(map.keySet(), x->unreserved(x)+"Component."+field(x)+" = "+unreserved(x)+";", "\n           "),
+		"       }",
+		"",
+		"       void Update()",
+		"       {",
+		"           "+all(map.keySet(), x->unreserved(x)+" = "+unreserved(x)+"Component."+field(x)+";", "\n           "),
+		"       }",
+		"",
+		"       void OnValidate()",
+		"       {",
+		"           "+all(map.keySet(), x->"if ("+unreserved(x)+"Component != null){"+unreserved(x)+"Component."+field(x)+" = "+unreserved(x)+";}", "\n           "),
+		"       }",
+		"   }",
+		"}");
 	}
 	
 	
@@ -141,7 +201,7 @@ public class ClassicUnity
 		var extra = "";
 		if (type == INPUT)
 		{
-			extra = "void Start() {Value.Enable();}";
+			extra = "void Start() {if (Value != null) {Value.Enable();}}";
 		}
 		return
 				lines("",
@@ -149,7 +209,7 @@ public class ClassicUnity
 				"",
 				"namespace M",
 				"{",
-				"    public class "+simpleComponent(name)+" : MonoBehaviour",
+				"    public class "+unreserved(name)+" : MonoBehaviour",
 				"    {",
 				"        "+field,
 				"        "+extra,
@@ -424,13 +484,8 @@ public class ClassicUnity
 		}
 	}
 	
-	private String simpleComponent(String name)
+	private String unreserved(String name)
 	{
-		var standard = library.getComponent(name);
-		if (standard != null)
-		{
-			return component(name);
-		}
 		for (var i = 0; i < csharpReserved.length; i++)
 		{
 			if (csharpReserved[i].equals(name))
@@ -439,6 +494,16 @@ public class ClassicUnity
 			}
 		}
 		return name;
+	}
+	
+	private String simpleComponent(String name)
+	{
+		var standard = library.getComponent(name);
+		if (standard != null)
+		{
+			return component(name);
+		}
+		return unreserved(name);
 	}
 	
 	private String component(String name)
