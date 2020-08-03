@@ -85,15 +85,24 @@ public enum Library {
 		entry("ceil", CEIL),
 		entry("floor", FLOOR),
 		entry("round", ROUND),
-		entry("clamp", CLAMP),
 		entry("integerPart", INTEGERPART),
 		entry("fractionalPart", FRACTIONALPART),
 		entry("inverse", INVERSE),
 		entry("reciprocal", RECIPROCAL),
-		
+
+		entry("clamp", CLAMP),
 		entry("lerp", LERP),
 		entry("unlerp", UNLERP),
 		entry("proportional", PROPORTIONAL),
+		entry("slerp", SLERP),
+		
+		entry("min", MIN),
+		entry("max", MAX),
+		
+		entry("degrees", DEGREES),
+		entry("radians", RADIANS),
+		
+		entry("step", STEP),
 		
 		entry("cross", CROSS),
 		entry("dot", DOT),
@@ -132,8 +141,6 @@ public enum Library {
 		entry("atan", ATAN),
 		entry("exp", EXP),
 		entry("log", LOG),
-		entry("exp10", EXP10),
-		entry("log10", LOG10),
 		entry("pow", POW),
 		entry("sqrt", SQRT),
 		entry("random", RANDOM),
@@ -273,15 +280,24 @@ public enum Library {
 				entry("ceil", CEIL),
 				entry("floor", FLOOR),
 				entry("round", ROUND),
-				entry("clamp", CLAMP),
 				entry("integerPart", INTEGERPART),
 				entry("fractionalPart", FRACTIONALPART),
 				entry("inverse", INVERSE),
 				entry("reciprocal", RECIPROCAL),
 				
+				entry("clamp", CLAMP),
 				entry("lerp", LERP),
 				entry("unlerp", UNLERP),
 				entry("proportional", PROPORTIONAL),
+				entry("slerp", SLERP),
+				
+				entry("min", MIN),
+				entry("max", MAX),
+				
+				entry("graduak", DEGREES),
+				entry("radianak", RADIANS),
+				
+				entry("step", STEP),
 				
 				entry("cross", CROSS),
 				entry("dot", DOT),
@@ -320,8 +336,6 @@ public enum Library {
 				entry("atan", ATAN),
 				entry("exp", EXP),
 				entry("log", LOG),
-				entry("exp10", EXP10),
-				entry("log10", LOG10),
 				entry("pow", POW),
 				entry("sqrt", SQRT),
 				entry("ausazko", RANDOM),
