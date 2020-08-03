@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Stack;
 
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 
@@ -37,6 +38,8 @@ public class ClassicUnity
 	
 	Set<String> namespaces = new HashSet<>();
 	Function currentFunction;
+	HashSet<String> variables;
+	Stack<HashSet<String>> stack;
 	
 	String[] csharpReserved = new String[]
 	{
@@ -70,6 +73,8 @@ public class ClassicUnity
 		this.library = game.library;
 		this.fileSystem = fileSystem;
 		this.queries = game.queries;
+		this.variables = new HashSet<String>();
+		this.stack = new Stack<>();
 		
 		for (var component : game.components.entrySet())
 		{
@@ -234,12 +239,16 @@ public class ClassicUnity
 	{
 		if (statement instanceof BindingBlock)
 		{
+			stack.push(new HashSet<String>(variables));
+			
 			var block = (BindingBlock) statement;
 			var name = block.getName();
 			if (library.getBlock(name) == QUERY)
 			{
-				var a = ((Value)block.getExpression()).getName();
+				var a = block.getExpression().getName();
 				var query = queries.get(currentFunction).get(a);
+				
+				variables.add(a);
 				
 				return lines("			",
 				"var transforms_"+a+" = FindObjectsOfType<Transform>();",
@@ -254,10 +263,13 @@ public class ClassicUnity
 				"}");
 			}
 			
+			variables = stack.pop();
+			
 			return "undefined";
 		}
 		else if (statement instanceof Block)
 		{
+			stack.push(new HashSet<String>(variables));
 			var block = (Block) statement;
 			var name = block.getName();
 			
@@ -281,6 +293,7 @@ public class ClassicUnity
 					"	"+all(block.getStatements(),x->code(x), "\n")+"\n"+
 					"}\n";
 			}
+			variables = stack.pop();
 			
 		}
 		else if (statement instanceof Assignment)
@@ -291,7 +304,17 @@ public class ClassicUnity
 			
 			if (atom instanceof Value)
 			{
-				return "var "+code(atom)+" = "+code(expression)+";";
+				var value = (Value) atom;
+				var name = value.getName();
+				if (variables.contains(name))
+				{
+					return code(atom)+" = "+code(expression)+";";
+				}
+				else
+				{
+					variables.add(name);
+					return "var "+code(atom)+" = "+code(expression)+";";
+				}
 			}
 			else if (atom instanceof Cell)
 			{
@@ -373,7 +396,7 @@ public class ClassicUnity
 		case ASSIGNMENT: return x+"="+y;
 		case ATAN: return "math.atan("+x+")";
 		case CEIL: return "math.ceil("+x+")";
-		case CLAMP: return "math.clamp("+x+","+y+","+z+")";
+		case CLAMP: return "math.clamp("+x+","+y+".x,"+y+".y)";
 		case COS: return "math.cos("+x+")";
 		case CREATE: return "Instantiate("+x+")";
 		case CROSS: return "math.cross("+x+","+y+")";
@@ -383,7 +406,6 @@ public class ClassicUnity
 		case DOT: return "math.dot("+x+","+y+")";
 		case EQUAL: return x+"=="+y;
 		case EXP: return "math.exp("+x+")";
-		case EXP10: return "math.exp10("+x+")";
 		case FLOOR: return "math.floor("+x+")";
 		case FRACTIONALPART: return "math.frac("+x+")";
 		case GREATER: return x+">"+y;
@@ -392,11 +414,10 @@ public class ClassicUnity
 		case HAS: return "("+y+".gameObject.GetComponent<"+x+">() != null)";
 		case IN: return y+".Contains("+x+".gameObject)";
 		case INEQUAL: return x+"!="+y;
-		case INTEGERPART: return "((int) "+x+")";
+		case INTEGERPART: return "math.trunc("+x+")";
 		case INVERSE: return "(1/"+x+")";
-		case LERP: return "math.lerp("+x+","+y+","+z+")";
+		case LERP: return "math.lerp("+x+","+y+".x,"+y+".y)";
 		case LOG: return "math.log("+x+")";
-		case LOG10: return "math.log10("+x+")";
 		case LOWER: return x+"<"+y;
 		case LOWEROREQUAL: return x+"<="+y;
 		case MULTIPLICATION: return x+"*"+y;
@@ -406,13 +427,13 @@ public class ClassicUnity
 		case OR: return x+"||"+y;
 		case PLAY: return x+".GetComponent<AudioSource>().PlayOneShot("+y+")";
 		case POW: return "math.pow("+x+","+y+")";
-		case PROPORTIONAL: return "undefined";
+		case PROPORTIONAL: return "math.remap("+x+", "+y+".x, "+y+".y, "+z+".x, "+z+".y)";
 		case RANDOM: return "UnityEngine.Random.Range("+x+".x,"+x+".y)";
 		case READ_NUMBER: return x+".ReadValue<float>()";
 		case READ_TRIGGERED: return x+".triggered";
 		case RECIPROCAL: return "-"+x;
 		case REFLECT: return "math.reflect("+x+","+y+")";
-		case REFRACT: return "math.refract("+x+","+y+")";
+		case REFRACT: return "math.refract("+x+","+y+", "+z+")";
 		case REMOVE: return "Destroy("+y+".gameObject.GetComponent<"+x+">())";
 		case ROUND: return "math.round("+x+")";
 		case SET_COLOR: return x+".SetColor("+y+","+z+")";
@@ -425,7 +446,7 @@ public class ClassicUnity
 		case STATE_NAME: return "undefined";
 		case SUBTRACTION: return x+"-"+y;
 		case TAN: return "math.tan("+x+")";
-		case UNLERP: return "math.unlerp("+x+","+y+","+z+")";
+		case UNLERP: return "math.unlerp("+x+","+y+".x,"+y+".y)";
 		case WRITE: return "Debug.Log("+x+")";
 		case WRITEERROR: return "Debug.Error("+x+")";
 		case XYZ: return "new Vector3("+x+","+y+","+z+")";
@@ -443,6 +464,12 @@ public class ClassicUnity
 		case SET_INTEGER: return x+".SetInt("+y+", (int)"+z+")";
 		case SET_KEYWORD: return "if ("+z+"){ "+x+".EnableKeyword("+y+");}else{ "+x+".DisableKeyword("+y+");}";
 		case SET_TEXTURE: return x+".SetTexture("+y+", "+z+")";
+		case DEGREES: return "math.degrees("+x+")";
+		case MAX: return "math.max("+x+", "+y+")";
+		case MIN: return "math.min("+x+", "+y+")";
+		case RADIANS: return "math.radians("+x+")";
+		case SLERP: return "math.slerp("+x+", "+y+", "+z+")";
+		case STEP: return "math.step("+x+", "+y+")";
 		}
 		return "undefined";
 	}

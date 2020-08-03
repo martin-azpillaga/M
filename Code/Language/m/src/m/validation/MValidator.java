@@ -9,6 +9,7 @@ import m.generator.Game;
 import m.library.Library;
 import m.m.*;
 import m.validation.problems.Problem;
+import m.validation.problems.ProblemMessage.Severity;
 import m.validation.problems.errors.ReadOnly;
 
 import static m.m.MPackage.Literals.*;
@@ -73,14 +74,27 @@ public class MValidator extends AbstractMValidator
 				library = entry.getKey();
 			}
 		}
-		if (list != null && list.isEmpty())
+		
+		var hasErrors = false;
+		if (list != null)
+		{
+			for (var problem : list)
+			{
+				for (var message : problem.messages(library))
+				{
+					if (message.severity == Severity.ERROR)
+					{
+						hasErrors = true;
+					}
+				}
+			}
+		}
+		if (!hasErrors)
 		{
 			game = contexts.get(library).infer();
 		}
-		else
-		{
-			reportProblems(list, library);
-		}
+		
+		reportProblems(list, library);
 	}
 	
 	void validate(Function function) {
