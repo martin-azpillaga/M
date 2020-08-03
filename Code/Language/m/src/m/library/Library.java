@@ -57,6 +57,7 @@ public enum Library {
 		
 		entry("mesh", Component.MESH),
 		entry("material", Component.MATERIAL),
+		entry("shadowReceiver", SHADOW_RECEIVER),
 		
 		entry("near", NEAR),
 		entry("far", FAR),
@@ -150,6 +151,14 @@ public enum Library {
 		
 		entry("setNumber", SET_NUMBER),
 		entry("setColor", SET_COLOR),
+		entry("setBool", SET_KEYWORD),
+		entry("setTexture", SET_TEXTURE),
+		entry("setInteger", SET_INTEGER),
+		entry("getNumber", GET_NUMBER),
+		entry("getColor", GET_COLOR),
+		entry("getBool", GET_KEYWORD),
+		entry("getTexture", GET_TEXTURE),
+		entry("getInteger", GET_INTEGER),
 		
 		entry("setTrigger", SET_TRIGGER),
 		entry("stateName", STATE_NAME),
@@ -194,7 +203,8 @@ public enum Library {
 		
 		entry(ENTITY, "entity"),
 		entry(ENTITY_LIST, "entityList"),
-		entry(QUATERNION, "quaternion")
+		entry(QUATERNION, "quaternion"),
+		entry(TEXTURE, "texture")
 	), Map.of(
 		RedefinedSymbol.class, "Redefined symbol",
 		UndefinedSymbol.class, "Undefined symbol",
@@ -236,6 +246,7 @@ public enum Library {
 				
 				entry("malla", Component.MESH),
 				entry("materiala", Component.MATERIAL),
+				entry("itzalJasotzailea", SHADOW_RECEIVER),
 				
 				entry("gertu", NEAR),
 				entry("urruti", FAR),
@@ -328,6 +339,14 @@ public enum Library {
 				
 				entry("ezarriZenbakia", SET_NUMBER),
 				entry("ezarriKolorea", SET_COLOR),
+				entry("ezarriOsoa", SET_INTEGER),
+				entry("ezarriTexture", SET_TEXTURE),
+				entry("ezarriProposizioa", SET_KEYWORD),
+				entry("hartuZenbakia", GET_NUMBER),
+				entry("hartuKolorea", GET_COLOR),
+				entry("hartuOsoa", GET_INTEGER),
+				entry("hartuTexture", GET_TEXTURE),
+				entry("hartuProposizioa", GET_KEYWORD),
 				
 				entry("ezarriKakoa", SET_TRIGGER),
 				entry("egoeraIzena", STATE_NAME),
@@ -372,7 +391,8 @@ public enum Library {
 					
 					entry(ENTITY, "entitatea"),
 					entry(ENTITY_LIST, "entitateLista"),
-					entry(QUATERNION, "kuaternioia")
+					entry(QUATERNION, "kuaternioia"),
+					entry(TEXTURE, "textura")
 			), Map.of(
 				RedefinedSymbol.class, "Simbolo hau dagoeneko definitua dago",
 				UndefinedSymbol.class, "Simbolo honek ez du definiziorik",

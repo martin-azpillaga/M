@@ -375,6 +375,14 @@ public class ClassicUnity
 		case ADD_FORCE: return x+".GetComponent<Rigidbody>()?.AddForce("+y+")";
 		case ADD_TORQUE: return x+".GetComponent<Rigidbody>()?.AddTorque("+y+")";
 		case CLOSEST_POINT: return "("+x+".GetComponent<Collider>() != null ? "+x+".GetComponent<Collider>().ClosestPoint("+y+")" + ":" + x+".position)";
+		case GET_COLOR: return x+".GetColor("+y+")";
+		case GET_INTEGER: return x+".GetInt("+y+")";
+		case GET_KEYWORD: return x+".IsKeywordEnabled("+y+")";
+		case GET_NUMBER: return x+".GetFloat("+y+")";
+		case GET_TEXTURE: return x+".GetTexture("+y+")";
+		case SET_INTEGER: return x+".SetInt("+y+", (int)"+z+")";
+		case SET_KEYWORD: return "if ("+z+"){ "+x+".EnableKeyword("+y+");}else{ "+x+".DisableKeyword("+y+");}";
+		case SET_TEXTURE: return x+".SetTexture("+y+", "+z+")";
 		}
 		return "undefined";
 	}
@@ -488,6 +496,7 @@ public class ClassicUnity
 			case ANIMATOR: return "Animator";
 			case BOX_CENTER: return "BoxCollider";
 			case SPHERE_CENTER: return "SphereCollider";
+			case SHADOW_RECEIVER: return "Renderer";
 			}
 		}
 		return "undefined";
@@ -541,6 +550,7 @@ public class ClassicUnity
 			case ANIMATOR: return "GetComponent<Animator>()";
 			case BOX_CENTER: return "center";
 			case SPHERE_CENTER: return "center";
+			case SHADOW_RECEIVER: return "receiveShadows";
 			}
 		}
 		return "undefined";
@@ -600,6 +610,8 @@ public class ClassicUnity
 					return "AudioClip";
 				case QUATERNION:
 					return "Quaternion";
+				case TEXTURE:
+					return "Texture";
 			}
 		}
 		return "Undefined";
