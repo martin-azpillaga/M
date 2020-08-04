@@ -177,8 +177,7 @@ public class ClassicUnity
 		"       "+all(map.keySet(), x->simpleComponent(x)+" " + unreserved(x)+"Component;", "\n       "),
 		"       void Start()",
 		"       {",
-		"           "+all(map.keySet(), x->unreserved(x)+"Component = GetComponent<"+simpleComponent(x)+">();", "\n           "),
-		"           "+all(map.keySet(), x->"if ("+unreserved(x)+"Component == null){ "+unreserved(x)+"Component = gameObject.AddComponent<"+simpleComponent(x)+">();}", "\n           "),
+		"           "+all(map.keySet(), x->unreserved(x)+"Component = GetComponent<"+simpleComponent(x)+">();\n"+"if ("+unreserved(x)+"Component == null){ "+unreserved(x)+"Component = gameObject.AddComponent<"+simpleComponent(x)+">();}", "\n           "),
 		"           "+all(map.keySet(), x->unreserved(x)+"Component."+field(x)+" = "+unreserved(x)+";", "\n           "),
 		"       }",
 		"",
@@ -594,6 +593,7 @@ public class ClassicUnity
 			case BOX_CENTER: return "BoxCollider";
 			case SPHERE_CENTER: return "SphereCollider";
 			case SHADOW_RECEIVER: return "Renderer";
+			case KINEMATIC: return "Rigidbody";
 			}
 		}
 		return "undefined";
@@ -648,6 +648,7 @@ public class ClassicUnity
 			case BOX_CENTER: return "center";
 			case SPHERE_CENTER: return "center";
 			case SHADOW_RECEIVER: return "receiveShadows";
+			case KINEMATIC: return "isKinematic";
 			}
 		}
 		return "undefined";

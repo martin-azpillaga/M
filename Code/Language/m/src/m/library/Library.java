@@ -48,6 +48,7 @@ public enum Library {
 		entry("angularVelocity", ANGULAR_VELOCITY),
 		entry("restitution", RESTITUTION),
 		entry("friction", FRICTION),
+		entry("kinematic", KINEMATIC),
 		
 		entry("crossable", NO_COLLISION_RESPONSE),
 		entry("radius", RADIUS),
@@ -243,6 +244,7 @@ public enum Library {
 				entry("abiaduraAngeluarra", ANGULAR_VELOCITY),
 				entry("restituzioa", RESTITUTION),
 				entry("marruskadura", FRICTION),
+				entry("kinematikoa", KINEMATIC),
 				
 				entry("gurutzagarria", NO_COLLISION_RESPONSE),
 				entry("erradioa", RADIUS),
