@@ -402,7 +402,7 @@ public class ClassicUnity
 		case CEIL: return "math.ceil("+x+")";
 		case CLAMP: return "math.clamp("+x+","+y+".x,"+y+".y)";
 		case COS: return "math.cos("+x+")";
-		case CREATE: return "Instantiate("+x+")";
+		case CREATE: return "Instantiate<GameObject>("+x+")";
 		case CROSS: return "math.cross("+x+","+y+")";
 		case DESTROY: return "Destroy("+x+".gameObject)";
 		case DISTANCE: return "math.distance("+x+","+y+")";
@@ -429,7 +429,7 @@ public class ClassicUnity
 		case NORMALIZE: return "math.normalize("+x+")";
 		case NOT: return "!"+x;
 		case OR: return x+"||"+y;
-		case PLAY: return x+".GetComponent<AudioSource>().PlayOneShot("+y+")";
+		case PLAY_ONCE: return x+".GetComponent<AudioSource>().PlayOneShot("+y+")";
 		case POW: return "math.pow("+x+","+y+")";
 		case PROPORTIONAL: return "math.remap("+x+", "+y+".x, "+y+".y, "+z+".x, "+z+".y)";
 		case RANDOM: return "UnityEngine.Random.Range("+x+".x,"+x+".y)";
@@ -452,12 +452,11 @@ public class ClassicUnity
 		case SUBTRACTION: return x+"-"+y;
 		case TAN: return "math.tan("+x+")";
 		case UNLERP: return "math.unlerp("+x+","+y+".x,"+y+".y)";
-		case WRITE: return "Debug.Log("+x+")";
-		case WRITEERROR: return "Debug.LogError("+x+")";
-		case WRITE_WARNING: return "Debug.LogWarning("+x+")";
+		case WRITE: return "if (Debug.isDebugBuild){ Debug.Log("+x+"); }";
+		case WRITEERROR: return "if (Debug.isDebugBuild){ Debug.LogError("+x+"); }";
+		case WRITE_WARNING: return "if (Debug.isDebugBuild){ Debug.LogWarning("+x+"); }";
 		case XYZ: return "new Vector3("+x+","+y+","+z+")";
 		case OVERLAPS: return x+".GetComponentsInChildren<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".position+Vector3.Scale((x as BoxCollider).center, "+x+".lossyScale), Vector3.Scale((x as BoxCollider).size,"+x+".lossyScale), "+x+".rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".position+(x as SphereCollider).center, (x as SphereCollider).radius, Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
-		case OVERLAP_COLLIDER: return "("+x+" is BoxCollider ? Physics.OverlapBox()";
 		case TO_NUMBER3: return x+".eulerAngles";
 		case TO_QUATERNION: return "Quaternion.Euler("+x+".x, "+x+".y, "+x+".z)";
 		case ADD_FORCE: return x+".GetComponent<Rigidbody>()?.AddForce("+y+")";
