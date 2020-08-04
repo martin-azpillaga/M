@@ -414,7 +414,7 @@ public class ClassicUnity
 		case FRACTIONALPART: return "math.frac("+x+")";
 		case GREATER: return x+">"+y;
 		case GREATEROREQUAL: return x+">="+y;
-		case HALT: return "Application.Quit()";
+		case HALT: return "#if UNITY_EDITOR\nUnityEditor.EditorApplication.isPlaying = false;\n#endif\nApplication.Quit()";
 		case HAS: return "("+y+".gameObject.GetComponent<"+simpleComponent(x)+">() != null)";
 		case IN: return y+".Contains("+x+".gameObject)";
 		case INEQUAL: return x+"!="+y;
@@ -452,7 +452,8 @@ public class ClassicUnity
 		case TAN: return "math.tan("+x+")";
 		case UNLERP: return "math.unlerp("+x+","+y+".x,"+y+".y)";
 		case WRITE: return "Debug.Log("+x+")";
-		case WRITEERROR: return "Debug.Error("+x+")";
+		case WRITEERROR: return "Debug.LogError("+x+")";
+		case WRITE_WARNING: return "Debug.LogWarning("+x+")";
 		case XYZ: return "new Vector3("+x+","+y+","+z+")";
 		case OVERLAPS: return x+".GetComponentsInChildren<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".position+Vector3.Scale((x as BoxCollider).center, "+x+".lossyScale), Vector3.Scale((x as BoxCollider).size,"+x+".lossyScale), "+x+".rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".position+(x as SphereCollider).center, (x as SphereCollider).radius, Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
 		case OVERLAP_COLLIDER: return "("+x+" is BoxCollider ? Physics.OverlapBox()";
