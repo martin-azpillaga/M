@@ -442,7 +442,7 @@ public class ClassicUnity
 		case ROUND: return "math.round("+x+")";
 		case SET_COLOR: return x+".SetColor("+y+","+z+")";
 		case SET_NUMBER: return x+".SetFloat("+y+","+z+")";
-		case SET_TRIGGER: return x+".SetTrigger("+y+")";
+		case SET_TRIGGER: return x+".GetComponent<Animator>()?.SetTrigger("+y+")";
 		case SIGN: return "math.sign("+x+")";
 		case SIN: return "math.sin("+x+")";
 		case SIZE: return x+".Count()";
@@ -454,7 +454,8 @@ public class ClassicUnity
 		case WRITE: return "Debug.Log("+x+")";
 		case WRITEERROR: return "Debug.Error("+x+")";
 		case XYZ: return "new Vector3("+x+","+y+","+z+")";
-		case OVERLAPS: return x+".GetComponentsInChildren<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".position+(x as BoxCollider).center, (x as BoxCollider).size, "+x+".rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".position+(x as SphereCollider).center, (x as SphereCollider).radius, Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
+		case OVERLAPS: return x+".GetComponentsInChildren<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".position+Vector3.Scale((x as BoxCollider).center, "+x+".lossyScale), Vector3.Scale((x as BoxCollider).size,"+x+".lossyScale), "+x+".rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".position+(x as SphereCollider).center, (x as SphereCollider).radius, Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
+		case OVERLAP_COLLIDER: return "("+x+" is BoxCollider ? Physics.OverlapBox()";
 		case TO_NUMBER3: return x+".eulerAngles";
 		case TO_QUATERNION: return "Quaternion.Euler("+x+".x, "+x+".y, "+x+".z)";
 		case ADD_FORCE: return x+".GetComponent<Rigidbody>()?.AddForce("+y+")";
@@ -589,7 +590,6 @@ public class ClassicUnity
 			case TIMER: return "Timer";
 			case VIEWPORT: return "Camera";
 			case VOLUME: return "AudioSource";
-			case ANIMATOR: return "Animator";
 			case BOX_CENTER: return "BoxCollider";
 			case SPHERE_CENTER: return "SphereCollider";
 			case SHADOW_RECEIVER: return "Renderer";
@@ -644,7 +644,6 @@ public class ClassicUnity
 			case TIMER: return "Value";
 			case VIEWPORT: return "viewport";
 			case VOLUME: return "volume";
-			case ANIMATOR: return "GetComponent<Animator>()";
 			case BOX_CENTER: return "center";
 			case SPHERE_CENTER: return "center";
 			case SHADOW_RECEIVER: return "receiveShadows";
@@ -661,56 +660,59 @@ public class ClassicUnity
 			var atomic = (AtomicType) type;
 			switch (atomic)
 			{
-				case ENTITY:
-					return "GameObject";
-				case NUMBER:
-					return "float";
-				case NUMBER2:
-					return "Vector2";
-				case NUMBER3:
-					return "Vector3";
-				case PROPOSITION:
-					return "bool";
-				case ENTITY_LIST:
-					namespaces.add("System.Collections.Generic");
-					return "List<GameObject>";
-				case INPUT:
-					namespaces.add("UnityEngine.InputSystem");
-					return "InputAction";
-				case STRING:
-					return "string";
-				case UNIT:
-					return "void";
-				case COLOR:
-					namespaces.add(UNITY_ENGINE);
-					return "Color";
-				case MESH:
-					namespaces.add(UNITY_ENGINE);
-					return "Mesh";
-				case MATERIAL:
-					namespaces.add(UNITY_ENGINE);
-					return "Material";
-				case ANIMATOR:
-					namespaces.add(UNITY_ENGINE);
-					return "Animator";
-				case COMPONENT:
-					return "Error (type component shouldnt be)";
-				case FONT:
-					namespaces.add("UnityEngine.UI");
-					return "Font";
-				case TEXT:
-					namespaces.add(UNITY_ENGINE_UI);
-					return "Text";
-				case IMAGE:
-					namespaces.add("UnityEngine.UI");
-					return "Image";
-				case AUDIOCLIP:
-					return "AudioClip";
-				case QUATERNION:
-					return "Quaternion";
-				case TEXTURE:
-					return "Texture";
+			case ENTITY:
+				return "GameObject";
+			case NUMBER:
+				return "float";
+			case NUMBER2:
+				return "Vector2";
+			case NUMBER3:
+				return "Vector3";
+			case PROPOSITION:
+				return "bool";
+			case ENTITY_LIST:
+				namespaces.add("System.Collections.Generic");
+				return "List<GameObject>";
+			case INPUT:
+				namespaces.add("UnityEngine.InputSystem");
+				return "InputAction";
+			case STRING:
+				return "string";
+			case UNIT:
+				return "void";
+			case COLOR:
+				namespaces.add(UNITY_ENGINE);
+				return "Color";
+			case MESH:
+				namespaces.add(UNITY_ENGINE);
+				return "Mesh";
+			case MATERIAL:
+				namespaces.add(UNITY_ENGINE);
+				return "Material";
+			case ANIMATOR:
+				namespaces.add(UNITY_ENGINE);
+				return "Animator";
+			case COMPONENT:
+				return "Error (type component shouldnt be)";
+			case FONT:
+				namespaces.add("UnityEngine.UI");
+				return "Font";
+			case TEXT:
+				namespaces.add(UNITY_ENGINE_UI);
+				return "Text";
+			case IMAGE:
+				namespaces.add("UnityEngine.UI");
+				return "Image";
+			case AUDIOCLIP:
+				return "AudioClip";
+			case QUATERNION:
+				return "Quaternion";
+			case TEXTURE:
+				return "Texture";
+			case COLLIDER:
+				return "Collider";
 			}
+			return "Undefined";
 		}
 		return "Undefined";
 	}	

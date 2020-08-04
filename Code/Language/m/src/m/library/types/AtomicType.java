@@ -11,6 +11,7 @@ public enum AtomicType implements Type
 	UNIT,
 	
 	COMPONENT,
+	COLLIDER,
 	
 	COLOR,
 	TEXTURE,

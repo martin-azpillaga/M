@@ -53,9 +53,7 @@ public enum Component implements Symbol{
 	AUDIOCLIP(AtomicType.AUDIOCLIP),
 	VOLUME(NUMBER),
 	PITCH(NUMBER),
-	LOOP(PROPOSITION),
-	
-	ANIMATOR(AtomicType.ANIMATOR)
+	LOOP(PROPOSITION)
 	;
 	
 	Type type;

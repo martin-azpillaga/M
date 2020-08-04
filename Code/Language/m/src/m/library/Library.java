@@ -78,8 +78,8 @@ public enum Library {
 		entry("audioClip", Component.AUDIOCLIP),
 		entry("volume", VOLUME),
 		entry("pitch", PITCH),
-		entry("loop", LOOP),
-		entry("animator", Component.ANIMATOR)),
+		entry("loop", LOOP)
+		),
 	Map.ofEntries(
 		entry("abs", ABS),
 		entry("sign", SIGN),
