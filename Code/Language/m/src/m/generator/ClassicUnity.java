@@ -184,7 +184,7 @@ public class ClassicUnity
 		"",
 		"       void Update()",
 		"       {",
-		"           "+all(map.keySet(), x->unreserved(x)+" = "+unreserved(x)+"Component."+field(x)+";", "\n           "),
+		"           "+all(map.keySet(), x->"if ("+unreserved(x)+"Component != null){"+unreserved(x)+" = "+unreserved(x)+"Component."+field(x)+";}", "\n           "),
 		"       }",
 		"",
 		"       void OnValidate()",
@@ -250,7 +250,7 @@ public class ClassicUnity
 				
 				variables.add(a);
 				
-				return lines("			",
+				var result = lines("			",
 				"var transforms_"+a+" = FindObjectsOfType<Transform>();",
 				"foreach (var "+a+" in transforms_"+a+")",
 				"{",
@@ -261,9 +261,12 @@ public class ClassicUnity
 				"	"+all(block.getStatements(), x->code(x), "\n				"),
 				"   }",
 				"}");
+
+				variables = stack.pop();
+				
+				return result;
 			}
 			
-			variables = stack.pop();
 			
 			return "undefined";
 		}
@@ -273,10 +276,11 @@ public class ClassicUnity
 			var block = (Block) statement;
 			var name = block.getName();
 			
+			var result = "";
 			if (library.getBlock(name) == SELECTION)
 			{
 				var condition = code(block.getExpression());
-				return 
+				result =
 					"\n"+
 					"if ("+condition+")\n"+
 					"{\n"+
@@ -286,7 +290,7 @@ public class ClassicUnity
 			else if (library.getBlock(name) == ITERATION)
 			{
 				var condition = code(block.getExpression());
-				return 
+				result = 
 					"\n"+
 					"while ("+condition+")\n"+
 					"{\n"+
@@ -294,6 +298,7 @@ public class ClassicUnity
 					"}\n";
 			}
 			variables = stack.pop();
+			return result;
 			
 		}
 		else if (statement instanceof Assignment)
@@ -389,7 +394,7 @@ public class ClassicUnity
 		{
 		case ABS: return "math.abs("+x+")";
 		case ACOS: return "math.acos("+x+")";
-		case ADD: return "if ("+y+".GetComponent<"+x+">() == null){"+y+".gameObject.AddComponent<"+x+">();"+"}";
+		case ADD: return "if ("+y+".GetComponent<"+simpleComponent(x)+">() == null){"+y+".gameObject.AddComponent<"+simpleComponent(x)+">();"+"}";
 		case ADDITION: return x+"+"+y;
 		case AND: return x+"&&"+y;
 		case ASIN: return "math.asin("+x+")";
@@ -411,7 +416,7 @@ public class ClassicUnity
 		case GREATER: return x+">"+y;
 		case GREATEROREQUAL: return x+">="+y;
 		case HALT: return "Application.Quit()";
-		case HAS: return "("+y+".gameObject.GetComponent<"+x+">() != null)";
+		case HAS: return "("+y+".gameObject.GetComponent<"+simpleComponent(x)+">() != null)";
 		case IN: return y+".Contains("+x+".gameObject)";
 		case INEQUAL: return x+"!="+y;
 		case INTEGERPART: return "math.trunc("+x+")";
@@ -434,7 +439,7 @@ public class ClassicUnity
 		case RECIPROCAL: return "-"+x;
 		case REFLECT: return "math.reflect("+x+","+y+")";
 		case REFRACT: return "math.refract("+x+","+y+", "+z+")";
-		case REMOVE: return "Destroy("+y+".gameObject.GetComponent<"+x+">())";
+		case REMOVE: return "if ("+y+".GetComponent<"+simpleComponent(x)+">() != null){ Destroy("+y+".gameObject.GetComponent<"+simpleComponent(x)+">());}";
 		case ROUND: return "math.round("+x+")";
 		case SET_COLOR: return x+".SetColor("+y+","+z+")";
 		case SET_NUMBER: return x+".SetFloat("+y+","+z+")";
