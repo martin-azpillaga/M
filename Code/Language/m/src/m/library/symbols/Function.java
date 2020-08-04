@@ -80,6 +80,7 @@ public enum Function implements Symbol{
 	
 	WRITE(UNIT, A),
 	WRITEERROR(UNIT, A),
+	WRITE_WARNING(UNIT, A),
 	HALT(UNIT),
 	
 	OVERLAPS(ENTITY_LIST, ENTITY),
