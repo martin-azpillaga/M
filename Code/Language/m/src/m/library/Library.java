@@ -170,10 +170,11 @@ public enum Library {
 		entry("getInteger", GET_INTEGER),
 		
 		entry("setTrigger", SET_TRIGGER),
-		entry("stateName", STATE_NAME),
+		entry("inState", IN_STATE),
 		
 		entry("readTriggered", READ_TRIGGERED),
 		entry("readNumber", READ_NUMBER),
+		entry("readVector", READ_VECTOR),
 		
 		entry("quaternion", TO_QUATERNION),
 		entry("angles", TO_NUMBER3),
@@ -367,10 +368,11 @@ public enum Library {
 				entry("hartuProposizioa", GET_KEYWORD),
 				
 				entry("ezarriKakoa", SET_TRIGGER),
-				entry("egoeraIzena", STATE_NAME),
+				entry("egoera", IN_STATE),
 				
 				entry("irakurriKakoa", READ_TRIGGERED),
 				entry("irakurriZenbakia", READ_NUMBER),
+				entry("irakurriBektorea", READ_VECTOR),
 				
 				entry("kuaternioia", TO_QUATERNION),
 				entry("angeluak", TO_NUMBER3),
