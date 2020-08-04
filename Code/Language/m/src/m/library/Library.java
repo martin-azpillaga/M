@@ -156,6 +156,7 @@ public enum Library {
 		entry("writeError", WRITEERROR),
 		entry("writeWarning", WRITE_WARNING),
 		entry("halt", HALT),
+		entry("breakpoint", BREAKPOINT),
 		
 		
 		entry("setNumber", SET_NUMBER),
@@ -353,7 +354,8 @@ public enum Library {
 				entry("idatzi", WRITE),
 				entry("idatziAkatsa", WRITEERROR),
 				entry("idatziAholkua", WRITE_WARNING),
-				entry("gelditu", HALT),
+				entry("amaitu", HALT),
+				entry("gelditu", BREAKPOINT),
 				
 				
 				entry("ezarriZenbakia", SET_NUMBER),
