@@ -476,6 +476,7 @@ public class ClassicUnity
 		case RADIANS: return "math.radians("+x+")";
 		case SLERP: return "math.slerp("+x+", "+y+", "+z+")";
 		case STEP: return "math.step("+x+", "+y+")";
+		case BREAKPOINT: return "Debug.Break()";
 		}
 		return "undefined";
 	}
