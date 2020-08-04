@@ -435,6 +435,7 @@ public class ClassicUnity
 		case RANDOM: return "UnityEngine.Random.Range("+x+".x,"+x+".y)";
 		case READ_NUMBER: return x+".ReadValue<float>()";
 		case READ_TRIGGERED: return x+".triggered";
+		case READ_VECTOR: return x+".ReadValue<Vector2>()";
 		case RECIPROCAL: return "-"+x;
 		case REFLECT: return "math.reflect("+x+","+y+")";
 		case REFRACT: return "math.refract("+x+","+y+", "+z+")";
@@ -447,7 +448,7 @@ public class ClassicUnity
 		case SIN: return "math.sin("+x+")";
 		case SIZE: return x+".Count()";
 		case SQRT: return "math.sqrt("+x+")";
-		case STATE_NAME: return "undefined";
+		case IN_STATE: return x+".GetComponent<Animator>()?.GetCurrentAnimatorStateInfo(0).IsName("+y+")";
 		case SUBTRACTION: return x+"-"+y;
 		case TAN: return "math.tan("+x+")";
 		case UNLERP: return "math.unlerp("+x+","+y+".x,"+y+".y)";
