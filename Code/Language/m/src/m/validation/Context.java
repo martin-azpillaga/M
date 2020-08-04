@@ -128,7 +128,7 @@ public class Context {
 			inference.bind(value, userVariables.get(name), SAME_VARIABLE);
 			accessedValues.add(userVariables.get(name));
 		}
-		else if (userComponents.containsKey(name))
+		else if (userComponents.containsKey(name) || library.getComponent(name) != null)
 		{
 			
 		}
