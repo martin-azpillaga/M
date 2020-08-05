@@ -1,5 +1,6 @@
 package m.generator;
 
+import static m.generator.AccessKind.TAG;
 import static m.generator.Writer.*;
 import static m.library.symbols.Block.*;
 import static m.library.types.AtomicType.*;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Stack;
 
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 
 import m.library.Library;
@@ -159,7 +161,17 @@ public class ClassicUnity
 	
 	private String generateMultiComponent(Function function, String query)
 	{
-		var map = game.queries.get(function).get(query);
+		var extras = extraComponents(function);
+		var normal = new ArrayList<String>();
+		if (game.queries.get(function).containsKey(query))
+		{
+			normal.addAll(game.queries.get(function).get(query).keySet());
+		}
+		var extra = new ArrayList<String>();
+		if (extras.containsKey(query))
+		{
+			extra.addAll(extras.get(query));
+		}
 		return lines("",
 		"using UnityEngine;",
 		"using UnityEngine.UI;",
@@ -173,22 +185,23 @@ public class ClassicUnity
 		"{",
 		"   public class "+function.getName()+"_"+query+" : MonoBehaviour",
 		"   {",
-		"       "+all(map.keySet(), x->"public "+typeOf(x)+" "+unreserved(x)+";", "\n       "),
-		"       "+all(map.keySet(), x->simpleComponent(x)+" " + unreserved(x)+"Component;", "\n       "),
+		"       "+all(normal, x->"public "+typeOf(x)+" "+unreserved(x)+";", "\n       "),
+		"       "+all(normal, x->simpleComponent(x)+" " + unreserved(x)+"Component;", "\n       "),
 		"       void Start()",
 		"       {",
-		"           "+all(map.keySet(), x->unreserved(x)+"Component = GetComponent<"+simpleComponent(x)+">();\n"+"if ("+unreserved(x)+"Component == null){ "+unreserved(x)+"Component = gameObject.AddComponent<"+simpleComponent(x)+">();}", "\n           "),
-		"           "+all(map.keySet(), x->unreserved(x)+"Component."+field(x)+" = "+unreserved(x)+";", "\n           "),
+		"           "+all(normal, x->unreserved(x)+"Component = GetComponent<"+simpleComponent(x)+">();\n"+"if ("+unreserved(x)+"Component == null){ "+unreserved(x)+"Component = gameObject.AddComponent<"+simpleComponent(x)+">();}", "\n           "),
+		"           "+all(normal, x->unreserved(x)+"Component."+field(x)+" = "+unreserved(x)+";", "\n           "),
+		"           "+all(extra, x->"if (GetComponent<"+x+">() == null) { gameObject.AddComponent<"+x+">(); }", "\n           "),
 		"       }",
 		"",
 		"       void Update()",
 		"       {",
-		"           "+all(map.keySet(), x->"if ("+unreserved(x)+"Component != null){"+unreserved(x)+" = "+unreserved(x)+"Component."+field(x)+";}", "\n           "),
+		"           "+all(normal, x->"if ("+unreserved(x)+"Component != null){"+unreserved(x)+" = "+unreserved(x)+"Component."+field(x)+";}", "\n           "),
 		"       }",
 		"",
 		"       void OnValidate()",
 		"       {",
-		"           "+all(map.keySet(), x->"if ("+unreserved(x)+"Component != null){"+unreserved(x)+"Component."+field(x)+" = "+unreserved(x)+";}", "\n           "),
+		"           "+all(normal, x->"if ("+unreserved(x)+"Component != null){"+unreserved(x)+"Component."+field(x)+" = "+unreserved(x)+";}", "\n           "),
 		"       }",
 		"   }",
 		"}");
@@ -245,15 +258,24 @@ public class ClassicUnity
 			if (library.getBlock(name) == QUERY)
 			{
 				var a = block.getExpression().getName();
-				var query = queries.get(currentFunction).get(a);
+				var extras = extraComponents(currentFunction);
+				var components = new ArrayList<String>();
+				if (queries.get(currentFunction).containsKey(a))
+				{
+					components.addAll(queries.get(currentFunction).get(a).keySet());
+				}
+				if (extras.containsKey(a))
+				{
+					components.addAll(extras.get(a));
+				}
 				
 				variables.add(a);
 				
 				var result = lines("			",
 				"foreach (var "+a+" in gos)",
 				"{",
-				"	"+all(query.keySet(), x->"var "+x+"_"+a+" = "+a+".GetComponent<"+component(x)+">();", "\n				"),
-				"	if ("+all(query.keySet(), x->x+"_"+a+" != null ", " && ")+"){",
+				"	"+all(components, x->"var "+x+"_"+a+" = "+a+".GetComponent<"+component(x)+">();", "\n				"),
+				"	if ("+all(components, x->x+"_"+a+" != null ", " && ")+"){",
 					"",
 				"   "+currentFunction.getName()+"_"+a+".Add("+a+");",
 				"	"+all(block.getStatements(), x->code(x), "\n				"),
@@ -454,6 +476,7 @@ public class ClassicUnity
 		case WRITE: return "if (Debug.isDebugBuild){ Debug.Log("+x+"); }";
 		case WRITEERROR: return "if (Debug.isDebugBuild){ Debug.LogError("+x+"); }";
 		case WRITE_WARNING: return "if (Debug.isDebugBuild){ Debug.LogWarning("+x+"); }";
+		case SCREENSHOT: return "ScreenCapture.CaptureScreenshot((System.DateTime.Now+\".png\").Replace(\"/\", \"-\"), 1)";
 		case XYZ: return "new Vector3("+x+","+y+","+z+")";
 		case OVERLAPS: return x+".GetComponentsInChildren<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".transform.position+Vector3.Scale((x as BoxCollider).center, "+x+".transform.lossyScale), Vector3.Scale((x as BoxCollider).size,"+x+".transform.lossyScale), "+x+".transform.rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".transform.position+Vector3.Scale("+x+".transform.lossyScale, (x as SphereCollider).center), (x as SphereCollider).radius*Mathf.Max("+x+".transform.lossyScale.x, Mathf.Max("+x+".transform.lossyScale.y, "+x+".transform.lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
 		case TO_NUMBER3: return x+".eulerAngles";
@@ -478,6 +501,45 @@ public class ClassicUnity
 		case BREAKPOINT: return "Debug.Break()";
 		}
 		return "undefined";
+	}
+	
+	private HashMap<String, HashSet<String>> extraComponents(Function function)
+	{
+		var map = new HashMap<String, HashSet<String>>();
+		
+		for (var application : EcoreUtil2.getAllContentsOfType(function, Application.class))
+		{
+			var name = application.getName();
+			var standard = game.library.getFunction(name);
+			if (standard != null)
+			{
+				switch (standard)
+				{
+				case SET_TRIGGER:
+				case IN_STATE:
+					var entity = ((Value)application.getArguments().get(0)).getName();
+					if (!map.containsKey(entity))
+					{
+						map.put(entity, new HashSet<String>());
+					}
+					map.get(entity).add("Animator");
+					break;
+				case PLAY:
+				case PLAY_ONCE:
+				case PAUSE:
+				case STOP:
+					var a = ((Value)application.getArguments().get(0)).getName();
+					if (!map.containsKey(a))
+					{
+						map.put(a, new HashSet<String>());
+					}
+					map.get(a).add("AudioSource");
+					break;
+				}
+			}
+		}
+		
+		return map;
 	}
 	
 
@@ -542,6 +604,15 @@ public class ClassicUnity
 	private String component(String name)
 	{
 		var found = library.getComponent(name);
+		if (name.equals("Animator"))
+		{
+			return "Animator";
+		}
+		else if (name.equals("AudioSource"))
+		{
+			return "AudioSource";
+		}
+		
 		if (found == null)
 		{
 			for (var i = 0; i < csharpReserved.length; i++)
