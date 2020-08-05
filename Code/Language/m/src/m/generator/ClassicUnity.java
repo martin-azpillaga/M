@@ -456,7 +456,7 @@ public class ClassicUnity
 		case WRITEERROR: return "if (Debug.isDebugBuild){ Debug.LogError("+x+"); }";
 		case WRITE_WARNING: return "if (Debug.isDebugBuild){ Debug.LogWarning("+x+"); }";
 		case XYZ: return "new Vector3("+x+","+y+","+z+")";
-		case OVERLAPS: return x+".GetComponentsInChildren<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".position+Vector3.Scale((x as BoxCollider).center, "+x+".lossyScale), Vector3.Scale((x as BoxCollider).size,"+x+".lossyScale), "+x+".rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".position+(x as SphereCollider).center, (x as SphereCollider).radius, Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
+		case OVERLAPS: return x+".GetComponentsInChildren<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".position+Vector3.Scale((x as BoxCollider).center, "+x+".lossyScale), Vector3.Scale((x as BoxCollider).size,"+x+".lossyScale), "+x+".rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".position+Vector3.Scale("+x+".lossyScale, (x as SphereCollider).center), (x as SphereCollider).radius*Mathf.Max("+x+".lossyScale.x, Mathf.Max("+x+".lossyScale.y, "+x+".lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
 		case TO_NUMBER3: return x+".eulerAngles";
 		case TO_QUATERNION: return "Quaternion.Euler("+x+".x, "+x+".y, "+x+".z)";
 		case ADD_FORCE: return x+".GetComponent<Rigidbody>()?.AddForce("+y+")";
