@@ -110,7 +110,7 @@ public class ClassicUnity
 			}
 		}
 
-		systems += "void FixedUpdate()\n{\n";
+		systems += "void FixedUpdate()\n{\n\n           var gos = FindObjectsOfType<Transform>().Select(x=>x.gameObject);\n";
 		
 		for (var function : game.functions.keySet())
 		{
@@ -250,13 +250,12 @@ public class ClassicUnity
 				variables.add(a);
 				
 				var result = lines("			",
-				"var transforms_"+a+" = FindObjectsOfType<Transform>();",
-				"foreach (var "+a+" in transforms_"+a+")",
+				"foreach (var "+a+" in gos)",
 				"{",
 				"	"+all(query.keySet(), x->"var "+x+"_"+a+" = "+a+".GetComponent<"+component(x)+">();", "\n				"),
 				"	if ("+all(query.keySet(), x->x+"_"+a+" != null ", " && ")+"){",
 					"",
-				"   "+currentFunction.getName()+"_"+a+".Add("+a+".gameObject);",
+				"   "+currentFunction.getName()+"_"+a+".Add("+a+");",
 				"	"+all(block.getStatements(), x->code(x), "\n				"),
 				"   }",
 				"}");
@@ -393,7 +392,7 @@ public class ClassicUnity
 		{
 		case ABS: return "math.abs("+x+")";
 		case ACOS: return "math.acos("+x+")";
-		case ADD: return "if ("+y+".GetComponent<"+simpleComponent(x)+">() == null){"+y+".gameObject.AddComponent<"+simpleComponent(x)+">();"+"}";
+		case ADD: return "if ("+y+".GetComponent<"+simpleComponent(x)+">() == null){"+y+".AddComponent<"+simpleComponent(x)+">();"+"}";
 		case ADDITION: return x+"+"+y;
 		case AND: return x+"&&"+y;
 		case ASIN: return "math.asin("+x+")";
@@ -404,7 +403,7 @@ public class ClassicUnity
 		case COS: return "math.cos("+x+")";
 		case CREATE: return "Instantiate<GameObject>("+x+")";
 		case CROSS: return "math.cross("+x+","+y+")";
-		case DESTROY: return "Destroy("+x+".gameObject)";
+		case DESTROY: return "Destroy("+x+")";
 		case DISTANCE: return "math.distance("+x+","+y+")";
 		case DIVISION: return x+"/"+y;
 		case DOT: return "math.dot("+x+","+y+")";
@@ -415,8 +414,8 @@ public class ClassicUnity
 		case GREATER: return x+">"+y;
 		case GREATEROREQUAL: return x+">="+y;
 		case HALT: return "#if UNITY_EDITOR\nUnityEditor.EditorApplication.isPlaying = false;\n#endif\nApplication.Quit()";
-		case HAS: return "("+y+".gameObject.GetComponent<"+simpleComponent(x)+">() != null)";
-		case IN: return y+".Contains("+x+".gameObject)";
+		case HAS: return "("+y+".GetComponent<"+simpleComponent(x)+">() != null)";
+		case IN: return y+".Contains("+x+")";
 		case INEQUAL: return x+"!="+y;
 		case INTEGERPART: return "math.trunc("+x+")";
 		case INVERSE: return "(1/"+x+")";
@@ -439,7 +438,7 @@ public class ClassicUnity
 		case RECIPROCAL: return "-"+x;
 		case REFLECT: return "math.reflect("+x+","+y+")";
 		case REFRACT: return "math.refract("+x+","+y+", "+z+")";
-		case REMOVE: return "if ("+y+".GetComponent<"+simpleComponent(x)+">() != null){ Destroy("+y+".gameObject.GetComponent<"+simpleComponent(x)+">());}";
+		case REMOVE: return "if ("+y+".GetComponent<"+simpleComponent(x)+">() != null){ Destroy("+y+".GetComponent<"+simpleComponent(x)+">());}";
 		case ROUND: return "math.round("+x+")";
 		case SET_COLOR: return x+".SetColor("+y+","+z+")";
 		case SET_NUMBER: return x+".SetFloat("+y+","+z+")";
@@ -456,12 +455,12 @@ public class ClassicUnity
 		case WRITEERROR: return "if (Debug.isDebugBuild){ Debug.LogError("+x+"); }";
 		case WRITE_WARNING: return "if (Debug.isDebugBuild){ Debug.LogWarning("+x+"); }";
 		case XYZ: return "new Vector3("+x+","+y+","+z+")";
-		case OVERLAPS: return x+".GetComponentsInChildren<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".position+Vector3.Scale((x as BoxCollider).center, "+x+".lossyScale), Vector3.Scale((x as BoxCollider).size,"+x+".lossyScale), "+x+".rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".position+Vector3.Scale("+x+".lossyScale, (x as SphereCollider).center), (x as SphereCollider).radius*Mathf.Max("+x+".lossyScale.x, Mathf.Max("+x+".lossyScale.y, "+x+".lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
+		case OVERLAPS: return x+".GetComponentsInChildren<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".transform.position+Vector3.Scale((x as BoxCollider).center, "+x+".transform.lossyScale), Vector3.Scale((x as BoxCollider).size,"+x+".transform.lossyScale), "+x+".transform.rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".transform.position+Vector3.Scale("+x+".transform.lossyScale, (x as SphereCollider).center), (x as SphereCollider).radius*Mathf.Max("+x+".transform.lossyScale.x, Mathf.Max("+x+".transform.lossyScale.y, "+x+".transform.lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
 		case TO_NUMBER3: return x+".eulerAngles";
 		case TO_QUATERNION: return "Quaternion.Euler("+x+".x, "+x+".y, "+x+".z)";
 		case ADD_FORCE: return x+".GetComponent<Rigidbody>()?.AddForce("+y+")";
 		case ADD_TORQUE: return x+".GetComponent<Rigidbody>()?.AddTorque("+y+")";
-		case CLOSEST_POINT: return "("+x+".GetComponent<Collider>() != null ? "+x+".GetComponent<Collider>().ClosestPoint("+y+")" + ":" + x+".position)";
+		case CLOSEST_POINT: return "("+x+".GetComponent<Collider>() != null ? "+x+".GetComponent<Collider>().ClosestPoint("+y+")" + ":" + x+".transform.position)";
 		case GET_COLOR: return x+".GetColor("+y+")";
 		case GET_INTEGER: return x+".GetInt("+y+")";
 		case GET_KEYWORD: return x+".IsKeywordEnabled("+y+")";
