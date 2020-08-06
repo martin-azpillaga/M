@@ -1,6 +1,5 @@
 package m.generator;
 
-import static m.generator.AccessKind.TAG;
 import static m.generator.Writer.*;
 import static m.library.symbols.Block.*;
 import static m.library.types.AtomicType.*;
@@ -499,6 +498,12 @@ public class ClassicUnity
 		case SLERP: return "math.slerp("+x+", "+y+", "+z+")";
 		case STEP: return "math.step("+x+", "+y+")";
 		case BREAKPOINT: return "Debug.Break()";
+		case PAUSE: return x+".GetComponent<AudioSource>().Pause()";
+		case PLAY: return x+".GetComponent<AudioSource>().Play()";
+		case STOP: return x+".GetComponent<AudioSource>().Stop()";
+		case UNPAUSE: return x+".GetComponent<AudioSource>().UnPause()";
+		default:
+			break;
 		}
 		return "undefined";
 	}
@@ -527,6 +532,7 @@ public class ClassicUnity
 				case PLAY:
 				case PLAY_ONCE:
 				case PAUSE:
+				case UNPAUSE:
 				case STOP:
 					var a = ((Value)application.getArguments().get(0)).getName();
 					if (!map.containsKey(a))

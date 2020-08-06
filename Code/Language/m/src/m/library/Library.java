@@ -182,6 +182,11 @@ public enum Library {
 		entry("angles", TO_NUMBER3),
 		
 		entry("play", PLAY),
+		entry("playOnce", PLAY_ONCE),
+		entry("pause", PAUSE),
+		entry("unpause", UNPAUSE),
+		entry("stop", STOP),
+		
 		entry("overlaps", OVERLAPS),
 		entry("addForce", ADD_FORCE),
 		entry("addTorque", ADD_TORQUE),
@@ -382,6 +387,11 @@ public enum Library {
 				entry("angeluak", TO_NUMBER3),
 				
 				entry("hasi", PLAY),
+				entry("playOnce", PLAY_ONCE),
+				entry("pause", PAUSE),
+				entry("unpause", UNPAUSE),
+				entry("stop", STOP),
+				
 				entry("gainean", OVERLAPS),
 				entry("gehituIndarra", ADD_FORCE),
 				entry("gehituIndarAngeluarra", ADD_TORQUE),
