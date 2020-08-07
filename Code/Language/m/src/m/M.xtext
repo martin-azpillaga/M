@@ -22,7 +22,7 @@ Cell: entity=Value '.' component=Value;
 
 terminal BLANKS: (BLANK|CONTROL)+;
 terminal IDENTIFIER: LETTER+;
-terminal OPERATOR: !(KEYWORD|BLANK|CONTROL|LETTER|NUMBER|MARK) (PUNCTUATION|SYMBOL)*;
+terminal OPERATOR: !(KEYWORD|BLANK|CONTROL|LETTER|NUMBER|MARK) (PUNCTUATION|SYMBOL)*|'==';
 terminal UNRECOGNIZED: .;
 
 terminal fragment KEYWORD: '('|')'|'='|','|'.'|'{'|'}';
