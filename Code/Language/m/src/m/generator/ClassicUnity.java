@@ -87,6 +87,7 @@ public class ClassicUnity
 		var systems = lines("",
 		"using UnityEngine;",
 		"using UnityEngine.UI;",
+		"using UnityEngine.EventSystems;",
 		"using UnityEngine.InputSystem;",
 		"using System.Collections.Generic;",
 		"using Unity.Mathematics;",
@@ -516,6 +517,9 @@ public class ClassicUnity
 		case X: return x+".x";
 		case Y: return x+".y";
 		case Z: return x+".z";
+		case OVER: return "(EventSystem.current.currentSelectedGameObject == "+x+")";
+		case TO_NUMBER: return "float.Parse("+x+", CultureInfo.InvariantCulture)";
+		case TO_STRING: return x+".ToString()";
 		}
 		return "undefined";
 	}
@@ -630,6 +634,10 @@ public class ClassicUnity
 		{
 			return "AudioSource";
 		}
+		else if (name.equals("Rigidbody"))
+		{
+			return "Rigidbody";
+		}
 		
 		if (found == null)
 		{
@@ -687,6 +695,18 @@ public class ClassicUnity
 			case DISPLAY: return "Camera";
 			case CULLING: return "Camera";
 			case ORTHOGRAPHIC_SIZE: return "Camera";
+			case FONT: return "Text";
+			case IMAGE: return "RawImage";
+			case IMAGE_COLOR: return "RawImage";
+			case IMAGE_MATERIAL: return "RawImage";
+			case SLIDER_VALUE: return "Slider";
+			case TEXT: return "Text";
+			case TEXTFIELD_VALUE: return "InputField";
+			case TEXT_COLOR: return "Text";
+			case TEXT_MATERIAL: return "Text";
+			case TOGGLED: return "Toggle";
+			case ANCHOR_MIN: return "RectTransform";
+			case ANCHOR_MAX: return "RectTransform";
 			}
 		}
 		return "undefined";
@@ -744,6 +764,18 @@ public class ClassicUnity
 			case DISPLAY: return "targetDisplay";
 			case CULLING: return "cullingMask";
 			case ORTHOGRAPHIC_SIZE: return "orthographicSize";
+			case FONT: return "font";
+			case IMAGE: return "texture";
+			case IMAGE_COLOR: return "color";
+			case IMAGE_MATERIAL: return "material";
+			case SLIDER_VALUE: return "value";
+			case TEXT: return "text";
+			case TEXTFIELD_VALUE: return "text";
+			case TEXT_COLOR: return "color";
+			case TEXT_MATERIAL: return "material";
+			case TOGGLED: return "isOn";
+			case ANCHOR_MAX: return "anchorMax";
+			case ANCHOR_MIN: return "anchorMin";
 			}
 		}
 		return "undefined";
