@@ -518,7 +518,7 @@ public class ClassicUnity
 		case Y: return x+".y";
 		case Z: return x+".z";
 		case OVER: return "(EventSystem.current.currentSelectedGameObject == "+x+")";
-		case TO_NUMBER: return "float.Parse("+x+", CultureInfo.InvariantCulture)";
+		case TO_NUMBER: return "float.Parse("+x+", System.Globalization.CultureInfo.InvariantCulture)";
 		case TO_STRING: return x+".ToString()";
 		}
 		return "undefined";
