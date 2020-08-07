@@ -73,6 +73,8 @@ public enum Library {
 		entry("spotAngle", SPOT_ANGLE),
 		entry("range", RANGE),
 		entry("intensity", INTENSITY),
+		entry("bounceIntensity", INDIRECT_MULTIPLIER),
+		entry("cookie", COOKIE),
 		
 		
 		entry("audioClip", Component.AUDIOCLIP),
@@ -279,6 +281,8 @@ public enum Library {
 				entry("fokoAngelua", SPOT_ANGLE),
 				entry("irismena", RANGE),
 				entry("intentsitatea", INTENSITY),
+				entry("erreboteIntentsitatea", INDIRECT_MULTIPLIER),
+				entry("gaileta", COOKIE),
 				
 				
 				entry("audioKlipa", Component.AUDIOCLIP),

@@ -672,6 +672,8 @@ public class ClassicUnity
 			case SPHERE_CENTER: return "SphereCollider";
 			case SHADOW_RECEIVER: return "Renderer";
 			case KINEMATIC: return "Rigidbody";
+			case INDIRECT_MULTIPLIER: return "Light";
+			case COOKIE: return "Light";
 			}
 		}
 		return "undefined";
@@ -695,7 +697,7 @@ public class ClassicUnity
 			case AUDIOCLIP: return "audioClip";
 			case BACKGROUND: return "backgroundColor";
 			case ELAPSED: return "";
-			case EMISSION: return "emission";
+			case EMISSION: return "color";
 			case EXTENTS: return "size";
 			case FAR: return "farPlane";
 			case FOV: return "fieldOfView";
@@ -726,6 +728,8 @@ public class ClassicUnity
 			case SPHERE_CENTER: return "center";
 			case SHADOW_RECEIVER: return "receiveShadows";
 			case KINEMATIC: return "isKinematic";
+			case INDIRECT_MULTIPLIER: return "bounceIntensity";
+			case COOKIE: return "cookie";
 			}
 		}
 		return "undefined";
