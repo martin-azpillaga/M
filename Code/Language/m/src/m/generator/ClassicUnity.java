@@ -3,6 +3,8 @@ package m.generator;
 import static m.generator.Writer.*;
 import static m.library.symbols.Block.*;
 import static m.library.types.AtomicType.*;
+import static m.library.symbols.Component.*;
+import static m.library.symbols.Function.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -325,6 +327,7 @@ public class ClassicUnity
 			var assignment = (Assignment) statement;
 			var atom = assignment.getAtom();
 			var expression = assignment.getExpression();
+			var code = code(expression);
 			
 			if (atom instanceof Value)
 			{
@@ -332,17 +335,22 @@ public class ClassicUnity
 				var name = value.getName();
 				if (variables.contains(name))
 				{
-					return code(atom)+" = "+code(expression)+";";
+					return code(atom)+" = "+code+";";
 				}
 				else
 				{
 					variables.add(name);
-					return "var "+code(atom)+" = "+code(expression)+";";
+					return "var "+code(atom)+" = "+code+";";
 				}
 			}
 			else if (atom instanceof Cell)
 			{
-				return code(atom)+" = "+code(expression)+";";
+				var cell = (Cell) atom;
+				if (library.getComponent(cell.getComponent().getName()) == DISPLAY)
+				{
+					code = "(int)("+code+")";
+				}
+				return code(atom)+" = "+code+";";
 			}
 		}
 		else if (statement instanceof Delegation)
@@ -504,6 +512,10 @@ public class ClassicUnity
 		case UNPAUSE: return x+".GetComponent<AudioSource>().UnPause()";
 		case VIEWPORT_TO_WORLD: return "Camera.main.ViewportToWorldPoint("+x+")";
 		case WORLD_TO_VIEWPORT: return "Camera.main.WorldToViewportPoint("+x+")";
+		case SCREEN_OVERLAPS: return "Physics.RaycastAll(Camera.main.ScreenPointToRay("+x+")).Select(x=>x.transform.gameObject)";
+		case X: return x+".x";
+		case Y: return x+".y";
+		case Z: return x+".z";
 		}
 		return "undefined";
 	}
@@ -516,32 +528,23 @@ public class ClassicUnity
 		{
 			var name = application.getName();
 			var standard = game.library.getFunction(name);
-			if (standard != null)
+			if (standard == SET_TRIGGER || standard == IN_STATE)
 			{
-				switch (standard)
+				var entity = ((Value)application.getArguments().get(0)).getName();
+				if (!map.containsKey(entity))
 				{
-				case SET_TRIGGER:
-				case IN_STATE:
-					var entity = ((Value)application.getArguments().get(0)).getName();
-					if (!map.containsKey(entity))
-					{
-						map.put(entity, new HashSet<String>());
-					}
-					map.get(entity).add("Animator");
-					break;
-				case PLAY:
-				case PLAY_ONCE:
-				case PAUSE:
-				case UNPAUSE:
-				case STOP:
-					var a = ((Value)application.getArguments().get(0)).getName();
-					if (!map.containsKey(a))
-					{
-						map.put(a, new HashSet<String>());
-					}
-					map.get(a).add("AudioSource");
-					break;
+					map.put(entity, new HashSet<String>());
 				}
+				map.get(entity).add("Animator");
+			}
+			else if (standard == PLAY || standard == PLAY_ONCE || standard == PAUSE || standard == UNPAUSE || standard == STOP)
+			{
+				var a = ((Value)application.getArguments().get(0)).getName();
+				if (!map.containsKey(a))
+				{
+					map.put(a, new HashSet<String>());
+				}
+				map.get(a).add("AudioSource");
 			}
 		}
 		
@@ -655,7 +658,6 @@ public class ClassicUnity
 			case NEAR: return "Camera";
 			case NO_COLLISION_RESPONSE: return "Collider";
 			case PARENT: return "Transform";
-			case PERSPECTIVE: return "Camera";
 			case PITCH: return "AudioSource";
 			case RADIUS: return "SphereCollider";
 			case RANGE: return "Light";
@@ -663,7 +665,6 @@ public class ClassicUnity
 			case RESTITUTION: return "Collider";
 			case ROTATION: return "Transform";
 			case SCALE: return "Transform";
-			case SKYBOX: return "Camera";
 			case SPOT_ANGLE: return "Light";
 			case TIMER: return "Timer";
 			case VIEWPORT: return "Camera";
@@ -674,6 +675,9 @@ public class ClassicUnity
 			case KINEMATIC: return "Rigidbody";
 			case INDIRECT_MULTIPLIER: return "Light";
 			case COOKIE: return "Light";
+			case DISPLAY: return "Camera";
+			case CULLING: return "Camera";
+			case ORTHOGRAPHIC_SIZE: return "Camera";
 			}
 		}
 		return "undefined";
@@ -711,7 +715,6 @@ public class ClassicUnity
 			case NEAR: return "nearClipPlane";
 			case NO_COLLISION_RESPONSE: return "isTrigger";
 			case PARENT: return "parent";
-			case PERSPECTIVE: return "";
 			case PITCH: return "pitch";
 			case RADIUS: return "radius";
 			case RANGE: return "range";
@@ -719,10 +722,9 @@ public class ClassicUnity
 			case RESTITUTION: return "material.bounciness";
 			case ROTATION: return "localRotation";
 			case SCALE: return "localScale";
-			case SKYBOX: return "";
 			case SPOT_ANGLE: return "spotAngle";
 			case TIMER: return "Value";
-			case VIEWPORT: return "viewport";
+			case VIEWPORT: return "rect";
 			case VOLUME: return "volume";
 			case BOX_CENTER: return "center";
 			case SPHERE_CENTER: return "center";
@@ -730,6 +732,9 @@ public class ClassicUnity
 			case KINEMATIC: return "isKinematic";
 			case INDIRECT_MULTIPLIER: return "bounceIntensity";
 			case COOKIE: return "cookie";
+			case DISPLAY: return "targetDisplay";
+			case CULLING: return "cullingMask";
+			case ORTHOGRAPHIC_SIZE: return "orthographicSize";
 			}
 		}
 		return "undefined";
@@ -793,6 +798,7 @@ public class ClassicUnity
 				return "Texture";
 			case COLLIDER:
 				return "Collider";
+			case RECT: return "Rect";
 			}
 			return "Undefined";
 		}
