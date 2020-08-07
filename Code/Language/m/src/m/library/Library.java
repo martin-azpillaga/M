@@ -77,6 +77,22 @@ public enum Library {
 		entry("bounceIntensity", INDIRECT_MULTIPLIER),
 		entry("cookie", COOKIE),
 		
+		entry("text", Component.TEXT),
+		entry("font", Component.FONT),
+		entry("textColor", TEXT_COLOR),
+		entry("textMaterial", TEXT_MATERIAL),
+		
+		entry("image", Component.IMAGE),
+		entry("imageColor", IMAGE_COLOR),
+		entry("imageMaterial", IMAGE_MATERIAL),
+		
+		entry("toggled", TOGGLED),
+		entry("sliderValue", SLIDER_VALUE),
+		entry("writtenText", TEXTFIELD_VALUE),
+		
+		entry("anchorMin", ANCHOR_MIN),
+		entry("anchorMax", ANCHOR_MAX),
+		
 		
 		entry("audioClip", Component.AUDIOCLIP),
 		entry("volume", VOLUME),
@@ -193,6 +209,10 @@ public enum Library {
 		entry("unpause", UNPAUSE),
 		entry("stop", STOP),
 		
+		entry("over", OVER),
+		entry("string", TO_STRING),
+		entry("number", TO_NUMBER),
+		
 		entry("overlaps", OVERLAPS),
 		entry("screenOverlaps", SCREEN_OVERLAPS),
 		entry("addForce", ADD_FORCE),
@@ -222,9 +242,9 @@ public enum Library {
 		entry(INPUT, "input"),
 		entry(AtomicType.MESH, "mesh"),
 		entry(AtomicType.MATERIAL, "material"),
-		entry(FONT, "font"),
-		entry(TEXT, "text"),
-		entry(IMAGE, "image"),
+		entry(AtomicType.FONT, "font"),
+		entry(AtomicType.TEXT, "text"),
+		entry(AtomicType.IMAGE, "image"),
 		entry(AtomicType.AUDIOCLIP, "audioClip"),
 		entry(AtomicType.ANIMATOR, "animator"),
 		
@@ -292,6 +312,22 @@ public enum Library {
 				entry("intentsitatea", INTENSITY),
 				entry("erreboteIntentsitatea", INDIRECT_MULTIPLIER),
 				entry("gaileta", COOKIE),
+				
+				entry("testua", Component.TEXT),
+				entry("letraEstiloa", Component.FONT),
+				entry("letraKolorea", TEXT_COLOR),
+				entry("letraMateriala", TEXT_MATERIAL),
+				
+				entry("irudia", Component.IMAGE),
+				entry("irudiKolorea", IMAGE_COLOR),
+				entry("irudiMateriala", IMAGE_MATERIAL),
+				
+				entry("sakatuta", TOGGLED),
+				entry("slideBalioa", SLIDER_VALUE),
+				entry("idatzitakoTestua", TEXTFIELD_VALUE),
+				
+				entry("euskarriaMin", ANCHOR_MIN),
+				entry("euskarriaMax", ANCHOR_MAX),
 				
 				
 				entry("audioKlipa", Component.AUDIOCLIP),
@@ -408,6 +444,10 @@ public enum Library {
 				entry("unpause", UNPAUSE),
 				entry("stop", STOP),
 				
+				entry("saguaGainean", OVER),
+				entry("zenbakia", TO_NUMBER),
+				entry("katea", TO_STRING),
+				
 				entry("gainean", OVERLAPS),
 				entry("pantailaGainean", SCREEN_OVERLAPS),
 				entry("gehituIndarra", ADD_FORCE),
@@ -437,9 +477,9 @@ public enum Library {
 					entry(INPUT, "inputa"),
 					entry(AtomicType.MESH, "malla"),
 					entry(AtomicType.MATERIAL, "materiala"),
-					entry(FONT, "letraEstiloa"),
-					entry(TEXT, "testua"),
-					entry(IMAGE, "irudia"),
+					entry(AtomicType.FONT, "letraEstiloa"),
+					entry(AtomicType.TEXT, "testua"),
+					entry(AtomicType.IMAGE, "irudia"),
 					entry(AtomicType.AUDIOCLIP, "audioKlipa"),
 					entry(AtomicType.ANIMATOR, "animatzailea"),
 					
