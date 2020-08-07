@@ -431,7 +431,7 @@ public class ClassicUnity
 		case CLAMP: return "math.clamp("+x+","+y+".x,"+y+".y)";
 		case COS: return "math.cos("+x+")";
 		case CREATE: return "Instantiate<GameObject>("+x+")";
-		case CROSS: return "math.cross("+x+","+y+")";
+		case CROSS: return "((Vector3)math.cross("+x+","+y+"))";
 		case DESTROY: return "Destroy("+x+")";
 		case DISTANCE: return "math.distance("+x+","+y+")";
 		case DIVISION: return x+"/"+y;
@@ -454,7 +454,7 @@ public class ClassicUnity
 		case LOWEROREQUAL: return x+"<="+y;
 		case MULTIPLICATION: return x+"*"+y;
 		case NORM: return "math.length("+x+")";
-		case NORMALIZE: return "math.normalize("+x+")";
+		case NORMALIZE: return "((Vector3)math.normalize("+x+"))";
 		case NOT: return "!"+x;
 		case OR: return x+"||"+y;
 		case PLAY_ONCE: return x+".GetComponent<AudioSource>().PlayOneShot("+y+")";
@@ -465,8 +465,8 @@ public class ClassicUnity
 		case READ_TRIGGERED: return x+".triggered";
 		case READ_VECTOR: return x+".ReadValue<Vector2>()";
 		case RECIPROCAL: return "-"+x;
-		case REFLECT: return "math.reflect("+x+","+y+")";
-		case REFRACT: return "math.refract("+x+","+y+", "+z+")";
+		case REFLECT: return "((Vector3)math.reflect("+x+","+y+"))";
+		case REFRACT: return "((Vector3)math.refract("+x+","+y+", "+z+"))";
 		case REMOVE: return "if ("+y+".GetComponent<"+simpleComponent(x)+">() != null){ Destroy("+y+".GetComponent<"+simpleComponent(x)+">());}";
 		case ROUND: return "math.round("+x+")";
 		case SET_COLOR: return x+".SetColor("+y+","+z+")";
@@ -488,8 +488,8 @@ public class ClassicUnity
 		case OVERLAPS: return x+".GetComponentsInChildren<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".transform.position+Vector3.Scale((x as BoxCollider).center, "+x+".transform.lossyScale), Vector3.Scale((x as BoxCollider).size/2,"+x+".transform.lossyScale), "+x+".transform.rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".transform.position+Vector3.Scale("+x+".transform.lossyScale, (x as SphereCollider).center), (x as SphereCollider).radius*Mathf.Max("+x+".transform.lossyScale.x, Mathf.Max("+x+".transform.lossyScale.y, "+x+".transform.lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
 		case TO_NUMBER3: return x+".eulerAngles";
 		case TO_QUATERNION: return "Quaternion.Euler("+x+".x, "+x+".y, "+x+".z)";
-		case ADD_FORCE: return x+".GetComponent<Rigidbody>()?.AddForce("+y+")";
-		case ADD_TORQUE: return x+".GetComponent<Rigidbody>()?.AddTorque("+y+")";
+		case ADD_FORCE: return x+".GetComponent<Rigidbody>().AddForce("+y+")";
+		case ADD_TORQUE: return x+".GetComponent<Rigidbody>().AddTorque("+y+")";
 		case CLOSEST_POINT: return "("+x+".GetComponent<Collider>() != null ? "+x+".GetComponent<Collider>().ClosestPoint("+y+")" + ":" + x+".transform.position)";
 		case GET_COLOR: return x+".GetColor("+y+")";
 		case GET_INTEGER: return x+".GetInt("+y+")";
@@ -545,6 +545,15 @@ public class ClassicUnity
 					map.put(a, new HashSet<String>());
 				}
 				map.get(a).add("AudioSource");
+			}
+			else if (standard == ADD_FORCE || standard == ADD_TORQUE)
+			{
+				var a = ((Value)application.getArguments().get(0)).getName();
+				if (!map.containsKey(a))
+				{
+					map.put(a, new HashSet<String>());
+				}
+				map.get(a).add("Rigidbody");
 			}
 		}
 		
