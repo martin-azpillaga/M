@@ -194,6 +194,9 @@ public enum Library {
 		entry("addTorque", ADD_TORQUE),
 		entry("closestPoint", CLOSEST_POINT),
 		
+		entry("worldToViewport", WORLD_TO_VIEWPORT),
+		entry("viewportToWorld", VIEWPORT_TO_WORLD),
+		
 		entry("=", ASSIGNMENT)),
 	Map.ofEntries(
 		entry("foreach", QUERY),
@@ -400,6 +403,9 @@ public enum Library {
 				entry("gehituIndarra", ADD_FORCE),
 				entry("gehituIndarAngeluarra", ADD_TORQUE),
 				entry("puntuGertukoena", CLOSEST_POINT),
+				
+				entry("mundutikPantailara", WORLD_TO_VIEWPORT),
+				entry("pantailatikMundura", VIEWPORT_TO_WORLD),
 				
 				entry("=", ASSIGNMENT)),
 			Map.ofEntries(

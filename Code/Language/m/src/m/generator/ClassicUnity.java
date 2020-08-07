@@ -502,8 +502,8 @@ public class ClassicUnity
 		case PLAY: return x+".GetComponent<AudioSource>().Play()";
 		case STOP: return x+".GetComponent<AudioSource>().Stop()";
 		case UNPAUSE: return x+".GetComponent<AudioSource>().UnPause()";
-		default:
-			break;
+		case VIEWPORT_TO_WORLD: return "Camera.main.ViewportToWorldPoint("+x+")";
+		case WORLD_TO_VIEWPORT: return "Camera.main.WorldToViewportPoint("+x+")";
 		}
 		return "undefined";
 	}
@@ -699,7 +699,7 @@ public class ClassicUnity
 			case ELAPSED: return "";
 			case EMISSION: return "color";
 			case EXTENTS: return "size";
-			case FAR: return "farPlane";
+			case FAR: return "farClipPlane";
 			case FOV: return "fieldOfView";
 			case FRICTION: return "material.dynamicFriction";
 			case INERTIA: return "inertiaTensor";
@@ -708,7 +708,7 @@ public class ClassicUnity
 			case MASS: return "mass";
 			case MATERIAL: return "material";
 			case MESH: return "mesh";
-			case NEAR: return "nearPlane";
+			case NEAR: return "nearClipPlane";
 			case NO_COLLISION_RESPONSE: return "isTrigger";
 			case PARENT: return "parent";
 			case PERSPECTIVE: return "";
