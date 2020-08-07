@@ -63,11 +63,12 @@ public enum Library {
 		entry("near", NEAR),
 		entry("far", FAR),
 		entry("fieldOfView", FOV),
-		entry("perspective", PERSPECTIVE),
+		entry("orthographicSize", ORTHOGRAPHIC_SIZE),
 		entry("background", BACKGROUND),
-		entry("skybox", SKYBOX),
+		entry("culling", CULLING),
 		entry("viewport", VIEWPORT),
 		entry("renderTexture", RENDER_TEXTURE),
+		entry("display", DISPLAY),
 		
 		entry("emission", EMISSION),
 		entry("spotAngle", SPOT_ANGLE),
@@ -134,6 +135,9 @@ public enum Library {
 		
 		entry("#", SIZE),
 		entry("in", IN),
+		entry("x", X),
+		entry("y", Y),
+		entry("z", Z),
 		entry("xyz", XYZ),
 		
 		entry("sin", SIN),
@@ -190,6 +194,7 @@ public enum Library {
 		entry("stop", STOP),
 		
 		entry("overlaps", OVERLAPS),
+		entry("screenOverlaps", SCREEN_OVERLAPS),
 		entry("addForce", ADD_FORCE),
 		entry("addTorque", ADD_TORQUE),
 		entry("closestPoint", CLOSEST_POINT),
@@ -274,11 +279,12 @@ public enum Library {
 				entry("gertu", NEAR),
 				entry("urruti", FAR),
 				entry("ikusmenAngelua", FOV),
-				entry("perspektiba", PERSPECTIVE),
+				entry("ikusmenTamaina", ORTHOGRAPHIC_SIZE),
+				entry("irudikatu", CULLING),
 				entry("atzealdea", BACKGROUND),
-				entry("zerua", SKYBOX),
 				entry("viewport", VIEWPORT),
 				entry("renderizazioEhundura", RENDER_TEXTURE),
+				entry("pantaila", DISPLAY),
 				
 				entry("emisioa", EMISSION),
 				entry("fokoAngelua", SPOT_ANGLE),
@@ -344,6 +350,9 @@ public enum Library {
 				
 				entry("#", SIZE),
 				entry("barne", IN),
+				entry("x", X),
+				entry("y", Y),
+				entry("z", Z),
 				entry("xyz", XYZ),
 				
 				entry("sin", SIN),
@@ -400,6 +409,7 @@ public enum Library {
 				entry("stop", STOP),
 				
 				entry("gainean", OVERLAPS),
+				entry("pantailaGainean", SCREEN_OVERLAPS),
 				entry("gehituIndarra", ADD_FORCE),
 				entry("gehituIndarAngeluarra", ADD_TORQUE),
 				entry("puntuGertukoena", CLOSEST_POINT),
