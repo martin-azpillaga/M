@@ -29,13 +29,13 @@ public class MGenerator extends AbstractGenerator
 		{
 			for (var function : game.functions.keySet())
 			{
-				game.queries.put(function, collectQueries(function));
+				game.queries.put(function, collectQueries(function, game));
 			}
 			new ClassicUnity().generate(game, fileSystem);
 		}
 	}
 	
-	private HashMap<String, HashMap<String,AccessKind>> collectQueries(Function function)
+	private HashMap<String, HashMap<String,AccessKind>> collectQueries(Function function, Game game)
 	{
 		var queries = new HashMap<String, HashMap<String,AccessKind>>();
 		
@@ -62,6 +62,8 @@ public class MGenerator extends AbstractGenerator
 				setComponentAccess(queries, name, component, READ);
 			}
 		}
+		
+		
 		
 		return queries;
 	}

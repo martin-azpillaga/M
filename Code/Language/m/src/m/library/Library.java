@@ -39,84 +39,90 @@ public enum Library {
 		entry("rotation", ROTATION),
 		entry("scale", SCALE),
 		entry("parent", PARENT),
-		entry("children", CHILDREN),
 		
 		
 		entry("mass", MASS),
 		entry("inertia", INERTIA),
-		entry("kinematic",KINEMATIC),
 		
 		entry("velocity",VELOCITY),
-		entry("acceleration", ACCELERATION),
-		entry("force", FORCE),
 		entry("angularVelocity", ANGULAR_VELOCITY),
-		entry("angularAcceleration", ANGULAR_ACCELERATION),
-		entry("angularForce", ANGULAR_FORCE),
-		
-		entry("collisions", COLLISIONS),
-		entry("collisionLayer", COLLISION_LAYER),
-		entry("collisionMask", COLLISION_MASK),
 		entry("restitution", RESTITUTION),
 		entry("friction", FRICTION),
-		entry("collisionEvents", COLLISION_EVENTS),
-		entry("noCollisionResponse", NO_COLLISION_RESPONSE),
+		entry("kinematic", KINEMATIC),
 		
+		entry("crossable", NO_COLLISION_RESPONSE),
 		entry("radius", RADIUS),
 		entry("extents", EXTENTS),
-		entry("meshCollider", MESH_COLLIDER),
-		entry("convexHull", CONVEX_HULL),
-		
-		entry("bond", BOND),
-		entry("anchor", ANCHOR),
-		entry("breakForce", BREAK_FORCE),
-		entry("breakAngularForce", BREAK_ANGULAR_FORCE),
-		
-		entry("lockedPositionX", LOCKED_POSITION_X),
-		entry("lockedPositionY", LOCKED_POSITION_Y),
-		entry("lockedPositionZ", LOCKED_POSITION_Z),
-		entry("lockedRotation", LOCKED_ROTATION),
-		
+		entry("boxCenter", BOX_CENTER),
+		entry("sphereCenter", SPHERE_CENTER),
 		
 		entry("mesh", Component.MESH),
 		entry("material", Component.MATERIAL),
-		
-		entry("number", NUMBER_LABEL),
+		entry("shadowReceiver", SHADOW_RECEIVER),
 		
 		entry("near", NEAR),
 		entry("far", FAR),
 		entry("fieldOfView", FOV),
-		entry("perspective", PERSPECTIVE),
+		entry("orthographicSize", ORTHOGRAPHIC_SIZE),
 		entry("background", BACKGROUND),
-		entry("skybox", SKYBOX),
+		entry("culling", CULLING),
 		entry("viewport", VIEWPORT),
 		entry("renderTexture", RENDER_TEXTURE),
+		entry("display", DISPLAY),
 		
 		entry("emission", EMISSION),
 		entry("spotAngle", SPOT_ANGLE),
 		entry("range", RANGE),
 		entry("intensity", INTENSITY),
+		entry("bounceIntensity", INDIRECT_MULTIPLIER),
+		entry("cookie", COOKIE),
+		
+		entry("text", Component.TEXT),
+		entry("font", Component.FONT),
+		entry("textColor", TEXT_COLOR),
+		entry("textMaterial", TEXT_MATERIAL),
+		
+		entry("image", Component.IMAGE),
+		entry("imageColor", IMAGE_COLOR),
+		entry("imageMaterial", IMAGE_MATERIAL),
+		
+		entry("toggled", TOGGLED),
+		entry("sliderValue", SLIDER_VALUE),
+		entry("writtenText", TEXTFIELD_VALUE),
+		
+		entry("anchorMin", ANCHOR_MIN),
+		entry("anchorMax", ANCHOR_MAX),
 		
 		
 		entry("audioClip", Component.AUDIOCLIP),
 		entry("volume", VOLUME),
 		entry("pitch", PITCH),
-		entry("loop", LOOP),
-		entry("animator", Component.ANIMATOR)),
+		entry("loop", LOOP)
+		),
 	Map.ofEntries(
 		entry("abs", ABS),
 		entry("sign", SIGN),
 		entry("ceil", CEIL),
 		entry("floor", FLOOR),
 		entry("round", ROUND),
-		entry("clamp", CLAMP),
 		entry("integerPart", INTEGERPART),
 		entry("fractionalPart", FRACTIONALPART),
 		entry("inverse", INVERSE),
 		entry("reciprocal", RECIPROCAL),
-		
+
+		entry("clamp", CLAMP),
 		entry("lerp", LERP),
 		entry("unlerp", UNLERP),
 		entry("proportional", PROPORTIONAL),
+		entry("slerp", SLERP),
+		
+		entry("min", MIN),
+		entry("max", MAX),
+		
+		entry("degrees", DEGREES),
+		entry("radians", RADIANS),
+		
+		entry("step", STEP),
 		
 		entry("cross", CROSS),
 		entry("dot", DOT),
@@ -145,6 +151,9 @@ public enum Library {
 		
 		entry("#", SIZE),
 		entry("in", IN),
+		entry("x", X),
+		entry("y", Y),
+		entry("z", Z),
 		entry("xyz", XYZ),
 		
 		entry("sin", SIN),
@@ -155,8 +164,6 @@ public enum Library {
 		entry("atan", ATAN),
 		entry("exp", EXP),
 		entry("log", LOG),
-		entry("exp10", EXP10),
-		entry("log10", LOG10),
 		entry("pow", POW),
 		entry("sqrt", SQRT),
 		entry("random", RANDOM),
@@ -169,19 +176,51 @@ public enum Library {
 		
 		entry("write", WRITE),
 		entry("writeError", WRITEERROR),
+		entry("writeWarning", WRITE_WARNING),
 		entry("halt", HALT),
+		entry("breakpoint", BREAKPOINT),
+		entry("screenshot", SCREENSHOT),
 		
 		
 		entry("setNumber", SET_NUMBER),
 		entry("setColor", SET_COLOR),
+		entry("setBool", SET_KEYWORD),
+		entry("setTexture", SET_TEXTURE),
+		entry("setInteger", SET_INTEGER),
+		entry("getNumber", GET_NUMBER),
+		entry("getColor", GET_COLOR),
+		entry("getBool", GET_KEYWORD),
+		entry("getTexture", GET_TEXTURE),
+		entry("getInteger", GET_INTEGER),
 		
 		entry("setTrigger", SET_TRIGGER),
-		entry("stateName", STATE_NAME),
+		entry("inState", IN_STATE),
 		
 		entry("readTriggered", READ_TRIGGERED),
 		entry("readNumber", READ_NUMBER),
+		entry("readVector", READ_VECTOR),
+		
+		entry("quaternion", TO_QUATERNION),
+		entry("angles", TO_NUMBER3),
 		
 		entry("play", PLAY),
+		entry("playOnce", PLAY_ONCE),
+		entry("pause", PAUSE),
+		entry("unpause", UNPAUSE),
+		entry("stop", STOP),
+		
+		entry("over", OVER),
+		entry("string", TO_STRING),
+		entry("number", TO_NUMBER),
+		
+		entry("overlaps", OVERLAPS),
+		entry("screenOverlaps", SCREEN_OVERLAPS),
+		entry("addForce", ADD_FORCE),
+		entry("addTorque", ADD_TORQUE),
+		entry("closestPoint", CLOSEST_POINT),
+		
+		entry("worldToViewport", WORLD_TO_VIEWPORT),
+		entry("viewportToWorld", VIEWPORT_TO_WORLD),
 		
 		entry("=", ASSIGNMENT)),
 	Map.ofEntries(
@@ -203,14 +242,16 @@ public enum Library {
 		entry(INPUT, "input"),
 		entry(AtomicType.MESH, "mesh"),
 		entry(AtomicType.MATERIAL, "material"),
-		entry(FONT, "font"),
-		entry(TEXT, "text"),
-		entry(IMAGE, "image"),
+		entry(AtomicType.FONT, "font"),
+		entry(AtomicType.TEXT, "text"),
+		entry(AtomicType.IMAGE, "image"),
 		entry(AtomicType.AUDIOCLIP, "audioClip"),
 		entry(AtomicType.ANIMATOR, "animator"),
 		
 		entry(ENTITY, "entity"),
-		entry(ENTITY_LIST, "entityList")
+		entry(ENTITY_LIST, "entityList"),
+		entry(QUATERNION, "quaternion"),
+		entry(TEXTURE, "texture")
 	), Map.of(
 		RedefinedSymbol.class, "Redefined symbol",
 		UndefinedSymbol.class, "Undefined symbol",
@@ -234,62 +275,59 @@ public enum Library {
 				entry("biraketa", ROTATION),
 				entry("eskala", SCALE),
 				entry("gurasoa", PARENT),
-				entry("umeak", CHILDREN),
 				
 				
 				entry("masa", MASS),
 				entry("inertzia", INERTIA),
-				entry("kinematikoa",KINEMATIC),
-				
 				entry("abiadura",VELOCITY),
-				entry("azelerazioa", ACCELERATION),
-				entry("indarra", FORCE),
 				entry("abiaduraAngeluarra", ANGULAR_VELOCITY),
-				entry("azelerazioAngeluarra", ANGULAR_ACCELERATION),
-				entry("indarAngeluarra", ANGULAR_FORCE),
-				
-				entry("kolisioak", COLLISIONS),
-				entry("kolisioGeruza", COLLISION_LAYER),
-				entry("kolisioMaskara", COLLISION_MASK),
 				entry("restituzioa", RESTITUTION),
 				entry("marruskadura", FRICTION),
-				entry("kolisioAdierazleak", COLLISION_EVENTS),
-				entry("kolisioReakzioEza", NO_COLLISION_RESPONSE),
+				entry("kinematikoa", KINEMATIC),
 				
+				entry("gurutzagarria", NO_COLLISION_RESPONSE),
 				entry("erradioa", RADIUS),
 				entry("dimentsioak", EXTENTS),
-				entry("mallaItxura", MESH_COLLIDER),
-				entry("ahurra", CONVEX_HULL),
-				
-				entry("lotura", BOND),
-				entry("loturaPuntua", ANCHOR),
-				entry("hausteIndarra", BREAK_FORCE),
-				entry("hausteIndarAngeluarra", BREAK_ANGULAR_FORCE),
-				
-				entry("mugiezinaX", LOCKED_POSITION_X),
-				entry("mugiezinaY", LOCKED_POSITION_Y),
-				entry("mugiezinaZ", LOCKED_POSITION_Z),
-				entry("biraezina", LOCKED_ROTATION),
+				entry("kaixaZentrua", BOX_CENTER),
+				entry("esferaZentrua", SPHERE_CENTER),
 				
 				
 				entry("malla", Component.MESH),
 				entry("materiala", Component.MATERIAL),
-				
-				entry("zenbakia", NUMBER_LABEL),
+				entry("itzalJasotzailea", SHADOW_RECEIVER),
 				
 				entry("gertu", NEAR),
 				entry("urruti", FAR),
 				entry("ikusmenAngelua", FOV),
-				entry("perspektiba", PERSPECTIVE),
+				entry("ikusmenTamaina", ORTHOGRAPHIC_SIZE),
+				entry("irudikatu", CULLING),
 				entry("atzealdea", BACKGROUND),
-				entry("zerua", SKYBOX),
 				entry("viewport", VIEWPORT),
 				entry("renderizazioEhundura", RENDER_TEXTURE),
+				entry("pantaila", DISPLAY),
 				
 				entry("emisioa", EMISSION),
 				entry("fokoAngelua", SPOT_ANGLE),
 				entry("irismena", RANGE),
 				entry("intentsitatea", INTENSITY),
+				entry("erreboteIntentsitatea", INDIRECT_MULTIPLIER),
+				entry("gaileta", COOKIE),
+				
+				entry("testua", Component.TEXT),
+				entry("letraEstiloa", Component.FONT),
+				entry("letraKolorea", TEXT_COLOR),
+				entry("letraMateriala", TEXT_MATERIAL),
+				
+				entry("irudia", Component.IMAGE),
+				entry("irudiKolorea", IMAGE_COLOR),
+				entry("irudiMateriala", IMAGE_MATERIAL),
+				
+				entry("sakatuta", TOGGLED),
+				entry("slideBalioa", SLIDER_VALUE),
+				entry("idatzitakoTestua", TEXTFIELD_VALUE),
+				
+				entry("euskarriaMin", ANCHOR_MIN),
+				entry("euskarriaMax", ANCHOR_MAX),
 				
 				
 				entry("audioKlipa", Component.AUDIOCLIP),
@@ -302,15 +340,24 @@ public enum Library {
 				entry("ceil", CEIL),
 				entry("floor", FLOOR),
 				entry("round", ROUND),
-				entry("clamp", CLAMP),
 				entry("integerPart", INTEGERPART),
 				entry("fractionalPart", FRACTIONALPART),
 				entry("inverse", INVERSE),
 				entry("reciprocal", RECIPROCAL),
 				
+				entry("clamp", CLAMP),
 				entry("lerp", LERP),
 				entry("unlerp", UNLERP),
 				entry("proportional", PROPORTIONAL),
+				entry("slerp", SLERP),
+				
+				entry("min", MIN),
+				entry("max", MAX),
+				
+				entry("graduak", DEGREES),
+				entry("radianak", RADIANS),
+				
+				entry("step", STEP),
 				
 				entry("cross", CROSS),
 				entry("dot", DOT),
@@ -339,6 +386,9 @@ public enum Library {
 				
 				entry("#", SIZE),
 				entry("barne", IN),
+				entry("x", X),
+				entry("y", Y),
+				entry("z", Z),
 				entry("xyz", XYZ),
 				
 				entry("sin", SIN),
@@ -349,8 +399,6 @@ public enum Library {
 				entry("atan", ATAN),
 				entry("exp", EXP),
 				entry("log", LOG),
-				entry("exp10", EXP10),
-				entry("log10", LOG10),
 				entry("pow", POW),
 				entry("sqrt", SQRT),
 				entry("ausazko", RANDOM),
@@ -363,19 +411,51 @@ public enum Library {
 				
 				entry("idatzi", WRITE),
 				entry("idatziAkatsa", WRITEERROR),
-				entry("gelditu", HALT),
+				entry("idatziAholkua", WRITE_WARNING),
+				entry("amaitu", HALT),
+				entry("gelditu", BREAKPOINT),
+				entry("argazkiaAtera", SCREENSHOT),
 				
 				
 				entry("ezarriZenbakia", SET_NUMBER),
 				entry("ezarriKolorea", SET_COLOR),
+				entry("ezarriOsoa", SET_INTEGER),
+				entry("ezarriTexture", SET_TEXTURE),
+				entry("ezarriProposizioa", SET_KEYWORD),
+				entry("hartuZenbakia", GET_NUMBER),
+				entry("hartuKolorea", GET_COLOR),
+				entry("hartuOsoa", GET_INTEGER),
+				entry("hartuTexture", GET_TEXTURE),
+				entry("hartuProposizioa", GET_KEYWORD),
 				
 				entry("ezarriKakoa", SET_TRIGGER),
-				entry("egoeraIzena", STATE_NAME),
+				entry("egoera", IN_STATE),
 				
 				entry("irakurriKakoa", READ_TRIGGERED),
 				entry("irakurriZenbakia", READ_NUMBER),
+				entry("irakurriBektorea", READ_VECTOR),
+				
+				entry("kuaternioia", TO_QUATERNION),
+				entry("angeluak", TO_NUMBER3),
 				
 				entry("hasi", PLAY),
+				entry("playOnce", PLAY_ONCE),
+				entry("pause", PAUSE),
+				entry("unpause", UNPAUSE),
+				entry("stop", STOP),
+				
+				entry("saguaGainean", OVER),
+				entry("zenbakia", TO_NUMBER),
+				entry("katea", TO_STRING),
+				
+				entry("gainean", OVERLAPS),
+				entry("pantailaGainean", SCREEN_OVERLAPS),
+				entry("gehituIndarra", ADD_FORCE),
+				entry("gehituIndarAngeluarra", ADD_TORQUE),
+				entry("puntuGertukoena", CLOSEST_POINT),
+				
+				entry("mundutikPantailara", WORLD_TO_VIEWPORT),
+				entry("pantailatikMundura", VIEWPORT_TO_WORLD),
 				
 				entry("=", ASSIGNMENT)),
 			Map.ofEntries(
@@ -397,14 +477,16 @@ public enum Library {
 					entry(INPUT, "inputa"),
 					entry(AtomicType.MESH, "malla"),
 					entry(AtomicType.MATERIAL, "materiala"),
-					entry(FONT, "letraEstiloa"),
-					entry(TEXT, "testua"),
-					entry(IMAGE, "irudia"),
+					entry(AtomicType.FONT, "letraEstiloa"),
+					entry(AtomicType.TEXT, "testua"),
+					entry(AtomicType.IMAGE, "irudia"),
 					entry(AtomicType.AUDIOCLIP, "audioKlipa"),
 					entry(AtomicType.ANIMATOR, "animatzailea"),
 					
 					entry(ENTITY, "entitatea"),
-					entry(ENTITY_LIST, "entitateLista")
+					entry(ENTITY_LIST, "entitateLista"),
+					entry(QUATERNION, "kuaternioia"),
+					entry(TEXTURE, "textura")
 			), Map.of(
 				RedefinedSymbol.class, "Simbolo hau dagoeneko definitua dago",
 				UndefinedSymbol.class, "Simbolo honek ez du definiziorik",
