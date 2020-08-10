@@ -114,7 +114,7 @@ public class ClassicUnity
 			}
 		}
 
-		systems += "void FixedUpdate()\n{\n\n           var gos = FindObjectsOfType<Transform>().Select(x=>x.gameObject);\n";
+		systems += "void Update()\n{\n\n           var gos = FindObjectsOfType<Transform>().Select(x=>x.gameObject);\n";
 		
 		for (var function : game.functions.keySet())
 		{
