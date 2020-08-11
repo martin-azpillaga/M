@@ -35,11 +35,11 @@ public class Context {
 	
 	Set<Value> accessedValues;
 	
-	Inference inference;
+	InferenceTree inference;
 	List<Problem> problems;
 	
 	public Context(List<Problem> problems, Library library) {
-		this.inference = new Inference(problems);
+		this.inference = new InferenceTree(problems);
 		this.problems = problems;
 		this.library = library;
 		
@@ -290,8 +290,24 @@ public class Context {
 	
 	public Game infer()
 	{
-		var game = inference.infer(userComponents, userFunctions);
+		var game = new Game();
+		
+		for (var component : userComponents.entrySet())
+		{
+			var type = inference.infer(component.getValue());
+			if (type != null)
+			{
+				game.components.put(component.getKey(), type);
+			}
+		}
+		
+		for (var function : userFunctions.entrySet())
+		{
+			game.functions.put(function.getValue(), null);
+		}
+		
 		game.library = library;
+		
 		return game;
 	}
 }

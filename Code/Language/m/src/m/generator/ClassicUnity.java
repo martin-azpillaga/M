@@ -127,7 +127,7 @@ public class ClassicUnity
 		for (var function : game.functions.entrySet())
 		{
 			var type = function.getValue();
-			if (type.getParameters().length == 0 && type.getReturnType() == UNIT)
+			if (type == null)
 			{
 				currentFunction = function.getKey();
 				systems += "if ("+function.getKey().getName()+")\n{"+generate(function.getKey())+"\n}";
