@@ -24,10 +24,11 @@ public class UndecidableType implements Problem
 		var list = new ArrayList<ProblemMessage>();
 		var message = library.getProblem(this.getClass());
 		var root = node;
+		list.add(new ProblemMessage(Severity.ERROR, message, root.expression, null));
 		while (root.binding != null)
 		{
-			list.add(new ProblemMessage(Severity.ERROR, message, root.expression, null));
 			root = root.binding.node;
+			list.add(new ProblemMessage(Severity.ERROR, message, root.expression, null));
 		}
 
 		return list;
