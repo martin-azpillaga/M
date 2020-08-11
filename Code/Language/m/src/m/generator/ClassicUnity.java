@@ -520,6 +520,9 @@ public class ClassicUnity
 		case OVER: return "(EventSystem.current.currentSelectedGameObject == "+x+")";
 		case TO_NUMBER: return "float.Parse("+x+", System.Globalization.CultureInfo.InvariantCulture)";
 		case TO_STRING: return x+".ToString()";
+		case IS_NEGATIVE: return "("+x+"< 0)";
+		case IS_POSITIVE: return "("+x+"> 0)";
+		case IS_ZERO: return "("+x+"== 0)";
 		}
 		return "undefined";
 	}
