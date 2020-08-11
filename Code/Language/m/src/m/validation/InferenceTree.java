@@ -69,8 +69,16 @@ public class InferenceTree
 			
 			if (rootA != rootB)
 			{
-				reroot(nodeA);
-				nodeA.binding = new Binding(nodeB, reason);
+				if (rootA.typing == null)
+				{
+					reroot(nodeA);
+					nodeA.binding = new Binding(nodeB, reason);
+				}
+				else
+				{
+					reroot(nodeB);
+					nodeB.binding = new Binding(nodeA, reason);
+				}
 			}
 		}
 	}
