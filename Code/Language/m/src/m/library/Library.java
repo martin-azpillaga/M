@@ -219,6 +219,10 @@ public enum Library {
 		entry("addTorque", ADD_TORQUE),
 		entry("closestPoint", CLOSEST_POINT),
 		
+		entry("isPositive", IS_POSITIVE),
+		entry("isNegative", IS_NEGATIVE),
+		entry("isZero", IS_ZERO),
+		
 		entry("worldToViewport", WORLD_TO_VIEWPORT),
 		entry("viewportToWorld", VIEWPORT_TO_WORLD),
 		
@@ -453,6 +457,10 @@ public enum Library {
 				entry("gehituIndarra", ADD_FORCE),
 				entry("gehituIndarAngeluarra", ADD_TORQUE),
 				entry("puntuGertukoena", CLOSEST_POINT),
+				
+				entry("positiboa", IS_POSITIVE),
+				entry("negatiboa", IS_NEGATIVE),
+				entry("zero", IS_ZERO),
 				
 				entry("mundutikPantailara", WORLD_TO_VIEWPORT),
 				entry("pantailatikMundura", VIEWPORT_TO_WORLD),
