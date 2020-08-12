@@ -8,8 +8,6 @@ import m.m.Expression;
 public class ExpressionNode
 {
 	public Expression expression;
-	public Binding binding;
-	public Typing typing;
 	public List<Binding> bindings;
 	public List<Typing> typings;
 	
