@@ -116,7 +116,7 @@ public class ClassicUnity
 
 		systems += "void Update()\n{\n\n           var gos = FindObjectsOfType<Transform>().Select(x=>x.gameObject);\n";
 		
-		for (var function : game.functions.keySet())
+		for (var function : game.systems)
 		{
 			for (var query : game.queries.get(function).keySet())
 			{
@@ -124,14 +124,10 @@ public class ClassicUnity
 			}
 		}
 		
-		for (var function : game.functions.entrySet())
+		for (var function : game.systems)
 		{
-			var type = function.getValue();
-			if (type == null)
-			{
-				currentFunction = function.getKey();
-				systems += "if ("+function.getKey().getName()+")\n{"+generate(function.getKey())+"\n}";
-			}
+			currentFunction = function;
+			systems += "if ("+function.getName()+")\n{"+generate(function)+"\n}";
 		}
 		
 		for (var function : game.functions.keySet())
