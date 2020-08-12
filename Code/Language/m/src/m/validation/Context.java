@@ -301,9 +301,9 @@ public class Context {
 			}
 		}
 		
-		for (var function : userFunctions.entrySet())
+		for (var function : userFunctions.values())
 		{
-			game.functions.put(function.getValue(), null);
+			game.systems.add(function);
 		}
 		
 		game.library = library;

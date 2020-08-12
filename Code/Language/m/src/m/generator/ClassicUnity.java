@@ -98,8 +98,8 @@ public class ClassicUnity
 		"{",
 		"   public class Systems : MonoBehaviour",
 		"   {",
-		"      "+all(game.functions.keySet(), x->"public bool "+x.getName()+" = true;", "\n      "));		
-		for (var function : game.functions.keySet())
+		"      "+all(game.systems, x->"public bool "+x.getName()+" = true;", "\n      "));		
+		for (var function : game.systems)
 		{
 			for (var query : game.queries.get(function).keySet())
 			{
@@ -130,7 +130,7 @@ public class ClassicUnity
 			systems += "if ("+function.getName()+")\n{"+generate(function)+"\n}";
 		}
 		
-		for (var function : game.functions.keySet())
+		for (var function : game.systems)
 		{
 			for (var query : game.queries.get(function).keySet())
 			{
