@@ -2,7 +2,6 @@ package m.validation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -150,8 +149,7 @@ public class InferenceTree
 	
 	private ExpressionNode checkIn(Expression e)
 	{
-		var expressionNode = new ExpressionNode();
-		expressionNode.expression = e;
+		var expressionNode = new ExpressionNode(e);
 		node.put(e, expressionNode);
 		return expressionNode;
 	}

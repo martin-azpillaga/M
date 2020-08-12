@@ -35,11 +35,11 @@ public class Context {
 	
 	Set<Value> accessedValues;
 	
-	InferenceTree inference;
+	InferenceGraph inference;
 	List<Problem> problems;
 	
 	public Context(List<Problem> problems, Library library) {
-		this.inference = new InferenceTree(problems);
+		this.inference = new InferenceGraph();
 		this.problems = problems;
 		this.library = library;
 		
@@ -285,7 +285,7 @@ public class Context {
 	
 	public void checkConsistency()
 	{
-		inference.check();
+		problems.addAll(inference.check());
 	}
 	
 	public Game infer()
