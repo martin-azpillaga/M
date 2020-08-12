@@ -45,14 +45,10 @@ public class Unity
 		{
 			generate(component.getKey(), component.getValue());
 		}
-		for (var function : game.functions.entrySet())
+		for (var function : game.systems)
 		{
-			var type = function.getValue();
-			if (type.getParameters().length == 0 && type.getReturnType() == UNIT)
-			{
-				currentFunction = function.getKey();
-				generate(function.getKey());
-			}
+			currentFunction = function;
+			generate(function);
 		}
 	}
 	

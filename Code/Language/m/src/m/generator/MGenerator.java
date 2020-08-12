@@ -27,7 +27,7 @@ public class MGenerator extends AbstractGenerator
 		var game = validator.getGame();
 		if (game != null)
 		{
-			for (var function : game.functions.keySet())
+			for (var function : game.systems)
 			{
 				game.queries.put(function, collectQueries(function, game));
 			}
