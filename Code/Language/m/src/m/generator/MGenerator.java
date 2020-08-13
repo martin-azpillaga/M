@@ -1,5 +1,6 @@
 package m.generator;
 
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +8,9 @@ import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.generator.AbstractGenerator;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
+import org.eclipse.xtext.generator.IFileSystemAccessExtension2;
 import org.eclipse.xtext.generator.IGeneratorContext;
+import org.eclipse.xtext.resource.IResourceDescriptions;
 
 import com.google.inject.Inject;
 
@@ -22,8 +25,20 @@ public class MGenerator extends AbstractGenerator
 	@Inject
 	MValidator validator;
 	
+	@Inject
+	IResourceDescriptions descriptions;
+	
 	public void doGenerate(Resource resource, IFileSystemAccess2 fileSystem, IGeneratorContext context)
 	{
+		var uri = ((IFileSystemAccessExtension2) fileSystem).getURI("b.m");
+		var rest = uri.toFileString();
+		var o = uri.toString();
+		var path = Paths.get(uri.path());
+		var all = descriptions.getAllResourceDescriptions();
+		for (var desc : all)
+		{
+			System.out.println(desc);
+		}
 		var game = validator.getGame();
 		if (game != null)
 		{

@@ -2,8 +2,13 @@ package m.validation;
 
 import java.util.*;
 
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.xtext.EcoreUtil2;
+import org.eclipse.xtext.resource.IContainer;
+import org.eclipse.xtext.resource.IResourceDescriptions;
 import org.eclipse.xtext.validation.Check;
+
+import com.google.inject.Inject;
 
 import m.generator.Game;
 import m.library.Library;
@@ -24,6 +29,13 @@ public class MValidator extends AbstractMValidator
 	Library currentLibrary;
 	List<Problem> currentProblems;
 	
+
+	@Inject
+	IResourceDescriptions descriptions;
+	
+	@Inject
+	  private IContainer.Manager containerManager;
+	
 	public Game getGame()
 	{
 		return game;
@@ -32,7 +44,17 @@ public class MValidator extends AbstractMValidator
 	@Check
 	public void validate(File file)
 	{
+		var text = "";
+		var all = descriptions.getAllResourceDescriptions();
+		for (var desc : all)
+		{
+			text += desc + "\n";
+			System.out.println(desc);
+		}
 		if (!file.eResource().getErrors().isEmpty()) return;
+		
+		info(text,file, null);
+		var uri = file.eResource().getURI();
 		
 		map = new HashMap<>();
 		contexts = new HashMap<>();
