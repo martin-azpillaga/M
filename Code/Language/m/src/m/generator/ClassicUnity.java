@@ -273,11 +273,11 @@ public class ClassicUnity
 				"foreach (var "+a+" in gos)",
 				"{",
 				"	"+all(components, x->"var "+x+"_"+a+" = "+a+".GetComponent<"+component(x)+">();", "\n				"),
-				"	if ("+all(components, x->x+"_"+a+" != null ", " && ")+"){",
+				components.isEmpty() ? "" : "	if ("+all(components, x->x+"_"+a+" != null ", " && ")+"){",
 					"",
 				"   "+currentFunction.getName()+"_"+a+".Add("+a+");",
 				"	"+all(block.getStatements(), x->code(x), "\n				"),
-				"   }",
+				components.isEmpty() ? "" : "   }",
 				"}");
 
 				variables = stack.pop();
