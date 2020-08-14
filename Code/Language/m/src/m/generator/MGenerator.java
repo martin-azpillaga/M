@@ -15,6 +15,7 @@ import org.eclipse.xtext.generator.IGeneratorContext;
 import com.google.inject.Inject;
 
 import m.m.Assignment;
+import m.m.BindingBlock;
 import m.m.Cell;
 import m.m.Function;
 import m.validation.MValidator;
@@ -41,6 +42,16 @@ public class MGenerator extends AbstractGenerator
 	private HashMap<String, HashMap<String,AccessKind>> collectQueries(Function function, Game game)
 	{
 		var queries = new HashMap<String, HashMap<String,AccessKind>>();
+		
+		for (var binding : EcoreUtil2.getAllContentsOfType(function, BindingBlock.class))
+		{
+			var entity = binding.getExpression().getName();
+			
+			if (!queries.containsKey(entity))
+			{
+				queries.put(entity, new HashMap<>());
+			}
+		}
 		
 		for (var cell : EcoreUtil2.getAllContentsOfType(function,Cell.class))
 		{
@@ -73,14 +84,13 @@ public class MGenerator extends AbstractGenerator
 	
 	private void setComponentAccess(Map<String, HashMap<String,AccessKind>> queries, String entity, String component, AccessKind kind)
 	{
-		if (!queries.containsKey(entity))
+		if (queries.containsKey(entity))
 		{
-			queries.put(entity, new HashMap<>());
-		}
-		var components = queries.get(entity);
-		if (!components.containsKey(component) || components.get(component) != WRITE)
-		{
-			queries.get(entity).put(component,kind);
+			var components = queries.get(entity);
+			if (!components.containsKey(component) || components.get(component) != WRITE)
+			{
+				queries.get(entity).put(component,kind);
+			}
 		}
 	}
 }

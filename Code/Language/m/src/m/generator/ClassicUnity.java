@@ -343,11 +343,22 @@ public class ClassicUnity
 			else if (atom instanceof Cell)
 			{
 				var cell = (Cell) atom;
+				var entity = cell.getEntity().getName();
+				var component = cell.getComponent().getName();
+				
 				if (library.getComponent(cell.getComponent().getName()) == DISPLAY)
 				{
 					code = "(int)("+code+")";
 				}
-				return code(atom)+" = "+code+";";
+				
+				if (game.queries.get(currentFunction).containsKey(entity))
+				{
+					return code(atom)+" = "+code+";";
+				}
+				else
+				{
+					return entity+".GetComponent<"+component(component)+">()."+field(component)+" = "+code+";";
+				}
 			}
 		}
 		else if (statement instanceof Delegation)
