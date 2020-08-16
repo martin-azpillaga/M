@@ -530,6 +530,8 @@ public class ClassicUnity
 		case IS_NEGATIVE: return "("+x+"< 0)";
 		case IS_POSITIVE: return "("+x+"> 0)";
 		case IS_ZERO: return "("+x+"== 0)";
+		case ACTIVATE_PARAMETER: return x+".GetComponent<Animator>().SetBool("+y+", true)";
+		case DEACTIVATE_PARAMETER: return x+".GetComponent<Animator>().SetBool("+y+", false)";
 		}
 		return "undefined";
 	}
@@ -542,7 +544,7 @@ public class ClassicUnity
 		{
 			var name = application.getName();
 			var standard = game.library.getFunction(name);
-			if (standard == SET_TRIGGER || standard == IN_STATE)
+			if (standard == SET_TRIGGER || standard == IN_STATE || standard == ACTIVATE_PARAMETER || standard == DEACTIVATE_PARAMETER )
 			{
 				var entity = ((Value)application.getArguments().get(0)).getName();
 				if (!map.containsKey(entity))

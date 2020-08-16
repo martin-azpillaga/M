@@ -195,6 +195,8 @@ public enum Library {
 		
 		entry("setTrigger", SET_TRIGGER),
 		entry("inState", IN_STATE),
+		entry("enableParameter", ACTIVATE_PARAMETER),
+		entry("disableParameter", DEACTIVATE_PARAMETER),
 		
 		entry("readTriggered", READ_TRIGGERED),
 		entry("readNumber", READ_NUMBER),
@@ -434,6 +436,8 @@ public enum Library {
 				
 				entry("ezarriKakoa", SET_TRIGGER),
 				entry("egoera", IN_STATE),
+				entry("jarriParametroa", ACTIVATE_PARAMETER),
+				entry("kenduParametroa", DEACTIVATE_PARAMETER),
 				
 				entry("irakurriKakoa", READ_TRIGGERED),
 				entry("irakurriZenbakia", READ_NUMBER),
