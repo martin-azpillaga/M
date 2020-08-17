@@ -2,7 +2,9 @@ package m.main;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.OpenOption;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
@@ -14,6 +16,7 @@ import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -40,10 +43,10 @@ class Server implements LanguageServer, LanguageClientAware
 		document = new DocumentService();
 		workspace = new Workspace();
 	}
-	private void write(String message)
+	public static void write(String message)
 	{
 		try {
-			Files.write(Paths.get("communication.t"), message.getBytes());
+			Files.writeString(Paths.get("communication.t"), message+"\n", StandardOpenOption.APPEND);
 		}
 		catch (IOException e)
 		{
@@ -58,6 +61,7 @@ class Server implements LanguageServer, LanguageClientAware
 		
 		var capabilities = new ServerCapabilities();
 		capabilities.setHoverProvider(true);
+		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
 		
 		return CompletableFuture.supplyAsync(()->new InitializeResult(capabilities));
 	}
@@ -100,26 +104,22 @@ class DocumentService implements TextDocumentService
 
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params) {
-		// TODO Auto-generated method stub
-		
+		Server.write("didOpen");
 	}
 
 	@Override
 	public void didChange(DidChangeTextDocumentParams params) {
-		// TODO Auto-generated method stub
-		
+		Server.write("didChange");
 	}
 
 	@Override
 	public void didClose(DidCloseTextDocumentParams params) {
-		// TODO Auto-generated method stub
-		
+		Server.write("didClose");
 	}
 
 	@Override
 	public void didSave(DidSaveTextDocumentParams params) {
-		// TODO Auto-generated method stub
-		
+		Server.write("didSave");
 	}
 }
 
@@ -128,13 +128,13 @@ class Workspace implements WorkspaceService
 
 	@Override
 	public void didChangeConfiguration(DidChangeConfigurationParams params) {
-		// TODO Auto-generated method stub
+		Server.write("workspace configuration changed");
 		
 	}
 
 	@Override
 	public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) {
-		// TODO Auto-generated method stub
+		Server.write("workspace files changed");
 		
 	}
 }
