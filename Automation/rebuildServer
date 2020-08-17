@@ -1,0 +1,5 @@
+#! /bin/sh
+
+cd Code/Language
+gradle shadowJar
+cp build/libs/Language-ls-ls.jar ../../ls.jar
