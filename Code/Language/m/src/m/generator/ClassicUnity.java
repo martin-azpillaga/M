@@ -98,8 +98,8 @@ public class ClassicUnity
 		"{",
 		"   public class Systems : MonoBehaviour",
 		"   {",
-		"      "+all(game.functions.keySet(), x->"public bool "+x.getName()+" = true;", "\n      "));		
-		for (var function : game.functions.keySet())
+		"      "+all(game.systems, x->"public bool "+x.getName()+" = true;", "\n      "));		
+		for (var function : game.systems)
 		{
 			for (var query : game.queries.get(function).keySet())
 			{
@@ -114,9 +114,9 @@ public class ClassicUnity
 			}
 		}
 
-		systems += "void FixedUpdate()\n{\n\n           var gos = FindObjectsOfType<Transform>().Select(x=>x.gameObject);\n";
+		systems += "void Update()\n{\n\n           var gos = FindObjectsOfType<Transform>().Select(x=>x.gameObject);\n";
 		
-		for (var function : game.functions.keySet())
+		for (var function : game.systems)
 		{
 			for (var query : game.queries.get(function).keySet())
 			{
@@ -124,17 +124,13 @@ public class ClassicUnity
 			}
 		}
 		
-		for (var function : game.functions.entrySet())
+		for (var function : game.systems)
 		{
-			var type = function.getValue();
-			if (type.getParameters().length == 0 && type.getReturnType() == UNIT)
-			{
-				currentFunction = function.getKey();
-				systems += "if ("+function.getKey().getName()+")\n{"+generate(function.getKey())+"\n}";
-			}
+			currentFunction = function;
+			systems += "if ("+function.getName()+")\n{"+generate(function)+"\n}";
 		}
 		
-		for (var function : game.functions.keySet())
+		for (var function : game.systems)
 		{
 			for (var query : game.queries.get(function).keySet())
 			{
@@ -277,11 +273,11 @@ public class ClassicUnity
 				"foreach (var "+a+" in gos)",
 				"{",
 				"	"+all(components, x->"var "+x+"_"+a+" = "+a+".GetComponent<"+component(x)+">();", "\n				"),
-				"	if ("+all(components, x->x+"_"+a+" != null ", " && ")+"){",
+				components.isEmpty() ? "" : "	if ("+all(components, x->x+"_"+a+" != null ", " && ")+"){",
 					"",
 				"   "+currentFunction.getName()+"_"+a+".Add("+a+");",
 				"	"+all(block.getStatements(), x->code(x), "\n				"),
-				"   }",
+				components.isEmpty() ? "" : "   }",
 				"}");
 
 				variables = stack.pop();
@@ -347,11 +343,22 @@ public class ClassicUnity
 			else if (atom instanceof Cell)
 			{
 				var cell = (Cell) atom;
+				var entity = cell.getEntity().getName();
+				var component = cell.getComponent().getName();
+				
 				if (library.getComponent(cell.getComponent().getName()) == DISPLAY)
 				{
 					code = "(int)("+code+")";
 				}
-				return code(atom)+" = "+code+";";
+				
+				if (game.queries.get(currentFunction).containsKey(entity))
+				{
+					return code(atom)+" = "+code+";";
+				}
+				else
+				{
+					return entity+".GetComponent<"+component(component)+">()."+field(component)+" = "+code+";";
+				}
 			}
 		}
 		else if (statement instanceof Delegation)
@@ -486,7 +493,7 @@ public class ClassicUnity
 		case WRITE_WARNING: return "if (Debug.isDebugBuild){ Debug.LogWarning("+x+"); }";
 		case SCREENSHOT: return "ScreenCapture.CaptureScreenshot((System.DateTime.Now+\".png\").Replace(\"/\", \"-\"), 1)";
 		case XYZ: return "new Vector3("+x+","+y+","+z+")";
-		case OVERLAPS: return x+".GetComponentsInChildren<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox("+x+".transform.position+Vector3.Scale((x as BoxCollider).center, "+x+".transform.lossyScale), Vector3.Scale((x as BoxCollider).size/2,"+x+".transform.lossyScale), "+x+".transform.rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere("+x+".transform.position+Vector3.Scale("+x+".transform.lossyScale, (x as SphereCollider).center), (x as SphereCollider).radius*Mathf.Max("+x+".transform.lossyScale.x, Mathf.Max("+x+".transform.lossyScale.y, "+x+".transform.lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject)";
+		case OVERLAPS: return x+".GetComponents<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox((x as BoxCollider).bounds.center, Vector3.Scale((x as BoxCollider).size/2,"+x+".transform.lossyScale), "+x+".transform.rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere((x as SphereCollider).bounds.center, (x as SphereCollider).radius*Mathf.Max("+x+".transform.lossyScale.x, Mathf.Max("+x+".transform.lossyScale.y, "+x+".transform.lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject).ToList()";
 		case TO_NUMBER3: return x+".eulerAngles";
 		case TO_QUATERNION: return "Quaternion.Euler("+x+".x, "+x+".y, "+x+".z)";
 		case ADD_FORCE: return x+".GetComponent<Rigidbody>().AddForce("+y+")";
@@ -520,6 +527,11 @@ public class ClassicUnity
 		case OVER: return "(EventSystem.current.currentSelectedGameObject == "+x+")";
 		case TO_NUMBER: return "float.Parse("+x+", System.Globalization.CultureInfo.InvariantCulture)";
 		case TO_STRING: return x+".ToString()";
+		case IS_NEGATIVE: return "("+x+"< 0)";
+		case IS_POSITIVE: return "("+x+"> 0)";
+		case IS_ZERO: return "("+x+"== 0)";
+		case ACTIVATE_PARAMETER: return x+".GetComponent<Animator>().SetBool("+y+", true)";
+		case DEACTIVATE_PARAMETER: return x+".GetComponent<Animator>().SetBool("+y+", false)";
 		}
 		return "undefined";
 	}
@@ -532,7 +544,7 @@ public class ClassicUnity
 		{
 			var name = application.getName();
 			var standard = game.library.getFunction(name);
-			if (standard == SET_TRIGGER || standard == IN_STATE)
+			if (standard == SET_TRIGGER || standard == IN_STATE || standard == ACTIVATE_PARAMETER || standard == DEACTIVATE_PARAMETER )
 			{
 				var entity = ((Value)application.getArguments().get(0)).getName();
 				if (!map.containsKey(entity))
@@ -743,7 +755,7 @@ public class ClassicUnity
 			case MESH: return "mesh";
 			case NEAR: return "nearClipPlane";
 			case NO_COLLISION_RESPONSE: return "isTrigger";
-			case PARENT: return "parent";
+			case PARENT: return "parent.gameObject";
 			case PITCH: return "pitch";
 			case RADIUS: return "radius";
 			case RANGE: return "range";

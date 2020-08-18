@@ -1,14 +1,21 @@
 package m.validation;
 
+import java.nio.file.Paths;
 import java.util.*;
 
+import org.eclipse.emf.common.util.URI;
 import org.eclipse.xtext.EcoreUtil2;
+import org.eclipse.xtext.resource.IContainer;
+import org.eclipse.xtext.resource.IResourceDescriptions;
 import org.eclipse.xtext.validation.Check;
+
+import com.google.inject.Inject;
 
 import m.generator.Game;
 import m.library.Library;
 import m.m.*;
 import m.validation.problems.Problem;
+import m.validation.problems.ProblemMessage;
 import m.validation.problems.ProblemMessage.Severity;
 import m.validation.problems.errors.ReadOnly;
 
@@ -32,6 +39,7 @@ public class MValidator extends AbstractMValidator
 	public void validate(File file)
 	{
 		if (!file.eResource().getErrors().isEmpty()) return;
+		
 		
 		map = new HashMap<>();
 		contexts = new HashMap<>();
@@ -75,6 +83,8 @@ public class MValidator extends AbstractMValidator
 			}
 		}
 		
+		var problemMessages = new ArrayList<ProblemMessage>();
+		
 		var hasErrors = false;
 		if (list != null)
 		{
@@ -82,6 +92,7 @@ public class MValidator extends AbstractMValidator
 			{
 				for (var message : problem.messages(library))
 				{
+					problemMessages.add(message);
 					if (message.severity == Severity.ERROR)
 					{
 						hasErrors = true;
@@ -94,7 +105,7 @@ public class MValidator extends AbstractMValidator
 			game = contexts.get(library).infer();
 		}
 		
-		reportProblems(list, library);
+		reportProblems(problemMessages);
 	}
 	
 	void validate(Function function) {
@@ -218,24 +229,21 @@ public class MValidator extends AbstractMValidator
 		}
 	}
 	
-	void reportProblems(List<Problem> problems, Library library)
+	void reportProblems(List<ProblemMessage> messages)
 	{
-		for (var problem : problems)
+		for (var message : messages)
 		{
-			for (var message : problem.messages(library))
+			switch (message.severity)
 			{
-				switch (message.severity)
-				{
-				case INFO:
-					info(message.message, message.source, message.feature);
-					break;
-				case WARNING:
-					warning(message.message, message.source, message.feature);
-					break;
-				case ERROR:
-					error(message.message, message.source, message.feature);
-					break;
-				}
+			case INFO:
+				info(message.message, message.source, message.feature);
+				break;
+			case WARNING:
+				warning(message.message, message.source, message.feature);
+				break;
+			case ERROR:
+				error(message.message, message.source, message.feature);
+				break;
 			}
 		}
 	}

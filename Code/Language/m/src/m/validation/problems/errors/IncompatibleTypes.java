@@ -1,9 +1,13 @@
 package m.validation.problems.errors;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Stack;
 
 import m.library.Library;
+import m.library.types.Type;
 import m.validation.problems.Problem;
 import m.validation.problems.ProblemMessage;
 import m.validation.problems.ProblemMessage.Severity;
@@ -22,21 +26,61 @@ public class IncompatibleTypes implements Problem
 	public List<ProblemMessage> messages(Library library)
 	{
 		var base = library.getProblem(this.getClass());
-		var root = node;
 		var list = new ArrayList<ProblemMessage>();
 		
-		while (root.binding != null)
-		{
-			list.add(new ProblemMessage(Severity.WARNING, base, root.expression, null));
-			root = root.binding.node;
-		}
-		base += "\n" + library.name(node.typing.getType()) + " - " + library.name(node.typing.getSymbol().getType()) + "\n" +
-		library.name(root.typing.getType()) + " - " + library.name(root.typing.getSymbol().getType());
+		var visited = new HashSet<ExpressionNode>();
+		var stack = new Stack<ExpressionNode>();
+		var current = node;
+		stack.push(current);
 		
-		var me = new ProblemMessage(Severity.ERROR, base, node.expression, null);
-		var last = new ProblemMessage(Severity.ERROR, base, root.expression, null);
-		list.add(me);
-		list.add(last);
+		var types = new HashSet<Type>();
+		var errors = new ArrayList<ExpressionNode>();
+		
+		while (!stack.isEmpty())
+		{
+			current = stack.pop();
+			
+			if (!visited.contains(current))
+			{
+				visited.add(current);
+				
+				for (var typing : current.typings)
+				{
+					if (!types.contains(typing.getType()))
+					{
+						base += "\n" + library.name(typing.getType()) + " -> " + typing.getSymbol() + " : " + library.name(typing.getSymbol().getType());
+						types.add(typing.getType());
+						errors.add(current);
+					}
+				}
+				
+				if (types.size() >= 2)
+				{
+					break;
+				}
+				
+				for (var binding : current.bindings)
+				{
+					if (!visited.contains(binding.node))
+					{
+						stack.push(binding.node);
+					}
+				}
+			}
+		}
+		
+		for (var n : visited)
+		{
+			if (errors.contains(n))
+			{
+				list.add(new ProblemMessage(Severity.ERROR, base, n.expression, null));
+			}
+			else
+			{
+				list.add(new ProblemMessage(Severity.WARNING, base, n.expression, null));				
+			}
+		}
+		
 		return list;
 	}
 }

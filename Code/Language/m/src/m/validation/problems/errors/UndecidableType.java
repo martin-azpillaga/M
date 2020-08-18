@@ -1,7 +1,9 @@
 package m.validation.problems.errors;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Stack;
 
 import m.library.Library;
 import m.validation.problems.Problem;
@@ -23,12 +25,31 @@ public class UndecidableType implements Problem
 	{
 		var list = new ArrayList<ProblemMessage>();
 		var message = library.getProblem(this.getClass());
-		var root = node;
-		while (root.binding != null)
+		
+		var visited = new HashSet<ExpressionNode>();
+		var stack = new Stack<ExpressionNode>();
+		
+		stack.push(node);
+		
+		while (!stack.isEmpty())
 		{
-			list.add(new ProblemMessage(Severity.ERROR, message, root.expression, null));
-			root = root.binding.node;
+			var node = stack.pop();
+
+			if (!visited.contains(node))
+			{
+				list.add(new ProblemMessage(Severity.ERROR, message, node.expression, null));
+				visited.add(node);
+				
+				for (var binding : node.bindings)
+				{
+					if (!visited.contains(binding.node))
+					{
+						stack.push(binding.node);
+					}
+				}
+			}
 		}
+		
 
 		return list;
 	}
