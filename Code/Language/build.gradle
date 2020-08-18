@@ -10,7 +10,7 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '5.1.0'
 }
 
-ext.xtextVersion = '2.20.0'
+ext.xtextVersion = '2.22.0'
 repositories {
     mavenCentral()
 }
@@ -92,7 +92,7 @@ dependencies {
 
 apply plugin : 'application'
 apply plugin : 'com.github.johnrengelman.shadow'
-mainClassName = 'org.eclipse.xtext.ide.server.ServerLauncher'
+mainClassName = 'm.main.Main'
 
 shadowJar {
     from(project.convention.getPlugin(JavaPluginConvention).sourceSets.main.output)
