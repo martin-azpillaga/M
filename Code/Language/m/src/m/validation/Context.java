@@ -307,6 +307,7 @@ public class Context {
 		}
 		
 		game.library = library;
+		game.inference = inference;
 		
 		return game;
 	}
