@@ -6,11 +6,18 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.CompletionList;
+import org.eclipse.lsp4j.CompletionOptions;
+import org.eclipse.lsp4j.CompletionParams;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
@@ -24,7 +31,9 @@ import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
@@ -73,6 +82,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		var capabilities = new ServerCapabilities();
 		capabilities.setHoverProvider(true);
 		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
+		capabilities.setCompletionProvider(new CompletionOptions());
 		
 		return CompletableFuture.supplyAsync(()->new InitializeResult(capabilities));
 	}
@@ -225,6 +235,37 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		hover.setContents(contents);
 		return CompletableFuture.supplyAsync(() -> hover);
 	}
+	
+	
+	@Override
+	public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(CompletionParams params)
+	{
+		Main.write("AutoComplete");
+		var list = new ArrayList<CompletionItem>();
+		
+		var item = new CompletionItem("Hello");
+		var i = new CompletionItem("World");
+		
+		list.add(item);
+		list.add(i);
+		i.setDetail("Details...");
+		i.setDocumentation("documentation");
+		
+		return CompletableFuture.supplyAsync(() -> Either.forLeft(list));
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	@Override
 	public void didChangeConfiguration(DidChangeConfigurationParams params) {
