@@ -5,7 +5,10 @@ import java.nio.file.Files;
 import java.nio.file.OpenOption;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
@@ -13,11 +16,17 @@ import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.Hover;
+import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.MarkedString;
+import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
@@ -120,6 +129,17 @@ class DocumentService implements TextDocumentService
 	@Override
 	public void didSave(DidSaveTextDocumentParams params) {
 		Server.write("didSave");
+	}
+	
+	@Override
+	public CompletableFuture<Hover> hover(HoverParams params)
+	{
+		Server.write("hover");
+		var hover = new Hover();
+		var contents = new ArrayList<Either<String,MarkedString>>();
+		contents.add(Either.forLeft("hi"));
+		hover.setContents(contents);
+		return CompletableFuture.supplyAsync(() -> hover);
 	}
 }
 
