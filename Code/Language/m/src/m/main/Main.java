@@ -2,12 +2,14 @@ package m.main;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
@@ -28,6 +30,8 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+import org.eclipse.xtext.parser.IParser;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.util.UriExtensions;
@@ -123,20 +127,35 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		var resourceSet = injector.getInstance(ResourceSet.class);
 		
 		var read = "";
-		InputStream input;
+		InputStream input = null;
+		XtextResource resource = null;
 		try {
 			input = Files.newInputStream(Paths.get(params.getTextDocument().getUri().replace("file://", "")));
 			read = Files.readString(Paths.get(params.getTextDocument().getUri().replace("file://", "")));
 			read += "\n\n" + input.readAllBytes();
+			resource = (XtextResource) resourceSet.createResource(URI.createURI(params.getTextDocument().getUri()));
+			resource.load(null);
 		} catch (IOException e) {
 			read = "IO Exception";
 		}
-		var uriExtensions = new UriExtensions();
-		var uriExtended = uriExtensions.toUri(params.getTextDocument().getUri()).trimFragment();
-		var resource = resourceSet.getResource(URI.createURI(params.getTextDocument().getUri().replace("file://", "")), false);
 		
+		for(var syntaxError : resource.getErrors())
+		{
+			read += "\n\n"+syntaxError.getMessage() + " : " + syntaxError.getLocation();
+		}
+		var parseResult = resource.getParseResult();
+		var node = NodeModelUtils.findLeafNodeAtOffset(parseResult.getRootNode(), 0);
+		read += "\n\n"+node.getText();
+		/*
+		var parser = injector.getInstance(IParser.class);
+		var parserResults = parser.parse(new InputStreamReader(input));
+		for (var parseError : parserResults.getSyntaxErrors())
+		{
+			Main.write(parseError.getText());
+			read += "\n\n"+parseError.getText();
+		}*/
 		var hover = new Hover();
-		var contents = new MarkupContent("markdown", (resource == null)+"\n\n"+read);
+		var contents = new MarkupContent("markdown", read+(resource.getErrors().size())+"\n\n"+resource.getContents().get(0).getClass());
 		hover.setContents(contents);
 		return CompletableFuture.supplyAsync(() -> hover);
 	}
