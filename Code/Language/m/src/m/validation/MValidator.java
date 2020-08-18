@@ -26,7 +26,7 @@ public class MValidator extends AbstractMValidator
 	Context context;
 	Map<Library,List<Problem>> map;
 	Map<Library, Context> contexts;
-	Game game;
+	public static Game game;
 	Library currentLibrary;
 	List<Problem> currentProblems;
 	
