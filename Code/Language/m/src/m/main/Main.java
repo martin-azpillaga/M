@@ -22,6 +22,7 @@ import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.launch.LSPLauncher;
@@ -30,6 +31,8 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
+import org.eclipse.xtext.EcoreUtil2;
+import org.eclipse.xtext.RuleCall;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.parser.IParser;
 import org.eclipse.xtext.resource.XtextResource;
@@ -39,6 +42,7 @@ import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
 
 import m.MStandaloneSetup;
+import m.m.Function;
 
 public class Main implements LanguageServer, LanguageClientAware, TextDocumentService, WorkspaceService
 {	
@@ -139,23 +143,50 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			read = "IO Exception";
 		}
 		
+		
 		for(var syntaxError : resource.getErrors())
 		{
 			read += "\n\n"+syntaxError.getMessage() + " : " + syntaxError.getLocation();
 		}
 		var parseResult = resource.getParseResult();
-		var node = NodeModelUtils.findLeafNodeAtOffset(parseResult.getRootNode(), 0);
-		read += "\n\n"+node.getText();
-		/*
-		var parser = injector.getInstance(IParser.class);
-		var parserResults = parser.parse(new InputStreamReader(input));
-		for (var parseError : parserResults.getSyntaxErrors())
+		
+		if (resource.getErrors().size() > 0)
 		{
-			Main.write(parseError.getText());
-			read += "\n\n"+parseError.getText();
-		}*/
+			var h = new Hover();
+			h.setContents(new MarkupContent("markdown", "solve syntax errors first"));
+			return CompletableFuture.supplyAsync(()->h);
+		}
+		var text = parseResult.getRootNode().getText();
+		var offset = offset(text, params.getPosition().getLine(), params.getPosition().getCharacter());
+		if (offset >= text.length())
+		{
+			var h = new Hover();
+			h.setContents(new MarkupContent("markdown", "end of file"));
+			return CompletableFuture.supplyAsync(()->h);
+		}
+		var node = NodeModelUtils.findLeafNodeAtOffset(parseResult.getRootNode(), offset);
+
+		var semantic = node.getSemanticElement();
+		
+		if (semantic instanceof Function)
+		{
+			var function = (Function) semantic;
+			if (node.getText().equals(function.getName()))
+			{
+				read = "Function " + function.getName();
+			}
+			else
+			{
+				read = "Inside function " + function.getName(); 
+			}
+		}
+		else
+		{
+			read = semantic.toString();
+		}
+		
 		var hover = new Hover();
-		var contents = new MarkupContent("markdown", read+(resource.getErrors().size())+"\n\n"+resource.getContents().get(0).getClass());
+		var contents = new MarkupContent("markdown", read);
 		hover.setContents(contents);
 		return CompletableFuture.supplyAsync(() -> hover);
 	}
@@ -170,5 +201,22 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) {
 		Main.write("workspace files changed");
 		
+	}
+	
+	private int offset(String text, int line, int character)
+	{
+		var count = 0;
+		for (var i = 0; i < text.length(); i++)
+		{
+			if (count == line)
+			{
+				return i+character;
+			}
+			if (text.charAt(i) == '\n')
+			{
+				count++;
+			}
+		}
+		return -1;
 	}
 }
