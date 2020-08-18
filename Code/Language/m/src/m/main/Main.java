@@ -129,6 +129,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		
 		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
 		var resourceSet = injector.getInstance(ResourceSet.class);
+		var validator = injector.getInstance(IResourceValidator.class);
 		
 		var read = "";
 		InputStream input = null;
@@ -148,12 +149,19 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		{
 			read += "\n\n"+syntaxError.getMessage() + " : " + syntaxError.getLocation();
 		}
+		
+		var diagnostics = validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl);
+		
+		for (var validationError : diagnostics)
+		{
+			read += "\n\n"+validationError.getMessage();
+		}
 		var parseResult = resource.getParseResult();
 		
 		if (resource.getErrors().size() > 0)
 		{
 			var h = new Hover();
-			h.setContents(new MarkupContent("markdown", "solve syntax errors first"));
+			h.setContents(new MarkupContent("markdown", "solve syntax errors first"+read));
 			return CompletableFuture.supplyAsync(()->h);
 		}
 		var text = parseResult.getRootNode().getText();
@@ -173,7 +181,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			var function = (Function) semantic;
 			if (node.getText().equals(function.getName()))
 			{
-				read = "Function " + function.getName();
+				read = "Function " + function.getName() + read;
 			}
 			else
 			{
