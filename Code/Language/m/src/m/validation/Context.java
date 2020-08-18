@@ -35,11 +35,11 @@ public class Context {
 	
 	Set<Value> accessedValues;
 	
-	Inference inference;
+	InferenceGraph inference;
 	List<Problem> problems;
 	
 	public Context(List<Problem> problems, Library library) {
-		this.inference = new Inference(problems);
+		this.inference = new InferenceGraph();
 		this.problems = problems;
 		this.library = library;
 		
@@ -285,13 +285,29 @@ public class Context {
 	
 	public void checkConsistency()
 	{
-		inference.check();
+		problems.addAll(inference.check());
 	}
 	
 	public Game infer()
 	{
-		var game = inference.infer(userComponents, userFunctions);
+		var game = new Game();
+		
+		for (var component : userComponents.entrySet())
+		{
+			var type = inference.infer(component.getValue());
+			if (type != null)
+			{
+				game.components.put(component.getKey(), type);
+			}
+		}
+		
+		for (var function : userFunctions.values())
+		{
+			game.systems.add(function);
+		}
+		
 		game.library = library;
+		
 		return game;
 	}
 }

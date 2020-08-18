@@ -195,6 +195,8 @@ public enum Library {
 		
 		entry("setTrigger", SET_TRIGGER),
 		entry("inState", IN_STATE),
+		entry("enableParameter", ACTIVATE_PARAMETER),
+		entry("disableParameter", DEACTIVATE_PARAMETER),
 		
 		entry("readTriggered", READ_TRIGGERED),
 		entry("readNumber", READ_NUMBER),
@@ -218,6 +220,10 @@ public enum Library {
 		entry("addForce", ADD_FORCE),
 		entry("addTorque", ADD_TORQUE),
 		entry("closestPoint", CLOSEST_POINT),
+		
+		entry("isPositive", IS_POSITIVE),
+		entry("isNegative", IS_NEGATIVE),
+		entry("isZero", IS_ZERO),
 		
 		entry("worldToViewport", WORLD_TO_VIEWPORT),
 		entry("viewportToWorld", VIEWPORT_TO_WORLD),
@@ -430,6 +436,8 @@ public enum Library {
 				
 				entry("ezarriKakoa", SET_TRIGGER),
 				entry("egoera", IN_STATE),
+				entry("jarriParametroa", ACTIVATE_PARAMETER),
+				entry("kenduParametroa", DEACTIVATE_PARAMETER),
 				
 				entry("irakurriKakoa", READ_TRIGGERED),
 				entry("irakurriZenbakia", READ_NUMBER),
@@ -453,6 +461,10 @@ public enum Library {
 				entry("gehituIndarra", ADD_FORCE),
 				entry("gehituIndarAngeluarra", ADD_TORQUE),
 				entry("puntuGertukoena", CLOSEST_POINT),
+				
+				entry("positiboa", IS_POSITIVE),
+				entry("negatiboa", IS_NEGATIVE),
+				entry("zero", IS_ZERO),
 				
 				entry("mundutikPantailara", WORLD_TO_VIEWPORT),
 				entry("pantailatikMundura", VIEWPORT_TO_WORLD),
