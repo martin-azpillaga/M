@@ -42,7 +42,10 @@ import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
 
 import m.MStandaloneSetup;
+import m.m.Cell;
 import m.m.Function;
+import m.m.Value;
+import m.validation.MValidator;
 
 public class Main implements LanguageServer, LanguageClientAware, TextDocumentService, WorkspaceService
 {	
@@ -131,6 +134,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		var resourceSet = injector.getInstance(ResourceSet.class);
 		var validator = injector.getInstance(IResourceValidator.class);
 		
+		
 		var read = "";
 		InputStream input = null;
 		XtextResource resource = null;
@@ -181,11 +185,34 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			var function = (Function) semantic;
 			if (node.getText().equals(function.getName()))
 			{
-				read = "Function " + function.getName() + read;
+				read = "Function " + function.getName();
 			}
 			else
 			{
 				read = "Inside function " + function.getName(); 
+			}
+		}
+		else if (semantic instanceof Value)
+		{
+			var value = (Value) semantic;
+			
+			var container = value.eContainer();
+			
+			if (container instanceof Cell)
+			{
+				var cell = (Cell) container;
+				if (cell.getComponent() == value)
+				{
+					read = "Type: "+MValidator.game.inference.infer(cell);
+				}
+				else
+				{
+					read = "Type: "+MValidator.game.inference.infer(value);
+				}
+			}
+			else
+			{
+				read = "Type: "+MValidator.game.inference.infer(value);
 			}
 		}
 		else
@@ -210,6 +237,14 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		Main.write("workspace files changed");
 		
 	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	private int offset(String text, int line, int character)
 	{
