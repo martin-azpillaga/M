@@ -2,13 +2,9 @@ package m.main;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
@@ -20,13 +16,9 @@ import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
-import org.eclipse.lsp4j.MarkedString;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.ServerCapabilities;
-import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
-import org.eclipse.lsp4j.jsonrpc.Launcher;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
@@ -34,24 +26,13 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
-public class Main
-{
+public class Main implements LanguageServer, LanguageClientAware, TextDocumentService, WorkspaceService
+{	
 	public static void main(String[] arguments) throws IOException
 	{
-		LSPLauncher.createServerLauncher(new Server(), System.in, System.out).startListening();
+		LSPLauncher.createServerLauncher(new Main(), System.in, System.out).startListening();
 	}
-}
-
-class Server implements LanguageServer, LanguageClientAware
-{
-	DocumentService document;
-	WorkspaceService workspace;
 	
-	public Server()
-	{
-		document = new DocumentService();
-		workspace = new Workspace();
-	}
 	public static void write(String message)
 	{
 		try {
@@ -88,73 +69,60 @@ class Server implements LanguageServer, LanguageClientAware
 
 	@Override
 	public TextDocumentService getTextDocumentService() {
-		return document;
+		return this;
 	}
 
 	@Override
 	public WorkspaceService getWorkspaceService() {
-		return workspace;
+		return this;
 	}
 
 	@Override
 	public void connect(LanguageClient client) {
-		try {
-			Files.write(Paths.get("communication.t"), "Hello".getBytes());
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+		Main.write("connect");
 	}
-}
-
-class DocumentService implements TextDocumentService
-{
-
+	
+	
+	
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params) {
-		Server.write("didOpen");
+		Main.write("didOpen");
 	}
 
 	@Override
 	public void didChange(DidChangeTextDocumentParams params) {
-		Server.write("didChange");
+		Main.write("didChange");
 	}
 
 	@Override
 	public void didClose(DidCloseTextDocumentParams params) {
-		Server.write("didClose");
+		Main.write("didClose");
 	}
 
 	@Override
 	public void didSave(DidSaveTextDocumentParams params) {
-		Server.write("didSave");
+		Main.write("didSave");
 	}
 	
 	@Override
 	public CompletableFuture<Hover> hover(HoverParams params)
 	{
-		Server.write("hover");
+		Main.write("hover");
 		var hover = new Hover();
-		var contents = new ArrayList<Either<String,MarkedString>>();
-		contents.add(Either.forLeft("hi"));
+		var contents = new MarkupContent("markdown", "**hello** *world*\n"+params.getTextDocument().getUri()+"\n"+params.getPosition().getLine()+" : "+params.getPosition().getCharacter());
 		hover.setContents(contents);
 		return CompletableFuture.supplyAsync(() -> hover);
 	}
-}
-
-class Workspace implements WorkspaceService
-{
-
+	
 	@Override
 	public void didChangeConfiguration(DidChangeConfigurationParams params) {
-		Server.write("workspace configuration changed");
+		Main.write("workspace configuration changed");
 		
 	}
 
 	@Override
 	public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) {
-		Server.write("workspace files changed");
+		Main.write("workspace files changed");
 		
 	}
 }
