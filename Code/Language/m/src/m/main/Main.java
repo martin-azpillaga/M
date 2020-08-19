@@ -2,19 +2,14 @@ package m.main;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
@@ -33,12 +28,15 @@ import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.MessageActionItem;
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.ShowMessageRequestParams;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
-import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.launch.LSPLauncher;
@@ -47,19 +45,14 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
-import org.eclipse.xtext.EcoreUtil2;
-import org.eclipse.xtext.RuleCall;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
-import org.eclipse.xtext.parser.IParser;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.util.CancelIndicator;
-import org.eclipse.xtext.util.UriExtensions;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
 
 import m.MStandaloneSetup;
-import m.library.Library;
 import m.library.symbols.Component;
 import m.m.Assignment;
 import m.m.Block;
@@ -83,8 +76,13 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		launcher.startListening();
 	}
 	
-	public static void write(String message)
+	public void write(String message)
 	{
+		if (client != null)
+		{
+			client.showMessage(new MessageParams(MessageType.Info, message));
+		}
+		
 		try {
 			Files.writeString(Paths.get("communication.t"), message+"\n", StandardOpenOption.APPEND);
 		}
@@ -96,22 +94,16 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	@Override
 	public CompletableFuture<InitializeResult> initialize(InitializeParams params)
-	{
-		write("Initialize");
-		
+	{		
 		var capabilities = new ServerCapabilities();
 		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
 		
 		capabilities.setHoverProvider(true);
 		capabilities.setCompletionProvider(new CompletionOptions());
 		
-		write(params.getRootUri());
-		write(params.getWorkspaceFolders().size()+" workspaces");
-		
 		for (var folder : params.getWorkspaceFolders())
 		{
 			var dir = Paths.get(folder.getUri().replace("file://", ""));
-			write(dir.toString());
 			
 			try {
 				// Only in workspace folder
@@ -119,7 +111,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				{
 					if (f.toString().endsWith(".m"))
 					{
-						write(f.toString());
+						//write(f.toString());
 					}
 				});
 				
@@ -128,7 +120,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				{
 					if (f.toString().endsWith(".m"))
 					{
-						write(f.toString());
+						//write(f.toString());
 					}
 				});
 			} catch (IOException e) {
@@ -141,38 +133,40 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	}
 
 	@Override
-	public CompletableFuture<Object> shutdown() {
-		write("shutdown");
+	public CompletableFuture<Object> shutdown()
+	{
 		return CompletableFuture.supplyAsync(() -> Boolean.TRUE);
 	}
 
 	@Override
-	public void exit() {
-		write("exit");
+	public void exit()
+	{
+		
 	}
 
 	@Override
-	public TextDocumentService getTextDocumentService() {
+	public TextDocumentService getTextDocumentService()
+	{
 		return this;
 	}
 
 	@Override
-	public WorkspaceService getWorkspaceService() {
+	public WorkspaceService getWorkspaceService()
+	{
 		return this;
 	}
 
 	@Override
-	public void connect(LanguageClient client) {
-		Main.write("connect");
+	public void connect(LanguageClient client)
+	{
 		this.client = client;
 	}
 	
 	
 	
 	@Override
-	public void didOpen(DidOpenTextDocumentParams params) {
-		Main.write("didOpen");
-		
+	public void didOpen(DidOpenTextDocumentParams params)
+	{
 		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
 		var resourceSet = injector.getInstance(ResourceSet.class);
 		var validator = injector.getInstance(IResourceValidator.class);
@@ -216,13 +210,8 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	}
 
 	@Override
-	public void didChange(DidChangeTextDocumentParams params) {
-		Main.write("didChange"+params.getContentChanges().size());
-		for (var change : params.getContentChanges())
-		{
-			Main.write(change.toString() + "  " + change.getText());
-		}
-		
+	public void didChange(DidChangeTextDocumentParams params)
+	{		
 		var text = params.getContentChanges().get(0).getText();
 		var targetStream = new ByteArrayInputStream(text.getBytes());
 
@@ -271,13 +260,14 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	}
 
 	@Override
-	public void didClose(DidCloseTextDocumentParams params) {
-		Main.write("didClose");
+	public void didClose(DidCloseTextDocumentParams params)
+	{
+		
 	}
 
 	@Override
-	public void didSave(DidSaveTextDocumentParams params) {
-		Main.write("didSave");
+	public void didSave(DidSaveTextDocumentParams params)
+	{
 	}
 	
 	@Override
@@ -398,13 +388,13 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	@Override
 	public void didChangeConfiguration(DidChangeConfigurationParams params) {
-		Main.write("workspace configuration changed");
+		write("workspace configuration changed");
 		
 	}
 
 	@Override
 	public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) {
-		Main.write("workspace files changed");
+		write("workspace files changed");
 		
 	}
 	
