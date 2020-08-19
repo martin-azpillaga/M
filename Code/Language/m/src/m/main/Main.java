@@ -1,5 +1,6 @@
 package m.main;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,6 +20,8 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.CompletionParams;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
@@ -31,6 +34,8 @@ import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
@@ -55,6 +60,7 @@ import org.eclipse.xtext.validation.IResourceValidator;
 
 import m.MStandaloneSetup;
 import m.library.Library;
+import m.library.symbols.Component;
 import m.m.Assignment;
 import m.m.Block;
 import m.m.Cell;
@@ -63,10 +69,18 @@ import m.m.Value;
 import m.validation.MValidator;
 
 public class Main implements LanguageServer, LanguageClientAware, TextDocumentService, WorkspaceService
-{	
+{
+	LanguageClient client;
+	
 	public static void main(String[] arguments) throws IOException
 	{
-		LSPLauncher.createServerLauncher(new Main(), System.in, System.out).startListening();
+		var server = new Main();
+		var launcher = LSPLauncher.createServerLauncher(server, System.in, System.out);
+		var client = launcher.getRemoteProxy();
+		
+		((LanguageClientAware)server).connect(client);
+		
+		launcher.startListening();
 	}
 	
 	public static void write(String message)
@@ -86,9 +100,42 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		write("Initialize");
 		
 		var capabilities = new ServerCapabilities();
-		capabilities.setHoverProvider(true);
 		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
+		
+		capabilities.setHoverProvider(true);
 		capabilities.setCompletionProvider(new CompletionOptions());
+		
+		write(params.getRootUri());
+		write(params.getWorkspaceFolders().size()+" workspaces");
+		
+		for (var folder : params.getWorkspaceFolders())
+		{
+			var dir = Paths.get(folder.getUri().replace("file://", ""));
+			write(dir.toString());
+			
+			try {
+				// Only in workspace folder
+				Files.list(dir).forEach(f -> 
+				{
+					if (f.toString().endsWith(".m"))
+					{
+						write(f.toString());
+					}
+				});
+				
+				// Also subfolders
+				Files.walk(dir).forEach(f -> 
+				{
+					if (f.toString().endsWith(".m"))
+					{
+						write(f.toString());
+					}
+				});
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		
 		return CompletableFuture.supplyAsync(()->new InitializeResult(capabilities));
 	}
@@ -117,6 +164,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public void connect(LanguageClient client) {
 		Main.write("connect");
+		this.client = client;
 	}
 	
 	
@@ -124,11 +172,102 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params) {
 		Main.write("didOpen");
+		
+		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
+		var resourceSet = injector.getInstance(ResourceSet.class);
+		var validator = injector.getInstance(IResourceValidator.class);
+		
+		XtextResource resource = null;
+		try {
+			resource = (XtextResource) resourceSet.createResource(URI.createURI(params.getTextDocument().getUri()));
+			resource.load(null);
+		} catch (IOException e) {
+			
+		}
+		var issues = validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl);
+		
+		var list = new ArrayList<Diagnostic>();
+		
+		for (var issue : issues)
+		{
+			var position = new Position(issue.getLineNumber()-1, issue.getColumn()-1);
+			var positionEnd = new Position(issue.getLineNumberEnd()-1, issue.getColumnEnd()-1);
+			
+			var range = new Range(position, positionEnd);
+			
+			var severity = DiagnosticSeverity.Information;
+			switch (issue.getSeverity())
+			{
+			case INFO: severity = DiagnosticSeverity.Information; break;
+			case WARNING: severity = DiagnosticSeverity.Warning; break;
+			case ERROR: severity = DiagnosticSeverity.Error; break;
+			case IGNORE: break;
+			}
+			
+			var diagnostic = new Diagnostic(range, issue.getMessage(), severity, "");
+			list.add(diagnostic);
+		}
+		
+		
+		var info = new Diagnostic(new Range(new Position(0, 0), new Position(0,3)), "Thanks for using M", DiagnosticSeverity.Hint, "");
+		list.add(info);
+		var diagnostics = new PublishDiagnosticsParams(params.getTextDocument().getUri(),list);
+		client.publishDiagnostics(diagnostics);
 	}
 
 	@Override
 	public void didChange(DidChangeTextDocumentParams params) {
-		Main.write("didChange");
+		Main.write("didChange"+params.getContentChanges().size());
+		for (var change : params.getContentChanges())
+		{
+			Main.write(change.toString() + "  " + change.getText());
+		}
+		
+		var text = params.getContentChanges().get(0).getText();
+		var targetStream = new ByteArrayInputStream(text.getBytes());
+
+		
+		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
+		var resourceSet = injector.getInstance(ResourceSet.class);
+		var validator = injector.getInstance(IResourceValidator.class);
+		
+		XtextResource resource = null;
+		try {
+			resource = (XtextResource) resourceSet.createResource(URI.createURI(params.getTextDocument().getUri()));
+			resource.load(targetStream,null);
+		} catch (IOException e) {
+			
+		}
+		
+		var issues = validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl);
+		
+		var list = new ArrayList<Diagnostic>();
+		
+		for (var issue : issues)
+		{
+			var position = new Position(issue.getLineNumber()-1, issue.getColumn()-1);
+			var positionEnd = new Position(issue.getLineNumberEnd()-1, issue.getColumnEnd()-1);
+			
+			var range = new Range(position, positionEnd);
+			
+			var severity = DiagnosticSeverity.Information;
+			switch (issue.getSeverity())
+			{
+			case INFO: severity = DiagnosticSeverity.Information; break;
+			case WARNING: severity = DiagnosticSeverity.Warning; break;
+			case ERROR: severity = DiagnosticSeverity.Error; break;
+			case IGNORE: break;
+			}
+			
+			var diagnostic = new Diagnostic(range, issue.getMessage(), severity, "");
+			list.add(diagnostic);
+		}
+		
+		
+		var info = new Diagnostic(new Range(new Position(0, 0), new Position(0,3)), "Thanks for using M", DiagnosticSeverity.Hint, "");
+		list.add(info);
+		var diagnostics = new PublishDiagnosticsParams(params.getTextDocument().getUri(),list);
+		client.publishDiagnostics(diagnostics);
 	}
 
 	@Override
@@ -147,6 +286,11 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		var result = "";
 		
 		var node = node(params.getTextDocument(), params.getPosition(), false);
+		
+		if (MValidator.game == null)
+		{
+			return CompletableFuture.supplyAsync(() -> new Hover());
+		}
 		
 		var semantic = node.getSemanticElement();
 		
@@ -212,9 +356,10 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		}
 		else if (semantic instanceof Cell)
 		{
-			for (var component : Library.ENGLISH.components.keySet())
+			for (var component : Component.values())
 			{
-				result.add(new CompletionItem(component));
+				// Try bimaps again
+				result.add(new CompletionItem(component.name()));
 			}
 		}
 		else
