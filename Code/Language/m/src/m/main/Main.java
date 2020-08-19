@@ -12,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.lsp4j.CompletionItem;
@@ -31,6 +32,7 @@ import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentPositionParams;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
@@ -42,6 +44,7 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.RuleCall;
+import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.parser.IParser;
 import org.eclipse.xtext.resource.XtextResource;
@@ -51,6 +54,9 @@ import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
 
 import m.MStandaloneSetup;
+import m.library.Library;
+import m.m.Assignment;
+import m.m.Block;
 import m.m.Cell;
 import m.m.Function;
 import m.m.Value;
@@ -138,56 +144,10 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public CompletableFuture<Hover> hover(HoverParams params)
 	{
-		Main.write("hover");
+		var result = "";
 		
-		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
-		var resourceSet = injector.getInstance(ResourceSet.class);
-		var validator = injector.getInstance(IResourceValidator.class);
+		var node = node(params.getTextDocument(), params.getPosition(), false);
 		
-		
-		var read = "";
-		InputStream input = null;
-		XtextResource resource = null;
-		try {
-			input = Files.newInputStream(Paths.get(params.getTextDocument().getUri().replace("file://", "")));
-			read = Files.readString(Paths.get(params.getTextDocument().getUri().replace("file://", "")));
-			read += "\n\n" + input.readAllBytes();
-			resource = (XtextResource) resourceSet.createResource(URI.createURI(params.getTextDocument().getUri()));
-			resource.load(null);
-		} catch (IOException e) {
-			read = "IO Exception";
-		}
-		
-		
-		for(var syntaxError : resource.getErrors())
-		{
-			read += "\n\n"+syntaxError.getMessage() + " : " + syntaxError.getLocation();
-		}
-		
-		var diagnostics = validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl);
-		
-		for (var validationError : diagnostics)
-		{
-			read += "\n\n"+validationError.getMessage();
-		}
-		var parseResult = resource.getParseResult();
-		
-		if (resource.getErrors().size() > 0)
-		{
-			var h = new Hover();
-			h.setContents(new MarkupContent("markdown", "solve syntax errors first"+read));
-			return CompletableFuture.supplyAsync(()->h);
-		}
-		var text = parseResult.getRootNode().getText();
-		var offset = offset(text, params.getPosition().getLine(), params.getPosition().getCharacter());
-		if (offset >= text.length())
-		{
-			var h = new Hover();
-			h.setContents(new MarkupContent("markdown", "end of file"));
-			return CompletableFuture.supplyAsync(()->h);
-		}
-		var node = NodeModelUtils.findLeafNodeAtOffset(parseResult.getRootNode(), offset);
-
 		var semantic = node.getSemanticElement();
 		
 		if (semantic instanceof Function)
@@ -195,11 +155,11 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			var function = (Function) semantic;
 			if (node.getText().equals(function.getName()))
 			{
-				read = "Function " + function.getName();
+				result = "Function " + function.getName();
 			}
 			else
 			{
-				read = "Inside function " + function.getName(); 
+				result = "Inside function " + function.getName(); 
 			}
 		}
 		else if (semantic instanceof Value)
@@ -213,25 +173,26 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				var cell = (Cell) container;
 				if (cell.getComponent() == value)
 				{
-					read = "Type: "+MValidator.game.inference.infer(cell);
+					result = "Type: "+MValidator.game.inference.infer(cell);
 				}
 				else
 				{
-					read = "Type: "+MValidator.game.inference.infer(value);
+					result = "Type: "+MValidator.game.inference.infer(value);
 				}
 			}
 			else
 			{
-				read = "Type: "+MValidator.game.inference.infer(value);
+				result = "Type: "+MValidator.game.inference.infer(value);
 			}
 		}
 		else
 		{
-			read = semantic.toString();
+			result = semantic.toString();
 		}
 		
+		
 		var hover = new Hover();
-		var contents = new MarkupContent("markdown", read);
+		var contents = new MarkupContent("markdown", result);
 		hover.setContents(contents);
 		return CompletableFuture.supplyAsync(() -> hover);
 	}
@@ -240,18 +201,41 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(CompletionParams params)
 	{
-		Main.write("AutoComplete");
-		var list = new ArrayList<CompletionItem>();
+		var result = new ArrayList<CompletionItem>();
 		
-		var item = new CompletionItem("Hello");
-		var i = new CompletionItem("World");
+		var node = node(params.getTextDocument(), params.getPosition(), true);
+		var semantic = node.getSemanticElement();
 		
-		list.add(item);
-		list.add(i);
-		i.setDetail("Details...");
-		i.setDocumentation("documentation");
+		if (semantic == null)
+		{
+			result.add(new CompletionItem("semantic is null\n\n"+node.getText()));
+		}
+		else if (semantic instanceof Cell)
+		{
+			for (var component : Library.ENGLISH.components.keySet())
+			{
+				result.add(new CompletionItem(component));
+			}
+		}
+		else
+		{
+			if (semantic instanceof Block)
+			{
+				var block = (Block) semantic;
+				
+				result.add(new CompletionItem(node.getText()+ " " + block.getStatements().size()));
+				if (block.getStatements().size() > 0)
+				{
+					var ass = (Assignment) block.getStatements().get(0);
+					result.add(new CompletionItem(ass.getAtom().toString()));
+					result.add(new CompletionItem("Exp: "+ass.getExpression()));
+					result.add(new CompletionItem("Node: "+node.getText()));
+				}
+			}
+			result.add(new CompletionItem(node.getText() + " " + semantic.toString()));
+		}
 		
-		return CompletableFuture.supplyAsync(() -> Either.forLeft(list));
+		return CompletableFuture.supplyAsync(() -> Either.forLeft(result));
 	}
 	
 	
@@ -283,7 +267,29 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	
 	
-	
+	private INode node(TextDocumentIdentifier document, Position position, boolean minusOne)
+	{
+		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
+		var resourceSet = injector.getInstance(ResourceSet.class);
+		var validator = injector.getInstance(IResourceValidator.class);
+		
+		XtextResource resource = null;
+		try {
+			resource = (XtextResource) resourceSet.createResource(URI.createURI(document.getUri()));
+			resource.load(null);
+		} catch (IOException e) {
+			
+		}
+		validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl);
+		var parseResult = resource.getParseResult();
+		
+		var text = parseResult.getRootNode().getText();
+		var offset = offset(text, position.getLine(), position.getCharacter());
+		if (minusOne) {offset --; }
+		var node = NodeModelUtils.findLeafNodeAtOffset(parseResult.getRootNode(), offset);
+		
+		return node;
+	}
 	
 	
 	

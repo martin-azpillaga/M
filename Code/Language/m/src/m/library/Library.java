@@ -510,7 +510,7 @@ public enum Library {
 	;
 
 	Map<String, Value> variables;
-	Map<String, Component> components;
+	public Map<String, Component> components;
 	Map<String, Function> functions;
 	Map<String, Block> blocks;
 	
