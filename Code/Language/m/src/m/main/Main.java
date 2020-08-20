@@ -2,6 +2,7 @@ package m.main;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -61,8 +62,11 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
+import org.eclipse.xtext.generator.IFileSystemAccess2;
+import org.eclipse.xtext.generator.JavaIoFileSystemAccess;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+import org.eclipse.xtext.parser.IEncodingProvider;
 import org.eclipse.xtext.parser.IParser;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.util.CancelIndicator;
@@ -71,6 +75,7 @@ import org.eclipse.xtext.validation.IResourceValidator;
 
 
 import m.MStandaloneSetup;
+import m.generator.ClassicUnity;
 import m.generator.MGenerator;
 import m.library.symbols.Component;
 import m.m.Assignment;
@@ -90,6 +95,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	IParser parser;
 	MValidator validator;
 	MGenerator generator;
+	JavaIoFileSystemAccess fileSystem;
 	
 	public static void main(String[] arguments) throws IOException
 	{
@@ -125,6 +131,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		validator = injector.getInstance(MValidator.class);
 		generator = injector.getInstance(MGenerator.class);
 		parser = injector.getInstance(IParser.class);
+		fileSystem = injector.getInstance(JavaIoFileSystemAccess.class);
 		
 		/* Asynchronous wait
 		var p = new ShowMessageRequestParams();
@@ -304,7 +311,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params)
-	{		
+	{
 		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
 		var resourceSet = injector.getInstance(ResourceSet.class);
 		var validator = injector.getInstance(IResourceValidator.class);
@@ -350,16 +357,8 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public void didChange(DidChangeTextDocumentParams params)
 	{
-		/* Semantic highlighting
-		var highlightParams = new SemanticHighlightingParams();
-		highlightParams.setTextDocument(params.getTextDocument());
-		var lines = new ArrayList<SemanticHighlightingInformation>();
-		var line = new SemanticHighlightingInformation();
-		line.setLine(0);
-		lines.add(line);
-		highlightParams.setLines(lines);
-		client.semanticHighlighting(highlightParams);
-		*/
+		// Update file content in memory
+		
 		var text = params.getContentChanges().get(0).getText();
 		var targetStream = new ByteArrayInputStream(text.getBytes());
 
@@ -398,6 +397,15 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			
 			var diagnostic = new Diagnostic(range, issue.getMessage(), severity, "");
 			list.add(diagnostic);
+		}
+
+		fileSystem.setOutputPath(workspaces.get(0).toString());
+
+		var game = MValidator.game;
+		if (game != null)
+		{
+			generator.generate(game, fileSystem);
+			write("generated");
 		}
 		
 		
