@@ -39,6 +39,18 @@ public class MGenerator extends AbstractGenerator
 		}
 	}
 	
+	public void generate(Game game, IFileSystemAccess2 fileSystem)
+	{
+		if (game != null)
+		{
+			for (var function : game.systems)
+			{
+				game.queries.put(function, collectQueries(function, game));
+			}
+			new ClassicUnity().generate(game, fileSystem);
+		}
+	}
+	
 	private HashMap<String, HashMap<String,AccessKind>> collectQueries(Function function, Game game)
 	{
 		var queries = new HashMap<String, HashMap<String,AccessKind>>();
