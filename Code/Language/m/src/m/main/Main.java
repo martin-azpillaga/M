@@ -9,13 +9,17 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.CompletionParams;
+import org.eclipse.lsp4j.DeleteFile;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
@@ -25,6 +29,8 @@ import org.eclipse.lsp4j.DidChangeWorkspaceFoldersParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.ExecuteCommandOptions;
+import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.FileChangeType;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.HoverParams;
@@ -37,12 +43,17 @@ import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.ResourceOperation;
 import org.eclipse.lsp4j.SemanticHighlightingInformation;
 import org.eclipse.lsp4j.SemanticHighlightingParams;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
+import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
+import org.eclipse.lsp4j.WorkspaceEdit;
+import org.eclipse.lsp4j.WorkspaceSymbolParams;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -57,6 +68,7 @@ import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
+
 
 import m.MStandaloneSetup;
 import m.generator.MGenerator;
@@ -114,13 +126,46 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		generator = injector.getInstance(MGenerator.class);
 		parser = injector.getInstance(IParser.class);
 		
-		parser.parse(null).getRootNode();
+		/* Asynchronous wait
+		var p = new ShowMessageRequestParams();
+		p.setMessage("click me");
+		p.setType(MessageType.Warning);
+		var list = new ArrayList<MessageActionItem>();
+		list.add(new MessageActionItem("Here we go"));
+		p.setActions(list);
+		try {
+			var selected = client.showMessageRequest(p);
+			write(selected.get(5l, java.util.concurrent.TimeUnit.SECONDS).getTitle());
+		} catch (InterruptedException | ExecutionException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TimeoutException e) {
+			write("Timeoput");
+			e.printStackTrace();
+		}
+		*/
+		
+		/* Apply edit to remove a file
+		 * 
+		 
+		var edit = new WorkspaceEdit();
+		var operation = new DeleteFile("");
+		var operations = new ArrayList<Either<TextDocumentEdit,ResourceOperation>>();
+		operations.add(Either.forRight(operation));
+		edit.setDocumentChanges(operations);
+		client.applyEdit(new ApplyWorkspaceEditParams(edit));
+		*/
+		
+		var commands = new ArrayList<String>();
+		commands.add("Go");
 		
 		var capabilities = new ServerCapabilities();
 		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
 		
 		capabilities.setHoverProvider(true);
 		capabilities.setCompletionProvider(new CompletionOptions());
+		capabilities.setExecuteCommandProvider(new ExecuteCommandOptions(commands));
+		capabilities.setWorkspaceSymbolProvider(true);
 		
 		workspaces = new ArrayList<Path>();
 		files = new ArrayList<String>();
@@ -232,10 +277,23 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		}
 	}
 	
+	public CompletableFuture<Object> executeCommand(ExecuteCommandParams params)
+	{
+		write("executing command ...");
+		
+		return CompletableFuture.supplyAsync(() -> Boolean.TRUE);
+	}
 	
 	
-	
-	
+	public CompletableFuture<List<? extends SymbolInformation>> symbol(WorkspaceSymbolParams params)
+	{
+		write("symbol information");
+		var list = new ArrayList<SymbolInformation>();
+		
+		
+		return CompletableFuture.supplyAsync(() -> list);
+	}
+
 	
 	
 	
@@ -246,7 +304,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params)
-	{
+	{		
 		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
 		var resourceSet = injector.getInstance(ResourceSet.class);
 		var validator = injector.getInstance(IResourceValidator.class);
