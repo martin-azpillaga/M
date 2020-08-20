@@ -43,8 +43,11 @@
             }
         ]
     },
-	"activationEvents": [
-		"onLanguage:m"
-	],
-	"main": "./extension.js"
+    "activationEvents": [
+        "onLanguage:m"
+    ],
+    "main": "./extension.js",
+    "dependencies": {
+        "vscode-languageclient": "6.1.3"
+    }
 }
