@@ -12,20 +12,27 @@
         "vscode": "^1.40.0"
     },
     "categories": [
-        "Programming Languages"
+        "Programming Languages",
+        "Snippets"
     ],
     "contributes": {
         "languages": [
             {
-                "id": "m-ls",
+                "id": "m",
                 "aliases": [
                     "M",
-                    "m-ls"
+                    "m"
                 ],
                 "extensions": [
                     ".m"
                 ],
                 "configuration": "./language-configuration.json"
+            }
+        ],
+        "snippets": [
+            {
+                "language": "m",
+                "path": "./snippets.json"
             }
         ]
     }
