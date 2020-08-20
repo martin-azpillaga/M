@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -41,6 +42,7 @@ import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
+import org.eclipse.lsp4j.ParameterInformation;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
@@ -49,6 +51,10 @@ import org.eclipse.lsp4j.SemanticHighlightingInformation;
 import org.eclipse.lsp4j.SemanticHighlightingParams;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
+import org.eclipse.lsp4j.SignatureHelp;
+import org.eclipse.lsp4j.SignatureHelpOptions;
+import org.eclipse.lsp4j.SignatureHelpParams;
+import org.eclipse.lsp4j.SignatureInformation;
 import org.eclipse.lsp4j.SymbolInformation;
 import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
@@ -56,6 +62,7 @@ import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.WorkspaceSymbolParams;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.eclipse.lsp4j.jsonrpc.services.JsonRequest;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
@@ -163,16 +170,18 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		client.applyEdit(new ApplyWorkspaceEditParams(edit));
 		*/
 		
+		write(params.getCapabilities().getTextDocument().getSignatureHelp().toString());
+		
 		var commands = new ArrayList<String>();
 		commands.add("Go");
+		
 		
 		var capabilities = new ServerCapabilities();
 		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
 		
 		capabilities.setHoverProvider(true);
 		capabilities.setCompletionProvider(new CompletionOptions());
-		capabilities.setExecuteCommandProvider(new ExecuteCommandOptions(commands));
-		capabilities.setWorkspaceSymbolProvider(true);
+		capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
 		
 		workspaces = new ArrayList<Path>();
 		files = new ArrayList<String>();
@@ -405,7 +414,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		if (game != null)
 		{
 			generator.generate(game, fileSystem);
-			write("generated");
 		}
 		
 		
@@ -425,6 +433,11 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	public void didSave(DidSaveTextDocumentParams params)
 	{
 	}
+	
+	
+	
+	
+	
 	
 	@Override
 	public CompletableFuture<Hover> hover(HoverParams params)
@@ -530,6 +543,18 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	}
 	
 	
+	@Override
+	public CompletableFuture<SignatureHelp> signatureHelp(SignatureHelpParams params)
+	{
+		write("signature triggered");
+		var list = new ArrayList<SignatureInformation>();
+		var parameters = new ArrayList<ParameterInformation>();
+		var info = new SignatureInformation("enableParameter", "enables the given boolean parameter in the animator", parameters);
+		list.add(info);
+		var help = new SignatureHelp();
+		help.setSignatures(list);
+		return CompletableFuture.supplyAsync(()->help);
+	}
 	
 	
 	
