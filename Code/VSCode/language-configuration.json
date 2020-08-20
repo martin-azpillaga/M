@@ -1,4 +1,13 @@
 {
+    "indentationRules":
+    {
+        "increaseIndentPattern": "{",
+        "decreaseIndentPattern": "}"
+    },
+    "folding":
+    {
+        "markers": {"start": "{", "end": "}"}
+    },
     "brackets": [
         ["{", "}"],
         ["[", "]"],
