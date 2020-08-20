@@ -3,6 +3,7 @@ package m.main;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -20,9 +21,11 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
+import org.eclipse.lsp4j.DidChangeWorkspaceFoldersParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
+import org.eclipse.lsp4j.FileChangeType;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.InitializeParams;
@@ -34,6 +37,8 @@ import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.SemanticHighlightingInformation;
+import org.eclipse.lsp4j.SemanticHighlightingParams;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.ShowMessageRequestParams;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
@@ -47,12 +52,14 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
+import org.eclipse.xtext.parser.IParser;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
 
 import m.MStandaloneSetup;
+import m.generator.MGenerator;
 import m.library.symbols.Component;
 import m.m.Assignment;
 import m.m.Block;
@@ -64,6 +71,13 @@ import m.validation.MValidator;
 public class Main implements LanguageServer, LanguageClientAware, TextDocumentService, WorkspaceService
 {
 	LanguageClient client;
+	
+	List<Path> workspaces;
+	List<String> files;
+	
+	IParser parser;
+	MValidator validator;
+	MGenerator generator;
 	
 	public static void main(String[] arguments) throws IOException
 	{
@@ -94,16 +108,28 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	@Override
 	public CompletableFuture<InitializeResult> initialize(InitializeParams params)
-	{		
+	{
+		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
+		validator = injector.getInstance(MValidator.class);
+		generator = injector.getInstance(MGenerator.class);
+		parser = injector.getInstance(IParser.class);
+		
+		parser.parse(null).getRootNode();
+		
 		var capabilities = new ServerCapabilities();
 		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
 		
 		capabilities.setHoverProvider(true);
 		capabilities.setCompletionProvider(new CompletionOptions());
 		
+		workspaces = new ArrayList<Path>();
+		files = new ArrayList<String>();
+		
 		for (var folder : params.getWorkspaceFolders())
 		{
 			var dir = Paths.get(folder.getUri().replace("file://", ""));
+			
+			workspaces.add(dir);
 			
 			try {
 				// Only in workspace folder
@@ -111,6 +137,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				{
 					if (f.toString().endsWith(".m"))
 					{
+						files.add(f.toString());
 						//write(f.toString());
 					}
 				});
@@ -130,6 +157,12 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		}
 		
 		return CompletableFuture.supplyAsync(()->new InitializeResult(capabilities));
+	}
+	
+	@Override
+	public void connect(LanguageClient client)
+	{
+		this.client = client;
 	}
 
 	@Override
@@ -156,11 +189,58 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		return this;
 	}
 
+	
+	
+	
+	
+	// Workspaces, initialized in initialize call
+	
+	
 	@Override
-	public void connect(LanguageClient client)
+	public void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 	{
-		this.client = client;
+		write("changed workspace");
+		for (var added : params.getEvent().getAdded())
+		{
+			workspaces.add(Paths.get(added.getUri().replace("file://", "")));
+		}
+		for (var removed : params.getEvent().getRemoved())
+		{
+			workspaces.remove(Paths.get(removed.getUri().replace("file://", "")));
+		}
 	}
+	
+	@Override
+	public void didChangeConfiguration(DidChangeConfigurationParams params)
+	{
+		
+	}
+
+	@Override
+	public void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
+	{
+		for (var change : params.getChanges())
+		{
+			if (change.getType() == FileChangeType.Created)
+			{
+				files.add(change.getUri().replace("file://", ""));
+			}
+			else if (change.getType() == FileChangeType.Deleted)
+			{
+				files.remove(change.getUri().replace("file://", ""));
+			}
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -211,7 +291,17 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 
 	@Override
 	public void didChange(DidChangeTextDocumentParams params)
-	{		
+	{
+		/* Semantic highlighting
+		var highlightParams = new SemanticHighlightingParams();
+		highlightParams.setTextDocument(params.getTextDocument());
+		var lines = new ArrayList<SemanticHighlightingInformation>();
+		var line = new SemanticHighlightingInformation();
+		line.setLine(0);
+		lines.add(line);
+		highlightParams.setLines(lines);
+		client.semanticHighlighting(highlightParams);
+		*/
 		var text = params.getContentChanges().get(0).getText();
 		var targetStream = new ByteArrayInputStream(text.getBytes());
 
@@ -386,17 +476,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	
 	
-	@Override
-	public void didChangeConfiguration(DidChangeConfigurationParams params) {
-		write("workspace configuration changed");
-		
-	}
-
-	@Override
-	public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) {
-		write("workspace files changed");
-		
-	}
+	
 	
 	
 	
