@@ -1,0 +1,47 @@
+{
+	"Foreach loop":
+	{
+		"prefix": "foreach",
+		"body": 
+		[
+			"foreach ${1:entity}:",
+			"{",
+			"\t$0",
+			"}"
+		],
+		"description": "loop over entities"
+	},
+	"Selection":
+	{
+		"prefix": "if",
+		"body":
+		[
+			"if ${1:condition}",
+			"{",
+			"\t$0",
+			"}"
+		],
+		"description": "check condition"
+	},
+	"Assignment":
+	{
+		"prefix": "set",
+		"body":
+		[
+			"${1:atom} = ${2:expression}"
+		],
+		"description": "modify value of atom"
+	},
+	"System":
+	{
+		"prefix": "system",
+		"body":
+		[
+			"${1:name} ()",
+			"{",
+			"\t$0",
+			"}"
+		],
+		"description": "systems tick every frame"
+	}
+}
