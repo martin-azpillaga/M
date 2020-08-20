@@ -1,0 +1,32 @@
+{
+    "publisher": "azpillaga-world",
+    "name": "m-ls",
+    "displayName": "M language server",
+    "description": "M language server",
+    "version": "0.0.2",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/martin-azpillaga/M"
+    },
+    "engines": {
+        "vscode": "^1.40.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [
+            {
+                "id": "m-ls",
+                "aliases": [
+                    "M",
+                    "m-ls"
+                ],
+                "extensions": [
+                    ".m"
+                ],
+                "configuration": "./configuration.json"
+            }
+        ]
+    }
+}
