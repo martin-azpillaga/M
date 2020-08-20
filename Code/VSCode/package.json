@@ -9,7 +9,7 @@
         "url": "https://github.com/martin-azpillaga/M"
     },
     "engines": {
-        "vscode": "^1.40.0"
+        "vscode": "^1.43.0"
     },
     "categories": [
         "Programming Languages",
@@ -42,5 +42,9 @@
                 "path": "./m.tmLanguage.json"
             }
         ]
-    }
+    },
+	"activationEvents": [
+		"onLanguage:m"
+	],
+	"main": "./extension.js"
 }
