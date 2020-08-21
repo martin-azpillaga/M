@@ -80,6 +80,8 @@ import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 import m.MStandaloneSetup;
 import m.generator.ClassicUnity;
@@ -106,6 +108,9 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	public static void main(String[] arguments) throws IOException
 	{
+		var bimap = HashBiMap.create();
+		bimap.put(1, 1);
+		
 		var server = new Main();
 		var launcher = LSPLauncher.createServerLauncher(server, System.in, System.out);
 		var client = launcher.getRemoteProxy();
@@ -120,14 +125,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		if (client != null)
 		{
 			client.showMessage(new MessageParams(MessageType.Info, message));
-		}
-		
-		try {
-			Files.writeString(Paths.get("communication.t"), message+"\n", StandardOpenOption.APPEND);
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
 		}
 	}
 	

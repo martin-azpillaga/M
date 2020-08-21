@@ -49,7 +49,12 @@ group = 'm'
 version = 'ls'
 
 sourceCompatibility = '11'
-targetCompatibility = '11'
+
+compileJava {
+    options.compilerArgs = [
+            "--release", "8" // Avoid using Java 12 APIs
+    ]
+}
 
 configurations.all {
     exclude group : 'asm'
@@ -102,4 +107,11 @@ shadowJar {
         'plugin.xml', 'systembundle.properties', 'profile.list')
     classifier = 'ls'
     append('plugin.properties')
+}
+
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+dependencies {
+    annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.2.0'
 }

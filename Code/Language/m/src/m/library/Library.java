@@ -1,6 +1,5 @@
 package m.library;
 
-import static java.util.Map.entry;
 import static m.library.symbols.Value.*;
 import static m.library.symbols.Component.*;
 import static m.library.symbols.Function.*;
@@ -21,19 +20,12 @@ import m.library.types.TypeVariable;
 import m.validation.problems.Problem;
 import m.validation.problems.errors.*;
 import m.validation.problems.warnings.*;
+import java.util.stream.*;
 
 public enum Library {
-	
+	/*
 	ENGLISH(
-	Map.ofEntries(
-		entry("epsilon", EPSILON),
-		entry("pi", PI),
-		entry("e", E),
-		entry("deltaTime", DELTA_TIME),
-		entry("fixedDeltaTime", FIXED_DELTA_TIME),
-		entry("time", TIME_SINCE_START),
-		entry("timeScale", TIME_SCALE)
-	),
+			(Map<String,Value>)Stream.of(new Object[][] {{"a", PI},{"b",PI}}).collect(Collectors.toMap(data -> (String) data[0], data ->(Value) data[1])),
 	Map.ofEntries(
 		entry("position", POSITION),
 		entry("rotation", ROTATION),
@@ -506,7 +498,7 @@ public enum Library {
 				UndecidableType.class, "Izaera ezarriezina",
 				UnusedValue.class, "Erabilerarik gabeko balioa",
 				ReadOnly.class, "Ezin konstante baten balioa berrezarri"
-			))
+			))*/
 	;
 
 	Map<String, Value> variables;
