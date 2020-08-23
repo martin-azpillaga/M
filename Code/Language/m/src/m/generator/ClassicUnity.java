@@ -153,7 +153,19 @@ public class ClassicUnity
 			var dependencies = "\"dependencies\": {";
 			if (manifest.contains(dependencies))
 			{
-				var index = manifest.indexOf("\"dependencies\"");
+				var index = manifest.indexOf(dependencies)+dependencies.length();
+				var buffer = new StringBuffer(manifest);
+				
+				if (!manifest.contains("\"com.unity.entities\""))
+				{
+					buffer.insert(index, "\"com.unity.entities\": \"0.11.1-preview.4\",");
+				}
+				if (!manifest.contains("\"com.unity.inputsystem\""))
+				{
+					buffer.insert(index, "\"com.unity.inputsystem\": \"1.0.0\",");
+				}
+				
+				fileSystem.generateFile("Packages/manifest.json", buffer.toString());
 			}
 		}
 		else

@@ -462,6 +462,11 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			{
 			}
 		}
+		else
+		{
+			fileSystem.setOutputPath(workspaces.get(0).toString());
+			generator.generate(game, fileSystem, Engine.Unity);
+		}
 	}
 	
 	
