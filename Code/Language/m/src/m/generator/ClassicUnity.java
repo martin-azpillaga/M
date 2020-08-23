@@ -81,7 +81,7 @@ public class ClassicUnity
 		
 		for (var component : game.components.entrySet())
 		{
-			fileSystem.generateFile("UnityClassic/Assets/Code/Components/"+unreserved(component.getKey())+".cs",
+			fileSystem.generateFile("Assets/Code/Components/"+unreserved(component.getKey())+".cs",
 					generate(component.getKey(), component.getValue()));
 		}
 		var systems = lines("",
@@ -134,13 +134,13 @@ public class ClassicUnity
 		{
 			for (var query : game.queries.get(function).keySet())
 			{
-				fileSystem.generateFile("UnityClassic/Assets/Code/MultiComponents/"+function.getName()+"_"+query+".cs", generateMultiComponent(function, query));
+				fileSystem.generateFile("Assets/Code/MultiComponents/"+function.getName()+"_"+query+".cs", generateMultiComponent(function, query));
 			}
 		}
 		
 		systems += "}\n}\n}\n";
 		
-		fileSystem.generateFile("UnityClassic/Assets/Code/Systems/Systems.cs", systems);
+		fileSystem.generateFile("Assets/Code/Systems/Systems.cs", systems);
 	}
 	
 	private String typeOf(String component)

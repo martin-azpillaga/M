@@ -1,11 +1,5 @@
 package m.library;
 
-import static m.library.symbols.Value.*;
-import static m.library.symbols.Component.*;
-import static m.library.symbols.Function.*;
-import static m.library.symbols.Block.*;
-import static m.library.types.AtomicType.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,708 +13,658 @@ import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.library.types.TypeVariable;
 import m.validation.problems.Problem;
-import m.validation.problems.errors.*;
-import m.validation.problems.warnings.*;
-import java.util.stream.*;
-import com.google.common.collect.BiMap;
-
-import com.google.common.collect.HashBiMap;
+import m.validation.problems.errors.IncompatibleTypes;
+import m.validation.problems.errors.ReadOnly;
+import m.validation.problems.errors.RedefinedSymbol;
+import m.validation.problems.errors.UndecidableType;
+import m.validation.problems.errors.UndefinedSymbol;
+import m.validation.problems.warnings.UnusedValue;
 
 public enum Library
 {
-	ENG
+	
+	ENGLISH
 	(
-	value -> switch(value)
+	value -> {switch(value)
 	{
-	case EPSILON-> "epsilon";
-	case DELTA_TIME -> ";";
-	case E -> "d";
-	case FIXED_DELTA_TIME -> "e";
-	case PI -> "f";
-	case TIME_SCALE -> "throw new UnsupportedOperationException";
-	case TIME_SINCE_START -> "timeSinceStart";
-	},
-	component -> switch(component)
+		case EPSILON: return "epsilon";
+		case DELTA_TIME: return ";";
+		case E: return "d";
+		case FIXED_DELTA_TIME: return "e";
+		case PI: return "f";
+		case TIME_SCALE: return "throw new UnsupportedOperationException";
+		case TIME_SINCE_START: return "timeSinceStart";
+	} return "";},
+	component -> {switch(component)
 	{
-	case POSITION -> "position";
-	case ROTATION -> "rotation";
-	case SCALE -> "scale";
-	case PARENT -> "parent";
+		case POSITION: return "position";
+		case ROTATION: return "rotation";
+		case SCALE: return "scale";
+		case PARENT: return "parent";
+		
+		case MASS: return "mass";
+		case INERTIA: return "inertia";
+		
+		case VELOCITY: return "velocity";
+		case ANGULAR_VELOCITY: return "angularVelocity";
+		case RESTITUTION: return "restitution";
+		case FRICTION: return "friction";
+		case KINEMATIC: return "kinematic";
+		
+		case NO_COLLISION_RESPONSE: return "crossable";
+		case RADIUS: return "radius";
+		case EXTENTS: return "extents";
+		case BOX_CENTER: return "boxCenter";
+		case SPHERE_CENTER: return "sphereCenter";
+		
+		case MESH: return "mesh";
+		case MATERIAL: return "material";
+		case SHADOW_RECEIVER: return "shadowReceiver";
+		
+		case NEAR: return "near";
+		case FAR: return "far";
+		case FOV: return "fieldOfView";
+		case ORTHOGRAPHIC_SIZE: return "orthographicSize";
+		case BACKGROUND: return "background";
+		case CULLING: return "culling";
+		case VIEWPORT: return "viewport";
+		case RENDER_TEXTURE: return "renderTexture";
+		case DISPLAY: return "display";
+		
+		case EMISSION: return "emission";
+		case SPOT_ANGLE: return "spotAngle";
+		case RANGE: return "range";
+		case INTENSITY: return "intensity";
+		case INDIRECT_MULTIPLIER: return "bounceIntensity";
+		case COOKIE: return "cookie";
+		
+		case TEXT: return "text";
+		case FONT: return "font";
+		case TEXT_COLOR: return "textColor";
+		case TEXT_MATERIAL: return "textMaterial";
+		
+		case IMAGE: return "image";
+		case IMAGE_COLOR: return "imageColor";
+		case IMAGE_MATERIAL: return "imageMaterial";
+		
+		case TOGGLED: return "toggled";
+		case SLIDER_VALUE: return "sliderValue";
+		case TEXTFIELD_VALUE: return "writtenText";
+		
+		case ANCHOR_MIN: return "anchorMin";
+		case ANCHOR_MAX: return "anchorMax";
+		
+		
+		case AUDIOCLIP: return "audioClip";
+		case VOLUME: return "volume";
+		case PITCH: return "pitch";
+		case LOOP: return "loop";
+	} return "";},
+	function -> {switch(function)
+	{
+	case ABS: return "abs";
+	case SIGN: return "sign";
+	case CEIL: return "ceil";
+	case FLOOR: return "floor";
+	case ROUND: return "round";
+	case INTEGERPART: return "integerPart";
+	case FRACTIONALPART: return "fractionalPart";
+	case INVERSE: return "inverse";
+	case RECIPROCAL: return "reciprocal";
+
+	case CLAMP: return "clamp";
+	case LERP: return "lerp";
+	case UNLERP: return "unlerp";
+	case PROPORTIONAL: return "proportional";
+	case SLERP: return "slerp";
 	
-	case MASS -> "mass";
-	case INERTIA -> "inertia";
+	case MIN: return "min";
+	case MAX: return "max";
 	
-	case VELOCITY -> "velocity";
-	case ANGULAR_VELOCITY -> "angularVelocity";
-	case RESTITUTION -> "restitution";
-	case FRICTION -> "friction";
-	case KINEMATIC -> "kinematic";
+	case DEGREES: return "degrees";
+	case RADIANS: return "radians";
 	
-	case NO_COLLISION_RESPONSE -> "crossable";
-	case RADIUS -> "radius";
-	case EXTENTS -> "extents";
-	case BOX_CENTER -> "boxCenter";
-	case SPHERE_CENTER -> "sphereCenter";
+	case STEP: return "step";
 	
-	case MESH -> "mesh";
-	case MATERIAL -> "material";
-	case SHADOW_RECEIVER -> "shadowReceiver";
+	case CROSS: return "cross";
+	case DOT: return "dot";
+	case NORM: return "norm";
+	case NORMALIZE: return "normalize";
+	case DISTANCE: return "distance";
+	case REFLECT: return "reflect";
+	case REFRACT: return "refract";
 	
-	case NEAR -> "near";
-	case FAR -> "far";
-	case FOV -> "fieldOfView";
-	case ORTHOGRAPHIC_SIZE -> "orthographicSize";
-	case BACKGROUND -> "background";
-	case CULLING -> "culling";
-	case VIEWPORT -> "viewport";
-	case RENDER_TEXTURE -> "renderTexture";
-	case DISPLAY -> "display";
+	case OR: return "||";
+	case AND: return "&&";
+	case NOT: return "!";
 	
-	case EMISSION -> "emission";
-	case SPOT_ANGLE -> "spotAngle";
-	case RANGE -> "range";
-	case INTENSITY -> "intensity";
-	case INDIRECT_MULTIPLIER -> "bounceIntensity";
-	case COOKIE -> "cookie";
+	case ADDITION: return "+";
+	case SUBTRACTION: return "-";
+	case MULTIPLICATION: return "*";
+	case DIVISION: return "/";
 	
-	case TEXT -> "text";
-	case FONT -> "font";
-	case TEXT_COLOR -> "textColor";
-	case TEXT_MATERIAL -> "textMaterial";
+	case EQUAL: return "==";
+	case INEQUAL: return "!=";
 	
-	case IMAGE -> "image";
-	case IMAGE_COLOR -> "imageColor";
-	case IMAGE_MATERIAL -> "imageMaterial";
+	case LOWER: return "<";
+	case LOWEROREQUAL: return "<=";
+	case GREATEROREQUAL: return ">=";
+	case GREATER: return ">";
 	
-	case TOGGLED -> "toggled";
-	case SLIDER_VALUE -> "sliderValue";
-	case TEXTFIELD_VALUE -> "writtenText";
+	case SIZE: return "#";
+	case IN: return "in";
+	case X: return "x";
+	case Y: return "y";
+	case Z: return "z";
+	case XYZ: return "xyz";
 	
-	case ANCHOR_MIN -> "anchorMin";
-	case ANCHOR_MAX -> "anchorMax";
+	case SIN: return "sin";
+	case COS: return "cos";
+	case TAN: return "tan";
+	case ASIN: return "asin";
+	case ACOS: return "acos";
+	case ATAN: return "atan";
+	case EXP: return "exp";
+	case LOG: return "log";
+	case POW: return "pow";
+	case SQRT: return "sqrt";
+	case RANDOM: return "random";
+	
+	case CREATE: return "create";
+	case DESTROY: return "destroy";
+	case ADD: return "add";
+	case REMOVE: return "remove";
+	case HAS: return "has";
+	
+	case WRITE: return "write";
+	case WRITEERROR: return "writeError";
+	case WRITE_WARNING: return "writeWarning";
+	case HALT: return "halt";
+	case BREAKPOINT: return "breakpoint";
+	case SCREENSHOT: return "screenshot";
 	
 	
-	case AUDIOCLIP -> "audioClip";
-	case VOLUME -> "volume";
-	case PITCH -> "pitch";
-	case LOOP -> "loop";
+	case SET_NUMBER: return "setNumber";
+	case SET_COLOR: return "setColor";
+	case SET_KEYWORD: return "setBool";
+	case SET_TEXTURE: return "setTexture";
+	case SET_INTEGER: return "setInteger";
+	case GET_NUMBER: return "getNumber";
+	case GET_COLOR: return "getColor";
+	case GET_KEYWORD: return "getBool";
+	case GET_TEXTURE: return "getTexture";
+	case GET_INTEGER: return "getInteger";
+	
+	case SET_TRIGGER: return "setTrigger";
+	case IN_STATE: return "inState";
+	case ACTIVATE_PARAMETER: return "enableParameter";
+	case DEACTIVATE_PARAMETER: return "disableParameter";
+	
+	case READ_TRIGGERED: return "readTriggered";
+	case READ_NUMBER: return "readNumber";
+	case READ_VECTOR: return "readVector";
+	
+	case TO_QUATERNION: return "quaternion";
+	case TO_NUMBER3: return "angles";
+	
+	case PLAY: return "play";
+	case PLAY_ONCE: return "playOnce";
+	case PAUSE: return "pause";
+	case UNPAUSE: return "unpause";
+	case STOP: return "stop";
+	
+	case OVER: return "over";
+	case TO_STRING: return "string";
+	case TO_NUMBER: return "number";
+	
+	case OVERLAPS: return "overlaps";
+	case SCREEN_OVERLAPS: return "screenOverlaps";
+	case ADD_FORCE: return "addForce";
+	case ADD_TORQUE: return "addTorque";
+	case CLOSEST_POINT: return "closestPoint";
+	
+	case IS_POSITIVE: return "isPositive";
+	case IS_NEGATIVE: return "isNegative";
+	case IS_ZERO: return "isZero";
+	
+	case WORLD_TO_VIEWPORT: return "worldToViewport";
+	case VIEWPORT_TO_WORLD: return "viewportToWorld";
+	
+	case ASSIGNMENT: return "=";
+	} return "";}
+	,
+	block -> {switch(block)
+	{
+	case SELECTION: return "if";
+	case ITERATION: return "while";
+	case QUERY: return "foreach";
+	} return "";},
+	type -> {switch(type)
+	{
+	case STRING: return "string";
+	case PROPOSITION: return "proposition";
+	case NUMBER: return "number";
+	case NUMBER2: return "number2";
+	case NUMBER3: return "number3";
+	case UNIT: return "unit";
+	
+	case COMPONENT: return "component";
+	
+	case COLOR: return "color";
+	
+	case INPUT: return "input";
+	case MESH: return "mesh";
+	case MATERIAL: return "material";
+	case FONT: return "font";
+	case TEXT: return "text";
+	case IMAGE: return "image";
+	case AUDIOCLIP: return "audioClip";
+	case ANIMATOR: return "animator";
+	
+	case ENTITY: return "entity";
+	case ENTITY_LIST: return "entityList";
+	case QUATERNION: return "quaternion";
+	case TEXTURE: return "texture";
+	case COLLIDER: return "collider";
+	case RECT: return "rectangle";
+	} return "";},
+	problem ->
+	{
+		if (problem == IncompatibleTypes.class)
+		{
+			return "Incompatible types";
+		}
+		else if (problem == UndecidableType.class)
+		{
+			return "Undecidable type";
+		}
+		else if (problem == RedefinedSymbol.class)
+		{
+			return "Redefined symbol";
+		}
+		else if (problem == UndefinedSymbol.class)
+		{
+			return "Undefined symbol";
+		}
+		else if (problem == ReadOnly.class)
+		{
+			return "Read only value";
+		}
+		else if (problem == UnusedValue.class)
+		{
+			return "Unused value";
+		}
+		else
+		{
+			return "Undefined name for problem";
+		}
 	}
 	),
-	ENGLISH(
-	new Object[][]
-	{
-		{"epsilon", EPSILON},
-		{"pi", PI},
-		{"e", E},
-		{"deltaTime", DELTA_TIME},
-		{"fixedDeltaTime", FIXED_DELTA_TIME},
-		{"timeSinceStart", TIME_SINCE_START},
-		{"timeScale", TIME_SCALE}
-	}
-	,new Object[][]
-	{
-		{"position", POSITION},
-		{"rotation", ROTATION},
-		{"scale", SCALE},
-		{"parent", PARENT},
-		
-		{"mass", MASS},
-		{"inertia", INERTIA},
-		
-		{"velocity", VELOCITY},
-		{"angularVelocity", ANGULAR_VELOCITY},
-		{"restitution", RESTITUTION},
-		{"friction", FRICTION},
-		{"kinematic", KINEMATIC},
-		
-		{"crossable", NO_COLLISION_RESPONSE},
-		{"radius", RADIUS},
-		{"extents", EXTENTS},
-		{"boxCenter", BOX_CENTER},
-		{"sphereCenter", SPHERE_CENTER},
-		
-		{"mesh", Component.MESH},
-		{"material", Component.MATERIAL},
-		{"shadowReceiver", SHADOW_RECEIVER},
-		
-		{"near", NEAR},
-		{"far", FAR},
-		{"fieldOfView", FOV},
-		{"orthographicSize", ORTHOGRAPHIC_SIZE},
-		{"background", BACKGROUND},
-		{"culling", CULLING},
-		{"viewport", VIEWPORT},
-		{"renderTexture", RENDER_TEXTURE},
-		{"display", DISPLAY},
-		
-		{"emission", EMISSION},
-		{"spotAngle", SPOT_ANGLE},
-		{"range", RANGE},
-		{"intensity", INTENSITY},
-		{"bounceIntensity", INDIRECT_MULTIPLIER},
-		{"cookie", COOKIE},
-		
-		{"text", Component.TEXT},
-		{"font", Component.FONT},
-		{"textColor", TEXT_COLOR},
-		{"textMaterial", TEXT_MATERIAL},
-		
-		{"image", Component.IMAGE},
-		{"imageColor", IMAGE_COLOR},
-		{"imageMaterial", IMAGE_MATERIAL},
-		
-		{"toggled", TOGGLED},
-		{"sliderValue", SLIDER_VALUE},
-		{"writtenText", TEXTFIELD_VALUE},
-		
-		{"anchorMin", ANCHOR_MIN},
-		{"anchorMax", ANCHOR_MAX},
-		
-		
-		{"audioClip", Component.AUDIOCLIP},
-		{"volume", VOLUME},
-		{"pitch", PITCH},
-		{"loop", LOOP},
-	},
-	null
-	,null
-	,null
-	,null
-	)
-	/*
-	ENGLISH(
-			(Map<String,Value>)Stream.of(new Object[][] {{"a", PI},{"b",PI}}).collect(Collectors.toMap(data -> (String) data[0], data ->(Value) data[1])),
-	Map.ofEntries(
-		{"position", POSITION},
-		{"rotation", ROTATION},
-		{"scale", SCALE},
-		{"parent", PARENT},
-		
-		
-		{"mass", MASS},
-		{"inertia", INERTIA},
-		
-		{"velocity", VELOCITY},
-		{"angularVelocity", ANGULAR_VELOCITY},
-		{"restitution", RESTITUTION},
-		{"friction", FRICTION},
-		{"kinematic", KINEMATIC},
-		
-		{"crossable", NO_COLLISION_RESPONSE},
-		{"radius", RADIUS},
-		{"extents", EXTENTS},
-		{"boxCenter", BOX_CENTER},
-		{"sphereCenter", SPHERE_CENTER},
-		
-		{"mesh", Component.MESH},
-		{"material", Component.MATERIAL},
-		{"shadowReceiver", SHADOW_RECEIVER},
-		
-		{"near", NEAR},
-		{"far", FAR},
-		{"fieldOfView", FOV},
-		{"orthographicSize", ORTHOGRAPHIC_SIZE},
-		{"background", BACKGROUND},
-		{"culling", CULLING},
-		{"viewport", VIEWPORT},
-		{"renderTexture", RENDER_TEXTURE},
-		{"display", DISPLAY},
-		
-		{"emission", EMISSION},
-		{"spotAngle", SPOT_ANGLE},
-		{"range", RANGE},
-		{"intensity", INTENSITY},
-		{"bounceIntensity", INDIRECT_MULTIPLIER},
-		{"cookie", COOKIE},
-		
-		{"text", Component.TEXT},
-		{"font", Component.FONT},
-		{"textColor", TEXT_COLOR},
-		{"textMaterial", TEXT_MATERIAL},
-		
-		{"image", Component.IMAGE},
-		{"imageColor", IMAGE_COLOR},
-		{"imageMaterial", IMAGE_MATERIAL},
-		
-		{"toggled", TOGGLED},
-		{"sliderValue", SLIDER_VALUE},
-		{"writtenText", TEXTFIELD_VALUE},
-		
-		{"anchorMin", ANCHOR_MIN},
-		{"anchorMax", ANCHOR_MAX},
-		
-		
-		{"audioClip", Component.AUDIOCLIP},
-		{"volume", VOLUME},
-		{"pitch", PITCH},
-		{"loop", LOOP},
-		),
-	Map.ofEntries(
-		{"abs", ABS},
-		{"sign", SIGN},
-		{"ceil", CEIL},
-		{"floor", FLOOR},
-		{"round", ROUND},
-		{"integerPart", INTEGERPART},
-		{"fractionalPart", FRACTIONALPART},
-		{"inverse", INVERSE},
-		{"reciprocal", RECIPROCAL},
-
-		{"clamp", CLAMP},
-		{"lerp", LERP},
-		{"unlerp", UNLERP},
-		{"proportional", PROPORTIONAL},
-		{"slerp", SLERP},
-		
-		{"min", MIN},
-		{"max", MAX},
-		
-		{"degrees", DEGREES},
-		{"radians", RADIANS},
-		
-		{"step", STEP},
-		
-		{"cross", CROSS},
-		{"dot", DOT},
-		{"norm", NORM},
-		{"normalize", NORMALIZE},
-		{"distance", DISTANCE},
-		{"reflect", REFLECT},
-		{"refract", REFRACT},
-		
-		{"||", OR},
-		{"&&", AND},
-		{"!", NOT},
-		
-		{"+", ADDITION},
-		{"-", SUBTRACTION},
-		{"*", MULTIPLICATION},
-		{"/", DIVISION},
-		
-		{"==", EQUAL},
-		{"!=", INEQUAL},
-		
-		{"<", LOWER},
-		{"<=", LOWEROREQUAL},
-		{">=", GREATEROREQUAL},
-		{">", GREATER},
-		
-		{"#", SIZE},
-		{"in", IN},
-		{"x", X},
-		{"y", Y},
-		{"z", Z},
-		{"xyz", XYZ},
-		
-		{"sin", SIN},
-		{"cos", COS},
-		{"tan", TAN},
-		{"asin", ASIN},
-		{"acos", ACOS},
-		{"atan", ATAN},
-		{"exp", EXP},
-		{"log", LOG},
-		{"pow", POW},
-		{"sqrt", SQRT},
-		{"random", RANDOM},
-		
-		{"create", CREATE},
-		{"destroy", DESTROY},
-		{"add", ADD},
-		{"remove", REMOVE},
-		{"has", HAS},
-		
-		{"write", WRITE},
-		{"writeError", WRITEERROR},
-		{"writeWarning", WRITE_WARNING},
-		{"halt", HALT},
-		{"breakpoint", BREAKPOINT},
-		{"screenshot", SCREENSHOT},
-		
-		
-		{"setNumber", SET_NUMBER},
-		{"setColor", SET_COLOR},
-		{"setBool", SET_KEYWORD},
-		{"setTexture", SET_TEXTURE},
-		{"setInteger", SET_INTEGER},
-		{"getNumber", GET_NUMBER},
-		{"getColor", GET_COLOR},
-		{"getBool", GET_KEYWORD},
-		{"getTexture", GET_TEXTURE},
-		{"getInteger", GET_INTEGER},
-		
-		{"setTrigger", SET_TRIGGER},
-		{"inState", IN_STATE},
-		{"enableParameter", ACTIVATE_PARAMETER},
-		{"disableParameter", DEACTIVATE_PARAMETER},
-		
-		{"readTriggered", READ_TRIGGERED},
-		{"readNumber", READ_NUMBER},
-		{"readVector", READ_VECTOR},
-		
-		{"quaternion", TO_QUATERNION},
-		{"angles", TO_NUMBER3},
-		
-		{"play", PLAY},
-		{"playOnce", PLAY_ONCE},
-		{"pause", PAUSE},
-		{"unpause", UNPAUSE},
-		{"stop", STOP},
-		
-		{"over", OVER},
-		{"string", TO_STRING},
-		{"number", TO_NUMBER},
-		
-		{"overlaps", OVERLAPS},
-		{"screenOverlaps", SCREEN_OVERLAPS},
-		{"addForce", ADD_FORCE},
-		{"addTorque", ADD_TORQUE},
-		{"closestPoint", CLOSEST_POINT},
-		
-		{"isPositive", IS_POSITIVE},
-		{"isNegative", IS_NEGATIVE},
-		{"isZero", IS_ZERO},
-		
-		{"worldToViewport", WORLD_TO_VIEWPORT},
-		{"viewportToWorld", VIEWPORT_TO_WORLD},
-		
-		{"=", ASSIGNMENT)},
-	Map.ofEntries(
-		{"foreach", QUERY},
-		{"if", SELECTION},
-		{"while", ITERATION},
-	), Map.ofEntries(
-		{STRING, "string"},
-		{PROPOSITION, "proposition"},
-		{NUMBER, "number"},
-		{NUMBER2, "number2"},
-		{NUMBER3, "number3"},
-		{UNIT, "unit"},
-		
-		{COMPONENT, "component"},
-		
-		{COLOR, "color"},
-		
-		{INPUT, "input"},
-		{AtomicType.MESH, "mesh"},
-		{AtomicType.MATERIAL, "material"},
-		{AtomicType.FONT, "font"},
-		{AtomicType.TEXT, "text"},
-		{AtomicType.IMAGE, "image"},
-		{AtomicType.AUDIOCLIP, "audioClip"},
-		{AtomicType.ANIMATOR, "animator"},
-		
-		{ENTITY, "entity"},
-		{ENTITY_LIST, "entityList"},
-		{QUATERNION, "quaternion"},
-		{TEXTURE, "texture"},
-	), Map.of(
-		RedefinedSymbol.class, "Redefined symbol",
-		UndefinedSymbol.class, "Undefined symbol",
-		IncompatibleTypes.class, "Incompatible types",
-		UndecidableType.class, "Undecidable type",
-		UnusedValue.class, "Unused value",
-		ReadOnly.class, "Cannot assign new value to read only constant"
-	)),
 	EUSKARA(
-			Map.ofEntries(
-				{"epsilon", EPSILON},
-				{"pi", PI},
-				{"e", E},
-				{"deltaDenbora", DELTA_TIME},
-				{"deltaDenboraZehaztua", FIXED_DELTA_TIME},
-				{"denbora", TIME_SINCE_START},
-				{"denboraEskala", TIME_SCALE},
-			),
-			Map.ofEntries(
-				{"kokapena", POSITION},
-				{"biraketa", ROTATION},
-				{"eskala", SCALE},
-				{"gurasoa", PARENT},
-				
-				
-				{"masa", MASS},
-				{"inertzia", INERTIA},
-				{"abiadura", VELOCITY},
-				{"abiaduraAngeluarra", ANGULAR_VELOCITY},
-				{"restituzioa", RESTITUTION},
-				{"marruskadura", FRICTION},
-				{"kinematikoa", KINEMATIC},
-				
-				{"gurutzagarria", NO_COLLISION_RESPONSE},
-				{"erradioa", RADIUS},
-				{"dimentsioak", EXTENTS},
-				{"kaixaZentrua", BOX_CENTER},
-				{"esferaZentrua", SPHERE_CENTER},
-				
-				
-				{"malla", Component.MESH},
-				{"materiala", Component.MATERIAL},
-				{"itzalJasotzailea", SHADOW_RECEIVER},
-				
-				{"gertu", NEAR},
-				{"urruti", FAR},
-				{"ikusmenAngelua", FOV},
-				{"ikusmenTamaina", ORTHOGRAPHIC_SIZE},
-				{"irudikatu", CULLING},
-				{"atzealdea", BACKGROUND},
-				{"viewport", VIEWPORT},
-				{"renderizazioEhundura", RENDER_TEXTURE},
-				{"pantaila", DISPLAY},
-				
-				{"emisioa", EMISSION},
-				{"fokoAngelua", SPOT_ANGLE},
-				{"irismena", RANGE},
-				{"intentsitatea", INTENSITY},
-				{"erreboteIntentsitatea", INDIRECT_MULTIPLIER},
-				{"gaileta", COOKIE},
-				
-				{"testua", Component.TEXT},
-				{"letraEstiloa", Component.FONT},
-				{"letraKolorea", TEXT_COLOR},
-				{"letraMateriala", TEXT_MATERIAL},
-				
-				{"irudia", Component.IMAGE},
-				{"irudiKolorea", IMAGE_COLOR},
-				{"irudiMateriala", IMAGE_MATERIAL},
-				
-				{"sakatuta", TOGGLED},
-				{"slideBalioa", SLIDER_VALUE},
-				{"idatzitakoTestua", TEXTFIELD_VALUE},
-				
-				{"euskarriaMin", ANCHOR_MIN},
-				{"euskarriaMax", ANCHOR_MAX},
-				
-				
-				{"audioKlipa", Component.AUDIOCLIP},
-				{"bolumena", VOLUME},
-				{"tonua", PITCH},
-				{"errepikapena", LOOP)},
-			Map.ofEntries(
-				{"abs", ABS},
-				{"sign", SIGN},
-				{"ceil", CEIL},
-				{"floor", FLOOR},
-				{"round", ROUND},
-				{"integerPart", INTEGERPART},
-				{"fractionalPart", FRACTIONALPART},
-				{"inverse", INVERSE},
-				{"reciprocal", RECIPROCAL},
-				
-				{"clamp", CLAMP},
-				{"lerp", LERP},
-				{"unlerp", UNLERP},
-				{"proportional", PROPORTIONAL},
-				{"slerp", SLERP},
-				
-				{"min", MIN},
-				{"max", MAX},
-				
-				{"graduak", DEGREES},
-				{"radianak", RADIANS},
-				
-				{"step", STEP},
-				
-				{"cross", CROSS},
-				{"dot", DOT},
-				{"norm", NORM},
-				{"normalize", NORMALIZE},
-				{"distance", DISTANCE},
-				{"reflect", REFLECT},
-				{"refract", REFRACT},
-				
-				{"||", OR},
-				{"&&", AND},
-				{"!", NOT},
-				
-				{"+", ADDITION},
-				{"-", SUBTRACTION},
-				{"*", MULTIPLICATION},
-				{"/", DIVISION},
-				
-				{"==", EQUAL},
-				{"!=", INEQUAL},
-				
-				{"<", LOWER},
-				{"<=", LOWEROREQUAL},
-				{">=", GREATEROREQUAL},
-				{">", GREATER},
-				
-				{"#", SIZE},
-				{"barne", IN},
-				{"x", X},
-				{"y", Y},
-				{"z", Z},
-				{"xyz", XYZ},
-				
-				{"sin", SIN},
-				{"cos", COS},
-				{"tan", TAN},
-				{"asin", ASIN},
-				{"acos", ACOS},
-				{"atan", ATAN},
-				{"exp", EXP},
-				{"log", LOG},
-				{"pow", POW},
-				{"sqrt", SQRT},
-				{"ausazko", RANDOM},
-				
-				{"sortu", CREATE},
-				{"desegin", DESTROY},
-				{"gehitu", ADD},
-				{"kendu", REMOVE},
-				{"badu", HAS},
-				
-				{"idatzi", WRITE},
-				{"idatziAkatsa", WRITEERROR},
-				{"idatziAholkua", WRITE_WARNING},
-				{"amaitu", HALT},
-				{"gelditu", BREAKPOINT},
-				{"argazkiaAtera", SCREENSHOT},
-				
-				
-				{"ezarriZenbakia", SET_NUMBER},
-				{"ezarriKolorea", SET_COLOR},
-				{"ezarriOsoa", SET_INTEGER},
-				{"ezarriTexture", SET_TEXTURE},
-				{"ezarriProposizioa", SET_KEYWORD},
-				{"hartuZenbakia", GET_NUMBER},
-				{"hartuKolorea", GET_COLOR},
-				{"hartuOsoa", GET_INTEGER},
-				{"hartuTexture", GET_TEXTURE},
-				{"hartuProposizioa", GET_KEYWORD},
-				
-				{"ezarriKakoa", SET_TRIGGER},
-				{"egoera", IN_STATE},
-				{"jarriParametroa", ACTIVATE_PARAMETER},
-				{"kenduParametroa", DEACTIVATE_PARAMETER},
-				
-				{"irakurriKakoa", READ_TRIGGERED},
-				{"irakurriZenbakia", READ_NUMBER},
-				{"irakurriBektorea", READ_VECTOR},
-				
-				{"kuaternioia", TO_QUATERNION},
-				{"angeluak", TO_NUMBER3},
-				
-				{"hasi", PLAY},
-				{"playOnce", PLAY_ONCE},
-				{"pause", PAUSE},
-				{"unpause", UNPAUSE},
-				{"stop", STOP},
-				
-				{"saguaGainean", OVER},
-				{"zenbakia", TO_NUMBER},
-				{"katea", TO_STRING},
-				
-				{"gainean", OVERLAPS},
-				{"pantailaGainean", SCREEN_OVERLAPS},
-				{"gehituIndarra", ADD_FORCE},
-				{"gehituIndarAngeluarra", ADD_TORQUE},
-				{"puntuGertukoena", CLOSEST_POINT},
-				
-				{"positiboa", IS_POSITIVE},
-				{"negatiboa", IS_NEGATIVE},
-				{"zero", IS_ZERO},
-				
-				{"mundutikPantailara", WORLD_TO_VIEWPORT},
-				{"pantailatikMundura", VIEWPORT_TO_WORLD},
-				
-				{"=", ASSIGNMENT)},
-			Map.ofEntries(
-				{"hartu", QUERY},
-				{"baldin", SELECTION},
-				{"bitartean", ITERATION},
-			), Map.ofEntries(
-					{STRING, "katea"},
-					{PROPOSITION, "proposizioa"},
-					{NUMBER, "zenbakia"},
-					{NUMBER2, "zenbakia2"},
-					{NUMBER3, "zenbakia3"},
-					{UNIT, "hutsa"},
-					
-					{COMPONENT, "komponentea"},
-					
-					{COLOR, "kolorea"},
-					
-					{INPUT, "inputa"},
-					{AtomicType.MESH, "malla"},
-					{AtomicType.MATERIAL, "materiala"},
-					{AtomicType.FONT, "letraEstiloa"},
-					{AtomicType.TEXT, "testua"},
-					{AtomicType.IMAGE, "irudia"},
-					{AtomicType.AUDIOCLIP, "audioKlipa"},
-					{AtomicType.ANIMATOR, "animatzailea"},
-					
-					{ENTITY, "entitatea"},
-					{ENTITY_LIST, "entitateLista"},
-					{QUATERNION, "kuaternioia"},
-					{TEXTURE, "textura"},
-			), Map.of(
-				RedefinedSymbol.class, "Simbolo hau dagoeneko definitua dago",
-				UndefinedSymbol.class, "Simbolo honek ez du definiziorik",
-				IncompatibleTypes.class, "Izaera bateraezinak",
-				UndecidableType.class, "Izaera ezarriezina",
-				UnusedValue.class, "Erabilerarik gabeko balioa",
-				ReadOnly.class, "Ezin konstante baten balioa berrezarri"
-			))*/
-	;
-
-	BiMap<String, Value> variables;
-	BiMap<String, Component> components;
-	BiMap<String, Function> functions;
-	BiMap<String, Block> blocks;
-	
-	BiMap<String, Type> atomicTypes;
-	BiMap<String, Class<? extends Problem>> problems;
-	
-	Library(Object[][] variables, Object[][] components, Object[][] functions, Object[][] blocks, Object[][] atomicTypes, Object[][] problems)
+	value -> {switch(value)
 	{
-		this.variables = HashBiMap.create(Stream.of(variables).collect(Collectors.toMap(x->(String)x[0], x->(Value)x[1])));
-		this.components = HashBiMap.create(Stream.of(components).collect(Collectors.toMap(x->(String)x[0], x->(Component)x[1])));
-		this.functions = HashBiMap.create(Stream.of(functions).collect(Collectors.toMap(x->(String)x[0], x->(Function)x[1])));
-		this.blocks = HashBiMap.create(Stream.of(blocks).collect(Collectors.toMap(x->(String)x[0], x->(Block)x[1])));
-		this.atomicTypes = HashBiMap.create(Stream.of(atomicTypes).collect(Collectors.toMap(x->(String)x[0], x->(AtomicType)x[1])));
-		this.problems = HashBiMap.create(Stream.of(problems).collect(Collectors.toMap(x->(String)x[0], x->(Class<? extends Problem>)x[1])));
+	case EPSILON: return "epsilon";
+	case PI: return "pi";
+	case E: return "e";
+	case DELTA_TIME: return "deltaDenbora";
+	case FIXED_DELTA_TIME: return "deltaDenboraZehaztua";
+	case TIME_SINCE_START: return "denbora";
+	case TIME_SCALE: return "denboraEskala";
+	} return "";},
+	component -> {switch(component)
+	{
+	case POSITION: return "kokapena";
+	case ROTATION: return "biraketa";
+	case SCALE: return "eskala";
+	case PARENT: return "gurasoa";
+	
+	
+	case MASS: return "masa";
+	case INERTIA: return "inertzia";
+	case VELOCITY: return "abiadura";
+	case ANGULAR_VELOCITY: return "abiaduraAngeluarra";
+	case RESTITUTION: return "restituzioa";
+	case FRICTION: return "marruskadura";
+	case KINEMATIC: return "kinematikoa";
+	
+	case NO_COLLISION_RESPONSE: return "gurutzagarria";
+	case RADIUS: return "erradioa";
+	case EXTENTS: return "dimentsioak";
+	case BOX_CENTER: return "kaixaZentrua";
+	case SPHERE_CENTER: return "esferaZentrua";
+	
+	
+	case MESH: return "malla";
+	case MATERIAL: return "materiala";
+	case SHADOW_RECEIVER: return "itzalJasotzailea";
+	
+	case NEAR: return "gertu";
+	case FAR: return "urruti";
+	case FOV: return "ikusmenAngelua";
+	case ORTHOGRAPHIC_SIZE: return "ikusmenTamaina";
+	case CULLING: return "irudikatu";
+	case BACKGROUND: return "atzealdea";
+	case VIEWPORT: return "viewport";
+	case RENDER_TEXTURE: return "renderizazioEhundura";
+	case DISPLAY: return "pantaila";
+	
+	case EMISSION: return "emisioa";
+	case SPOT_ANGLE: return "fokoAngelua";
+	case RANGE: return "irismena";
+	case INTENSITY: return "intentsitatea";
+	case INDIRECT_MULTIPLIER: return "erreboteIntentsitatea";
+	case COOKIE: return "gaileta";
+	
+	case TEXT: return "testua";
+	case FONT: return "letraEstiloa";
+	case TEXT_COLOR: return "letraKolorea";
+	case TEXT_MATERIAL: return "letraMateriala";
+	
+	case IMAGE: return "irudia";
+	case IMAGE_COLOR: return "irudiKolorea";
+	case IMAGE_MATERIAL: return "irudiMateriala";
+	
+	case TOGGLED: return "sakatuta";
+	case SLIDER_VALUE: return "slideBalioa";
+	case TEXTFIELD_VALUE: return "idatzitakoTestua";
+	
+	case ANCHOR_MIN: return "euskarriaMin";
+	case ANCHOR_MAX: return "euskarriaMax";
+	
+	
+	case AUDIOCLIP: return "audioKlipa";
+	case VOLUME: return "bolumena";
+	case PITCH: return "tonua";
+	case LOOP: return "errepikapena";
+	} return "";},
+	function -> {switch(function)
+	{
+	case ABS: return "abs";
+	case SIGN: return "sign";
+	case CEIL: return "ceil";
+	case FLOOR: return "floor";
+	case ROUND: return "round";
+	case INTEGERPART: return "integerPart";
+	case FRACTIONALPART: return "fractionalPart";
+	case INVERSE: return "inverse";
+	case RECIPROCAL: return "reciprocal";
+	
+	case CLAMP: return "clamp";
+	case LERP: return "lerp";
+	case UNLERP: return "unlerp";
+	case PROPORTIONAL: return "proportional";
+	case SLERP: return "slerp";
+	
+	case MIN: return "min";
+	case MAX: return "max";
+	
+	case DEGREES: return "graduak";
+	case RADIANS: return "radianak";
+	
+	case STEP: return "step";
+	
+	case CROSS: return "cross";
+	case DOT: return "dot";
+	case NORM: return "norm";
+	case NORMALIZE: return "normalize";
+	case DISTANCE: return "distance";
+	case REFLECT: return "reflect";
+	case REFRACT: return "refract";
+	
+	case OR: return "||";
+	case AND: return "&&";
+	case NOT: return "!";
+	
+	case ADDITION: return "+";
+	case SUBTRACTION: return "-";
+	case MULTIPLICATION: return "*";
+	case DIVISION: return "/";
+	
+	case EQUAL: return "==";
+	case INEQUAL: return "!=";
+	
+	case LOWER: return "<";
+	case LOWEROREQUAL: return "<=";
+	case GREATEROREQUAL: return ">=";
+	case GREATER: return ">";
+	
+	case SIZE: return "#";
+	case IN: return "barne";
+	case X: return "x";
+	case Y: return "y";
+	case Z: return "z";
+	case XYZ: return "xyz";
+	
+	case SIN: return "sin";
+	case COS: return "cos";
+	case TAN: return "tan";
+	case ASIN: return "asin";
+	case ACOS: return "acos";
+	case ATAN: return "atan";
+	case EXP: return "exp";
+	case LOG: return "log";
+	case POW: return "pow";
+	case SQRT: return "sqrt";
+	case RANDOM: return "ausazko";
+	
+	case CREATE: return "sortu";
+	case DESTROY: return "desegin";
+	case ADD: return "gehitu";
+	case REMOVE: return "kendu";
+	case HAS: return "badu";
+	
+	case WRITE: return "idatzi";
+	case WRITEERROR: return "idatziAkatsa";
+	case WRITE_WARNING: return "idatziAholkua";
+	case HALT: return "amaitu";
+	case BREAKPOINT: return "gelditu";
+	case SCREENSHOT: return "argazkiaAtera";
+	
+	
+	case SET_NUMBER: return "ezarriZenbakia";
+	case SET_COLOR: return "ezarriKolorea";
+	case SET_INTEGER: return "ezarriOsoa";
+	case SET_TEXTURE: return "ezarriTexture";
+	case SET_KEYWORD: return "ezarriProposizioa";
+	case GET_NUMBER: return "hartuZenbakia";
+	case GET_COLOR: return "hartuKolorea";
+	case GET_INTEGER: return "hartuOsoa";
+	case GET_TEXTURE: return "hartuTexture";
+	case GET_KEYWORD: return "hartuProposizioa";
+	
+	case SET_TRIGGER: return "ezarriKakoa";
+	case IN_STATE: return "egoera";
+	case ACTIVATE_PARAMETER: return "jarriParametroa";
+	case DEACTIVATE_PARAMETER: return "kenduParametroa";
+	
+	case READ_TRIGGERED: return "irakurriKakoa";
+	case READ_NUMBER: return "irakurriZenbakia";
+	case READ_VECTOR: return "irakurriBektorea";
+	
+	case TO_QUATERNION: return "kuaternioia";
+	case TO_NUMBER3: return "angeluak";
+	
+	case PLAY: return "hasi";
+	case PLAY_ONCE: return "playOnce";
+	case PAUSE: return "pause";
+	case UNPAUSE: return "unpause";
+	case STOP: return "stop";
+	
+	case OVER: return "saguaGainean";
+	case TO_NUMBER: return "zenbakia";
+	case TO_STRING: return "katea";
+	
+	case OVERLAPS: return "gainean";
+	case SCREEN_OVERLAPS: return "pantailaGainean";
+	case ADD_FORCE: return "gehituIndarra";
+	case ADD_TORQUE: return "gehituIndarAngeluarra";
+	case CLOSEST_POINT: return "puntuGertukoena";
+	
+	case IS_POSITIVE: return "positiboa";
+	case IS_NEGATIVE: return "negatiboa";
+	case IS_ZERO: return "zero";
+	
+	case WORLD_TO_VIEWPORT: return "mundutikPantailara";
+	case VIEWPORT_TO_WORLD: return "pantailatikMundura";
+	
+	case ASSIGNMENT: return "=";
+	} return "";},
+	block -> {switch(block)
+	{
+	case QUERY: return "hartu";
+	case SELECTION: return "baldin";
+	case ITERATION: return "bitartean";
+	} return "";},
+	type -> {switch(type)
+	{
+	case STRING: return "katea";
+	case PROPOSITION: return "proposizioa";
+	case NUMBER: return "zenbakia";
+	case NUMBER2: return "zenbakia2";
+	case NUMBER3: return "zenbakia3";
+	case UNIT: return "hutsa";
+	
+	case COMPONENT: return "komponentea";
+	
+	case COLOR: return "kolorea";
+	
+	case INPUT: return "inputa";
+	case MESH: return "malla";
+	case MATERIAL: return "materiala";
+	case FONT: return "letraEstiloa";
+	case TEXT: return "testua";
+	case IMAGE: return "irudia";
+	case AUDIOCLIP: return "audioKlipa";
+	case ANIMATOR: return "animatzailea";
+	
+	case ENTITY: return "entitatea";
+	case ENTITY_LIST: return "entitateLista";
+	case QUATERNION: return "kuaternioia";
+	case TEXTURE: return "textura";
+	case COLLIDER: return "collider";
+	case RECT: return "rektangulua";
+	} return "";},
+	problem ->
+	{
+		if (problem == IncompatibleTypes.class)
+		{
+			return "Izaera bateraezinak";
+		}
+		else if (problem == UndecidableType.class)
+		{
+			return "Izaera ezarriezina";
+		}
+		else if (problem == RedefinedSymbol.class)
+		{
+			return "Simbolo hau dagoeneko definitua dago";
+		}
+		else if (problem == UndefinedSymbol.class)
+		{
+			return "Simbolo honek ez du definiziorik";
+		}
+		else if (problem == ReadOnly.class)
+		{
+			return "Ezin konstante baten balioa berrezarri";
+		}
+		else if (problem == UnusedValue.class)
+		{
+			return "Erabilerarik gabeko balioa";
+		}
+		else
+		{
+			return "Problema honen izena ezarri gabe dago";
+		}
+	}
+	);
+	
+	Map<Value, String> valueToName;
+	Map<Component, String> componentToName;
+	Map<Function, String> functionToName;
+	Map<Block, String> blockToName;
+	Map<AtomicType, String> typeToName;
+	Map<Class, String> problemToName;
+	
+	Map<String, Value> nameToValue;
+	Map<String, Component> nameToComponent;
+	Map<String, Function> nameToFunction;
+	Map<String, Block> nameToBlock;
+	Map<String, AtomicType> nameToType;
+	Map<String, Class> nameToProblem;
+	
+	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Class, String> problems)
+	{
+		valueToName = forward(values, Value.values());
+		nameToValue = reverse(values, Value.values());
+		
+		componentToName = forward(components, Component.values());
+		nameToComponent = reverse(components, Component.values());
+
+		functionToName = forward(functions, Function.values());
+		nameToFunction = reverse(functions, Function.values());
+
+		blockToName = forward(blocks, Block.values());
+		nameToBlock = reverse(blocks, Block.values());
+
+		typeToName = forward(atomicTypes, AtomicType.values());
+		nameToType = reverse(atomicTypes, AtomicType.values());
+		
+		var problemTypes = new Class[] {UndecidableType.class, IncompatibleTypes.class, UndefinedSymbol.class, RedefinedSymbol.class, ReadOnly.class, UnusedValue.class};
+		
+		problemToName = forward(problems, problemTypes);
+		nameToProblem = reverse(problems, problemTypes);
 	}
 	
-	Map<String, Value> valueInverse;
-	
-	Library(java.util.function.Function<Value, String> f, java.util.function.Function<Component, String> ff)
+	private <A,B> HashMap<A,B> forward(java.util.function.Function<A,B> f, A[] values)
 	{
-		valueInverse = new HashMap<>();
-		for (var v : Value.values())
+		var map = new HashMap<A,B>();
+		
+		for (var value : values)
 		{
-			var mapped = f.apply(v);
+			map.put(value, f.apply(value));
+		}
+		
+		return map;
+	}
+	
+	private <A,B> HashMap<B,A> reverse(java.util.function.Function<A,B> f, A[] values)
+	{
+		var map = new HashMap<B,A>();
+		
+		for (var value : values)
+		{
+			var mapped = f.apply(value);
 			
-			if (valueInverse.containsKey(mapped))
+			if (map.containsKey(mapped))
 			{
 				System.err.println("Value already present: "+mapped);
 			}
 			else
 			{
-				valueInverse.put(mapped, v);
+				map.put(mapped, value);
 			}
 		}
+		
+		return map;
 	}
 	public Value getValue(String name) {
-		return variables.get(name);
+		return nameToValue.get(name);
 	}
 	
 	public Component getComponent(String name) {
-		return components.get(name);
+		return nameToComponent.get(name);
 	}
 	
 	public Function getFunction(String name) {
-		return functions.get(name);
+		return nameToFunction.get(name);
 	}
 	
 	public Block getBlock(String name) {
-		return blocks.get(name);
+		return nameToBlock.get(name);
 	}
 	
 	public String getProblem(Class<? extends Problem> problem)
 	{
-		return problems.inverse().get(problem);
+		return problemToName.get(problem);
 	}
 	
 	public String name(Type type)
@@ -729,7 +673,7 @@ public enum Library
 		{
 			var atomicType = (AtomicType) type;
 			
-			return atomicTypes.inverse().get(atomicType);
+			return typeToName.get(atomicType);
 		}
 		else if (type instanceof TypeVariable)
 		{
