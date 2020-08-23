@@ -39,7 +39,7 @@ public class MGenerator extends AbstractGenerator
 		}
 	}
 	
-	public void generate(Game game, IFileSystemAccess2 fileSystem)
+	public void generate(Game game, IFileSystemAccess2 fileSystem, Engine engine)
 	{
 		if (game != null)
 		{
@@ -47,7 +47,12 @@ public class MGenerator extends AbstractGenerator
 			{
 				game.queries.put(function, collectQueries(function, game));
 			}
-			new ClassicUnity().generate(game, fileSystem);
+		}
+		switch (engine)
+		{
+		case Unity: new ClassicUnity().generate(game, fileSystem); break;
+		case Unreal: break;
+		case Godot: break;
 		}
 	}
 	
