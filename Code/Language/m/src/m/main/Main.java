@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ResourceSet;
@@ -85,6 +87,7 @@ import com.google.common.collect.HashBiMap;
 
 import m.MStandaloneSetup;
 import m.generator.ClassicUnity;
+import m.generator.Engine;
 import m.generator.MGenerator;
 import m.library.symbols.Component;
 import m.m.Assignment;
@@ -110,6 +113,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	{
 		var bimap = HashBiMap.create();
 		bimap.put(1, 1);
+		HashBiMap.create(Stream.of(new Object[][] {{1,1},{2,2}}).collect(Collectors.toMap(x -> (Integer) x[0], x -> (Integer) x[1])));
 		
 		var server = new Main();
 		var launcher = LSPLauncher.createServerLauncher(server, System.in, System.out);
@@ -405,13 +409,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			list.add(diagnostic);
 		}
 
-		fileSystem.setOutputPath(workspaces.get(0).toString());
-
-		var game = MValidator.game;
-		if (game != null)
-		{
-			generator.generate(game, fileSystem);
-		}
+		generateCode();
 		
 		
 		var info = new Diagnostic(new Range(new Position(0, 0), new Position(0,3)), "Thanks for using M", DiagnosticSeverity.Hint, "");
@@ -429,6 +427,49 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public void didSave(DidSaveTextDocumentParams params)
 	{
+	}
+	
+	
+	private void generateCode()
+	{
+		var game = MValidator.game;
+		if (game == null) return;
+		
+		var path = Paths.get(workspaces.get(0).toString(), "m.project");
+		if (Files.exists(path))
+		{
+			try
+			{
+				var configuration = Files.readAllLines(path);
+				for (var line : configuration)
+				{
+					if (line.startsWith("Unity: "))
+					{
+						var unity = line.substring("Unity: ".length());
+						fileSystem.setOutputPath(unity);
+
+						generator.generate(game, fileSystem, Engine.Unity);
+					}
+					else if (line.startsWith("Unreal: "))
+					{
+						var unreal = line.substring("Unreal: ".length());
+						fileSystem.setOutputPath(unreal);
+
+						generator.generate(game, fileSystem, Engine.Unreal);
+					}
+					else if (line.startsWith("Godot: "))
+					{
+						var godot = line.substring("Godot: ".length());
+						fileSystem.setOutputPath(godot);
+
+						generator.generate(game, fileSystem, Engine.Godot);
+					}
+				}
+			}
+			catch (IOException e)
+			{
+			}
+		}
 	}
 	
 	
