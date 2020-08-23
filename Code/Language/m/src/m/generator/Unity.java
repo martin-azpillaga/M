@@ -464,7 +464,6 @@ public class Unity
 			switch (found)
 			{
 				case VELOCITY: {namespaces.add("Unity.Physics"); return "PhysicsVelocity";}
-				case TIMEOUT: return "timeout";
 				case POSITION: {namespaces.add("Unity.Transforms"); return "Translation";}
 			}
 		}
@@ -483,7 +482,6 @@ public class Unity
 			switch (found)
 			{
 				case VELOCITY: {namespaces.add("Unity.Physics"); return "Linear";}
-				case TIMEOUT: return "Value";
 				case POSITION: return "Value";
 			}
 		}
