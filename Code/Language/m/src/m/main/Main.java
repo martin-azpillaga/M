@@ -2,28 +2,22 @@ package m.main;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.CompletionParams;
-import org.eclipse.lsp4j.DeleteFile;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
@@ -33,7 +27,6 @@ import org.eclipse.lsp4j.DidChangeWorkspaceFoldersParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
-import org.eclipse.lsp4j.ExecuteCommandOptions;
 import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.FileChangeType;
 import org.eclipse.lsp4j.Hover;
@@ -41,52 +34,41 @@ import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.MarkupContent;
-import org.eclipse.lsp4j.MessageActionItem;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.ParameterInformation;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.ResourceOperation;
-import org.eclipse.lsp4j.SemanticHighlightingInformation;
-import org.eclipse.lsp4j.SemanticHighlightingParams;
 import org.eclipse.lsp4j.ServerCapabilities;
-import org.eclipse.lsp4j.ShowMessageRequestParams;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SignatureHelpOptions;
 import org.eclipse.lsp4j.SignatureHelpParams;
 import org.eclipse.lsp4j.SignatureInformation;
 import org.eclipse.lsp4j.SymbolInformation;
-import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
-import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.WorkspaceSymbolParams;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.eclipse.lsp4j.jsonrpc.services.JsonRequest;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
-import org.eclipse.xtext.generator.IFileSystemAccess2;
+import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.generator.JavaIoFileSystemAccess;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
-import org.eclipse.xtext.parser.IEncodingProvider;
 import org.eclipse.xtext.parser.IParser;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
 
-import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
 import m.MStandaloneSetup;
-import m.generator.ClassicUnity;
 import m.generator.Engine;
 import m.generator.MGenerator;
 import m.library.symbols.Component;
@@ -111,10 +93,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	public static void main(String[] arguments) throws IOException
 	{
-		var bimap = HashBiMap.create();
-		bimap.put(1, 1);
-		HashBiMap.create(Stream.of(new Object[][] {{1,1},{2,2}}).collect(Collectors.toMap(x -> (Integer) x[0], x -> (Integer) x[1])));
-		
 		var server = new Main();
 		var launcher = LSPLauncher.createServerLauncher(server, System.in, System.out);
 		var client = launcher.getRemoteProxy();
@@ -171,8 +149,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		client.applyEdit(new ApplyWorkspaceEditParams(edit));
 		*/
 		
-		write(params.getCapabilities().getTextDocument().getSignatureHelp().toString());
-		
 		var commands = new ArrayList<String>();
 		commands.add("Go");
 		
@@ -180,9 +156,9 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		var capabilities = new ServerCapabilities();
 		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
 		
-		capabilities.setHoverProvider(true);
-		capabilities.setCompletionProvider(new CompletionOptions());
-		capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
+		//capabilities.setHoverProvider(true);
+		//capabilities.setCompletionProvider(new CompletionOptions());
+		//capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
 		
 		workspaces = new ArrayList<Path>();
 		files = new ArrayList<String>();
@@ -408,8 +384,21 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			var diagnostic = new Diagnostic(range, issue.getMessage(), severity, "");
 			list.add(diagnostic);
 		}
+		
+		var hasErrors = false;
+		
+		for (var issue : issues)
+		{
+			if (issue.getSeverity() == Severity.ERROR)
+			{
+				hasErrors = true;
+			}
+		}
 
-		generateCode();
+		if (!hasErrors)
+		{
+			generateCode();
+		}
 		
 		
 		var info = new Diagnostic(new Range(new Position(0, 0), new Position(0,3)), "Thanks for using M", DiagnosticSeverity.Hint, "");
@@ -427,6 +416,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public void didSave(DidSaveTextDocumentParams params)
 	{
+		
 	}
 	
 	
@@ -436,6 +426,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		if (game == null) return;
 		
 		var path = Paths.get(workspaces.get(0).toString(), "m.project");
+
 		if (Files.exists(path))
 		{
 			try
@@ -447,6 +438,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 					{
 						var unity = line.substring("Unity: ".length());
 						fileSystem.setOutputPath(unity);
+						
 
 						generator.generate(game, fileSystem, Engine.Unity);
 					}
