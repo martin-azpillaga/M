@@ -7,6 +7,7 @@ import static m.library.symbols.Block.*;
 import static m.library.types.AtomicType.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import m.library.symbols.Block;
@@ -21,13 +22,90 @@ import m.validation.problems.Problem;
 import m.validation.problems.errors.*;
 import m.validation.problems.warnings.*;
 import java.util.stream.*;
-
 import com.google.common.collect.BiMap;
 
 import com.google.common.collect.HashBiMap;
 
 public enum Library
 {
+	ENG
+	(
+	value -> switch(value)
+	{
+	case EPSILON-> "epsilon";
+	case DELTA_TIME -> ";";
+	case E -> "d";
+	case FIXED_DELTA_TIME -> "e";
+	case PI -> "f";
+	case TIME_SCALE -> "throw new UnsupportedOperationException";
+	case TIME_SINCE_START -> "timeSinceStart";
+	},
+	component -> switch(component)
+	{
+	case POSITION -> "position";
+	case ROTATION -> "rotation";
+	case SCALE -> "scale";
+	case PARENT -> "parent";
+	
+	case MASS -> "mass";
+	case INERTIA -> "inertia";
+	
+	case VELOCITY -> "velocity";
+	case ANGULAR_VELOCITY -> "angularVelocity";
+	case RESTITUTION -> "restitution";
+	case FRICTION -> "friction";
+	case KINEMATIC -> "kinematic";
+	
+	case NO_COLLISION_RESPONSE -> "crossable";
+	case RADIUS -> "radius";
+	case EXTENTS -> "extents";
+	case BOX_CENTER -> "boxCenter";
+	case SPHERE_CENTER -> "sphereCenter";
+	
+	case MESH -> "mesh";
+	case MATERIAL -> "material";
+	case SHADOW_RECEIVER -> "shadowReceiver";
+	
+	case NEAR -> "near";
+	case FAR -> "far";
+	case FOV -> "fieldOfView";
+	case ORTHOGRAPHIC_SIZE -> "orthographicSize";
+	case BACKGROUND -> "background";
+	case CULLING -> "culling";
+	case VIEWPORT -> "viewport";
+	case RENDER_TEXTURE -> "renderTexture";
+	case DISPLAY -> "display";
+	
+	case EMISSION -> "emission";
+	case SPOT_ANGLE -> "spotAngle";
+	case RANGE -> "range";
+	case INTENSITY -> "intensity";
+	case INDIRECT_MULTIPLIER -> "bounceIntensity";
+	case COOKIE -> "cookie";
+	
+	case TEXT -> "text";
+	case FONT -> "font";
+	case TEXT_COLOR -> "textColor";
+	case TEXT_MATERIAL -> "textMaterial";
+	
+	case IMAGE -> "image";
+	case IMAGE_COLOR -> "imageColor";
+	case IMAGE_MATERIAL -> "imageMaterial";
+	
+	case TOGGLED -> "toggled";
+	case SLIDER_VALUE -> "sliderValue";
+	case TEXTFIELD_VALUE -> "writtenText";
+	
+	case ANCHOR_MIN -> "anchorMin";
+	case ANCHOR_MAX -> "anchorMax";
+	
+	
+	case AUDIOCLIP -> "audioClip";
+	case VOLUME -> "volume";
+	case PITCH -> "pitch";
+	case LOOP -> "loop";
+	}
+	),
 	ENGLISH(
 	new Object[][]
 	{
@@ -41,68 +119,68 @@ public enum Library
 	}
 	,new Object[][]
 	{
-			{"position", POSITION},
-			{"rotation", ROTATION},
-			{"scale", SCALE},
-			{"parent", PARENT},
-			
-			{"mass", MASS},
-			{"inertia", INERTIA},
-			
-			{"velocity", VELOCITY},
-			{"angularVelocity", ANGULAR_VELOCITY},
-			{"restitution", RESTITUTION},
-			{"friction", FRICTION},
-			{"kinematic", KINEMATIC},
-			
-			{"crossable", NO_COLLISION_RESPONSE},
-			{"radius", RADIUS},
-			{"extents", EXTENTS},
-			{"boxCenter", BOX_CENTER},
-			{"sphereCenter", SPHERE_CENTER},
-			
-			{"mesh", Component.MESH},
-			{"material", Component.MATERIAL},
-			{"shadowReceiver", SHADOW_RECEIVER},
-			
-			{"near", NEAR},
-			{"far", FAR},
-			{"fieldOfView", FOV},
-			{"orthographicSize", ORTHOGRAPHIC_SIZE},
-			{"background", BACKGROUND},
-			{"culling", CULLING},
-			{"viewport", VIEWPORT},
-			{"renderTexture", RENDER_TEXTURE},
-			{"display", DISPLAY},
-			
-			{"emission", EMISSION},
-			{"spotAngle", SPOT_ANGLE},
-			{"range", RANGE},
-			{"intensity", INTENSITY},
-			{"bounceIntensity", INDIRECT_MULTIPLIER},
-			{"cookie", COOKIE},
-			
-			{"text", Component.TEXT},
-			{"font", Component.FONT},
-			{"textColor", TEXT_COLOR},
-			{"textMaterial", TEXT_MATERIAL},
-			
-			{"image", Component.IMAGE},
-			{"imageColor", IMAGE_COLOR},
-			{"imageMaterial", IMAGE_MATERIAL},
-			
-			{"toggled", TOGGLED},
-			{"sliderValue", SLIDER_VALUE},
-			{"writtenText", TEXTFIELD_VALUE},
-			
-			{"anchorMin", ANCHOR_MIN},
-			{"anchorMax", ANCHOR_MAX},
-			
-			
-			{"audioClip", Component.AUDIOCLIP},
-			{"volume", VOLUME},
-			{"pitch", PITCH},
-			{"loop", LOOP},
+		{"position", POSITION},
+		{"rotation", ROTATION},
+		{"scale", SCALE},
+		{"parent", PARENT},
+		
+		{"mass", MASS},
+		{"inertia", INERTIA},
+		
+		{"velocity", VELOCITY},
+		{"angularVelocity", ANGULAR_VELOCITY},
+		{"restitution", RESTITUTION},
+		{"friction", FRICTION},
+		{"kinematic", KINEMATIC},
+		
+		{"crossable", NO_COLLISION_RESPONSE},
+		{"radius", RADIUS},
+		{"extents", EXTENTS},
+		{"boxCenter", BOX_CENTER},
+		{"sphereCenter", SPHERE_CENTER},
+		
+		{"mesh", Component.MESH},
+		{"material", Component.MATERIAL},
+		{"shadowReceiver", SHADOW_RECEIVER},
+		
+		{"near", NEAR},
+		{"far", FAR},
+		{"fieldOfView", FOV},
+		{"orthographicSize", ORTHOGRAPHIC_SIZE},
+		{"background", BACKGROUND},
+		{"culling", CULLING},
+		{"viewport", VIEWPORT},
+		{"renderTexture", RENDER_TEXTURE},
+		{"display", DISPLAY},
+		
+		{"emission", EMISSION},
+		{"spotAngle", SPOT_ANGLE},
+		{"range", RANGE},
+		{"intensity", INTENSITY},
+		{"bounceIntensity", INDIRECT_MULTIPLIER},
+		{"cookie", COOKIE},
+		
+		{"text", Component.TEXT},
+		{"font", Component.FONT},
+		{"textColor", TEXT_COLOR},
+		{"textMaterial", TEXT_MATERIAL},
+		
+		{"image", Component.IMAGE},
+		{"imageColor", IMAGE_COLOR},
+		{"imageMaterial", IMAGE_MATERIAL},
+		
+		{"toggled", TOGGLED},
+		{"sliderValue", SLIDER_VALUE},
+		{"writtenText", TEXTFIELD_VALUE},
+		
+		{"anchorMin", ANCHOR_MIN},
+		{"anchorMax", ANCHOR_MAX},
+		
+		
+		{"audioClip", Component.AUDIOCLIP},
+		{"volume", VOLUME},
+		{"pitch", PITCH},
+		{"loop", LOOP},
 	},
 	null
 	,null
@@ -605,6 +683,25 @@ public enum Library
 		this.problems = HashBiMap.create(Stream.of(problems).collect(Collectors.toMap(x->(String)x[0], x->(Class<? extends Problem>)x[1])));
 	}
 	
+	Map<String, Value> valueInverse;
+	
+	Library(java.util.function.Function<Value, String> f, java.util.function.Function<Component, String> ff)
+	{
+		valueInverse = new HashMap<>();
+		for (var v : Value.values())
+		{
+			var mapped = f.apply(v);
+			
+			if (valueInverse.containsKey(mapped))
+			{
+				System.err.println("Value already present: "+mapped);
+			}
+			else
+			{
+				valueInverse.put(mapped, v);
+			}
+		}
+	}
 	public Value getValue(String name) {
 		return variables.get(name);
 	}

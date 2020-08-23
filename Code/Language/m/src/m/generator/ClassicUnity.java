@@ -667,12 +667,10 @@ public class ClassicUnity
 			switch (found)
 			{
 			case VELOCITY: return "Rigidbody";
-			case TIMEOUT: return "timeout";
 			case POSITION: return "Transform";
 			case ANGULAR_VELOCITY: return "Rigidbody";
 			case AUDIOCLIP: return "AudioSource";
 			case BACKGROUND: return "Camera";
-			case ELAPSED: return "Elapsed";
 			case EMISSION: return "Light";
 			case EXTENTS: return "BoxCollider";
 			case FAR: return "Camera";
@@ -695,7 +693,6 @@ public class ClassicUnity
 			case ROTATION: return "Transform";
 			case SCALE: return "Transform";
 			case SPOT_ANGLE: return "Light";
-			case TIMER: return "Timer";
 			case VIEWPORT: return "Camera";
 			case VOLUME: return "AudioSource";
 			case BOX_CENTER: return "BoxCollider";
@@ -736,12 +733,10 @@ public class ClassicUnity
 			switch (found)
 			{
 			case VELOCITY: return "velocity";
-			case TIMEOUT: return "Value";
 			case POSITION: return "localPosition";
 			case ANGULAR_VELOCITY: return "angularVelocity";
 			case AUDIOCLIP: return "audioClip";
 			case BACKGROUND: return "backgroundColor";
-			case ELAPSED: return "";
 			case EMISSION: return "color";
 			case EXTENTS: return "size";
 			case FAR: return "farClipPlane";
@@ -764,7 +759,6 @@ public class ClassicUnity
 			case ROTATION: return "localRotation";
 			case SCALE: return "localScale";
 			case SPOT_ANGLE: return "spotAngle";
-			case TIMER: return "Value";
 			case VIEWPORT: return "rect";
 			case VOLUME: return "volume";
 			case BOX_CENTER: return "center";

@@ -61,11 +61,6 @@ public enum Component implements Symbol{
 	COOKIE(TEXTURE),
 	
 	
-	TIMER(NUMBER),
-	ELAPSED(NUMBER),
-	TIMEOUT(PROPOSITION),
-	
-	
 	AUDIOCLIP(AtomicType.AUDIOCLIP),
 	VOLUME(NUMBER),
 	PITCH(NUMBER),
