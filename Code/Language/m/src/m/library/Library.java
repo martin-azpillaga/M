@@ -22,234 +22,320 @@ import m.validation.problems.errors.*;
 import m.validation.problems.warnings.*;
 import java.util.stream.*;
 
-public enum Library {
+import com.google.common.collect.BiMap;
+
+import com.google.common.collect.HashBiMap;
+
+public enum Library
+{
+	ENGLISH(
+	new Object[][]
+	{
+		{"epsilon", EPSILON},
+		{"pi", PI},
+		{"e", E},
+		{"deltaTime", DELTA_TIME},
+		{"fixedDeltaTime", FIXED_DELTA_TIME},
+		{"timeSinceStart", TIME_SINCE_START},
+		{"timeScale", TIME_SCALE}
+	}
+	,new Object[][]
+	{
+			{"position", POSITION},
+			{"rotation", ROTATION},
+			{"scale", SCALE},
+			{"parent", PARENT},
+			
+			{"mass", MASS},
+			{"inertia", INERTIA},
+			
+			{"velocity", VELOCITY},
+			{"angularVelocity", ANGULAR_VELOCITY},
+			{"restitution", RESTITUTION},
+			{"friction", FRICTION},
+			{"kinematic", KINEMATIC},
+			
+			{"crossable", NO_COLLISION_RESPONSE},
+			{"radius", RADIUS},
+			{"extents", EXTENTS},
+			{"boxCenter", BOX_CENTER},
+			{"sphereCenter", SPHERE_CENTER},
+			
+			{"mesh", Component.MESH},
+			{"material", Component.MATERIAL},
+			{"shadowReceiver", SHADOW_RECEIVER},
+			
+			{"near", NEAR},
+			{"far", FAR},
+			{"fieldOfView", FOV},
+			{"orthographicSize", ORTHOGRAPHIC_SIZE},
+			{"background", BACKGROUND},
+			{"culling", CULLING},
+			{"viewport", VIEWPORT},
+			{"renderTexture", RENDER_TEXTURE},
+			{"display", DISPLAY},
+			
+			{"emission", EMISSION},
+			{"spotAngle", SPOT_ANGLE},
+			{"range", RANGE},
+			{"intensity", INTENSITY},
+			{"bounceIntensity", INDIRECT_MULTIPLIER},
+			{"cookie", COOKIE},
+			
+			{"text", Component.TEXT},
+			{"font", Component.FONT},
+			{"textColor", TEXT_COLOR},
+			{"textMaterial", TEXT_MATERIAL},
+			
+			{"image", Component.IMAGE},
+			{"imageColor", IMAGE_COLOR},
+			{"imageMaterial", IMAGE_MATERIAL},
+			
+			{"toggled", TOGGLED},
+			{"sliderValue", SLIDER_VALUE},
+			{"writtenText", TEXTFIELD_VALUE},
+			
+			{"anchorMin", ANCHOR_MIN},
+			{"anchorMax", ANCHOR_MAX},
+			
+			
+			{"audioClip", Component.AUDIOCLIP},
+			{"volume", VOLUME},
+			{"pitch", PITCH},
+			{"loop", LOOP},
+	},
+	null
+	,null
+	,null
+	,null
+	)
 	/*
 	ENGLISH(
 			(Map<String,Value>)Stream.of(new Object[][] {{"a", PI},{"b",PI}}).collect(Collectors.toMap(data -> (String) data[0], data ->(Value) data[1])),
 	Map.ofEntries(
-		entry("position", POSITION),
-		entry("rotation", ROTATION),
-		entry("scale", SCALE),
-		entry("parent", PARENT),
+		{"position", POSITION},
+		{"rotation", ROTATION},
+		{"scale", SCALE},
+		{"parent", PARENT},
 		
 		
-		entry("mass", MASS),
-		entry("inertia", INERTIA),
+		{"mass", MASS},
+		{"inertia", INERTIA},
 		
-		entry("velocity",VELOCITY),
-		entry("angularVelocity", ANGULAR_VELOCITY),
-		entry("restitution", RESTITUTION),
-		entry("friction", FRICTION),
-		entry("kinematic", KINEMATIC),
+		{"velocity", VELOCITY},
+		{"angularVelocity", ANGULAR_VELOCITY},
+		{"restitution", RESTITUTION},
+		{"friction", FRICTION},
+		{"kinematic", KINEMATIC},
 		
-		entry("crossable", NO_COLLISION_RESPONSE),
-		entry("radius", RADIUS),
-		entry("extents", EXTENTS),
-		entry("boxCenter", BOX_CENTER),
-		entry("sphereCenter", SPHERE_CENTER),
+		{"crossable", NO_COLLISION_RESPONSE},
+		{"radius", RADIUS},
+		{"extents", EXTENTS},
+		{"boxCenter", BOX_CENTER},
+		{"sphereCenter", SPHERE_CENTER},
 		
-		entry("mesh", Component.MESH),
-		entry("material", Component.MATERIAL),
-		entry("shadowReceiver", SHADOW_RECEIVER),
+		{"mesh", Component.MESH},
+		{"material", Component.MATERIAL},
+		{"shadowReceiver", SHADOW_RECEIVER},
 		
-		entry("near", NEAR),
-		entry("far", FAR),
-		entry("fieldOfView", FOV),
-		entry("orthographicSize", ORTHOGRAPHIC_SIZE),
-		entry("background", BACKGROUND),
-		entry("culling", CULLING),
-		entry("viewport", VIEWPORT),
-		entry("renderTexture", RENDER_TEXTURE),
-		entry("display", DISPLAY),
+		{"near", NEAR},
+		{"far", FAR},
+		{"fieldOfView", FOV},
+		{"orthographicSize", ORTHOGRAPHIC_SIZE},
+		{"background", BACKGROUND},
+		{"culling", CULLING},
+		{"viewport", VIEWPORT},
+		{"renderTexture", RENDER_TEXTURE},
+		{"display", DISPLAY},
 		
-		entry("emission", EMISSION),
-		entry("spotAngle", SPOT_ANGLE),
-		entry("range", RANGE),
-		entry("intensity", INTENSITY),
-		entry("bounceIntensity", INDIRECT_MULTIPLIER),
-		entry("cookie", COOKIE),
+		{"emission", EMISSION},
+		{"spotAngle", SPOT_ANGLE},
+		{"range", RANGE},
+		{"intensity", INTENSITY},
+		{"bounceIntensity", INDIRECT_MULTIPLIER},
+		{"cookie", COOKIE},
 		
-		entry("text", Component.TEXT),
-		entry("font", Component.FONT),
-		entry("textColor", TEXT_COLOR),
-		entry("textMaterial", TEXT_MATERIAL),
+		{"text", Component.TEXT},
+		{"font", Component.FONT},
+		{"textColor", TEXT_COLOR},
+		{"textMaterial", TEXT_MATERIAL},
 		
-		entry("image", Component.IMAGE),
-		entry("imageColor", IMAGE_COLOR),
-		entry("imageMaterial", IMAGE_MATERIAL),
+		{"image", Component.IMAGE},
+		{"imageColor", IMAGE_COLOR},
+		{"imageMaterial", IMAGE_MATERIAL},
 		
-		entry("toggled", TOGGLED),
-		entry("sliderValue", SLIDER_VALUE),
-		entry("writtenText", TEXTFIELD_VALUE),
+		{"toggled", TOGGLED},
+		{"sliderValue", SLIDER_VALUE},
+		{"writtenText", TEXTFIELD_VALUE},
 		
-		entry("anchorMin", ANCHOR_MIN),
-		entry("anchorMax", ANCHOR_MAX),
+		{"anchorMin", ANCHOR_MIN},
+		{"anchorMax", ANCHOR_MAX},
 		
 		
-		entry("audioClip", Component.AUDIOCLIP),
-		entry("volume", VOLUME),
-		entry("pitch", PITCH),
-		entry("loop", LOOP)
+		{"audioClip", Component.AUDIOCLIP},
+		{"volume", VOLUME},
+		{"pitch", PITCH},
+		{"loop", LOOP},
 		),
 	Map.ofEntries(
-		entry("abs", ABS),
-		entry("sign", SIGN),
-		entry("ceil", CEIL),
-		entry("floor", FLOOR),
-		entry("round", ROUND),
-		entry("integerPart", INTEGERPART),
-		entry("fractionalPart", FRACTIONALPART),
-		entry("inverse", INVERSE),
-		entry("reciprocal", RECIPROCAL),
+		{"abs", ABS},
+		{"sign", SIGN},
+		{"ceil", CEIL},
+		{"floor", FLOOR},
+		{"round", ROUND},
+		{"integerPart", INTEGERPART},
+		{"fractionalPart", FRACTIONALPART},
+		{"inverse", INVERSE},
+		{"reciprocal", RECIPROCAL},
 
-		entry("clamp", CLAMP),
-		entry("lerp", LERP),
-		entry("unlerp", UNLERP),
-		entry("proportional", PROPORTIONAL),
-		entry("slerp", SLERP),
+		{"clamp", CLAMP},
+		{"lerp", LERP},
+		{"unlerp", UNLERP},
+		{"proportional", PROPORTIONAL},
+		{"slerp", SLERP},
 		
-		entry("min", MIN),
-		entry("max", MAX),
+		{"min", MIN},
+		{"max", MAX},
 		
-		entry("degrees", DEGREES),
-		entry("radians", RADIANS),
+		{"degrees", DEGREES},
+		{"radians", RADIANS},
 		
-		entry("step", STEP),
+		{"step", STEP},
 		
-		entry("cross", CROSS),
-		entry("dot", DOT),
-		entry("norm", NORM),
-		entry("normalize", NORMALIZE),
-		entry("distance", DISTANCE),
-		entry("reflect", REFLECT),
-		entry("refract", REFRACT),
+		{"cross", CROSS},
+		{"dot", DOT},
+		{"norm", NORM},
+		{"normalize", NORMALIZE},
+		{"distance", DISTANCE},
+		{"reflect", REFLECT},
+		{"refract", REFRACT},
 		
-		entry("||", OR),
-		entry("&&", AND),
-		entry("!", NOT),
+		{"||", OR},
+		{"&&", AND},
+		{"!", NOT},
 		
-		entry("+", ADDITION),
-		entry("-", SUBTRACTION),
-		entry("*", MULTIPLICATION),
-		entry("/", DIVISION),
+		{"+", ADDITION},
+		{"-", SUBTRACTION},
+		{"*", MULTIPLICATION},
+		{"/", DIVISION},
 		
-		entry("==", EQUAL),
-		entry("!=", INEQUAL),
+		{"==", EQUAL},
+		{"!=", INEQUAL},
 		
-		entry("<", LOWER),
-		entry("<=", LOWEROREQUAL),
-		entry(">=", GREATEROREQUAL),
-		entry(">", GREATER),
+		{"<", LOWER},
+		{"<=", LOWEROREQUAL},
+		{">=", GREATEROREQUAL},
+		{">", GREATER},
 		
-		entry("#", SIZE),
-		entry("in", IN),
-		entry("x", X),
-		entry("y", Y),
-		entry("z", Z),
-		entry("xyz", XYZ),
+		{"#", SIZE},
+		{"in", IN},
+		{"x", X},
+		{"y", Y},
+		{"z", Z},
+		{"xyz", XYZ},
 		
-		entry("sin", SIN),
-		entry("cos", COS),
-		entry("tan", TAN),
-		entry("asin", ASIN),
-		entry("acos", ACOS),
-		entry("atan", ATAN),
-		entry("exp", EXP),
-		entry("log", LOG),
-		entry("pow", POW),
-		entry("sqrt", SQRT),
-		entry("random", RANDOM),
+		{"sin", SIN},
+		{"cos", COS},
+		{"tan", TAN},
+		{"asin", ASIN},
+		{"acos", ACOS},
+		{"atan", ATAN},
+		{"exp", EXP},
+		{"log", LOG},
+		{"pow", POW},
+		{"sqrt", SQRT},
+		{"random", RANDOM},
 		
-		entry("create", CREATE),
-		entry("destroy", DESTROY),
-		entry("add", ADD),
-		entry("remove", REMOVE),
-		entry("has", HAS),
+		{"create", CREATE},
+		{"destroy", DESTROY},
+		{"add", ADD},
+		{"remove", REMOVE},
+		{"has", HAS},
 		
-		entry("write", WRITE),
-		entry("writeError", WRITEERROR),
-		entry("writeWarning", WRITE_WARNING),
-		entry("halt", HALT),
-		entry("breakpoint", BREAKPOINT),
-		entry("screenshot", SCREENSHOT),
+		{"write", WRITE},
+		{"writeError", WRITEERROR},
+		{"writeWarning", WRITE_WARNING},
+		{"halt", HALT},
+		{"breakpoint", BREAKPOINT},
+		{"screenshot", SCREENSHOT},
 		
 		
-		entry("setNumber", SET_NUMBER),
-		entry("setColor", SET_COLOR),
-		entry("setBool", SET_KEYWORD),
-		entry("setTexture", SET_TEXTURE),
-		entry("setInteger", SET_INTEGER),
-		entry("getNumber", GET_NUMBER),
-		entry("getColor", GET_COLOR),
-		entry("getBool", GET_KEYWORD),
-		entry("getTexture", GET_TEXTURE),
-		entry("getInteger", GET_INTEGER),
+		{"setNumber", SET_NUMBER},
+		{"setColor", SET_COLOR},
+		{"setBool", SET_KEYWORD},
+		{"setTexture", SET_TEXTURE},
+		{"setInteger", SET_INTEGER},
+		{"getNumber", GET_NUMBER},
+		{"getColor", GET_COLOR},
+		{"getBool", GET_KEYWORD},
+		{"getTexture", GET_TEXTURE},
+		{"getInteger", GET_INTEGER},
 		
-		entry("setTrigger", SET_TRIGGER),
-		entry("inState", IN_STATE),
-		entry("enableParameter", ACTIVATE_PARAMETER),
-		entry("disableParameter", DEACTIVATE_PARAMETER),
+		{"setTrigger", SET_TRIGGER},
+		{"inState", IN_STATE},
+		{"enableParameter", ACTIVATE_PARAMETER},
+		{"disableParameter", DEACTIVATE_PARAMETER},
 		
-		entry("readTriggered", READ_TRIGGERED),
-		entry("readNumber", READ_NUMBER),
-		entry("readVector", READ_VECTOR),
+		{"readTriggered", READ_TRIGGERED},
+		{"readNumber", READ_NUMBER},
+		{"readVector", READ_VECTOR},
 		
-		entry("quaternion", TO_QUATERNION),
-		entry("angles", TO_NUMBER3),
+		{"quaternion", TO_QUATERNION},
+		{"angles", TO_NUMBER3},
 		
-		entry("play", PLAY),
-		entry("playOnce", PLAY_ONCE),
-		entry("pause", PAUSE),
-		entry("unpause", UNPAUSE),
-		entry("stop", STOP),
+		{"play", PLAY},
+		{"playOnce", PLAY_ONCE},
+		{"pause", PAUSE},
+		{"unpause", UNPAUSE},
+		{"stop", STOP},
 		
-		entry("over", OVER),
-		entry("string", TO_STRING),
-		entry("number", TO_NUMBER),
+		{"over", OVER},
+		{"string", TO_STRING},
+		{"number", TO_NUMBER},
 		
-		entry("overlaps", OVERLAPS),
-		entry("screenOverlaps", SCREEN_OVERLAPS),
-		entry("addForce", ADD_FORCE),
-		entry("addTorque", ADD_TORQUE),
-		entry("closestPoint", CLOSEST_POINT),
+		{"overlaps", OVERLAPS},
+		{"screenOverlaps", SCREEN_OVERLAPS},
+		{"addForce", ADD_FORCE},
+		{"addTorque", ADD_TORQUE},
+		{"closestPoint", CLOSEST_POINT},
 		
-		entry("isPositive", IS_POSITIVE),
-		entry("isNegative", IS_NEGATIVE),
-		entry("isZero", IS_ZERO),
+		{"isPositive", IS_POSITIVE},
+		{"isNegative", IS_NEGATIVE},
+		{"isZero", IS_ZERO},
 		
-		entry("worldToViewport", WORLD_TO_VIEWPORT),
-		entry("viewportToWorld", VIEWPORT_TO_WORLD),
+		{"worldToViewport", WORLD_TO_VIEWPORT},
+		{"viewportToWorld", VIEWPORT_TO_WORLD},
 		
-		entry("=", ASSIGNMENT)),
+		{"=", ASSIGNMENT)},
 	Map.ofEntries(
-		entry("foreach", QUERY),
-		entry("if", SELECTION),
-		entry("while", ITERATION)
+		{"foreach", QUERY},
+		{"if", SELECTION},
+		{"while", ITERATION},
 	), Map.ofEntries(
-		entry(STRING, "string"),
-		entry(PROPOSITION, "proposition"),
-		entry(NUMBER, "number"),
-		entry(NUMBER2, "number2"),
-		entry(NUMBER3, "number3"),
-		entry(UNIT, "unit"),
+		{STRING, "string"},
+		{PROPOSITION, "proposition"},
+		{NUMBER, "number"},
+		{NUMBER2, "number2"},
+		{NUMBER3, "number3"},
+		{UNIT, "unit"},
 		
-		entry(COMPONENT, "component"),
+		{COMPONENT, "component"},
 		
-		entry(COLOR, "color"),
+		{COLOR, "color"},
 		
-		entry(INPUT, "input"),
-		entry(AtomicType.MESH, "mesh"),
-		entry(AtomicType.MATERIAL, "material"),
-		entry(AtomicType.FONT, "font"),
-		entry(AtomicType.TEXT, "text"),
-		entry(AtomicType.IMAGE, "image"),
-		entry(AtomicType.AUDIOCLIP, "audioClip"),
-		entry(AtomicType.ANIMATOR, "animator"),
+		{INPUT, "input"},
+		{AtomicType.MESH, "mesh"},
+		{AtomicType.MATERIAL, "material"},
+		{AtomicType.FONT, "font"},
+		{AtomicType.TEXT, "text"},
+		{AtomicType.IMAGE, "image"},
+		{AtomicType.AUDIOCLIP, "audioClip"},
+		{AtomicType.ANIMATOR, "animator"},
 		
-		entry(ENTITY, "entity"),
-		entry(ENTITY_LIST, "entityList"),
-		entry(QUATERNION, "quaternion"),
-		entry(TEXTURE, "texture")
+		{ENTITY, "entity"},
+		{ENTITY_LIST, "entityList"},
+		{QUATERNION, "quaternion"},
+		{TEXTURE, "texture"},
 	), Map.of(
 		RedefinedSymbol.class, "Redefined symbol",
 		UndefinedSymbol.class, "Undefined symbol",
@@ -260,237 +346,237 @@ public enum Library {
 	)),
 	EUSKARA(
 			Map.ofEntries(
-				entry("epsilon", EPSILON),
-				entry("pi", PI),
-				entry("e", E),
-				entry("deltaDenbora", DELTA_TIME),
-				entry("deltaDenboraZehaztua", FIXED_DELTA_TIME),
-				entry("denbora", TIME_SINCE_START),
-				entry("denboraEskala", TIME_SCALE)
+				{"epsilon", EPSILON},
+				{"pi", PI},
+				{"e", E},
+				{"deltaDenbora", DELTA_TIME},
+				{"deltaDenboraZehaztua", FIXED_DELTA_TIME},
+				{"denbora", TIME_SINCE_START},
+				{"denboraEskala", TIME_SCALE},
 			),
 			Map.ofEntries(
-				entry("kokapena", POSITION),
-				entry("biraketa", ROTATION),
-				entry("eskala", SCALE),
-				entry("gurasoa", PARENT),
+				{"kokapena", POSITION},
+				{"biraketa", ROTATION},
+				{"eskala", SCALE},
+				{"gurasoa", PARENT},
 				
 				
-				entry("masa", MASS),
-				entry("inertzia", INERTIA),
-				entry("abiadura",VELOCITY),
-				entry("abiaduraAngeluarra", ANGULAR_VELOCITY),
-				entry("restituzioa", RESTITUTION),
-				entry("marruskadura", FRICTION),
-				entry("kinematikoa", KINEMATIC),
+				{"masa", MASS},
+				{"inertzia", INERTIA},
+				{"abiadura", VELOCITY},
+				{"abiaduraAngeluarra", ANGULAR_VELOCITY},
+				{"restituzioa", RESTITUTION},
+				{"marruskadura", FRICTION},
+				{"kinematikoa", KINEMATIC},
 				
-				entry("gurutzagarria", NO_COLLISION_RESPONSE),
-				entry("erradioa", RADIUS),
-				entry("dimentsioak", EXTENTS),
-				entry("kaixaZentrua", BOX_CENTER),
-				entry("esferaZentrua", SPHERE_CENTER),
-				
-				
-				entry("malla", Component.MESH),
-				entry("materiala", Component.MATERIAL),
-				entry("itzalJasotzailea", SHADOW_RECEIVER),
-				
-				entry("gertu", NEAR),
-				entry("urruti", FAR),
-				entry("ikusmenAngelua", FOV),
-				entry("ikusmenTamaina", ORTHOGRAPHIC_SIZE),
-				entry("irudikatu", CULLING),
-				entry("atzealdea", BACKGROUND),
-				entry("viewport", VIEWPORT),
-				entry("renderizazioEhundura", RENDER_TEXTURE),
-				entry("pantaila", DISPLAY),
-				
-				entry("emisioa", EMISSION),
-				entry("fokoAngelua", SPOT_ANGLE),
-				entry("irismena", RANGE),
-				entry("intentsitatea", INTENSITY),
-				entry("erreboteIntentsitatea", INDIRECT_MULTIPLIER),
-				entry("gaileta", COOKIE),
-				
-				entry("testua", Component.TEXT),
-				entry("letraEstiloa", Component.FONT),
-				entry("letraKolorea", TEXT_COLOR),
-				entry("letraMateriala", TEXT_MATERIAL),
-				
-				entry("irudia", Component.IMAGE),
-				entry("irudiKolorea", IMAGE_COLOR),
-				entry("irudiMateriala", IMAGE_MATERIAL),
-				
-				entry("sakatuta", TOGGLED),
-				entry("slideBalioa", SLIDER_VALUE),
-				entry("idatzitakoTestua", TEXTFIELD_VALUE),
-				
-				entry("euskarriaMin", ANCHOR_MIN),
-				entry("euskarriaMax", ANCHOR_MAX),
+				{"gurutzagarria", NO_COLLISION_RESPONSE},
+				{"erradioa", RADIUS},
+				{"dimentsioak", EXTENTS},
+				{"kaixaZentrua", BOX_CENTER},
+				{"esferaZentrua", SPHERE_CENTER},
 				
 				
-				entry("audioKlipa", Component.AUDIOCLIP),
-				entry("bolumena", VOLUME),
-				entry("tonua", PITCH),
-				entry("errepikapena", LOOP)),
+				{"malla", Component.MESH},
+				{"materiala", Component.MATERIAL},
+				{"itzalJasotzailea", SHADOW_RECEIVER},
+				
+				{"gertu", NEAR},
+				{"urruti", FAR},
+				{"ikusmenAngelua", FOV},
+				{"ikusmenTamaina", ORTHOGRAPHIC_SIZE},
+				{"irudikatu", CULLING},
+				{"atzealdea", BACKGROUND},
+				{"viewport", VIEWPORT},
+				{"renderizazioEhundura", RENDER_TEXTURE},
+				{"pantaila", DISPLAY},
+				
+				{"emisioa", EMISSION},
+				{"fokoAngelua", SPOT_ANGLE},
+				{"irismena", RANGE},
+				{"intentsitatea", INTENSITY},
+				{"erreboteIntentsitatea", INDIRECT_MULTIPLIER},
+				{"gaileta", COOKIE},
+				
+				{"testua", Component.TEXT},
+				{"letraEstiloa", Component.FONT},
+				{"letraKolorea", TEXT_COLOR},
+				{"letraMateriala", TEXT_MATERIAL},
+				
+				{"irudia", Component.IMAGE},
+				{"irudiKolorea", IMAGE_COLOR},
+				{"irudiMateriala", IMAGE_MATERIAL},
+				
+				{"sakatuta", TOGGLED},
+				{"slideBalioa", SLIDER_VALUE},
+				{"idatzitakoTestua", TEXTFIELD_VALUE},
+				
+				{"euskarriaMin", ANCHOR_MIN},
+				{"euskarriaMax", ANCHOR_MAX},
+				
+				
+				{"audioKlipa", Component.AUDIOCLIP},
+				{"bolumena", VOLUME},
+				{"tonua", PITCH},
+				{"errepikapena", LOOP)},
 			Map.ofEntries(
-				entry("abs", ABS),
-				entry("sign", SIGN),
-				entry("ceil", CEIL),
-				entry("floor", FLOOR),
-				entry("round", ROUND),
-				entry("integerPart", INTEGERPART),
-				entry("fractionalPart", FRACTIONALPART),
-				entry("inverse", INVERSE),
-				entry("reciprocal", RECIPROCAL),
+				{"abs", ABS},
+				{"sign", SIGN},
+				{"ceil", CEIL},
+				{"floor", FLOOR},
+				{"round", ROUND},
+				{"integerPart", INTEGERPART},
+				{"fractionalPart", FRACTIONALPART},
+				{"inverse", INVERSE},
+				{"reciprocal", RECIPROCAL},
 				
-				entry("clamp", CLAMP),
-				entry("lerp", LERP),
-				entry("unlerp", UNLERP),
-				entry("proportional", PROPORTIONAL),
-				entry("slerp", SLERP),
+				{"clamp", CLAMP},
+				{"lerp", LERP},
+				{"unlerp", UNLERP},
+				{"proportional", PROPORTIONAL},
+				{"slerp", SLERP},
 				
-				entry("min", MIN),
-				entry("max", MAX),
+				{"min", MIN},
+				{"max", MAX},
 				
-				entry("graduak", DEGREES),
-				entry("radianak", RADIANS),
+				{"graduak", DEGREES},
+				{"radianak", RADIANS},
 				
-				entry("step", STEP),
+				{"step", STEP},
 				
-				entry("cross", CROSS),
-				entry("dot", DOT),
-				entry("norm", NORM),
-				entry("normalize", NORMALIZE),
-				entry("distance", DISTANCE),
-				entry("reflect", REFLECT),
-				entry("refract", REFRACT),
+				{"cross", CROSS},
+				{"dot", DOT},
+				{"norm", NORM},
+				{"normalize", NORMALIZE},
+				{"distance", DISTANCE},
+				{"reflect", REFLECT},
+				{"refract", REFRACT},
 				
-				entry("||", OR),
-				entry("&&", AND),
-				entry("!", NOT),
+				{"||", OR},
+				{"&&", AND},
+				{"!", NOT},
 				
-				entry("+", ADDITION),
-				entry("-", SUBTRACTION),
-				entry("*", MULTIPLICATION),
-				entry("/", DIVISION),
+				{"+", ADDITION},
+				{"-", SUBTRACTION},
+				{"*", MULTIPLICATION},
+				{"/", DIVISION},
 				
-				entry("==", EQUAL),
-				entry("!=", INEQUAL),
+				{"==", EQUAL},
+				{"!=", INEQUAL},
 				
-				entry("<", LOWER),
-				entry("<=", LOWEROREQUAL),
-				entry(">=", GREATEROREQUAL),
-				entry(">", GREATER),
+				{"<", LOWER},
+				{"<=", LOWEROREQUAL},
+				{">=", GREATEROREQUAL},
+				{">", GREATER},
 				
-				entry("#", SIZE),
-				entry("barne", IN),
-				entry("x", X),
-				entry("y", Y),
-				entry("z", Z),
-				entry("xyz", XYZ),
+				{"#", SIZE},
+				{"barne", IN},
+				{"x", X},
+				{"y", Y},
+				{"z", Z},
+				{"xyz", XYZ},
 				
-				entry("sin", SIN),
-				entry("cos", COS),
-				entry("tan", TAN),
-				entry("asin", ASIN),
-				entry("acos", ACOS),
-				entry("atan", ATAN),
-				entry("exp", EXP),
-				entry("log", LOG),
-				entry("pow", POW),
-				entry("sqrt", SQRT),
-				entry("ausazko", RANDOM),
+				{"sin", SIN},
+				{"cos", COS},
+				{"tan", TAN},
+				{"asin", ASIN},
+				{"acos", ACOS},
+				{"atan", ATAN},
+				{"exp", EXP},
+				{"log", LOG},
+				{"pow", POW},
+				{"sqrt", SQRT},
+				{"ausazko", RANDOM},
 				
-				entry("sortu", CREATE),
-				entry("desegin", DESTROY),
-				entry("gehitu", ADD),
-				entry("kendu", REMOVE),
-				entry("badu", HAS),
+				{"sortu", CREATE},
+				{"desegin", DESTROY},
+				{"gehitu", ADD},
+				{"kendu", REMOVE},
+				{"badu", HAS},
 				
-				entry("idatzi", WRITE),
-				entry("idatziAkatsa", WRITEERROR),
-				entry("idatziAholkua", WRITE_WARNING),
-				entry("amaitu", HALT),
-				entry("gelditu", BREAKPOINT),
-				entry("argazkiaAtera", SCREENSHOT),
+				{"idatzi", WRITE},
+				{"idatziAkatsa", WRITEERROR},
+				{"idatziAholkua", WRITE_WARNING},
+				{"amaitu", HALT},
+				{"gelditu", BREAKPOINT},
+				{"argazkiaAtera", SCREENSHOT},
 				
 				
-				entry("ezarriZenbakia", SET_NUMBER),
-				entry("ezarriKolorea", SET_COLOR),
-				entry("ezarriOsoa", SET_INTEGER),
-				entry("ezarriTexture", SET_TEXTURE),
-				entry("ezarriProposizioa", SET_KEYWORD),
-				entry("hartuZenbakia", GET_NUMBER),
-				entry("hartuKolorea", GET_COLOR),
-				entry("hartuOsoa", GET_INTEGER),
-				entry("hartuTexture", GET_TEXTURE),
-				entry("hartuProposizioa", GET_KEYWORD),
+				{"ezarriZenbakia", SET_NUMBER},
+				{"ezarriKolorea", SET_COLOR},
+				{"ezarriOsoa", SET_INTEGER},
+				{"ezarriTexture", SET_TEXTURE},
+				{"ezarriProposizioa", SET_KEYWORD},
+				{"hartuZenbakia", GET_NUMBER},
+				{"hartuKolorea", GET_COLOR},
+				{"hartuOsoa", GET_INTEGER},
+				{"hartuTexture", GET_TEXTURE},
+				{"hartuProposizioa", GET_KEYWORD},
 				
-				entry("ezarriKakoa", SET_TRIGGER),
-				entry("egoera", IN_STATE),
-				entry("jarriParametroa", ACTIVATE_PARAMETER),
-				entry("kenduParametroa", DEACTIVATE_PARAMETER),
+				{"ezarriKakoa", SET_TRIGGER},
+				{"egoera", IN_STATE},
+				{"jarriParametroa", ACTIVATE_PARAMETER},
+				{"kenduParametroa", DEACTIVATE_PARAMETER},
 				
-				entry("irakurriKakoa", READ_TRIGGERED),
-				entry("irakurriZenbakia", READ_NUMBER),
-				entry("irakurriBektorea", READ_VECTOR),
+				{"irakurriKakoa", READ_TRIGGERED},
+				{"irakurriZenbakia", READ_NUMBER},
+				{"irakurriBektorea", READ_VECTOR},
 				
-				entry("kuaternioia", TO_QUATERNION),
-				entry("angeluak", TO_NUMBER3),
+				{"kuaternioia", TO_QUATERNION},
+				{"angeluak", TO_NUMBER3},
 				
-				entry("hasi", PLAY),
-				entry("playOnce", PLAY_ONCE),
-				entry("pause", PAUSE),
-				entry("unpause", UNPAUSE),
-				entry("stop", STOP),
+				{"hasi", PLAY},
+				{"playOnce", PLAY_ONCE},
+				{"pause", PAUSE},
+				{"unpause", UNPAUSE},
+				{"stop", STOP},
 				
-				entry("saguaGainean", OVER),
-				entry("zenbakia", TO_NUMBER),
-				entry("katea", TO_STRING),
+				{"saguaGainean", OVER},
+				{"zenbakia", TO_NUMBER},
+				{"katea", TO_STRING},
 				
-				entry("gainean", OVERLAPS),
-				entry("pantailaGainean", SCREEN_OVERLAPS),
-				entry("gehituIndarra", ADD_FORCE),
-				entry("gehituIndarAngeluarra", ADD_TORQUE),
-				entry("puntuGertukoena", CLOSEST_POINT),
+				{"gainean", OVERLAPS},
+				{"pantailaGainean", SCREEN_OVERLAPS},
+				{"gehituIndarra", ADD_FORCE},
+				{"gehituIndarAngeluarra", ADD_TORQUE},
+				{"puntuGertukoena", CLOSEST_POINT},
 				
-				entry("positiboa", IS_POSITIVE),
-				entry("negatiboa", IS_NEGATIVE),
-				entry("zero", IS_ZERO),
+				{"positiboa", IS_POSITIVE},
+				{"negatiboa", IS_NEGATIVE},
+				{"zero", IS_ZERO},
 				
-				entry("mundutikPantailara", WORLD_TO_VIEWPORT),
-				entry("pantailatikMundura", VIEWPORT_TO_WORLD),
+				{"mundutikPantailara", WORLD_TO_VIEWPORT},
+				{"pantailatikMundura", VIEWPORT_TO_WORLD},
 				
-				entry("=", ASSIGNMENT)),
+				{"=", ASSIGNMENT)},
 			Map.ofEntries(
-				entry("hartu", QUERY),
-				entry("baldin", SELECTION),
-				entry("bitartean", ITERATION)
+				{"hartu", QUERY},
+				{"baldin", SELECTION},
+				{"bitartean", ITERATION},
 			), Map.ofEntries(
-					entry(STRING, "katea"),
-					entry(PROPOSITION, "proposizioa"),
-					entry(NUMBER, "zenbakia"),
-					entry(NUMBER2, "zenbakia2"),
-					entry(NUMBER3, "zenbakia3"),
-					entry(UNIT, "hutsa"),
+					{STRING, "katea"},
+					{PROPOSITION, "proposizioa"},
+					{NUMBER, "zenbakia"},
+					{NUMBER2, "zenbakia2"},
+					{NUMBER3, "zenbakia3"},
+					{UNIT, "hutsa"},
 					
-					entry(COMPONENT, "komponentea"),
+					{COMPONENT, "komponentea"},
 					
-					entry(COLOR, "kolorea"),
+					{COLOR, "kolorea"},
 					
-					entry(INPUT, "inputa"),
-					entry(AtomicType.MESH, "malla"),
-					entry(AtomicType.MATERIAL, "materiala"),
-					entry(AtomicType.FONT, "letraEstiloa"),
-					entry(AtomicType.TEXT, "testua"),
-					entry(AtomicType.IMAGE, "irudia"),
-					entry(AtomicType.AUDIOCLIP, "audioKlipa"),
-					entry(AtomicType.ANIMATOR, "animatzailea"),
+					{INPUT, "inputa"},
+					{AtomicType.MESH, "malla"},
+					{AtomicType.MATERIAL, "materiala"},
+					{AtomicType.FONT, "letraEstiloa"},
+					{AtomicType.TEXT, "testua"},
+					{AtomicType.IMAGE, "irudia"},
+					{AtomicType.AUDIOCLIP, "audioKlipa"},
+					{AtomicType.ANIMATOR, "animatzailea"},
 					
-					entry(ENTITY, "entitatea"),
-					entry(ENTITY_LIST, "entitateLista"),
-					entry(QUATERNION, "kuaternioia"),
-					entry(TEXTURE, "textura")
+					{ENTITY, "entitatea"},
+					{ENTITY_LIST, "entitateLista"},
+					{QUATERNION, "kuaternioia"},
+					{TEXTURE, "textura"},
 			), Map.of(
 				RedefinedSymbol.class, "Simbolo hau dagoeneko definitua dago",
 				UndefinedSymbol.class, "Simbolo honek ez du definiziorik",
@@ -501,22 +587,22 @@ public enum Library {
 			))*/
 	;
 
-	Map<String, Value> variables;
-	public Map<String, Component> components;
-	Map<String, Function> functions;
-	Map<String, Block> blocks;
+	BiMap<String, Value> variables;
+	BiMap<String, Component> components;
+	BiMap<String, Function> functions;
+	BiMap<String, Block> blocks;
 	
-	Map<Type, String> atomicTypes;
-	Map<Class<? extends Problem>, String> problems;
+	BiMap<String, Type> atomicTypes;
+	BiMap<String, Class<? extends Problem>> problems;
 	
-	Library(Map<String, Value> variables, Map<String, Component> components, Map<String, Function> functions, Map<String, Block> blocks, Map<Type, String> atomicTypes, Map<Class<? extends Problem>, String> problems)
+	Library(Object[][] variables, Object[][] components, Object[][] functions, Object[][] blocks, Object[][] atomicTypes, Object[][] problems)
 	{
-		this.variables = variables;
-		this.components = components;
-		this.functions = functions;
-		this.blocks = blocks;
-		this.atomicTypes = atomicTypes;
-		this.problems = problems;
+		this.variables = HashBiMap.create(Stream.of(variables).collect(Collectors.toMap(x->(String)x[0], x->(Value)x[1])));
+		this.components = HashBiMap.create(Stream.of(components).collect(Collectors.toMap(x->(String)x[0], x->(Component)x[1])));
+		this.functions = HashBiMap.create(Stream.of(functions).collect(Collectors.toMap(x->(String)x[0], x->(Function)x[1])));
+		this.blocks = HashBiMap.create(Stream.of(blocks).collect(Collectors.toMap(x->(String)x[0], x->(Block)x[1])));
+		this.atomicTypes = HashBiMap.create(Stream.of(atomicTypes).collect(Collectors.toMap(x->(String)x[0], x->(AtomicType)x[1])));
+		this.problems = HashBiMap.create(Stream.of(problems).collect(Collectors.toMap(x->(String)x[0], x->(Class<? extends Problem>)x[1])));
 	}
 	
 	public Value getValue(String name) {
@@ -537,7 +623,7 @@ public enum Library {
 	
 	public String getProblem(Class<? extends Problem> problem)
 	{
-		return problems.get(problem);
+		return problems.inverse().get(problem);
 	}
 	
 	public String name(Type type)
@@ -546,7 +632,7 @@ public enum Library {
 		{
 			var atomicType = (AtomicType) type;
 			
-			return atomicTypes.get(atomicType);
+			return atomicTypes.inverse().get(atomicType);
 		}
 		else if (type instanceof TypeVariable)
 		{
