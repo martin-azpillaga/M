@@ -28,11 +28,11 @@ public enum Library
 	value -> {switch(value)
 	{
 		case EPSILON: return "epsilon";
-		case DELTA_TIME: return ";";
-		case E: return "d";
-		case FIXED_DELTA_TIME: return "e";
-		case PI: return "f";
-		case TIME_SCALE: return "throw new UnsupportedOperationException";
+		case DELTA_TIME: return "deltaTime";
+		case E: return "e";
+		case FIXED_DELTA_TIME: return "fixedDeltaTime";
+		case PI: return "pi";
+		case TIME_SCALE: return "timeScale";
 		case TIME_SINCE_START: return "timeSinceStart";
 	} return "";},
 	component -> {switch(component)

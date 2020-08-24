@@ -159,13 +159,13 @@ public class ClassicUnity
 				if (!manifest.contains("\"com.unity.entities\""))
 				{
 					buffer.insert(index, "\"com.unity.entities\": \"0.11.1-preview.4\",");
+					fileSystem.generateFile("Packages/manifest.json", buffer.toString());
 				}
 				if (!manifest.contains("\"com.unity.inputsystem\""))
 				{
 					buffer.insert(index, "\"com.unity.inputsystem\": \"1.0.0\",");
+					fileSystem.generateFile("Packages/manifest.json", buffer.toString());
 				}
-				
-				fileSystem.generateFile("Packages/manifest.json", buffer.toString());
 			}
 		}
 		else
