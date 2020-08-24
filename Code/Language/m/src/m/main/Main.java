@@ -1,7 +1,11 @@
 package m.main;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -83,7 +87,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 {
 	LanguageClient client;
 	
-	List<Path> workspaces;
+	List<String> workspaces;
 	List<String> files;
 	
 	IParser parser;
@@ -160,18 +164,18 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		//capabilities.setCompletionProvider(new CompletionOptions());
 		//capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
 		
-		workspaces = new ArrayList<Path>();
+		workspaces = new ArrayList<String>();
 		files = new ArrayList<String>();
 		
 		for (var folder : params.getWorkspaceFolders())
 		{
-			var dir = Paths.get(folder.getUri().replace("file://", ""));
+			var dir = folder.getUri().replace("file://", "");
 			
 			workspaces.add(dir);
 			
 			try {
 				// Only in workspace folder
-				Files.list(dir).forEach(f -> 
+				Files.list(Paths.get(dir)).forEach(f -> 
 				{
 					if (f.toString().endsWith(".m"))
 					{
@@ -181,7 +185,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				});
 				
 				// Also subfolders
-				Files.walk(dir).forEach(f -> 
+				Files.walk(Paths.get(dir)).forEach(f -> 
 				{
 					if (f.toString().endsWith(".m"))
 					{
@@ -240,11 +244,11 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		write("changed workspace");
 		for (var added : params.getEvent().getAdded())
 		{
-			workspaces.add(Paths.get(added.getUri().replace("file://", "")));
+			workspaces.add(added.getUri().replace("file://", ""));
 		}
 		for (var removed : params.getEvent().getRemoved())
 		{
-			workspaces.remove(Paths.get(removed.getUri().replace("file://", "")));
+			workspaces.remove(removed.getUri().replace("file://", ""));
 		}
 	}
 	
@@ -422,12 +426,23 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	private void generateCode()
 	{
+		write("generator called");
 		var game = MValidator.game;
 		if (game == null) return;
 		
-		var path = Paths.get(workspaces.get(0).toString(), "m.project");
+		write("game is ok");
+		
+		Path path = null;
+		try {
+			path = Paths.get(URLDecoder.decode(workspaces.get(0), "UTF-8").replace("/c:/", "C:/").replace("/d:/", "D:/").replace("/e:/",  "E:/"), "m.project");
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		write("Finding project file: "+path.toString());
 
-		if (Files.exists(path))
+		if (new File(path.toString()).exists())
 		{
 			try
 			{
@@ -439,8 +454,11 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 						var unity = line.substring("Unity: ".length());
 						fileSystem.setOutputPath(unity);
 						
+						write("Generating code at: "+unity);
 
 						generator.generate(game, fileSystem, Engine.Unity);
+						
+						write("Generated");
 					}
 					else if (line.startsWith("Unreal: "))
 					{
@@ -464,8 +482,17 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		}
 		else
 		{
-			fileSystem.setOutputPath(workspaces.get(0).toString());
+			var defaultPath = "";
+			try {
+				defaultPath = java.net.URLDecoder.decode(Paths.get(workspaces.get(0), "src-gen", "ClassicUnity").toString(), "UTF-8");
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				write(e.getMessage());
+			}
+			write("Generating in default path: "+defaultPath);
+			fileSystem.setOutputPath(defaultPath);
 			generator.generate(game, fileSystem, Engine.Unity);
+			write("Generated");
 		}
 	}
 	
