@@ -1,25 +1,39 @@
 package m.validation;
 
-import java.nio.file.Paths;
-import java.util.*;
+import static m.m.MPackage.Literals.APPLICATION__NAME;
+import static m.m.MPackage.Literals.BINARY__OPERATOR;
+import static m.m.MPackage.Literals.BINDING_BLOCK__NAME;
+import static m.m.MPackage.Literals.BLOCK__NAME;
+import static m.m.MPackage.Literals.UNARY__OPERATOR;
 
-import org.eclipse.emf.common.util.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.eclipse.xtext.EcoreUtil2;
-import org.eclipse.xtext.resource.IContainer;
-import org.eclipse.xtext.resource.IResourceDescriptions;
 import org.eclipse.xtext.validation.Check;
-
-import com.google.inject.Inject;
 
 import m.generator.Game;
 import m.library.Library;
-import m.m.*;
+import m.m.Application;
+import m.m.Assignment;
+import m.m.Binary;
+import m.m.BindingBlock;
+import m.m.Block;
+import m.m.Cell;
+import m.m.Delegation;
+import m.m.Expression;
+import m.m.File;
+import m.m.Function;
+import m.m.Statement;
+import m.m.Unary;
+import m.m.Value;
+import m.main.InferenceData;
 import m.validation.problems.Problem;
 import m.validation.problems.ProblemMessage;
 import m.validation.problems.ProblemMessage.Severity;
 import m.validation.problems.errors.ReadOnly;
-
-import static m.m.MPackage.Literals.*;
 
 public class MValidator extends AbstractMValidator
 {
@@ -33,6 +47,53 @@ public class MValidator extends AbstractMValidator
 	public Game getGame()
 	{
 		return game;
+	}
+	
+	public InferenceData localValidate(File file)
+	{
+		map = new HashMap<>();
+		contexts = new HashMap<>();
+		
+		for (var library : Library.values())
+		{
+			currentProblems = new ArrayList<Problem>();
+			context = new Context(currentProblems, library);
+			map.put(library, currentProblems);
+			contexts.put(library, context);
+			this.currentLibrary = library;
+			
+			for (var function : file.getFunctions())
+			{
+				context.declareFunction(function);
+			}
+			// Can become a single pass if done with delayed checking
+			for (var cell : EcoreUtil2.getAllContentsOfType(file, Cell.class))
+			{
+				context.declareComponent(cell);
+			}
+			for (var function : file.getFunctions())
+			{
+				validate(function);
+			}
+		}
+		
+		var minProblems = Integer.MAX_VALUE;
+		List<Problem> list = null;
+		Library library = null;
+		
+		for (var entry : map.entrySet())
+		{
+			if (entry.getValue().size() < minProblems)
+			{
+				minProblems = entry.getValue().size();
+				list = entry.getValue();
+				library = entry.getKey();
+			}
+		}
+		
+		var minProblemContext = contexts.get(library);
+		
+		return minProblemContext.getInferenceData();
 	}
 	
 	@Check
