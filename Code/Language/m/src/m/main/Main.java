@@ -110,6 +110,8 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	static Main instance;
 	
+	List<CrossReference> crossReferences;
+	
 	public static void main(String[] arguments) throws IOException
 	{
 		var server = new Main();
@@ -143,6 +145,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		generator = injector.getInstance(MGenerator.class);
 		parser = injector.getInstance(IParser.class);
 		fileSystem = injector.getInstance(JavaIoFileSystemAccess.class);
+		crossReferences = new ArrayList<>();
 		
 		
 		var capabilities = new ServerCapabilities();
@@ -192,7 +195,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 								var inferenceData = validator.localValidate(file);
 								
 								workspace.files.put(f.toString(), inferenceData);
-								write(f.toString()+": "+inferenceData.nodes.size() + " nodes and "+inferenceData.components.size()+" components");
 							}
 						}
 						catch (FileNotFoundException e)
@@ -368,8 +370,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			e.printStackTrace();
 		}
 		
-		write(filePath + " changed");
-		
 		Workspace workspace = null;
 		var found = false;
 		for (var i = 0; i < workspaces.size() && !found; i++)
@@ -387,7 +387,22 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			return;
 		}
 		
-		write("workspace has "+workspace.files.size()+ " files");
+		// Delete previous crossReferences to this file
+		
+		for (var i = 0; i < crossReferences.size(); i++)
+		{
+			var crossReference = crossReferences.get(i);
+			if (crossReference.fileA.equals(filePath))
+			{
+				crossReference.nodeB.bindings.remove(crossReference.bindingB);
+				crossReferences.remove(crossReference);
+			}
+			else if (crossReference.fileB.equals(filePath))
+			{
+				crossReference.nodeA.bindings.remove(crossReference.bindingA);
+				crossReferences.remove(crossReference);
+			}
+		}
 		
 		var text = params.getContentChanges().get(0).getText();
 		var targetStream = new ByteArrayInputStream(text.getBytes());
@@ -415,24 +430,22 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			diagnostics.add(new Diagnostic(range, message));
 		}
 		
-		write("Found "+ parseResult.getSyntaxErrors() + " syntax errors");
-		
 		var file = (m.m.File) parseResult.getRootASTElement();
 		
 		var inferenceData = validator.localValidate(file);
-		
-		write("Validation complete");
 		
 		// Dangling references from files that reference nodes from previous versions of a file
 		workspace.files.put(filePath, inferenceData);
 		
 		var totalNodes = new ArrayList<ExpressionNode>();
 		var totalComponents = new HashMap<String, ExpressionNode>();
+		var definedIn = new HashMap<String,String>();
 		
 		var i = 0;
-		for (var data : workspace.files.values())
+		for (var entry : workspace.files.entrySet())
 		{
-			write("File "+i++);
+			var currentFile = entry.getKey();
+			var data = entry.getValue();
 			totalNodes.addAll(data.nodes);
 			
 			for (var component : data.components.keySet())
@@ -440,12 +453,28 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				var existing = totalComponents.get(component);
 				if (existing == null)
 				{
+					write(component+" defined in "+currentFile);
+					definedIn.put(component, currentFile);
 					totalComponents.put(component, data.components.get(component));
 				}
 				else
 				{
-					data.components.get(component).bindings.add(new Binding(existing, BindingReason.SAME_COMPONENT));
-					existing.bindings.add(new Binding(data.components.get(component), BindingReason.SAME_COMPONENT));
+					write("cross reference to "+ component);
+					var bindingA = new Binding(existing, BindingReason.SAME_COMPONENT);
+					var bindingB = new Binding(data.components.get(component), BindingReason.SAME_COMPONENT);
+					var crossReference = new CrossReference();
+					crossReference.fileA = currentFile;
+					crossReference.nodeA = data.components.get(component);
+					crossReference.bindingA = bindingA;
+					
+					crossReference.fileB = definedIn.get(component);
+					crossReference.nodeB = existing;
+					crossReference.bindingB = bindingB;
+					
+					crossReferences.add(crossReference);
+					
+					data.components.get(component).bindings.add(bindingA);
+					existing.bindings.add(bindingB);
 				}
 			}
 		}
@@ -461,7 +490,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			{
 				if (EcoreUtil2.getRoot(message.source, true) != file)
 				{
-					write("Node "+message.source+" is in another file");
 					continue;
 				}
 				var node = NodeModelUtils.getNode(message.source);
@@ -479,7 +507,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				case ERROR: severity = DiagnosticSeverity.Error; break;
 				}
 				var diagnostic = new Diagnostic(range, message.message, severity, "");
-				write("Diagnostic at "+node.getText()+" at "+range);
 				
 				diagnostics.add(diagnostic);
 				
@@ -501,7 +528,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 
 		if (!hasErrors)
 		{
-			write("Generate code");
 			//generateCode();
 		}
 		
@@ -509,52 +535,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		diagnostics.add(info);
 		var diagnosticParams = new PublishDiagnosticsParams(params.getTextDocument().getUri(),diagnostics);
 		client.publishDiagnostics(diagnosticParams);
-		/*
-		var issues = inferenceData.problems;
-		
-		var list = new ArrayList<Diagnostic>();
-		
-		for (var issue : issues)
-		{
-			var position = new Position(issue.getLineNumber()-1, issue.getColumn()-1);
-			var positionEnd = new Position(issue.getLineNumberEnd()-1, issue.getColumnEnd()-1);
-			
-			var range = new Range(position, positionEnd);
-			
-			var severity = DiagnosticSeverity.Information;
-			switch (issue.getSeverity())
-			{
-			case INFO: severity = DiagnosticSeverity.Information; break;
-			case WARNING: severity = DiagnosticSeverity.Warning; break;
-			case ERROR: severity = DiagnosticSeverity.Error; break;
-			case IGNORE: break;
-			}
-			
-			var diagnostic = new Diagnostic(range, issue.getMessage(), severity, "");
-			list.add(diagnostic);
-		}
-		
-		var hasErrors = false;
-		
-		for (var issue : issues)
-		{
-			if (issue.getSeverity() == Severity.ERROR)
-			{
-				hasErrors = true;
-			}
-		}
-
-		if (!hasErrors)
-		{
-			generateCode();
-		}
-		
-		
-		var info = new Diagnostic(new Range(new Position(0, 0), new Position(0,3)), "Thanks for using M", DiagnosticSeverity.Hint, "");
-		list.add(info);
-		var diagnostics = new PublishDiagnosticsParams(params.getTextDocument().getUri(),list);
-		client.publishDiagnostics(diagnostics);
-		*/
 	}
 
 	@Override
