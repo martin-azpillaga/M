@@ -126,6 +126,11 @@ public class InferenceGraph
 		return inference.get(get(a));
 	}
 	
+	public Type infer(ExpressionNode node)
+	{
+		return inference.get(node);
+	}
+	
 	private ExpressionNode get(Expression a)
 	{
 		var node = map.get(a);

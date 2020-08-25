@@ -315,6 +315,8 @@ public class Context {
 	
 	public InferenceData getInferenceData()
 	{
-		return inference.getInferenceData(userComponents);
+		var data = inference.getInferenceData(userComponents);
+		data.functions.putAll(userFunctions);
+		return data;
 	}
 }
