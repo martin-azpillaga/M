@@ -64,17 +64,20 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.generator.JavaIoFileSystemAccess;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.parser.IParser;
+import org.eclipse.xtext.resource.EObjectAtOffsetHelper;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
 
 import com.google.common.collect.HashBiMap;
+import com.google.inject.spi.Message;
 
 import m.MStandaloneSetup;
 import m.generator.Engine;
@@ -365,6 +368,8 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			e.printStackTrace();
 		}
 		
+		write(filePath + " changed");
+		
 		Workspace workspace = null;
 		var found = false;
 		for (var i = 0; i < workspaces.size() && !found; i++)
@@ -381,6 +386,8 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			write("Could not find workspace for "+ filePath);
 			return;
 		}
+		
+		write("workspace has "+workspace.files.size()+ " files");
 		
 		var text = params.getContentChanges().get(0).getText();
 		var targetStream = new ByteArrayInputStream(text.getBytes());
@@ -408,19 +415,25 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			diagnostics.add(new Diagnostic(range, message));
 		}
 		
+		write("Found "+ parseResult.getSyntaxErrors() + " syntax errors");
+		
 		var file = (m.m.File) parseResult.getRootASTElement();
 		
 		var inferenceData = validator.localValidate(file);
 		
+		write("Validation complete");
 		
+		// Dangling references from files that reference nodes from previous versions of a file
 		workspace.files.put(filePath, inferenceData);
 		
 		var totalNodes = new ArrayList<ExpressionNode>();
 		var totalComponents = new HashMap<String, ExpressionNode>();
 		
+		var i = 0;
 		for (var data : workspace.files.values())
 		{
-			totalNodes.addAll(inferenceData.nodes);
+			write("File "+i++);
+			totalNodes.addAll(data.nodes);
 			
 			for (var component : data.components.keySet())
 			{
@@ -432,6 +445,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				else
 				{
 					data.components.get(component).bindings.add(new Binding(existing, BindingReason.SAME_COMPONENT));
+					existing.bindings.add(new Binding(data.components.get(component), BindingReason.SAME_COMPONENT));
 				}
 			}
 		}
@@ -439,11 +453,23 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		var inference = new InferenceGraph(totalNodes);
 		var problems = inference.check();
 		
+		write("Inference problems: "+problems.size());
+		
 		for (var problem : problems)
 		{
 			for (var message : problem.messages(Library.ENGLISH))
 			{
+				if (EcoreUtil2.getRoot(message.source, true) != file)
+				{
+					write("Node "+message.source+" is in another file");
+					continue;
+				}
 				var node = NodeModelUtils.getNode(message.source);
+				if (node == null)
+				{
+					write("Node for "+message.source+ "not found");
+					continue;
+				}
 				var range = new Range(new Position(node.getStartLine()-1, character(text,node.getOffset())), new Position(node.getEndLine()-1, character(text,node.getEndOffset())));
 				var severity = DiagnosticSeverity.Information;
 				switch (message.severity)
@@ -460,11 +486,29 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			}
 		}
 		
+		var hasErrors = false;
+		
+		for (var issue : problems)
+		{
+			for (var message : issue.messages(Library.ENGLISH))
+			{
+				if (message.severity == m.validation.problems.ProblemMessage.Severity.ERROR)
+				{
+					hasErrors = true;
+				}
+			}
+		}
+
+		if (!hasErrors)
+		{
+			write("Generate code");
+			//generateCode();
+		}
+		
 		var info = new Diagnostic(new Range(new Position(0, 0), new Position(0,3)), "Thanks for using M", DiagnosticSeverity.Hint, "");
 		diagnostics.add(info);
 		var diagnosticParams = new PublishDiagnosticsParams(params.getTextDocument().getUri(),diagnostics);
 		client.publishDiagnostics(diagnosticParams);
-		
 		/*
 		var issues = inferenceData.problems;
 		
