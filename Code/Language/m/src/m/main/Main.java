@@ -2,7 +2,10 @@ package m.main;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
@@ -11,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -75,29 +79,38 @@ import com.google.common.collect.HashBiMap;
 import m.MStandaloneSetup;
 import m.generator.Engine;
 import m.generator.MGenerator;
+import m.library.Library;
 import m.library.symbols.Component;
 import m.m.Assignment;
 import m.m.Block;
 import m.m.Cell;
 import m.m.Function;
 import m.m.Value;
+import m.validation.InferenceGraph;
 import m.validation.MValidator;
+import m.validation.problems.errors.IncompatibleTypes;
+import m.validation.problems.errors.UndecidableType;
+import m.validation.rules.Binding;
+import m.validation.rules.Binding.BindingReason;
+import m.validation.rules.ExpressionNode;
 
 public class Main implements LanguageServer, LanguageClientAware, TextDocumentService, WorkspaceService
 {
 	LanguageClient client;
 	
-	List<String> workspaces;
-	List<String> files;
+	List<Workspace> workspaces;
 	
 	IParser parser;
 	MValidator validator;
 	MGenerator generator;
 	JavaIoFileSystemAccess fileSystem;
 	
+	static Main instance;
+	
 	public static void main(String[] arguments) throws IOException
 	{
 		var server = new Main();
+		instance = server;
 		var launcher = LSPLauncher.createServerLauncher(server, System.in, System.out);
 		var client = launcher.getRemoteProxy();
 		
@@ -106,7 +119,12 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		launcher.startListening();
 	}
 	
-	public void write(String message)
+	public static void writeMessage(String message)
+	{
+		instance.write(message);
+	}
+	
+	private void write(String message)
 	{
 		if (client != null)
 		{
@@ -123,77 +141,66 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		parser = injector.getInstance(IParser.class);
 		fileSystem = injector.getInstance(JavaIoFileSystemAccess.class);
 		
-		/* Asynchronous wait
-		var p = new ShowMessageRequestParams();
-		p.setMessage("click me");
-		p.setType(MessageType.Warning);
-		var list = new ArrayList<MessageActionItem>();
-		list.add(new MessageActionItem("Here we go"));
-		p.setActions(list);
-		try {
-			var selected = client.showMessageRequest(p);
-			write(selected.get(5l, java.util.concurrent.TimeUnit.SECONDS).getTitle());
-		} catch (InterruptedException | ExecutionException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (TimeoutException e) {
-			write("Timeoput");
-			e.printStackTrace();
-		}
-		*/
-		
-		/* Apply edit to remove a file
-		 * 
-		 
-		var edit = new WorkspaceEdit();
-		var operation = new DeleteFile("");
-		var operations = new ArrayList<Either<TextDocumentEdit,ResourceOperation>>();
-		operations.add(Either.forRight(operation));
-		edit.setDocumentChanges(operations);
-		client.applyEdit(new ApplyWorkspaceEditParams(edit));
-		*/
-		
-		var commands = new ArrayList<String>();
-		commands.add("Go");
-		
 		
 		var capabilities = new ServerCapabilities();
 		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
-		
 		//capabilities.setHoverProvider(true);
 		//capabilities.setCompletionProvider(new CompletionOptions());
 		//capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
 		
-		workspaces = new ArrayList<String>();
-		files = new ArrayList<String>();
+		workspaces = new ArrayList<>();
 		
 		for (var folder : params.getWorkspaceFolders())
 		{
-			var dir = folder.getUri().replace("file://", "");
-			
-			workspaces.add(dir);
-			
+			String root = "";
 			try {
-				// Only in workspace folder
-				Files.list(Paths.get(dir)).forEach(f -> 
-				{
-					if (f.toString().endsWith(".m"))
-					{
-						files.add(f.toString());
-						//write(f.toString());
-					}
-				});
-				
-				// Also subfolders
-				Files.walk(Paths.get(dir)).forEach(f -> 
-				{
-					if (f.toString().endsWith(".m"))
-					{
-						//write(f.toString());
-					}
-				});
-			} catch (IOException e) {
+				root = URLDecoder.decode(folder.getUri().replace("file://", ""),"UTF-8");
+			} catch (UnsupportedEncodingException e1) {
 				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			
+			var workspace = new Workspace(root);
+			workspaces.add(workspace);
+			
+			try
+			{
+				Files.walk(Paths.get(root)).forEach(f -> 
+				{
+					if (f.toString().endsWith(".m"))
+					{
+						try
+						{
+							var parseResult = parser.parse(new InputStreamReader(new FileInputStream(f.toString())));
+							for (var syntaxError : parseResult.getSyntaxErrors())
+							{
+								write(f.toString()+": "+syntaxError.toString());
+							}
+							
+							var file = (m.m.File) parseResult.getRootASTElement();
+							
+							if (file == null)
+							{
+								workspace.files.put(f.toString(), new InferenceData());
+								write(f.toString()+": empty");
+							}
+							else
+							{
+								var inferenceData = validator.localValidate(file);
+								
+								workspace.files.put(f.toString(), inferenceData);
+								write(f.toString()+": "+inferenceData.nodes.size() + " nodes and "+inferenceData.components.size()+" components");
+							}
+						}
+						catch (FileNotFoundException e)
+						{
+							e.printStackTrace();
+						}
+					}
+				});
+			}
+			catch (IOException e)
+			{
 				e.printStackTrace();
 			}
 		}
@@ -244,7 +251,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		write("changed workspace");
 		for (var added : params.getEvent().getAdded())
 		{
-			workspaces.add(added.getUri().replace("file://", ""));
+			//workspaces.add(added.getUri().replace("file://", ""));
 		}
 		for (var removed : params.getEvent().getRemoved())
 		{
@@ -265,11 +272,11 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		{
 			if (change.getType() == FileChangeType.Created)
 			{
-				files.add(change.getUri().replace("file://", ""));
+				//files.add(change.getUri().replace("file://", ""));
 			}
 			else if (change.getType() == FileChangeType.Deleted)
 			{
-				files.remove(change.getUri().replace("file://", ""));
+				//files.remove(change.getUri().replace("file://", ""));
 			}
 		}
 	}
@@ -302,6 +309,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params)
 	{
+		/*
 		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
 		var resourceSet = injector.getInstance(ResourceSet.class);
 		var validator = injector.getInstance(IResourceValidator.class);
@@ -341,31 +349,124 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		var info = new Diagnostic(new Range(new Position(0, 0), new Position(0,3)), "Thanks for using M", DiagnosticSeverity.Hint, "");
 		list.add(info);
 		var diagnostics = new PublishDiagnosticsParams(params.getTextDocument().getUri(),list);
-		client.publishDiagnostics(diagnostics);
+		client.publishDiagnostics(diagnostics);*/
 	}
 
 	@Override
 	public void didChange(DidChangeTextDocumentParams params)
 	{
-		// Update file content in memory
+		String filePath = "";
+		try
+		{
+			filePath = URLDecoder.decode(params.getTextDocument().getUri().replace("file://", ""), "UTF-8");
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			e.printStackTrace();
+		}
+		
+		Workspace workspace = null;
+		var found = false;
+		for (var i = 0; i < workspaces.size() && !found; i++)
+		{
+			if (filePath.startsWith(workspaces.get(i).root))
+			{
+				workspace = workspaces.get(i);
+				found = true;
+			}
+		}
+		
+		if (workspace == null)
+		{
+			write("Could not find workspace for "+ filePath);
+			return;
+		}
 		
 		var text = params.getContentChanges().get(0).getText();
 		var targetStream = new ByteArrayInputStream(text.getBytes());
-
+		var diagnostics = new ArrayList<Diagnostic>();
 		
-		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
-		var resourceSet = injector.getInstance(ResourceSet.class);
-		var validator = injector.getInstance(IResourceValidator.class);
+		var parseResult = parser.parse(new InputStreamReader(targetStream));
 		
-		XtextResource resource = null;
-		try {
-			resource = (XtextResource) resourceSet.createResource(URI.createURI(params.getTextDocument().getUri()));
-			resource.load(targetStream,null);
-		} catch (IOException e) {
+		for (var syntaxError : parseResult.getSyntaxErrors())
+		{
+			var character = character(text, syntaxError.getOffset());
+			var endCharacter = character(text, syntaxError.getEndOffset());
 			
+			var position = new Position(syntaxError.getStartLine()-1, character);
+			var positionEnd = new Position(syntaxError.getStartLine()-1, Math.max(endCharacter, character+1));
+			
+			var range = new Range(position, positionEnd);
+			
+			var message = syntaxError.getSyntaxErrorMessage().getMessage();
+			
+			if (message.equals("mismatched input '<EOF>' expecting '}'"))
+			{
+				message = "Introduce another statement or \nWrite } to finish statements";
+			}
+			
+			diagnostics.add(new Diagnostic(range, message));
 		}
 		
-		var issues = validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl);
+		var file = (m.m.File) parseResult.getRootASTElement();
+		
+		var inferenceData = validator.localValidate(file);
+		
+		
+		workspace.files.put(filePath, inferenceData);
+		
+		var totalNodes = new ArrayList<ExpressionNode>();
+		var totalComponents = new HashMap<String, ExpressionNode>();
+		
+		for (var data : workspace.files.values())
+		{
+			totalNodes.addAll(inferenceData.nodes);
+			
+			for (var component : data.components.keySet())
+			{
+				var existing = totalComponents.get(component);
+				if (existing == null)
+				{
+					totalComponents.put(component, data.components.get(component));
+				}
+				else
+				{
+					data.components.get(component).bindings.add(new Binding(existing, BindingReason.SAME_COMPONENT));
+				}
+			}
+		}
+		
+		var inference = new InferenceGraph(totalNodes);
+		var problems = inference.check();
+		
+		for (var problem : problems)
+		{
+			for (var message : problem.messages(Library.ENGLISH))
+			{
+				var node = NodeModelUtils.getNode(message.source);
+				var range = new Range(new Position(node.getStartLine()-1, character(text,node.getOffset())), new Position(node.getEndLine()-1, character(text,node.getEndOffset())));
+				var severity = DiagnosticSeverity.Information;
+				switch (message.severity)
+				{
+				case INFO: severity = DiagnosticSeverity.Information; break;
+				case WARNING: severity = DiagnosticSeverity.Warning; break;
+				case ERROR: severity = DiagnosticSeverity.Error; break;
+				}
+				var diagnostic = new Diagnostic(range, message.message, severity, "");
+				write("Diagnostic at "+node.getText()+" at "+range);
+				
+				diagnostics.add(diagnostic);
+				
+			}
+		}
+		
+		var info = new Diagnostic(new Range(new Position(0, 0), new Position(0,3)), "Thanks for using M", DiagnosticSeverity.Hint, "");
+		diagnostics.add(info);
+		var diagnosticParams = new PublishDiagnosticsParams(params.getTextDocument().getUri(),diagnostics);
+		client.publishDiagnostics(diagnosticParams);
+		
+		/*
+		var issues = inferenceData.problems;
 		
 		var list = new ArrayList<Diagnostic>();
 		
@@ -409,6 +510,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		list.add(info);
 		var diagnostics = new PublishDiagnosticsParams(params.getTextDocument().getUri(),list);
 		client.publishDiagnostics(diagnostics);
+		*/
 	}
 
 	@Override
@@ -426,19 +528,25 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	private void generateCode()
 	{
+		/* Apply edit to remove a file
+		 * 
+		 
+		var edit = new WorkspaceEdit();
+		var operation = new DeleteFile("");
+		var operations = new ArrayList<Either<TextDocumentEdit,ResourceOperation>>();
+		operations.add(Either.forRight(operation));
+		edit.setDocumentChanges(operations);
+		client.applyEdit(new ApplyWorkspaceEditParams(edit));
+		*/
+		
 		write("generator called");
 		var game = MValidator.game;
 		if (game == null) return;
 		
 		write("game is ok");
 		
-		Path path = null;
-		try {
-			path = Paths.get(URLDecoder.decode(workspaces.get(0), "UTF-8").replace("/c:/", "C:/").replace("/d:/", "D:/").replace("/e:/",  "E:/"), "m.project");
-		} catch (UnsupportedEncodingException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		Path path = Paths.get(workspaces.get(0).root.replace("/c:/", "C:/").replace("/d:/", "D:/").replace("/e:/",  "E:/"), "m.project");
+		
 		
 		write("Finding project file: "+path.toString());
 
@@ -482,13 +590,8 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		}
 		else
 		{
-			var defaultPath = "";
-			try {
-				defaultPath = java.net.URLDecoder.decode(Paths.get(workspaces.get(0), "src-gen", "ClassicUnity").toString(), "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				write(e.getMessage());
-			}
+			var defaultPath = Paths.get(workspaces.get(0).root, "src-gen", "ClassicUnity").toString();
+			
 			write("Generating in default path: "+defaultPath);
 			fileSystem.setOutputPath(defaultPath);
 			generator.generate(game, fileSystem, Engine.Unity);
@@ -657,6 +760,20 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		var node = NodeModelUtils.findLeafNodeAtOffset(parseResult.getRootNode(), offset);
 		
 		return node;
+	}
+	
+	private int character(String text, int offset)
+	{
+		var count = 0;
+		for (var i = 0; i < offset; i++)
+		{
+			count++;
+			if (text.charAt(i) == '\n')
+			{
+				count = 0;
+			}
+		}
+		return count;
 	}
 	
 	

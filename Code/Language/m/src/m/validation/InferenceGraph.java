@@ -8,7 +8,10 @@ import java.util.Map;
 import java.util.Stack;
 
 import m.library.types.Type;
+import m.m.Cell;
 import m.m.Expression;
+import m.main.InferenceData;
+import m.main.Main;
 import m.validation.problems.Problem;
 import m.validation.problems.errors.IncompatibleTypes;
 import m.validation.problems.errors.UndecidableType;
@@ -28,6 +31,12 @@ public class InferenceGraph
 		list = new ArrayList<>();
 		map = new HashMap<>();
 		inference = new HashMap<>();
+	}
+	
+	public InferenceGraph(List<ExpressionNode> nodes)
+	{
+		this.list = nodes;
+		this.inference = new HashMap<>();
 	}
 	
 	public void bind(Expression a, Expression b, BindingReason reason)
@@ -127,5 +136,21 @@ public class InferenceGraph
 			map.put(a, node);
 		}
 		return node;
+	}
+	
+	public InferenceData getInferenceData(Map<String, Cell> components)
+	{
+		var data = new InferenceData();
+		
+		data.nodes.addAll(this.list);
+		
+		for (var component : components.entrySet())
+		{
+			var node = map.get(component.getValue());
+			
+			data.components.put(component.getKey(), node);
+		}
+		
+		return data;
 	}
 }
