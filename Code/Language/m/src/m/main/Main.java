@@ -81,6 +81,7 @@ import com.google.inject.spi.Message;
 
 import m.MStandaloneSetup;
 import m.generator.Engine;
+import m.generator.Game;
 import m.generator.MGenerator;
 import m.library.Library;
 import m.library.symbols.Component;
@@ -439,6 +440,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		
 		var totalNodes = new ArrayList<ExpressionNode>();
 		var totalComponents = new HashMap<String, ExpressionNode>();
+		var totalFunctions = new HashMap<String, Function>();
 		var definedIn = new HashMap<String,String>();
 		
 		var i = 0;
@@ -476,6 +478,11 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 					data.components.get(component).bindings.add(bindingA);
 					existing.bindings.add(bindingB);
 				}
+			}
+			
+			for (var function : data.functions.entrySet())
+			{
+				totalFunctions.put(function.getKey(), function.getValue());
 			}
 		}
 		
@@ -525,10 +532,33 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				}
 			}
 		}
+		
+		write("hasErrors: "+hasErrors);
 
 		if (!hasErrors)
 		{
-			//generateCode();
+			var game = new Game();
+			
+			for (var component : totalComponents.entrySet())
+			{
+				var type = inference.infer(component.getValue());
+				if (type != null)
+				{
+					game.components.put(component.getKey(), type);
+				}
+			}
+			
+			for (var function : totalFunctions.values())
+			{
+				game.systems.add(function);
+			}
+			
+			game.library = Library.ENGLISH;
+			game.inference = inference;
+			
+			write("Call generate");
+			
+			generateCode(game);
 		}
 		
 		var info = new Diagnostic(new Range(new Position(0, 0), new Position(0,3)), "Thanks for using M", DiagnosticSeverity.Hint, "");
@@ -550,7 +580,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	}
 	
 	
-	private void generateCode()
+	private void generateCode(Game game)
 	{
 		/* Apply edit to remove a file
 		 * 
@@ -562,12 +592,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		edit.setDocumentChanges(operations);
 		client.applyEdit(new ApplyWorkspaceEditParams(edit));
 		*/
-		
-		write("generator called");
-		var game = MValidator.game;
-		if (game == null) return;
-		
-		write("game is ok");
 		
 		Path path = Paths.get(workspaces.get(0).root.replace("/c:/", "C:/").replace("/d:/", "D:/").replace("/e:/",  "E:/"), "m.project");
 		
