@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Pong | Project M</title>
+    <meta name="generator" content="VuePress 1.5.4">
+    
+    <meta name="description" content="A data-driven programming language for game developers">
+    <link rel="preload" href="/assets/css/0.styles.7f79b7ea.css" as="style"><link rel="preload" href="/assets/js/app.58246eed.js" as="script"><link rel="preload" href="/assets/js/2.09ea20ae.js" as="script"><link rel="preload" href="/assets/js/16.419d6364.js" as="script"><link rel="prefetch" href="/assets/js/10.a00b7967.js"><link rel="prefetch" href="/assets/js/11.b8065b65.js"><link rel="prefetch" href="/assets/js/12.0dde2e9e.js"><link rel="prefetch" href="/assets/js/13.0dc88554.js"><link rel="prefetch" href="/assets/js/14.22220a83.js"><link rel="prefetch" href="/assets/js/15.b9fdfd33.js"><link rel="prefetch" href="/assets/js/17.5072f7ae.js"><link rel="prefetch" href="/assets/js/18.16f41493.js"><link rel="prefetch" href="/assets/js/19.60763de3.js"><link rel="prefetch" href="/assets/js/20.34b1af12.js"><link rel="prefetch" href="/assets/js/21.eb91a2a5.js"><link rel="prefetch" href="/assets/js/22.c63b1308.js"><link rel="prefetch" href="/assets/js/23.80f7ad8f.js"><link rel="prefetch" href="/assets/js/24.58e60bd0.js"><link rel="prefetch" href="/assets/js/25.46eb3096.js"><link rel="prefetch" href="/assets/js/26.ea6096ae.js"><link rel="prefetch" href="/assets/js/27.b84010f6.js"><link rel="prefetch" href="/assets/js/28.61bc8a4c.js"><link rel="prefetch" href="/assets/js/29.0535ec86.js"><link rel="prefetch" href="/assets/js/3.0becae8a.js"><link rel="prefetch" href="/assets/js/30.d3b26fe6.js"><link rel="prefetch" href="/assets/js/31.c3b5360b.js"><link rel="prefetch" href="/assets/js/32.47d75025.js"><link rel="prefetch" href="/assets/js/33.46f5dd44.js"><link rel="prefetch" href="/assets/js/34.1b7b5a7c.js"><link rel="prefetch" href="/assets/js/35.ec2b612e.js"><link rel="prefetch" href="/assets/js/36.2d035c9e.js"><link rel="prefetch" href="/assets/js/37.a14945ab.js"><link rel="prefetch" href="/assets/js/38.52da2884.js"><link rel="prefetch" href="/assets/js/4.6d883f6b.js"><link rel="prefetch" href="/assets/js/5.71922889.js"><link rel="prefetch" href="/assets/js/6.339d378f.js"><link rel="prefetch" href="/assets/js/7.79b10682.js"><link rel="prefetch" href="/assets/js/8.439e8c27.js"><link rel="prefetch" href="/assets/js/9.185dea49.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.7f79b7ea.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://avatars2.githubusercontent.com/u/6147446?s=400&amp;u=c325f5bfc187e889f05cc872681ad1cb1ba6b3b5&amp;v=4" alt="Project M" class="logo"> <span class="site-name can-hide">Project M</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/0. Starter guide/0. Set up.html" class="nav-link">
+  Starter guide
+</a></div><div class="nav-item"><a href="/1. User guide/0. How to/0. Transforms.html" class="nav-link">
+  User guide
+</a></div><div class="nav-item"><a href="/2. Developer guide/0. Philosophy/0. Motivation.html" class="nav-link">
+  Developer guide
+</a></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/0. Starter guide/0. Set up.html" class="nav-link">
+  Starter guide
+</a></div><div class="nav-item"><a href="/1. User guide/0. How to/0. Transforms.html" class="nav-link">
+  User guide
+</a></div><div class="nav-item"><a href="/2. Developer guide/0. Philosophy/0. Motivation.html" class="nav-link">
+  Developer guide
+</a></div> <!----></nav>  <ul class="sidebar-links"><li><section class="sidebar-group collapsable depth-0"><p class="sidebar-heading open"><span>How to</span> <span class="arrow down"></span></p> <ul class="sidebar-links sidebar-group-items"><li><a href="/1. User guide/0. How to/0. Transforms.html" class="sidebar-link">Transforms</a></li><li><a href="/1. User guide/0. How to/1. Rendering.html" class="sidebar-link">Rendering</a></li></ul></section></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="pong"><a href="#pong" class="header-anchor">#</a> Pong</h1> <p>In this document you will create a clone of the classic game of Pong by Atari.
+You will learn the basics of rendering entities and moving them through physical
+properties like mass and restitution. Then, you will be able to detect
+collisions and add gameplay features accordingly.</p> <h2 id="five-influential-games"><a href="#five-influential-games" class="header-anchor">#</a> Five influential games</h2> <p>As example games we have selected some of the most influential, iconic and
+successful games in their era. Small in scope but still interesting enough to
+illustrate the different aspects the language M is capable of.</p> <p>You can start with the classic game of <a href="/1. User guide/1. Guided examples/0. Pong.html">Pong</a>, developed by Atari in 1972, where
+you will learn the basics of entity and system creation and physics
+interactions.</p> <p>Next is the <a href="/1. User guide/1. Guided examples/1. Space invaders.html">Space Invaders</a> game, developed by Tomohiro Nishikado and
+distributed by Taito in 1978. You will learn about batch creation of entities,
+creation and destruction of entities in runtime.</p> <p>For the 80's era we have chosen the well known <a href="/1. User guide/1. Guided examples/2. Pacman.html">Pacman</a> and <a href="/1. User guide/1. Guided examples/3. Mario.html">Mario</a>. In Pacman
+you can learn how to use reinforcement learning AI techniques and in Mario how
+to design diverse levels.</p> <p>For the 90's we enter the era of 3D graphics. To showcase this ability, we have
+created a demo of <a href="/1. User guide/1. Guided examples/4. Crash Bandicoot.html">Crash Bandicoot</a>, developed by Naughty Dog, that combines all
+the concepts in a three dimensional game.</p> <h2 id="prerequisites"><a href="#prerequisites" class="header-anchor">#</a> Prerequisites</h2> <p>Before starting this tutorial we recommend checking the [rendering] and
+[physics] tutorials.</p> <h2 id="final-result"><a href="#final-result" class="header-anchor">#</a> Final result</h2> <p>You can download the resulting project in each interface here:</p> <ul><li>[English text]</li> <li>[Euskara]</li> <li>[Blockly blocks]</li> <li>[Unity zip]</li></ul> <h3 id="let-s-start"><a href="#let-s-start" class="header-anchor">#</a> Let's start</h3> <p>As discussed in [key concepts], the entities store all the data of the game.
+This includes visual entities such as the ball but also non visual elements like
+the game rules.</p> <p>First, we will identify all the entities in Pong. We have the ball, the two
+paddles that the players can control, the top and bottom wall, the two goals,
+the score counters and an extra entity for holding the game rules.</p> <p>Some of these entities have a lot of data in common. For example, the top and
+bottom wall differ in their position, but their scale and physical properties
+are the same. Instead of creating all entities from scratch, we will define a
+prefab and create two variants of that prefab as our final walls.</p> <p>What data do we need to define a wall? This depends on the abstraction we make.
+In this example, we have decided that we will need a position, scale and a
+sprite. Since the position changes in the instances we will add the common
+elements:</p> <p>We will start by defining the visual properties of the entities. Then, continue
+with the physical ones.</p> <div class="language-text extra-class"><pre class="language-text"><code>    &quot;wall&quot;
+    {
+        scale 100 2, sprite &quot;wall&quot;
+    }
+</code></pre></div><p>Now our walls will be visible. To interact with the walls, we will need to add
+physical properties to them. We will add a box collider to detect collisions
+with other physical bodies and avoid penetrations and a restitution value of 1
+to make the collision bouncy.</p> <div class="language-m extra-class"><pre class="language-text"><code>    wall has
+    {
+        scale 100 2, sprite wall,
+        extent 1 1, restitution 1
+    }
+</code></pre></div><p>Notice that the size of the box collider is relative to the scale of the entity.</p> <p>Let us continue with the ball.</p> <div class="language-m extra-class"><pre class="language-text"><code>    ball has
+    {
+        scale 2 2, sprite ball,
+        radius 0.5, restitution 1
+    }
+</code></pre></div><p>It's like a wall, except it uses a circle collider with a radius that fits its
+scale. The ball takes part in more interactions, and as such we must add more
+data to it.</p> <p>Tag components are useful to mark entities that take part in certain
+interactions. We can distinguish if a system will process an entity by looking
+whether it contains a tag or not. In pong, we want the ball to be part of the
+serving, scoring and spawning interactions. For simplicity, we will add a tag
+for each of those interactions.</p> <div class="language-m extra-class"><pre class="language-text"><code>    ball has
+    {
+        scale 2 2, sprite ball,
+        radius 0.5, restitution 1,
+        serveTag, scoreTag, spawnTag,
+        spawnPosition 0 1
+    }
+</code></pre></div><p>Ending the components with the word Tag is not necessary, it's a naming
+convention. The particular thing about tags is that they don't carry any data,
+making them specially efficient to filter.</p> <p>For the paddle, we need to include some sort of input controls to control its
+movement. We will create a component that holds the name of the input that will
+control the paddle, in this case, the left stick Y axis of the gamepad. Also,
+the direction component will control in which direction moves this paddle, its
+modulus being the speed.</p> <div class="language-m extra-class"><pre class="language-text"><code>paddle has
+{
+    scale 2 5, sprite paddle,
+    extent 1 1, restitution 1,
+    motion gamepad left Y, direction 0 10
+}
+</code></pre></div><p>Make sure that the code compiles and you can open the project in the game
+engine. You should see the entity prefabs under the Design/Prefabs/ folder. Next
+we will add our first system for interaction:</p> <div class="language-m extra-class"><pre class="language-text"><code>    control
+    {
+        for all entity paddle
+        {
+            paddle.velocity = paddle.direction * paddle.motionValue
+        }
+    }
+</code></pre></div><div class="language-m extra-class"><pre class="language-text"><code>spawn
+{
+    for all entity collision with enterCollision
+    {
+        if has(collision.first, spawnTag)
+        {
+            collision.first.position = collision.first.spawnPosition
+        }
+    }
+}
+</code></pre></div><div class="language-m extra-class"><pre class="language-text"><code>    serve
+    {
+        for all entity ball with serveTag
+        {
+            angle = random(ball.angleRange)
+
+            ball.velocity = join(cos(angle),sin(angle)) * random(ball.lengthRange)
+        }
+    }
+</code></pre></div><div class="language-m extra-class"><pre class="language-text"><code>    score
+    {
+        for all entity collision with enterCollision
+        {
+            if has(collision.first, scoreTag)
+            {
+                for all entity board
+                {
+                    if board.team = collision.second.team
+                    {
+                        board.score += collision.second.worth
+                    }
+                }
+            }
+        }
+    }
+</code></pre></div><div class="language-m extra-class"><pre class="language-text"><code>    restart
+    {
+        for all entity rules
+        {
+            for all entity board
+            {
+                if board.score &gt;= rules.maximumScore
+                {
+                    count++
+                }
+            }
+
+            if count &gt;= rules.minimumBoardsOverScore
+            {
+                for all entity any
+                {
+                    destroy(any)
+                }
+
+                create(rules.scene)
+            }
+        }
+    }
+</code></pre></div><h3 id="new-way"><a href="#new-way" class="header-anchor">#</a> New way</h3> <div class="language-{.set .pong .main.m} extra-class"><pre class="language-text"><code>control ≔
+[
+    ∀ a
+    [
+        a.velocity ≔ a.baseVelocity × a.inputValue
+    ]
+]
+
+serve ≔
+[
+    ∀ a | has[serveSignal, a]
+    [
+        α ≔ random[a.serveAngle]
+        l ≔ random[a.serveLength] + a.z
+        a.velocity ≔ [cos[α], sin[α], a.z] × l
+        remove[serveSignal, a]
+    ]
+]
+
+respawn ≔
+[
+    ∀ a | has[respawnApplier, a]
+    [
+        ∀ b | b ∈ a.collisions
+        [
+            b.position ≔ b.respawnPosition
+            add[serveSignal, b]
+        ]
+    ]
+]
+
+score ≔
+[
+    ∀ a | has[scoreApplier, a]
+    [
+        ∀ b | b ∈ a.collisions
+        [
+            b.number ≔ b.number + b.worth
+        ]
+    ]
+]
+
+restart ≔
+[
+    A ≔ { z | z.number &gt; z.maxNumber }
+    ∀ a | #A &gt; a.requiredBoardsToReset
+    [
+        ∀ b
+        [
+            b.number ≔ b.resetNumber
+        ]
+    ]
+]
+</code></pre></div><h3 id="what-s-next"><a href="#what-s-next" class="header-anchor">#</a> What's next</h3> <p>Offer little exercises or the next tutorial.</p> <h3 id="have-questions"><a href="#have-questions" class="header-anchor">#</a> Have questions</h3> <p>Post them somewhere, open an issue?</p></div> <footer class="page-edit"><!----> <div class="last-updated"><span class="prefix">Last Updated:</span> <span class="time">5/21/2020, 7:33:00 PM</span></div></footer> <!----> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.58246eed.js" defer></script><script src="/assets/js/2.09ea20ae.js" defer></script><script src="/assets/js/16.419d6364.js" defer></script>
+  </body>
+</html>

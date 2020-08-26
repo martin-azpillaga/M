@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Continuous deployment | Project M</title>
+    <meta name="generator" content="VuePress 1.5.4">
+    
+    <meta name="description" content="A data-driven programming language for game developers">
+    <link rel="preload" href="/assets/css/0.styles.7f79b7ea.css" as="style"><link rel="preload" href="/assets/js/app.58246eed.js" as="script"><link rel="preload" href="/assets/js/2.09ea20ae.js" as="script"><link rel="preload" href="/assets/js/32.47d75025.js" as="script"><link rel="prefetch" href="/assets/js/10.a00b7967.js"><link rel="prefetch" href="/assets/js/11.b8065b65.js"><link rel="prefetch" href="/assets/js/12.0dde2e9e.js"><link rel="prefetch" href="/assets/js/13.0dc88554.js"><link rel="prefetch" href="/assets/js/14.22220a83.js"><link rel="prefetch" href="/assets/js/15.b9fdfd33.js"><link rel="prefetch" href="/assets/js/16.419d6364.js"><link rel="prefetch" href="/assets/js/17.5072f7ae.js"><link rel="prefetch" href="/assets/js/18.16f41493.js"><link rel="prefetch" href="/assets/js/19.60763de3.js"><link rel="prefetch" href="/assets/js/20.34b1af12.js"><link rel="prefetch" href="/assets/js/21.eb91a2a5.js"><link rel="prefetch" href="/assets/js/22.c63b1308.js"><link rel="prefetch" href="/assets/js/23.80f7ad8f.js"><link rel="prefetch" href="/assets/js/24.58e60bd0.js"><link rel="prefetch" href="/assets/js/25.46eb3096.js"><link rel="prefetch" href="/assets/js/26.ea6096ae.js"><link rel="prefetch" href="/assets/js/27.b84010f6.js"><link rel="prefetch" href="/assets/js/28.61bc8a4c.js"><link rel="prefetch" href="/assets/js/29.0535ec86.js"><link rel="prefetch" href="/assets/js/3.0becae8a.js"><link rel="prefetch" href="/assets/js/30.d3b26fe6.js"><link rel="prefetch" href="/assets/js/31.c3b5360b.js"><link rel="prefetch" href="/assets/js/33.46f5dd44.js"><link rel="prefetch" href="/assets/js/34.1b7b5a7c.js"><link rel="prefetch" href="/assets/js/35.ec2b612e.js"><link rel="prefetch" href="/assets/js/36.2d035c9e.js"><link rel="prefetch" href="/assets/js/37.a14945ab.js"><link rel="prefetch" href="/assets/js/38.52da2884.js"><link rel="prefetch" href="/assets/js/4.6d883f6b.js"><link rel="prefetch" href="/assets/js/5.71922889.js"><link rel="prefetch" href="/assets/js/6.339d378f.js"><link rel="prefetch" href="/assets/js/7.79b10682.js"><link rel="prefetch" href="/assets/js/8.439e8c27.js"><link rel="prefetch" href="/assets/js/9.185dea49.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.7f79b7ea.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://avatars2.githubusercontent.com/u/6147446?s=400&amp;u=c325f5bfc187e889f05cc872681ad1cb1ba6b3b5&amp;v=4" alt="Project M" class="logo"> <span class="site-name can-hide">Project M</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/0. Starter guide/0. Set up.html" class="nav-link">
+  Starter guide
+</a></div><div class="nav-item"><a href="/1. User guide/0. How to/0. Transforms.html" class="nav-link">
+  User guide
+</a></div><div class="nav-item"><a href="/2. Developer guide/0. Philosophy/0. Motivation.html" class="nav-link">
+  Developer guide
+</a></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/0. Starter guide/0. Set up.html" class="nav-link">
+  Starter guide
+</a></div><div class="nav-item"><a href="/1. User guide/0. How to/0. Transforms.html" class="nav-link">
+  User guide
+</a></div><div class="nav-item"><a href="/2. Developer guide/0. Philosophy/0. Motivation.html" class="nav-link">
+  Developer guide
+</a></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/2. Developer guide/0. Philosophy/0. Motivation.html" class="sidebar-link">Language properties</a></li><li><a href="/2. Developer guide/0. Philosophy/2. Design decisions.html" class="sidebar-link">Design decisions</a></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="continuous-deployment"><a href="#continuous-deployment" class="header-anchor">#</a> Continuous deployment</h1> <p>Code - including documentation - is automatically transformed to deployed
+artifacts.</p> <ol><li>Develop code - including docs -</li> <li>Lint code. Incorrect? Go to 1</li> <li>Build code and generate artifacts.</li> <li>Test artifacts. Incorrect? Go to 1.</li> <li>Deploy artifacts to the web.</li></ol> <p>Node versions are annoying.</p> <p>Please not that apart from 1. a script automates all the tasks.</p> <h2 id="continuous-integration"><a href="#continuous-integration" class="header-anchor">#</a> Continuous integration</h2> <p>Code - including documentation - that satisfies the quality requirements gets
+committed. Thanks to git hooks implemented in python, we can run quality tools
+like scc, markdownlint and vale and disallow commits that don't follow the
+quality standard.</p> <p>Code checker runs gradle shadowJar, gradle clean, and scc. Doc checker runs
+markdownlint, markdown-link-checker and vale.</p> <p>The outputs are:</p> <ul><li>m.jar containing all java .classes and nothing else</li> <li>m-web.html containing all block definitions and toolboxes and a reference to
+<code>Blockly.js</code></li> <li>m.AppImage: The theia based application built with electron.</li></ul> <h2 id="staging"><a href="#staging" class="header-anchor">#</a> Staging</h2> <h3 id="testing-m-jar"><a href="#testing-m-jar" class="header-anchor">#</a> Testing m.jar</h3> <p>A custom script checks that all the code blocks in the documentation work as
+expected. It goes through the markdown pages and gathers code blocks. Then runs
+the m-compiler.jar with generated files to check that the console output is as
+expected.</p> <h3 id="testing-m-html"><a href="#testing-m-html" class="header-anchor">#</a> Testing m.html</h3> <p>A selenium script checks that all the block-based code blocks in the
+documentation work as expected. It goes through the markdown pages and gathers
+block-based code blocks. Then runs selenium with m.html, inputs the code block
+and checks that there are no errors.</p> <h3 id="testing-m-appimage"><a href="#testing-m-appimage" class="header-anchor">#</a> Testing m.AppImage</h3> <p>A selenium script checks that all the text-based code blocks in the
+documentation work as expected. It goes through the markdown pages and gathers
+text-based code blocks. Then runs selenium with m.AppImage electron application,
+inputs the code block and checks that there are no errors.</p> <h2 id="deployment"><a href="#deployment" class="header-anchor">#</a> Deployment</h2> <p>Upload m.jar, m.html and m.AppImage to a Github release. Host m.html using
+github-pages. Host browser version of m.AppImage in Glitch.</p> <h2 id="publish"><a href="#publish" class="header-anchor">#</a> Publish</h2> <p>Twurl posts a tweet with the last commit message. Right now the secrets are in
+the .twurlrc file. Github secrets contains the tokens for accessing the twitter
+app.</p> <h2 id="new-cycle"><a href="#new-cycle" class="header-anchor">#</a> New cycle</h2> <p>Development consists of 8 steps, where each step has a manual side and an
+automated side.</p> <p>We can divide these 8 steps into two groups of 3 and 2 linking them giving as a
+familiar dev ops cycle:</p> <ul><li>Coding
+<ul><li>Code / Build</li> <li>Refactor / Lint</li> <li>Document / Test</li></ul></li> <li>Coding -&gt; Production
+<ul><li>Generate artifacts / Release</li></ul></li> <li>Production
+<ul><li>Review / Deploy</li> <li>Write changelog / Publish</li> <li>Write issues / Feedback</li></ul></li> <li>Production -&gt; Coding
+<ul><li>Create milestone / Plan</li></ul></li></ul> <p>Every step has a corresponding github action file under .github/workflows that
+runs on a specific event.</p> <p>For example, Code is the process of creating source code whereas Build is the
+process of automatically compiling that code. Document is the process of
+explaining why the developer wrote that code that way and Test is the process of
+automatically testing that what the programmer expected and wrote in the
+documentation is precisely what happens when executed.</p></div> <footer class="page-edit"><!----> <div class="last-updated"><span class="prefix">Last Updated:</span> <span class="time">5/22/2020, 2:41:04 AM</span></div></footer> <!----> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.58246eed.js" defer></script><script src="/assets/js/2.09ea20ae.js" defer></script><script src="/assets/js/32.47d75025.js" defer></script>
+  </body>
+</html>

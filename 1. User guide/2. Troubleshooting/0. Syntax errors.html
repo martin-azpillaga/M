@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Parsing errors | Project M</title>
+    <meta name="generator" content="VuePress 1.5.4">
+    
+    <meta name="description" content="A data-driven programming language for game developers">
+    <link rel="preload" href="/assets/css/0.styles.7f79b7ea.css" as="style"><link rel="preload" href="/assets/js/app.58246eed.js" as="script"><link rel="preload" href="/assets/js/2.09ea20ae.js" as="script"><link rel="preload" href="/assets/js/21.eb91a2a5.js" as="script"><link rel="prefetch" href="/assets/js/10.a00b7967.js"><link rel="prefetch" href="/assets/js/11.b8065b65.js"><link rel="prefetch" href="/assets/js/12.0dde2e9e.js"><link rel="prefetch" href="/assets/js/13.0dc88554.js"><link rel="prefetch" href="/assets/js/14.22220a83.js"><link rel="prefetch" href="/assets/js/15.b9fdfd33.js"><link rel="prefetch" href="/assets/js/16.419d6364.js"><link rel="prefetch" href="/assets/js/17.5072f7ae.js"><link rel="prefetch" href="/assets/js/18.16f41493.js"><link rel="prefetch" href="/assets/js/19.60763de3.js"><link rel="prefetch" href="/assets/js/20.34b1af12.js"><link rel="prefetch" href="/assets/js/22.c63b1308.js"><link rel="prefetch" href="/assets/js/23.80f7ad8f.js"><link rel="prefetch" href="/assets/js/24.58e60bd0.js"><link rel="prefetch" href="/assets/js/25.46eb3096.js"><link rel="prefetch" href="/assets/js/26.ea6096ae.js"><link rel="prefetch" href="/assets/js/27.b84010f6.js"><link rel="prefetch" href="/assets/js/28.61bc8a4c.js"><link rel="prefetch" href="/assets/js/29.0535ec86.js"><link rel="prefetch" href="/assets/js/3.0becae8a.js"><link rel="prefetch" href="/assets/js/30.d3b26fe6.js"><link rel="prefetch" href="/assets/js/31.c3b5360b.js"><link rel="prefetch" href="/assets/js/32.47d75025.js"><link rel="prefetch" href="/assets/js/33.46f5dd44.js"><link rel="prefetch" href="/assets/js/34.1b7b5a7c.js"><link rel="prefetch" href="/assets/js/35.ec2b612e.js"><link rel="prefetch" href="/assets/js/36.2d035c9e.js"><link rel="prefetch" href="/assets/js/37.a14945ab.js"><link rel="prefetch" href="/assets/js/38.52da2884.js"><link rel="prefetch" href="/assets/js/4.6d883f6b.js"><link rel="prefetch" href="/assets/js/5.71922889.js"><link rel="prefetch" href="/assets/js/6.339d378f.js"><link rel="prefetch" href="/assets/js/7.79b10682.js"><link rel="prefetch" href="/assets/js/8.439e8c27.js"><link rel="prefetch" href="/assets/js/9.185dea49.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.7f79b7ea.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://avatars2.githubusercontent.com/u/6147446?s=400&amp;u=c325f5bfc187e889f05cc872681ad1cb1ba6b3b5&amp;v=4" alt="Project M" class="logo"> <span class="site-name can-hide">Project M</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/0. Starter guide/0. Set up.html" class="nav-link">
+  Starter guide
+</a></div><div class="nav-item"><a href="/1. User guide/0. How to/0. Transforms.html" class="nav-link">
+  User guide
+</a></div><div class="nav-item"><a href="/2. Developer guide/0. Philosophy/0. Motivation.html" class="nav-link">
+  Developer guide
+</a></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/0. Starter guide/0. Set up.html" class="nav-link">
+  Starter guide
+</a></div><div class="nav-item"><a href="/1. User guide/0. How to/0. Transforms.html" class="nav-link">
+  User guide
+</a></div><div class="nav-item"><a href="/2. Developer guide/0. Philosophy/0. Motivation.html" class="nav-link">
+  Developer guide
+</a></div> <!----></nav>  <ul class="sidebar-links"><li><section class="sidebar-group collapsable depth-0"><p class="sidebar-heading open"><span>How to</span> <span class="arrow down"></span></p> <ul class="sidebar-links sidebar-group-items"><li><a href="/1. User guide/0. How to/0. Transforms.html" class="sidebar-link">Transforms</a></li><li><a href="/1. User guide/0. How to/1. Rendering.html" class="sidebar-link">Rendering</a></li></ul></section></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="parsing-errors"><a href="#parsing-errors" class="header-anchor">#</a> Parsing errors</h1> <p>We can identify most error cases. We can document the error cases and the
+expected error messages here. Users can search this page to find more
+information about an error and solve their issue.</p> <p>Parsing errors happen when the given input is not syntactically correct. That
+is, it doesn't follow the grammar rules.</p> <h2 id="creating-an-entity"><a href="#creating-an-entity" class="header-anchor">#</a> Creating an entity</h2> <p>The grammar rule for an entity is</p> <div class="language-xtext extra-class"><pre class="language-text"><code>Entity:
+    name+=ID+
+    ( ':' base+=ID+ )?
+    ( '{' components+=Component (',' components+=Component)* '}')
+    |
+    ('[' subEntities+=Entity (',' subEntities+=Entity)* ']')
+</code></pre></div><p>The following code contains all the complexity an entity can handle</p> <div class="language-text extra-class"><pre class="language-text"><code>&quot;entity % name ☀ with unicode&quot;
+    : &quot;base&quot;
+    {
+        vector -2.04e+45 90 008,
+        asset &quot;☆ more unicode&quot;
+    }
+</code></pre></div><div class="language-out extra-class"><pre class="language-text"><code>Validation correct
+</code></pre></div><p>And this gives errors</p> <div class="language-text extra-class"><pre class="language-text"><code>%name%
+</code></pre></div><h3 id="error-while-parsing-entity"><a href="#error-while-parsing-entity" class="header-anchor">#</a> Error while parsing entity</h3> <h3 id="wrong-start-of-concept"><a href="#wrong-start-of-concept" class="header-anchor">#</a> Wrong start of concept</h3> <p>When starting a file with</p> <div class="language-text extra-class"><pre class="language-text"><code>%name%
+</code></pre></div><p>Generates an error with output</p> <div class="language-error extra-class"><pre class="language-text"><code>Error while parsing the concept.
+To start a block you can either:
+- Specify an entity with a string '&quot;'
+- Specify a procedure with an identifier
+</code></pre></div><h3 id="wrong-name-of-entity"><a href="#wrong-name-of-entity" class="header-anchor">#</a> Wrong name of entity</h3> <div class="language-text extra-class"><pre class="language-text"><code>&quot;entity/folder&quot;
+</code></pre></div><p>produces the error</p> <div class="language-error extra-class"><pre class="language-text"><code>e
+</code></pre></div><p>Colon or open</p> <div class="language-text extra-class"><pre class="language-text"><code>&quot;entity&quot; anything
+</code></pre></div><div class="language-error extra-class"><pre class="language-text"><code>Error while parsing the entity.
+After the name you can either:
+- Specify the base of the entity with ':'
+- Specify the list of components with '{'
+anything does not match ':' nor '{'
+</code></pre></div><p>Base filename</p> <div class="language-text extra-class"><pre class="language-text"><code>&quot;entity&quot; : &quot;base/name&quot;
+</code></pre></div><div class="language-error extra-class"><pre class="language-text"><code>Error while parsing the entity.
+The base of an entity must be a filename.
+Filenames cannot contain a forward slash: /
+</code></pre></div><h3 id="wrong-name"><a href="#wrong-name" class="header-anchor">#</a> Wrong name</h3> <p>This happens when the name of an entity is not valid. The error message is</p> <div class="language-error extra-class"><pre class="language-text"><code>&gt; Wrong name of entity.
+&gt; The name of an entity must be a list of identifiers.
+</code></pre></div><p>The parser gives further information depending on the case:</p> <p>It cannot contain special characters</p> <div class="language-text extra-class"><pre class="language-text"><code>%entity%
+</code></pre></div><div class="language-error extra-class"><pre class="language-text"><code>Cannot contain special characters: %.
+</code></pre></div><p>It cannot start with digits</p> <div class="language-text extra-class"><pre class="language-text"><code>7entity
+</code></pre></div><div class="language-error extra-class"><pre class="language-text"><code>Cannot start with a digit: 7.
+</code></pre></div><p>It can be a reserved word</p> <div class="language-text extra-class"><pre class="language-text"><code>foreach
+</code></pre></div><div class="language-error extra-class"><pre class="language-text"><code>Cannot be a reserved word: foreach.
+</code></pre></div><p>It can contain any number of identifiers as long as they follow these rules</p> <div class="language-text extra-class"><pre class="language-text"><code>entity name%
+</code></pre></div><div class="language-error extra-class"><pre class="language-text"><code>Cannot contain special characters: %
+</code></pre></div><h3 id="incomplete-entity"><a href="#incomplete-entity" class="header-anchor">#</a> Incomplete entity</h3> <p>This error happens when the parser is waiting for input.</p> <h2 id="not-found-here"><a href="#not-found-here" class="header-anchor">#</a> Not found here</h2> <p>If the error you are getting is not listed, please create issue in the
+<a href="https://github.com/martin-azpillaga/M/issues" target="_blank" rel="noopener noreferrer">Github issues page<svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></a>.</p></div> <footer class="page-edit"><!----> <div class="last-updated"><span class="prefix">Last Updated:</span> <span class="time">5/21/2020, 7:33:00 PM</span></div></footer> <!----> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.58246eed.js" defer></script><script src="/assets/js/2.09ea20ae.js" defer></script><script src="/assets/js/21.eb91a2a5.js" defer></script>
+  </body>
+</html>

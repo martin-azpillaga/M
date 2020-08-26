@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Space Invaders | Project M</title>
+    <meta name="generator" content="VuePress 1.5.4">
+    
+    <meta name="description" content="A data-driven programming language for game developers">
+    <link rel="preload" href="/assets/css/0.styles.7f79b7ea.css" as="style"><link rel="preload" href="/assets/js/app.58246eed.js" as="script"><link rel="preload" href="/assets/js/2.09ea20ae.js" as="script"><link rel="preload" href="/assets/js/17.5072f7ae.js" as="script"><link rel="prefetch" href="/assets/js/10.a00b7967.js"><link rel="prefetch" href="/assets/js/11.b8065b65.js"><link rel="prefetch" href="/assets/js/12.0dde2e9e.js"><link rel="prefetch" href="/assets/js/13.0dc88554.js"><link rel="prefetch" href="/assets/js/14.22220a83.js"><link rel="prefetch" href="/assets/js/15.b9fdfd33.js"><link rel="prefetch" href="/assets/js/16.419d6364.js"><link rel="prefetch" href="/assets/js/18.16f41493.js"><link rel="prefetch" href="/assets/js/19.60763de3.js"><link rel="prefetch" href="/assets/js/20.34b1af12.js"><link rel="prefetch" href="/assets/js/21.eb91a2a5.js"><link rel="prefetch" href="/assets/js/22.c63b1308.js"><link rel="prefetch" href="/assets/js/23.80f7ad8f.js"><link rel="prefetch" href="/assets/js/24.58e60bd0.js"><link rel="prefetch" href="/assets/js/25.46eb3096.js"><link rel="prefetch" href="/assets/js/26.ea6096ae.js"><link rel="prefetch" href="/assets/js/27.b84010f6.js"><link rel="prefetch" href="/assets/js/28.61bc8a4c.js"><link rel="prefetch" href="/assets/js/29.0535ec86.js"><link rel="prefetch" href="/assets/js/3.0becae8a.js"><link rel="prefetch" href="/assets/js/30.d3b26fe6.js"><link rel="prefetch" href="/assets/js/31.c3b5360b.js"><link rel="prefetch" href="/assets/js/32.47d75025.js"><link rel="prefetch" href="/assets/js/33.46f5dd44.js"><link rel="prefetch" href="/assets/js/34.1b7b5a7c.js"><link rel="prefetch" href="/assets/js/35.ec2b612e.js"><link rel="prefetch" href="/assets/js/36.2d035c9e.js"><link rel="prefetch" href="/assets/js/37.a14945ab.js"><link rel="prefetch" href="/assets/js/38.52da2884.js"><link rel="prefetch" href="/assets/js/4.6d883f6b.js"><link rel="prefetch" href="/assets/js/5.71922889.js"><link rel="prefetch" href="/assets/js/6.339d378f.js"><link rel="prefetch" href="/assets/js/7.79b10682.js"><link rel="prefetch" href="/assets/js/8.439e8c27.js"><link rel="prefetch" href="/assets/js/9.185dea49.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.7f79b7ea.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><img src="https://avatars2.githubusercontent.com/u/6147446?s=400&amp;u=c325f5bfc187e889f05cc872681ad1cb1ba6b3b5&amp;v=4" alt="Project M" class="logo"> <span class="site-name can-hide">Project M</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/0. Starter guide/0. Set up.html" class="nav-link">
+  Starter guide
+</a></div><div class="nav-item"><a href="/1. User guide/0. How to/0. Transforms.html" class="nav-link">
+  User guide
+</a></div><div class="nav-item"><a href="/2. Developer guide/0. Philosophy/0. Motivation.html" class="nav-link">
+  Developer guide
+</a></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/0. Starter guide/0. Set up.html" class="nav-link">
+  Starter guide
+</a></div><div class="nav-item"><a href="/1. User guide/0. How to/0. Transforms.html" class="nav-link">
+  User guide
+</a></div><div class="nav-item"><a href="/2. Developer guide/0. Philosophy/0. Motivation.html" class="nav-link">
+  Developer guide
+</a></div> <!----></nav>  <ul class="sidebar-links"><li><section class="sidebar-group collapsable depth-0"><p class="sidebar-heading open"><span>How to</span> <span class="arrow down"></span></p> <ul class="sidebar-links sidebar-group-items"><li><a href="/1. User guide/0. How to/0. Transforms.html" class="sidebar-link">Transforms</a></li><li><a href="/1. User guide/0. How to/1. Rendering.html" class="sidebar-link">Rendering</a></li></ul></section></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="space-invaders"><a href="#space-invaders" class="header-anchor">#</a> Space Invaders</h1> <div class="language-m extra-class"><pre class="language-text"><code>    ship has
+    scale 5 2 appearance sprite.ship
+    extent 1 1 category [ship]
+    motorAxis gamepad.leftX motorSpeed 10 0 shootButton gamepad.south
+    deathSensor detect [alien shipProjectile] goodness
+    gunCreation entity.bullet creationVelocity 0 30 gunOffset 0 1.6
+    velocity 0 0.
+
+    alien has
+    scale 9 4 appearance sprite.alien
+    extent 1 1 category [alien]
+    mass 1
+    deathSensor detect [ship space shipProjectile] hiveSensor detect [wall]
+    flipSensor detect [wall] gunCreation entity.bullet creationVelocity 0 -30
+    gunOffset 0 -2.6
+    worth 10
+    evilness hive gun
+    relegation 0
+    promotion 1.
+
+    ufo has scale 5 2 appearance sprite.ufo
+    mass 1 extent 1 1 category [alien]
+    deathSensor detect [shipProjectile] scapeSensor detect [wall] worth 500.
+
+    bullet has
+    scale 1 1 appearance sprite.bullet
+    extent 1 1 deathSensor detect [alien shipProjectile evilProjectile wall
+    space defense]
+    team [single]
+    category [shipProjectile] mass 1.
+
+    goodBullet based on bullet has
+    category [shipProjectile].
+
+    evilBullet based on bullet has
+    category [evilProjectile].
+
+    space has
+    scale 100 4 appearance sprite.space
+    extent 1 1 category [space].
+
+    wall has
+    scale 4 100 appearance sprite.wall
+    extent 1 1 category [wall].
+
+    defense has
+    scale 11 11 appearance sprite.defense
+    extent 1 1  trigger 1 category [defense]
+    deathSensor detect [shipProjectile evilProjectile alien].
+
+    hiveMind has
+    requiredEntities 1
+    requiredGoodness 1
+    scene entity.menu
+    autoSpeed 5 0
+    autoSpeedRatio 1.1
+    flipFactor -1
+    gunTimer 1s
+    gunTimerRatio 0.9
+    probabilityRange 0 1
+    probability 0.5
+    ufoTimer 10s
+    bonus entity.ufo
+    bonusSpawnPoint -40 40
+    bonusVelocity 10 0.
+
+    board has
+    scale 5 10,
+    team [single], number 0.
+
+    audioEffect has
+    audioClip audio.yay, lifetime 5s.
+
+    player has rotation 0 0 10,
+    viewDistance 1000, viewAngle 50, position 0 0, clearColor 0.5 0.5 0.5 1.
+
+    hud has
+    canvas 100 100 contains
+        score based on board has position -40 40.
+    .
+
+    menu contains
+        hud has canvas 100 100 contains
+            title has position 0 10, scale 100 10, text 'Space_Invaders'.
+            subtitle has position 0 -20, scale 100 5, text 'Press_Start'.
+        .
+        trigger has detector gamepad.start, scene entity.playground.
+        player based on player.
+    .
+
+playground contains
+    ship based on ship has position 0 -40.
+    topSpace based on space has position 0 50.
+    bottomSpace based on space has position 0 -50.
+    leftWall based on wall has position -50 0.
+    rightWall based on wall has position 50 0.
+
+    alien based on alien has position 0 0 relegation 0 promotion -1.
+    alienB based on alien has position -20 0 relegation 1 promotion -1.
+    alienC based on alien has position -40 0 relegation 2 promotion -1.
+    alienD based on alien has position 20 0 relegation 3 promotion -1.
+    alienE based on alien has position 40 0 relegation 4 promotion -1.
+
+    alienFather based on alien without gun has position 0 10 relegation 5
+    promotion 0.
+    alienBFather based on alien without gun has position -20 10 relegation 6
+    promotion 1.
+    alienCFather based on alien without gun has position -40 10 relegation 7
+    promotion 2.
+    alienDFather based on alien without gun has position 20 10 relegation 8
+    promotion 3.
+    alienEFather based on alien without gun has position 40 10 relegation 9
+    promotion 4.
+
+    alienGrandpa based on alien without gun has position 0 20 relegation 10
+    promotion 5.
+    alienBGrandpa based on alien without gun has position -20 20 relegation 11
+     promotion 6.
+    alienCGrandpa based on alien without gun has position -40 20 relegation 12
+     promotion 7.
+    alienDGrandpa based on alien without gun has position 20 20 relegation 13
+     promotion 8.
+    alienEGrandpa based on alien without gun has position 40 20 relegation 14
+     promotion 9.
+
+    hiveMind based on hiveMind.
+
+    defenseA based on defense has position -33 -20.
+    defenseB based on defense has position -11 -20.
+    defenseC based on defense has position 11 -20.
+    defenseD based on defense has position 33 -20.
+
+    player based on player.
+    canvas based on hud.
+    .
+</code></pre></div></div> <footer class="page-edit"><!----> <div class="last-updated"><span class="prefix">Last Updated:</span> <span class="time">5/21/2020, 7:33:00 PM</span></div></footer> <!----> </main></div><div class="global-ui"></div></div>
+    <script src="/assets/js/app.58246eed.js" defer></script><script src="/assets/js/2.09ea20ae.js" defer></script><script src="/assets/js/17.5072f7ae.js" defer></script>
+  </body>
+</html>
