@@ -1,31 +1,29 @@
 package m.main;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
-import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.CompletionParams;
+import org.eclipse.lsp4j.DeleteFile;
+import org.eclipse.lsp4j.DeleteFileOptions;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
@@ -35,7 +33,6 @@ import org.eclipse.lsp4j.DidChangeWorkspaceFoldersParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
-import org.eclipse.lsp4j.ExecuteCommandParams;
 import org.eclipse.lsp4j.FileChangeType;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.HoverParams;
@@ -48,15 +45,15 @@ import org.eclipse.lsp4j.ParameterInformation;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.ResourceOperation;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SignatureHelp;
-import org.eclipse.lsp4j.SignatureHelpOptions;
 import org.eclipse.lsp4j.SignatureHelpParams;
 import org.eclipse.lsp4j.SignatureInformation;
-import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
-import org.eclipse.lsp4j.WorkspaceSymbolParams;
+import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -65,19 +62,14 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 import org.eclipse.xtext.EcoreUtil2;
-import org.eclipse.xtext.diagnostics.Severity;
 import org.eclipse.xtext.generator.JavaIoFileSystemAccess;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.parser.IParser;
-import org.eclipse.xtext.resource.EObjectAtOffsetHelper;
 import org.eclipse.xtext.resource.XtextResource;
 import org.eclipse.xtext.util.CancelIndicator;
 import org.eclipse.xtext.validation.CheckMode;
 import org.eclipse.xtext.validation.IResourceValidator;
-
-import com.google.common.collect.HashBiMap;
-import com.google.inject.spi.Message;
 
 import m.MStandaloneSetup;
 import m.generator.Engine;
@@ -92,8 +84,6 @@ import m.m.Function;
 import m.m.Value;
 import m.validation.InferenceGraph;
 import m.validation.MValidator;
-import m.validation.problems.errors.IncompatibleTypes;
-import m.validation.problems.errors.UndecidableType;
 import m.validation.rules.Binding;
 import m.validation.rules.Binding.BindingReason;
 import m.validation.rules.ExpressionNode;
@@ -113,31 +103,26 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	List<CrossReference> crossReferences;
 	
-	public static void main(String[] arguments) throws IOException
+	public static void main(String[] arguments)
 	{
-		var server = new Main();
-		instance = server;
-		var launcher = LSPLauncher.createServerLauncher(server, System.in, System.out);
-		var client = launcher.getRemoteProxy();
+		instance = new Main();
+		var launcher = LSPLauncher.createServerLauncher(instance, System.in, System.out);
 		
-		((LanguageClientAware)server).connect(client);
+		var client = launcher.getRemoteProxy();
+		instance.connect(client);
 		
 		launcher.startListening();
 	}
 	
-	public static void writeMessage(String message)
+	@Override
+	public void connect(LanguageClient client)
 	{
-		instance.write(message);
+		this.client = client;
 	}
 	
-	private void write(String message)
-	{
-		if (client != null)
-		{
-			client.showMessage(new MessageParams(MessageType.Info, message));
-		}
-	}
 	
+	
+	// Set capabilities and initialize workspaces with file -> inferenceData
 	@Override
 	public CompletableFuture<InitializeResult> initialize(InitializeParams params)
 	{
@@ -159,67 +144,24 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		
 		for (var folder : params.getWorkspaceFolders())
 		{
-			String root = "";
-			try {
-				root = URLDecoder.decode(folder.getUri().replace("file://", ""),"UTF-8");
-			} catch (UnsupportedEncodingException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			
-			var workspace = new Workspace(root);
-			workspaces.add(workspace);
-			
-			try
-			{
-				Files.walk(Paths.get(root)).forEach(f -> 
-				{
-					if (f.toString().endsWith(".m"))
-					{
-						try
-						{
-							var parseResult = parser.parse(new InputStreamReader(new FileInputStream(f.toString())));
-							for (var syntaxError : parseResult.getSyntaxErrors())
-							{
-								write(f.toString()+": "+syntaxError.toString());
-							}
-							
-							var file = (m.m.File) parseResult.getRootASTElement();
-							
-							if (file == null)
-							{
-								workspace.files.put(f.toString(), new InferenceData());
-								write(f.toString()+": empty");
-							}
-							else
-							{
-								var inferenceData = validator.localValidate(file);
-								
-								workspace.files.put(f.toString(), inferenceData);
-							}
-						}
-						catch (FileNotFoundException e)
-						{
-							e.printStackTrace();
-						}
-					}
-				});
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
-			}
+			initializeWorkspace(folder.getUri());
 		}
 		
 		return CompletableFuture.supplyAsync(()->new InitializeResult(capabilities));
 	}
 	
 	@Override
-	public void connect(LanguageClient client)
+	public TextDocumentService getTextDocumentService()
 	{
-		this.client = client;
+		return this;
 	}
 
+	@Override
+	public WorkspaceService getWorkspaceService()
+	{
+		return this;
+	}
+	
 	@Override
 	public CompletableFuture<Object> shutdown()
 	{
@@ -232,78 +174,105 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		
 	}
 
-	@Override
-	public TextDocumentService getTextDocumentService()
+	
+	private void initializeWorkspace(String path)
 	{
-		return this;
+		String root = decode(path);
+		
+		var workspace = new Workspace(root);
+		workspaces.add(workspace);
+		
+		try
+		{
+			Files.walk(Paths.get(root)).forEach(f -> 
+			{
+				if (f.toString().endsWith(".m"))
+				{
+					try
+					{
+						localInference(f.toString(), workspace, new String(Files.readAllBytes(Paths.get(f.toString()))));
+					}
+					catch (IOException e)
+					{
+						write(e.getMessage());
+					}
+				}
+			});
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
-	@Override
-	public WorkspaceService getWorkspaceService()
-	{
-		return this;
-	}
-
 	
 	
 	
 	
-	// Workspaces, initialized in initialize call
-	
-	
+	// Never called by VSCode?
 	@Override
 	public void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 	{
 		write("changed workspace");
 		for (var added : params.getEvent().getAdded())
 		{
-			//workspaces.add(added.getUri().replace("file://", ""));
+			initializeWorkspace(added.getUri());
+			write("Added workspace " + added.getUri());
 		}
 		for (var removed : params.getEvent().getRemoved())
 		{
-			workspaces.remove(removed.getUri().replace("file://", ""));
+			for (var i = 0; i < workspaces.size(); i++)
+			{
+				var workspace = workspaces.get(i);
+				
+				if (workspace.root.equals(decode(removed.getUri())))
+				{
+					workspaces.remove(workspace);
+					write("Removed workspace " + workspace.root);
+				}
+			}
 		}
 	}
 	
+	// No configuration is sync'ed between server and client
 	@Override
 	public void didChangeConfiguration(DidChangeConfigurationParams params)
 	{
 		
 	}
 
+	
+	// Local inference on added file, remove from workspace when deleted
 	@Override
 	public void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
 	{
 		for (var change : params.getChanges())
 		{
+			var path = decode(change.getUri());
+			var workspace = findWorkspace(path);
+			
 			if (change.getType() == FileChangeType.Created)
 			{
-				//files.add(change.getUri().replace("file://", ""));
+				
+				try
+				{
+					localInference(path, workspace, new String(Files.readAllBytes(Paths.get(path))));
+					write("Added file "+ decode(change.getUri()));
+				}
+				catch (IOException e)
+				{
+					write(e.getMessage());
+				}
 			}
 			else if (change.getType() == FileChangeType.Deleted)
 			{
-				//files.remove(change.getUri().replace("file://", ""));
+				workspace.files.remove(path);
+				write("Deleted file "+ path);
 			}
 		}
 	}
 	
-	public CompletableFuture<Object> executeCommand(ExecuteCommandParams params)
-	{
-		write("executing command ...");
-		
-		return CompletableFuture.supplyAsync(() -> Boolean.TRUE);
-	}
 	
-	
-	public CompletableFuture<List<? extends SymbolInformation>> symbol(WorkspaceSymbolParams params)
-	{
-		write("symbol information");
-		var list = new ArrayList<SymbolInformation>();
-		
-		
-		return CompletableFuture.supplyAsync(() -> list);
-	}
-
 	
 	
 	
@@ -315,256 +284,35 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params)
 	{
-		/*
-		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
-		var resourceSet = injector.getInstance(ResourceSet.class);
-		var validator = injector.getInstance(IResourceValidator.class);
-		
-		XtextResource resource = null;
-		try {
-			resource = (XtextResource) resourceSet.createResource(URI.createURI(params.getTextDocument().getUri()));
-			resource.load(null);
-		} catch (IOException e) {
+		var filePath = decode(params.getTextDocument().getUri());
 			
-		}
-		var issues = validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl);
+		var workspace = findWorkspace(filePath);
 		
-		var list = new ArrayList<Diagnostic>();
+		var text = params.getTextDocument().getText();
 		
-		for (var issue : issues)
-		{
-			var position = new Position(issue.getLineNumber()-1, issue.getColumn()-1);
-			var positionEnd = new Position(issue.getLineNumberEnd()-1, issue.getColumnEnd()-1);
-			
-			var range = new Range(position, positionEnd);
-			
-			var severity = DiagnosticSeverity.Information;
-			switch (issue.getSeverity())
-			{
-			case INFO: severity = DiagnosticSeverity.Information; break;
-			case WARNING: severity = DiagnosticSeverity.Warning; break;
-			case ERROR: severity = DiagnosticSeverity.Error; break;
-			case IGNORE: break;
-			}
-			
-			var diagnostic = new Diagnostic(range, issue.getMessage(), severity, "");
-			list.add(diagnostic);
-		}
+		var diagnostics = localInference(filePath, workspace, text);
 		
+		//diagnostics.addAll(globalInference(filePath, workspace, text, true));
 		
-		var info = new Diagnostic(new Range(new Position(0, 0), new Position(0,3)), "Thanks for using M", DiagnosticSeverity.Hint, "");
-		list.add(info);
-		var diagnostics = new PublishDiagnosticsParams(params.getTextDocument().getUri(),list);
-		client.publishDiagnostics(diagnostics);*/
+		client.publishDiagnostics(new PublishDiagnosticsParams(params.getTextDocument().getUri(),diagnostics));
 	}
+	
+	
 
 	@Override
 	public void didChange(DidChangeTextDocumentParams params)
 	{
-		String filePath = "";
-		try
-		{
-			filePath = URLDecoder.decode(params.getTextDocument().getUri().replace("file://", ""), "UTF-8");
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			e.printStackTrace();
-		}
+		var filePath = decode(params.getTextDocument().getUri());
 		
-		Workspace workspace = null;
-		var found = false;
-		for (var i = 0; i < workspaces.size() && !found; i++)
-		{
-			if (filePath.startsWith(workspaces.get(i).root))
-			{
-				workspace = workspaces.get(i);
-				found = true;
-			}
-		}
-		
-		if (workspace == null)
-		{
-			write("Could not find workspace for "+ filePath);
-			return;
-		}
-		
-		// Delete previous crossReferences to this file
-		
-		for (var i = 0; i < crossReferences.size(); i++)
-		{
-			var crossReference = crossReferences.get(i);
-			if (crossReference.fileA.equals(filePath))
-			{
-				crossReference.nodeB.bindings.remove(crossReference.bindingB);
-				crossReferences.remove(crossReference);
-			}
-			else if (crossReference.fileB.equals(filePath))
-			{
-				crossReference.nodeA.bindings.remove(crossReference.bindingA);
-				crossReferences.remove(crossReference);
-			}
-		}
+		var workspace = findWorkspace(filePath);
 		
 		var text = params.getContentChanges().get(0).getText();
-		var targetStream = new ByteArrayInputStream(text.getBytes());
-		var diagnostics = new ArrayList<Diagnostic>();
 		
-		var parseResult = parser.parse(new InputStreamReader(targetStream));
+		var diagnostics = localInference(filePath, workspace, text);
 		
-		for (var syntaxError : parseResult.getSyntaxErrors())
-		{
-			var character = character(text, syntaxError.getOffset());
-			var endCharacter = character(text, syntaxError.getEndOffset());
-			
-			var position = new Position(syntaxError.getStartLine()-1, character);
-			var positionEnd = new Position(syntaxError.getStartLine()-1, Math.max(endCharacter, character+1));
-			
-			var range = new Range(position, positionEnd);
-			
-			var message = syntaxError.getSyntaxErrorMessage().getMessage();
-			
-			if (message.equals("mismatched input '<EOF>' expecting '}'"))
-			{
-				message = "Introduce another statement or \nWrite } to finish statements";
-			}
-			
-			diagnostics.add(new Diagnostic(range, message));
-		}
+		diagnostics.addAll(globalInference(filePath, workspace, text, true));
 		
-		var file = (m.m.File) parseResult.getRootASTElement();
-		
-		var inferenceData = validator.localValidate(file);
-		
-		// Dangling references from files that reference nodes from previous versions of a file
-		workspace.files.put(filePath, inferenceData);
-		
-		var totalNodes = new ArrayList<ExpressionNode>();
-		var totalComponents = new HashMap<String, ExpressionNode>();
-		var totalFunctions = new HashMap<String, Function>();
-		var definedIn = new HashMap<String,String>();
-		
-		var i = 0;
-		for (var entry : workspace.files.entrySet())
-		{
-			var currentFile = entry.getKey();
-			var data = entry.getValue();
-			totalNodes.addAll(data.nodes);
-			
-			for (var component : data.components.keySet())
-			{
-				var existing = totalComponents.get(component);
-				if (existing == null)
-				{
-					write(component+" defined in "+currentFile);
-					definedIn.put(component, currentFile);
-					totalComponents.put(component, data.components.get(component));
-				}
-				else
-				{
-					write("cross reference to "+ component);
-					var bindingA = new Binding(existing, BindingReason.SAME_COMPONENT);
-					var bindingB = new Binding(data.components.get(component), BindingReason.SAME_COMPONENT);
-					var crossReference = new CrossReference();
-					crossReference.fileA = currentFile;
-					crossReference.nodeA = data.components.get(component);
-					crossReference.bindingA = bindingA;
-					
-					crossReference.fileB = definedIn.get(component);
-					crossReference.nodeB = existing;
-					crossReference.bindingB = bindingB;
-					
-					crossReferences.add(crossReference);
-					
-					data.components.get(component).bindings.add(bindingA);
-					existing.bindings.add(bindingB);
-				}
-			}
-			
-			for (var function : data.functions.entrySet())
-			{
-				totalFunctions.put(function.getKey(), function.getValue());
-			}
-		}
-		
-		var inference = new InferenceGraph(totalNodes);
-		var problems = inference.check();
-		
-		write("Inference problems: "+problems.size());
-		
-		for (var problem : problems)
-		{
-			for (var message : problem.messages(Library.ENGLISH))
-			{
-				if (EcoreUtil2.getRoot(message.source, true) != file)
-				{
-					continue;
-				}
-				var node = NodeModelUtils.getNode(message.source);
-				if (node == null)
-				{
-					write("Node for "+message.source+ "not found");
-					continue;
-				}
-				var range = new Range(new Position(node.getStartLine()-1, character(text,node.getOffset())), new Position(node.getEndLine()-1, character(text,node.getEndOffset())));
-				var severity = DiagnosticSeverity.Information;
-				switch (message.severity)
-				{
-				case INFO: severity = DiagnosticSeverity.Information; break;
-				case WARNING: severity = DiagnosticSeverity.Warning; break;
-				case ERROR: severity = DiagnosticSeverity.Error; break;
-				}
-				var diagnostic = new Diagnostic(range, message.message, severity, "");
-				
-				diagnostics.add(diagnostic);
-				
-			}
-		}
-		
-		var hasErrors = false;
-		
-		for (var issue : problems)
-		{
-			for (var message : issue.messages(Library.ENGLISH))
-			{
-				if (message.severity == m.validation.problems.ProblemMessage.Severity.ERROR)
-				{
-					hasErrors = true;
-				}
-			}
-		}
-		
-		write("hasErrors: "+hasErrors);
-
-		if (!hasErrors)
-		{
-			var game = new Game();
-			
-			for (var component : totalComponents.entrySet())
-			{
-				var type = inference.infer(component.getValue());
-				if (type != null)
-				{
-					game.components.put(component.getKey(), type);
-				}
-			}
-			
-			for (var function : totalFunctions.values())
-			{
-				game.systems.add(function);
-			}
-			
-			game.library = Library.ENGLISH;
-			game.inference = inference;
-			
-			write("Call generate");
-			
-			generateCode(game);
-		}
-		
-		var info = new Diagnostic(new Range(new Position(0, 0), new Position(0,3)), "Thanks for using M", DiagnosticSeverity.Hint, "");
-		diagnostics.add(info);
-		var diagnosticParams = new PublishDiagnosticsParams(params.getTextDocument().getUri(),diagnostics);
-		client.publishDiagnostics(diagnosticParams);
+		client.publishDiagnostics(new PublishDiagnosticsParams(params.getTextDocument().getUri(),diagnostics));
 	}
 
 	@Override
@@ -580,23 +328,11 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	}
 	
 	
-	private void generateCode(Game game)
-	{
-		/* Apply edit to remove a file
-		 * 
-		 
-		var edit = new WorkspaceEdit();
-		var operation = new DeleteFile("");
-		var operations = new ArrayList<Either<TextDocumentEdit,ResourceOperation>>();
-		operations.add(Either.forRight(operation));
-		edit.setDocumentChanges(operations);
-		client.applyEdit(new ApplyWorkspaceEditParams(edit));
-		*/
-		
-		Path path = Paths.get(workspaces.get(0).root.replace("/c:/", "C:/").replace("/d:/", "D:/").replace("/e:/",  "E:/"), "m.project");
+	private void generateCode(Game game, Workspace workspace)
+	{		
+		Path path = Paths.get(workspace.root.replace("/c:/", "C:/").replace("/d:/", "D:/").replace("/e:/",  "E:/"), "m.project");
 		
 		
-		write("Finding project file: "+path.toString());
 
 		if (new File(path.toString()).exists())
 		{
@@ -609,12 +345,12 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 					{
 						var unity = line.substring("Unity: ".length());
 						fileSystem.setOutputPath(unity);
-						
-						write("Generating code at: "+unity);
 
-						generator.generate(game, fileSystem, Engine.Unity);
+						var generatedFolder = Paths.get(unity,"Assets","Code");
 						
-						write("Generated");
+						deleteDirectory(new File(generatedFolder.toString()));
+						
+						generator.generate(game, fileSystem, Engine.Unity);
 					}
 					else if (line.startsWith("Unreal: "))
 					{
@@ -638,7 +374,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		}
 		else
 		{
-			var defaultPath = Paths.get(workspaces.get(0).root, "src-gen", "ClassicUnity").toString();
+			var defaultPath = Paths.get(workspace.root, "src-gen", "ClassicUnity").toString();
 			
 			write("Generating in default path: "+defaultPath);
 			fileSystem.setOutputPath(defaultPath);
@@ -783,7 +519,215 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	
 	
+	private Workspace findWorkspace(String filePath)
+	{
+		Workspace workspace = null;
+		var found = false;
+		for (var i = 0; i < workspaces.size() && !found; i++)
+		{
+			if (filePath.startsWith(workspaces.get(i).root))
+			{
+				workspace = workspaces.get(i);
+				found = true;
+			}
+		}
+		
+		return workspace;
+	}
 	
+	private List<Diagnostic> globalInference(String filePath, Workspace workspace, String text, boolean shouldGenerate)
+	{
+		var diagnostics = new ArrayList<Diagnostic>();
+		// Delete previous crossReferences to this file
+		
+		for (var i = 0; i < crossReferences.size(); i++)
+		{
+			var crossReference = crossReferences.get(i);
+			if (crossReference.fileA.equals(filePath))
+			{
+				crossReference.nodeB.bindings.remove(crossReference.bindingB);
+				crossReferences.remove(crossReference);
+			}
+			else if (crossReference.fileB.equals(filePath))
+			{
+				crossReference.nodeA.bindings.remove(crossReference.bindingA);
+				crossReferences.remove(crossReference);
+			}
+		}
+		
+		
+		var totalNodes = new ArrayList<ExpressionNode>();
+		var totalComponents = new HashMap<String, ExpressionNode>();
+		var totalFunctions = new HashMap<String, Function>();
+		var definedIn = new HashMap<String,String>();
+		
+
+		for (var entry : workspace.files.entrySet())
+		{
+			var currentFile = entry.getKey();
+			var data = entry.getValue();
+			totalNodes.addAll(data.nodes);
+			
+			for (var component : data.components.keySet())
+			{
+				var existing = totalComponents.get(component);
+				if (existing == null)
+				{
+					definedIn.put(component, currentFile);
+					totalComponents.put(component, data.components.get(component));
+				}
+				else
+				{
+					var bindingA = new Binding(existing, BindingReason.SAME_COMPONENT);
+					var bindingB = new Binding(data.components.get(component), BindingReason.SAME_COMPONENT);
+					var crossReference = new CrossReference();
+					crossReference.fileA = currentFile;
+					crossReference.nodeA = data.components.get(component);
+					crossReference.bindingA = bindingA;
+					
+					crossReference.fileB = definedIn.get(component);
+					crossReference.nodeB = existing;
+					crossReference.bindingB = bindingB;
+					
+					crossReferences.add(crossReference);
+					
+					data.components.get(component).bindings.add(bindingA);
+					existing.bindings.add(bindingB);
+				}
+			}
+			
+			for (var function : data.functions.entrySet())
+			{
+				totalFunctions.put(function.getKey(), function.getValue());
+			}
+		}
+		
+		var inference = new InferenceGraph(totalNodes);
+		var problems = inference.check();
+		
+		
+		for (var problem : problems)
+		{
+			for (var message : problem.messages(Library.ENGLISH))
+			{
+				if (EcoreUtil2.getRoot(message.source, true) != workspace.files.get(filePath).rootObject)
+				{
+					continue;
+				}
+				var node = NodeModelUtils.getNode(message.source);
+				if (node == null)
+				{
+					write("Node for "+message.source+ "not found");
+					continue;
+				}
+				var range = new Range(new Position(node.getStartLine()-1, character(text,node.getOffset())), new Position(node.getEndLine()-1, character(text,node.getEndOffset())));
+				var severity = DiagnosticSeverity.Information;
+				switch (message.severity)
+				{
+				case INFO: severity = DiagnosticSeverity.Information; break;
+				case WARNING: severity = DiagnosticSeverity.Warning; break;
+				case ERROR: severity = DiagnosticSeverity.Error; break;
+				}
+				var diagnostic = new Diagnostic(range, message.message, severity, "");
+				
+				diagnostics.add(diagnostic);
+				
+			}
+		}
+		
+		var hasErrors = false;
+		
+		for (var i = 0; i < diagnostics.size() && !hasErrors; i++)
+		{
+			if (diagnostics.get(i).getSeverity() == DiagnosticSeverity.Error)
+			{
+				hasErrors = true;
+			}
+		}
+		
+		if (!hasErrors && shouldGenerate)
+		{
+			var game = new Game();
+			
+			for (var component : totalComponents.entrySet())
+			{
+				var type = inference.infer(component.getValue());
+				if (type != null)
+				{
+					game.components.put(component.getKey(), type);
+				}
+			}
+			
+			for (var function : totalFunctions.values())
+			{
+				game.systems.add(function);
+			}
+			
+			game.library = Library.ENGLISH;
+			game.inference = inference;
+			
+			
+			generateCode(game, workspace);
+		}
+		
+		return diagnostics;
+	}
+	
+	
+	
+	
+	private List<Diagnostic> localInference(String f, Workspace workspace, String fileText)
+	{
+		var result = new ArrayList<Diagnostic>();
+		
+		var parseResult = parser.parse(new StringReader(fileText));
+		for (var syntaxError : parseResult.getSyntaxErrors())
+		{
+			var character = character(fileText, syntaxError.getOffset());
+			var endCharacter = character(fileText, syntaxError.getEndOffset());
+			
+			var position = new Position(syntaxError.getStartLine()-1, character);
+			var positionEnd = new Position(syntaxError.getStartLine()-1, Math.max(endCharacter, character+1));
+			
+			var range = new Range(position, positionEnd);
+			
+			var message = syntaxError.getSyntaxErrorMessage().getMessage();
+			
+			if (message.equals("mismatched input '<EOF>' expecting '}'"))
+			{
+				message = "Expecting a statement or }";
+			}
+			
+			result.add(new Diagnostic(range, message));
+		}
+		
+		var file = (m.m.File) parseResult.getRootASTElement();
+		
+		if (file == null)
+		{
+			workspace.files.put(f, new InferenceData());
+			write("File is null");
+		}
+		else
+		{
+			var inferenceData = validator.localValidate(file);
+			inferenceData.rootObject = file;
+			
+			workspace.files.put(f, inferenceData);
+		}
+		
+		return result;
+	}
+	
+	private boolean deleteDirectory(File directoryToBeDeleted) {
+	    File[] allContents = directoryToBeDeleted.listFiles();
+	    if (allContents != null) {
+	        for (File file : allContents) {
+	            deleteDirectory(file);
+	        }
+	    }
+	    return directoryToBeDeleted.delete();
+	}
 	
 	
 	private INode node(TextDocumentIdentifier document, Position position, boolean minusOne)
@@ -813,7 +757,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	private int character(String text, int offset)
 	{
 		var count = 0;
-		for (var i = 0; i < offset; i++)
+		for (var i = 0; i < offset && i < text.length(); i++)
 		{
 			count++;
 			if (text.charAt(i) == '\n')
@@ -841,5 +785,32 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			}
 		}
 		return -1;
+	}
+	
+	private String decode(String path)
+	{
+		var result = "";
+		try
+		{
+			result = URLDecoder.decode(path.replace("file://", ""),"UTF-8");
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			result = "Unsupported encoding UTF-8";
+		}
+		return result;
+	}	
+	
+	public static void writeMessage(String message)
+	{
+		instance.write(message);
+	}
+	
+	private void write(String message)
+	{
+		if (client != null)
+		{
+			client.showMessage(new MessageParams(MessageType.Info, message));
+		}
 	}
 }
