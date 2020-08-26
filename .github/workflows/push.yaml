@@ -110,14 +110,25 @@ jobs:
     steps:
       - name: Download repository
         uses: actions/checkout@v2
-      - name: Cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle
-            Code/Editor/node_modules
-            pandoc-2.9.1-1-amd64.deb
-          key: functionality
+      - name: Install vuepress
+        run: |
+          sudo npm install -g vuepress
+          cp -r Documentation ../Documentation
+          git fetch
+          git checkout gh-pages
+          cp -r ../Documentation Documentation
+          cd Documentation
+          sudo vuepress build
+          cd ..
+          cp -r Documentation/.vuepress/dist/* .
+          sudo rm -rf Documentation/
+          git config --global user.name "Github actions"
+          git config --global user.email "media@azpillaga.world"  
+          git add .
+          git commit -m "Deploy vuepress site using Github actions"
+          git push
+          git reset --hard
+          git checkout -
       - name: Install java 13
         uses: actions/setup-java@v1
         with:
