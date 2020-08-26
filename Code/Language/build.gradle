@@ -48,8 +48,13 @@ apply plugin : 'eclipse'
 group = 'm'
 version = 'ls'
 
-sourceCompatibility = '11'
-targetCompatibility = '11'
+sourceCompatibility = '13'
+
+compileJava {
+    options.compilerArgs = [
+            "--release", "8" // Thanks to Jabel
+    ]
+}
 
 configurations.all {
     exclude group : 'asm'
@@ -102,4 +107,11 @@ shadowJar {
         'plugin.xml', 'systembundle.properties', 'profile.list')
     classifier = 'ls'
     append('plugin.properties')
+}
+
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+dependencies {
+    annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.2.0'
 }

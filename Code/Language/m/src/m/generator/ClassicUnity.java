@@ -31,6 +31,7 @@ import m.m.Function;
 import m.m.Statement;
 import m.m.Unary;
 import m.m.Value;
+import m.main.Main;
 
 public class ClassicUnity
 {
@@ -79,9 +80,13 @@ public class ClassicUnity
 		this.variables = new HashSet<String>();
 		this.stack = new Stack<>();
 		
+		resolvePackages();
+		
+		
+		
 		for (var component : game.components.entrySet())
 		{
-			fileSystem.generateFile("UnityClassic/Assets/Code/Components/"+unreserved(component.getKey())+".cs",
+			fileSystem.generateFile("Assets/Code/Components/"+unreserved(component.getKey())+".cs",
 					generate(component.getKey(), component.getValue()));
 		}
 		var systems = lines("",
@@ -134,13 +139,85 @@ public class ClassicUnity
 		{
 			for (var query : game.queries.get(function).keySet())
 			{
-				fileSystem.generateFile("UnityClassic/Assets/Code/MultiComponents/"+function.getName()+"_"+query+".cs", generateMultiComponent(function, query));
+				fileSystem.generateFile("Assets/Code/MultiComponents/"+function.getName()+"_"+query+".cs", generateMultiComponent(function, query));
 			}
 		}
 		
 		systems += "}\n}\n}\n";
 		
-		fileSystem.generateFile("UnityClassic/Assets/Code/Systems/Systems.cs", systems);
+		fileSystem.generateFile("Assets/Code/Systems/Systems.cs", systems);
+	}
+	
+	private void resolvePackages()
+	{
+		if (fileSystem.isFile("Packages/manifest.json"))
+		{
+			var manifest = fileSystem.readTextFile("Packages/manifest.json").toString();
+			var dependencies = "\"dependencies\": {";
+			if (manifest.contains(dependencies))
+			{
+				var index = manifest.indexOf(dependencies)+dependencies.length();
+				var buffer = new StringBuffer(manifest);
+				
+				if (!manifest.contains("\"com.unity.entities\""))
+				{
+					buffer.insert(index, "\"com.unity.entities\": \"0.11.1-preview.4\",");
+					fileSystem.generateFile("Packages/manifest.json", buffer.toString());
+				}
+				if (!manifest.contains("\"com.unity.inputsystem\""))
+				{
+					buffer.insert(index, "\"com.unity.inputsystem\": \"1.0.0\",");
+					fileSystem.generateFile("Packages/manifest.json", buffer.toString());
+				}
+			}
+		}
+		else
+		{
+			fileSystem.generateFile("Packages/manifest.json", lines
+			(
+			"",
+			"{",
+			"  \"dependencies\": {",
+			"    \"com.unity.entities\": \"0.11.1-preview.4\",",
+			"    \"com.unity.inputsystem\": \"1.0.0\",",
+            "    \"com.unity.ugui\": \"1.0.0\",",  
+            "    \"com.unity.modules.ai\": \"1.0.0\",",  
+            "    \"com.unity.modules.androidjni\": \"1.0.0\",",  
+            "    \"com.unity.modules.animation\": \"1.0.0\",",  
+            "    \"com.unity.modules.assetbundle\": \"1.0.0\",",  
+            "    \"com.unity.modules.audio\": \"1.0.0\",",  
+            "    \"com.unity.modules.cloth\": \"1.0.0\",",  
+            "    \"com.unity.modules.director\": \"1.0.0\",",  
+            "    \"com.unity.modules.imageconversion\": \"1.0.0\",",  
+            "    \"com.unity.modules.imgui\": \"1.0.0\",",  
+            "    \"com.unity.modules.jsonserialize\": \"1.0.0\",",  
+            "    \"com.unity.modules.particlesystem\": \"1.0.0\",",  
+            "    \"com.unity.modules.physics\": \"1.0.0\",",  
+            "    \"com.unity.modules.physics2d\": \"1.0.0\",",  
+            "    \"com.unity.modules.screencapture\": \"1.0.0\",",  
+            "    \"com.unity.modules.terrain\": \"1.0.0\",",  
+            "    \"com.unity.modules.terrainphysics\": \"1.0.0\",",  
+            "    \"com.unity.modules.tilemap\": \"1.0.0\",",  
+            "    \"com.unity.modules.ui\": \"1.0.0\",",  
+            "    \"com.unity.modules.uielements\": \"1.0.0\",",  
+            "    \"com.unity.modules.umbra\": \"1.0.0\",",  
+            "    \"com.unity.modules.unityanalytics\": \"1.0.0\",",  
+            "    \"com.unity.modules.unitywebrequest\": \"1.0.0\",",  
+            "    \"com.unity.modules.unitywebrequestassetbundle\": \"1.0.0\",",  
+            "    \"com.unity.modules.unitywebrequestaudio\": \"1.0.0\",",  
+            "    \"com.unity.modules.unitywebrequesttexture\": \"1.0.0\",",  
+            "    \"com.unity.modules.unitywebrequestwww\": \"1.0.0\",",  
+            "    \"com.unity.modules.vehicles\": \"1.0.0\",",  
+            "    \"com.unity.modules.video\": \"1.0.0\",",  
+            "    \"com.unity.modules.vr\": \"1.0.0\",",  
+            "    \"com.unity.modules.wind\": \"1.0.0\",",  
+            "    \"com.unity.modules.xr\": \"1.0.0\"",
+			"  }",
+			"}"
+			));
+		}
+		
+		
 	}
 	
 	private String typeOf(String component)
@@ -667,12 +744,10 @@ public class ClassicUnity
 			switch (found)
 			{
 			case VELOCITY: return "Rigidbody";
-			case TIMEOUT: return "timeout";
 			case POSITION: return "Transform";
 			case ANGULAR_VELOCITY: return "Rigidbody";
 			case AUDIOCLIP: return "AudioSource";
 			case BACKGROUND: return "Camera";
-			case ELAPSED: return "Elapsed";
 			case EMISSION: return "Light";
 			case EXTENTS: return "BoxCollider";
 			case FAR: return "Camera";
@@ -695,7 +770,6 @@ public class ClassicUnity
 			case ROTATION: return "Transform";
 			case SCALE: return "Transform";
 			case SPOT_ANGLE: return "Light";
-			case TIMER: return "Timer";
 			case VIEWPORT: return "Camera";
 			case VOLUME: return "AudioSource";
 			case BOX_CENTER: return "BoxCollider";
@@ -736,12 +810,10 @@ public class ClassicUnity
 			switch (found)
 			{
 			case VELOCITY: return "velocity";
-			case TIMEOUT: return "Value";
 			case POSITION: return "localPosition";
 			case ANGULAR_VELOCITY: return "angularVelocity";
 			case AUDIOCLIP: return "audioClip";
 			case BACKGROUND: return "backgroundColor";
-			case ELAPSED: return "";
 			case EMISSION: return "color";
 			case EXTENTS: return "size";
 			case FAR: return "farClipPlane";
@@ -764,7 +836,6 @@ public class ClassicUnity
 			case ROTATION: return "localRotation";
 			case SCALE: return "localScale";
 			case SPOT_ANGLE: return "spotAngle";
-			case TIMER: return "Value";
 			case VIEWPORT: return "rect";
 			case VOLUME: return "volume";
 			case BOX_CENTER: return "center";

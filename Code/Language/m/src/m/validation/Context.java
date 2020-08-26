@@ -17,6 +17,7 @@ import m.generator.Game;
 import m.library.Library;
 import m.library.types.*;
 import m.m.*;
+import m.main.InferenceData;
 import m.validation.problems.Problem;
 import m.validation.problems.errors.RedefinedSymbol;
 import m.validation.problems.errors.UndefinedSymbol;
@@ -307,7 +308,15 @@ public class Context {
 		}
 		
 		game.library = library;
+		game.inference = inference;
 		
 		return game;
+	}
+	
+	public InferenceData getInferenceData()
+	{
+		var data = inference.getInferenceData(userComponents);
+		data.functions.putAll(userFunctions);
+		return data;
 	}
 }

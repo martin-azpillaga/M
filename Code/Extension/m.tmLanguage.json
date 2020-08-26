@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "M",
+  "patterns": [
+    {
+      "include": "#keywords"
+    }
+  ],
+  "repository": {
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.control.m",
+          "match": "\b(foreach|if)\b"
+        }
+      ]
+    }
+  },
+  "scopeName": "source.m"
+}
