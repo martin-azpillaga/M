@@ -307,6 +307,10 @@ jobs:
         run: |
           sudo npm install
           vsce package -o m.vsix
+      - name: Publish VSCode extension to marketplace
+        working-directory: Code/Extension
+        run: |
+          vsce publish || exit 0
       - name: Download Linux
         uses: actions/download-artifact@v2
         with:
