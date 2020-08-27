@@ -277,9 +277,6 @@ jobs:
       - name: Install yarn
         run: |
           npm install -g yarn
-          node --version
-          yarn --version
-          python --version
       - name: Build Editor for electron
         run: |
           yarn
@@ -295,6 +292,7 @@ jobs:
           name: linux
           path: dist/m-0.2.0.AppImage
   release:
+    if: ${{ github.ref == 'refs/heads/master' }}
     needs: [packagingUbuntu, packagingWindows, packagingMac]
     runs-on: ubuntu-latest
     timeout-minutes: 50
