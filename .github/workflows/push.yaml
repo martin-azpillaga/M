@@ -307,6 +307,7 @@ jobs:
       - name: Build VSCode extension
         working-directory: Code/Extension
         run: |
+          sudo npm install
           vsce package -o m.vsix
       - name: Download Linux
         uses: actions/download-artifact@v2
