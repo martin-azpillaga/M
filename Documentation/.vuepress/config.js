@@ -1,6 +1,7 @@
 module.exports = {
     title: 'Project M',
     description: 'A data-driven programming language for game developers',
+    theme: 'yuu',
     themeConfig: {
       logo: 'https://avatars2.githubusercontent.com/u/6147446?s=400&u=c325f5bfc187e889f05cc872681ad1cb1ba6b3b5&v=4',
       nav: [
