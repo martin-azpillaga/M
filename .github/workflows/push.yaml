@@ -118,6 +118,7 @@ jobs:
           git checkout gh-pages
           cp -r ../Documentation Documentation
           cd Documentation
+          sudo yarn add vuepress-theme-yuu
           sudo vuepress build
           cd ..
           cp -r Documentation/.vuepress/dist/* .
