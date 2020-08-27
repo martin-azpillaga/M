@@ -255,6 +255,12 @@ jobs:
       - name: Package application
         run: |
           yarn electron-builder
+      - name: Upload dmg
+        if: ${{ matrix.os }} == 'macos-latest'
+        uses: actions/upload-artifact@v2
+        with:
+          name: mac
+          path: dist/m-0.2.0.dmg
   packagingUbuntu:
     needs: test
     runs-on: ubuntu-latest
@@ -289,7 +295,7 @@ jobs:
           name: linux
           path: dist/m-0.2.0.AppImage
   release:
-    needs: [packagingUbuntu, packagingWindows]
+    needs: [packagingUbuntu, packagingWindows, packagingMac]
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
@@ -310,6 +316,10 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: windows
+      - name: Download Windows
+        uses: actions/download-artifact@v2
+        with:
+          name: mac
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.0.0
@@ -337,6 +347,15 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./m 0.2.0.exe
           asset_name: m.exe
+          asset_content_type: text/text
+      - name: Upload dmg to release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./m-0.2.0.dmg
+          asset_name: m.dmg
           asset_content_type: text/text
       - name: Upload vsix to release
         uses: actions/upload-release-asset@v1.0.1
