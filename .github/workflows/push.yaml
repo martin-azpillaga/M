@@ -231,6 +231,30 @@ jobs:
         with:
           name: windows
           path: "dist\\m 0.2.0.exe"
+  packagingMac:
+    needs: test
+    runs-on: macos-latest
+    timeout-minutes: 100
+    steps:
+      - name: Download the editor folder
+        uses: actions/download-artifact@v2
+        with:
+          name: editor
+      - name: Install node 10
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - name: Install yarn
+        run: |
+          npm install -g yarn
+      - name: Build Editor for electron
+        run: |
+          yarn
+          yarn theia rebuild:electron
+          yarn theia build --app-target electron
+      - name: Package application
+        run: |
+          yarn electron-builder
   packagingUbuntu:
     needs: test
     runs-on: ubuntu-latest
@@ -265,11 +289,19 @@ jobs:
           name: linux
           path: dist/m-0.2.0.AppImage
   release:
-    if: ${{ github.ref == 'refs/heads/master' }}
     needs: [packagingUbuntu, packagingWindows]
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
+      - name: Download repository
+        uses: actions/checkout@v2
+      - name: Install vsce
+        run: |
+          sudo npm install -g vsce
+      - name: Build VSCode extension
+        working-directory: Code/Extension
+        run: |
+          vsce package -o m.vsix
       - name: Download Linux
         uses: actions/download-artifact@v2
         with:
@@ -305,4 +337,13 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./m 0.2.0.exe
           asset_name: m.exe
+          asset_content_type: text/text
+      - name: Upload vsix to release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Code/Extension/m.vsix
+          asset_name: m.vsix
           asset_content_type: text/text
