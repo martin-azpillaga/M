@@ -1,7 +1,5 @@
 package m.library.types;
 
-import static m.library.types.AtomicType.*;
-
 public class TypeVariable implements Type {
 	
 	public static final TypeVariable A = new TypeVariable("a");

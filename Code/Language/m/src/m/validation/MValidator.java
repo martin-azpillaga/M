@@ -78,7 +78,6 @@ public class MValidator extends AbstractMValidator
 		}
 		
 		var minProblems = Integer.MAX_VALUE;
-		List<Problem> list = null;
 		Library library = null;
 		
 		for (var entry : map.entrySet())
@@ -86,7 +85,6 @@ public class MValidator extends AbstractMValidator
 			if (entry.getValue().size() < minProblems)
 			{
 				minProblems = entry.getValue().size();
-				list = entry.getValue();
 				library = entry.getKey();
 			}
 		}

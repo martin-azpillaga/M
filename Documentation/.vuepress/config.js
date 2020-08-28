@@ -4,8 +4,8 @@ module.exports = {
     theme: 'yuu',
     themeConfig: {
         yuu: {
-			defaultDarkTheme: true,
-		},
+            defaultDarkTheme: true,
+        },
         logo: 'https://avatars2.githubusercontent.com/u/6147446?s=400&u=c325f5bfc187e889f05cc872681ad1cb1ba6b3b5&v=4',
         nav: [{
                 text: 'Starter guide',
