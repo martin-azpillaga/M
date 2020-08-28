@@ -582,16 +582,16 @@ public enum Library
 	Map<Function, String> functionToName;
 	Map<Block, String> blockToName;
 	Map<AtomicType, String> typeToName;
-	Map<Class, String> problemToName;
+	Map<Class<?>, String> problemToName;
 	
 	Map<String, Value> nameToValue;
 	Map<String, Component> nameToComponent;
 	Map<String, Function> nameToFunction;
 	Map<String, Block> nameToBlock;
 	Map<String, AtomicType> nameToType;
-	Map<String, Class> nameToProblem;
+	Map<String, Class<?>> nameToProblem;
 	
-	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Class, String> problems)
+	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Class<?>, String> problems)
 	{
 		valueToName = forward(values, Value.values());
 		nameToValue = reverse(values, Value.values());

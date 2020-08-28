@@ -31,7 +31,6 @@ import m.m.Function;
 import m.m.Statement;
 import m.m.Unary;
 import m.m.Value;
-import m.main.Main;
 
 public class ClassicUnity
 {
