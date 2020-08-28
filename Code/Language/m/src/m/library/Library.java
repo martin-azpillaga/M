@@ -12,6 +12,7 @@ import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.library.types.TypeVariable;
+import m.main.Main;
 import m.validation.problems.Problem;
 import m.validation.problems.errors.IncompatibleTypes;
 import m.validation.problems.errors.ReadOnly;
@@ -636,7 +637,7 @@ public enum Library
 			
 			if (map.containsKey(mapped))
 			{
-				System.err.println("Value already present: "+mapped);
+				Main.writeMessage("Value already present: "+mapped);
 			}
 			else
 			{

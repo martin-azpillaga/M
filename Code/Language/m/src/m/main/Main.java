@@ -15,6 +15,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ResourceSet;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionParams;
@@ -52,7 +53,6 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
-import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.generator.JavaIoFileSystemAccess;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
@@ -173,9 +173,9 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		var workspace = new Workspace(root);
 		workspaces.add(workspace);
 		
-		try
+		try (var folder = Files.walk(Paths.get(root)))
 		{
-			Files.walk(Paths.get(root)).forEach(f -> 
+			folder.forEach(f -> 
 			{
 				if (f.toString().endsWith(".m"))
 				{
@@ -241,6 +241,8 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		{
 			var path = decode(change.getUri());
 			var workspace = findWorkspace(path);
+
+			if (workspace == null) { continue; }
 			
 			if (change.getType() == FileChangeType.Created)
 			{
@@ -361,6 +363,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			}
 			catch (IOException e)
 			{
+				write(e.getMessage());
 			}
 		}
 		else
@@ -416,16 +419,16 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				var cell = (Cell) container;
 				if (cell.getComponent() == value)
 				{
-					result = "Type: "+MValidator.game.inference.infer(cell);
+					result = MValidator.game.inference.infer(cell).toString();
 				}
 				else
 				{
-					result = "Type: "+MValidator.game.inference.infer(value);
+					result = MValidator.game.inference.infer(value).toString();
 				}
 			}
 			else
 			{
-				result = "Type: "+MValidator.game.inference.infer(value);
+				result = MValidator.game.inference.infer(value).toString();
 			}
 		}
 		else
@@ -601,7 +604,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		{
 			for (var message : problem.messages(Library.ENGLISH))
 			{
-				if (EcoreUtil2.getRoot(message.source, true) != workspace.files.get(filePath).rootObject)
+				if (EcoreUtil.getRoot(message.source, true) != workspace.files.get(filePath).rootObject)
 				{
 					continue;
 				}
@@ -732,7 +735,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			resource = (XtextResource) resourceSet.createResource(URI.createURI(document.getUri()));
 			resource.load(null);
 		} catch (IOException e) {
-			
+			write(e.getMessage());
 		}
 		validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl);
 		var parseResult = resource.getParseResult();
