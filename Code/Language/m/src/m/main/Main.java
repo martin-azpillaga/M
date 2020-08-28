@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -97,12 +99,21 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	public static void main(String[] arguments)
 	{
 		instance = new Main();
-		var launcher = LSPLauncher.createServerLauncher(instance, System.in, System.out);
-		
-		var client = launcher.getRemoteProxy();
-		instance.connect(client);
-		
-		launcher.startListening();
+
+		try (var socket = new ServerSocket(5007))
+		{
+			var clientSocket = socket.accept();
+			var launcher = LSPLauncher.createServerLauncher(instance, clientSocket.getInputStream(), clientSocket.getOutputStream());
+			
+			var client = launcher.getRemoteProxy();
+			instance.connect(client);
+			
+			launcher.startListening();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
