@@ -13,11 +13,11 @@ module.exports = {
             },
             {
                 text: 'User guide',
-                link: '/1. User guide/0. How to/0. Transforms'
+                link: '/1. User guide/0. Standard library'
             },
             {
                 text: 'Developer guide',
-                link: '/2. Developer guide/0. Philosophy/0. Motivation'
+                link: '/2. Developer guide/0. Design decisions'
             }
         ],
         sidebar: {
@@ -26,16 +26,22 @@ module.exports = {
                 '1. Your first project',
                 '2. Personalize'
             ],
-            '/1. User guide/': [{
-                title: 'How to',
-                children: [
-                    '0. How to/0. Transforms',
-                    '0. How to/1. Rendering'
-                ]
-            }],
+            '/1. User guide/': [
+                '0. Standard library',
+                {
+                    title: 'Guided examples',
+                    children: [
+                        '1. Guided examples/0. Pong',
+                        '1. Guided examples/1. Space invaders'
+                    ]
+                },
+                '2. Troubleshooting'
+            ],
             '/2. Developer guide/': [
-                '0. Philosophy/0. Motivation',
-                '0. Philosophy/2. Design decisions'
+                '0. Design decisions',
+                '1. Setting up the development environment',
+                '2. Structure of the project',
+                '3. Contributing'
             ]
 
         },
