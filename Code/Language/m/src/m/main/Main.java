@@ -100,19 +100,32 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	{
 		instance = new Main();
 
-		try (var socket = new ServerSocket(5007))
+		if (arguments.length == 0)
 		{
-			var clientSocket = socket.accept();
-			var launcher = LSPLauncher.createServerLauncher(instance, clientSocket.getInputStream(), clientSocket.getOutputStream());
+			var launcher = LSPLauncher.createServerLauncher(instance, System.in, System.out);
 			
 			var client = launcher.getRemoteProxy();
 			instance.connect(client);
 			
 			launcher.startListening();
 		}
-		catch (IOException e)
+		else
 		{
-			e.printStackTrace();
+			var socketNumber = Integer.parseInt(arguments[0]);
+			try (var socket = new ServerSocket(socketNumber))
+			{
+				var clientSocket = socket.accept();
+				var launcher = LSPLauncher.createServerLauncher(instance, clientSocket.getInputStream(), clientSocket.getOutputStream());
+				
+				var client = launcher.getRemoteProxy();
+				instance.connect(client);
+				
+				launcher.startListening();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -381,10 +394,8 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		{
 			var defaultPath = Paths.get(workspace.root, "src-gen", "ClassicUnity").toString();
 			
-			write("Generating in default path: "+defaultPath);
 			fileSystem.setOutputPath(defaultPath);
 			generator.generate(game, fileSystem, Engine.Unity);
-			write("Generated");
 		}
 	}
 	
@@ -803,6 +814,14 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		{
 			result = "Unsupported encoding UTF-8";
 		}
+
+		var os = System.getProperty("os.name");
+
+		if (os.startsWith("Win"))
+		{
+			result = result.substring(1);
+		}
+
 		return result;
 	}	
 	

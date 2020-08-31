@@ -3,7 +3,7 @@
   "name": "m-ls",
   "displayName": "M language server",
   "description": "M language server",
-  "version": "0.4.2",
+  "version": "0.4.4",
   "repository": {
     "type": "git",
     "url": "https://github.com/martin-azpillaga/M"
