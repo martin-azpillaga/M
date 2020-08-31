@@ -1,12 +1,11 @@
 package m.main;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,12 +17,10 @@ import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.resource.ResourceSet;
-import org.eclipse.lsp4j.ApplyWorkspaceEditParams;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionParams;
-import org.eclipse.lsp4j.DeleteFile;
-import org.eclipse.lsp4j.DeleteFileOptions;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
@@ -45,15 +42,12 @@ import org.eclipse.lsp4j.ParameterInformation;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.ResourceOperation;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SignatureHelpParams;
 import org.eclipse.lsp4j.SignatureInformation;
-import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
-import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -61,7 +55,6 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
-import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.generator.JavaIoFileSystemAccess;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
@@ -106,12 +99,34 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	public static void main(String[] arguments)
 	{
 		instance = new Main();
-		var launcher = LSPLauncher.createServerLauncher(instance, System.in, System.out);
-		
-		var client = launcher.getRemoteProxy();
-		instance.connect(client);
-		
-		launcher.startListening();
+
+		if (arguments.length == 0)
+		{
+			var launcher = LSPLauncher.createServerLauncher(instance, System.in, System.out);
+			
+			var client = launcher.getRemoteProxy();
+			instance.connect(client);
+			
+			launcher.startListening();
+		}
+		else
+		{
+			var socketNumber = Integer.parseInt(arguments[0]);
+			try (var socket = new ServerSocket(socketNumber))
+			{
+				var clientSocket = socket.accept();
+				var launcher = LSPLauncher.createServerLauncher(instance, clientSocket.getInputStream(), clientSocket.getOutputStream());
+				
+				var client = launcher.getRemoteProxy();
+				instance.connect(client);
+				
+				launcher.startListening();
+			}
+			catch (IOException e)
+			{
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	@Override
@@ -182,9 +197,9 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		var workspace = new Workspace(root);
 		workspaces.add(workspace);
 		
-		try
+		try (var folder = Files.walk(Paths.get(root)))
 		{
-			Files.walk(Paths.get(root)).forEach(f -> 
+			folder.forEach(f -> 
 			{
 				if (f.toString().endsWith(".m"))
 				{
@@ -250,6 +265,8 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		{
 			var path = decode(change.getUri());
 			var workspace = findWorkspace(path);
+
+			if (workspace == null) { continue; }
 			
 			if (change.getType() == FileChangeType.Created)
 			{
@@ -370,16 +387,15 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			}
 			catch (IOException e)
 			{
+				write(e.getMessage());
 			}
 		}
 		else
 		{
 			var defaultPath = Paths.get(workspace.root, "src-gen", "ClassicUnity").toString();
 			
-			write("Generating in default path: "+defaultPath);
 			fileSystem.setOutputPath(defaultPath);
 			generator.generate(game, fileSystem, Engine.Unity);
-			write("Generated");
 		}
 	}
 	
@@ -425,16 +441,16 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				var cell = (Cell) container;
 				if (cell.getComponent() == value)
 				{
-					result = "Type: "+MValidator.game.inference.infer(cell);
+					result = MValidator.game.inference.infer(cell).toString();
 				}
 				else
 				{
-					result = "Type: "+MValidator.game.inference.infer(value);
+					result = MValidator.game.inference.infer(value).toString();
 				}
 			}
 			else
 			{
-				result = "Type: "+MValidator.game.inference.infer(value);
+				result = MValidator.game.inference.infer(value).toString();
 			}
 		}
 		else
@@ -610,7 +626,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		{
 			for (var message : problem.messages(Library.ENGLISH))
 			{
-				if (EcoreUtil2.getRoot(message.source, true) != workspace.files.get(filePath).rootObject)
+				if (EcoreUtil.getRoot(message.source, true) != workspace.files.get(filePath).rootObject)
 				{
 					continue;
 				}
@@ -741,7 +757,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			resource = (XtextResource) resourceSet.createResource(URI.createURI(document.getUri()));
 			resource.load(null);
 		} catch (IOException e) {
-			
+			write(e.getMessage());
 		}
 		validator.validate(resource, CheckMode.ALL, CancelIndicator.NullImpl);
 		var parseResult = resource.getParseResult();
@@ -798,6 +814,14 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		{
 			result = "Unsupported encoding UTF-8";
 		}
+
+		var os = System.getProperty("os.name");
+
+		if (os.startsWith("Win"))
+		{
+			result = result.substring(1);
+		}
+
 		return result;
 	}	
 	

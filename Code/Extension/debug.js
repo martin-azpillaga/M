@@ -5,15 +5,23 @@ var {
     workspace
 } = require('vscode');
 
+var net = require('net');
+
 var client;
 
 exports.activate = function(context) {
-
-    var serverOptions = {
-        run: {
-            command: "java",
-            args: ["-jar", context.asAbsolutePath("ls.jar")]
-        }
+    console.log("Activating debug client on port 5007");
+    let connectionInfo = {
+        port: 5007
+    };
+    let serverOptions = () => {
+        // Connect to language server via socket
+        let socket = net.connect(connectionInfo);
+        let result = {
+            writer: socket,
+            reader: socket
+        };
+        return Promise.resolve(result);
     };
 
     var clientOptions = {

@@ -11,7 +11,6 @@ import m.library.types.Type;
 import m.m.Cell;
 import m.m.Expression;
 import m.main.InferenceData;
-import m.main.Main;
 import m.validation.problems.Problem;
 import m.validation.problems.errors.IncompatibleTypes;
 import m.validation.problems.errors.UndecidableType;

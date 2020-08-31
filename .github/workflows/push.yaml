@@ -68,6 +68,8 @@ jobs:
     steps:
       - name: Download repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: Cache
         uses: actions/cache@v2
         with:
@@ -100,7 +102,7 @@ jobs:
           sonar-scanner \
           -Dsonar.organization=martin-azpillaga \
           -Dsonar.projectKey=martin-azpillaga_M \
-          -Dsonar.sources=Code/Editor,Code/Language/m/src \
+          -Dsonar.sources=Code/Editor,Code/Language/m/src,Code/Extension \
           -Dsonar.java.binaries=Code/Language/build/classes \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.login=c1285d7b6c459b50e7eee08102a94f4b68bd70f9
@@ -110,14 +112,26 @@ jobs:
     steps:
       - name: Download repository
         uses: actions/checkout@v2
-      - name: Cache
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle
-            Code/Editor/node_modules
-            pandoc-2.9.1-1-amd64.deb
-          key: functionality
+      - name: Install vuepress
+        run: |
+          sudo npm install -g vuepress
+          cp -r Documentation ../Documentation
+          git fetch
+          git checkout gh-pages
+          cp -r ../Documentation Documentation
+          cd Documentation
+          sudo yarn add vuepress-theme-yuu
+          sudo vuepress build
+          cd ..
+          cp -r Documentation/.vuepress/dist/* .
+          sudo rm -rf Documentation/
+          git config --global user.name "Github actions"
+          git config --global user.email "media@azpillaga.world"  
+          git add .
+          git commit -m "Deploy vuepress site using Github actions"
+          git push
+          git reset --hard
+          git checkout -
       - name: Install java 13
         uses: actions/setup-java@v1
         with:
@@ -219,6 +233,36 @@ jobs:
         with:
           name: windows
           path: "dist\\m 0.2.0.exe"
+  packagingMac:
+    needs: test
+    runs-on: macos-latest
+    timeout-minutes: 100
+    steps:
+      - name: Download the editor folder
+        uses: actions/download-artifact@v2
+        with:
+          name: editor
+      - name: Install node 10
+        uses: actions/setup-node@v1
+        with:
+          node-version: '10.x'
+      - name: Install yarn
+        run: |
+          npm install -g yarn
+      - name: Build Editor for electron
+        run: |
+          yarn
+          yarn theia rebuild:electron
+          yarn theia build --app-target electron
+      - name: Package application
+        run: |
+          yarn electron-builder
+      - name: Upload dmg
+        if: ${{ matrix.os }} == 'macos-latest'
+        uses: actions/upload-artifact@v2
+        with:
+          name: mac
+          path: dist/m-0.2.0.dmg
   packagingUbuntu:
     needs: test
     runs-on: ubuntu-latest
@@ -235,9 +279,6 @@ jobs:
       - name: Install yarn
         run: |
           npm install -g yarn
-          node --version
-          yarn --version
-          python --version
       - name: Build Editor for electron
         run: |
           yarn
@@ -254,10 +295,24 @@ jobs:
           path: dist/m-0.2.0.AppImage
   release:
     if: ${{ github.ref == 'refs/heads/master' }}
-    needs: [packagingUbuntu, packagingWindows]
+    needs: [packagingUbuntu, packagingWindows, packagingMac]
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
+      - name: Download repository
+        uses: actions/checkout@v2
+      - name: Install vsce
+        run: |
+          sudo npm install -g vsce
+      - name: Build VSCode extension
+        working-directory: Code/Extension
+        run: |
+          sudo npm install
+          vsce package -o m.vsix
+      - name: Publish VSCode extension to marketplace
+        working-directory: Code/Extension
+        run: |
+          vsce publish || exit 0
       - name: Download Linux
         uses: actions/download-artifact@v2
         with:
@@ -266,6 +321,10 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: windows
+      - name: Download Windows
+        uses: actions/download-artifact@v2
+        with:
+          name: mac
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.0.0
@@ -293,4 +352,22 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./m 0.2.0.exe
           asset_name: m.exe
+          asset_content_type: text/text
+      - name: Upload dmg to release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./m-0.2.0.dmg
+          asset_name: m.dmg
+          asset_content_type: text/text
+      - name: Upload vsix to release
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./Code/Extension/m.vsix
+          asset_name: m.vsix
           asset_content_type: text/text
