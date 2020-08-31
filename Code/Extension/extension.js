@@ -8,6 +8,7 @@ var {
 var client;
 
 exports.activate = function(context) {
+
     var serverOptions = {
         run: {
             command: "java",
