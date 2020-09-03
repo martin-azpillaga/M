@@ -1,5 +1,9 @@
-const { window } = require("vscode");
-const { lookpath } = require("lookpath");
+const {
+    window
+} = require("vscode");
+const {
+    lookpath
+} = require("lookpath");
 
 var {
     LanguageClient
@@ -13,9 +17,9 @@ var client;
 exports.activate = async function(context) {
 
     var java = await lookpath("javaccc");
-    if (!java)
-    {
-        window.showInformationMessage("M requires a Java 8+ runtime to execute. Please install and add Java 8+ to the path");
+    if (!java) {
+        var selection = window.showInformationMessage("M requires a Java 8+ runtime to execute. Please install and add Java 8+ to the path", "Install Java 8+");
+        selection.then(x => require("openurl").open("https://jdk.java.net/14/"));
         return;
     }
 
