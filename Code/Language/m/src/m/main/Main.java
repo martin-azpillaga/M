@@ -151,7 +151,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		
 		var capabilities = new ServerCapabilities();
 		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
-		//capabilities.setHoverProvider(true);
+		capabilities.setHoverProvider(true);
 		//capabilities.setCompletionProvider(new CompletionOptions());
 		//capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
 		

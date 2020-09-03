@@ -46,8 +46,9 @@
   "activationEvents": [
     "onLanguage:m"
   ],
-  "main": "./debug.js",
+  "main": "./extension.js",
   "dependencies": {
+    "lookpath": "^1.1.0",
     "vscode-languageclient": "6.1.3"
   }
 }
