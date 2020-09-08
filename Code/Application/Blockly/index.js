@@ -1,5 +1,5 @@
 
-var workspace = Blockly.inject('blocklyDiv', {toolbox: document.getElementById('toolbox'), zoom: {controls: true, wheel: true}});
+var workspace = Blockly.inject('blocklyDiv', {toolbox: document.getElementById('toolbox'), zoom: {controls: true, wheel: true}, renderer: "zelos", theme: "dark"});
 
 document.getElementById("load-button").addEventListener("click", function()
 {
@@ -50,7 +50,7 @@ Blockly.Blocks['system'] = {
       this.appendDummyInput()
           .appendField(new Blockly.FieldTextInput("system"), "name");
       this.appendStatementInput("statements")
-          .setCheck(["selection", "iteration", "forall", "assignment", "subprocess"]);
+          .setCheck(["selection", "iteration", "forall", "subprocess"]);
       this.setColour(230);
    this.setTooltip("");
    this.setHelpUrl("");
@@ -60,12 +60,12 @@ Blockly.Blocks['system'] = {
   Blockly.Blocks['selection'] = {
     init: function() {
       this.appendValueInput("condition")
-          .setCheck("Boolean")
-          .appendField("→");
+          .setCheck("Number")
+          .appendField("select");
       this.appendStatementInput("positiveStatements")
-          .setCheck(["selection", "iteration", "forall", "assignment", "subprocess"]);
+          .setCheck(["selection", "iteration", "forall", "subprocess"]);
       this.setPreviousStatement(true, "selection");
-      this.setNextStatement(true, ["selection", "iteration", "forall", "assignment", "subprocess"]);
+      this.setNextStatement(true, ["selection", "iteration", "forall", "subprocess"]);
       this.setColour(230);
    this.setTooltip("");
    this.setHelpUrl("");
@@ -75,12 +75,12 @@ Blockly.Blocks['system'] = {
   Blockly.Blocks['iteration'] = {
     init: function() {
       this.appendValueInput("condition")
-          .setCheck("Boolean")
-          .appendField("↺");
+          .setCheck(["Bool", "sda"])
+          .appendField("iterate");
       this.appendStatementInput("statements")
-          .setCheck(["selection", "iteration", "forall", "assignment", "subprocess"]);
+          .setCheck(["selection", "iteration", "forall", "subprocess"]);
       this.setPreviousStatement(true, "iteration");
-      this.setNextStatement(true, ["selection", "iteration", "forall", "assignment", "subprocess"]);
+      this.setNextStatement(true, ["selection", "iteration", "forall", "subprocess"]);
       this.setColour(230);
    this.setTooltip("");
    this.setHelpUrl("");
@@ -89,31 +89,57 @@ Blockly.Blocks['system'] = {
   
   Blockly.Blocks['forall'] = {
     init: function() {
-      this.appendValueInput("condition")
-          .setCheck("Boolean")
-          .appendField("∀")
+      this.appendDummyInput()
+          .appendField("foreach")
           .appendField(new Blockly.FieldTextInput("entity"), "entity");
       this.appendStatementInput("statements")
-          .setCheck(["selection", "iteration", "forall", "assignment", "subprocess"]);
+          .setCheck(["selection", "iteration", "forall", "subprocess"]);
       this.setPreviousStatement(true, "forall");
-      this.setNextStatement(true, ["selection", "iteration", "forall", "assignment", "subprocess"]);
+      this.setNextStatement(true, ["selection", "iteration", "forall", "subprocess"]);
       this.setColour(230);
    this.setTooltip("");
    this.setHelpUrl("");
     }
   };
-  
-  Blockly.Blocks['assignment'] = {
+
+  Blockly.Blocks['set'] = {
     init: function() {
-      this.appendValueInput("condition")
-          .setCheck("Boolean")
-          .appendField("∀")
-          .appendField(new Blockly.FieldTextInput("entity"), "entity");
-      this.appendStatementInput("statements")
-          .setCheck(["selection", "iteration", "forall", "assignment", "subprocess"]);
-      this.setPreviousStatement(true, "forall");
-      this.setNextStatement(true, ["selection", "iteration", "forall", "assignment", "subprocess"]);
+      this.appendValueInput("expression")
+          .appendField("set")
+          .appendField(new Blockly.FieldTextInput("entity"), "entity")
+          .appendField("to")
+          .setCheck(["Bool", "sda"]);
       this.setColour(230);
+      this.setPreviousStatement(true, "forall");
+      this.setNextStatement(true, ["selection", "iteration", "forall", "subprocess"]);
+   this.setTooltip("");
+   this.setHelpUrl("");
+    }
+  };
+
+  Blockly.Blocks['cell'] = {
+    init: function() {
+        this.appendDummyInput()
+          .appendField(new Blockly.FieldTextInput("entity"), "entity")
+          .appendField(".")
+          .appendField(new Blockly.FieldTextInput("component"), "component");
+      this.setColour(230);
+      this.setOutput("Bool");
+   this.setTooltip("");
+   this.setHelpUrl("");
+    }
+  };
+
+  Blockly.Blocks['times'] = {
+    init: function() {
+        this.appendValueInput("left")
+          .setCheck(["Bool", "sda"]);
+          this.appendValueInput("right")
+          .appendField("*")
+          .setCheck(["Bool", "sda"]);
+      this.setColour(230);
+      this.setOutput("Bool");
+      this.setInputsInline(true);
    this.setTooltip("");
    this.setHelpUrl("");
     }
