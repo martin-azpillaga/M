@@ -41,10 +41,18 @@
         "scopeName": "source.m",
         "path": "./m.tmLanguage.json"
       }
+    ],
+    "commands": [
+      {
+        "command": "m.open",
+        "title": "Open Visual editor",
+        "category": "M"
+      }
     ]
   },
   "activationEvents": [
-    "onLanguage:m"
+    "onLanguage:m",
+    "onCommand:m.open"
   ],
   "main": "./extension.js",
   "dependencies": {
