@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # What is M
 
 M is a data oriented programming language for developing games and interactive
@@ -118,3 +119,8 @@ All kind actions are welcome. Here are some ideas:
 Thank you.
 
 [download]: https://github.com/martin-azpillaga/M/releases/latest/download/m-0.0.0.AppImage
+=======
+# M
+
+M is a data oriented programming language for game developers.
+>>>>>>> archive/gh-pages
