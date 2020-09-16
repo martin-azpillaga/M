@@ -120,6 +120,18 @@ jobs:
           git checkout gh-pages
           cp -r ../Documentation Documentation
           cd Documentation
+          echo before
+          ls
+          for f in **/*.md **/**/*.md
+          do
+              g=$(echo $f | tr '[:upper:]' '[:lower:]')
+              g=$(echo $g | sed -e 's/[0-9]*\. //g' -e 's/ /-/g')
+              echo $g
+              mkdir -p ${g%/*}
+              mv "$f" $g
+          done
+          echo after
+          ls
           sudo yarn add vuepress-theme-yuu
           sudo vuepress build
           cd ..
