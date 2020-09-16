@@ -1,5 +1,0 @@
-task copyLanguageServer{
-	doLast{
-		println "Copy language server from m.ide to xtext-server"
-	}
-}

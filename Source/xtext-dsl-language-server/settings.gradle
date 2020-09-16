@@ -1,2 +1,0 @@
-include 'io.typefox.xtext.langserver.example'
-include 'io.typefox.xtext.langserver.example.ide'

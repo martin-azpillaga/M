@@ -1,5 +1,0 @@
-task download{
-	doLast{
-		println "Download blockly.js"
-	}
-}

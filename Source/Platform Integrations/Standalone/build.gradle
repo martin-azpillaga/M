@@ -1,5 +1,0 @@
-task buildStandalone{
-	doLast{
-		println "Build Standalone editor"
-	}
-}
