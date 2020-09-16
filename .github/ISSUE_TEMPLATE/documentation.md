@@ -8,6 +8,7 @@ assignees: martin-azpillaga
 ---
 
 ### Description
+<<<<<<< HEAD
 
 - Description
 
@@ -17,4 +18,12 @@ assignees: martin-azpillaga
 
 ### Benefit
 
+=======
+- Description
+
+### Methodology
+- Methodology
+
+### Benefit
+>>>>>>> source2/master
 - Benefit
