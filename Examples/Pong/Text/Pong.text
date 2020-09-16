@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ball has
 position 0 0, scale 2 2, appearance sprite.ball,
 mass 1, radius 0.5, restitution 1, category [balls],
@@ -32,6 +33,91 @@ canvas 100 100 contains
 	left_board based on board has team [blue], position -25 40.
 	right_board based on board has team [red], position 25 40.
 .
+=======
+ball inside playground
+{
+	position 0 0, scale 2 2, appearance sprite.ball,
+	mass 1, radius 0.5, restitution 1, body, category ball,
+	servable_tag, respawn_point 0 0, angle -1 1, length 10 20
+}
+
+paddle
+{
+	position 0 0, scale 4 10, appearance sprite.paddle, 
+	category paddle, body, extent 1 1, restitution 1,
+	motion gamepad.leftY, direction 0 15
+}
+
+speedUp in playground
+{
+	ball - paddle
+}
+
+respawn in playground
+{
+	ball - goal
+}
+
+score in playground
+{
+	goal - ball
+}
+
+count
+{
+	redGoal - redScore,
+	blueGoal - blueScore
+}
+
+
+
+goal
+{
+	position 0 0, scale 2 100, appearance sprite.goal,
+	extent 1 1, restitution 1, category goal,
+	worth 1, effect entity.audioEffect
+}
+
+wall
+{
+	position 0 0, scale 100 2, appearance sprite.wall, sortingorder 40,
+	body, extent 1 1, restitution 1
+}
+
+board 
+{
+	position 0 0, scale 5 10, number 0
+	maximum 10, scene entity.menu.
+}
+
+audioEffect
+{
+	audiosource audio.yay, 
+	lifetime 5s
+}
+
+
+player
+{
+	position 0 0, viewDistance 1000, viewAngle 50, clearColor 0.5 0.5 0.5 1
+}
+
+
+hud
+{
+	canvas 100 100
+}
+
+left_board in canvas based on board
+{
+	category redBoard, position -25 40
+}
+right_board in canvas based on board
+{
+	category blueBoard, position 25 40
+}
+
+>>>>>>> private/development
 
 playground contains
 	ball based on ball.
@@ -54,6 +140,7 @@ menu contains
 	player based on player.
 .
 
+<<<<<<< HEAD
 
 start:
 for all entity a with triggered detector
@@ -63,6 +150,16 @@ for all entity a with triggered detector
 		destroy(b)
 	}
 	create(a.scene)
+=======
+start:
+for all a,b related by transition satisfying a triggered detector
+{
+	for all entity c
+	{
+		destroy(c)
+	}
+	create(b)
+>>>>>>> private/development
 }
 
 move:
