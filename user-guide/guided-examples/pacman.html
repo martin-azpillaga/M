@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Pacman | Project M</title>
+    <meta name="generator" content="VuePress 1.5.4">
+    
+    <meta name="description" content="A data-driven programming language for game developers">
+    <link rel="preload" href="/M/assets/css/0.styles.00ee1bd5.css" as="style"><link rel="preload" href="/M/assets/js/app.6d9f7c86.js" as="script"><link rel="preload" href="/M/assets/js/2.ac6125bd.js" as="script"><link rel="preload" href="/M/assets/js/15.97727dd2.js" as="script"><link rel="prefetch" href="/M/assets/js/10.4866b9fe.js"><link rel="prefetch" href="/M/assets/js/11.443834b4.js"><link rel="prefetch" href="/M/assets/js/12.ef0c39ea.js"><link rel="prefetch" href="/M/assets/js/13.31428065.js"><link rel="prefetch" href="/M/assets/js/14.3d7c5a3a.js"><link rel="prefetch" href="/M/assets/js/16.33a910ef.js"><link rel="prefetch" href="/M/assets/js/17.98580470.js"><link rel="prefetch" href="/M/assets/js/18.48a01eab.js"><link rel="prefetch" href="/M/assets/js/19.03f26e1b.js"><link rel="prefetch" href="/M/assets/js/3.f0b70bc9.js"><link rel="prefetch" href="/M/assets/js/4.54f0d416.js"><link rel="prefetch" href="/M/assets/js/5.0e323e9b.js"><link rel="prefetch" href="/M/assets/js/6.9c226347.js"><link rel="prefetch" href="/M/assets/js/7.aabc8879.js"><link rel="prefetch" href="/M/assets/js/8.eabc5278.js"><link rel="prefetch" href="/M/assets/js/9.0e55059b.js">
+    <link rel="stylesheet" href="/M/assets/css/0.styles.00ee1bd5.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/M/" class="home-link router-link-active"><img src="https://avatars2.githubusercontent.com/u/6147446?s=400&amp;u=c325f5bfc187e889f05cc872681ad1cb1ba6b3b5&amp;v=4" alt="Project M" class="logo"> <span class="site-name can-hide">Project M</span></a> <div class="links"><!----> <div class="user-settings"><a href="#" class="settings-button"><svg aria-hidden="true" data-prefix="fas" data-icon="cog" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-cog fa-w-16 settings-icon"><path fill="currentColor" d="M444.788 291.1l42.616 24.599c4.867 2.809 7.126 8.618 5.459 13.985-11.07 35.642-29.97 67.842-54.689 94.586a12.016 12.016 0 0 1-14.832 2.254l-42.584-24.595a191.577 191.577 0 0 1-60.759 35.13v49.182a12.01 12.01 0 0 1-9.377 11.718c-34.956 7.85-72.499 8.256-109.219.007-5.49-1.233-9.403-6.096-9.403-11.723v-49.184a191.555 191.555 0 0 1-60.759-35.13l-42.584 24.595a12.016 12.016 0 0 1-14.832-2.254c-24.718-26.744-43.619-58.944-54.689-94.586-1.667-5.366.592-11.175 5.459-13.985L67.212 291.1a193.48 193.48 0 0 1 0-70.199l-42.616-24.599c-4.867-2.809-7.126-8.618-5.459-13.985 11.07-35.642 29.97-67.842 54.689-94.586a12.016 12.016 0 0 1 14.832-2.254l42.584 24.595a191.577 191.577 0 0 1 60.759-35.13V25.759a12.01 12.01 0 0 1 9.377-11.718c34.956-7.85 72.499-8.256 109.219-.007 5.49 1.233 9.403 6.096 9.403 11.723v49.184a191.555 191.555 0 0 1 60.759 35.13l42.584-24.595a12.016 12.016 0 0 1 14.832 2.254c24.718 26.744 43.619 58.944 54.689 94.586 1.667 5.366-.592 11.175-5.459 13.985L444.788 220.9a193.485 193.485 0 0 1 0 70.2zM336 256c0-44.112-35.888-80-80-80s-80 35.888-80 80 35.888 80 80 80 80-35.888 80-80z"></path></svg></a> <div class="user-settings-menu" style="display:none;"><div class="theme-options"><!----> <!----> <div class="dark-theme-options toggle-option"><label for="dark-theme-toggle">Enable Dark Theme?</label> <input id="dark-theme-toggle" type="checkbox"></div> <!----> <!----></div></div></div> <!----> <div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/M/starter-guide/set-up.html" class="nav-link">
+  Starter guide
+</a></div><div class="nav-item"><a href="/M/user-guide/standard-library.html" class="nav-link">
+  User guide
+</a></div><div class="nav-item"><a href="/M/developer-guide/design-decisions.html" class="nav-link">
+  Developer guide
+</a></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/M/starter-guide/set-up.html" class="nav-link">
+  Starter guide
+</a></div><div class="nav-item"><a href="/M/user-guide/standard-library.html" class="nav-link">
+  User guide
+</a></div><div class="nav-item"><a href="/M/developer-guide/design-decisions.html" class="nav-link">
+  Developer guide
+</a></div> <!----></nav>  <ul class="sidebar-links"><li><a href="/M/user-guide/standard-library.html" class="sidebar-link">The standard library</a></li><li><section class="sidebar-group collapsable depth-0"><p class="sidebar-heading"><span>Guided examples</span> <span class="arrow right"></span></p> <!----></section></li><li><a href="/M/user-guide/troubleshooting.html" class="sidebar-link">Troubleshooting</a></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="pacman"><a href="#pacman" class="header-anchor">#</a> Pacman</h1> <div class="language-m extra-class"><pre class="language-text"><code>    main world contains menu.
+
+    directionChange has
+    button gamepad.left
+    direction 0 0.
+
+    rayCaster has
+    scale 4.5 4.5 casting extent 0.99 0.99 offset 0 0
+    sensor detect [wall]
+    parentRelation 0
+    velocity 0 0.
+
+    wall has
+    scale 5 5 appearance sprite.wall physical category [wall] extent 1 1.
+
+    food has
+    scale 1 1 appearance sprite.food radius 0.5 winRequirement worth 10
+    deathSensor detect [character].
+
+    fruit has
+    scale 3 3 appearance sprite.fruit radius 0.5 worth 100 deathSensor
+    detect [character] lifeTimer 7s.
+
+    rules has
+    spawnTimer 20s
+    creation entity.fruit
+    spawnPosition 0 -5
+    winCondition 0
+    loseCondition 0
+    scene entity.menu.
+
+    powerUp has
+    scale 3 3
+    appearance sprite.powerUp
+    radius 0.5
+    winRequirement
+    worth 50
+    deathSensor detect [character]
+    invincibilityFormula
+    fearTimer 10s.
+
+    character has
+    demoMode
+    demoPowerlessVelocity -5 0
+    demoPowerVelocity 5 0
+    category [character]
+    personality
+    fearAmount 0
+    respawnPoint 0 -25
+    sortingOrder 2
+    wish
+    mass 1
+    physical
+    scale 4.5 4.5
+    appearance sprite.pacman
+    parent 0
+    extent 1 1
+    speed 5
+    teleportFactor -1
+    teleportSensor detect [portal]
+    clashSensor detect [evil]
+    loseRequirement
+    .
+
+    portal has
+    appearance sprite.portal
+    scale 5 5
+    extent 1 1
+    category [portal]
+    physical.
+
+    label has number 0 scale 10 5 combo 0 initialCombo 0 scoreboard.
+
+    lifeImage has image sprite.life scale 3 3 life.
+
+    ghost has
+    demoMode
+    demoFearVelocity 2 0
+    appearance sprite.ghost
+    scale 4.5 4.5
+    sortingOrder 1
+    extent 0.99 0.99
+    category [evil]
+    clashSensor detect [character]
+    autoMove
+    autoSpeed -5 0
+    autoSpeedFactor -1
+    reboundSensor detect [wall]
+    respawnPoint 0 5
+    velocity 0 0
+    teleportFactor -1
+    teleportSensor detect [portal]
+    independenceTime 10s
+    independenceTimeRange 2 5
+    independencePoint 0 15
+    coward
+    fearAppearance sprite.scared
+    fearFrames 7
+    worth 200
+    normalAppearance sprite.ghost
+    .
+
+    audioEffect has
+    audioClip sound, lifeTimer 1s.
+
+    player has
+    viewDistance 10, viewAngle 50, clearColor 0.2 0.2 0.2 1.
+
+
+    hud has
+    canvas 100 100 contains
+        score_board based on label has position -40 45.
+        life_image_1 based on lifeImage has position 35 45.
+        life_image_2 based on lifeImage has position 40 45.
+        life_image_3 based on lifeImage has position 45 45.
+    .
+
+    menu contains
+        hud has canvas 100 100 contains
+            title has position 0 10, scale 100 10, text 'Pacman'.
+            subtitle has position 0 -20, scale 100 5, text 'Play_start'.
+            options has position 0 -40 scale 100 4 text 'Options_select'.
+        .
+        trigger has detector gamepad.start, scene entity.playground.
+        rulesPage has detector gamepad.select, scene entity.rulesPage.
+        player based on player.
+    .
+
+    rulesPage contains
+        hud has canvas 100 100 contains
+            blinkyText has position 10 45 scale 40 5 text 'Blinky'.
+            pinkyText has position 10 35 scale 40 5 text 'Pinky'.
+            inkyText has position 10 25 scale 40 5 text 'Inky'.
+            clydeText has position 10 15 scale 40 5 text 'Clyde'.
+
+            demoScore has position 30 0 scale 10 5 number 0 combo 0.
+            demoText has position 40 0 scale 10 5 text 'pts'.
+
+            foodText has position 10 -15 scale 40 5 text '_10_pts'.
+            powerUpText has position 10 -25 scale 40 5 text '_50_pts'.
+            fruitText has position 10 -35 scale 40 5 text '_100_pts'.
+            copyrightText has position 0 -45 scale 40 5 text
+            'c_1980_MIDWAY_MFG_CO'.
+        .
+
+        blinky has position -30 45 scale 5 5 appearance sprite.blinky.
+        pinky has position -30 35 scale 5 5 appearance sprite.pinky.
+        inky has position -30 25 scale 5 5 appearance sprite.inky.
+        clyde has position -30 15 scale 5 5 appearance sprite.clyde.
+
+        realPowerUp based on powerUp has position -40 0.
+        realPacman based on character has position 0 0.
+        caster based on rayCaster.
+        realBlinky based on ghost without independenceTime has position 10 0
+         appearance sprite.blinky.
+        realPinky based on ghost without independenceTime has position 15 0
+         appearance sprite.pinky.
+        realInky based on ghost without independenceTime has position 20 0
+         appearance sprite.inky.
+        realClyde based on ghost without independenceTime has position 25 0
+         appearance sprite.clyde.
+
+        food has position -15 -15 scale 1 1 appearance sprite.food.
+        powerUp has position -15 -25 scale 4 4 appearance sprite.powerUp.
+        fruit has position -15 -35 scale 3 3 appearance sprite.fruit.
+
+        titlePage has detector gamepad.south, scene entity.menu.
+        player based on player.
+    .
+
+    demo:
+    for all entity a with demoMode
+    {
+        initialize amount
+        for all entity b with fear
+        {
+            amount = amount++
+        }
+
+        if amount = a.fearAmount
+        {
+            a.velocity = a.demoPowerlessVelocity
+        }
+        else
+        {
+            a.velocity = a.demoPowerVelocity
+        }
+    }
+
+    demoFear:
+    for all entity c with fear demoMode
+    {
+        c.autoSpeed = c.demoFearVelocity
+    }
+
+    goIndependent:
+    for all entity a with timed out independenceTime
+    {
+        a.position = a.independencePoint
+        remove (independenceTime, a)
+    }
+
+    move:
+    for all entity a with autoMove
+    {
+        a.velocity = a.autoSpeed
+    }
+
+    rebound:
+    for all entity a with enter reboundSensor
+    {
+        a.autoSpeed *= a.autoSpeedFactor
+    }
+
+    haunt:
+    for all entity a with personality enter clashSensor
+    {
+        initialize amount
+        for all entity b with fear
+        {
+            amount = amount++
+        }
+
+        if amount = a.fearAmount
+        {
+            a.position = a.respawnPoint
+        }
+    }
+
+    loseLife:
+    for all entity a with personality enter clashSensor
+    {
+        initialize amount
+        for all entity b with fear
+        {
+            amount = amount++
+        }
+
+        if amount = a.fearAmount
+        {
+            for all entity c with life
+            {
+                destroy (c)
+                break
+            }
+        }
+    }
+
+    defeat:
+    for all entity a with fear no demoMode enter clashSensor
+    {
+        a.position = a.respawnPoint
+        time = add (independenceTime, a)
+        time := random(a.independenceTimeRange)
+    }
+
+    demoDefeat:
+    for all entity b with fear demoMode enter clashSensor
+    {
+        destroy (b)
+    }
+
+    becomeInvincible:
+    for all entity a with invincibilityFormula enter deathSensor
+    {
+        for all entity b with coward
+        {
+            add(fear, b)
+            fearTimer = add(fearTimer, b)
+            b.appearance = b.fearAppearance
+            fearTimer := b.fearFrames
+        }
+    }
+
+    becomeVincible:
+    for all entity a with timed out fearTimer
+    {
+        remove (fearTimer, a)
+        remove (fear, a)
+        a.appearance = a.normalAppearance
+    }
+
+    lose:
+    for all entity a
+    {
+        initialize amount
+        for all entity b with life
+        {
+            amount = amount++
+        }
+        if amount = a.loseCondition
+        {
+            for all entity c
+            {
+                destroy (c)
+            }
+            create (a.scene)
+        }
+    }
+    win:
+    for all entity a
+    {
+        initialize amount
+        for all entity b with winRequirement
+        {
+            amount = amount++
+        }
+        if amount = a.winCondition
+        {
+            for all entity c
+            {
+                destroy (c)
+            }
+            create (a.scene)
+        }
+    }
+    spawn:
+    for all entity a with timed out spawnTimer
+    {
+        spawn = create(a.creation)
+        spawn.position = a.spawnPosition
+    }
+
+    dieByTime:
+    for all entity a with timed out lifeTimer
+    {
+        destroy (a)
+    }
+
+    teleport:
+    for all entity a with enter teleportSensor
+    {
+        a.position = join(x(a.position) * a.teleportFactor,y(a.position))
+    }
+    die:
+    for all entity a with enter deathSensor
+    {
+        destroy (a)
+    }
+
+    score:
+    for all entity a with enter deathSensor
+    {
+        for all entity b with scoreboard
+        {
+            b.number = b.number + a.worth
+        }
+    }
+
+    performCombo:
+    for all entity a with fear enter clashSensor
+    {
+        for all entity b
+        {
+            b.combo = b.combo++
+            b.number = b.number + a.worth * b.combo
+        }
+    }
+
+    resetCombo:
+    for all entity a with timed out fearTimer
+    {
+        for all entity b
+        {
+            b.combo = b.initialCombo
+        }
+    }
+
+    redirect:
+    for all entity a with wish no enter sensor no stay sensor
+    {
+        for all entity b
+        {
+            if a.parentRelation = b.parent
+            {
+                b.velocity = a.offset * b.speed
+                remove(wish, a)
+            }
+        }
+    }
+
+    makeWish:
+    for all entity a with triggered button
+    {
+        for all entity b with casting
+        {
+            b.offset = a.direction
+            add(wish, b)
+        }
+    }
+
+    follow:
+    for all entity a
+    {
+        for all entity b
+        {
+            if a.parentRelation = b.parent
+            {
+                a.position = b.position + a.offset
+            }
+        }
+    }
+
+    start:
+    for all entity a with triggered detector
+    {
+        for all entity b
+        {
+            destroy (b)
+        }
+        create (a.scene)
+    }
+</code></pre></div><p>You can download the file that represent the [game in blocks] and load it in the
+visual editor to visualize it.</p></div> <footer class="page-edit"><!----> <!----></footer> <!----> </main></div><div class="global-ui"></div></div>
+    <script src="/M/assets/js/app.6d9f7c86.js" defer></script><script src="/M/assets/js/2.ac6125bd.js" defer></script><script src="/M/assets/js/15.97727dd2.js" defer></script>
+  </body>
+</html>
