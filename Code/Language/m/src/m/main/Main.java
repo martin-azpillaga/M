@@ -76,6 +76,7 @@ import m.m.Function;
 import m.m.Value;
 import m.validation.InferenceGraph;
 import m.validation.MValidator;
+import m.validation.problems.Problem;
 import m.validation.rules.Binding;
 import m.validation.rules.Binding.BindingReason;
 import m.validation.rules.ExpressionNode;
@@ -520,18 +521,14 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	private Workspace findWorkspace(String filePath)
 	{
-		Workspace workspace = null;
-		var found = false;
-		for (var i = 0; i < workspaces.size() && !found; i++)
+		for (var workspace : workspaces)
 		{
-			if (filePath.startsWith(workspaces.get(i).root))
+			if (filePath.startsWith(workspace.root))
 			{
-				workspace = workspaces.get(i);
-				found = true;
+				return workspace;
 			}
 		}
-		
-		return workspace;
+		return null;
 	}
 	
 	private List<Diagnostic> globalInference(String filePath, Workspace workspace, String text, boolean shouldGenerate)
@@ -671,6 +668,37 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		
 		return diagnostics;
 	}
+
+	private List<Diagnostic> toDiagnostics(List<Problem> problems, String text)
+	{
+		var diagnostics = new ArrayList<Diagnostic>();
+
+		for (var problem : problems)
+		{
+			for (var message : problem.messages(Library.ENGLISH))
+			{
+				var node = NodeModelUtils.getNode(message.source);
+				if (node == null)
+				{
+					write("Node for "+message.source+ "not found");
+					continue;
+				}
+				var range = new Range(new Position(node.getStartLine()-1, character(text,node.getOffset())), new Position(node.getEndLine()-1, character(text,node.getEndOffset())));
+				var severity = DiagnosticSeverity.Information;
+				switch (message.severity)
+				{
+				case INFO: severity = DiagnosticSeverity.Information; break;
+				case WARNING: severity = DiagnosticSeverity.Warning; break;
+				case ERROR: severity = DiagnosticSeverity.Error; break;
+				}
+				var diagnostic = new Diagnostic(range, message.message, severity, "");
+				
+				diagnostics.add(diagnostic);
+				
+			}
+		}
+		return diagnostics;
+	}
 	
 	
 	
@@ -711,6 +739,8 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		{
 			var inferenceData = validator.localValidate(file);
 			inferenceData.rootObject = file;
+
+			result.addAll(toDiagnostics(inferenceData.problems, fileText));
 			
 			workspace.files.put(f, inferenceData);
 		}

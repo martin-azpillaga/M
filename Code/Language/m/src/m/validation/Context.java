@@ -317,6 +317,7 @@ public class Context {
 	{
 		var data = inference.getInferenceData(userComponents);
 		data.functions.putAll(userFunctions);
+		data.problems = this.problems;
 		return data;
 	}
 }
