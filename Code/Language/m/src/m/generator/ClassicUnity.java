@@ -6,6 +6,8 @@ import static m.library.types.AtomicType.*;
 import static m.library.symbols.Component.*;
 import static m.library.symbols.Function.*;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -80,6 +82,9 @@ public class ClassicUnity
 		this.stack = new Stack<>();
 		
 		resolvePackages();
+
+		var generatedPath = Paths.get(fileSystem.getURI("").toString(), "Assets", "Code").toString().replace("file:", "");
+		deleteDirectory(new File(generatedPath));
 		
 		
 		
@@ -926,5 +931,15 @@ public class ClassicUnity
 			return "Undefined";
 		}
 		return "Undefined";
-	}	
+	}
+
+	private boolean deleteDirectory(File directoryToBeDeleted) {
+	    File[] allContents = directoryToBeDeleted.listFiles();
+	    if (allContents != null) {
+	        for (File file : allContents) {
+	            deleteDirectory(file);
+	        }
+	    }
+	    return directoryToBeDeleted.delete();
+	}
 }

@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.emf.common.util.URI;
@@ -55,7 +55,6 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
-import org.eclipse.xtext.generator.JavaIoFileSystemAccess;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.parser.IParser;
@@ -90,7 +89,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	IParser parser;
 	MValidator validator;
 	MGenerator generator;
-	JavaIoFileSystemAccess fileSystem;
 	
 	static Main instance;
 	
@@ -145,13 +143,12 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		validator = injector.getInstance(MValidator.class);
 		generator = injector.getInstance(MGenerator.class);
 		parser = injector.getInstance(IParser.class);
-		fileSystem = injector.getInstance(JavaIoFileSystemAccess.class);
 		crossReferences = new ArrayList<>();
 		
 		
 		var capabilities = new ServerCapabilities();
 		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
-		capabilities.setHoverProvider(true);
+		//capabilities.setHoverProvider(true);
 		//capabilities.setCompletionProvider(new CompletionOptions());
 		//capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
 		
@@ -186,7 +183,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public void exit()
 	{
-		
+		System.exit(0);
 	}
 
 	
@@ -249,11 +246,11 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		}
 	}
 	
-	// No configuration is sync'ed between server and client
+	
 	@Override
 	public void didChangeConfiguration(DidChangeConfigurationParams params)
 	{
-		
+		// No configuration is sync'ed between server and client
 	}
 
 	
@@ -335,21 +332,21 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public void didClose(DidCloseTextDocumentParams params)
 	{
-		
+		// No action
 	}
 
 	@Override
 	public void didSave(DidSaveTextDocumentParams params)
 	{
-		
+		// No action
 	}
 	
 	
 	private void generateCode(Game game, Workspace workspace)
 	{		
-		Path path = Paths.get(workspace.root.replace("/c:/", "C:/").replace("/d:/", "D:/").replace("/e:/",  "E:/"), "m.project");
+		var path = Paths.get(workspace.root.replace("/c:/", "C:/").replace("/d:/", "D:/").replace("/e:/",  "E:/"), "m.project");
 		
-		
+		var map = Map.of("Unity", Engine.Unity, "Unreal", Engine.Unreal, "Godot", Engine.Godot);
 
 		if (new File(path.toString()).exists())
 		{
@@ -358,34 +355,17 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				var configuration = Files.readAllLines(path);
 				for (var line : configuration)
 				{
-					if (line.startsWith("Unity: "))
+					for (var engine : map.entrySet())
 					{
-						var unity = line.substring("Unity: ".length());
-						if (unity.startsWith("./"))
+						if (line.startsWith(engine.getKey()))
 						{
-							unity = unity.replace(".", workspace.root);
+							var output = line.substring((engine.getKey()+": ").length());
+							if (output.startsWith("./"))
+							{
+								output = output.replace(".", workspace.root);
+							}
+							generator.generate(game, engine.getValue(), output);
 						}
-						fileSystem.setOutputPath(unity);
-
-						var generatedFolder = Paths.get(unity,"Assets","Code");
-						
-						deleteDirectory(new File(generatedFolder.toString()));
-						
-						generator.generate(game, fileSystem, Engine.Unity);
-					}
-					else if (line.startsWith("Unreal: "))
-					{
-						var unreal = line.substring("Unreal: ".length());
-						fileSystem.setOutputPath(unreal);
-
-						generator.generate(game, fileSystem, Engine.Unreal);
-					}
-					else if (line.startsWith("Godot: "))
-					{
-						var godot = line.substring("Godot: ".length());
-						fileSystem.setOutputPath(godot);
-
-						generator.generate(game, fileSystem, Engine.Godot);
 					}
 				}
 			}
@@ -396,10 +376,9 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		}
 		else
 		{
-			var defaultPath = Paths.get(workspace.root, "src-gen", "ClassicUnity").toString();
+			var defaultPath = Paths.get(workspace.root, "Output", "ClassicUnity").toString();
 			
-			fileSystem.setOutputPath(defaultPath);
-			generator.generate(game, fileSystem, Engine.Unity);
+			generator.generate(game, Engine.Unity, defaultPath);
 		}
 	}
 	

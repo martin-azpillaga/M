@@ -11,6 +11,7 @@ import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.generator.AbstractGenerator;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 import org.eclipse.xtext.generator.IGeneratorContext;
+import org.eclipse.xtext.generator.JavaIoFileSystemAccess;
 
 import com.google.inject.Inject;
 
@@ -24,6 +25,9 @@ public class MGenerator extends AbstractGenerator
 {
 	@Inject
 	MValidator validator;
+
+	@Inject
+	JavaIoFileSystemAccess fileSystem;
 	
 	
 	public void doGenerate(Resource resource, IFileSystemAccess2 fileSystem, IGeneratorContext context)
@@ -38,9 +42,10 @@ public class MGenerator extends AbstractGenerator
 			new ClassicUnity().generate(game, fileSystem);
 		}
 	}
-	
-	public void generate(Game game, IFileSystemAccess2 fileSystem, Engine engine)
+
+	public void generate(Game game, Engine engine, String path)
 	{
+		fileSystem.setOutputPath(path);
 		if (game != null)
 		{
 			for (var function : game.systems)
