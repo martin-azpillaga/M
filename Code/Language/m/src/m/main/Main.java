@@ -95,6 +95,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	List<CrossReference> crossReferences;
 	
+	// 1 Connection
 	public static void main(String[] arguments)
 	{
 		instance = new Main();
@@ -187,6 +188,9 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		System.exit(0);
 	}
 
+
+	// 2 Workspace folders
+
 	
 	private void initializeWorkspace(String path)
 	{
@@ -214,7 +218,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		}
 		catch (IOException e)
 		{
-			e.printStackTrace();
+			write(e.getMessage());
 		}
 	}
 
@@ -252,6 +256,8 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	public void didChangeConfiguration(DidChangeConfigurationParams params)
 	{
 		// No configuration is sync'ed between server and client
+		// All configuration is stored in configuration files like m.project
+		// so that the projects are more portable
 	}
 
 	
@@ -341,6 +347,14 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	{
 		// No action
 	}
+
+
+
+
+
+
+
+
 	
 	
 	private void generateCode(Game game, Workspace workspace)
@@ -747,17 +761,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		
 		return result;
 	}
-	
-	private boolean deleteDirectory(File directoryToBeDeleted) {
-	    File[] allContents = directoryToBeDeleted.listFiles();
-	    if (allContents != null) {
-	        for (File file : allContents) {
-	            deleteDirectory(file);
-	        }
-	    }
-	    return directoryToBeDeleted.delete();
-	}
-	
 	
 	private INode node(TextDocumentIdentifier document, Position position, boolean minusOne)
 	{

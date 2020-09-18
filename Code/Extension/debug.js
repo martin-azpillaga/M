@@ -56,8 +56,8 @@ function start() {
             language: 'm'
         }],
         synchronize: {
-            fileEvents: workspace.createFileSystemWatcher('**/.m')
-        }
+            fileEvents: workspace.createFileSystemWatcher('**/*.m')
+        },
     };
 
     client = new LanguageClient('mserver', 'm language server', serverOptions, clientOptions);
