@@ -48,6 +48,8 @@ import org.eclipse.lsp4j.SignatureHelpParams;
 import org.eclipse.lsp4j.SignatureInformation;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
+import org.eclipse.lsp4j.WorkspaceFoldersOptions;
+import org.eclipse.lsp4j.WorkspaceServerCapabilities;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
@@ -150,6 +152,10 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		
 		var capabilities = new ServerCapabilities();
 		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
+		var workspaceFolders = new WorkspaceFoldersOptions();
+		workspaceFolders.setSupported(true);
+		workspaceFolders.setChangeNotifications(true);
+		capabilities.setWorkspace(new WorkspaceServerCapabilities(workspaceFolders));
 		//capabilities.setHoverProvider(true);
 		//capabilities.setCompletionProvider(new CompletionOptions());
 		//capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
@@ -194,7 +200,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	private void initializeWorkspace(String path)
 	{
-		String root = decode(path);
+		var root = decode(path);
 		
 		var workspace = new Workspace(root);
 		workspaces.add(workspace);
@@ -230,11 +236,9 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 	{
-		write("changed workspace");
 		for (var added : params.getEvent().getAdded())
 		{
 			initializeWorkspace(added.getUri());
-			write("Added workspace " + added.getUri());
 		}
 		for (var removed : params.getEvent().getRemoved())
 		{
@@ -245,7 +249,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				if (workspace.root.equals(decode(removed.getUri())))
 				{
 					workspaces.remove(workspace);
-					write("Removed workspace " + workspace.root);
 				}
 			}
 		}

@@ -60,7 +60,7 @@ function start() {
         },
     };
 
-    client = new LanguageClient('mserver', 'm language server', serverOptions, clientOptions);
+    client = new LanguageClient('mserver', 'm language server', serverOptions, clientOptions, true);
 
     client.start();
 }
