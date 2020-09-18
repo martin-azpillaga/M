@@ -1,6 +1,12 @@
 var {
     LanguageClient
 } = require("vscode-languageclient");
+const {
+    window,
+    commands,
+    ViewColumn,
+    Uri
+} = require("vscode");
 var {
     workspace
 } = require('vscode');
@@ -10,7 +16,27 @@ var net = require('net');
 var client;
 
 exports.activate = function(context) {
-    console.log("Activating debug client on port 5007");
+
+    context.subscriptions.push(
+        commands.registerCommand('m.restart', () => {
+            if (client)
+            {
+                client.stop();
+            }
+            start();
+        })
+    );
+
+    start();
+}
+exports.deactivate = function deactivate() {
+    if (!client) {
+        return undefined;
+    }
+    client.stop();
+}
+
+function start() {
     let connectionInfo = {
         port: 5007
     };
@@ -37,10 +63,4 @@ exports.activate = function(context) {
     client = new LanguageClient('mserver', 'm language server', serverOptions, clientOptions);
 
     client.start();
-}
-exports.deactivate = function() {
-    if (!client) {
-        return undefined;
-    }
-    client.stop();
 }

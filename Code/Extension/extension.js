@@ -72,7 +72,7 @@ exports.activate = async function(context) {
         }
     };
 
-    client = new LanguageClient('mserver', 'm language server', serverOptions, clientOptions);
+    client = new LanguageClient('m-language-server', 'm language server', serverOptions, clientOptions);
 
     client.start();
 }

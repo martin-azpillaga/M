@@ -99,7 +99,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	public static void main(String[] arguments)
 	{
 		instance = new Main();
-
+		
 		if (arguments.length == 0)
 		{
 			var launcher = LSPLauncher.createServerLauncher(instance, System.in, System.out);
@@ -361,6 +361,10 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 					if (line.startsWith("Unity: "))
 					{
 						var unity = line.substring("Unity: ".length());
+						if (unity.startsWith("./"))
+						{
+							unity = unity.replace(".", workspace.root);
+						}
 						fileSystem.setOutputPath(unity);
 
 						var generatedFolder = Paths.get(unity,"Assets","Code");
