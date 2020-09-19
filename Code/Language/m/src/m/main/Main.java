@@ -195,6 +195,10 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	}
 
 
+
+
+
+
 	// 2 Workspace folders
 
 	
@@ -209,7 +213,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		{
 			folder.forEach(f -> 
 			{
-				if (f.toString().endsWith(".m"))
+				if (f.toString().endsWith(".Ⲙ"))
 				{
 					try
 					{
@@ -228,11 +232,22 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		}
 	}
 
+	private Workspace findWorkspace(String filePath)
+	{
+		for (var workspace : workspaces)
+		{
+			if (filePath.startsWith(workspace.root))
+			{
+				return workspace;
+			}
+		}
+		return null;
+	}
+
 	
 	
 	
 	
-	// Never called by VSCode?
 	@Override
 	public void didChangeWorkspaceFolders(DidChangeWorkspaceFoldersParams params)
 	{
@@ -281,7 +296,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				try
 				{
 					localInference(path, workspace, new String(Files.readAllBytes(Paths.get(path))));
-					write("Added file "+ decode(change.getUri()));
 				}
 				catch (IOException e)
 				{
@@ -291,7 +305,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			else if (change.getType() == FileChangeType.Deleted)
 			{
 				workspace.files.remove(path);
-				write("Deleted file "+ path);
 			}
 		}
 	}
@@ -303,7 +316,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	
 	
-	
+	// 3 files
 	
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params)
@@ -316,7 +329,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		
 		var diagnostics = localInference(filePath, workspace, text);
 		
-		//diagnostics.addAll(globalInference(filePath, workspace, text, true));
+		diagnostics.addAll(globalInference(filePath, workspace, text, true));
 		
 		client.publishDiagnostics(new PublishDiagnosticsParams(params.getTextDocument().getUri(),diagnostics));
 	}
@@ -360,50 +373,12 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 
 	
 	
-	private void generateCode(Game game, Workspace workspace)
-	{		
-		var path = Paths.get(workspace.root.replace("/c:/", "C:/").replace("/d:/", "D:/").replace("/e:/",  "E:/"), "m.project");
-		
-		var map = Map.of("Unity", Engine.Unity, "Unreal", Engine.Unreal, "Godot", Engine.Godot);
-
-		if (new File(path.toString()).exists())
-		{
-			try
-			{
-				var configuration = Files.readAllLines(path);
-				for (var line : configuration)
-				{
-					for (var engine : map.entrySet())
-					{
-						if (line.startsWith(engine.getKey()))
-						{
-							var output = line.substring((engine.getKey()+": ").length());
-							if (output.startsWith("./"))
-							{
-								output = output.replace(".", workspace.root);
-							}
-							generator.generate(game, engine.getValue(), output);
-						}
-					}
-				}
-			}
-			catch (IOException e)
-			{
-				write(e.getMessage());
-			}
-		}
-		else
-		{
-			var defaultPath = Paths.get(workspace.root, "Output", "ClassicUnity").toString();
-			
-			generator.generate(game, Engine.Unity, defaultPath);
-		}
-	}
 	
 	
 	
 	
 	
+	// 4 Quality of development features
 	
 	@Override
 	public CompletableFuture<Hover> hover(HoverParams params)
@@ -536,17 +511,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	
 	
-	private Workspace findWorkspace(String filePath)
-	{
-		for (var workspace : workspaces)
-		{
-			if (filePath.startsWith(workspace.root))
-			{
-				return workspace;
-			}
-		}
-		return null;
-	}
+	
 	
 	private List<Diagnostic> globalInference(String filePath, Workspace workspace, String text, boolean shouldGenerate)
 	{
@@ -623,14 +588,13 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		{
 			for (var message : problem.messages(Library.ENGLISH))
 			{
-				if (EcoreUtil.getRoot(message.source, true) != workspace.files.get(filePath).rootObject)
+				if (message.source != null && EcoreUtil.getRoot(message.source, true) != workspace.files.get(filePath).rootObject)
 				{
 					continue;
 				}
 				var node = NodeModelUtils.getNode(message.source);
 				if (node == null)
 				{
-					write("Node for "+message.source+ "not found");
 					continue;
 				}
 				var range = new Range(new Position(node.getStartLine()-1, character(text,node.getOffset())), new Position(node.getEndLine()-1, character(text,node.getEndOffset())));
@@ -763,6 +727,46 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		}
 		
 		return result;
+	}
+
+	private void generateCode(Game game, Workspace workspace)
+	{		
+		var path = Paths.get(workspace.root.replace("/c:/", "C:/").replace("/d:/", "D:/").replace("/e:/",  "E:/"), "m.project");
+		
+		if (new File(path.toString()).exists())
+		{
+			try
+			{
+				var configuration = Files.readAllLines(path);
+				for (var line : configuration)
+				{
+					for (var engine : Engine.values())
+					{
+						if (line.startsWith(engine.getName()))
+						{
+							var output = line.substring((engine.getName()+": ").length());
+							if (output.startsWith("./"))
+							{
+								output = output.replace(".", workspace.root);
+							}
+							generator.generate(game, engine, output);
+						}
+					}
+				}
+			}
+			catch (IOException e)
+			{
+				write(e.getMessage());
+			}
+		}
+		else
+		{
+			for (var engine : Engine.values())
+			{
+				var defaultPath = Paths.get(workspace.root, "Output", engine.getName()).toString();
+				generator.generate(game, engine, defaultPath);
+			}
+		}
 	}
 	
 	private INode node(TextDocumentIdentifier document, Position position, boolean minusOne)

@@ -68,7 +68,7 @@ exports.activate = async function(context) {
             language: 'm'
         }],
         synchronize: {
-            fileEvents: workspace.createFileSystemWatcher('**/*.m')
+            fileEvents: workspace.createFileSystemWatcher('**/*.Ⲙ')
         }
     };
 

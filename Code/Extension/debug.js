@@ -56,7 +56,7 @@ function start() {
             language: 'm'
         }],
         synchronize: {
-            fileEvents: workspace.createFileSystemWatcher('**/*.m')
+            fileEvents: workspace.createFileSystemWatcher('**/*.Ⲙ')
         },
     };
 
