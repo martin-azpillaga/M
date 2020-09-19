@@ -161,7 +161,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		workspaceFolders.setSupported(true);
 		workspaceFolders.setChangeNotifications(true);
 		capabilities.setWorkspace(new WorkspaceServerCapabilities(workspaceFolders));
-		//capabilities.setHoverProvider(true);
+		capabilities.setHoverProvider(true);
 		//capabilities.setCompletionProvider(new CompletionOptions());
 		//capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
 		
@@ -402,12 +402,15 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	{
 		var result = "";
 		
-		var node = node(params.getTextDocument(), params.getPosition(), false);
+		var file = decode(params.getTextDocument().getUri());
+		var workspace = findWorkspace(file);
+		var localData = workspace.files.get(file);
+
+		var text = localData.text;
+		var position = params.getPosition();
+		var offset = offset(text, position.getLine(), position.getCharacter());
 		
-		if (MValidator.game == null)
-		{
-			return CompletableFuture.supplyAsync(() -> new Hover());
-		}
+		var node = NodeModelUtils.findLeafNodeAtOffset(localData.rootNode, offset);
 		
 		var semantic = node.getSemanticElement();
 		
@@ -434,7 +437,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				var cell = (Cell) container;
 				if (cell.getComponent() == value)
 				{
-					result = MValidator.game.inference.infer(cell).toString();
+					result = "Component of type " + workspace.inference.infer(cell).toString();
 				}
 				else
 				{
@@ -610,6 +613,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		var inference = new InferenceGraph(totalNodes);
 		var problems = inference.check();
 		
+		workspace.inference = inference;
 		
 		for (var problem : problems)
 		{
@@ -786,6 +790,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		{
 			data = validator.localValidate(file);
 			data.rootObject = file;
+			data.rootNode = parseResult.getRootNode();
 			data.text = fileText;
 
 			result.addAll(toDiagnostics(data.problems, fileText));

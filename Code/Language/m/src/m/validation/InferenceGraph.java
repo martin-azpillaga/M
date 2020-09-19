@@ -52,7 +52,7 @@ public class InferenceGraph
 	public void type(Expression a, Typing typing)
 	{
 		if (a == null) return;
-		
+
 		var node = get(a);
 		node.typings.add(typing);
 	}
@@ -125,8 +125,15 @@ public class InferenceGraph
 	}
 	
 	public Type infer(Expression a)
-	{		
-		return inference.get(get(a));
+	{
+		for (var entry : inference.entrySet())
+		{
+			if (a == entry.getKey().expression)
+			{
+				return entry.getValue();
+			}
+		}
+		return null;
 	}
 	
 	public Type infer(ExpressionNode node)
