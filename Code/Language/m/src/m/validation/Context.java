@@ -79,6 +79,8 @@ public class Context {
 	
 	public void declareComponent(Cell cell)
 	{
+		if (cell.getComponent() == null) return;
+
 		var name = cell.getComponent().getName();
 
 		if (library.getValue(name) != null || library.getFunction(name) != null)
@@ -117,6 +119,8 @@ public class Context {
 	
 	public void accessVariable(Value value)
 	{
+		if (value == null) return;
+		
 		var name = value.getName();
 		
 		var standard = library.getValue(name);
@@ -141,6 +145,8 @@ public class Context {
 	
 	public void accessComponent(Cell cell)
 	{
+		if (cell == null || cell.getComponent() == null) return;
+
 		var name = cell.getComponent().getName();
 		var standard = library.getComponent(name);
 		if (standard != null)

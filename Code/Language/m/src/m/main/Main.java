@@ -82,6 +82,7 @@ import m.validation.MValidator;
 import m.validation.problems.Problem;
 import m.validation.problems.ProblemMessage.Severity;
 import m.validation.problems.errors.RedefinedSymbol;
+import m.validation.problems.errors.SyntaxError;
 import m.validation.rules.Binding;
 import m.validation.rules.Binding.BindingReason;
 import m.validation.rules.ExpressionNode;
@@ -641,6 +642,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			}
 		}
 		
+		// Check for global and local errors
 		var hasErrors = false;
 		
 		for (var list : diagnostics.values())
@@ -650,6 +652,20 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				if (list.get(i).getSeverity() == DiagnosticSeverity.Error)
 				{
 					hasErrors = true;
+				}
+			}
+		}
+
+		for (var localData : workspace.files.values())
+		{
+			for (var problem : localData.problems)
+			{
+				for (var message : problem.messages(Library.ENGLISH))
+				{
+					if (message.severity == Severity.ERROR)
+					{
+						hasErrors = true;
+					}
 				}
 			}
 		}
@@ -718,6 +734,10 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 
 		for (var problem : problems)
 		{
+			if (problem instanceof SyntaxError)
+			{
+				continue;
+			}
 			for (var message : problem.messages(Library.ENGLISH))
 			{
 				var node = NodeModelUtils.getNode(message.source);
@@ -749,8 +769,29 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	private List<Diagnostic> localInference(String f, Workspace workspace, String fileText)
 	{
 		var result = new ArrayList<Diagnostic>();
+
+		var data = new InferenceData();
 		
 		var parseResult = parser.parse(new StringReader(fileText));
+		
+		
+		var file = (m.m.File) parseResult.getRootASTElement();
+		
+		if (file == null)
+		{
+			data.text = fileText;
+			workspace.files.put(f, data);
+		}
+		else
+		{
+			data = validator.localValidate(file);
+			data.rootObject = file;
+			data.text = fileText;
+
+			result.addAll(toDiagnostics(data.problems, fileText));
+		}
+
+
 		for (var syntaxError : parseResult.getSyntaxErrors())
 		{
 			var character = character(fileText, syntaxError.getOffset());
@@ -767,29 +808,14 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			{
 				message = "Expecting a statement or }";
 			}
+
+			data.problems.add(new SyntaxError(message));
 			
 			result.add(new Diagnostic(range, message));
 		}
-		
-		var file = (m.m.File) parseResult.getRootASTElement();
-		
-		if (file == null)
-		{
-			var data = new InferenceData();
-			data.text = fileText;
-			workspace.files.put(f, data);
-			write("File is null");
-		}
-		else
-		{
-			var inferenceData = validator.localValidate(file);
-			inferenceData.rootObject = file;
-			inferenceData.text = fileText;
 
-			result.addAll(toDiagnostics(inferenceData.problems, fileText));
 			
-			workspace.files.put(f, inferenceData);
-		}
+		workspace.files.put(f, data);
 		
 		return result;
 	}
