@@ -615,6 +615,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			for (var message : problem.messages(Library.ENGLISH))
 			{
 				var file = fileOf(message.source, workspace);
+				text = workspace.files.get(file).text;
 				
 				var node = NodeModelUtils.getNode(message.source);
 				if (node == null)
@@ -691,17 +692,11 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		var redefined = new RedefinedSymbol(function, FUNCTION__NAME);
 		var problems = new ArrayList<Problem>();
 		problems.add(redefined);
-		try
+
+		var converted = toDiagnostics(problems, workspace.files.get(file).text);
+		for (var c : converted)
 		{
-			var converted = toDiagnostics(problems, new String(Files.readAllBytes(Paths.get(file.toString()))));
-			for (var c : converted)
-			{
-				diagnostics.get(file).add(c);
-			}
-		}
-		catch (Exception e)
-		{
-			write(e.getMessage());
+			diagnostics.get(file).add(c);
 		}
 	}
 
@@ -780,13 +775,16 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		
 		if (file == null)
 		{
-			workspace.files.put(f, new InferenceData());
+			var data = new InferenceData();
+			data.text = fileText;
+			workspace.files.put(f, data);
 			write("File is null");
 		}
 		else
 		{
 			var inferenceData = validator.localValidate(file);
 			inferenceData.rootObject = file;
+			inferenceData.text = fileText;
 
 			result.addAll(toDiagnostics(inferenceData.problems, fileText));
 			

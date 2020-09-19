@@ -18,4 +18,5 @@ public class InferenceData
 	public Map<String, Function> functions = new HashMap<>();
 	public List<Problem> problems = new ArrayList<>();
 	public EObject rootObject;
+	public String text;
 }
