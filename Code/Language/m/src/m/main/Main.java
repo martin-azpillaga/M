@@ -437,16 +437,26 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				var cell = (Cell) container;
 				if (cell.getComponent() == value)
 				{
-					result = "Component of type " + workspace.inference.infer(cell).toString();
+					var info = workspace.inference.info(cell);
+					var type = Library.ENGLISH.name(workspace.inference.infer(cell));
+
+					if (info.typings.size() == 0)
+					{
+						result = "User component of type " + type;
+					}
+					else
+					{
+						result = "Standard component of type " + type;
+					}
 				}
 				else
 				{
-					result = MValidator.game.inference.infer(value).toString();
+					result = workspace.inference.infer(value).toString();
 				}
 			}
 			else
 			{
-				result = MValidator.game.inference.infer(value).toString();
+				result = workspace.inference.infer(value).toString();
 			}
 		}
 		else

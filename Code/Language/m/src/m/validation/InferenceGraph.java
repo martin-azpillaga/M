@@ -135,6 +135,18 @@ public class InferenceGraph
 		}
 		return null;
 	}
+
+	public ExpressionNode info(Expression a)
+	{
+		for (var entry : inference.entrySet())
+		{
+			if (a == entry.getKey().expression)
+			{
+				return entry.getKey();
+			}
+		}
+		return null;
+	}
 	
 	public Type infer(ExpressionNode node)
 	{
