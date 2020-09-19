@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.emf.common.util.URI;
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.lsp4j.CompletionItem;
@@ -79,9 +80,12 @@ import m.m.Value;
 import m.validation.InferenceGraph;
 import m.validation.MValidator;
 import m.validation.problems.Problem;
+import m.validation.problems.ProblemMessage.Severity;
+import m.validation.problems.errors.RedefinedSymbol;
 import m.validation.rules.Binding;
 import m.validation.rules.Binding.BindingReason;
 import m.validation.rules.ExpressionNode;
+import static m.m.MPackage.Literals.*;
 
 public class Main implements LanguageServer, LanguageClientAware, TextDocumentService, WorkspaceService
 {
@@ -321,17 +325,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params)
 	{
-		var filePath = decode(params.getTextDocument().getUri());
-			
-		var workspace = findWorkspace(filePath);
-		
-		var text = params.getTextDocument().getText();
-		
-		var diagnostics = localInference(filePath, workspace, text);
-		
-		diagnostics.addAll(globalInference(filePath, workspace, text, true));
-		
-		client.publishDiagnostics(new PublishDiagnosticsParams(params.getTextDocument().getUri(),diagnostics));
+		onChange(params.getTextDocument().getUri(), params.getTextDocument().getText());
 	}
 	
 	
@@ -339,17 +333,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public void didChange(DidChangeTextDocumentParams params)
 	{
-		var filePath = decode(params.getTextDocument().getUri());
-		
-		var workspace = findWorkspace(filePath);
-		
-		var text = params.getContentChanges().get(0).getText();
-		
-		var diagnostics = localInference(filePath, workspace, text);
-		
-		diagnostics.addAll(globalInference(filePath, workspace, text, true));
-		
-		client.publishDiagnostics(new PublishDiagnosticsParams(params.getTextDocument().getUri(),diagnostics));
+		onChange(params.getTextDocument().getUri(), params.getContentChanges().get(0).getText());
 	}
 
 	@Override
@@ -362,6 +346,38 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	public void didSave(DidSaveTextDocumentParams params)
 	{
 		// No action
+	}
+
+	private void onChange(String uri, String text)
+	{
+		var filePath = decode(uri);
+		
+		var workspace = findWorkspace(filePath);
+		
+		var diagnostics = localInference(filePath, workspace, text);
+		
+		var globalDiagnostics = globalInference(filePath, workspace, text, true);
+
+		if (globalDiagnostics.containsKey(filePath))
+		{
+			globalDiagnostics.get(filePath).addAll(diagnostics);
+		}
+		else
+		{
+			globalDiagnostics.put(filePath, diagnostics);
+		}
+
+		for (var entry : workspace.files.entrySet())
+		{
+			if (globalDiagnostics.containsKey(entry.getKey()))
+			{
+				client.publishDiagnostics(new PublishDiagnosticsParams("file://"+entry.getKey(), globalDiagnostics.get(entry.getKey())));
+			}
+			else
+			{
+				client.publishDiagnostics(new PublishDiagnosticsParams("file://"+entry.getKey(), new ArrayList<Diagnostic>()));
+			}
+		}
 	}
 
 
@@ -513,9 +529,9 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	
 	
 	
-	private List<Diagnostic> globalInference(String filePath, Workspace workspace, String text, boolean shouldGenerate)
+	private HashMap<String, List<Diagnostic>> globalInference(String filePath, Workspace workspace, String text, boolean shouldGenerate)
 	{
-		var diagnostics = new ArrayList<Diagnostic>();
+		var diagnostics = new HashMap<String, List<Diagnostic>>();
 		// Delete previous crossReferences to this file
 		
 		for (var i = 0; i < crossReferences.size(); i++)
@@ -576,7 +592,17 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			
 			for (var function : data.functions.entrySet())
 			{
-				totalFunctions.put(function.getKey(), function.getValue());
+				if (totalFunctions.containsKey(function.getKey()))
+				{
+					var file = fileOf(totalFunctions.get(function.getKey()), workspace);
+
+					reportRedefinedFunction(totalFunctions.get(function.getKey()), workspace, file, diagnostics);
+					reportRedefinedFunction(function.getValue(), workspace, currentFile, diagnostics);
+				}
+				else
+				{
+					totalFunctions.put(function.getKey(), function.getValue());
+				}
 			}
 		}
 		
@@ -588,10 +614,8 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		{
 			for (var message : problem.messages(Library.ENGLISH))
 			{
-				if (message.source != null && EcoreUtil.getRoot(message.source, true) != workspace.files.get(filePath).rootObject)
-				{
-					continue;
-				}
+				var file = fileOf(message.source, workspace);
+				
 				var node = NodeModelUtils.getNode(message.source);
 				if (node == null)
 				{
@@ -607,21 +631,28 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				}
 				var diagnostic = new Diagnostic(range, message.message, severity, "");
 				
-				diagnostics.add(diagnostic);
+				if (!diagnostics.containsKey(file))
+				{
+					diagnostics.put(file, new ArrayList<Diagnostic>());
+				}
+				diagnostics.get(file).add(diagnostic);
 				
 			}
 		}
 		
 		var hasErrors = false;
 		
-		for (var i = 0; i < diagnostics.size() && !hasErrors; i++)
+		for (var list : diagnostics.values())
 		{
-			if (diagnostics.get(i).getSeverity() == DiagnosticSeverity.Error)
+			for (var i = 0; i < list.size() && !hasErrors; i++)
 			{
-				hasErrors = true;
+				if (list.get(i).getSeverity() == DiagnosticSeverity.Error)
+				{
+					hasErrors = true;
+				}
 			}
 		}
-		
+
 		if (!hasErrors && shouldGenerate)
 		{
 			var game = new Game();
@@ -648,6 +679,42 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		}
 		
 		return diagnostics;
+	}
+
+	private void reportRedefinedFunction(Function function, Workspace workspace, String file, Map<String,List<Diagnostic>> diagnostics)
+	{
+		if (! diagnostics.containsKey(file))
+		{
+			diagnostics.put(file, new ArrayList<Diagnostic>());
+		}
+
+		var redefined = new RedefinedSymbol(function, FUNCTION__NAME);
+		var problems = new ArrayList<Problem>();
+		problems.add(redefined);
+		try
+		{
+			var converted = toDiagnostics(problems, new String(Files.readAllBytes(Paths.get(file.toString()))));
+			for (var c : converted)
+			{
+				diagnostics.get(file).add(c);
+			}
+		}
+		catch (Exception e)
+		{
+			write(e.getMessage());
+		}
+	}
+
+	private String fileOf(EObject o, Workspace workspace)
+	{
+		for (var file : workspace.files.entrySet())
+		{
+			if (EcoreUtil.getRoot(o, true) == file.getValue().rootObject)
+			{
+				return file.getKey();
+			}
+		}
+		return "";
 	}
 
 	private List<Diagnostic> toDiagnostics(List<Problem> problems, String text)
