@@ -115,13 +115,12 @@ jobs:
       - name: Install vuepress
         run: |
           sudo npm install -g vuepress
+          sudo npm install -g reveal-md
           cp -r Documentation ../Documentation
           git fetch
           git checkout gh-pages
           cp -r ../Documentation Documentation
           cd Documentation
-          echo before
-          ls
           for f in **/*.md **/**/*.md
           do
               g=$(echo $f | tr '[:upper:]' '[:lower:]')
@@ -130,12 +129,11 @@ jobs:
               mkdir -p ${g%/*}
               mv "$f" $g
           done
-          echo after
-          ls
           sudo yarn add vuepress-theme-yuu
           sudo vuepress build
           cd ..
           cp -r Documentation/.vuepress/dist/* .
+          reveal-md Documentation/slides.md --separator "\n\n" --static presentation
           sudo rm -rf Documentation/
           git config --global user.name "Github actions"
           git config --global user.email "media@azpillaga.world"  
