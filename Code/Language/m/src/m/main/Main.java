@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,6 +46,7 @@ import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SignatureHelp;
+import org.eclipse.lsp4j.SignatureHelpOptions;
 import org.eclipse.lsp4j.SignatureHelpParams;
 import org.eclipse.lsp4j.SignatureInformation;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
@@ -74,6 +76,7 @@ import m.generator.Game;
 import m.generator.MGenerator;
 import m.library.Library;
 import m.library.symbols.Component;
+import m.library.types.FunctionType;
 import m.m.Application;
 import m.m.Assignment;
 import m.m.Binary;
@@ -168,7 +171,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		capabilities.setWorkspace(new WorkspaceServerCapabilities(workspaceFolders));
 		capabilities.setHoverProvider(true);
 		//capabilities.setCompletionProvider(new CompletionOptions());
-		//capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
+		capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
 		
 		workspaces = new ArrayList<>();
 		
@@ -640,11 +643,46 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 	@Override
 	public CompletableFuture<SignatureHelp> signatureHelp(SignatureHelpParams params)
 	{
-		write("signature triggered");
+		var file = decode(params.getTextDocument().getUri());
+		var workspace = findWorkspace(file);
+		var library = workspace.game.library;
+
+		var offset = offset(workspace.files.get(file).text, params.getPosition().getLine(), params.getPosition().getCharacter());
+		var node = NodeModelUtils.findLeafNodeAtOffset(workspace.files.get(file).rootNode, offset);
+		var semantic = node.getSemanticElement();
+
+		if (semantic instanceof Application)
+		{
+			var application = (Application) semantic;
+			var name = application.getName();
+			var standard = library.getFunction(name);
+
+			if (standard != null)
+			{
+				var type = (FunctionType) standard.getType();
+				var list = new ArrayList<SignatureInformation>();
+				var parameters = new ArrayList<ParameterInformation>();
+				for (var i = 0; i < type.getParameters().length; i++)
+				{
+					parameters.add(new ParameterInformation("Parameter "+i, library.name(type.getParameters()[i])));
+				}
+				var info = new SignatureInformation(name + " : " + library.name(type), "", parameters);
+				list.add(info);
+				var help = new SignatureHelp();
+				help.setSignatures(list);
+				if (params.getContext().getTriggerCharacter() != null)
+				{
+					help.setActiveParameter(application.getArguments().size());
+				}
+				else
+				{
+					help.setActiveParameter(application.getArguments().size()-1);
+				}
+				return CompletableFuture.supplyAsync(()->help);
+			}
+		}
+
 		var list = new ArrayList<SignatureInformation>();
-		var parameters = new ArrayList<ParameterInformation>();
-		var info = new SignatureInformation("enableParameter", "enables the given boolean parameter in the animator", parameters);
-		list.add(info);
 		var help = new SignatureHelp();
 		help.setSignatures(list);
 		return CompletableFuture.supplyAsync(()->help);
