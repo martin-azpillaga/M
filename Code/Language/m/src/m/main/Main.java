@@ -58,6 +58,7 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
+import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.parser.IParser;
@@ -437,8 +438,8 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				var cell = (Cell) container;
 				if (cell.getComponent() == value)
 				{
-					var info = workspace.inference.info(cell);
-					var type = Library.ENGLISH.name(workspace.inference.infer(cell));
+					var info = workspace.game.inference.info(cell);
+					var type = Library.ENGLISH.name(workspace.game.inference.infer(cell));
 
 					if (info.typings.size() == 0)
 					{
@@ -451,12 +452,40 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				}
 				else
 				{
-					result = workspace.inference.infer(value).toString();
+					var function = EcoreUtil2.getContainerOfType(cell, Function.class);
+					var query = workspace.game.queries.get(function).get(value.getName());
+					
+					if (query == null)
+					{
+						result = "Variable of type " + workspace.game.inference.infer(value).toString();
+					}
+					else
+					{
+						result = "Entity query " + value.getName() + " requires components\n\n";
+						for (var component : query.entrySet())
+						{
+							result += "* " + component.getKey() + " : " + component.getValue() + "\n\n";
+						}
+					}
 				}
 			}
 			else
 			{
-				result = workspace.inference.infer(value).toString();
+				var function = EcoreUtil2.getContainerOfType(value, Function.class);
+				var query = workspace.game.queries.get(function).get(value.getName());
+				
+				if (query == null)
+				{
+					result = "Variable of type " + workspace.game.inference.infer(value).toString();
+				}
+				else
+				{
+					result = "Entity query " + value.getName() + " requires components\n\n";
+					for (var component : query.entrySet())
+					{
+						result += "* " + component.getKey() + " : " + component.getValue() + "\n\n";
+					}
+				}
 			}
 		}
 		else
@@ -623,8 +652,6 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		var inference = new InferenceGraph(totalNodes);
 		var problems = inference.check();
 		
-		workspace.inference = inference;
-		
 		for (var problem : problems)
 		{
 			for (var message : problem.messages(Library.ENGLISH))
@@ -684,28 +711,30 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			}
 		}
 
+		var game = new Game();
+			
+		for (var component : totalComponents.entrySet())
+		{
+			var type = inference.infer(component.getValue());
+			game.components.put(component.getKey(), type);
+		}
+		
+		for (var function : totalFunctions.values())
+		{
+			game.systems.add(function);
+		}
+
+		game.library = Library.ENGLISH;
+		game.inference = inference;
+		for (var function : game.systems)
+		{
+			game.queries.put(function, generator.collectQueries(function, game));
+		}
+
+		workspace.game = game;
+
 		if (!hasErrors && shouldGenerate)
 		{
-			var game = new Game();
-			
-			for (var component : totalComponents.entrySet())
-			{
-				var type = inference.infer(component.getValue());
-				if (type != null)
-				{
-					game.components.put(component.getKey(), type);
-				}
-			}
-			
-			for (var function : totalFunctions.values())
-			{
-				game.systems.add(function);
-			}
-			
-			game.library = Library.ENGLISH;
-			game.inference = inference;
-			
-			
 			generateCode(game, workspace);
 		}
 		

@@ -61,7 +61,7 @@ public class MGenerator extends AbstractGenerator
 		}
 	}
 	
-	private HashMap<String, HashMap<String,AccessKind>> collectQueries(Function function, Game game)
+	public HashMap<String, HashMap<String,AccessKind>> collectQueries(Function function, Game game)
 	{
 		var queries = new HashMap<String, HashMap<String,AccessKind>>();
 		
