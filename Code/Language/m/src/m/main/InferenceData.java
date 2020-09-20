@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.nodemodel.INode;
 
 import m.m.Function;
 import m.validation.problems.Problem;
@@ -18,4 +19,6 @@ public class InferenceData
 	public Map<String, Function> functions = new HashMap<>();
 	public List<Problem> problems = new ArrayList<>();
 	public EObject rootObject;
+	public String text;
+	public INode rootNode;
 }

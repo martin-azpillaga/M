@@ -153,7 +153,7 @@ public enum Library
 	case GREATER: return ">";
 	
 	case SIZE: return "#";
-	case IN: return "in";
+	case IN: return "@";
 	case X: return "x";
 	case Y: return "y";
 	case Z: return "z";
@@ -430,7 +430,7 @@ public enum Library
 	case GREATER: return ">";
 	
 	case SIZE: return "#";
-	case IN: return "barne";
+	case IN: return "@";
 	case X: return "x";
 	case Y: return "y";
 	case Z: return "z";
@@ -688,7 +688,7 @@ public enum Library
 			{
 				result.add(name(p));
 			}
-			return String.join(",", result) + "->" + name(functionType.getReturnType());
+			return String.join(" × ", result) + " -> " + name(functionType.getReturnType());
 		}
 		else
 		{

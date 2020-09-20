@@ -40,6 +40,8 @@ public class InferenceGraph
 	
 	public void bind(Expression a, Expression b, BindingReason reason)
 	{
+		if (a == null || b == null) return;
+
 		var nodeA = get(a);
 		var nodeB = get(b);
 		
@@ -49,6 +51,8 @@ public class InferenceGraph
 	
 	public void type(Expression a, Typing typing)
 	{
+		if (a == null) return;
+
 		var node = get(a);
 		node.typings.add(typing);
 	}
@@ -121,8 +125,27 @@ public class InferenceGraph
 	}
 	
 	public Type infer(Expression a)
-	{		
-		return inference.get(get(a));
+	{
+		for (var entry : inference.entrySet())
+		{
+			if (a == entry.getKey().expression)
+			{
+				return entry.getValue();
+			}
+		}
+		return null;
+	}
+
+	public ExpressionNode info(Expression a)
+	{
+		for (var entry : inference.entrySet())
+		{
+			if (a == entry.getKey().expression)
+			{
+				return entry.getKey();
+			}
+		}
+		return null;
 	}
 	
 	public Type infer(ExpressionNode node)
