@@ -441,16 +441,24 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				var cell = (Cell) container;
 				if (cell.getComponent() == value)
 				{
+					var standard = workspace.game.library.getComponent(value.getName());
 					var info = workspace.game.inference.info(cell);
 					var type = Library.ENGLISH.name(workspace.game.inference.infer(cell));
 
 					if (info == null)
 					{
-						result = "User component with undecidable type";
+						if (standard != null)
+						{
+							result = "Component with incompatible types";
+						}
+						else
+						{
+							result = "User component with undecidable type";
+						}
 					}
 					else
 					{
-						if (info.typings.size() == 0)
+						if (standard == null)
 						{
 							result = "User component of type " + type;
 						}
@@ -468,13 +476,22 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 					if (query == null)
 					{
 						var type = workspace.game.inference.infer(value);
+						var standard = workspace.game.library.getValue(value.getName());
+
 						if (type == null)
 						{
 							result = "Variable of undecidable type";
 						}
 						else
 						{
-							result = "Variable of type " + workspace.game.library.name(type);
+							if (standard == null)
+							{
+								result = "User variable of type " + workspace.game.library.name(type);
+							}
+							else
+							{
+								result = "Standard variable of type " + workspace.game.library.name(type);
+							}
 						}
 					}
 					else
@@ -495,13 +512,22 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				if (query == null)
 				{
 					var type = workspace.game.inference.infer(value);
+					var standard = workspace.game.library.getValue(value.getName());
+					
 					if (type == null)
 					{
 						result = "Variable of undecidable type";
 					}
 					else
 					{
-						result = "Variable of type " + workspace.game.library.name(type);
+						if (standard == null)
+						{
+							result = "User variable of type " + workspace.game.library.name(type);
+						}
+						else
+						{
+							result = "Standard variable of type " + workspace.game.library.name(type);
+						}
 					}
 				}
 				else
