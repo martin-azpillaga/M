@@ -753,7 +753,7 @@ public enum Library
 			
 			if (map.containsKey(mapped))
 			{
-				Main.writeMessage("Value already present: "+mapped);
+				// Error
 			}
 			else
 			{
@@ -787,6 +787,11 @@ public enum Library
 	public String getDescription(Function function)
 	{
 		return functionToDescription.get(function);
+	}
+
+	public String getName(Component component)
+	{
+		return componentToName.get(component);
 	}
 	
 	public String name(Type type)
