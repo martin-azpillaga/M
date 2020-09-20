@@ -60,6 +60,7 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.nodemodel.INode;
+import org.eclipse.xtext.nodemodel.impl.HiddenLeafNode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.parser.IParser;
 import org.eclipse.xtext.resource.XtextResource;
@@ -408,6 +409,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		
 		var file = decode(params.getTextDocument().getUri());
 		var workspace = findWorkspace(file);
+		var library = workspace.game.library;
 		var localData = workspace.files.get(file);
 
 		var text = localData.text;
@@ -416,6 +418,13 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		
 		var node = NodeModelUtils.findLeafNodeAtOffset(localData.rootNode, offset);
 		
+		if (node instanceof HiddenLeafNode)
+		{
+			var hover = new Hover();
+			var contents = new MarkupContent("markdown", result);
+			hover.setContents(contents);
+			return CompletableFuture.supplyAsync(() -> hover);
+		}
 		var semantic = node.getSemanticElement();
 		
 		if (semantic instanceof Function)
@@ -423,11 +432,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			var function = (Function) semantic;
 			if (node.getText().equals(function.getName()))
 			{
-				result = "Function " + function.getName() + "\n\nComplexity: "+workspace.game.queries.get(function).size();
-			}
-			else
-			{
-				result = "Inside function " + function.getName(); 
+				result = "User system";
 			}
 		}
 		else if (semantic instanceof Value)
@@ -441,7 +446,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				var cell = (Cell) container;
 				if (cell.getComponent() == value)
 				{
-					var standard = workspace.game.library.getComponent(value.getName());
+					var standard = library.getComponent(value.getName());
 					var info = workspace.game.inference.info(cell);
 					var type = Library.ENGLISH.name(workspace.game.inference.infer(cell));
 
@@ -449,22 +454,22 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 					{
 						if (standard != null)
 						{
-							result = "Component with incompatible types";
+							result = "Standard component";
 						}
 						else
 						{
-							result = "User component with undecidable type";
+							result = "User component";
 						}
 					}
 					else
 					{
 						if (standard == null)
 						{
-							result = "User component of type " + type;
+							result = "User component\n\nType: " + type;
 						}
 						else
 						{
-							result = "Standard component of type " + type;
+							result = "Standard component\n\nType: " + type;
 						}
 					}
 				}
@@ -476,27 +481,34 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 					if (query == null)
 					{
 						var type = workspace.game.inference.infer(value);
-						var standard = workspace.game.library.getValue(value.getName());
+						var standard = library.getValue(value.getName());
 
 						if (type == null)
 						{
-							result = "Variable of undecidable type";
+							if (standard == null)
+							{
+								result = "User variable";
+							}
+							else
+							{
+								result = "Standard variable";
+							}
 						}
 						else
 						{
 							if (standard == null)
 							{
-								result = "User variable of type " + workspace.game.library.name(type);
+								result = "User variable\n\nType: " + library.name(type);
 							}
 							else
 							{
-								result = "Standard variable of type " + workspace.game.library.name(type);
+								result = "Standard variable\n\nType: " + library.name(type);
 							}
 						}
 					}
 					else
 					{
-						result = "Entity query " + value.getName() + " requires components\n\n";
+						result = "Entity query\n\n";
 						for (var component : query.entrySet())
 						{
 							result += "* " + component.getKey() + " : " + component.getValue() + "\n\n";
@@ -512,27 +524,34 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				if (query == null)
 				{
 					var type = workspace.game.inference.infer(value);
-					var standard = workspace.game.library.getValue(value.getName());
+					var standard = library.getValue(value.getName());
 					
 					if (type == null)
 					{
-						result = "Variable of undecidable type";
+						if (standard == null)
+						{
+							result = "User value";
+						}
+						else
+						{
+							result = "Standard value";
+						}
 					}
 					else
 					{
 						if (standard == null)
 						{
-							result = "User variable of type " + workspace.game.library.name(type);
+							result = "User value\n\nType: " + library.name(type);
 						}
 						else
 						{
-							result = "Standard variable of type " + workspace.game.library.name(type);
+							result = "Standard value\n\nType: " + library.name(type);
 						}
 					}
 				}
 				else
 				{
-					result = "Entity query " + value.getName() + " requires components\n\n";
+					result = "Entity query\n\n";
 					for (var component : query.entrySet())
 					{
 						result += "* " + component.getKey() + " : " + component.getValue() + "\n\n";
@@ -543,55 +562,36 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 		else if (semantic instanceof Binary)
 		{
 			var binary = (Binary) semantic;
-			var library = workspace.game.library;
 			var standard = library.getFunction(binary.getOperator());
-			if (standard == null)
+			if (standard != null)
 			{
-				result = "Undefined operator " + binary.getOperator();
-			}
-			else
-			{
-				result = "Standard operator " + binary.getOperator() + "\n\n" + library.name(standard.getType());
+				result = "Standard operator\n\nType: " + library.name(standard.getType());
 			}
 		}
 		else if (semantic instanceof Unary)
 		{
 			var unary = (Unary) semantic;
-			var library = workspace.game.library;
 			var standard = library.getFunction(unary.getOperator());
-			if (standard == null)
+			if (standard != null)
 			{
-				result = "Undefined operator " + unary.getOperator();
-			}
-			else
-			{
-				result = "Standard operator " + unary.getOperator() + "\n\n" + library.name(standard.getType());
+				result = "Standard operator\n\nType: " + library.name(standard.getType());
 			}
 		}
 		else if (semantic instanceof Application)
 		{
 			var application = (Application) semantic;
-			var library = workspace.game.library;
 			var standard = library.getFunction(application.getName());
-			if (standard == null)
+			if (standard != null)
 			{
-				result = "Undefined function " + application.getName();
-			}
-			else
-			{
-				result = "Standard function " + application.getName() + "\n\n" + library.name(standard.getType());
+				result = "Standard operator\n\nType: " + library.name(standard.getType());
 			}
 		}
-		else
-		{
-			result = semantic.toString();
-		}
-		
-		
+
 		var hover = new Hover();
 		var contents = new MarkupContent("markdown", result);
 		hover.setContents(contents);
 		return CompletableFuture.supplyAsync(() -> hover);
+
 	}
 	
 	

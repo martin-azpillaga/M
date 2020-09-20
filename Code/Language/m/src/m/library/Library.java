@@ -688,7 +688,7 @@ public enum Library
 			{
 				result.add(name(p));
 			}
-			return String.join(",", result) + "->" + name(functionType.getReturnType());
+			return String.join(" × ", result) + " -> " + name(functionType.getReturnType());
 		}
 		else
 		{
