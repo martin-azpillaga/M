@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.CompletionParams;
@@ -69,9 +70,7 @@ import m.library.Library;
 import m.library.symbols.Component;
 import m.library.types.FunctionType;
 import m.m.Application;
-import m.m.Assignment;
 import m.m.Binary;
-import m.m.Block;
 import m.m.Cell;
 import m.m.Function;
 import m.m.Unary;
@@ -573,29 +572,21 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		}
 		else if (semantic instanceof Cell)
 		{
+            for (var component : workspace.game.components.keySet())
+            {
+                var item = new CompletionItem(component);
+                item.setDocumentation("documentation");
+                item.setDetail("type: "+workspace.game.components.get(component));
+                item.setKind(CompletionItemKind.Class);
+                item.setInsertText(component+" ");
+                result.add(item);
+            }
 			for (var component : Component.values())
 			{
 				result.add(new CompletionItem(library.getName(component)));
 			}
-		}
-		else
-		{
-			if (semantic instanceof Block)
-			{
-				var block = (Block) semantic;
-				
-				result.add(new CompletionItem(node.getText()+ " " + block.getStatements().size()));
-				if (block.getStatements().size() > 0)
-				{
-					var ass = (Assignment) block.getStatements().get(0);
-					result.add(new CompletionItem(ass.getAtom().toString()));
-					result.add(new CompletionItem("Exp: "+ass.getExpression()));
-					result.add(new CompletionItem("Node: "+node.getText()));
-				}
-			}
-			result.add(new CompletionItem(node.getText() + " " + semantic.toString()));
-		}
-		
+        }
+        
 		return CompletableFuture.supplyAsync(() -> Either.forLeft(result));
 	}
 	

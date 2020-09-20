@@ -12,7 +12,6 @@ import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.library.types.TypeVariable;
-import m.main.Main;
 import m.validation.problems.Problem;
 import m.validation.problems.errors.IncompatibleTypes;
 import m.validation.problems.errors.ReadOnly;
@@ -200,6 +199,7 @@ public enum Library
 	case IN_STATE: return "inState";
 	case ACTIVATE_PARAMETER: return "enableParameter";
 	case DEACTIVATE_PARAMETER: return "disableParameter";
+	case PLAY_ANIMATION: return "playAnimation";
 	
 	case READ_TRIGGERED: return "readTriggered";
 	case READ_NUMBER: return "readNumber";
@@ -363,6 +363,7 @@ public enum Library
 		case PAUSE: return "Pause the audio";
 		case PLAY: return "Play the audio";
 		case PLAY_ONCE: return "Play the audio once";
+		case PLAY_ANIMATION: return "Play the animation state";
 		case POW: return "The first number raised to the second";
 		case PROPORTIONAL: return "The proportional value of the number when shifted from the original extents to the destination extents";
 		case RADIANS: return "Convert the degrees to radians";
@@ -586,6 +587,7 @@ public enum Library
 	case IN_STATE: return "egoera";
 	case ACTIVATE_PARAMETER: return "jarriParametroa";
 	case DEACTIVATE_PARAMETER: return "kenduParametroa";
+	case PLAY_ANIMATION: return "aldatuAnimazioa";
 	
 	case READ_TRIGGERED: return "irakurriKakoa";
 	case READ_NUMBER: return "irakurriZenbakia";

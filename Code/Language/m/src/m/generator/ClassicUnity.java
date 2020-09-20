@@ -613,6 +613,7 @@ public class ClassicUnity
 		case IS_ZERO: return "("+x+"== 0)";
 		case ACTIVATE_PARAMETER: return x+".GetComponent<Animator>().SetBool("+y+", true)";
 		case DEACTIVATE_PARAMETER: return x+".GetComponent<Animator>().SetBool("+y+", false)";
+		case PLAY_ANIMATION: return x+".GetComponent<Animator>().Play("+y+")";
 		}
 		return "undefined";
 	}
