@@ -299,7 +299,116 @@ public enum Library
 		{
 			return "Undefined name for problem";
 		}
+	},
+	function ->	{ switch(function)
+	{
+		case ABS: return "Absolute value of a number";
+		case ACOS: return "Arc cosine of an angle";
+		case ACTIVATE_PARAMETER: return "Enable the parameter in the animator";
+		case ADD: return "Add component to an entity";
+		case ADDITION: return "Adds two numbers or vectors";
+		case ADD_FORCE: return "Add force to the entity's rigidbody";
+		case ADD_TORQUE: return "";
+		case AND: return "";
+		case ASIN: return "";
+		case ASSIGNMENT: return "";
+		case ATAN: return "";
+		case BREAKPOINT: return "";
+		case CEIL: return "";
+		case CLAMP: return "";
+		case CLOSEST_POINT: return "";
+		case COS: return "";
+		case CREATE: return "";
+		case CROSS: return "";
+		case DEACTIVATE_PARAMETER: return "";
+		case DEGREES: return "";
+		case DESTROY: return "";
+		case DISTANCE: return "";
+		case DIVISION: return "";
+		case DOT: return "";
+		case EQUAL: return "";
+		case EXP: return "";
+		case FLOOR: return "";
+		case FRACTIONALPART: return "";
+		case GET_COLOR: return "";
+		case GET_INTEGER: return "";
+		case GET_KEYWORD: return "";
+		case GET_NUMBER: return "";
+		case GET_TEXTURE: return "";
+		case GREATER: return "";
+		case GREATEROREQUAL: return "";
+		case HALT: return "";
+		case HAS: return "";
+		case IN: return "";
+		case INEQUAL: return "";
+		case INTEGERPART: return "";
+		case INVERSE: return "";
+		case IN_STATE: return "";
+		case IS_NEGATIVE: return "";
+		case IS_POSITIVE: return "";
+		case IS_ZERO: return "";
+		case LERP: return "";
+		case LOG: return "";
+		case LOWER: return "";
+		case LOWEROREQUAL: return "";
+		case MAX: return "";
+		case MIN: return "";
+		case MULTIPLICATION: return "";
+		case NORM: return "";
+		case NORMALIZE: return "";
+		case NOT: return "";
+		case OR: return "";
+		case OVER: return "";
+		case OVERLAPS: return "";
+		case PAUSE: return "";
+		case PLAY: return "";
+		case PLAY_ONCE: return "";
+		case POW: return "";
+		case PROPORTIONAL: return "";
+		case RADIANS: return "";
+		case RANDOM: return "";
+		case READ_NUMBER: return "";
+		case READ_TRIGGERED: return "";
+		case READ_VECTOR: return "";
+		case RECIPROCAL: return "";
+		case REFLECT: return "";
+		case REFRACT: return "";
+		case REMOVE: return "";
+		case ROUND: return "";
+		case SCREENSHOT: return "";
+		case SCREEN_OVERLAPS: return "";
+		case SET_COLOR: return "";
+		case SET_INTEGER: return "";
+		case SET_KEYWORD: return "";
+		case SET_NUMBER: return "";
+		case SET_TEXTURE: return "";
+		case SET_TRIGGER: return "";
+		case SIGN: return "";
+		case SIN: return "";
+		case SIZE: return "";
+		case SLERP: return "";
+		case SQRT: return "";
+		case STEP: return "";
+		case STOP: return "";
+		case SUBTRACTION: return "";
+		case TAN: return "";
+		case TO_NUMBER: return "";
+		case TO_NUMBER3: return "";
+		case TO_QUATERNION: return "";
+		case TO_STRING: return "";
+		case UNLERP: return "";
+		case UNPAUSE: return "";
+		case VIEWPORT_TO_WORLD: return "";
+		case WORLD_TO_VIEWPORT: return "";
+		case WRITE: return "";
+		case WRITEERROR: return "";
+		case WRITE_WARNING: return "";
+		case X: return "";
+		case XYZ: return "";
+		case Y: return "";
+		case Z: return "";
 	}
+	return "";}
 	),
 	EUSKARA(
 	value -> {switch(value)
@@ -575,6 +684,10 @@ public enum Library
 		{
 			return "Problema honen izena ezarri gabe dago";
 		}
+	},
+	function ->
+	{
+		return "";
 	}
 	);
 	
@@ -584,6 +697,7 @@ public enum Library
 	Map<Block, String> blockToName;
 	Map<AtomicType, String> typeToName;
 	Map<Class<?>, String> problemToName;
+	Map<Function, String> functionToDescription;
 	
 	Map<String, Value> nameToValue;
 	Map<String, Component> nameToComponent;
@@ -592,7 +706,7 @@ public enum Library
 	Map<String, AtomicType> nameToType;
 	Map<String, Class<?>> nameToProblem;
 	
-	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Class<?>, String> problems)
+	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Class<?>, String> problems,java.util.function.Function<Function, String> functionDescriptions)
 	{
 		valueToName = forward(values, Value.values());
 		nameToValue = reverse(values, Value.values());
@@ -613,6 +727,8 @@ public enum Library
 		
 		problemToName = forward(problems, problemTypes);
 		nameToProblem = reverse(problems, problemTypes);
+
+		functionToDescription = forward(functionDescriptions, Function.values());
 	}
 	
 	private <A,B> HashMap<A,B> forward(java.util.function.Function<A,B> f, A[] values)
@@ -666,6 +782,11 @@ public enum Library
 	public String getProblem(Class<? extends Problem> problem)
 	{
 		return problemToName.get(problem);
+	}
+
+	public String getDescription(Function function)
+	{
+		return functionToDescription.get(function);
 	}
 	
 	public String name(Type type)

@@ -666,7 +666,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				{
 					parameters.add(new ParameterInformation("Parameter "+i, library.name(type.getParameters()[i])));
 				}
-				var info = new SignatureInformation(name + " : " + library.name(type), "", parameters);
+				var info = new SignatureInformation(name + " : " + library.name(type), library.getDescription(standard), parameters);
 				list.add(info);
 				var help = new SignatureHelp();
 				help.setSignatures(list);
