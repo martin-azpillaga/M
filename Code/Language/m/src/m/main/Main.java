@@ -73,10 +73,13 @@ import m.generator.Game;
 import m.generator.MGenerator;
 import m.library.Library;
 import m.library.symbols.Component;
+import m.m.Application;
 import m.m.Assignment;
+import m.m.Binary;
 import m.m.Block;
 import m.m.Cell;
 import m.m.Function;
+import m.m.Unary;
 import m.m.Value;
 import m.validation.InferenceGraph;
 import m.validation.MValidator;
@@ -420,7 +423,7 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 			var function = (Function) semantic;
 			if (node.getText().equals(function.getName()))
 			{
-				result = "Function " + function.getName();
+				result = "Function " + function.getName() + "\n\nComplexity: "+workspace.game.queries.get(function).size();
 			}
 			else
 			{
@@ -464,7 +467,15 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 					
 					if (query == null)
 					{
-						result = "Variable of type " + workspace.game.inference.infer(value).toString();
+						var type = workspace.game.inference.infer(value);
+						if (type == null)
+						{
+							result = "Variable of undecidable type";
+						}
+						else
+						{
+							result = "Variable of type " + workspace.game.library.name(type);
+						}
 					}
 					else
 					{
@@ -483,7 +494,15 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 				
 				if (query == null)
 				{
-					result = "Variable of type " + workspace.game.inference.infer(value).toString();
+					var type = workspace.game.inference.infer(value);
+					if (type == null)
+					{
+						result = "Variable of undecidable type";
+					}
+					else
+					{
+						result = "Variable of type " + workspace.game.library.name(type);
+					}
 				}
 				else
 				{
@@ -493,6 +512,48 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 						result += "* " + component.getKey() + " : " + component.getValue() + "\n\n";
 					}
 				}
+			}
+		}
+		else if (semantic instanceof Binary)
+		{
+			var binary = (Binary) semantic;
+			var library = workspace.game.library;
+			var standard = library.getFunction(binary.getOperator());
+			if (standard == null)
+			{
+				result = "Undefined operator " + binary.getOperator();
+			}
+			else
+			{
+				result = "Standard operator " + binary.getOperator() + "\n\n" + library.name(standard.getType());
+			}
+		}
+		else if (semantic instanceof Unary)
+		{
+			var unary = (Unary) semantic;
+			var library = workspace.game.library;
+			var standard = library.getFunction(unary.getOperator());
+			if (standard == null)
+			{
+				result = "Undefined operator " + unary.getOperator();
+			}
+			else
+			{
+				result = "Standard operator " + unary.getOperator() + "\n\n" + library.name(standard.getType());
+			}
+		}
+		else if (semantic instanceof Application)
+		{
+			var application = (Application) semantic;
+			var library = workspace.game.library;
+			var standard = library.getFunction(application.getName());
+			if (standard == null)
+			{
+				result = "Undefined function " + application.getName();
+			}
+			else
+			{
+				result = "Standard function " + application.getName() + "\n\n" + library.name(standard.getType());
 			}
 		}
 		else
