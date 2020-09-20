@@ -441,13 +441,20 @@ public class Main implements LanguageServer, LanguageClientAware, TextDocumentSe
 					var info = workspace.game.inference.info(cell);
 					var type = Library.ENGLISH.name(workspace.game.inference.infer(cell));
 
-					if (info.typings.size() == 0)
+					if (info == null)
 					{
-						result = "User component of type " + type;
+						result = "User component with undecidable type";
 					}
 					else
 					{
-						result = "Standard component of type " + type;
+						if (info.typings.size() == 0)
+						{
+							result = "User component of type " + type;
+						}
+						else
+						{
+							result = "Standard component of type " + type;
+						}
 					}
 				}
 				else

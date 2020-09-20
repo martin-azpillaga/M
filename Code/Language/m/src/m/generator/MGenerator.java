@@ -78,6 +78,11 @@ public class MGenerator extends AbstractGenerator
 		for (var cell : EcoreUtil2.getAllContentsOfType(function,Cell.class))
 		{
 			var name = cell.getEntity().getName();
+			if (cell.getComponent() == null)
+			{
+				continue;
+			}
+			
 			var component = cell.getComponent().getName();
 			var container = cell.eContainer();
 			
