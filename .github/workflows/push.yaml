@@ -46,7 +46,11 @@ jobs:
           [ -f checkstyle-8.34-all.jar ] || wget https://github.com/checkstyle/checkstyle/releases/download/checkstyle-8.34/checkstyle-8.34-all.jar
       - name: Lint Markdown
         run: |
-          npx markdownlint-cli -i LICENSE.md -i node_modules "**/*.md"
+          npx markdownlint-cli -i LICENSE.md \
+          -i node_modules \
+          -i Documentation/index.md \
+          -i Documentation/video.md \
+          "**/*.md"
       - name: Lint Yaml
         run: |
           find . -not -wholename "*node_modules*" -name "*.yaml" -exec sh -c 'npx yamllint {}' \;

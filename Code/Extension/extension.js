@@ -30,21 +30,21 @@ exports.activate = async function(context) {
                 {
                     enableScripts: true
                 } // Webview options. More on these later.
-              );
-              console.log("0");
-              const blocklyPath = Uri.file(
+            );
+            console.log("0");
+            const blocklyPath = Uri.file(
                 path.join(context.extensionPath, 'blockly.js')
-              );
-              const cssPath = Uri.file(path.join(context.extensionPath, 'index.css'));
-              console.log(blocklyPath);
-              const blockly = panel.webview.asWebviewUri(blocklyPath);
-              const blocksPath = Uri.file(
+            );
+            const cssPath = Uri.file(path.join(context.extensionPath, 'index.css'));
+            console.log(blocklyPath);
+            const blockly = panel.webview.asWebviewUri(blocklyPath);
+            const blocksPath = Uri.file(
                 path.join(context.extensionPath, 'index.js')
-              );
-              console.log("vscode-resource:"+blocklyPath.path);
-              const blocks = panel.webview.asWebviewUri(blocksPath);
+            );
+            console.log("vscode-resource:" + blocklyPath.path);
+            const blocks = panel.webview.asWebviewUri(blocksPath);
 
-            panel.webview.html = blocksHtml("vscode-resource:"+blocklyPath.path, "vscode-resource:"+blocksPath.path, "vscode-resource:"+cssPath);
+            panel.webview.html = blocksHtml("vscode-resource:" + blocklyPath.path, "vscode-resource:" + blocksPath.path, "vscode-resource:" + cssPath);
         })
     );
 
@@ -83,8 +83,7 @@ exports.deactivate = function() {
     client.stop();
 }
 
-function blocksHtml(blockly, blocks, css)
-{
+function blocksHtml(blockly, blocks, css) {
     return `<!DOCTYPE html>
     <html>
     <head>

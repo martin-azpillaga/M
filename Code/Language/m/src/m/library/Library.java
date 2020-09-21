@@ -12,7 +12,6 @@ import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.library.types.TypeVariable;
-import m.main.Main;
 import m.validation.problems.Problem;
 import m.validation.problems.errors.IncompatibleTypes;
 import m.validation.problems.errors.ReadOnly;
@@ -200,6 +199,7 @@ public enum Library
 	case IN_STATE: return "inState";
 	case ACTIVATE_PARAMETER: return "enableParameter";
 	case DEACTIVATE_PARAMETER: return "disableParameter";
+	case PLAY_ANIMATION: return "playAnimation";
 	
 	case READ_TRIGGERED: return "readTriggered";
 	case READ_NUMBER: return "readNumber";
@@ -299,7 +299,117 @@ public enum Library
 		{
 			return "Undefined name for problem";
 		}
+	},
+	function ->	{ switch(function)
+	{
+		case ABS: return "Absolute value of a number";
+		case ACOS: return "Arc cosine of a number";
+		case ACTIVATE_PARAMETER: return "Enable the parameter in the animator";
+		case ADD: return "Add component to an entity";
+		case ADDITION: return "Adds two numbers or vectors";
+		case ADD_FORCE: return "Add force to the entity's rigidbody";
+		case ADD_TORQUE: return "Add torque to the entity's rigidbody";
+		case AND: return "Logical and of two propositions";
+		case ASIN: return "Arc sine of a number";
+		case ASSIGNMENT: return "Assigns the expression to the atom";
+		case ATAN: return "Arc tangent of a number";
+		case BREAKPOINT: return "Pause execution when reached this point";
+		case CEIL: return "The closest integer greater or equal to the given number";
+		case CLAMP: return "Clamp the number if it exceeds the low and high limits";
+		case CLOSEST_POINT: return "Closest point of another collider from the entity's colliders";
+		case COS: return "Cosine of the angle";
+		case CREATE: return "Create a copy of the entity";
+		case CROSS: return "Cross product of the two vectors";
+		case DEACTIVATE_PARAMETER: return "Disable the parameter in the animator";
+		case DEGREES: return "Convert from radians to degrees";
+		case DESTROY: return "Destroy the entity";
+		case DISTANCE: return "Distance between the two points";
+		case DIVISION: return "Division of the two numbers";
+		case DOT: return "Dot product of the two vectors";
+		case EQUAL: return "True if both values are equal";
+		case EXP: return "e raised to the number";
+		case FLOOR: return "Highest integer lower or equal to the number";
+		case FRACTIONALPART: return "Fractional part of the number";
+		case GET_COLOR: return "Value of the property of the material of the entity";
+		case GET_INTEGER: return "Value of the property of the material of the entity";
+		case GET_KEYWORD: return "Value of the property of the material of the entity";
+		case GET_NUMBER: return "Value of the property of the material of the entity";
+		case GET_TEXTURE: return "Value of the property of the material of the entity";
+		case GREATER: return "True if the first number is higher than the second";
+		case GREATEROREQUAL: return "True if the first number is higher or equal to the second";
+		case HALT: return "Stop the execution";
+		case HAS: return "True if the entity has the component";
+		case IN: return "True if the entity belongs to the entity list";
+		case INEQUAL: return "True if the values are not equal";
+		case INTEGERPART: return "Integer part of the number";
+		case INVERSE: return "Multiplicative inverse of the number";
+		case IN_STATE: return "True if the animator of the entity is in the state";
+		case IS_NEGATIVE: return "True if the number is lower than zero";
+		case IS_POSITIVE: return "True if the number is higher than zero";
+		case IS_ZERO: return "True if the number is zero";
+		case LERP: return "Linearly interpolate the number between the extents";
+		case LOG: return "Natural logarithm of the number";
+		case LOWER: return "True if the first number is lower than the second";
+		case LOWEROREQUAL: return "True if the first number is lower or equal to the second";
+		case MAX: return "Maximum of the two numbers";
+		case MIN: return "Minimum of the two numbers";
+		case MULTIPLICATION: return "Multiplication of the two numbers or the vector and the number";
+		case NORM: return "Length of the vector";
+		case NORMALIZE: return "Normalized version of the vector";
+		case NOT: return "Negation of the proposition";
+		case OR: return "Inclusive disjunction of the propositions";
+		case OVER: return "True if the point is over the entity's colliders";
+		case OVERLAPS: return "List of all the entities overlapping the entity's colliders";
+		case PAUSE: return "Pause the audio";
+		case PLAY: return "Play the audio";
+		case PLAY_ONCE: return "Play the audio once";
+		case PLAY_ANIMATION: return "Play the animation state";
+		case POW: return "The first number raised to the second";
+		case PROPORTIONAL: return "The proportional value of the number when shifted from the original extents to the destination extents";
+		case RADIANS: return "Convert the degrees to radians";
+		case RANDOM: return "A random number between the minimum and the maximum numbers";
+		case READ_NUMBER: return "Numerical value of the input device";
+		case READ_TRIGGERED: return "True if the input device has been triggered this frame";
+		case READ_VECTOR: return "Vector value of the input device";
+		case RECIPROCAL: return "Additive inverse of the number";
+		case REFLECT: return "Reflection of the vector";
+		case REFRACT: return "Refraction of the vector when changes to the new environment";
+		case REMOVE: return "Remove the component from the entity";
+		case ROUND: return "The number rounded up or down";
+		case SCREENSHOT: return "Take a screenshot";
+		case SCREEN_OVERLAPS: return "All the entities whose colliders are overlaping the entity's colliders";
+		case SET_COLOR: return "Set the property of the material of the entity";
+		case SET_INTEGER: return "Set the property of the material of the entity";
+		case SET_KEYWORD: return "Set the property of the material of the entity";
+		case SET_NUMBER: return "Set the property of the material of the entity";
+		case SET_TEXTURE: return "Set the property of the material of the entity";
+		case SET_TRIGGER: return "Set the property of the material of the entity";
+		case SIGN: return "1 if the number is positive or zero, -1 otherwise";
+		case SIN: return "Sine of the angle";
+		case SIZE: return "Size of the list of entities";
+		case SLERP: return "Spherically interpolate between the two quaternions";
+		case SQRT: return "Square root of the number";
+		case STEP: return "Value of the step function at the number";
+		case STOP: return "Stop the audio";
+		case SUBTRACTION: return "Subtraction of the two numbers or vectors";
+		case TAN: return "Tangent of the angle";
+		case TO_NUMBER: return "Convert the string to a number";
+		case TO_NUMBER3: return "Convert the quaternion to a 3D vector";
+		case TO_QUATERNION: return "Convert the 3D vector to a quaternion";
+		case TO_STRING: return "Convert the number to a string";
+		case UNLERP: return "Inverse of interpolating the number between the extents";
+		case UNPAUSE: return "Unpause the audio";
+		case VIEWPORT_TO_WORLD: return "Convert the viewport coordinates to world coordinates";
+		case WORLD_TO_VIEWPORT: return "Convert world coordinates to viewport coordinates";
+		case WRITE: return "Write a log message with the value";
+		case WRITEERROR: return "Write an error message with the value";
+		case WRITE_WARNING: return "Write a warning message with the value";
+		case X: return "First entry of the vector";
+		case XYZ: return "3D vector with the three numbers as entries";
+		case Y: return "Second entry of the vector";
+		case Z: return "Third entry of the vector";
 	}
+	return "";}
 	),
 	EUSKARA(
 	value -> {switch(value)
@@ -477,6 +587,7 @@ public enum Library
 	case IN_STATE: return "egoera";
 	case ACTIVATE_PARAMETER: return "jarriParametroa";
 	case DEACTIVATE_PARAMETER: return "kenduParametroa";
+	case PLAY_ANIMATION: return "aldatuAnimazioa";
 	
 	case READ_TRIGGERED: return "irakurriKakoa";
 	case READ_NUMBER: return "irakurriZenbakia";
@@ -575,6 +686,10 @@ public enum Library
 		{
 			return "Problema honen izena ezarri gabe dago";
 		}
+	},
+	function ->
+	{
+		return "";
 	}
 	);
 	
@@ -584,6 +699,7 @@ public enum Library
 	Map<Block, String> blockToName;
 	Map<AtomicType, String> typeToName;
 	Map<Class<?>, String> problemToName;
+	Map<Function, String> functionToDescription;
 	
 	Map<String, Value> nameToValue;
 	Map<String, Component> nameToComponent;
@@ -592,7 +708,7 @@ public enum Library
 	Map<String, AtomicType> nameToType;
 	Map<String, Class<?>> nameToProblem;
 	
-	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Class<?>, String> problems)
+	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Class<?>, String> problems,java.util.function.Function<Function, String> functionDescriptions)
 	{
 		valueToName = forward(values, Value.values());
 		nameToValue = reverse(values, Value.values());
@@ -613,6 +729,8 @@ public enum Library
 		
 		problemToName = forward(problems, problemTypes);
 		nameToProblem = reverse(problems, problemTypes);
+
+		functionToDescription = forward(functionDescriptions, Function.values());
 	}
 	
 	private <A,B> HashMap<A,B> forward(java.util.function.Function<A,B> f, A[] values)
@@ -637,7 +755,7 @@ public enum Library
 			
 			if (map.containsKey(mapped))
 			{
-				Main.writeMessage("Value already present: "+mapped);
+				// Error
 			}
 			else
 			{
@@ -666,6 +784,31 @@ public enum Library
 	public String getProblem(Class<? extends Problem> problem)
 	{
 		return problemToName.get(problem);
+	}
+
+	public String getDescription(Function function)
+	{
+		return functionToDescription.get(function);
+	}
+
+	public String getDescription(Component component)
+	{
+		return "Component description here";
+	}
+
+	public String getName(Component component)
+	{
+		return componentToName.get(component);
+	}
+
+	public String getName(Function function)
+	{
+		return functionToName.get(function);
+	}
+
+	public String getName(Value value)
+	{
+		return valueToName.get(value);
 	}
 	
 	public String name(Type type)
