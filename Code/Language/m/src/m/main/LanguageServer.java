@@ -605,7 +605,6 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				item.setDocumentation(library.getDescription(library.getComponent(component)));
 				item.setDetail(library.name(workspace.game.components.get(component)));
                 item.setKind(CompletionItemKind.Class);
-                item.setInsertText(component+" ");
                 result.add(item);
             }
 			for (var component : Component.values())
@@ -614,7 +613,6 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				item.setDocumentation(library.getDescription(component));
 				item.setDetail(library.name(component.getType()));
                 item.setKind(CompletionItemKind.Enum);
-                item.setInsertText(component+" ");
                 result.add(item);
 			}
 		}
@@ -729,6 +727,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 
 								var item = new CompletionItem(atom.getName());
 								item.setKind(CompletionItemKind.Variable);
+								item.setSortText("0"+atom.getName());
 								result.add(item);
 							}
 						}
@@ -800,6 +799,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 
 								var item = new CompletionItem(atom.getName());
 								item.setKind(CompletionItemKind.Variable);
+								item.setSortText("0"+atom.getName());
 								result.add(item);
 							}
 						}
