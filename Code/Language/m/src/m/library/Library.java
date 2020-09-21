@@ -791,6 +791,11 @@ public enum Library
 		return functionToDescription.get(function);
 	}
 
+	public String getDescription(Component component)
+	{
+		return "Component description here";
+	}
+
 	public String getName(Component component)
 	{
 		return componentToName.get(component);

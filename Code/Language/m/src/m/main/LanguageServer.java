@@ -74,10 +74,13 @@ import m.library.Library;
 import m.library.symbols.Component;
 import m.library.types.FunctionType;
 import m.m.Application;
+import m.m.Assignment;
 import m.m.Binary;
 import m.m.BindingBlock;
+import m.m.Block;
 import m.m.Cell;
 import m.m.Function;
+import m.m.Statement;
 import m.m.Unary;
 import m.m.Value;
 import m.validation.InferenceGraph;
@@ -122,10 +125,10 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
         workspaceFolders.setChangeNotifications(true);
 		
 		var capabilities = new ServerCapabilities();
-		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
+        capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
 		capabilities.setWorkspace(new WorkspaceServerCapabilities(workspaceFolders));
 		capabilities.setHoverProvider(true);
-		capabilities.setCompletionProvider(new CompletionOptions(false, Arrays.asList(".","(",")","{","}")));
+		capabilities.setCompletionProvider(new CompletionOptions(false, Arrays.asList(".","(",")","{","}"," ")));
 		capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
 		
 		workspaces = new ArrayList<>();
@@ -570,97 +573,45 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		var node = NodeModelUtils.findLeafNodeAtOffset(localData.rootNode, offset-1);
 		
 		var semantic = node.getSemanticElement();
-        
-        if (semantic instanceof Function)
-        {
-            var nameSet = false;
-            var openParen = false;
-            var closeParen = false;
-            var parent = node.getParent();
-            for (var children : parent.getChildren())
+		
+		if (semantic instanceof Cell || semantic instanceof Value && semantic.eContainer() instanceof Cell)
+		{
+			Cell cell;
+			if (semantic instanceof Cell)
+			{
+				cell = (Cell) semantic;
+			}
+			else
+			{
+				cell = (Cell) semantic.eContainer();
+			}
+
+			for (var component : workspace.game.components.keySet())
             {
-                if (children instanceof HiddenLeafNode)
-                {
-                    continue;
-                }
-
-                if (!nameSet)
-                {
-                    if (children.getGrammarElement() instanceof RuleCall)
-                    {
-                        var ruleCall = (RuleCall) children.getGrammarElement();
-                        if (ruleCall.getRule() instanceof TerminalRule)
-                        {
-                            var terminal = (TerminalRule) ruleCall.getRule();
-                            if (terminal.getName().equals("IDENTIFIER"))
-                            {
-                                nameSet = true;
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    if (!openParen && children.getGrammarElement() instanceof Keyword)
-                    {
-                        if (((Keyword)children.getGrammarElement()).getValue().equals("("))
-                        {
-                            openParen = true;
-                        }
-                    }
-                }
-
-                if (children instanceof LeafNodeWithSyntaxError)
-                {
-                    break;
-                }
+				if (cell.getComponent() != null && cell.getComponent().getName().equals(component))
+				{
+					continue;
+				}
+                var item = new CompletionItem(component);
+				item.setDocumentation(library.getDescription(library.getComponent(component)));
+				item.setDetail(library.name(workspace.game.components.get(component)));
+                item.setKind(CompletionItemKind.Class);
+                item.setInsertText(component+" ");
+                result.add(item);
             }
-
-            if (!openParen)
-            {
-                var completion = new CompletionItem(((Function) semantic).getName()+"()");
-                completion.setFilterText(((Function) semantic).getName());
-
-                var another = new CompletionItem(((Function) semantic).getName()+"()");
-                another.setFilterText((((Function)semantic).getName()+"a"));
-                
-                result.add(another);
-                result.add(completion);
-            }
-            else if (!closeParen)
-            {
-                result.add(new CompletionItem(")"));
-            }
-        }
-        else if (semantic instanceof BindingBlock)
-        {
-            var block = (BindingBlock) semantic;
-            if (block.getExpression() != null)
-            {
-                var variable = new CompletionItem(block.getExpression().getName());
-                variable.setKind(CompletionItemKind.Variable);
-                result.add(variable);
-                for (var function : m.library.symbols.Function.values())
-                {
-                    if (function != m.library.symbols.Function.ASSIGNMENT)
-                    {
-                        var item = new CompletionItem(library.getName(function));
-                        item.setKind(CompletionItemKind.Function);
-                        result.add(item);
-                    }
-                }
-
-                for (var value : m.library.symbols.Value.values())
-                {
-                    var item = new CompletionItem(library.getName(value));
-                    item.setKind(CompletionItemKind.Value);
-                    result.add(item);
-                }
-            }
-        }
-        else if (semantic instanceof Value)
-        {
-            for (var function : m.library.symbols.Function.values())
+			for (var component : Component.values())
+			{
+                var item = new CompletionItem(library.getName(component));
+				item.setDocumentation(library.getDescription(component));
+				item.setDetail(library.name(component.getType()));
+                item.setKind(CompletionItemKind.Enum);
+                item.setInsertText(component+" ");
+                result.add(item);
+			}
+		}
+		else if (semantic instanceof Value)
+		{
+			for (var function : m.library.symbols.Function.values())
             {
                 if (function != m.library.symbols.Function.ASSIGNMENT)
                 {
@@ -675,24 +626,60 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
                 var item = new CompletionItem(library.getName(value));
                 item.setKind(CompletionItemKind.Value);
                 result.add(item);
-            }
-        }
-		else if (semantic instanceof Cell)
-		{
-            for (var component : workspace.game.components.keySet())
-            {
-                var item = new CompletionItem(component);
-                item.setDocumentation("documentation");
-                item.setDetail("type: "+workspace.game.components.get(component));
-                item.setKind(CompletionItemKind.Class);
-                item.setInsertText(component+" ");
-                result.add(item);
-            }
-			for (var component : Component.values())
-			{
-				result.add(new CompletionItem(library.getName(component)));
 			}
-        }
+			
+			EObject statement = EcoreUtil2.getContainerOfType(semantic, Statement.class);
+			var container = statement.eContainer();
+
+			while(container != null)
+			{
+				List<Statement> statements;
+
+				if (container instanceof Block)
+				{
+					statements = ((Block) container).getStatements();
+				}
+				else if (container instanceof BindingBlock)
+				{
+					statements = ((BindingBlock) container).getStatements();
+				}
+				else if (container instanceof Function)
+				{
+					statements = ((Function) container).getStatements();
+				}
+				else
+				{
+					statements = new ArrayList<Statement>();
+				}
+
+				for (var s : statements)
+				{
+					if (s == statement)
+					{
+						break;
+					}
+					else
+					{
+						if (s instanceof Assignment)
+						{
+							var assignment = (Assignment) s;
+							if (assignment.getAtom() instanceof Value)
+							{
+								var atom = (Value) assignment.getAtom();
+
+								var item = new CompletionItem(atom.getName());
+								item.setKind(CompletionItemKind.Variable);
+								result.add(item);
+							}
+						}
+					}
+				}
+
+				var temp = container.eContainer();
+				statement = container;
+				container = temp;
+			}
+		}
         
 		return CompletableFuture.supplyAsync(() -> Either.forLeft(result));
     }
