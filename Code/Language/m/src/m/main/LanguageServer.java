@@ -74,6 +74,7 @@ import m.generator.Game;
 import m.generator.MGenerator;
 import m.library.Library;
 import m.library.symbols.Component;
+import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.m.Application;
 import m.m.Assignment;
@@ -577,7 +578,12 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		var semantic = node.getSemanticElement();
 		var grammatic = node.getGrammarElement();
 		
-		if (semantic instanceof Cell || semantic instanceof Value && semantic.eContainer() instanceof Cell)
+		if (semantic.eContainer() instanceof BindingBlock && ((BindingBlock)semantic.eContainer()).getExpression() == semantic)
+		{
+			var x = 5;
+			x = x+x;
+		}
+		else if (semantic instanceof Cell || semantic instanceof Value && semantic.eContainer() instanceof Cell)
 		{
 			Cell cell;
 			if (semantic instanceof Cell)
@@ -632,8 +638,21 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			}
 			
 			EObject statement = EcoreUtil2.getContainerOfType(semantic, Statement.class);
+			if (statement == null)
+			{
+				statement = EcoreUtil2.getContainerOfType(semantic, Function.class);
+			}
 			if (statement == semantic)
 			{
+				if (statement instanceof BindingBlock)
+				{
+					var name = ((BindingBlock) statement).getExpression().getName();
+					var item = new CompletionItem(name);
+					item.setDetail(library.name(AtomicType.ENTITY));
+					item.setSortText("0"+name);
+					item.setKind(CompletionItemKind.Variable);
+					result.add(item);
+				}
 				// identifier lost in a block
 				var siblings = node.getParent().getParent().getChildren();
 				for (var sibling : siblings)
@@ -660,6 +679,87 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 					}
 				}
 			}
+			var container = statement.eContainer();
+
+			while(! (container instanceof m.m.File))
+			{
+				if (container instanceof BindingBlock)
+				{
+					var name = ((BindingBlock) container).getExpression().getName();
+					var item = new CompletionItem(name);
+					item.setDetail(library.name(AtomicType.ENTITY));
+					item.setSortText("0"+name);
+					item.setKind(CompletionItemKind.Variable);
+					result.add(item);
+				}
+
+				List<Statement> statements;
+
+				if (container instanceof Block)
+				{
+					statements = ((Block) container).getStatements();
+				}
+				else if (container instanceof BindingBlock)
+				{
+					statements = ((BindingBlock) container).getStatements();
+				}
+				else if (container instanceof Function)
+				{
+					statements = ((Function) container).getStatements();
+				}
+				else
+				{
+					statements = new ArrayList<Statement>();
+				}
+
+				for (var s : statements)
+				{
+					if (s == statement)
+					{
+						break;
+					}
+					else
+					{
+						if (s instanceof Assignment)
+						{
+							var assignment = (Assignment) s;
+							if (assignment.getAtom() instanceof Value)
+							{
+								var atom = (Value) assignment.getAtom();
+
+								var item = new CompletionItem(atom.getName());
+								item.setKind(CompletionItemKind.Variable);
+								result.add(item);
+							}
+						}
+					}
+				}
+
+				var temp = container.eContainer();
+				statement = container;
+				container = temp;
+			}
+		}
+		else if (semantic instanceof Value)
+		{
+			for (var function : m.library.symbols.Function.values())
+            {
+                if (function != m.library.symbols.Function.ASSIGNMENT)
+                {
+                    var item = new CompletionItem(library.getName(function));
+                    item.setKind(CompletionItemKind.Function);
+                    result.add(item);
+                }
+            }
+
+            for (var value : m.library.symbols.Value.values())
+            {
+                var item = new CompletionItem(library.getName(value));
+                item.setKind(CompletionItemKind.Value);
+                result.add(item);
+			}
+			
+			EObject statement = EcoreUtil2.getContainerOfType(semantic, Statement.class);
 			var container = statement.eContainer();
 
 			while(! (container instanceof m.m.File))
