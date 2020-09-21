@@ -58,13 +58,10 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 import org.eclipse.xtext.EcoreUtil2;
-import org.eclipse.xtext.Keyword;
-import org.eclipse.xtext.RuleCall;
 import org.eclipse.xtext.TerminalRule;
 import org.eclipse.xtext.nodemodel.impl.CompositeNode;
 import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
 import org.eclipse.xtext.nodemodel.impl.HiddenLeafNode;
-import org.eclipse.xtext.nodemodel.impl.LeafNodeWithSyntaxError;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.parser.IParser;
 
@@ -597,7 +594,11 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 
 			for (var component : workspace.game.components.keySet())
             {
-				if (cell.getComponent() != null && cell.getComponent().getName().equals(component))
+				if (cell.getComponent() != null && cell.getComponent().getName() != null && cell.getComponent().getName().equals(component))
+				{
+					continue;
+				}
+				if (component == null)
 				{
 					continue;
 				}
@@ -617,7 +618,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			}
 		}
 		else if (grammatic instanceof TerminalRule && ((TerminalRule)grammatic).getName().equals("IDENTIFIER"))
-		{
+		{			
 			for (var function : m.library.symbols.Function.values())
             {
                 if (function != m.library.symbols.Function.ASSIGNMENT)
@@ -763,6 +764,16 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 
 			while(! (container instanceof m.m.File))
 			{
+				if (container instanceof BindingBlock)
+				{
+					var name = ((BindingBlock) container).getExpression().getName();
+					var item = new CompletionItem(name);
+					item.setDetail(library.name(AtomicType.ENTITY));
+					item.setSortText("0"+name);
+					item.setKind(CompletionItemKind.Variable);
+					result.add(item);
+				}
+
 				List<Statement> statements;
 
 				if (container instanceof Block)
@@ -824,19 +835,20 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		var library = workspace.game.library;
 
 		var offset = offset(workspace.files.get(file).text, params.getPosition().getLine(), params.getPosition().getCharacter());
-		var node = NodeModelUtils.findLeafNodeAtOffset(workspace.files.get(file).rootNode, offset);
-		var semantic = node.getSemanticElement();
+		var node = NodeModelUtils.findLeafNodeAtOffset(workspace.files.get(file).rootNode, offset-1);
 
-		if (semantic instanceof Application)
+		var help = new SignatureHelp();
+		var list = new ArrayList<SignatureInformation>();
+		
+		if (node != null && node.getSemanticElement() instanceof Application)
 		{
-			var application = (Application) semantic;
+			var application = (Application) node.getSemanticElement();
 			var name = application.getName();
 			var standard = library.getFunction(name);
 
 			if (standard != null)
 			{
 				var type = (FunctionType) standard.getType();
-				var list = new ArrayList<SignatureInformation>();
 				var parameters = new ArrayList<ParameterInformation>();
 				for (var i = 0; i < type.getParameters().length; i++)
 				{
@@ -844,7 +856,6 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				}
 				var info = new SignatureInformation(name + " : " + library.name(type), library.getDescription(standard), parameters);
 				list.add(info);
-				var help = new SignatureHelp();
 				help.setSignatures(list);
 				if (params.getContext().getTriggerCharacter() != null)
 				{
@@ -858,8 +869,8 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			}
 		}
 
-		var list = new ArrayList<SignatureInformation>();
-		var help = new SignatureHelp();
+		
+		
 		help.setSignatures(list);
 		return CompletableFuture.supplyAsync(()->help);
 	}
