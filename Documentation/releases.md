@@ -16,4 +16,5 @@ Download a free and open source editor based on Theia with all the dependencies 
 [For windows](https://github.com/martin-azpillaga/M/releases/download/v0.3.1/m.exe)
 [For OSX](https://github.com/martin-azpillaga/M/releases/download/v0.3.1/m.dmg)
 
-They are all self contained, no need for installation. Execute the binary and start developing.
+They are all self contained, no need for installation.
+Execute the binary and start developing.

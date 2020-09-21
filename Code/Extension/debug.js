@@ -19,8 +19,7 @@ exports.activate = function(context) {
 
     context.subscriptions.push(
         commands.registerCommand('m.restart', () => {
-            if (client)
-            {
+            if (client) {
                 client.stop();
             }
             start();

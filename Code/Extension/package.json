@@ -1,19 +1,32 @@
 {
-  "publisher": "azpillaga-world",
   "name": "m-ls",
   "displayName": "M language server",
-  "description": "M language server",
-  "version": "0.5.0",
+  "description": "Data-driven language for game developers",
+  "version": "0.5.1",
+  "preview": true,
+  "qna": false,
+  "publisher": "azpillaga-world",
+  "license": "AGPL-3.0-only",
+  "icon": "logo.png",
+  "homepage": "https://minim.tools/M",
   "repository": {
     "type": "git",
     "url": "https://github.com/martin-azpillaga/M"
+  },
+  "bugs": {
+    "email": "martin@minim.tools",
+    "url": "https://github.com/martin-azpillaga/M/issues"
   },
   "engines": {
     "vscode": "^1.43.0"
   },
   "categories": [
-    "Programming Languages",
-    "Snippets"
+    "Programming Languages"
+  ],
+  "keywords": [
+    "data-driven",
+    "programming language",
+    "game development"
   ],
   "contributes": {
     "languages": [
