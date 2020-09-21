@@ -65,6 +65,12 @@ The idea is to use M to write the code and use the game engine as the level edit
 
 Let me open the Unity project. Pong demo ??
 
+M doesn't generate executable games, but game projects that you can edit using
+a game engine.
+
+You can inspect the generated code, tweak design values and customize the look
+with art pieces made in your favorite content creation program.
+
 ## Properties
 
 But then, why use M in the first place? Why not develop the code in the engine's language?
