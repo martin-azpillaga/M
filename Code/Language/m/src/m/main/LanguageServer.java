@@ -58,7 +58,11 @@ import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 import org.eclipse.xtext.EcoreUtil2;
+import org.eclipse.xtext.Keyword;
+import org.eclipse.xtext.RuleCall;
+import org.eclipse.xtext.TerminalRule;
 import org.eclipse.xtext.nodemodel.impl.HiddenLeafNode;
+import org.eclipse.xtext.nodemodel.impl.LeafNodeWithSyntaxError;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 import org.eclipse.xtext.parser.IParser;
 
@@ -71,6 +75,7 @@ import m.library.symbols.Component;
 import m.library.types.FunctionType;
 import m.m.Application;
 import m.m.Binary;
+import m.m.BindingBlock;
 import m.m.Cell;
 import m.m.Function;
 import m.m.Unary;
@@ -111,7 +116,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		validator = injector.getInstance(MValidator.class);
 		generator = injector.getInstance(MGenerator.class);
 		parser = injector.getInstance(IParser.class);
-        
+
         var workspaceFolders = new WorkspaceFoldersOptions();
 		workspaceFolders.setSupported(true);
         workspaceFolders.setChangeNotifications(true);
@@ -120,7 +125,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
 		capabilities.setWorkspace(new WorkspaceServerCapabilities(workspaceFolders));
 		capabilities.setHoverProvider(true);
-		capabilities.setCompletionProvider(new CompletionOptions(false, Arrays.asList(".")));
+		capabilities.setCompletionProvider(new CompletionOptions(false, Arrays.asList(".","(",")","{","}")));
 		capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
 		
 		workspaces = new ArrayList<>();
@@ -565,11 +570,113 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		var node = NodeModelUtils.findLeafNodeAtOffset(localData.rootNode, offset-1);
 		
 		var semantic = node.getSemanticElement();
-		
-		if (semantic == null)
-		{
-			result.add(new CompletionItem("semantic is null\n\n"+node.getText()));
-		}
+        
+        if (semantic instanceof Function)
+        {
+            var nameSet = false;
+            var openParen = false;
+            var closeParen = false;
+            var parent = node.getParent();
+            for (var children : parent.getChildren())
+            {
+                if (children instanceof HiddenLeafNode)
+                {
+                    continue;
+                }
+
+                if (!nameSet)
+                {
+                    if (children.getGrammarElement() instanceof RuleCall)
+                    {
+                        var ruleCall = (RuleCall) children.getGrammarElement();
+                        if (ruleCall.getRule() instanceof TerminalRule)
+                        {
+                            var terminal = (TerminalRule) ruleCall.getRule();
+                            if (terminal.getName().equals("IDENTIFIER"))
+                            {
+                                nameSet = true;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    if (!openParen && children.getGrammarElement() instanceof Keyword)
+                    {
+                        if (((Keyword)children.getGrammarElement()).getValue().equals("("))
+                        {
+                            openParen = true;
+                        }
+                    }
+                }
+
+                if (children instanceof LeafNodeWithSyntaxError)
+                {
+                    break;
+                }
+            }
+
+            if (!openParen)
+            {
+                var completion = new CompletionItem(((Function) semantic).getName()+"()");
+                completion.setFilterText(((Function) semantic).getName());
+
+                var another = new CompletionItem(((Function) semantic).getName()+"()");
+                another.setFilterText((((Function)semantic).getName()+"a"));
+                
+                result.add(another);
+                result.add(completion);
+            }
+            else if (!closeParen)
+            {
+                result.add(new CompletionItem(")"));
+            }
+        }
+        else if (semantic instanceof BindingBlock)
+        {
+            var block = (BindingBlock) semantic;
+            if (block.getExpression() != null)
+            {
+                var variable = new CompletionItem(block.getExpression().getName());
+                variable.setKind(CompletionItemKind.Variable);
+                result.add(variable);
+                for (var function : m.library.symbols.Function.values())
+                {
+                    if (function != m.library.symbols.Function.ASSIGNMENT)
+                    {
+                        var item = new CompletionItem(library.getName(function));
+                        item.setKind(CompletionItemKind.Function);
+                        result.add(item);
+                    }
+                }
+
+                for (var value : m.library.symbols.Value.values())
+                {
+                    var item = new CompletionItem(library.getName(value));
+                    item.setKind(CompletionItemKind.Value);
+                    result.add(item);
+                }
+            }
+        }
+        else if (semantic instanceof Value)
+        {
+            for (var function : m.library.symbols.Function.values())
+            {
+                if (function != m.library.symbols.Function.ASSIGNMENT)
+                {
+                    var item = new CompletionItem(library.getName(function));
+                    item.setKind(CompletionItemKind.Function);
+                    result.add(item);
+                }
+            }
+
+            for (var value : m.library.symbols.Value.values())
+            {
+                var item = new CompletionItem(library.getName(value));
+                item.setKind(CompletionItemKind.Value);
+                result.add(item);
+            }
+        }
 		else if (semantic instanceof Cell)
 		{
             for (var component : workspace.game.components.keySet())
@@ -588,7 +695,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
         }
         
 		return CompletableFuture.supplyAsync(() -> Either.forLeft(result));
-	}
+    }
 	
 	
 	@Override
@@ -1020,7 +1127,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				count++;
 			}
 		}
-		return -1;
+		return text.length();
 	}
 	
 	private String decode(String path)

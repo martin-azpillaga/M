@@ -795,6 +795,16 @@ public enum Library
 	{
 		return componentToName.get(component);
 	}
+
+	public String getName(Function function)
+	{
+		return functionToName.get(function);
+	}
+
+	public String getName(Value value)
+	{
+		return valueToName.get(value);
+	}
 	
 	public String name(Type type)
 	{
