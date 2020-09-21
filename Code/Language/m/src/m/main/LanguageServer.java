@@ -472,7 +472,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 						result = "Entity query\n\n";
 						for (var component : query.entrySet())
 						{
-							result += "* " + component.getKey() + " : " + component.getValue() + "\n\n";
+							result += "* " + component.getKey() + "\n\n";
 						}
 					}
 				}
@@ -515,7 +515,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 					result = "Entity query\n\n";
 					for (var component : query.entrySet())
 					{
-						result += "* " + component.getKey() + " : " + component.getValue() + "\n\n";
+						result += "* " + component.getKey() + "\n\n";
 					}
 				}
 			}
@@ -544,7 +544,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			var standard = library.getFunction(application.getName());
 			if (standard != null)
 			{
-				result = "Standard operator\n\nType: " + library.name(standard.getType());
+				result = "Standard function\n\nType: " + library.name(standard.getType());
 			}
 		}
 

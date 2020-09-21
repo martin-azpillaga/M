@@ -3,7 +3,7 @@
   "name": "m-ls",
   "displayName": "M language server",
   "description": "M language server",
-  "version": "0.4.5",
+  "version": "0.5.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/martin-azpillaga/M"
@@ -60,7 +60,7 @@
     "onCommand:m.open",
     "onCommand:m.restart"
   ],
-  "main": "./debug.js",
+  "main": "./extension.js",
   "dependencies": {
     "lookpath": "^1.1.0",
     "openurl": "^1.1.1",
