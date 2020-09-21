@@ -61,6 +61,8 @@ import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.Keyword;
 import org.eclipse.xtext.RuleCall;
 import org.eclipse.xtext.TerminalRule;
+import org.eclipse.xtext.nodemodel.impl.CompositeNode;
+import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
 import org.eclipse.xtext.nodemodel.impl.HiddenLeafNode;
 import org.eclipse.xtext.nodemodel.impl.LeafNodeWithSyntaxError;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
@@ -573,6 +575,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		var node = NodeModelUtils.findLeafNodeAtOffset(localData.rootNode, offset-1);
 		
 		var semantic = node.getSemanticElement();
+		var grammatic = node.getGrammarElement();
 		
 		if (semantic instanceof Cell || semantic instanceof Value && semantic.eContainer() instanceof Cell)
 		{
@@ -609,7 +612,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
                 result.add(item);
 			}
 		}
-		else if (semantic instanceof Value)
+		else if (grammatic instanceof TerminalRule && ((TerminalRule)grammatic).getName().equals("IDENTIFIER"))
 		{
 			for (var function : m.library.symbols.Function.values())
             {
@@ -629,9 +632,37 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			}
 			
 			EObject statement = EcoreUtil2.getContainerOfType(semantic, Statement.class);
+			if (statement == semantic)
+			{
+				// identifier lost in a block
+				var siblings = node.getParent().getParent().getChildren();
+				for (var sibling : siblings)
+				{
+					if (sibling == node.getParent())
+					{
+						break;
+					}
+					else if (sibling instanceof CompositeNode && ((CompositeNode)sibling).getFirstChild() instanceof CompositeNodeWithSemanticElement)
+					{
+						var semanticOfSibling = ((CompositeNode)sibling).getFirstChild().getSemanticElement();
+						if (semanticOfSibling instanceof Assignment)
+						{
+							var assignment = (Assignment) semanticOfSibling;
+							if (assignment.getAtom() instanceof Value)
+							{
+								var atom = (Value) assignment.getAtom();
+
+								var item = new CompletionItem(atom.getName());
+								item.setKind(CompletionItemKind.Variable);
+								result.add(item);
+							}
+						}
+					}
+				}
+			}
 			var container = statement.eContainer();
 
-			while(container != null)
+			while(! (container instanceof m.m.File))
 			{
 				List<Statement> statements;
 
