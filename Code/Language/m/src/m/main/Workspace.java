@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import m.generator.Game;
-
 public class Workspace
 {
 	public String root;

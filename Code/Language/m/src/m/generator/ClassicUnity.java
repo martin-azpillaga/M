@@ -33,20 +33,21 @@ import m.m.Function;
 import m.m.Statement;
 import m.m.Unary;
 import m.m.Value;
+import m.main.Game;
+import m.main.UserFunction;
 
 public class ClassicUnity
 {
-	IFileSystemAccess2 fileSystem;
-	Library library;
 	Game game;
-	HashMap<Function, HashMap<String, HashMap<String, AccessKind>>> queries;
+	Library library;
+	IFileSystemAccess2 fileSystem;
 	
 	Set<String> namespaces = new HashSet<>();
-	Function currentFunction;
+	UserFunction currentFunction;
 	HashSet<String> variables;
 	Stack<HashSet<String>> stack;
 	
-	String[] csharpReserved = new String[]
+	final static String[] csharpReserved = new String[]
 	{
 		"abstract", "as", "base", "bool",	
 		"break", "byte", "case", "catch",	
@@ -75,9 +76,8 @@ public class ClassicUnity
 	public void generate(Game game, IFileSystemAccess2 fileSystem)
 	{
 		this.game = game;
-		this.library = game.library;
+		this.library = game.getLibrary();
 		this.fileSystem = fileSystem;
-		this.queries = game.queries;
 		this.variables = new HashSet<String>();
 		this.stack = new Stack<>();
 		
@@ -88,11 +88,12 @@ public class ClassicUnity
 		
 		
 		
-		for (var component : game.components.entrySet())
+		for (var component : game.getComponents().entrySet())
 		{
 			fileSystem.generateFile("Assets/Code/Components/"+unreserved(component.getKey())+".cs",
 					generate(component.getKey(), component.getValue()));
 		}
+		/*
 		var systems = lines("",
 		"using UnityEngine;",
 		"using UnityEngine.UI;",
@@ -149,7 +150,7 @@ public class ClassicUnity
 		
 		systems += "}\n}\n}\n";
 		
-		fileSystem.generateFile("Assets/Code/Systems/Systems.cs", systems);
+		fileSystem.generateFile("Assets/Code/Systems/Systems.cs", systems);*/
 	}
 	
 	private void resolvePackages()
@@ -233,18 +234,18 @@ public class ClassicUnity
 		}
 		else
 		{
-			var user = game.components.get(component);
+			var user = game.getComponents().get(component);
 			return unity(user);
 		}
 	}
 	
-	private String generateMultiComponent(Function function, String query)
+	private String generateMultiComponent(UserFunction function, String query)
 	{
 		var extras = extraComponents(function);
 		var normal = new ArrayList<String>();
-		if (game.queries.get(function).containsKey(query))
+		if (function.getQueries().containsKey(query))
 		{
-			normal.addAll(game.queries.get(function).get(query).keySet());
+			normal.addAll(function.getQueries().get(query).keySet());
 		}
 		var extra = new ArrayList<String>();
 		if (extras.containsKey(query))
@@ -339,9 +340,9 @@ public class ClassicUnity
 				var a = block.getExpression().getName();
 				var extras = extraComponents(currentFunction);
 				var components = new ArrayList<String>();
-				if (queries.get(currentFunction).containsKey(a))
+				if (currentFunction.getQueries().containsKey(a))
 				{
-					components.addAll(queries.get(currentFunction).get(a).keySet());
+					components.addAll(currentFunction.getQueries().get(a).keySet());
 				}
 				if (extras.containsKey(a))
 				{
@@ -432,7 +433,7 @@ public class ClassicUnity
 					code = "(int)("+code+")";
 				}
 				
-				if (game.queries.get(currentFunction).containsKey(entity))
+				if (currentFunction.getQueries().containsKey(entity))
 				{
 					return code(atom)+" = "+code+";";
 				}
@@ -625,7 +626,7 @@ public class ClassicUnity
 		for (var application : EcoreUtil2.getAllContentsOfType(function, Application.class))
 		{
 			var name = application.getName();
-			var standard = game.library.getFunction(name);
+			var standard = game.getLibrary().getFunction(name);
 			if (standard == SET_TRIGGER || standard == IN_STATE || standard == ACTIVATE_PARAMETER || standard == DEACTIVATE_PARAMETER )
 			{
 				var entity = ((Value)application.getArguments().get(0)).getName();

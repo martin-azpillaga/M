@@ -700,6 +700,8 @@ public enum Library
 	Map<AtomicType, String> typeToName;
 	Map<Class<?>, String> problemToName;
 	Map<Function, String> functionToDescription;
+	Map<Component, String> componentToDescription;
+	Map<Value, String> valueToDescription;
 	
 	Map<String, Value> nameToValue;
 	Map<String, Component> nameToComponent;
@@ -793,7 +795,12 @@ public enum Library
 
 	public String getDescription(Component component)
 	{
-		return "Component description here";
+		return componentToDescription.get(component);
+	}
+
+	public String getDescription(Value value)
+	{
+		return valueToDescription.get(value);
 	}
 
 	public String getName(Component component)
@@ -811,7 +818,7 @@ public enum Library
 		return valueToName.get(value);
 	}
 	
-	public String name(Type type)
+	public String getName(Type type)
 	{
 		if (type instanceof AtomicType)
 		{
@@ -829,9 +836,9 @@ public enum Library
 			var result = new ArrayList<String>();
 			for (var p : functionType.getParameters())
 			{
-				result.add(name(p));
+				result.add(getName(p));
 			}
-			return String.join(" × ", result) + " -> " + name(functionType.getReturnType());
+			return String.join(" × ", result) + " -> " + getName(functionType.getReturnType());
 		}
 		else
 		{

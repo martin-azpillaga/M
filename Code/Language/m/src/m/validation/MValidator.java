@@ -14,7 +14,7 @@ import java.util.Map;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.validation.Check;
 
-import m.generator.Game;
+import m.main.Game;
 import m.library.Library;
 import m.m.Application;
 import m.m.Assignment;
