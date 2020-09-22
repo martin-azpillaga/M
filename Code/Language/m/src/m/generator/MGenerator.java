@@ -25,7 +25,7 @@ public class MGenerator extends AbstractGenerator
 		var game = validator.getGame();
 		if (game != null)
 		{
-			new ClassicUnity().generate(game, fileSystem);
+			new Unity().generate(game, fileSystem);
 		}
 	}
 
@@ -34,7 +34,7 @@ public class MGenerator extends AbstractGenerator
 		fileSystem.setOutputPath(path);
 		switch (engine)
 		{
-			case Unity: new ClassicUnity().generate(game, fileSystem); break;
+			case Unity: new Unity().generate(game, fileSystem); break;
 			case Unreal: break;
 			case Godot: break;
 		}

@@ -36,7 +36,7 @@ import m.m.Value;
 import m.main.Game;
 import m.main.UserFunction;
 
-public class ClassicUnity
+public class Unity
 {
 	Game game;
 	Library library;
@@ -70,9 +70,6 @@ public class ClassicUnity
 		"using", "virtual", "void", "volatile",
 		"while"
 	};
-	
-	private static final String UNITY_ENGINE = "UnityEngine";
-	private static final String UNITY_ENGINE_UI = "UnityEngine.UI";
 
 
 
@@ -207,7 +204,8 @@ public class ClassicUnity
 	private String generateComponent(String name, Type type)
 	{
 		namespaces.clear();
-		namespaces.add(UNITY_ENGINE);
+		namespaces.add("UnityEngine");
+		namespaces.add("Unity.Entities");
 		if (type == INPUT)
 		{
 			namespaces.add("UnityEngine.InputSystem");
@@ -219,7 +217,7 @@ public class ClassicUnity
 			"",
 			"namespace M",
 			"{",
-				"public class "+unreserved(name)+" : MonoBehaviour",
+				"public class "+unreserved(name)+" : MonoBehaviour, IConvertGameObjectToEntity",
 				"{",
 					iff(type != UNIT),
 					"public "+unity(type)+" Value;",
@@ -235,6 +233,10 @@ public class ClassicUnity
 						"}",
 					"}",
 					end,
+					"",
+					"public void Convert(Entity entity, EntityManager manager, GameObjectConversionSystem system)",
+					"{",
+					"}",
 				"}",
 			"}"
 		);
@@ -354,7 +356,7 @@ public class ClassicUnity
 	private String generateSystem(UserFunction function)
 	{
 		namespaces.clear();
-		namespaces.add(UNITY_ENGINE);
+		namespaces.add("UnityEngine");
 		namespaces.add("System.Collections.Generic");
 
 		currentFunction = function;
@@ -740,16 +742,16 @@ public class ClassicUnity
 				namespaces.add("Unity.Mathematics");
 				return "math.E";
 			case TIME_SINCE_START:
-				namespaces.add(UNITY_ENGINE);
+				namespaces.add("UnityEngine");
 				return "UnityEngine.Time.time";
 			case FIXED_DELTA_TIME:
-				namespaces.add(UNITY_ENGINE);
+				namespaces.add("UnityEngine");
 				return "UnityEngine.Time.fixedDeltaTime";
 			case DELTA_TIME:
-				namespaces.add(UNITY_ENGINE);
+				namespaces.add("UnityEngine");
 				return "UnityEngine.Time.deltaTime";
 			case TIME_SCALE:
-				namespaces.add(UNITY_ENGINE);
+				namespaces.add("UnityEngine");
 				return "UnityEngine.Time.timeScale";
 			}
 			return "undefinedVariable";
@@ -962,16 +964,16 @@ public class ClassicUnity
 			case UNIT:
 				return "void";
 			case COLOR:
-				namespaces.add(UNITY_ENGINE);
+				namespaces.add("UnityEngine");
 				return "Color";
 			case MESH:
-				namespaces.add(UNITY_ENGINE);
+				namespaces.add("UnityEngine");
 				return "Mesh";
 			case MATERIAL:
-				namespaces.add(UNITY_ENGINE);
+				namespaces.add("UnityEngine");
 				return "Material";
 			case ANIMATOR:
-				namespaces.add(UNITY_ENGINE);
+				namespaces.add("UnityEngine");
 				return "Animator";
 			case COMPONENT:
 				return "Error (type component shouldnt be)";
@@ -979,7 +981,7 @@ public class ClassicUnity
 				namespaces.add("UnityEngine.UI");
 				return "Font";
 			case TEXT:
-				namespaces.add(UNITY_ENGINE_UI);
+				namespaces.add("UnityEngine.UI");
 				return "Text";
 			case IMAGE:
 				namespaces.add("UnityEngine.UI");
