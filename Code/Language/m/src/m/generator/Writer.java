@@ -6,18 +6,23 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import static m.generator.Writer.Keyword.*;
 
 public class Writer 
 {
+	enum Keyword
+	{
+		YES, NO, OTHERWISE, END;
+	}
+
+	public static Keyword end = Keyword.END;
+
+	private static String indent = "{";
+	private static String dedent = "}";
+	private static String indentationString = "\t";
+
 	private static int indentation;
 	private static StringBuilder builder;
-	private static void indentation()
-	{
-		for (var i = 0; i < indentation; i++)
-		{
-			builder.append("\t");
-		}
-	}
 	private static boolean skipping;
 
 	public static <T> List<Object> foreach(Collection<T> collection, Function<T,Object> function)
@@ -30,21 +35,16 @@ public class Writer
 		}
 		return list;
 	}
-
-	public static String iff(boolean condition)
-	{
-		return condition ? yes : no;
-	}
-	private static final String yes = "##true##"; 
-	private static final String no = "##no##";
-	public static final String otherwise = "##else##";
-	public static final String end = "##end##";
-	public static final String indent = "{";
-	public static final String dedent = "}";
+	
 	public static <T> String foreach(Collection<T> set, java.util.function.Function<T,String> f, String separator)
 	{
 		return String.join(separator, set.stream().map(f).collect(Collectors.toList()));
 	}
+
+	public static Keyword iff(boolean condition)
+	{
+		return condition ? YES : NO;
+	}	
 
 	public static List<Object> lines(Object... lines)
 	{
@@ -98,11 +98,11 @@ public class Writer
 		{
 			return;
 		}
-		else if (line.equals(yes))
+		else if (line.equals(YES))
 		{
 			return;
 		}
-		else if (line.equals(no))
+		else if (line.equals(NO))
 		{
 			skipping = true;
 			return;
@@ -129,6 +129,14 @@ public class Writer
 			{
 				writeLine(element);
 			}
+		}
+	}
+
+	private static void indentation()
+	{
+		for (var i = 0; i < indentation; i++)
+		{
+			builder.append(indentationString);
 		}
 	}
 }
