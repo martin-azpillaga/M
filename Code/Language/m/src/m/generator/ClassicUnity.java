@@ -98,11 +98,14 @@ public class ClassicUnity
 			);
 		}
 
+		var systems = new ArrayList<UserFunction>();
+
 		for (var function : game.getFunctions())
 		{
 			var type = function.getType();
 			if (type.getParameters() == null && type.getReturnType() == UNIT)
 			{
+				systems.add(function);
 				fileSystem.generateFile
 				(
 					"Assets/Code/Systems/"+unreserved(function.getName())+".cs",
@@ -114,66 +117,14 @@ public class ClassicUnity
 		fileSystem.generateFile
 		(
 			"Assets/Code/Debugging/SystemDebugger.cs",
-			generateSystemDebugger()
+			systemDebugger(systems)
 		);
-		/*
-		var systems = lines("",
-		"using UnityEngine;",
-		"using UnityEngine.UI;",
-		"using UnityEngine.EventSystems;",
-		"using UnityEngine.InputSystem;",
-		"using System.Collections.Generic;",
-		"using Unity.Mathematics;",
-		"using System;",
-		"using System.Linq;",
-		"",
-		"namespace M",
-		"{",
-		"   public class Systems : MonoBehaviour",
-		"   {",
-		"      "+all(game.systems, x->"public bool "+x.getName()+" = true;", "\n      "));		
-		for (var function : game.systems)
-		{
-			for (var query : game.queries.get(function).keySet())
-			{
-				var tooltip = new HashSet<String>();
-				for (var component : game.queries.get(function).get(query).keySet())
-				{
-					tooltip.add(simpleComponent(component));
-				}
-				systems += lines("",
-					"[Tooltip(\""+all(tooltip, x->x, ", ")+"\")]",
-					"public List<GameObject> " + function.getName() + "_" + query + ";\n");
-			}
-		}
 
-		systems += "void Update()\n{\n\n           var gos = FindObjectsOfType<Transform>().Select(x=>x.gameObject);\n";
-		
-		for (var function : game.systems)
-		{
-			for (var query : game.queries.get(function).keySet())
-			{
-				systems += function.getName() + "_" + query + " = new List<GameObject>();\n";
-			}
-		}
-		
-		for (var function : game.systems)
-		{
-			currentFunction = function;
-			systems += "if ("+function.getName()+")\n{"+generate(function)+"\n}";
-		}
-		
-		for (var function : game.systems)
-		{
-			for (var query : game.queries.get(function).keySet())
-			{
-				fileSystem.generateFile("Assets/Code/MultiComponents/"+function.getName()+"_"+query+".cs", generateMultiComponent(function, query));
-			}
-		}
-		
-		systems += "}\n}\n}\n";
-		
-		fileSystem.generateFile("Assets/Code/Systems/Systems.cs", systems);*/
+		fileSystem.generateFile
+		(
+			"Assets/Code/Debugging/SystemRunner.cs",
+			systemRunner(systems)
+		);
 	}
 	
 	private void resolvePackages()
@@ -289,46 +240,70 @@ public class ClassicUnity
 		);
 	}
 
-	private String generateSystemDebugger()
+	private String systemDebugger(List<UserFunction> systems)
 	{
-		var systems = new ArrayList<UserFunction>();
-		for (var function : game.getFunctions())
-		{
-			var type = function.getType();
-			if (type.getParameters() == null && type.getReturnType() == UNIT)
-			{
-				systems.add(function);
-			}
-		}
-
 		return write
 		(
 			"using UnityEngine;",
-			"using System.Linq;",
 			"",
 			"namespace M",
 			"{",
 				"public class SystemDebugger : MonoBehaviour",
 				"{",
 					foreach(systems, s->"public bool "+s.getName()+" = true;"),
+				"}",
+			"}"
+		);
+	}
+
+	private String systemRunner(List<UserFunction> systems)
+	{
+		return write
+		(
+			"using UnityEngine;",
+			"using Unity.Entities;",
+			"using System.Linq;",
+			"",
+			"namespace M",
+			"{",
+				"public class SystemRunner : SystemBase",
+				"{",
+					foreach(systems, s->s.getName()+" "+s.getName()+";"),
 					"",
-					foreach(systems, s->s.getName()+" "+s.getName()+"System;"),
-					"",
-					"void Start()",
+					"protected override void OnCreate()",
 					"{",
-						foreach(systems, s->s.getName()+"System = new "+s.getName()+"();"),
+						foreach(systems, s->s.getName()+" = new "+s.getName()+"();"),
 					"}",
-					"void Update()",
+					"",
+					"protected override void OnUpdate()",
 					"{",
-						"var gameObjects = FindObjectsOfType<Transform>().Select(x=>x.gameObject).ToList();",
+						"var gameObjects = GameObject.FindObjectsOfType<Transform>().Select(x=>x.gameObject).ToList();",
 						"",
-						foreach(systems, s->lines
-						(
-							"if ("+s.getName()+")",
-							"{",
-								s.getName()+"System.Run(gameObjects);",	
-							"}"
-						)),
+						"var debuggers = GameObject.FindObjectsOfType<SystemDebugger>().ToList();",
+						"",
+						"if (debuggers.Count == 0)",
+						"{",
+							foreach(systems, s->s.getName()+".Run(gameObjects);"),
+						"}",
+						"else if (debuggers.Count == 1)",
+						"{",
+							"var debugger = debuggers[0];",
+							"",
+							foreach(systems, s->lines
+							(
+								"if (debugger."+s.getName()+")",
+								"{",
+									s.getName()+".Run(gameObjects);",	
+								"}"
+							)),
+						"}",
+						"else",
+						"{",
+							"Debug.LogError(\"Multiple system debuggers detected. Leave one debugger at maximum\");",
+							"#if UNITY_EDITOR",
+							"UnityEditor.EditorApplication.isPaused = true;",
+							"#endif",
+						"}",
 					"}",
 				"}",
 			"}"
