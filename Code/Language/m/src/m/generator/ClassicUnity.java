@@ -94,7 +94,17 @@ public class ClassicUnity
 		for (var component : game.getComponents().entrySet())
 		{
 			fileSystem.generateFile("Assets/Code/Components/"+unreserved(component.getKey())+".cs",
-					generate(component.getKey(), component.getValue()));
+				generateComponent(component.getKey(), component.getValue()));
+		}
+
+		for (var function : game.getFunctions())
+		{
+			var type = function.getType();
+			if (type.getParameters() == null && type.getReturnType() == UNIT)
+			{
+				fileSystem.generateFile("Assets/Code/Systems/"+unreserved(function.getName())+".cs",
+					generateSystem(function));
+			}
 		}
 		/*
 		var systems = lines("",
@@ -181,46 +191,47 @@ public class ClassicUnity
 		}
 		else
 		{
-			fileSystem.generateFile("Packages/manifest.json", lines
+			fileSystem.generateFile("Packages/manifest.json", write
 			(
 			"",
 			"{",
-			"  \"dependencies\": {",
-			"    \"com.unity.entities\": \"0.11.1-preview.4\",",
-			"    \"com.unity.inputsystem\": \"1.0.0\",",
-            "    \"com.unity.ugui\": \"1.0.0\",",  
-            "    \"com.unity.modules.ai\": \"1.0.0\",",  
-            "    \"com.unity.modules.androidjni\": \"1.0.0\",",  
-            "    \"com.unity.modules.animation\": \"1.0.0\",",  
-            "    \"com.unity.modules.assetbundle\": \"1.0.0\",",  
-            "    \"com.unity.modules.audio\": \"1.0.0\",",  
-            "    \"com.unity.modules.cloth\": \"1.0.0\",",  
-            "    \"com.unity.modules.director\": \"1.0.0\",",  
-            "    \"com.unity.modules.imageconversion\": \"1.0.0\",",  
-            "    \"com.unity.modules.imgui\": \"1.0.0\",",  
-            "    \"com.unity.modules.jsonserialize\": \"1.0.0\",",  
-            "    \"com.unity.modules.particlesystem\": \"1.0.0\",",  
-            "    \"com.unity.modules.physics\": \"1.0.0\",",  
-            "    \"com.unity.modules.physics2d\": \"1.0.0\",",  
-            "    \"com.unity.modules.screencapture\": \"1.0.0\",",  
-            "    \"com.unity.modules.terrain\": \"1.0.0\",",  
-            "    \"com.unity.modules.terrainphysics\": \"1.0.0\",",  
-            "    \"com.unity.modules.tilemap\": \"1.0.0\",",  
-            "    \"com.unity.modules.ui\": \"1.0.0\",",  
-            "    \"com.unity.modules.uielements\": \"1.0.0\",",  
-            "    \"com.unity.modules.umbra\": \"1.0.0\",",  
-            "    \"com.unity.modules.unityanalytics\": \"1.0.0\",",  
-            "    \"com.unity.modules.unitywebrequest\": \"1.0.0\",",  
-            "    \"com.unity.modules.unitywebrequestassetbundle\": \"1.0.0\",",  
-            "    \"com.unity.modules.unitywebrequestaudio\": \"1.0.0\",",  
-            "    \"com.unity.modules.unitywebrequesttexture\": \"1.0.0\",",  
-            "    \"com.unity.modules.unitywebrequestwww\": \"1.0.0\",",  
-            "    \"com.unity.modules.vehicles\": \"1.0.0\",",  
-            "    \"com.unity.modules.video\": \"1.0.0\",",  
-            "    \"com.unity.modules.vr\": \"1.0.0\",",  
-            "    \"com.unity.modules.wind\": \"1.0.0\",",  
-            "    \"com.unity.modules.xr\": \"1.0.0\"",
-			"  }",
+			"\"dependencies\":",
+			"{",
+				"\"com.unity.entities\": \"0.11.1-preview.4\",",
+				"\"com.unity.inputsystem\": \"1.0.0\",",
+				"\"com.unity.ugui\": \"1.0.0\",",  
+				"\"com.unity.modules.ai\": \"1.0.0\",",  
+				"\"com.unity.modules.androidjni\": \"1.0.0\",",  
+				"\"com.unity.modules.animation\": \"1.0.0\",",  
+				"\"com.unity.modules.assetbundle\": \"1.0.0\",",  
+				"\"com.unity.modules.audio\": \"1.0.0\",",  
+				"\"com.unity.modules.cloth\": \"1.0.0\",",  
+				"\"com.unity.modules.director\": \"1.0.0\",",  
+				"\"com.unity.modules.imageconversion\": \"1.0.0\",",  
+				"\"com.unity.modules.imgui\": \"1.0.0\",",  
+				"\"com.unity.modules.jsonserialize\": \"1.0.0\",",  
+				"\"com.unity.modules.particlesystem\": \"1.0.0\",",  
+				"\"com.unity.modules.physics\": \"1.0.0\",",  
+				"\"com.unity.modules.physics2d\": \"1.0.0\",",  
+				"\"com.unity.modules.screencapture\": \"1.0.0\",",  
+				"\"com.unity.modules.terrain\": \"1.0.0\",",  
+				"\"com.unity.modules.terrainphysics\": \"1.0.0\",",  
+				"\"com.unity.modules.tilemap\": \"1.0.0\",",  
+				"\"com.unity.modules.ui\": \"1.0.0\",",  
+				"\"com.unity.modules.uielements\": \"1.0.0\",",  
+				"\"com.unity.modules.umbra\": \"1.0.0\",",  
+				"\"com.unity.modules.unityanalytics\": \"1.0.0\",",  
+				"\"com.unity.modules.unitywebrequest\": \"1.0.0\",",  
+				"\"com.unity.modules.unitywebrequestassetbundle\": \"1.0.0\",",  
+				"\"com.unity.modules.unitywebrequestaudio\": \"1.0.0\",",  
+				"\"com.unity.modules.unitywebrequesttexture\": \"1.0.0\",",  
+				"\"com.unity.modules.unitywebrequestwww\": \"1.0.0\",",  
+				"\"com.unity.modules.vehicles\": \"1.0.0\",",  
+				"\"com.unity.modules.video\": \"1.0.0\",",  
+				"\"com.unity.modules.vr\": \"1.0.0\",",  
+				"\"com.unity.modules.wind\": \"1.0.0\",",  
+				"\"com.unity.modules.xr\": \"1.0.0\"",
+				"}",
 			"}"
 			));
 		}
@@ -228,111 +239,77 @@ public class ClassicUnity
 		
 	}
 	
-	private String typeOf(String component)
-	{
-		var standard = library.getComponent(component);
-		if (standard != null)
-		{
-			return unity(standard.getType());
-		}
-		else
-		{
-			var user = game.getComponents().get(component);
-			return unity(user);
-		}
-	}
-	
-	private String generateMultiComponent(UserFunction function, String query)
-	{
-		var extras = extraComponents(function);
-		var normal = new ArrayList<String>();
-		if (function.getQueries().containsKey(query))
-		{
-			normal.addAll(function.getQueries().get(query).keySet());
-		}
-		var extra = new ArrayList<String>();
-		if (extras.containsKey(query))
-		{
-			extra.addAll(extras.get(query));
-		}
-		return lines("",
-		"using UnityEngine;",
-		"using UnityEngine.UI;",
-		"using UnityEngine.InputSystem;",
-		"using System.Collections.Generic;",
-		"using Unity.Mathematics;",
-		"using System;",
-		"using System.Linq;",
-		"",
-		"namespace M",
-		"{",
-		"   public class "+function.getName()+"_"+query+" : MonoBehaviour",
-		"   {",
-		"       "+all(normal, x->"public "+typeOf(x)+" "+unreserved(x)+";", "\n       "),
-		"       "+all(normal, x->simpleComponent(x)+" " + unreserved(x)+"Component;", "\n       "),
-		"       void Start()",
-		"       {",
-		"           "+all(normal, x->unreserved(x)+"Component = GetComponent<"+simpleComponent(x)+">();\n"+"if ("+unreserved(x)+"Component == null){ "+unreserved(x)+"Component = gameObject.AddComponent<"+simpleComponent(x)+">();}", "\n           "),
-		"           "+all(normal, x->unreserved(x)+"Component."+field(x)+" = "+unreserved(x)+";", "\n           "),
-		"           "+all(extra, x->"if (GetComponent<"+x+">() == null) { gameObject.AddComponent<"+x+">(); }", "\n           "),
-		"       }",
-		"",
-		"       void Update()",
-		"       {",
-		"           "+all(normal, x->"if ("+unreserved(x)+"Component != null){"+unreserved(x)+" = "+unreserved(x)+"Component."+field(x)+";}", "\n           "),
-		"       }",
-		"",
-		"       void OnValidate()",
-		"       {",
-		"           "+all(normal, x->"if ("+unreserved(x)+"Component != null){"+unreserved(x)+"Component."+field(x)+" = "+unreserved(x)+";}", "\n           "),
-		"       }",
-		"   }",
-		"}");
-	}
 	
 	
 	
-	private String generate(String name, Type type)
+	
+	private String generateComponent(String name, Type type)
 	{
 		namespaces.clear();
 		namespaces.add(UNITY_ENGINE);
+		if (type == INPUT)
+		{
+			namespaces.add("UnityEngine.InputSystem");
+		}
 
 		return write
 		(
 			foreach(namespaces, n->"using "+n+";"),
 			"",
-			"public class "+unreserved(name)+" : MonoBehaviour",
+			"namespace M",
 			"{",
-				iff(type != UNIT),
-				"public "+unity(type)+" Value;",
-				end,
-
-				iff(type == INPUT),
-				"void Start()",
+				"public class "+unreserved(name)+" : MonoBehaviour",
 				"{",
-					"if (Value != null)",
+					iff(type != UNIT),
+					"public "+unity(type)+" Value;",
+					end,
+
+					iff(type == INPUT),
+					"",
+					"void Start()",
 					"{",
-						"Value.Enable();",
+						"if (Value != null)",
+						"{",
+							"Value.Enable();",
+						"}",
 					"}",
+					end,
 				"}",
-				end,
 			"}"
 		);
 	}
-	
-	
-	
-	private String generate(Function function)
+
+	private String generateSystem(UserFunction function)
 	{
 		namespaces.clear();
 		namespaces.add(UNITY_ENGINE);
-		
-		var statements = all(function.getStatements(), x->code(x), "\n			");
-		
-		return statements;
+		namespaces.add("System.Collections.Generic");
+
+		currentFunction = function;
+
+		var lines = write
+		(
+			"namespace M",
+			"{",
+				"public class "+unreserved(function.getName()),
+				"{",
+					"public void Run(List<GameObject> gameObjects)",
+					"{",
+						foreach(function.getStatements(), s->code(s)),
+					"}",
+				"}",
+			"}"
+		);
+
+		return write
+		(
+			foreach(namespaces, n->"using "+n+";"),
+			"",
+			lines
+		);
 	}
 	
-	private String code(Statement statement)
+	private Object code(Statement statement)
 	{
 		if (statement instanceof BindingBlock)
 		{
@@ -355,17 +332,23 @@ public class ClassicUnity
 				}
 				
 				variables.add(a);
-				
-				var result = lines("			",
-				"foreach (var "+a+" in gos)",
-				"{",
-				"	"+all(components, x->"var "+x+"_"+a+" = "+a+".GetComponent<"+component(x)+">();", "\n				"),
-				components.isEmpty() ? "" : "	if ("+all(components, x->x+"_"+a+" != null ", " && ")+"){",
-					"",
-				"   "+currentFunction.getName()+"_"+a+".Add("+a+");",
-				"	"+all(block.getStatements(), x->code(x), "\n				"),
-				components.isEmpty() ? "" : "   }",
-				"}");
+
+				var result = lines
+				(
+					"foreach (var "+a+" in gameObjects)",
+					"{",
+						foreach(components, c->"var "+c+"_"+a+" = "+a+".GetComponent<"+component(c)+">();"),
+						"",
+						iff(!components.isEmpty()),
+						"if ("+foreach(components, c->c+"_"+a+" != null", " && ")+")",
+						"{",
+						end,
+							foreach(block.getStatements(), s->code(s)),
+						iff(!components.isEmpty()),
+						"}",
+						end,
+					"}"
+				);
 
 				variables = stack.pop();
 				
@@ -381,26 +364,30 @@ public class ClassicUnity
 			var block = (Block) statement;
 			var name = block.getName();
 			
-			var result = "";
+			Object result = "";
 			if (library.getBlock(name) == SELECTION)
 			{
 				var condition = code(block.getExpression());
-				result =
-					"\n"+
-					"if ("+condition+")\n"+
-					"{\n"+
-					"	"+all(block.getStatements(),x->code(x), "\n")+"\n"+
-					"}\n";
+				result = lines
+				(
+					"",
+					"if ("+condition+")",
+					"{",
+						foreach(block.getStatements(), s->code(s)),
+					"}"
+				);
 			}
 			else if (library.getBlock(name) == ITERATION)
 			{
 				var condition = code(block.getExpression());
-				result = 
-					"\n"+
-					"while ("+condition+")\n"+
-					"{\n"+
-					"	"+all(block.getStatements(),x->code(x), "\n")+"\n"+
-					"}\n";
+				result = lines
+				(
+					"",
+					"while ("+condition+")",
+					"{",
+						foreach(block.getStatements(), s->code(s)),
+					"}"
+				);
 			}
 			variables = stack.pop();
 			return result;
@@ -514,73 +501,73 @@ public class ClassicUnity
 		
 		switch (standard)
 		{
-		case ABS: return "math.abs("+x+")";
-		case ACOS: return "math.acos("+x+")";
+		case ABS: namespaces.add("Unity.Mathematics"); return "math.abs("+x+")";
+		case ACOS: namespaces.add("Unity.Mathematics"); return "math.acos("+x+")";
 		case ADD: return "if ("+y+".GetComponent<"+simpleComponent(x)+">() == null){"+y+".AddComponent<"+simpleComponent(x)+">();"+"}";
-		case ADDITION: return x+"+"+y;
-		case AND: return x+"&&"+y;
-		case ASIN: return "math.asin("+x+")";
-		case ASSIGNMENT: return x+"="+y;
-		case ATAN: return "math.atan("+x+")";
-		case CEIL: return "math.ceil("+x+")";
-		case CLAMP: return "math.clamp("+x+","+y+".x,"+y+".y)";
-		case COS: return "math.cos("+x+")";
-		case CREATE: return "Instantiate<GameObject>("+x+")";
-		case CROSS: return "((Vector3)math.cross("+x+","+y+"))";
-		case DESTROY: return "Destroy("+x+")";
-		case DISTANCE: return "math.distance("+x+","+y+")";
-		case DIVISION: return x+"/"+y;
-		case DOT: return "math.dot("+x+","+y+")";
-		case EQUAL: return x+"=="+y;
-		case EXP: return "math.exp("+x+")";
-		case FLOOR: return "math.floor("+x+")";
-		case FRACTIONALPART: return "math.frac("+x+")";
-		case GREATER: return x+">"+y;
-		case GREATEROREQUAL: return x+">="+y;
+		case ADDITION: return x+" + "+y;
+		case AND: return x+" && "+y;
+		case ASIN: namespaces.add("Unity.Mathematics"); return "math.asin("+x+")";
+		case ASSIGNMENT: return x+" = "+y;
+		case ATAN: namespaces.add("Unity.Mathematics"); return "math.atan("+x+")";
+		case CEIL: namespaces.add("Unity.Mathematics"); return "math.ceil("+x+")";
+		case CLAMP: namespaces.add("Unity.Mathematics"); return "math.clamp("+x+", "+y+".x, "+y+".y)";
+		case COS: namespaces.add("Unity.Mathematics"); return "math.cos("+x+")";
+		case CREATE: return "GameObject.Instantiate<GameObject>("+x+")";
+		case CROSS: namespaces.add("Unity.Mathematics"); return "((Vector3)math.cross("+x+","+y+"))";
+		case DESTROY: return "GameObject.Destroy("+x+")";
+		case DISTANCE: namespaces.add("Unity.Mathematics"); return "math.distance("+x+", "+y+")";
+		case DIVISION: return x+" / "+y;
+		case DOT: namespaces.add("Unity.Mathematics"); return "math.dot("+x+", "+y+")";
+		case EQUAL: return x+" == "+y;
+		case EXP: namespaces.add("Unity.Mathematics"); return "math.exp("+x+")";
+		case FLOOR: namespaces.add("Unity.Mathematics"); return "math.floor("+x+")";
+		case FRACTIONALPART: namespaces.add("Unity.Mathematics"); return "math.frac("+x+")";
+		case GREATER: return x+" > "+y;
+		case GREATEROREQUAL: return x+" >= "+y;
 		case HALT: return "#if UNITY_EDITOR\nUnityEditor.EditorApplication.isPlaying = false;\n#endif\nApplication.Quit()";
 		case HAS: return "("+y+".GetComponent<"+simpleComponent(x)+">() != null)";
 		case IN: return y+".Contains("+x+")";
-		case INEQUAL: return x+"!="+y;
-		case INTEGERPART: return "math.trunc("+x+")";
-		case INVERSE: return "(1/"+x+")";
-		case LERP: return "math.lerp("+x+","+y+".x,"+y+".y)";
-		case LOG: return "math.log("+x+")";
-		case LOWER: return x+"<"+y;
-		case LOWEROREQUAL: return x+"<="+y;
-		case MULTIPLICATION: return x+"*"+y;
-		case NORM: return "math.length("+x+")";
-		case NORMALIZE: return "((Vector3)math.normalize("+x+"))";
+		case INEQUAL: return x+" != "+y;
+		case INTEGERPART: namespaces.add("Unity.Mathematics"); return "math.trunc("+x+")";
+		case INVERSE: return "(1 / "+x+")";
+		case LERP: namespaces.add("Unity.Mathematics"); return "math.lerp("+x+", "+y+".x, "+y+".y)";
+		case LOG: namespaces.add("Unity.Mathematics"); return "math.log("+x+")";
+		case LOWER: return x+" < "+y;
+		case LOWEROREQUAL: return x+" <= "+y;
+		case MULTIPLICATION: return x+" * "+y;
+		case NORM: namespaces.add("Unity.Mathematics"); return "math.length("+x+")";
+		case NORMALIZE: namespaces.add("Unity.Mathematics"); return "((Vector3)math.normalize("+x+"))";
 		case NOT: return "!"+x;
-		case OR: return x+"||"+y;
+		case OR: return x+" || "+y;
 		case PLAY_ONCE: return x+".GetComponent<AudioSource>().PlayOneShot("+y+")";
-		case POW: return "math.pow("+x+","+y+")";
-		case PROPORTIONAL: return "math.remap("+x+", "+y+".x, "+y+".y, "+z+".x, "+z+".y)";
-		case RANDOM: return "UnityEngine.Random.Range("+x+".x,"+x+".y)";
+		case POW: namespaces.add("Unity.Mathematics"); return "math.pow("+x+", "+y+")";
+		case PROPORTIONAL: namespaces.add("Unity.Mathematics"); return "math.remap("+x+", "+y+".x, "+y+".y, "+z+".x, "+z+".y)";
+		case RANDOM: return "UnityEngine.Random.Range("+x+".x, "+x+".y)";
 		case READ_NUMBER: return x+".ReadValue<float>()";
 		case READ_TRIGGERED: return x+".triggered";
 		case READ_VECTOR: return x+".ReadValue<Vector2>()";
 		case RECIPROCAL: return "-"+x;
-		case REFLECT: return "((Vector3)math.reflect("+x+","+y+"))";
-		case REFRACT: return "((Vector3)math.refract("+x+","+y+", "+z+"))";
-		case REMOVE: return "if ("+y+".GetComponent<"+simpleComponent(x)+">() != null){ Destroy("+y+".GetComponent<"+simpleComponent(x)+">());}";
-		case ROUND: return "math.round("+x+")";
-		case SET_COLOR: return x+".SetColor("+y+","+z+")";
-		case SET_NUMBER: return x+".SetFloat("+y+","+z+")";
+		case REFLECT: namespaces.add("Unity.Mathematics"); return "((Vector3)math.reflect("+x+", "+y+"))";
+		case REFRACT: namespaces.add("Unity.Mathematics"); return "((Vector3)math.refract("+x+", "+y+", "+z+"))";
+		case REMOVE: return "if ("+y+".GetComponent<"+simpleComponent(x)+">() != null){ GameObject.Destroy("+y+".GetComponent<"+simpleComponent(x)+">());}";
+		case ROUND: namespaces.add("Unity.Mathematics"); return "math.round("+x+")";
+		case SET_COLOR: return x+".SetColor("+y+", "+z+")";
+		case SET_NUMBER: return x+".SetFloat("+y+", "+z+")";
 		case SET_TRIGGER: return x+".GetComponent<Animator>().SetTrigger("+y+")";
-		case SIGN: return "math.sign("+x+")";
-		case SIN: return "math.sin("+x+")";
+		case SIGN: namespaces.add("Unity.Mathematics"); return "math.sign("+x+")";
+		case SIN: namespaces.add("Unity.Mathematics"); return "math.sin("+x+")";
 		case SIZE: return x+".Count()";
-		case SQRT: return "math.sqrt("+x+")";
+		case SQRT: namespaces.add("Unity.Mathematics"); return "math.sqrt("+x+")";
 		case IN_STATE: return x+".GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("+y+")";
-		case SUBTRACTION: return x+"-"+y;
-		case TAN: return "math.tan("+x+")";
-		case UNLERP: return "math.unlerp("+x+","+y+".x,"+y+".y)";
+		case SUBTRACTION: return x+" - "+y;
+		case TAN: namespaces.add("Unity.Mathematics"); return "math.tan("+x+")";
+		case UNLERP: namespaces.add("Unity.Mathematics"); return "math.unlerp("+x+", "+y+".x, "+y+".y)";
 		case WRITE: return "if (Debug.isDebugBuild){ Debug.Log("+x+"); }";
 		case WRITEERROR: return "if (Debug.isDebugBuild){ Debug.LogError("+x+"); }";
 		case WRITE_WARNING: return "if (Debug.isDebugBuild){ Debug.LogWarning("+x+"); }";
 		case SCREENSHOT: return "ScreenCapture.CaptureScreenshot((System.DateTime.Now+\".png\").Replace(\"/\", \"-\"), 1)";
-		case XYZ: return "new Vector3("+x+","+y+","+z+")";
-		case OVERLAPS: return x+".GetComponents<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox((x as BoxCollider).bounds.center, Vector3.Scale((x as BoxCollider).size/2,"+x+".transform.lossyScale), "+x+".transform.rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere((x as SphereCollider).bounds.center, (x as SphereCollider).radius*Mathf.Max("+x+".transform.lossyScale.x, Mathf.Max("+x+".transform.lossyScale.y, "+x+".transform.lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject).ToList()";
+		case XYZ: return "new Vector3("+x+", "+y+", "+z+")";
+		case OVERLAPS: namespaces.add("System.Linq"); namespaces.add("System"); return x+".GetComponents<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox((x as BoxCollider).bounds.center, Vector3.Scale((x as BoxCollider).size/2,"+x+".transform.lossyScale), "+x+".transform.rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere((x as SphereCollider).bounds.center, (x as SphereCollider).radius*Mathf.Max("+x+".transform.lossyScale.x, Mathf.Max("+x+".transform.lossyScale.y, "+x+".transform.lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject).ToList()";
 		case TO_NUMBER3: return x+".eulerAngles";
 		case TO_QUATERNION: return "Quaternion.Euler("+x+".x, "+x+".y, "+x+".z)";
 		case ADD_FORCE: return x+".GetComponent<Rigidbody>().AddForce("+y+")";
@@ -592,14 +579,14 @@ public class ClassicUnity
 		case GET_NUMBER: return x+".GetFloat("+y+")";
 		case GET_TEXTURE: return x+".GetTexture("+y+")";
 		case SET_INTEGER: return x+".SetInt("+y+", (int)"+z+")";
-		case SET_KEYWORD: return "if ("+z+"){ "+x+".EnableKeyword("+y+");}else{ "+x+".DisableKeyword("+y+");}";
+		case SET_KEYWORD: return "if ("+z+"){ "+x+".EnableKeyword("+y+"); }else{ "+x+".DisableKeyword("+y+"); }";
 		case SET_TEXTURE: return x+".SetTexture("+y+", "+z+")";
-		case DEGREES: return "math.degrees("+x+")";
-		case MAX: return "math.max("+x+", "+y+")";
-		case MIN: return "math.min("+x+", "+y+")";
-		case RADIANS: return "math.radians("+x+")";
-		case SLERP: return "math.slerp("+x+", "+y+", "+z+")";
-		case STEP: return "math.step("+x+", "+y+")";
+		case DEGREES: namespaces.add("Unity.Mathematics"); return "math.degrees("+x+")";
+		case MAX: namespaces.add("Unity.Mathematics"); return "math.max("+x+", "+y+")";
+		case MIN: namespaces.add("Unity.Mathematics"); return "math.min("+x+", "+y+")";
+		case RADIANS: namespaces.add("Unity.Mathematics"); return "math.radians("+x+")";
+		case SLERP: namespaces.add("Unity.Mathematics"); return "math.slerp("+x+", "+y+", "+z+")";
+		case STEP: namespaces.add("Unity.Mathematics"); return "math.step("+x+", "+y+")";
 		case BREAKPOINT: return "Debug.Break()";
 		case PAUSE: return x+".GetComponent<AudioSource>().Pause()";
 		case PLAY: return x+".GetComponent<AudioSource>().Play()";
@@ -607,16 +594,16 @@ public class ClassicUnity
 		case UNPAUSE: return x+".GetComponent<AudioSource>().UnPause()";
 		case VIEWPORT_TO_WORLD: return "Camera.main.ViewportToWorldPoint("+x+")";
 		case WORLD_TO_VIEWPORT: return "Camera.main.WorldToViewportPoint("+x+")";
-		case SCREEN_OVERLAPS: return "Physics.RaycastAll(Camera.main.ScreenPointToRay("+x+")).Select(x=>x.transform.gameObject)";
+		case SCREEN_OVERLAPS: namespaces.add("System.Linq"); return "Physics.RaycastAll(Camera.main.ScreenPointToRay("+x+")).Select(x=>x.transform.gameObject)";
 		case X: return x+".x";
 		case Y: return x+".y";
 		case Z: return x+".z";
 		case OVER: return "(EventSystem.current.currentSelectedGameObject == "+x+")";
 		case TO_NUMBER: return "float.Parse("+x+", System.Globalization.CultureInfo.InvariantCulture)";
 		case TO_STRING: return x+".ToString()";
-		case IS_NEGATIVE: return "("+x+"< 0)";
-		case IS_POSITIVE: return "("+x+"> 0)";
-		case IS_ZERO: return "("+x+"== 0)";
+		case IS_NEGATIVE: return "("+x+" < 0)";
+		case IS_POSITIVE: return "("+x+" > 0)";
+		case IS_ZERO: return "("+x+" == 0)";
 		case ACTIVATE_PARAMETER: return x+".GetComponent<Animator>().SetBool("+y+", true)";
 		case DEACTIVATE_PARAMETER: return x+".GetComponent<Animator>().SetBool("+y+", false)";
 		case PLAY_ANIMATION: return x+".GetComponent<Animator>().Play("+y+")";
@@ -722,6 +709,20 @@ public class ClassicUnity
 		}
 		return unreserved(name);
 	}
+
+	private String typeOf(String component)
+	{
+		var standard = library.getComponent(component);
+		if (standard != null)
+		{
+			return unity(standard.getType());
+		}
+		else
+		{
+			var user = game.getComponents().get(component);
+			return unity(user);
+		}
+	}
 	
 	private String component(String name)
 	{
@@ -792,18 +793,18 @@ public class ClassicUnity
 			case DISPLAY: return "Camera";
 			case CULLING: return "Camera";
 			case ORTHOGRAPHIC_SIZE: return "Camera";
-			case FONT: return "Text";
-			case IMAGE: return "RawImage";
-			case IMAGE_COLOR: return "RawImage";
-			case IMAGE_MATERIAL: return "RawImage";
-			case SLIDER_VALUE: return "Slider";
-			case TEXT: return "Text";
-			case TEXTFIELD_VALUE: return "InputField";
-			case TEXT_COLOR: return "Text";
-			case TEXT_MATERIAL: return "Text";
-			case TOGGLED: return "Toggle";
-			case ANCHOR_MIN: return "RectTransform";
-			case ANCHOR_MAX: return "RectTransform";
+			case FONT: namespaces.add("UnityEngine.UI"); return "Text";
+			case IMAGE: namespaces.add("UnityEngine.UI"); return "RawImage";
+			case IMAGE_COLOR: namespaces.add("UnityEngine.UI"); return "RawImage";
+			case IMAGE_MATERIAL: namespaces.add("UnityEngine.UI"); return "RawImage";
+			case SLIDER_VALUE: namespaces.add("UnityEngine.UI"); return "Slider";
+			case TEXT: namespaces.add("UnityEngine.UI"); return "Text";
+			case TEXTFIELD_VALUE: namespaces.add("UnityEngine.UI"); return "InputField";
+			case TEXT_COLOR: namespaces.add("UnityEngine.UI"); return "Text";
+			case TEXT_MATERIAL: namespaces.add("UnityEngine.UI"); return "Text";
+			case TOGGLED: namespaces.add("UnityEngine.UI"); return "Toggle";
+			case ANCHOR_MIN: namespaces.add("UnityEngine.UI"); return "RectTransform";
+			case ANCHOR_MAX: namespaces.add("UnityEngine.UI"); return "RectTransform";
 			}
 		}
 		return "undefined";

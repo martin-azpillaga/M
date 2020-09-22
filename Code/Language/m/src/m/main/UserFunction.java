@@ -11,14 +11,14 @@ import java.util.Map;
 
 import org.eclipse.xtext.EcoreUtil2;
 
-import m.library.types.Type;
+import m.library.types.FunctionType;
 
 public class UserFunction extends FunctionImpl
 {
-    Type type;
+    FunctionType type;
     Map<String,HashMap<String,Boolean>> queries;
 
-    public UserFunction(Function function, Type type)
+    public UserFunction(Function function, FunctionType type)
     {
         this.name = function.getName();
         this.parameters = function.getParameters();
@@ -27,7 +27,7 @@ public class UserFunction extends FunctionImpl
         collectQueries();
     }
 
-    public Type getType()
+    public FunctionType getType()
     {
         return type;
     }
