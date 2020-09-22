@@ -73,6 +73,9 @@ public class ClassicUnity
 	
 	private static final String UNITY_ENGINE = "UnityEngine";
 	private static final String UNITY_ENGINE_UI = "UnityEngine.UI";
+
+
+
 	public void generate(Game game, IFileSystemAccess2 fileSystem)
 	{
 		this.game = game;
@@ -293,26 +296,28 @@ public class ClassicUnity
 	{
 		namespaces.clear();
 		namespaces.add(UNITY_ENGINE);
-		
-		var field = type != UNIT? "public "+ unity(type) + " Value;" : "";
-		var extra = "";
-		if (type == INPUT)
-		{
-			extra = "void Start() {if (Value != null) {Value.Enable();}}";
-		}
-		return
-				lines("",
-				all(namespaces,x->"using "+x+";", "\n"),
-				"",
-				"namespace M",
+
+		return write
+		(
+			foreach(namespaces, n->"using "+n+";"),
+			"",
+			"public class "+unreserved(name)+" : MonoBehaviour",
+			"{",
+				iff(type != UNIT),
+				"public "+unity(type)+" Value;",
+				end,
+
+				iff(type == INPUT),
+				"void Start()",
 				"{",
-				"    public class "+unreserved(name)+" : MonoBehaviour",
-				"    {",
-				"        "+field,
-				"        "+extra,
-				"    }",
-				"}"
-				);
+					"if (Value != null)",
+					"{",
+						"Value.Enable();",
+					"}",
+				"}",
+				end,
+			"}"
+		);
 	}
 	
 	
