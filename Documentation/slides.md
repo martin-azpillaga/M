@@ -70,6 +70,8 @@ The idea is to use M to write the code and the game engine as the level editor.
 
 Let me open the Unity project. Pong demo ??
 
+Show the system debugger and entity debugger.
+
 M doesn't generate executable games, but game projects that you can edit using
 a game engine.
 

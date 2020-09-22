@@ -12,7 +12,7 @@ public class Writer
 {
 	enum Keyword
 	{
-		YES, NO, OTHERWISE, END;
+		YES, NO, END;
 	}
 
 	public static Keyword end = Keyword.END;
@@ -75,7 +75,18 @@ public class Writer
 					writeLine(element);
 				}
 			}
-			else
+			else if (line instanceof Keyword)
+			{
+				if (line == NO)
+				{
+					skipping = true;
+				}
+				else if (line == END)
+				{
+					skipping = false;
+				}
+			}
+			else if (line != null)
 			{
 				writeLine(line.toString());
 			}
@@ -85,26 +96,8 @@ public class Writer
 
 	private static void writeLine(Object line)
 	{
-		if (line == null)
+		if (skipping)
 		{
-			return;
-		}
-		else if (line.equals(end))
-		{
-			skipping = false;
-			return;
-		}
-		else if (skipping)
-		{
-			return;
-		}
-		else if (line.equals(YES))
-		{
-			return;
-		}
-		else if (line.equals(NO))
-		{
-			skipping = true;
 			return;
 		}
 		else if (line.equals(dedent))

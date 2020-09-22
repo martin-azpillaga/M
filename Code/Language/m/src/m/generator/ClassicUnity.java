@@ -242,17 +242,58 @@ public class ClassicUnity
 
 	private String systemDebugger(List<UserFunction> systems)
 	{
-		return write
+		namespaces.clear();
+
+		var lines = lines
 		(
 			"using UnityEngine;",
+			"using System.Collections.Generic;",
+			"using System.Linq;",
 			"",
 			"namespace M",
 			"{",
 				"public class SystemDebugger : MonoBehaviour",
 				"{",
-					foreach(systems, s->"public bool "+s.getName()+" = true;"),
+					foreach(systems, s->lines
+					(
+						"public bool "+s.getName()+" = true;",
+						foreach(s.getQueries().keySet(), q->"[SerializeField] List<GameObject> "+s.getName()+"_"+q+" = new List<GameObject>();")
+					)),
+					"",
+					"void Update()",
+					"{",
+						foreach(systems, s->lines
+						(
+							foreach(s.getQueries().entrySet(), q->lines
+							(
+								s.getName()+"_"+q.getKey()+".Clear();"
+							))
+						)),
+						"",
+						"var gameObjects = GameObject.FindObjectsOfType<Transform>().Select(x=>x.gameObject).ToList();",
+						"",
+						"foreach (var go in gameObjects)",
+						"{",
+							foreach(systems, s->lines
+							(
+								foreach(s.getQueries().entrySet(), q->lines
+								(
+									"if ("+foreach(q.getValue().keySet(), c->"go.GetComponent<"+component(c)+">()", " && ")+")",
+									"{",
+										s.getName()+"_"+q.getKey()+".Add(go);",
+									"}"
+								))
+							)),
+						"}",
+					"}",
 				"}",
 			"}"
+		);
+
+		return write
+		(
+			foreach(namespaces, n->"using "+n+";"),
+			lines
 		);
 	}
 
@@ -371,7 +412,7 @@ public class ClassicUnity
 						foreach(components, c->"var "+c+"_"+a+" = "+a+".GetComponent<"+component(c)+">();"),
 						"",
 						iff(!components.isEmpty()),
-						"if ("+foreach(components, c->c+"_"+a+" != null", " && ")+")",
+						"if ("+foreach(components, c->c+"_"+a, " && ")+")",
 						"{",
 						end,
 							foreach(block.getStatements(), s->code(s)),
