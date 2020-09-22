@@ -211,6 +211,8 @@ public class Unity
 			namespaces.add("UnityEngine.InputSystem");
 		}
 
+		var classifier = valueType(type) ? "struct" : "class";
+
 		return write
 		(
 			foreach(namespaces, n->"using "+n+";"),
@@ -236,7 +238,26 @@ public class Unity
 					"",
 					"public void Convert(Entity entity, EntityManager manager, GameObjectConversionSystem system)",
 					"{",
+						"manager.AddComponentData(entity, new "+name+"Data {Value  = Value});",
 					"}",
+				"}",
+				"",
+				"public "+classifier+" "+name+"Data : IComponentData",
+				"{",
+					iff(type != UNIT),
+					"public "+unity(type)+" Value;",
+					end,
+
+					iff(type == INPUT),
+					"",
+					"void Start()",
+					"{",
+						"if (Value != null)",
+						"{",
+							"Value.Enable();",
+						"}",
+					"}",
+					end,
 				"}",
 			"}"
 		);
@@ -1019,5 +1040,12 @@ public class Unity
 				file.delete();
 			}
 		}
+	}
+
+	private boolean valueType(Type type)
+	{
+		return type == UNIT || type == NUMBER || type == NUMBER2
+			|| type == NUMBER3 || type == COLOR || type == ENTITY ||
+			type == QUATERNION || type == PROPOSITION;
 	}
 }
