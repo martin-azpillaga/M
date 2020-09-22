@@ -85,16 +85,17 @@ public class ClassicUnity
 		this.stack = new Stack<>();
 		
 		resolvePackages();
-
-		var generatedPath = Paths.get(fileSystem.getURI("").toString(), "Assets", "Code").toString().replace("file:", "");
-		deleteDirectory(new File(generatedPath));
 		
+		clean(Paths.get(fileSystem.getURI("").toString(), "Assets", "Code").toString().replace("file:", ""));
 		
 		
 		for (var component : game.getComponents().entrySet())
 		{
-			fileSystem.generateFile("Assets/Code/Components/"+unreserved(component.getKey())+".cs",
-				generateComponent(component.getKey(), component.getValue()));
+			fileSystem.generateFile
+			(
+				"Assets/Code/Components/"+unreserved(component.getKey())+".cs",
+				generateComponent(component.getKey(), component.getValue())
+			);
 		}
 
 		for (var function : game.getFunctions())
@@ -102,10 +103,19 @@ public class ClassicUnity
 			var type = function.getType();
 			if (type.getParameters() == null && type.getReturnType() == UNIT)
 			{
-				fileSystem.generateFile("Assets/Code/Systems/"+unreserved(function.getName())+".cs",
-					generateSystem(function));
+				fileSystem.generateFile
+				(
+					"Assets/Code/Systems/"+unreserved(function.getName())+".cs",
+					generateSystem(function)
+				);
 			}
 		}
+
+		fileSystem.generateFile
+		(
+			"Assets/Code/Debugging/SystemDebugger.cs",
+			generateSystemDebugger()
+		);
 		/*
 		var systems = lines("",
 		"using UnityEngine;",
@@ -274,6 +284,52 @@ public class ClassicUnity
 						"}",
 					"}",
 					end,
+				"}",
+			"}"
+		);
+	}
+
+	private String generateSystemDebugger()
+	{
+		var systems = new ArrayList<UserFunction>();
+		for (var function : game.getFunctions())
+		{
+			var type = function.getType();
+			if (type.getParameters() == null && type.getReturnType() == UNIT)
+			{
+				systems.add(function);
+			}
+		}
+
+		return write
+		(
+			"using UnityEngine;",
+			"using System.Linq;",
+			"",
+			"namespace M",
+			"{",
+				"public class SystemDebugger : MonoBehaviour",
+				"{",
+					foreach(systems, s->"public bool "+s.getName()+" = true;"),
+					"",
+					foreach(systems, s->s.getName()+" "+s.getName()+"System;"),
+					"",
+					"void Start()",
+					"{",
+						foreach(systems, s->s.getName()+"System = new "+s.getName()+"();"),
+					"}",
+					"void Update()",
+					"{",
+						"var gameObjects = FindObjectsOfType<Transform>().Select(x=>x.gameObject).ToList();",
+						"",
+						foreach(systems, s->lines
+						(
+							"if ("+s.getName()+")",
+							"{",
+								s.getName()+"System.Run(gameObjects);",	
+							"}"
+						)),
+					"}",
 				"}",
 			"}"
 		);
@@ -710,20 +766,6 @@ public class ClassicUnity
 		return unreserved(name);
 	}
 
-	private String typeOf(String component)
-	{
-		var standard = library.getComponent(component);
-		if (standard != null)
-		{
-			return unity(standard.getType());
-		}
-		else
-		{
-			var user = game.getComponents().get(component);
-			return unity(user);
-		}
-	}
-	
 	private String component(String name)
 	{
 		var found = library.getComponent(name);
@@ -941,13 +983,23 @@ public class ClassicUnity
 		return "Undefined";
 	}
 
-	private boolean deleteDirectory(File directoryToBeDeleted) {
-	    File[] allContents = directoryToBeDeleted.listFiles();
-	    if (allContents != null) {
-	        for (File file : allContents) {
-	            deleteDirectory(file);
-	        }
-	    }
-	    return directoryToBeDeleted.delete();
+	private void clean(String root)
+	{
+		var components = new File(root+"/Components");
+		for (var file : components.listFiles())
+		{
+			if (file.getName().endsWith(".cs"))
+			{
+				file.delete();
+			}
+		}
+		var systems = new File(root+"/Systems");
+		for (var file : systems.listFiles())
+		{
+			if (file.getName().endsWith(".cs"))
+			{
+				file.delete();
+			}
+		}
 	}
 }
