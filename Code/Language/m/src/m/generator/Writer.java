@@ -20,9 +20,9 @@ public class Writer
 	}
 	private static boolean skipping;
 
-	public static <T> List<String> foreach(Collection<T> collection, Function<T,String> function)
+	public static <T> List<Object> foreach(Collection<T> collection, Function<T,Object> function)
 	{
-		var list = new ArrayList<String>();
+		var list = new ArrayList<Object>();
 		
 		for (var element : collection)
 		{
@@ -41,14 +41,21 @@ public class Writer
 	public static final String end = "##end##";
 	public static final String indent = "{";
 	public static final String dedent = "}";
-	public static <T> String all(Collection<T> set, java.util.function.Function<T,String> f, String separator)
+	public static <T> String foreach(Collection<T> set, java.util.function.Function<T,String> f, String separator)
 	{
 		return String.join(separator, set.stream().map(f).collect(Collectors.toList()));
 	}
-	
-	public static String lines(String indentation, String... lines)
+
+	public static List<Object> lines(Object... lines)
 	{
-		return String.join("\n"+indentation, lines);
+		var list = new ArrayList<Object>();
+
+		for (var line : lines)
+		{
+			list.add(line);
+		}
+
+		return list;
 	}
 
 	public static String write(Object... lines)
@@ -120,7 +127,7 @@ public class Writer
 			var list = (List<?>) line;
 			for (var element : list)
 			{
-				writeLine((String)element);
+				writeLine(element);
 			}
 		}
 	}
