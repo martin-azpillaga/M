@@ -163,6 +163,8 @@ public class Unity
 			"{",
 				"\"com.unity.entities\": \"0.11.1-preview.4\",",
 				"\"com.unity.inputsystem\": \"1.0.0\",",
+				"\"com.unity.rendering.hybrid\": \"0.5.2-preview.4\"",
+				"\"com.unity.physics\": \"0.4.1-preview\",",
 				"\"com.unity.ugui\": \"1.0.0\",",  
 				"\"com.unity.modules.ai\": \"1.0.0\",",  
 				"\"com.unity.modules.androidjni\": \"1.0.0\",",  
@@ -276,6 +278,7 @@ public class Unity
 		var lines = lines
 		(
 			"using UnityEngine;",
+			"using Unity.Entities;",
 			"using System.Collections.Generic;",
 			"using System.Linq;",
 			"",
@@ -283,6 +286,8 @@ public class Unity
 			"{",
 				"public class SystemDebugger : MonoBehaviour",
 				"{",
+					"public bool dataOriented;",
+					"",
 					foreach(systems, s->lines
 					(
 						"public bool "+s.getName()+" = true;",
@@ -291,6 +296,21 @@ public class Unity
 						"[Space]",
 						end
 					)),
+					"",
+					"void Start()",
+					"{",
+						"if (dataOriented)",
+						"{",
+							"var gameObjects = GameObject.FindObjectsOfType<Transform>();",
+							"foreach (var t in gameObjects)",
+							"{",
+								"if (t.gameObject.name != \"New Game Object\")",
+								"{",
+									"t.gameObject.AddComponent<ConvertToEntity>();",
+								"}",
+							"}",
+						"}",
+					"}",
 					"",
 					"void Update()",
 					"{",
