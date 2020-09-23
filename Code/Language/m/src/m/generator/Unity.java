@@ -108,6 +108,11 @@ public class Unity
 					"Assets/Code/Systems/"+unreserved(function.getName())+".cs",
 					generateSystem(function)
 				);
+				fileSystem.generateFile
+				(
+					"Assets/Code/Performance/Systems/"+unreserved(function.getName())+"Jobified.cs",
+					generateJobifiedSystem(function)
+				);
 			}
 		}
 
@@ -376,8 +381,7 @@ public class Unity
 						(
 							foreach(s.getQueries().keySet(), q->"{"+s.getName()+"_"+q+", new List<Type>{"+foreach(s.getQueries().get(q).keySet(),c->"typeof("+component(c)+")",", ")+"}},")
 						)),
-					"}",
-					";",
+					"};",
 					"int selected;",
 					"",
 					"public override void OnInspectorGUI()",
@@ -542,33 +546,33 @@ public class Unity
 					"Entities.ForEach((RectTransform rectTransform) =>",
 					"{",
 						"AddHybridComponent(rectTransform);",
-					"}",");",
+					"});",
 					"Entities.ForEach((CanvasScaler canvasScaler) =>",
 					"{",
 						"AddHybridComponent(canvasScaler);",
-					"}",");",
+					"});",
 					"Entities.ForEach((GraphicRaycaster graphicRaycaster) =>",
 					"{",
 						"AddHybridComponent(graphicRaycaster);",
-					"}",");",
+					"});",
 					"Entities.ForEach((CanvasRenderer canvasRenderer) =>",
 					"{",
 						"AddHybridComponent(canvasRenderer);",
-					"}",");",
+					"});",
 					"Entities.ForEach((Camera camera) =>",
 					"{",
 						"AddHybridComponent(camera);",
-					"}",");",
+					"});",
 					"Entities.ForEach((Canvas canvas) =>",
 					"{",
 						"AddHybridComponent(canvas);",
 						"DstEntityManager.SetComponentData(GetPrimaryEntity(canvas), new Translation{Value = Vector3.zero});",
-					"}",");",
+					"});",
 					"Entities.ForEach((Text text) =>",
 					"{",
 						"AddHybridComponent(text);",
 						"parents.Add(GetPrimaryEntity(text), GetPrimaryEntity(text.GetComponent<RectTransform>().parent));",
-					"}",");",
+					"});",
 				"}",
 			"}"
 		);
@@ -617,6 +621,80 @@ public class Unity
 		);
 	}
 
+	private String generateJobifiedSystem(UserFunction function)
+	{
+		var constants = new HashMap<String,Type>();
+		
+		var values = EcoreUtil2.getAllContentsOfType(function, Value.class);
+		for (var value : values)
+		{
+			var standard = library.getValue(value.getName());
+			if (standard != null)
+			{
+				constants.put(value.getName(), standard.getType());
+			}
+		}
+
+		namespaces.clear();
+		namespaces.add("UnityEngine");
+		namespaces.add("Unity.Entities");
+		namespaces.add("Unity.Jobs");
+		namespaces.add("Unity.Collections");
+		namespaces.add("Unity.Burst");
+		namespaces.add("static Unity.Collections.Allocator");
+		namespaces.add("static Unity.Entities.ComponentType");
+		
+		currentFunction = function;
+
+		var lines = lines
+		(
+			"namespace M",
+			"{",
+				"public class "+unreserved(function.getName())+"Jobified : SystemBase",
+				"{",
+					foreach(function.getQueries().keySet(), q->"EntityQuery "+q+";"),
+					"",
+					"protected override void OnCreate()",
+					"{",
+						foreach(function.getQueries().entrySet(), e->
+						e.getKey()+" = GetEntityQuery("+foreach(e.getValue().entrySet(), c->"Read"+(c.getValue()?"Write":"Only")+"<"+jobComponent(c.getKey())+">()", ", ")+");"),
+					"}",
+					"",
+					"protected override void OnUpdate()",
+					"{",
+						"var job = new RegularJob",
+						"{",
+							"manager = EntityManager,",
+							foreach(constants.keySet(), c->c+" = "+variable(c)+","),
+							foreach(function.getQueries().keySet(), q->"chunks_"+q+" = "+q+".CreateArchetypeChunkArray(TempJob),"),
+						"};",
+						"",
+						"job.Schedule();",
+					"}",
+					"",
+					"[BurstCompile]",
+					"protected struct RegularJob : IJob",
+					"{",
+						"public EntityManager manager;",
+						foreach(constants.entrySet(), e->"public "+unity(e.getValue())+" "+e.getKey()+";"),
+						foreach(function.getQueries().keySet(), q->"[DeallocateOnJobCompletion] public NativeArray<ArchetypeChunk> chunks_"+q+";"),
+						"",
+						"public void Execute()",
+						"{",
+						"}",
+					"}",
+				"}",
+			"}"
+		);
+
+		return write
+		(
+			foreach(namespaces, n->"using "+n+";"),
+			"",
+			lines
+		);
+	}
+
 	private String generateSystem(UserFunction function)
 	{
 		namespaces.clear();
@@ -625,7 +703,7 @@ public class Unity
 
 		currentFunction = function;
 
-		var lines = write
+		var lines = lines
 		(
 			"namespace M",
 			"{",
@@ -1049,6 +1127,92 @@ public class Unity
 	}
 
 	private String component(String name)
+	{
+		var found = library.getComponent(name);
+		if (name.equals("Animator"))
+		{
+			return "Animator";
+		}
+		else if (name.equals("AudioSource"))
+		{
+			return "AudioSource";
+		}
+		else if (name.equals("Rigidbody"))
+		{
+			return "Rigidbody";
+		}
+		
+		if (found == null)
+		{
+			for (var i = 0; i < csharpReserved.length; i++)
+			{
+				if (csharpReserved[i].equals(name))
+				{
+					return "_"+name;
+				}
+			}
+			return "M."+name;
+		}
+		else
+		{
+			switch (found)
+			{
+			case VELOCITY: return "Rigidbody";
+			case POSITION: return "Transform";
+			case ANGULAR_VELOCITY: return "Rigidbody";
+			case AUDIOCLIP: return "AudioSource";
+			case BACKGROUND: return "Camera";
+			case EMISSION: return "Light";
+			case EXTENTS: return "BoxCollider";
+			case FAR: return "Camera";
+			case FOV: return "Camera";
+			case FRICTION: return "Collider";
+			case INERTIA: return "Rigidbody";
+			case INTENSITY: return "Light";
+			case LOOP: return "AudioSource";
+			case MASS: return "Rigidbody";
+			case MATERIAL: return "MeshRenderer";
+			case MESH: return "MeshFilter";
+			case NEAR: return "Camera";
+			case NO_COLLISION_RESPONSE: return "Collider";
+			case PARENT: return "Transform";
+			case PITCH: return "AudioSource";
+			case RADIUS: return "SphereCollider";
+			case RANGE: return "Light";
+			case RENDER_TEXTURE: return "Camera";
+			case RESTITUTION: return "Collider";
+			case ROTATION: return "Transform";
+			case SCALE: return "Transform";
+			case SPOT_ANGLE: return "Light";
+			case VIEWPORT: return "Camera";
+			case VOLUME: return "AudioSource";
+			case BOX_CENTER: return "BoxCollider";
+			case SPHERE_CENTER: return "SphereCollider";
+			case SHADOW_RECEIVER: return "Renderer";
+			case KINEMATIC: return "Rigidbody";
+			case INDIRECT_MULTIPLIER: return "Light";
+			case COOKIE: return "Light";
+			case DISPLAY: return "Camera";
+			case CULLING: return "Camera";
+			case ORTHOGRAPHIC_SIZE: return "Camera";
+			case FONT: namespaces.add("UnityEngine.UI"); return "Text";
+			case IMAGE: namespaces.add("UnityEngine.UI"); return "RawImage";
+			case IMAGE_COLOR: namespaces.add("UnityEngine.UI"); return "RawImage";
+			case IMAGE_MATERIAL: namespaces.add("UnityEngine.UI"); return "RawImage";
+			case SLIDER_VALUE: namespaces.add("UnityEngine.UI"); return "Slider";
+			case TEXT: namespaces.add("UnityEngine.UI"); return "Text";
+			case TEXTFIELD_VALUE: namespaces.add("UnityEngine.UI"); return "InputField";
+			case TEXT_COLOR: namespaces.add("UnityEngine.UI"); return "Text";
+			case TEXT_MATERIAL: namespaces.add("UnityEngine.UI"); return "Text";
+			case TOGGLED: namespaces.add("UnityEngine.UI"); return "Toggle";
+			case ANCHOR_MIN: namespaces.add("UnityEngine.UI"); return "RectTransform";
+			case ANCHOR_MAX: namespaces.add("UnityEngine.UI"); return "RectTransform";
+			}
+		}
+		return "undefined";
+	}
+
+	private String jobComponent(String name)
 	{
 		var found = library.getComponent(name);
 		if (name.equals("Animator"))

@@ -105,7 +105,7 @@ public class Writer
 		{
 			return;
 		}
-		else if (line.equals(dedent))
+		else if (line instanceof String && ((String)line).startsWith(dedent))
 		{
 			indentation--;
 		}
