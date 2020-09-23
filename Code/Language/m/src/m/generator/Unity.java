@@ -128,6 +128,18 @@ public class Unity
 			"Assets/Code/Debugging/EntityDebugger.cs",
 			entityDebugger(systems)
 		);
+
+		fileSystem.generateFile
+		(
+			"Assets/Code/Performance/ConversionSystem.cs",
+			conversionSystem()
+		);
+
+		fileSystem.generateFile
+		(
+			"Assets/Code/Performance/FixRectTransforms.cs",
+			fixRectTransforms()
+		);
 	}
 	
 	private void resolvePackages()
@@ -163,7 +175,7 @@ public class Unity
 			"{",
 				"\"com.unity.entities\": \"0.11.1-preview.4\",",
 				"\"com.unity.inputsystem\": \"1.0.0\",",
-				"\"com.unity.rendering.hybrid\": \"0.5.2-preview.4\"",
+				"\"com.unity.rendering.hybrid\": \"0.5.2-preview.4\",",
 				"\"com.unity.physics\": \"0.4.1-preview\",",
 				"\"com.unity.ugui\": \"1.0.0\",",  
 				"\"com.unity.modules.ai\": \"1.0.0\",",  
@@ -235,7 +247,7 @@ public class Unity
 
 					iff(type == INPUT),
 					"",
-					"void Start()",
+					"void Awake()",
 					"{",
 						"if (Value != null)",
 						"{",
@@ -254,17 +266,6 @@ public class Unity
 				"{",
 					iff(type != UNIT),
 					"public "+unity(type)+" Value;",
-					end,
-
-					iff(type == INPUT),
-					"",
-					"void Start()",
-					"{",
-						"if (Value != null)",
-						"{",
-							"Value.Enable();",
-						"}",
-					"}",
 					end,
 				"}",
 			"}"
@@ -516,6 +517,100 @@ public class Unity
 							"UnityEditor.EditorApplication.isPaused = true;",
 							"#endif",
 						"}",
+					"}",
+				"}",
+			"}"
+		);
+	}
+
+	private String conversionSystem()
+	{
+		return write
+		(
+			"using System.Collections.Generic;",
+			"using UnityEngine;",
+			"using Unity.Entities;",
+			"using UnityEngine.UI;",
+			"using Unity.Transforms;",
+			"",
+			"public class ConversionSystem : GameObjectConversionSystem",
+			"{",
+				"public static Dictionary<Entity, Entity> parents = new Dictionary<Entity, Entity>();",
+				"",
+				"protected override void OnUpdate()",
+				"{",
+					"Entities.ForEach((RectTransform rectTransform) =>",
+					"{",
+						"AddHybridComponent(rectTransform);",
+					"}",");",
+					"Entities.ForEach((CanvasScaler canvasScaler) =>",
+					"{",
+						"AddHybridComponent(canvasScaler);",
+					"}",");",
+					"Entities.ForEach((GraphicRaycaster graphicRaycaster) =>",
+					"{",
+						"AddHybridComponent(graphicRaycaster);",
+					"}",");",
+					"Entities.ForEach((CanvasRenderer canvasRenderer) =>",
+					"{",
+						"AddHybridComponent(canvasRenderer);",
+					"}",");",
+					"Entities.ForEach((Camera camera) =>",
+					"{",
+						"AddHybridComponent(camera);",
+					"}",");",
+					"Entities.ForEach((Canvas canvas) =>",
+					"{",
+						"AddHybridComponent(canvas);",
+						"DstEntityManager.SetComponentData(GetPrimaryEntity(canvas), new Translation{Value = Vector3.zero});",
+					"}",");",
+					"Entities.ForEach((Text text) =>",
+					"{",
+						"AddHybridComponent(text);",
+						"parents.Add(GetPrimaryEntity(text), GetPrimaryEntity(text.GetComponent<RectTransform>().parent));",
+					"}",");",
+				"}",
+			"}"
+		);
+	}
+
+	private String fixRectTransforms()
+	{
+		return write
+		(
+			"using UnityEngine;",
+			"using Unity.Entities;",
+			"using Unity.Collections;",
+			"",
+			"namespace M",
+			"{",
+				"public class FixRectTransforms : SystemBase",
+				"{",
+					"EntityQuery query;",
+					"",
+					"protected override void OnCreate()",
+					"{",
+						"query = GetEntityQuery(ComponentType.ReadWrite<RectTransform>());",
+					"}",
+					"",
+					"protected override void OnStartRunning()",
+					"{",
+						"var entities = query.ToEntityArray(Allocator.Temp);",
+						"",
+						"foreach (var entity in entities)",
+						"{",
+							"if (ConversionSystem.parents.ContainsKey(entity))",
+							"{",
+								"EntityManager.GetComponentObject<RectTransform>(entity).SetParent(EntityManager.GetComponentObject<RectTransform>(ConversionSystem.parents[entity]));",
+							"}",
+						"}",
+						"",
+						"entities.Dispose();",
+					"}",
+					"",
+					"protected override void OnUpdate()",
+					"{",
+						"",
 					"}",
 				"}",
 			"}"

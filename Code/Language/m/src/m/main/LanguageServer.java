@@ -407,7 +407,8 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				if (cell.getComponent() == value)
 				{
 					var standard = library.getComponent(value.getName());
-					var info = workspace.game.inference.info(cell);
+
+					var info = workspace.game.inference.infer(cell);
 					var type = Library.ENGLISH.getName(workspace.game.inference.infer(cell));
 
 					if (info == null)
@@ -1062,6 +1063,8 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		{
 			game.functions.add(new UserFunction(function, new FunctionType(null, AtomicType.UNIT)));
 		}
+
+		game.inference = inference;
 
 		workspace.game = game;
 

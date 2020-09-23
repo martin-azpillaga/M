@@ -733,6 +733,8 @@ public enum Library
 		nameToProblem = reverse(problems, problemTypes);
 
 		functionToDescription = forward(functionDescriptions, Function.values());
+		componentToDescription = new HashMap<Component,String>();
+		valueToDescription = new HashMap<Value,String>();
 	}
 	
 	private <A,B> HashMap<A,B> forward(java.util.function.Function<A,B> f, A[] values)
@@ -795,6 +797,8 @@ public enum Library
 
 	public String getDescription(Component component)
 	{
+		if (component == null) return "Component description here";
+
 		return componentToDescription.get(component);
 	}
 
