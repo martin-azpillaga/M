@@ -58,9 +58,8 @@ public class Writer
 		return list;
 	}
 
-	public static String write(Object... lines)
+	public static void process(Object... lines)
 	{
-		builder = new StringBuilder();
 		for (var line : lines)
 		{
 			if (line instanceof String)
@@ -72,7 +71,7 @@ public class Writer
 				var list = (List<?>) line;
 				for (var element : list)
 				{
-					writeLine(element);
+					process(element);
 				}
 			}
 			else if (line instanceof Keyword)
@@ -91,6 +90,12 @@ public class Writer
 				writeLine(line.toString());
 			}
 		}
+	}
+
+	public static String write(Object... lines)
+	{
+		builder = new StringBuilder();
+		process(lines);
 		return builder.toString();
 	}
 
@@ -105,23 +110,12 @@ public class Writer
 			indentation--;
 		}
 		
-		if (line instanceof String)
+		indentation();
+		builder.append(line);
+		builder.append("\n");
+		if (line.equals(indent))
 		{
-			indentation();
-			builder.append(line);
-			builder.append("\n");
-			if (line.equals(indent))
-			{
-				indentation++;
-			}
-		}
-		else if (line instanceof List<?>)
-		{
-			var list = (List<?>) line;
-			for (var element : list)
-			{
-				writeLine(element);
-			}
+			indentation++;
 		}
 	}
 

@@ -113,14 +113,20 @@ public class Unity
 
 		fileSystem.generateFile
 		(
+			"Assets/Code/Main/SystemRunner.cs",
+			systemRunner(systems)
+		);
+
+		fileSystem.generateFile
+		(
 			"Assets/Code/Debugging/SystemDebugger.cs",
 			systemDebugger(systems)
 		);
 
 		fileSystem.generateFile
 		(
-			"Assets/Code/Debugging/SystemRunner.cs",
-			systemRunner(systems)
+			"Assets/Code/Debugging/EntityDebugger.cs",
+			entityDebugger(systems)
 		);
 	}
 	
@@ -280,7 +286,10 @@ public class Unity
 					foreach(systems, s->lines
 					(
 						"public bool "+s.getName()+" = true;",
-						foreach(s.getQueries().keySet(), q->"[SerializeField] List<GameObject> "+s.getName()+"_"+q+" = new List<GameObject>();")
+						foreach(s.getQueries().keySet(), q->"[SerializeField] List<GameObject> "+s.getName()+"_"+q+" = new List<GameObject>();"),
+						iff(!systems.isEmpty() && s != systems.get(systems.size()-1)),
+						"[Space]",
+						end
 					)),
 					"",
 					"void Update()",
@@ -309,6 +318,125 @@ public class Unity
 							)),
 						"}",
 					"}",
+				"}",
+			"}"
+		);
+
+		return write
+		(
+			foreach(namespaces, n->"using "+n+";"),
+			lines
+		);
+	}
+
+	private String entityDebugger(List<UserFunction> systems)
+	{
+		var lines = lines
+		(
+			"using UnityEngine;",
+			"using UnityEditor;",
+			"using System;",
+			"using System.Collections.Generic;",
+			"using static M.Query;",
+			"",
+			"namespace M",
+			"{",
+				"public class EntityDebugger : MonoBehaviour",
+				"{",
+				"}",
+				"",
+				"[CustomEditor(typeof(EntityDebugger))]",
+				"public class EntityDebuggerInspector : Editor",
+				"{",
+					"string[] options = Enum.GetNames(typeof(Query));",
+					"Dictionary<Query, List<Type>> types = new Dictionary<Query, List<Type>>()",
+					"{",
+						foreach(systems, s->lines
+						(
+							foreach(s.getQueries().keySet(), q->"{"+s.getName()+"_"+q+", new List<Type>{"+foreach(s.getQueries().get(q).keySet(),c->"typeof("+component(c)+")",", ")+"}},")
+						)),
+					"}",
+					";",
+					"int selected;",
+					"",
+					"public override void OnInspectorGUI()",
+					"{",
+						"var debugger = (EntityDebugger) target;",
+						"var go = debugger.gameObject;",
+						"",
+						"EditorGUILayout.LabelField(\"Participates in\");",
+						"",
+						"foreach (var query in types.Keys)",
+						"{",
+							"var list = types[query];",
+							"",
+							"var missingComponent = false;",
+							"var i = 0;",
+							"",
+							"while (!missingComponent && i < list.Count)",
+							"{",
+								"var type = list[i];",
+								"if (go.GetComponent(type) == null)",
+								"{",
+									"missingComponent = true;",
+								"}",
+								"i++;",
+							"}",
+							"",
+							"if (!missingComponent)",
+							"{",
+								"var typeNames = \"\";",
+								"foreach (var type in list)",
+								"{",
+									"typeNames += type.Name;",
+									"if (type != list[list.Count-1])",
+									"{",
+										"typeNames += \", \";",
+									"}",
+								"}",
+								"EditorGUILayout.LabelField(query.ToString()+\" : \"+typeNames);",
+							"}",
+						"}",
+						"",
+						"EditorGUILayout.LabelField(\"\");",
+						"",
+						"selected = EditorGUILayout.Popup(\"Select\", selected, options);",
+						"",
+						"EditorGUILayout.LabelField(\"Missing components\");",
+						"",
+						"var selectedQuery = (Query) selected;",
+						"var selectedList = types[selectedQuery];",
+						"",
+						"var missing = \"\";",
+						"foreach (var type in selectedList)",
+						"{",
+							"if (go.GetComponent(type) == null)",
+							"{",
+								"missing += type.Name;",
+								"if (type != selectedList[selectedList.Count-1])",
+								"{",
+									"missing += \", \";",
+								"}",
+							"}",
+						"}",
+						"EditorGUILayout.LabelField(missing);",
+						"",
+						"if (GUILayout.Button(\"Add components\"))",
+						"{",
+							"foreach (var type in selectedList)",
+							"{",
+								"if (go.GetComponent(type) == null)",
+								"{",
+									"go.AddComponent(type);",
+								"}",
+							"}",
+						"}",
+					"}",
+				"}",
+				"",
+				"enum Query",
+				"{",
+					foreach(systems, s->foreach(s.getQueries().keySet(),q->s.getName()+"_"+q+","," ")),
 				"}",
 			"}"
 		);
