@@ -44,6 +44,7 @@ public class Unity
 	
 	Set<String> namespaces = new HashSet<>();
 	UserFunction currentFunction;
+	boolean jobified;
 	HashSet<String> variables;
 	Stack<HashSet<String>> stack;
 	
@@ -93,6 +94,11 @@ public class Unity
 				"Assets/Code/Components/"+unreserved(component.getKey())+".cs",
 				generateComponent(component.getKey(), component.getValue())
 			);
+			fileSystem.generateFile
+			(
+				"Assets/Code/Components/Jobified/"+unreserved(component.getKey())+"Data.cs",
+				generateDataComponent(component.getKey(), component.getValue())
+			);
 		}
 
 		var systems = new ArrayList<UserFunction>();
@@ -102,15 +108,17 @@ public class Unity
 			var type = function.getType();
 			if (type.getParameters() == null && type.getReturnType() == UNIT)
 			{
+				jobified = false;
 				systems.add(function);
 				fileSystem.generateFile
 				(
 					"Assets/Code/Systems/"+unreserved(function.getName())+".cs",
 					generateSystem(function)
 				);
+				jobified = true;
 				fileSystem.generateFile
 				(
-					"Assets/Code/Performance/Systems/"+unreserved(function.getName())+"Jobified.cs",
+					"Assets/Code/Systems/Jobified/"+unreserved(function.getName())+"Jobified.cs",
 					generateJobifiedSystem(function)
 				);
 			}
@@ -230,21 +238,12 @@ public class Unity
 	{
 		namespaces.clear();
 		namespaces.add("UnityEngine");
-		namespaces.add("Unity.Entities");
-		if (type == INPUT)
-		{
-			namespaces.add("UnityEngine.InputSystem");
-		}
 
-		var classifier = valueType(type) ? "struct" : "class";
-
-		return write
+		var lines = lines
 		(
-			foreach(namespaces, n->"using "+n+";"),
-			"",
 			"namespace M",
 			"{",
-				"public class "+unreserved(name)+" : MonoBehaviour, IConvertGameObjectToEntity",
+				"public class "+unreserved(name)+" : MonoBehaviour",
 				"{",
 					iff(type != UNIT),
 					"public "+unity(type)+" Value;",
@@ -260,13 +259,29 @@ public class Unity
 						"}",
 					"}",
 					end,
-					"",
-					"public void Convert(Entity entity, EntityManager manager, GameObjectConversionSystem system)",
-					"{",
-						"manager.AddComponentData(entity, new "+name+"Data {Value  = Value});",
-					"}",
 				"}",
-				"",
+			"}"
+		);
+
+		return write
+		(
+			foreach(namespaces, n->"using "+n+";"),
+			"",
+			lines
+		);
+	}
+
+	private String generateDataComponent(String name, Type type)
+	{
+		namespaces.clear();
+		namespaces.add("Unity.Entities");
+
+		var classifier = valueType(type) ? "struct" : "class";
+
+		var lines = lines
+		(
+			"namespace M",
+			"{",
 				"public "+classifier+" "+name+"Data : IComponentData",
 				"{",
 					iff(type != UNIT),
@@ -274,6 +289,12 @@ public class Unity
 					end,
 				"}",
 			"}"
+		);
+
+		return write
+		(
+			foreach(namespaces, n->"using "+n+";"),
+			lines
 		);
 	}
 
@@ -293,6 +314,7 @@ public class Unity
 				"public class SystemDebugger : MonoBehaviour",
 				"{",
 					"public bool dataOriented;",
+					"public bool multithread;",
 					"",
 					foreach(systems, s->lines
 					(
@@ -485,6 +507,8 @@ public class Unity
 			"{",
 				"public class SystemRunner : SystemBase",
 				"{",
+					"public static bool multithread;",
+					"",
 					foreach(systems, s->s.getName()+" "+s.getName()+";"),
 					"",
 					"protected override void OnCreate()",
@@ -505,6 +529,8 @@ public class Unity
 						"else if (debuggers.Count == 1)",
 						"{",
 							"var debugger = debuggers[0];",
+							"",
+							"multithread = debugger.multithread;",
 							"",
 							foreach(systems, s->lines
 							(
@@ -537,12 +563,26 @@ public class Unity
 			"using UnityEngine.UI;",
 			"using Unity.Transforms;",
 			"",
+			"[UpdateInGroup(typeof(GameObjectAfterConversionGroup))]",
 			"public class ConversionSystem : GameObjectConversionSystem",
 			"{",
 				"public static Dictionary<Entity, Entity> parents = new Dictionary<Entity, Entity>();",
 				"",
 				"protected override void OnUpdate()",
 				"{",
+					"Entities.ForEach((Transform transform) =>",
+					"{",
+						"var entity = GetPrimaryEntity(transform);",
+						"",
+						foreach(game.getComponents().keySet(), c->lines
+						(
+						"var "+unreserved(c)+" = transform.GetComponent<"+component(c)+">();",
+						"if ("+unreserved(c)+")",
+						"{",
+							"DstEntityManager.AddComponentData(entity, new "+component(c)+"Data{ Value = "+unreserved(c)+".Value });",
+						"}"
+						)),
+					"});",
 					"Entities.ForEach((RectTransform rectTransform) =>",
 					"{",
 						"AddHybridComponent(rectTransform);",
@@ -703,7 +743,14 @@ public class Unity
 							foreach(nativeComponents.entrySet(), e->e.getKey()+"Type = GetArchetypeChunkComponentType<"+jobComponent(e.getKey())+">("+e.getValue()+"),"),
 						"};",
 						"",
-						"job.Schedule();",
+						"if (SystemRunner.multithread)",
+						"{",
+							"job.Schedule();",
+						"}",
+						"else",
+						"{",
+							"job.Run();",
+						"}",
 					"}",
 					"",
 					"[BurstCompile]",
@@ -1408,16 +1455,20 @@ public class Unity
 			switch (atomic)
 			{
 			case ENTITY:
+				namespaces.add("UnityEngine");
 				return "GameObject";
 			case NUMBER:
 				return "float";
 			case NUMBER2:
+				namespaces.add("UnityEngine");
 				return "Vector2";
 			case NUMBER3:
+				namespaces.add("UnityEngine");
 				return "Vector3";
 			case PROPOSITION:
 				return "bool";
 			case ENTITY_LIST:
+				namespaces.add("UnityEngine");
 				namespaces.add("System.Collections.Generic");
 				return "List<GameObject>";
 			case INPUT:
@@ -1451,14 +1502,20 @@ public class Unity
 				namespaces.add("UnityEngine.UI");
 				return "Image";
 			case AUDIOCLIP:
+				namespaces.add("UnityEngine");
 				return "AudioClip";
 			case QUATERNION:
+				namespaces.add("UnityEngine");
 				return "Quaternion";
 			case TEXTURE:
+				namespaces.add("UnityEngine");
 				return "Texture";
 			case COLLIDER:
+				namespaces.add("UnityEngine");
 				return "Collider";
-			case RECT: return "Rect";
+			case RECT:	
+				namespaces.add("UnityEngine");
+				return "Rect";
 			}
 			return "Undefined";
 		}
