@@ -144,13 +144,13 @@ public class Unity
 
 		fileSystem.generateFile
 		(
-			"Assets/Code/Performance/ConversionSystem.cs",
+			"Assets/Code/Main/ConversionSystem.cs",
 			conversionSystem()
 		);
 
 		fileSystem.generateFile
 		(
-			"Assets/Code/Performance/FixRectTransforms.cs",
+			"Assets/Code/Fix/FixRectTransforms.cs",
 			fixRectTransforms()
 		);
 	}
@@ -880,7 +880,6 @@ public class Unity
 				var condition = code(block.getExpression());
 				result = lines
 				(
-					"",
 					"if ("+condition+")",
 					"{",
 						foreach(block.getStatements(), s->code(s)),
@@ -892,7 +891,6 @@ public class Unity
 				var condition = code(block.getExpression());
 				result = lines
 				(
-					"",
 					"while ("+condition+")",
 					"{",
 						foreach(block.getStatements(), s->code(s)),
@@ -1013,14 +1011,14 @@ public class Unity
 		{
 		case ABS: namespaces.add("Unity.Mathematics"); return "math.abs("+x+")";
 		case ACOS: namespaces.add("Unity.Mathematics"); return "math.acos("+x+")";
-		case ADD: return "if ("+y+".GetComponent<"+simpleComponent(x)+">() == null){"+y+".AddComponent<"+simpleComponent(x)+">();"+"}";
+		case ADD: return "if (("+y+").GetComponent<"+simpleComponent(x)+">() == null){("+y+").AddComponent<"+simpleComponent(x)+">();"+"}";
 		case ADDITION: return x+" + "+y;
 		case AND: return x+" && "+y;
 		case ASIN: namespaces.add("Unity.Mathematics"); return "math.asin("+x+")";
 		case ASSIGNMENT: return x+" = "+y;
 		case ATAN: namespaces.add("Unity.Mathematics"); return "math.atan("+x+")";
 		case CEIL: namespaces.add("Unity.Mathematics"); return "math.ceil("+x+")";
-		case CLAMP: namespaces.add("Unity.Mathematics"); return "math.clamp("+x+", "+y+".x, "+y+".y)";
+		case CLAMP: namespaces.add("Unity.Mathematics"); return "math.clamp("+x+", ("+y+").x, ("+y+").y)";
 		case COS: namespaces.add("Unity.Mathematics"); return "math.cos("+x+")";
 		case CREATE: return "GameObject.Instantiate<GameObject>("+x+")";
 		case CROSS: namespaces.add("Unity.Mathematics"); return "((Vector3)math.cross("+x+","+y+"))";
@@ -1035,62 +1033,62 @@ public class Unity
 		case GREATER: return x+" > "+y;
 		case GREATEROREQUAL: return x+" >= "+y;
 		case HALT: return "#if UNITY_EDITOR\nUnityEditor.EditorApplication.isPlaying = false;\n#endif\nApplication.Quit()";
-		case HAS: return "("+y+".GetComponent<"+simpleComponent(x)+">() != null)";
+		case HAS: return "(("+y+").GetComponent<"+simpleComponent(x)+">() != null)";
 		case IN: return y+".Contains("+x+")";
 		case INEQUAL: return x+" != "+y;
 		case INTEGERPART: namespaces.add("Unity.Mathematics"); return "math.trunc("+x+")";
-		case INVERSE: return "(1 / "+x+")";
-		case LERP: namespaces.add("Unity.Mathematics"); return "math.lerp("+x+", "+y+".x, "+y+".y)";
+		case INVERSE: return "(1 / ("+x+"))";
+		case LERP: namespaces.add("Unity.Mathematics"); return "math.lerp("+x+", ("+y+").x, ("+y+").y)";
 		case LOG: namespaces.add("Unity.Mathematics"); return "math.log("+x+")";
 		case LOWER: return x+" < "+y;
 		case LOWEROREQUAL: return x+" <= "+y;
 		case MULTIPLICATION: return x+" * "+y;
 		case NORM: namespaces.add("Unity.Mathematics"); return "math.length("+x+")";
 		case NORMALIZE: namespaces.add("Unity.Mathematics"); return "((Vector3)math.normalize("+x+"))";
-		case NOT: return "!"+x;
+		case NOT: return "! ("+x+")";
 		case OR: return x+" || "+y;
-		case PLAY_ONCE: return x+".GetComponent<AudioSource>().PlayOneShot("+y+")";
+		case PLAY_ONCE: return "("+x+").GetComponent<AudioSource>().PlayOneShot("+y+")";
 		case POW: namespaces.add("Unity.Mathematics"); return "math.pow("+x+", "+y+")";
-		case PROPORTIONAL: namespaces.add("Unity.Mathematics"); return "math.remap("+x+", "+y+".x, "+y+".y, "+z+".x, "+z+".y)";
-		case RANDOM: return "UnityEngine.Random.Range("+x+".x, "+x+".y)";
-		case READ_NUMBER: return x+".ReadValue<float>()";
-		case READ_TRIGGERED: return x+".triggered";
-		case READ_VECTOR: return x+".ReadValue<Vector2>()";
-		case RECIPROCAL: return "-"+x;
+		case PROPORTIONAL: namespaces.add("Unity.Mathematics"); return "math.remap("+x+", ("+y+").x, ("+y+").y, ("+z+").x, ("+z+").y)";
+		case RANDOM: return "UnityEngine.Random.Range(("+x+").x, ("+x+").y)";
+		case READ_NUMBER: return "("+x+").ReadValue<float>()";
+		case READ_TRIGGERED: return "("+x+").triggered";
+		case READ_VECTOR: return "("+x+").ReadValue<Vector2>()";
+		case RECIPROCAL: return "-("+x+")";
 		case REFLECT: namespaces.add("Unity.Mathematics"); return "((Vector3)math.reflect("+x+", "+y+"))";
 		case REFRACT: namespaces.add("Unity.Mathematics"); return "((Vector3)math.refract("+x+", "+y+", "+z+"))";
-		case REMOVE: return "if ("+y+".GetComponent<"+simpleComponent(x)+">() != null){ GameObject.Destroy("+y+".GetComponent<"+simpleComponent(x)+">());}";
+		case REMOVE: return "if (("+y+").GetComponent<"+simpleComponent(x)+">() != null){ GameObject.Destroy(("+y+").GetComponent<"+simpleComponent(x)+">());}";
 		case ROUND: namespaces.add("Unity.Mathematics"); return "math.round("+x+")";
-		case SET_COLOR: return x+".SetColor("+y+", "+z+")";
-		case SET_NUMBER: return x+".SetFloat("+y+", "+z+")";
-		case SET_TRIGGER: return x+".GetComponent<Animator>().SetTrigger("+y+")";
+		case SET_COLOR: return "("+x+").SetColor("+y+", "+z+")";
+		case SET_NUMBER: return "("+x+").SetFloat("+y+", "+z+")";
+		case SET_TRIGGER: return "("+x+").GetComponent<Animator>().SetTrigger("+y+")";
 		case SIGN: namespaces.add("Unity.Mathematics"); return "math.sign("+x+")";
 		case SIN: namespaces.add("Unity.Mathematics"); return "math.sin("+x+")";
-		case SIZE: return x+".Count()";
+		case SIZE: return "("+x+").Count()";
 		case SQRT: namespaces.add("Unity.Mathematics"); return "math.sqrt("+x+")";
-		case IN_STATE: return x+".GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("+y+")";
-		case SUBTRACTION: return x+" - "+y;
+		case IN_STATE: return "("+x+").GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("+y+")";
+		case SUBTRACTION: return "("+x+") - ("+y+")";
 		case TAN: namespaces.add("Unity.Mathematics"); return "math.tan("+x+")";
-		case UNLERP: namespaces.add("Unity.Mathematics"); return "math.unlerp("+x+", "+y+".x, "+y+".y)";
+		case UNLERP: namespaces.add("Unity.Mathematics"); return "math.unlerp("+x+", ("+y+").x, ("+y+").y)";
 		case WRITE: return "if (Debug.isDebugBuild){ Debug.Log("+x+"); }";
 		case WRITEERROR: return "if (Debug.isDebugBuild){ Debug.LogError("+x+"); }";
 		case WRITE_WARNING: return "if (Debug.isDebugBuild){ Debug.LogWarning("+x+"); }";
 		case SCREENSHOT: return "ScreenCapture.CaptureScreenshot((System.DateTime.Now+\".png\").Replace(\"/\", \"-\"), 1)";
 		case XYZ: return "new Vector3("+x+", "+y+", "+z+")";
-		case OVERLAPS: namespaces.add("System.Linq"); namespaces.add("System"); return x+".GetComponents<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox((x as BoxCollider).bounds.center, Vector3.Scale((x as BoxCollider).size/2,"+x+".transform.lossyScale), "+x+".transform.rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere((x as SphereCollider).bounds.center, (x as SphereCollider).radius*Mathf.Max("+x+".transform.lossyScale.x, Mathf.Max("+x+".transform.lossyScale.y, "+x+".transform.lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject).ToList()";
-		case TO_NUMBER3: return x+".eulerAngles";
-		case TO_QUATERNION: return "Quaternion.Euler("+x+".x, "+x+".y, "+x+".z)";
-		case ADD_FORCE: return x+".GetComponent<Rigidbody>().AddForce("+y+")";
-		case ADD_TORQUE: return x+".GetComponent<Rigidbody>().AddTorque("+y+")";
-		case CLOSEST_POINT: return "("+x+".GetComponent<Collider>() != null ? "+x+".GetComponent<Collider>().ClosestPoint("+y+")" + ":" + x+".transform.position)";
-		case GET_COLOR: return x+".GetColor("+y+")";
-		case GET_INTEGER: return x+".GetInt("+y+")";
-		case GET_KEYWORD: return x+".IsKeywordEnabled("+y+")";
-		case GET_NUMBER: return x+".GetFloat("+y+")";
-		case GET_TEXTURE: return x+".GetTexture("+y+")";
-		case SET_INTEGER: return x+".SetInt("+y+", (int)"+z+")";
-		case SET_KEYWORD: return "if ("+z+"){ "+x+".EnableKeyword("+y+"); }else{ "+x+".DisableKeyword("+y+"); }";
-		case SET_TEXTURE: return x+".SetTexture("+y+", "+z+")";
+		case OVERLAPS: namespaces.add("System.Linq"); namespaces.add("System"); return "("+x+").GetComponents<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox((x as BoxCollider).bounds.center, Vector3.Scale((x as BoxCollider).size/2,"+x+".transform.lossyScale), "+x+".transform.rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere((x as SphereCollider).bounds.center, (x as SphereCollider).radius*Mathf.Max("+x+".transform.lossyScale.x, Mathf.Max("+x+".transform.lossyScale.y, "+x+".transform.lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject).ToList()";
+		case TO_NUMBER3: return "("+x+").eulerAngles";
+		case TO_QUATERNION: return "Quaternion.Euler(("+x+").x, ("+x+").y, ("+x+").z)";
+		case ADD_FORCE: return "("+x+").GetComponent<Rigidbody>().AddForce("+y+")";
+		case ADD_TORQUE: return "("+x+").GetComponent<Rigidbody>().AddTorque("+y+")";
+		case CLOSEST_POINT: return "(("+x+").GetComponent<Collider>() != null ? "+x+".GetComponent<Collider>().ClosestPoint("+y+")" + ":" + x+".transform.position)";
+		case GET_COLOR: return "("+x+").GetColor("+y+")";
+		case GET_INTEGER: return "("+x+").GetInt("+y+")";
+		case GET_KEYWORD: return "("+x+").IsKeywordEnabled("+y+")";
+		case GET_NUMBER: return "("+x+").GetFloat("+y+")";
+		case GET_TEXTURE: return "("+x+").GetTexture("+y+")";
+		case SET_INTEGER: return "("+x+".SetInt("+y+", (int)("+z+"))";
+		case SET_KEYWORD: return "if ("+z+"){ ("+x+").EnableKeyword("+y+"); }else{ ("+x+").DisableKeyword("+y+"); }";
+		case SET_TEXTURE: return "("+x+").SetTexture("+y+", "+z+")";
 		case DEGREES: namespaces.add("Unity.Mathematics"); return "math.degrees("+x+")";
 		case MAX: namespaces.add("Unity.Mathematics"); return "math.max("+x+", "+y+")";
 		case MIN: namespaces.add("Unity.Mathematics"); return "math.min("+x+", "+y+")";
@@ -1098,25 +1096,25 @@ public class Unity
 		case SLERP: namespaces.add("Unity.Mathematics"); return "math.slerp("+x+", "+y+", "+z+")";
 		case STEP: namespaces.add("Unity.Mathematics"); return "math.step("+x+", "+y+")";
 		case BREAKPOINT: return "Debug.Break()";
-		case PAUSE: return x+".GetComponent<AudioSource>().Pause()";
-		case PLAY: return x+".GetComponent<AudioSource>().Play()";
-		case STOP: return x+".GetComponent<AudioSource>().Stop()";
+		case PAUSE: return "("+x+").GetComponent<AudioSource>().Pause()";
+		case PLAY: return "("+x+").GetComponent<AudioSource>().Play()";
+		case STOP: return "("+x+").GetComponent<AudioSource>().Stop()";
 		case UNPAUSE: return x+".GetComponent<AudioSource>().UnPause()";
 		case VIEWPORT_TO_WORLD: return "Camera.main.ViewportToWorldPoint("+x+")";
 		case WORLD_TO_VIEWPORT: return "Camera.main.WorldToViewportPoint("+x+")";
 		case SCREEN_OVERLAPS: namespaces.add("System.Linq"); return "Physics.RaycastAll(Camera.main.ScreenPointToRay("+x+")).Select(x=>x.transform.gameObject)";
-		case X: return x+".x";
-		case Y: return x+".y";
-		case Z: return x+".z";
+		case X: return "("+x+").x";
+		case Y: return "("+x+").y";
+		case Z: return "("+x+").z";
 		case OVER: return "(EventSystem.current.currentSelectedGameObject == "+x+")";
 		case TO_NUMBER: return "float.Parse("+x+", System.Globalization.CultureInfo.InvariantCulture)";
-		case TO_STRING: return x+".ToString()";
+		case TO_STRING: return "("+x+").ToString()";
 		case IS_NEGATIVE: return "("+x+" < 0)";
 		case IS_POSITIVE: return "("+x+" > 0)";
 		case IS_ZERO: return "("+x+" == 0)";
-		case ACTIVATE_PARAMETER: return x+".GetComponent<Animator>().SetBool("+y+", true)";
-		case DEACTIVATE_PARAMETER: return x+".GetComponent<Animator>().SetBool("+y+", false)";
-		case PLAY_ANIMATION: return x+".GetComponent<Animator>().Play("+y+")";
+		case ACTIVATE_PARAMETER: return "("+x+").GetComponent<Animator>().SetBool("+y+", true)";
+		case DEACTIVATE_PARAMETER: return "("+x+").GetComponent<Animator>().SetBool("+y+", false)";
+		case PLAY_ANIMATION: return "("+x+").GetComponent<Animator>().Play("+y+")";
 		}
 		return "undefined";
 	}
