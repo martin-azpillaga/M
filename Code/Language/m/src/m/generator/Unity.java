@@ -19,6 +19,7 @@ import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 
 import m.library.Library;
+import m.library.symbols.Component;
 import m.library.types.AtomicType;
 import m.library.types.Type;
 import m.m.Application;
@@ -124,6 +125,8 @@ public class Unity
 			}
 		}
 
+		jobified = false;
+
 		fileSystem.generateFile
 		(
 			"Assets/Code/Main/SystemRunner.cs",
@@ -152,6 +155,18 @@ public class Unity
 		(
 			"Assets/Code/Fix/FixRectTransforms.cs",
 			fixRectTransforms()
+		);
+
+		fileSystem.generateFile
+		(
+			"Assets/Code/Fix/textData.cs",
+			generateDataComponent("text", STRING)
+		);
+
+		fileSystem.generateFile
+		(
+			"Assets/Code/Fix/SyncPoint.cs",
+			generateSyncPoint()
 		);
 	}
 	
@@ -590,6 +605,12 @@ public class Unity
 							"parents.Add(GetPrimaryEntity(root), GetPrimaryEntity(root.parent));",
 						"}",
 					"});",
+					"Entities.ForEach((Text text) =>",
+					"{",
+						"var entity = GetPrimaryEntity(text);",
+						"",
+						"DstEntityManager.AddComponentData(entity, new M.textData{Value = text.text});",
+					"});",
 				"}",
 				"",
 				"protected void Process(Component root)",
@@ -666,6 +687,39 @@ public class Unity
 					"protected override void OnUpdate()",
 					"{",
 						"",
+					"}",
+				"}",
+			"}"
+		);
+	}
+
+	private String generateSyncPoint()
+	{
+		return write
+		(
+			"using Unity.Entities;",
+			"using UnityEngine.UI;",
+			"",
+			"namespace M",
+			"{",
+				"[UpdateInGroup(typeof(PresentationSystemGroup))]",
+				"public class SyncPoint : SystemBase",
+				"{",
+					"EntityQuery query;",
+					"",
+					"protected override void OnCreate()",
+					"{",
+						"query = GetEntityQuery(ComponentType.ReadOnly<M.textData>(), ComponentType.ReadWrite<Text>());",
+					"}",
+					"protected override void OnUpdate()",
+					"{",
+						"var datas = query.ToComponentDataArray<M.textData>();",
+						"var texts = query.ToComponentArray<Text>();",
+						"",
+						"for (var i = 0; i < datas.Length; i++)",
+						"{",
+							"texts[i].text = datas[i].Value;",
+						"}",
 					"}",
 				"}",
 			"}"
@@ -984,7 +1038,9 @@ public class Unity
 						return lines
 						(
 							code(atom)+" = "+code+";",
-							component+"Array_"+entity+"[e_"+entity+"] = "+component+"_"+entity+";"
+							iff(valueType(component)),
+							component+"Array_"+entity+"[e_"+entity+"] = "+component+"_"+entity+";",
+							end
 						);
 					}
 					else
@@ -1089,7 +1145,7 @@ public class Unity
 		case GREATEROREQUAL: return x+" >= "+y;
 		case HALT: return "#if UNITY_EDITOR\nUnityEditor.EditorApplication.isPlaying = false;\n#endif\nApplication.Quit()";
 		case HAS: return "(("+y+").GetComponent<"+simpleComponent(x)+">() != null)";
-		case IN: return y+".Contains("+x+")";
+		case IN: return jobified ? "true" : y+".Contains("+x+")";
 		case INEQUAL: return x+" != "+y;
 		case INTEGERPART: namespaces.add("Unity.Mathematics"); return "math.trunc("+x+")";
 		case INVERSE: return "(1 / ("+x+"))";
@@ -1130,7 +1186,7 @@ public class Unity
 		case WRITE_WARNING: return "if (Debug.isDebugBuild){ Debug.LogWarning("+x+"); }";
 		case SCREENSHOT: return "ScreenCapture.CaptureScreenshot((System.DateTime.Now+\".png\").Replace(\"/\", \"-\"), 1)";
 		case XYZ: return "new Vector3("+x+", "+y+", "+z+")";
-		case OVERLAPS: namespaces.add("System.Linq"); namespaces.add("System"); return "("+x+").GetComponents<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox((x as BoxCollider).bounds.center, Vector3.Scale((x as BoxCollider).size/2,"+x+".transform.lossyScale), "+x+".transform.rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere((x as SphereCollider).bounds.center, (x as SphereCollider).radius*Mathf.Max("+x+".transform.lossyScale.x, Mathf.Max("+x+".transform.lossyScale.y, "+x+".transform.lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject).ToList()";
+		case OVERLAPS: namespaces.add("System.Linq"); namespaces.add("System"); return jobified ? "new System.Collections.Generic.List<GameObject>()" : "("+x+").GetComponents<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox((x as BoxCollider).bounds.center, Vector3.Scale((x as BoxCollider).size/2,"+x+".transform.lossyScale), "+x+".transform.rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere((x as SphereCollider).bounds.center, (x as SphereCollider).radius*Mathf.Max("+x+".transform.lossyScale.x, Mathf.Max("+x+".transform.lossyScale.y, "+x+".transform.lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject).ToList()";
 		case TO_NUMBER3: return "("+x+").eulerAngles";
 		case TO_QUATERNION: return "Quaternion.Euler(("+x+").x, ("+x+").y, ("+x+").z)";
 		case ADD_FORCE: return "("+x+").GetComponent<Rigidbody>().AddForce("+y+")";
@@ -1288,6 +1344,10 @@ public class Unity
 		{
 			return "Rigidbody";
 		}
+		if (found == Component.TEXT && jobified)
+		{
+			return "M.textData";
+		}
 		
 		if (found == null)
 		{
@@ -1433,7 +1493,7 @@ public class Unity
 			case IMAGE_COLOR: namespaces.add("UnityEngine.UI"); return "RawImage";
 			case IMAGE_MATERIAL: namespaces.add("UnityEngine.UI"); return "RawImage";
 			case SLIDER_VALUE: namespaces.add("UnityEngine.UI"); return "Slider";
-			case TEXT: namespaces.add("UnityEngine.UI"); return "Text";
+			case TEXT: namespaces.add("UnityEngine.UI"); return "M.textData";
 			case TEXTFIELD_VALUE: namespaces.add("UnityEngine.UI"); return "InputField";
 			case TEXT_COLOR: namespaces.add("UnityEngine.UI"); return "Text";
 			case TEXT_MATERIAL: namespaces.add("UnityEngine.UI"); return "Text";
@@ -1499,7 +1559,7 @@ public class Unity
 			case IMAGE_COLOR: return "color";
 			case IMAGE_MATERIAL: return "material";
 			case SLIDER_VALUE: return "value";
-			case TEXT: return "text";
+			case TEXT: return jobified ? "Value" : "text";
 			case TEXTFIELD_VALUE: return "text";
 			case TEXT_COLOR: return "color";
 			case TEXT_MATERIAL: return "material";
