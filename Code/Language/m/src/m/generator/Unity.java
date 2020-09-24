@@ -775,6 +775,7 @@ public class Unity
 						"",
 						"public void Execute()",
 						"{",
+							foreach(function.getStatements(), s->code(s)),
 						"}",
 					"}",
 				"}",
@@ -843,8 +844,50 @@ public class Unity
 				
 				variables.add(a);
 
-				var result = lines
-				(
+				List<Object> lines = null;
+
+				if (jobified)
+				{
+					var nativeComponents = new HashSet<String>();
+					var hybridComponents = new HashSet<String>();
+
+					for (var component : currentFunction.getQueries().get(a).keySet())
+					{
+						if (valueType(component))
+						{
+							nativeComponents.add(component);
+						}
+						else
+						{
+							hybridComponents.add(component);
+						}
+					}
+
+					lines = lines
+					(
+						"for (var c_"+a+" = 0; c_"+a+" < chunks_"+a+".Length; c_"+a+"++)",
+						"{",
+							"var chunk_"+a+" = chunks_"+a+"[c_"+a+"];",
+							"var entityCount_"+a+" = chunk_"+a+".Count;",
+							"",
+							"var entityArray_"+a+" = chunk_"+a+".GetNativeArray(entityType);",
+							foreach(nativeComponents, c->"var "+c+"Array_"+a+" = chunk_"+a+".GetNativeArray("+c+"Type);"),
+							"",
+							"for (var e_"+a+" = 0; e_"+a+" < entityCount_"+a+"; e_"+a+"++)",
+							"{",
+								"var entity_"+a+" = entityArray_"+a+"[e_"+a+"];",
+								foreach(nativeComponents, c->"var "+c+"_"+a+" = "+c+"Array_"+a+"[e_"+a+"];"),
+								foreach(hybridComponents, c->"var "+c+"_"+a+" = manager.GetComponentObject<"+jobComponent(c)+">(entity_"+a+");"),
+								"",
+								foreach(block.getStatements(), s->code(s)),
+							"}",
+						"}"
+					);
+				}
+				else
+				{
+					lines = lines
+					(
 					"foreach (var "+a+" in gameObjects)",
 					"{",
 						foreach(components, c->"var "+c+"_"+a+" = "+a+".GetComponent<"+component(c)+">();"),
@@ -858,11 +901,12 @@ public class Unity
 						"}",
 						end,
 					"}"
-				);
+					);
+				}
 
 				variables = stack.pop();
 				
-				return result;
+				return lines;
 			}
 			
 			
@@ -935,7 +979,18 @@ public class Unity
 				
 				if (currentFunction.getQueries().containsKey(entity))
 				{
-					return code(atom)+" = "+code+";";
+					if (jobified)
+					{
+						return lines
+						(
+							code(atom)+" = "+code+";",
+							component+"Array_"+entity+"[e_"+entity+"] = "+component+"_"+entity+";"
+						);
+					}
+					else
+					{
+						return code(atom)+" = "+code+";";
+					}
 				}
 				else
 				{
@@ -1401,8 +1456,8 @@ public class Unity
 		{
 			switch (found)
 			{
-			case VELOCITY: return "velocity";
-			case POSITION: return "localPosition";
+			case VELOCITY: return jobified ? "Linear" : "velocity";
+			case POSITION: return jobified ? "Value" : "localPosition";
 			case ANGULAR_VELOCITY: return "angularVelocity";
 			case AUDIOCLIP: return "audioClip";
 			case BACKGROUND: return "backgroundColor";
