@@ -635,6 +635,38 @@ public class Unity
 			}
 		}
 
+		var nativeComponents = new HashMap<String,Boolean>();
+		var hybridComponents = new HashMap<String,Boolean>();
+
+		for (var componentSet : function.getQueries().values())
+		{
+			for (var entry : componentSet.entrySet())
+			{
+				if (valueType(entry.getKey()))
+				{
+					if (nativeComponents.containsKey(entry.getKey()))
+					{
+						nativeComponents.put(entry.getKey(), nativeComponents.get(entry.getKey()) || entry.getValue());
+					}
+					else
+					{
+						nativeComponents.put(entry.getKey(), entry.getValue());
+					}
+				}
+				else
+				{
+					if (hybridComponents.containsKey(entry.getKey()))
+					{
+						hybridComponents.put(entry.getKey(), hybridComponents.get(entry.getKey()) || entry.getValue());
+					}
+					else
+					{
+						hybridComponents.put(entry.getKey(), entry.getValue());
+					}					
+				}
+			}
+		}
+
 		namespaces.clear();
 		namespaces.add("UnityEngine");
 		namespaces.add("Unity.Entities");
@@ -665,8 +697,10 @@ public class Unity
 						"var job = new RegularJob",
 						"{",
 							"manager = EntityManager,",
+							"entityType = GetArchetypeChunkEntityType(),",
 							foreach(constants.keySet(), c->c+" = "+variable(c)+","),
 							foreach(function.getQueries().keySet(), q->"chunks_"+q+" = "+q+".CreateArchetypeChunkArray(TempJob),"),
+							foreach(nativeComponents.entrySet(), e->e.getKey()+"Type = GetArchetypeChunkComponentType<"+jobComponent(e.getKey())+">("+e.getValue()+"),"),
 						"};",
 						"",
 						"job.Schedule();",
@@ -676,8 +710,10 @@ public class Unity
 					"protected struct RegularJob : IJob",
 					"{",
 						"public EntityManager manager;",
+						"public ArchetypeChunkEntityType entityType;",
 						foreach(constants.entrySet(), e->"public "+unity(e.getValue())+" "+e.getKey()+";"),
 						foreach(function.getQueries().keySet(), q->"[DeallocateOnJobCompletion] public NativeArray<ArchetypeChunk> chunks_"+q+";"),
+						foreach(nativeComponents.entrySet(), e->(e.getValue()?"":"[ReadOnly] ")+"public ArchetypeChunkComponentType<"+jobComponent(e.getKey())+"> "+e.getKey()+"Type;"),
 						"",
 						"public void Execute()",
 						"{",
@@ -1225,7 +1261,7 @@ public class Unity
 		}
 		else if (name.equals("Rigidbody"))
 		{
-			return "Rigidbody";
+			return "PhysicsVelocity";
 		}
 		
 		if (found == null)
@@ -1237,15 +1273,15 @@ public class Unity
 					return "_"+name;
 				}
 			}
-			return "M."+name;
+			return "M."+name+"Data";
 		}
 		else
 		{
 			switch (found)
 			{
-			case VELOCITY: return "Rigidbody";
-			case POSITION: return "Transform";
-			case ANGULAR_VELOCITY: return "Rigidbody";
+			case VELOCITY: namespaces.add("Unity.Physics"); return "PhysicsVelocity";
+			case POSITION: namespaces.add("Unity.Transforms"); return "Translation";
+			case ANGULAR_VELOCITY: namespaces.add("Unity.Physics"); return "PhysicsVelocity";
 			case AUDIOCLIP: return "AudioSource";
 			case BACKGROUND: return "Camera";
 			case EMISSION: return "Light";
@@ -1454,5 +1490,19 @@ public class Unity
 		return type == UNIT || type == NUMBER || type == NUMBER2
 			|| type == NUMBER3 || type == COLOR || type == ENTITY ||
 			type == QUATERNION || type == PROPOSITION;
+	}
+
+	private boolean valueType(String component)
+	{
+		var standard = library.getComponent(component);
+
+		if (standard != null)
+		{
+			return valueType(standard.getType());
+		}
+		else
+		{
+			return valueType(game.getComponents().get(component));
+		}
 	}
 }
