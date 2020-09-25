@@ -9,12 +9,16 @@ import static m.library.symbols.Function.*;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
 
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 
@@ -783,6 +787,14 @@ public class Unity
 		
 		currentFunction = function;
 
+		var containsOverlaps = checkOverlaps(function);
+
+		if (containsOverlaps)
+		{
+			namespaces.add("Unity.Physics");
+			namespaces.add("Unity.Physics.Systems");
+		}
+
 		var lines = lines
 		(
 			"namespace M",
@@ -790,11 +802,20 @@ public class Unity
 				"public class "+unreserved(function.getName())+"Jobified : SystemBase",
 				"{",
 					foreach(function.getQueries().keySet(), q->"EntityQuery "+q+";"),
+					
+					iff(containsOverlaps),
+					"",
+					"BuildPhysicsWorld physics;",
+					end,
 					"",
 					"protected override void OnCreate()",
 					"{",
 						foreach(function.getQueries().entrySet(), e->
 						e.getKey()+" = GetEntityQuery("+foreach(e.getValue().entrySet(), c->"Read"+(c.getValue()?"Write":"Only")+"<"+jobComponent(c.getKey())+">()", ", ")+");"),
+						iff(containsOverlaps),
+						"",
+						"physics = World.DefaultGameObjectInjectionWorld.GetExistingSystem<BuildPhysicsWorld>();",
+						end,
 					"}",
 					"",
 					"protected override void OnUpdate()",
@@ -806,6 +827,9 @@ public class Unity
 							foreach(constants.keySet(), c->c+" = "+variable(c)+","),
 							foreach(function.getQueries().keySet(), q->"chunks_"+q+" = "+q+".CreateArchetypeChunkArray(TempJob),"),
 							foreach(nativeComponents.entrySet(), e->e.getKey()+"Type = GetArchetypeChunkComponentType<"+jobComponent(e.getKey())+">("+e.getValue()+"),"),
+							iff(containsOverlaps),
+							"collisionWorld = physics.PhysicsWorld.CollisionWorld,",
+							end,
 						"};",
 						"",
 						"if (SystemRunner.multithread)",
@@ -826,8 +850,11 @@ public class Unity
 						foreach(constants.entrySet(), e->"public "+unity(e.getValue())+" "+e.getKey()+";"),
 						foreach(function.getQueries().keySet(), q->"[DeallocateOnJobCompletion] public NativeArray<ArchetypeChunk> chunks_"+q+";"),
 						foreach(nativeComponents.entrySet(), e->(e.getValue()?"":"[ReadOnly] ")+"public ArchetypeChunkComponentType<"+jobComponent(e.getKey())+"> "+e.getKey()+"Type;"),
+						iff(containsOverlaps),
+						"public CollisionWorld collisionWorld;",
+						end,
 						"",
-						"public void Execute()",
+						(containsOverlaps ? "unsafe " : "")+"public void Execute()",
 						"{",
 							foreach(function.getStatements(), s->code(s)),
 						"}",
@@ -873,9 +900,25 @@ public class Unity
 			lines
 		);
 	}
+
+	private boolean checkOverlaps(EObject o)
+	{
+		for (var application : EcoreUtil2.getAllContentsOfType(o, Application.class))
+		{
+			if (library.getFunction(application.getName()) == OVERLAPS)
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 	
 	private Object code(Statement statement)
 	{
+		Object result = "undefined";
+
+		var containsOverlaps = false;
+
 		if (statement instanceof BindingBlock)
 		{
 			stack.push(new HashSet<String>(variables));
@@ -960,11 +1003,12 @@ public class Unity
 
 				variables = stack.pop();
 				
-				return lines;
+				result = lines;
 			}
-			
-			
-			return "undefined";
+			else
+			{
+				result = "undefined";
+			}
 		}
 		else if (statement instanceof Block)
 		{
@@ -972,7 +1016,6 @@ public class Unity
 			var block = (Block) statement;
 			var name = block.getName();
 			
-			Object result = "";
 			if (library.getBlock(name) == SELECTION)
 			{
 				var condition = code(block.getExpression());
@@ -983,6 +1026,7 @@ public class Unity
 						foreach(block.getStatements(), s->code(s)),
 					"}"
 				);
+				containsOverlaps = checkOverlaps(block.getExpression());
 			}
 			else if (library.getBlock(name) == ITERATION)
 			{
@@ -994,10 +1038,9 @@ public class Unity
 						foreach(block.getStatements(), s->code(s)),
 					"}"
 				);
+				containsOverlaps = checkOverlaps(block.getExpression());
 			}
-			variables = stack.pop();
-			return result;
-			
+			variables = stack.pop();			
 		}
 		else if (statement instanceof Assignment)
 		{
@@ -1005,6 +1048,8 @@ public class Unity
 			var atom = assignment.getAtom();
 			var expression = assignment.getExpression();
 			var code = code(expression);
+
+			containsOverlaps = checkOverlaps(expression);
 			
 			if (atom instanceof Value)
 			{
@@ -1012,12 +1057,12 @@ public class Unity
 				var name = value.getName();
 				if (variables.contains(name))
 				{
-					return code(atom)+" = "+code+";";
+					result = code(atom)+" = "+code+";";
 				}
 				else
 				{
 					variables.add(name);
-					return "var "+code(atom)+" = "+code+";";
+					result = "var "+code(atom)+" = "+code+";";
 				}
 			}
 			else if (atom instanceof Cell)
@@ -1035,7 +1080,7 @@ public class Unity
 				{
 					if (jobified)
 					{
-						return lines
+						result = lines
 						(
 							code(atom)+" = "+code+";",
 							iff(valueType(component)),
@@ -1045,20 +1090,35 @@ public class Unity
 					}
 					else
 					{
-						return code(atom)+" = "+code+";";
+						result = code(atom)+" = "+code+";";
 					}
 				}
 				else
 				{
-					return entity+".GetComponent<"+component(component)+">()."+field(component)+" = "+code+";";
+					result = entity+".GetComponent<"+component(component)+">()."+field(component)+" = "+code+";";
 				}
 			}
 		}
 		else if (statement instanceof Delegation)
 		{
-			return code(((Delegation) statement).getApplication())+";";
+			var delegation = (Delegation) statement;
+			containsOverlaps = checkOverlaps(delegation);
+			result = code(delegation.getApplication())+";";
 		}
-		return "undefined";
+
+		if (jobified && containsOverlaps)
+		{
+			var random = new Random();
+			var randomized = random.nextInt(10000000);
+			result = lines
+			(
+				"var collisions_"+randomized+" = new NativeList<ColliderCastHit>(Allocator.Temp);",
+				result,
+				"collisions_"+randomized+".Dispose();"
+			);
+		}
+
+		return result;
 	}
 	
 	private String code(Expression e)
