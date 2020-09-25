@@ -113,23 +113,14 @@ public class Unity
 			var type = function.getType();
 			if (type.getParameters() == null && type.getReturnType() == UNIT)
 			{
-				jobified = false;
 				systems.add(function);
 				fileSystem.generateFile
 				(
 					"Assets/Code/Systems/"+unreserved(function.getName())+".cs",
 					generateSystem(function)
 				);
-				jobified = true;
-				fileSystem.generateFile
-				(
-					"Assets/Code/Systems/Jobified/"+unreserved(function.getName())+"Jobified.cs",
-					generateJobifiedSystem(function)
-				);
 			}
 		}
-
-		jobified = false;
 
 		fileSystem.generateFile
 		(
@@ -172,6 +163,20 @@ public class Unity
 			"Assets/Code/Fix/SyncPoint.cs",
 			generateSyncPoint()
 		);
+
+		jobified = true;
+		for (var function : game.getFunctions())
+		{
+			var type = function.getType();
+			if (type.getParameters() == null && type.getReturnType() == UNIT)
+			{
+				fileSystem.generateFile
+				(
+					"Assets/Code/Systems/Jobified/"+unreserved(function.getName())+"Jobified.cs",
+					generateJobifiedSystem(function)
+				);
+			}
+		}
 	}
 	
 	private void resolvePackages()
@@ -741,6 +746,22 @@ public class Unity
 			if (standard != null)
 			{
 				constants.put(value.getName(), standard.getType());
+			}
+		}
+
+		var extraComponents = extraComponents(function);
+		var queries = function.getQueries();
+
+		for (var entry : extraComponents.entrySet())
+		{
+			var entity = entry.getKey();
+			if (!queries.containsKey(entity))
+			{
+				queries.put(entity, new HashMap<String,Boolean>());
+			}
+			for (var component : entry.getValue())
+			{
+				queries.get(entity).put(component, true);
 			}
 		}
 
@@ -1325,6 +1346,20 @@ public class Unity
 				}
 				map.get(a).add("Rigidbody");
 			}
+			else if (jobified && standard == OVERLAPS)
+			{
+				var a = ((Value)application.getArguments().get(0)).getName();
+				if (!map.containsKey(a))
+				{
+					map.put(a, new HashSet<String>());
+				}
+				namespaces.add("Unity.Physics");
+				namespaces.add("Unity.Transforms");
+				map.get(a).add("PhysicsCollider");
+				map.get(a).add("Translation");
+
+
+			}
 		}
 		
 		return map;
@@ -1493,6 +1528,19 @@ public class Unity
 		else if (name.equals("Rigidbody"))
 		{
 			return "PhysicsVelocity";
+		}
+		else if (name.equals("PhysicsCollider"))
+		{
+			return "PhysicsCollider";
+		}
+		else if (name.equals("Translation"))
+		{
+			namespaces.add("Unity.Transforms");
+			return "Translation";
+		}
+		if (found == Component.TEXT && jobified)
+		{
+			return "M.textData";
 		}
 		
 		if (found == null)
@@ -1735,6 +1783,11 @@ public class Unity
 
 	private boolean valueType(String component)
 	{
+		if (component.equals("PhysicsCollider") || component.equals("Translation"))
+		{
+			return true;
+		}
+		
 		var standard = library.getComponent(component);
 
 		if (standard != null)

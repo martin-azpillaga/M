@@ -29,6 +29,8 @@ public class Writer
 	{
 		var list = new ArrayList<Object>();
 		
+		if (collection == null) return list;
+
 		for (var element : collection)
 		{
 			list.add(function.apply(element));
@@ -38,6 +40,8 @@ public class Writer
 	
 	public static <T> String foreach(Collection<T> set, java.util.function.Function<T,String> f, String separator)
 	{
+		if (set == null) return "";
+		
 		return String.join(separator, set.stream().map(f).collect(Collectors.toList()));
 	}
 
