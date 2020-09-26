@@ -310,7 +310,11 @@ public class Unity
 			"{",
 				"public "+classifier+" "+name+"Data : IComponentData",
 				"{",
-					iff(type != UNIT),
+					iff(type == ENTITY_LIST),
+					"public List<Entity> Value;",
+					end,
+					
+					iff(type != UNIT && type != ENTITY_LIST),
 					"public "+unity(type)+" Value;",
 					end,
 				"}",
@@ -628,12 +632,22 @@ public class Unity
 				"{",
 					"var entity = GetPrimaryEntity(root);",
 					"",
-					foreach(game.getComponents().keySet(), c->lines
+					foreach(game.getComponents().entrySet(), e->lines
 					(
-					"var "+unreserved(c)+" = root.GetComponent<"+component(c)+">();",
-					"if ("+unreserved(c)+")",
+					"var "+unreserved(e.getKey())+" = root.GetComponent<"+component(e.getKey())+">();",
+					"if ("+unreserved(e.getKey())+")",
 					"{",
-						"DstEntityManager.AddComponentData(entity, new "+component(c)+"Data{ Value = "+unreserved(c)+".Value });",
+						iff(e.getValue() == ENTITY_LIST),
+						"var list = new List<Entity>();",
+						"foreach (var gameObject in "+unreserved(e.getKey())+".Value)",
+						"{",
+							"list.Add(GetPrimaryEntity(gameObject));",
+						"}",
+						"DstEntityManager.AddComponentData(entity, new "+component(e.getKey())+"Data{ Value = list });",
+						end,
+						iff(e.getValue() != ENTITY_LIST),
+						"DstEntityManager.AddComponentData(entity, new "+component(e.getKey())+"Data{ Value = "+unreserved(e.getKey())+".Value });",
+						end,
 					"}"
 					)),
 					"",
@@ -1227,7 +1241,7 @@ public class Unity
 			{
 				namespaces.add("System.Linq");
 				var nativeList = overlapNames.get(e);
-				return nativeList+".Select(x => x.Entity).ToList()";
+				return nativeList+".AsArray().Select(x => x.Entity).ToList()";
 			}
 			return application(standard, args);
 		}
