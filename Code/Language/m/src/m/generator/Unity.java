@@ -52,6 +52,7 @@ public class Unity
 	boolean jobified;
 	HashSet<String> variables;
 	Stack<HashSet<String>> stack;
+	HashMap<Application,String> overlapNames;
 	
 	final static String[] csharpReserved = new String[]
 	{
@@ -86,6 +87,7 @@ public class Unity
 		this.fileSystem = fileSystem;
 		this.variables = new HashSet<String>();
 		this.stack = new Stack<>();
+		this.overlapNames = new HashMap<Application, String>();
 		
 		resolvePackages();
 		
@@ -807,11 +809,13 @@ public class Unity
 		namespaces.add("static Unity.Entities.ComponentType");
 		
 		currentFunction = function;
+		overlapNames = new HashMap<Application,String>();
 
-		var containsOverlaps = checkOverlaps(function);
+		var overlaps = overlaps(function);
 
-		if (containsOverlaps)
+		if (overlaps.size() != 0)
 		{
+			namespaces.add("Unity.Mathematics");
 			namespaces.add("Unity.Physics");
 			namespaces.add("Unity.Physics.Systems");
 		}
@@ -824,7 +828,7 @@ public class Unity
 				"{",
 					foreach(function.getQueries().keySet(), q->"EntityQuery "+q+";"),
 					
-					iff(containsOverlaps),
+					iff(overlaps.size() != 0),
 					"",
 					"BuildPhysicsWorld physics;",
 					end,
@@ -833,7 +837,7 @@ public class Unity
 					"{",
 						foreach(function.getQueries().entrySet(), e->
 						e.getKey()+" = GetEntityQuery("+foreach(e.getValue().entrySet(), c->"Read"+(c.getValue()?"Write":"Only")+"<"+jobComponent(c.getKey())+">()", ", ")+");"),
-						iff(containsOverlaps),
+						iff(overlaps.size() != 0),
 						"",
 						"physics = World.DefaultGameObjectInjectionWorld.GetExistingSystem<BuildPhysicsWorld>();",
 						end,
@@ -848,7 +852,7 @@ public class Unity
 							foreach(constants.keySet(), c->c+" = "+variable(c)+","),
 							foreach(function.getQueries().keySet(), q->"chunks_"+q+" = "+q+".CreateArchetypeChunkArray(TempJob),"),
 							foreach(nativeComponents.entrySet(), e->e.getKey()+"Type = GetArchetypeChunkComponentType<"+jobComponent(e.getKey())+">("+e.getValue()+"),"),
-							iff(containsOverlaps),
+							iff(overlaps.size() != 0),
 							"collisionWorld = physics.PhysicsWorld.CollisionWorld,",
 							end,
 						"};",
@@ -871,11 +875,11 @@ public class Unity
 						foreach(constants.entrySet(), e->"public "+unity(e.getValue())+" "+e.getKey()+";"),
 						foreach(function.getQueries().keySet(), q->"[DeallocateOnJobCompletion] public NativeArray<ArchetypeChunk> chunks_"+q+";"),
 						foreach(nativeComponents.entrySet(), e->(e.getValue()?"":"[ReadOnly] ")+"public ArchetypeChunkComponentType<"+jobComponent(e.getKey())+"> "+e.getKey()+"Type;"),
-						iff(containsOverlaps),
+						iff(overlaps.size() != 0),
 						"public CollisionWorld collisionWorld;",
 						end,
 						"",
-						(containsOverlaps ? "unsafe " : "")+"public void Execute()",
+						(overlaps.size() != 0 ? "unsafe " : "")+"public void Execute()",
 						"{",
 							foreach(function.getStatements(), s->code(s)),
 						"}",
@@ -899,6 +903,7 @@ public class Unity
 		namespaces.add("System.Collections.Generic");
 
 		currentFunction = function;
+		overlapNames = new HashMap<Application,String>();
 
 		var lines = lines
 		(
@@ -922,23 +927,23 @@ public class Unity
 		);
 	}
 
-	private boolean checkOverlaps(EObject o)
+	private ArrayList<Application> overlaps(EObject o)
 	{
+		var list = new ArrayList<Application>();
 		for (var application : EcoreUtil2.getAllContentsOfType(o, Application.class))
 		{
 			if (library.getFunction(application.getName()) == OVERLAPS)
 			{
-				return true;
+				list.add(application);
 			}
 		}
-		return false;
+		return list;
 	}
 	
 	private Object code(Statement statement)
 	{
 		Object result = "undefined";
-
-		var containsOverlaps = false;
+		var detectedNow = false;
 
 		if (statement instanceof BindingBlock)
 		{
@@ -1039,7 +1044,15 @@ public class Unity
 			
 			if (library.getBlock(name) == SELECTION)
 			{
+				var overlaps = overlaps(block.getExpression());
+				for (var overlap : overlaps)
+				{
+					detectedNow = true;
+					overlapNames.put(overlap, "collisions_"+new Random().nextInt(1000000));
+				}
+
 				var condition = code(block.getExpression());
+				
 				result = lines
 				(
 					"if ("+condition+")",
@@ -1047,11 +1060,23 @@ public class Unity
 						foreach(block.getStatements(), s->code(s)),
 					"}"
 				);
-				containsOverlaps = checkOverlaps(block.getExpression());
 			}
 			else if (library.getBlock(name) == ITERATION)
 			{
+				var overlaps = overlaps(block.getExpression());
+				for (var overlap : overlaps)
+				{
+					detectedNow = true;
+					overlapNames.put(overlap, "collisions_"+new Random().nextInt(1000000));
+				}
+
 				var condition = code(block.getExpression());
+				
+				for (var overlap : overlaps)
+				{
+					detectedNow = true;
+					overlapNames.put(overlap, "collisions_"+new Random().nextInt(1000000));
+				}
 				result = lines
 				(
 					"while ("+condition+")",
@@ -1059,7 +1084,6 @@ public class Unity
 						foreach(block.getStatements(), s->code(s)),
 					"}"
 				);
-				containsOverlaps = checkOverlaps(block.getExpression());
 			}
 			variables = stack.pop();			
 		}
@@ -1070,7 +1094,12 @@ public class Unity
 			var expression = assignment.getExpression();
 			var code = code(expression);
 
-			containsOverlaps = checkOverlaps(expression);
+			var overlaps = overlaps(expression);
+			for (var overlap : overlaps)
+			{
+				detectedNow = true;
+				overlapNames.put(overlap, "collisions_"+new Random().nextInt(1000000));
+			}
 			
 			if (atom instanceof Value)
 			{
@@ -1123,19 +1152,35 @@ public class Unity
 		else if (statement instanceof Delegation)
 		{
 			var delegation = (Delegation) statement;
-			containsOverlaps = checkOverlaps(delegation);
-			result = code(delegation.getApplication())+";";
+			var application = delegation.getApplication();
+
+			var overlaps = overlaps(application);
+			for (var overlap : overlaps)
+			{
+				detectedNow = true;
+				overlapNames.put(overlap, "collisions_"+new Random().nextInt(1000000));
+			}
+
+			result = code(application)+";";
 		}
 
-		if (jobified && containsOverlaps)
+		if (jobified && detectedNow)
 		{
-			var random = new Random();
-			var randomized = random.nextInt(10000000);
 			result = lines
 			(
-				"var collisions_"+randomized+" = new NativeList<ColliderCastHit>(Allocator.Temp);",
+				foreach(overlapNames.entrySet(), e->lines
+				(
+					"var "+e.getValue()+" = new NativeList<ColliderCastHit>(Allocator.Temp);",
+					"collisionWorld.CastCollider(new ColliderCastInput",
+					"{",
+						"Collider = PhysicsCollider_"+((Value)e.getKey().getArguments().get(0)).getName()+".ColliderPtr,",
+						"Orientation = quaternion.identity,",
+						"Start = Translation_"+((Value)e.getKey().getArguments().get(0)).getName()+".Value,",
+						"End = Translation_"+((Value)e.getKey().getArguments().get(0)).getName()+".Value,",
+					"}, ref "+e.getValue()+");"
+				)),
 				result,
-				"collisions_"+randomized+".Dispose();"
+				foreach(overlapNames.values(), o->o+".Dispose();")
 			);
 		}
 
@@ -1178,6 +1223,12 @@ public class Unity
 			var name = application.getName();
 			var args = application.getArguments();
 			var standard = library.getFunction(name);
+			if (jobified && standard == OVERLAPS)
+			{
+				namespaces.add("System.Linq");
+				var nativeList = overlapNames.get(e);
+				return nativeList+".Select(x => x.Entity).ToList()";
+			}
 			return application(standard, args);
 		}
 		return "undefined";
@@ -1226,7 +1277,7 @@ public class Unity
 		case GREATEROREQUAL: return x+" >= "+y;
 		case HALT: return "#if UNITY_EDITOR\nUnityEditor.EditorApplication.isPlaying = false;\n#endif\nApplication.Quit()";
 		case HAS: return "(("+y+").GetComponent<"+simpleComponent(x)+">() != null)";
-		case IN: return jobified ? "true" : y+".Contains("+x+")";
+		case IN: return jobified ? "("+y+").Contains(entity_"+x+")" : "("+y+").Contains("+x+")";
 		case INEQUAL: return x+" != "+y;
 		case INTEGERPART: namespaces.add("Unity.Mathematics"); return "math.trunc("+x+")";
 		case INVERSE: return "(1 / ("+x+"))";
@@ -1267,7 +1318,17 @@ public class Unity
 		case WRITE_WARNING: return "if (Debug.isDebugBuild){ Debug.LogWarning("+x+"); }";
 		case SCREENSHOT: return "ScreenCapture.CaptureScreenshot((System.DateTime.Now+\".png\").Replace(\"/\", \"-\"), 1)";
 		case XYZ: return "new Vector3("+x+", "+y+", "+z+")";
-		case OVERLAPS: namespaces.add("System.Linq"); namespaces.add("System"); return jobified ? "new System.Collections.Generic.List<GameObject>()" : "("+x+").GetComponents<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox((x as BoxCollider).bounds.center, Vector3.Scale((x as BoxCollider).size/2,"+x+".transform.lossyScale), "+x+".transform.rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere((x as SphereCollider).bounds.center, (x as SphereCollider).radius*Mathf.Max("+x+".transform.lossyScale.x, Mathf.Max("+x+".transform.lossyScale.y, "+x+".transform.lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject).ToList()";
+		case OVERLAPS:
+			if (jobified)
+			{
+				
+			}
+			else
+			{
+				namespaces.add("System.Linq");
+				namespaces.add("System");
+				return "("+x+").GetComponents<Collider>().Select(x=> x is BoxCollider ? Physics.OverlapBox((x as BoxCollider).bounds.center, Vector3.Scale((x as BoxCollider).size/2,"+x+".transform.lossyScale), "+x+".transform.rotation, Int32.MaxValue, QueryTriggerInteraction.Collide): x is SphereCollider ? Physics.OverlapSphere((x as SphereCollider).bounds.center, (x as SphereCollider).radius*Mathf.Max("+x+".transform.lossyScale.x, Mathf.Max("+x+".transform.lossyScale.y, "+x+".transform.lossyScale.z)), Int32.MaxValue, QueryTriggerInteraction.Collide) : null).Aggregate(new List<Collider>(), (list, x) => {list.AddRange(x); return list;}).Select(x=>x.transform.gameObject).ToList()";
+			}
 		case TO_NUMBER3: return "("+x+").eulerAngles";
 		case TO_QUATERNION: return "Quaternion.Euler(("+x+").x, ("+x+").y, ("+x+").z)";
 		case ADD_FORCE: return "("+x+").GetComponent<Rigidbody>().AddForce("+y+")";
@@ -1787,7 +1848,7 @@ public class Unity
 		{
 			return true;
 		}
-		
+
 		var standard = library.getComponent(component);
 
 		if (standard != null)
