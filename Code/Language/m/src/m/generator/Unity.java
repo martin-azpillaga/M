@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
@@ -121,11 +122,7 @@ public class Unity
 		
 		clean(Paths.get(fileSystem.getURI("").toString(), "Assets", "Code").toString().replace("file:", ""));
 		
-		fileSystem.generateFile
-		(
-			"Assets/Code/M.asmdef",
-			assemblyDefinition(null)
-		);
+		resolveAssembly();
 
 		for (var component : game.getComponents().entrySet())
 		{
@@ -133,11 +130,6 @@ public class Unity
 			(
 				"Assets/Code/Components/"+unreserved(component.getKey())+".cs",
 				generateComponent(component.getKey(), component.getValue())
-			);
-			fileSystem.generateFile
-			(
-				"Assets/Code/Components/Jobified/"+unreserved(component.getKey())+"Data.cs",
-				generateDataComponent(component.getKey(), component.getValue())
 			);
 		}
 
@@ -200,6 +192,14 @@ public class Unity
 		);
 
 		jobified = true;
+		for (var component : game.getComponents().entrySet())
+		{
+			fileSystem.generateFile
+			(
+				"Assets/Code/Components/Jobified/"+unreserved(component.getKey())+"Data.cs",
+				generateDataComponent(component.getKey(), component.getValue())
+			);
+		}
 		for (var function : game.getFunctions())
 		{
 			var type = function.getType();
@@ -218,100 +218,127 @@ public class Unity
 	{
 		if (fileSystem.isFile("Packages/manifest.json"))
 		{
-			var manifest = fileSystem.readTextFile("Packages/manifest.json").toString();
-			var dependencies = "\"dependencies\": {";
-			if (manifest.contains(dependencies))
+			var regenerate = false;
+			var current = fileSystem.readTextFile("Packages/manifest.json").toString();
+			var manifest = new Gson().fromJson(current, PackageManifest.class);
+			var dependencies = manifest.dependencies;
+
+			if (!dependencies.containsKey("com.unity.entities"))
 			{
-				var index = manifest.indexOf(dependencies)+dependencies.length();
-				var buffer = new StringBuffer(manifest);
-				
-				if (!manifest.contains("\"com.unity.entities\""))
-				{
-					buffer.insert(index, "\"com.unity.entities\": \"0.11.1-preview.4\",");
-					fileSystem.generateFile("Packages/manifest.json", buffer.toString());
-				}
-				if (!manifest.contains("\"com.unity.inputsystem\""))
-				{
-					buffer.insert(index, "\"com.unity.inputsystem\": \"1.0.0\",");
-					fileSystem.generateFile("Packages/manifest.json", buffer.toString());
-				}
+				regenerate = true;
+				dependencies.put("com.unity.entities", "0.11.1-preview.4");
+			}
+			if (!dependencies.containsKey("com.unity.inputsystem"))
+			{
+				regenerate = true;
+				dependencies.put("com.unity.inputsystem", "1.0.0");
+			}
+			if (!dependencies.containsKey("com.unity.rendering.hybrid"))
+			{
+				regenerate = true;
+				dependencies.put("com.unity.rendering.hybrid", "0.5.2-preview.4");
+			}
+			if (!dependencies.containsKey("com.unity.physics"))
+			{
+				regenerate = true;
+				dependencies.put("com.unity.physics", "0.4.1-preview");
+			}
+			if (regenerate)
+			{
+				var json = new Gson().toJson(manifest);
+				fileSystem.generateFile("Packages/manifest.json", json);
 			}
 		}
 		else
 		{
-			fileSystem.generateFile("Packages/manifest.json", write
-			(
-			"",
-			"{",
-			"\"dependencies\":",
-			"{",
-				"\"com.unity.entities\": \"0.11.1-preview.4\",",
-				"\"com.unity.inputsystem\": \"1.0.0\",",
-				"\"com.unity.rendering.hybrid\": \"0.5.2-preview.4\",",
-				"\"com.unity.physics\": \"0.4.1-preview\",",
-				"\"com.unity.ugui\": \"1.0.0\",",  
-				"\"com.unity.modules.ai\": \"1.0.0\",",  
-				"\"com.unity.modules.androidjni\": \"1.0.0\",",  
-				"\"com.unity.modules.animation\": \"1.0.0\",",  
-				"\"com.unity.modules.assetbundle\": \"1.0.0\",",  
-				"\"com.unity.modules.audio\": \"1.0.0\",",  
-				"\"com.unity.modules.cloth\": \"1.0.0\",",  
-				"\"com.unity.modules.director\": \"1.0.0\",",  
-				"\"com.unity.modules.imageconversion\": \"1.0.0\",",  
-				"\"com.unity.modules.imgui\": \"1.0.0\",",  
-				"\"com.unity.modules.jsonserialize\": \"1.0.0\",",  
-				"\"com.unity.modules.particlesystem\": \"1.0.0\",",  
-				"\"com.unity.modules.physics\": \"1.0.0\",",  
-				"\"com.unity.modules.physics2d\": \"1.0.0\",",  
-				"\"com.unity.modules.screencapture\": \"1.0.0\",",  
-				"\"com.unity.modules.terrain\": \"1.0.0\",",  
-				"\"com.unity.modules.terrainphysics\": \"1.0.0\",",  
-				"\"com.unity.modules.tilemap\": \"1.0.0\",",  
-				"\"com.unity.modules.ui\": \"1.0.0\",",  
-				"\"com.unity.modules.uielements\": \"1.0.0\",",  
-				"\"com.unity.modules.umbra\": \"1.0.0\",",  
-				"\"com.unity.modules.unityanalytics\": \"1.0.0\",",  
-				"\"com.unity.modules.unitywebrequest\": \"1.0.0\",",  
-				"\"com.unity.modules.unitywebrequestassetbundle\": \"1.0.0\",",  
-				"\"com.unity.modules.unitywebrequestaudio\": \"1.0.0\",",  
-				"\"com.unity.modules.unitywebrequesttexture\": \"1.0.0\",",  
-				"\"com.unity.modules.unitywebrequestwww\": \"1.0.0\",",  
-				"\"com.unity.modules.vehicles\": \"1.0.0\",",  
-				"\"com.unity.modules.video\": \"1.0.0\",",  
-				"\"com.unity.modules.vr\": \"1.0.0\",",  
-				"\"com.unity.modules.wind\": \"1.0.0\",",  
-				"\"com.unity.modules.xr\": \"1.0.0\"",
-				"}",
-			"}"
-			));
+			var map = new HashMap<String,String>();
+			map.put("com.unity.entities", "0.11.1-preview.4");
+			map.put("com.unity.inputsystem", "1.0.0");
+			map.put("com.unity.rendering.hybrid", "0.5.2-preview.4");
+			map.put("com.unity.physics", "0.4.1-preview");
+			map.put("com.unity.ugui", "1.0.0");  
+			map.put("com.unity.modules.ai", "1.0.0");  
+			map.put("com.unity.modules.androidjni", "1.0.0");  
+			map.put("com.unity.modules.animation", "1.0.0");  
+			map.put("com.unity.modules.assetbundle", "1.0.0");  
+			map.put("com.unity.modules.audio", "1.0.0");  
+			map.put("com.unity.modules.cloth", "1.0.0");  
+			map.put("com.unity.modules.director", "1.0.0");  
+			map.put("com.unity.modules.imageconversion", "1.0.0");  
+			map.put("com.unity.modules.imgui", "1.0.0");  
+			map.put("com.unity.modules.jsonserialize", "1.0.0");  
+			map.put("com.unity.modules.particlesystem", "1.0.0");  
+			map.put("com.unity.modules.physics", "1.0.0");  
+			map.put("com.unity.modules.physics2d", "1.0.0");  
+			map.put("com.unity.modules.screencapture", "1.0.0");  
+			map.put("com.unity.modules.terrain", "1.0.0");  
+			map.put("com.unity.modules.terrainphysics", "1.0.0");  
+			map.put("com.unity.modules.tilemap", "1.0.0");  
+			map.put("com.unity.modules.ui", "1.0.0");  
+			map.put("com.unity.modules.uielements", "1.0.0");  
+			map.put("com.unity.modules.umbra", "1.0.0");  
+			map.put("com.unity.modules.unityanalytics", "1.0.0");  
+			map.put("com.unity.modules.unitywebrequest", "1.0.0");  
+			map.put("com.unity.modules.unitywebrequestassetbundle", "1.0.0");  
+			map.put("com.unity.modules.unitywebrequestaudio", "1.0.0");  
+			map.put("com.unity.modules.unitywebrequesttexture", "1.0.0");  
+			map.put("com.unity.modules.unitywebrequestwww", "1.0.0");  
+			map.put("com.unity.modules.vehicles", "1.0.0");  
+			map.put("com.unity.modules.video", "1.0.0");  
+			map.put("com.unity.modules.vr", "1.0.0");  
+			map.put("com.unity.modules.wind", "1.0.0");  
+			map.put("com.unity.modules.xr", "1.0.0");
+			var json = new Gson().toJson(new PackageManifest(map));
+			fileSystem.generateFile("Packages/manifest.json", json);
 		}
 	}
 
-	private String assemblyDefinition(String current)
+	private void resolveAssembly()
 	{
-		if (current == null)
+		var file = "Assets/Code/M.asmdef";
+		var gson = new Gson();
+		var needed = ImmutableList.of
+		(
+			"Unity.Entities",
+			"Unity.Transforms",
+			"Unity.Physics",
+			"Unity.Mathematics",
+			"Unity.Jobs",
+			"Unity.Collections",
+			"Unity.InputSystem",
+			"Unity.Burst",
+			"Unity.Entities.Hybrid"
+		);
+
+		if (fileSystem.isFile(file))
 		{
-			return new Gson().toJson(new AssemblyDefinition
-			(
-				"M",
-				ImmutableList.of
-				(
-					"Unity.Entities",
-					"Unity.Transforms",
-					"Unity.Physics",
-					"Unity.Mathematics",
-					"Unity.Jobs",
-					"Unity.Collections",
-					"Unity.InputSystem",
-					"Unity.Burst",
-					"Unity.Entities.Hybrid"
-				),
-				true
-			));
+			var regenerate = false;
+
+			var text = fileSystem.readTextFile(file).toString();
+			var assembly = gson.fromJson(text, AssemblyDefinition.class);
+
+			var references = assembly.references;
+			
+			for (var need : needed)
+			{
+				if (!references.contains(need))
+				{
+					regenerate = true;
+					references.add(need);
+				}
+			}
+
+			if (regenerate)
+			{
+				var json = gson.toJson(assembly);
+				fileSystem.generateFile(file, json);
+			}
 		}
 		else
 		{
-			return current;
+			var assembly = new AssemblyDefinition("M",needed,true);
+			var json = gson.toJson(assembly, AssemblyDefinition.class);
+			fileSystem.generateFile(file, json);
 		}
 	}
 	
@@ -369,11 +396,7 @@ public class Unity
 			"{",
 				"public "+classifier+" "+name+"Data : IComponentData",
 				"{",
-					iff(type == ENTITY_LIST),
-					"public List<Entity> Value;",
-					end,
-					
-					iff(type != UNIT && type != ENTITY_LIST),
+					iff(type != UNIT),
 					"public "+unity(type)+" Value;",
 					end,
 				"}",
@@ -383,6 +406,7 @@ public class Unity
 		return write
 		(
 			foreach(namespaces, n->"using "+n+";"),
+			"",
 			lines
 		);
 	}
@@ -1836,17 +1860,41 @@ public class Unity
 			case NUMBER:
 				return "float";
 			case NUMBER2:
-				namespaces.add("UnityEngine");
-				return "Vector2";
+				if (jobified)
+				{
+					namespaces.add("Unity.Mathematics");
+					return "float2";
+				}
+				else
+				{
+					namespaces.add("UnityEngine");
+					return "Vector2";
+				}
 			case NUMBER3:
+			if (jobified)
+			{
+				namespaces.add("Unity.Mathematics");
+				return "float3";
+			}
+			else
+			{
 				namespaces.add("UnityEngine");
 				return "Vector3";
+			}
 			case PROPOSITION:
 				return "bool";
 			case ENTITY_LIST:
-				namespaces.add("UnityEngine");
 				namespaces.add("System.Collections.Generic");
-				return "List<GameObject>";
+				if (jobified)
+				{
+					namespaces.add("Unity.Entities");
+					return "List<Entity>";
+				}
+				else
+				{
+					namespaces.add("UnityEngine");
+					return "List<GameObject>";
+				}
 			case INPUT:
 				namespaces.add("UnityEngine.InputSystem");
 				return "InputAction";
@@ -1964,5 +2012,15 @@ class AssemblyDefinition
 		this.name = name;
 		this.references = references;
 		this.allowUnsafeCode = allowUnsafeCode;
+	}
+}
+
+class PackageManifest
+{
+	public Map<String,String> dependencies;
+
+	public PackageManifest(Map<String,String> dependencies)
+	{
+		this.dependencies = dependencies;
 	}
 }
