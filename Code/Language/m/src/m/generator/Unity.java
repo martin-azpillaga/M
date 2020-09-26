@@ -1,22 +1,50 @@
 package m.generator;
 
-import static m.generator.Writer.*;
-import static m.library.symbols.Block.*;
-import static m.library.types.AtomicType.*;
-import static m.library.symbols.Component.*;
-import static m.library.symbols.Function.*;
+import static m.generator.Writer.end;
+import static m.generator.Writer.foreach;
+import static m.generator.Writer.iff;
+import static m.generator.Writer.lines;
+import static m.generator.Writer.write;
+import static m.library.symbols.Block.ITERATION;
+import static m.library.symbols.Block.QUERY;
+import static m.library.symbols.Block.SELECTION;
+import static m.library.symbols.Component.DISPLAY;
+import static m.library.symbols.Function.ACTIVATE_PARAMETER;
+import static m.library.symbols.Function.ADD_FORCE;
+import static m.library.symbols.Function.ADD_TORQUE;
+import static m.library.symbols.Function.DEACTIVATE_PARAMETER;
+import static m.library.symbols.Function.IN_STATE;
+import static m.library.symbols.Function.OVERLAPS;
+import static m.library.symbols.Function.PAUSE;
+import static m.library.symbols.Function.PLAY;
+import static m.library.symbols.Function.PLAY_ONCE;
+import static m.library.symbols.Function.SET_TRIGGER;
+import static m.library.symbols.Function.STOP;
+import static m.library.symbols.Function.UNPAUSE;
+import static m.library.types.AtomicType.COLOR;
+import static m.library.types.AtomicType.ENTITY;
+import static m.library.types.AtomicType.ENTITY_LIST;
+import static m.library.types.AtomicType.INPUT;
+import static m.library.types.AtomicType.NUMBER;
+import static m.library.types.AtomicType.NUMBER2;
+import static m.library.types.AtomicType.NUMBER3;
+import static m.library.types.AtomicType.PROPOSITION;
+import static m.library.types.AtomicType.QUATERNION;
+import static m.library.types.AtomicType.STRING;
+import static m.library.types.AtomicType.UNIT;
 
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
+
+import com.google.common.collect.ImmutableList;
+import com.google.gson.Gson;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.EcoreUtil2;
@@ -93,7 +121,12 @@ public class Unity
 		
 		clean(Paths.get(fileSystem.getURI("").toString(), "Assets", "Code").toString().replace("file:", ""));
 		
-		
+		fileSystem.generateFile
+		(
+			"Assets/Code/M.asmdef",
+			assemblyDefinition(null)
+		);
+
 		for (var component : game.getComponents().entrySet())
 		{
 			fileSystem.generateFile
@@ -252,8 +285,34 @@ public class Unity
 			"}"
 			));
 		}
-		
-		
+	}
+
+	private String assemblyDefinition(String current)
+	{
+		if (current == null)
+		{
+			return new Gson().toJson(new AssemblyDefinition
+			(
+				"M",
+				ImmutableList.of
+				(
+					"Unity.Entities",
+					"Unity.Transforms",
+					"Unity.Physics",
+					"Unity.Mathematics",
+					"Unity.Jobs",
+					"Unity.Collections",
+					"Unity.InputSystem",
+					"Unity.Burst",
+					"Unity.Entities.Hybrid"
+				),
+				true
+			));
+		}
+		else
+		{
+			return current;
+		}
 	}
 	
 	
@@ -538,11 +597,13 @@ public class Unity
 				"public class SystemRunner : SystemBase",
 				"{",
 					"public static bool multithread;",
+					"public static Unity.Mathematics.Random random;",
 					"",
 					foreach(systems, s->s.getName()+" "+s.getName()+";"),
 					"",
 					"protected override void OnCreate()",
 					"{",
+						"random = new Unity.Mathematics.Random((uint)UnityEngine.Random.Range(1,100000));",
 						foreach(systems, s->s.getName()+" = new "+s.getName()+"();"),
 					"}",
 					"",
@@ -564,7 +625,7 @@ public class Unity
 							"",
 							foreach(systems, s->lines
 							(
-								"if (debugger."+s.getName()+")",
+								"if (!multithread && debugger."+s.getName()+")",
 								"{",
 									s.getName()+".Run(gameObjects);",	
 								"}"
@@ -1307,7 +1368,7 @@ public class Unity
 		case PLAY_ONCE: return "("+x+").GetComponent<AudioSource>().PlayOneShot("+y+")";
 		case POW: namespaces.add("Unity.Mathematics"); return "math.pow("+x+", "+y+")";
 		case PROPORTIONAL: namespaces.add("Unity.Mathematics"); return "math.remap("+x+", ("+y+").x, ("+y+").y, ("+z+").x, ("+z+").y)";
-		case RANDOM: return "UnityEngine.Random.Range(("+x+").x, ("+x+").y)";
+		case RANDOM: return (jobified ? "SystemRunner.random.NextFloat(" : "UnityEngine.Random.Range(")+"("+x+").x, ("+x+").y)";
 		case READ_NUMBER: return "("+x+").ReadValue<float>()";
 		case READ_TRIGGERED: return "("+x+").triggered";
 		case READ_VECTOR: return "("+x+").ReadValue<Vector2>()";
@@ -1762,8 +1823,16 @@ public class Unity
 			switch (atomic)
 			{
 			case ENTITY:
-				namespaces.add("UnityEngine");
-				return "GameObject";
+				if (jobified)
+				{
+					namespaces.add("Unity.Entities");
+					return "Entity";
+				}
+				else
+				{
+					namespaces.add("UnityEngine");
+					return "GameObject";
+				}
 			case NUMBER:
 				return "float";
 			case NUMBER2:
@@ -1873,5 +1942,27 @@ public class Unity
 		{
 			return valueType(game.getComponents().get(component));
 		}
+	}
+}
+
+class AssemblyDefinition
+{
+	String name;
+	List<String> references;
+	List<String> includePlatforms;
+	List<String> excludePlatforms;
+	boolean allowUnsafeCode;
+	boolean overrideReferences;
+	List<String> precompiledReferences;
+	boolean autoReferenced;
+	List<String> definedConstraints;
+	List<String> versionDefines;
+	boolean noEngineReferences;
+
+	public AssemblyDefinition(String name, List<String> references, boolean allowUnsafeCode)
+	{
+		this.name = name;
+		this.references = references;
+		this.allowUnsafeCode = allowUnsafeCode;
 	}
 }
