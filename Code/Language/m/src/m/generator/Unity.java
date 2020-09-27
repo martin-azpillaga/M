@@ -471,10 +471,12 @@ public class Unity
 							(
 								foreach(s.getQueries().entrySet(), q->lines
 								(
+									iff (!q.getValue().isEmpty()),
 									"if ("+foreach(q.getValue().keySet(), c->"go.GetComponent<"+component(c)+">()", " && ")+")",
 									"{",
 										s.getName()+"_"+q.getKey()+".Add(go);",
-									"}"
+									"}",
+									end
 								))
 							)),
 						"}",
@@ -679,6 +681,23 @@ public class Unity
 			"using UnityEngine.UI;",
 			"using Unity.Transforms;",
 			"",
+			"[UpdateInGroup(typeof(GameObjectDeclareReferencedObjectsGroup))]",
+			"public class DeclarePrefabs : GameObjectConversionSystem",
+			"{",
+				"protected override void OnUpdate()",
+				"{",
+					foreach(game.getComponents().entrySet(), e->lines
+					(
+						iff(e.getValue() == ENTITY),
+						"Entities.ForEach(("+component(e.getKey())+" component) =>",
+						"{",
+							"DeclareReferencedPrefab(component.Value);",
+						"});",
+						end
+					)),
+				"}",
+			"}",
+			"",
 			"[UpdateInGroup(typeof(GameObjectAfterConversionGroup))]",
 			"public class ConversionSystem : GameObjectConversionSystem",
 			"{",
@@ -730,7 +749,10 @@ public class Unity
 						"}",
 						"DstEntityManager.AddComponentData(entity, new "+component(e.getKey())+"Data{ Value = list });",
 						end,
-						iff(e.getValue() != ENTITY_LIST),
+						iff(e.getValue() == ENTITY),
+						"DstEntityManager.AddComponentData(entity, new "+component(e.getKey())+"Data{ Value = GetPrimaryEntity("+unreserved(e.getKey())+".Value) });",
+						end,
+						iff(e.getValue() != ENTITY_LIST && e.getValue() != ENTITY),
 						"DstEntityManager.AddComponentData(entity, new "+component(e.getKey())+"Data{ Value = "+unreserved(e.getKey())+".Value });",
 						end,
 					"}"
@@ -745,6 +767,7 @@ public class Unity
 						"typeof(GraphicRaycaster),",
 						"typeof(Camera),",
 						"typeof(CanvasRenderer),",
+						"typeof(AudioListener),",
 					"};",
 					"",
 					"foreach (var type in engineTypes)",
@@ -925,6 +948,7 @@ public class Unity
 			"{",
 				"public class "+unreserved(function.getName())+"Jobified : SystemBase",
 				"{",
+					"EndSimulationEntityCommandBufferSystem ecbSystem;",
 					foreach(function.getQueries().keySet(), q->"EntityQuery "+q+";"),
 					
 					iff(overlaps.size() != 0),
@@ -934,8 +958,16 @@ public class Unity
 					"",
 					"protected override void OnCreate()",
 					"{",
-						foreach(function.getQueries().entrySet(), e->
-						e.getKey()+" = GetEntityQuery("+foreach(e.getValue().entrySet(), c->"Read"+(c.getValue()?"Write":"Only")+"<"+jobComponent(c.getKey())+">()", ", ")+");"),
+						"ecbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();",
+						foreach(function.getQueries().entrySet(), e->lines
+						(
+							iff (e.getValue().isEmpty()),
+							e.getKey()+" = GetEntityQuery(new ComponentType[]{});",
+							end,
+							iff (!e.getValue().isEmpty()),
+							e.getKey()+" = GetEntityQuery("+foreach(e.getValue().entrySet(), c->"Read"+(c.getValue()?"Write":"Only")+"<"+jobComponent(c.getKey())+">()", ", ")+");",
+							end
+						)),
 						iff(overlaps.size() != 0),
 						"",
 						"physics = World.DefaultGameObjectInjectionWorld.GetExistingSystem<BuildPhysicsWorld>();",
@@ -947,6 +979,7 @@ public class Unity
 						"var job = new RegularJob",
 						"{",
 							"manager = EntityManager,",
+							"ecb = ecbSystem.CreateCommandBuffer(),",
 							"entityType = GetArchetypeChunkEntityType(),",
 							foreach(constants.keySet(), c->c+" = "+variable(c)+","),
 							foreach(function.getQueries().keySet(), q->"chunks_"+q+" = "+q+".CreateArchetypeChunkArray(TempJob),"),
@@ -958,7 +991,8 @@ public class Unity
 						"",
 						"if (SystemRunner.multithread)",
 						"{",
-							"job.Schedule();",
+							"var handle = job.Schedule();",
+							"ecbSystem.AddJobHandleForProducer(handle);",
 						"}",
 						"else",
 						"{",
@@ -970,6 +1004,7 @@ public class Unity
 					"protected struct RegularJob : IJob",
 					"{",
 						"public EntityManager manager;",
+						"public EntityCommandBuffer ecb;",
 						"public ArchetypeChunkEntityType entityType;",
 						foreach(constants.entrySet(), e->"public "+unity(e.getValue())+" "+e.getKey()+";"),
 						foreach(function.getQueries().keySet(), q->"[DeallocateOnJobCompletion] public NativeArray<ArchetypeChunk> chunks_"+q+";"),
@@ -1306,7 +1341,7 @@ public class Unity
 		else if (e instanceof Value)
 		{
 			var value = (Value) e;
-			return variable(value.getName());
+			return access(value.getName());
 		}
 		else if (e instanceof Cell)
 		{
@@ -1362,9 +1397,9 @@ public class Unity
 		case CEIL: namespaces.add("Unity.Mathematics"); return "math.ceil("+x+")";
 		case CLAMP: namespaces.add("Unity.Mathematics"); return "math.clamp("+x+", ("+y+").x, ("+y+").y)";
 		case COS: namespaces.add("Unity.Mathematics"); return "math.cos("+x+")";
-		case CREATE: return "GameObject.Instantiate<GameObject>("+x+")";
+		case CREATE: return jobified ? "ecb.Instantiate("+x+")" : "GameObject.Instantiate<GameObject>("+x+")";
 		case CROSS: namespaces.add("Unity.Mathematics"); return "((Vector3)math.cross("+x+","+y+"))";
-		case DESTROY: return "GameObject.Destroy("+x+")";
+		case DESTROY: return jobified ? "ecb.DestroyEntity(entity_"+x+")" : "GameObject.Destroy("+x+")";
 		case DISTANCE: namespaces.add("Unity.Mathematics"); return "math.distance("+x+", "+y+")";
 		case DIVISION: return x+" / "+y;
 		case DOT: namespaces.add("Unity.Mathematics"); return "math.dot("+x+", "+y+")";
@@ -1559,6 +1594,18 @@ public class Unity
 		else
 		{
 			return name;
+		}
+	}
+
+	private String access(String name)
+	{
+		if (jobified)
+		{
+			return name;
+		}
+		else
+		{
+			return variable(name);
 		}
 	}
 	
