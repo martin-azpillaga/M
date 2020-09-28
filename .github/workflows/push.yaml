@@ -4,14 +4,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Versions
-        run: |
-          node --version
-          yarn --version
-          python --version
       - name: Download repository
         uses: actions/checkout@v2
-      - name: Check other files
+      - name: Check file extensions
         run: |
           find . -type f \
           -not -wholename "*.git*" -and \
@@ -29,14 +24,14 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-      - name: Cache node modules
+      - name: Cache
         uses: actions/cache@v2
         with:
           path: |
             node_modules
             checkstyle-8.34-all.jar
           key: format
-      - name: Install node packages
+      - name: Install linters
         run: |
           npm install markdownlint-cli
           npm install npm-groovy-lint
@@ -85,15 +80,12 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: '13'
-      - name: Install eslint
-        run: |
-          npm install eslint
       - name: Build language server
         working-directory: Code/Language
         run: |
           mkdir m.ide m.ui
           gradle shadowJar
-      - name: Lint Java
+      - name: Check Java and Javascript
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -110,13 +102,13 @@ jobs:
           -Dsonar.java.binaries=Code/Language/build/classes \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.login=c1285d7b6c459b50e7eee08102a94f4b68bd70f9
-  build:
+  content:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Download repository
         uses: actions/checkout@v2
-      - name: Install vuepress
+      - name: Build documentation
         run: |
           sudo npm install -g vuepress
           sudo npm install -g reveal-md
@@ -172,9 +164,6 @@ jobs:
           mkdir m.ide m.ui
           gradle shadowJar
           cp build/libs/Language-ls-ls.jar ../Editor/ls.jar
-      - name: Build documentation
-        run: |
-          find . -name "*.md" | sort | xargs -d "\n" pandoc > Code/Editor/Documentation.html
       - name: Build tests
         run: |
           pandoc README.md -t json | node Automation/reader.js > Code/Editor/test.js
@@ -184,14 +173,14 @@ jobs:
         with:
           name: editor
           path: Code/Editor
-  test:
-    needs: build
+  reliability:
+    needs: content
     runs-on: ubuntu-latest
     timeout-minutes: 100
     steps:
       - name: Download repository
         uses: actions/checkout@v2
-      - name: Download IDE folder
+      - name: Download editor folder
         uses: actions/download-artifact@v2
         with:
           name: editor
@@ -213,132 +202,49 @@ jobs:
           yarn theia start --app-target browser workspace &
           Xvfb :3 &
           sleep 5 && xvfb-run yarn mocha test.js
-  packagingWindows:
-    needs: test
-    runs-on: windows-latest
-    timeout-minutes: 100
-    steps:
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '2.x'
-      - name: Download Editor folder
-        uses: actions/download-artifact@v2
-        with:
-          name: editor
-      - name: Install node 10
-        uses: actions/setup-node@v1
-        with:
-          node-version: '10.x'
-      - name: Add msbuild to PATH
-        uses: microsoft/setup-msbuild@v1.0.0
-      - name: Build Editor for electron
-        run: |
-          npm config set python python2.7
-          npm install -g yarn
-          yarn
-          yarn theia rebuild:electron
-          yarn theia build --app-target electron
-      - name: Package application
-        run: |
-          yarn electron-builder
-      - name: Upload Exe
-        if: ${{ matrix.os }} == 'windows-latest'
-        uses: actions/upload-artifact@v2
-        with:
-          name: windows
-          path: "dist\\m 0.2.0.exe"
-  packagingMac:
-    needs: test
-    runs-on: macos-latest
-    timeout-minutes: 100
-    steps:
-      - name: Download the editor folder
-        uses: actions/download-artifact@v2
-        with:
-          name: editor
-      - name: Install node 10
-        uses: actions/setup-node@v1
-        with:
-          node-version: '10.x'
-      - name: Install yarn
-        run: |
-          npm install -g yarn
-      - name: Build Editor for electron
-        run: |
-          yarn
-          yarn theia rebuild:electron
-          yarn theia build --app-target electron
-      - name: Package application
-        run: |
-          yarn electron-builder
-      - name: Upload dmg
-        if: ${{ matrix.os }} == 'macos-latest'
-        uses: actions/upload-artifact@v2
-        with:
-          name: mac
-          path: dist/m-0.2.0.dmg
-  packagingUbuntu:
-    needs: test
-    runs-on: ubuntu-latest
-    timeout-minutes: 100
-    steps:
-      - name: Download the editor folder
-        uses: actions/download-artifact@v2
-        with:
-          name: editor
-      - name: Install node 10
-        uses: actions/setup-node@v1
-        with:
-          node-version: '10.x'
-      - name: Install yarn
-        run: |
-          npm install -g yarn
-      - name: Build Editor for electron
-        run: |
-          yarn
-          yarn theia rebuild:electron
-          yarn theia build --app-target electron
-      - name: Package application
-        run: |
-          yarn electron-builder
-      - name: Upload AppImage
-        if: ${{ matrix.os }} == 'ubuntu-latest'
-        uses: actions/upload-artifact@v2
-        with:
-          name: linux
-          path: dist/m-0.2.0.AppImage
-  release:
-    if: ${{ github.ref == 'refs/heads/master' }}
-    needs: [packagingUbuntu, packagingWindows, packagingMac]
+  packaging:
+    needs: reliability
     runs-on: ubuntu-latest
     timeout-minutes: 50
     steps:
       - name: Download repository
         uses: actions/checkout@v2
+      - name: Download editor folder
+        uses: actions/download-artifact@v2
+        with:
+          name: editor
+      - name: Move language server
+        run: |
+          mv ls.jar Code/Extension/ls.jar
       - name: Install vsce
         run: |
           sudo npm install -g vsce
-      - name: Build VSCode extension
+      - name: Package VSCode extension
         working-directory: Code/Extension
         run: |
+          curl -o logo.png https://avatars2.githubusercontent.com/u/6147446?s=60&v=4
+          cp ../../README.md README.md
           sudo npm install
           vsce package -o m.vsix
       - name: Publish VSCode extension to marketplace
         working-directory: Code/Extension
         run: |
           vsce publish || exit 0
-      - name: Download Linux
+      - name: Upload VSCode extension to github artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: m.vsix
+          path: Code/Extension/m.vsix
+  release:
+    if: ${{ github.ref == 'refs/heads/master' }}
+    needs: packaging
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Download Extension
         uses: actions/download-artifact@v2
         with:
-          name: linux
-      - name: Download Windows
-        uses: actions/download-artifact@v2
-        with:
-          name: windows
-      - name: Download Windows
-        uses: actions/download-artifact@v2
-        with:
-          name: mac
+          name: m.vsix
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.0.0
@@ -349,39 +255,12 @@ jobs:
           release_name: Prerelease ${{ github.ref }}
           draft: true
           prerelease: true
-      - name: Upload appimage to release
+      - name: Upload VSCode to release
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./m-0.2.0.AppImage
-          asset_name: m.AppImage
-          asset_content_type: text/text
-      - name: Upload exe to release
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./m 0.2.0.exe
-          asset_name: m.exe
-          asset_content_type: text/text
-      - name: Upload dmg to release
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./m-0.2.0.dmg
-          asset_name: m.dmg
-          asset_content_type: text/text
-      - name: Upload vsix to release
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Code/Extension/m.vsix
+          asset_path: ./m.vsix
           asset_name: m.vsix
           asset_content_type: text/text
