@@ -622,6 +622,7 @@ public class Unity
 			"{",
 				"public class SystemRunner : SystemBase",
 				"{",
+					"public static bool dataOriented;",
 					"public static bool multithread;",
 					"public static Unity.Mathematics.Random random;",
 					"",
@@ -641,17 +642,21 @@ public class Unity
 						"",
 						"if (debuggers.Count == 0)",
 						"{",
-							foreach(systems, s->s.getName()+".Run(gameObjects);"),
+							"if (!dataOriented)",
+							"{",
+								foreach(systems, s->s.getName()+".Run(gameObjects);"),
+							"}",
 						"}",
 						"else if (debuggers.Count == 1)",
 						"{",
 							"var debugger = debuggers[0];",
 							"",
 							"multithread = debugger.multithread;",
+							"dataOriented = debugger.dataOriented;",
 							"",
 							foreach(systems, s->lines
 							(
-								"if (!multithread && debugger."+s.getName()+")",
+								"if (!dataOriented && debugger."+s.getName()+")",
 								"{",
 									s.getName()+".Run(gameObjects);",	
 								"}"
@@ -983,7 +988,7 @@ public class Unity
 							"entityType = GetArchetypeChunkEntityType(),",
 							foreach(constants.keySet(), c->c+" = "+variable(c)+","),
 							foreach(function.getQueries().keySet(), q->"chunks_"+q+" = "+q+".CreateArchetypeChunkArray(TempJob),"),
-							foreach(nativeComponents.entrySet(), e->e.getKey()+"Type = GetArchetypeChunkComponentType<"+jobComponent(e.getKey())+">("+e.getValue()+"),"),
+							foreach(nativeComponents.entrySet(), e->e.getKey()+"Type = GetArchetypeChunkComponentType<"+jobComponent(e.getKey())+">("+!e.getValue()+"),"),
 							iff(overlaps.size() != 0),
 							"collisionWorld = physics.PhysicsWorld.CollisionWorld,",
 							end,
@@ -1995,16 +2000,16 @@ public class Unity
 
 	private void clean(String root)
 	{
-		var components = new File(root+"/Components");
-		for (var file : components.listFiles())
-		{
-			if (file.getName().endsWith(".cs"))
-			{
-				file.delete();
-			}
-		}
-		var systems = new File(root+"/Systems");
-		for (var file : systems.listFiles())
+		cleanCSharpFiles(root+"/Components");
+		cleanCSharpFiles(root+"/Components/Jobified");
+		cleanCSharpFiles(root+"/Systems");
+		cleanCSharpFiles(root+"/Systems/Jobified");
+	}
+
+	private void cleanCSharpFiles(String path)
+	{
+		var directory = new File(path);
+		for (var file : directory.listFiles())
 		{
 			if (file.getName().endsWith(".cs"))
 			{
