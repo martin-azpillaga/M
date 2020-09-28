@@ -17,8 +17,7 @@
     "@theia/preview": "next",
     "@theia/search-in-workspace": "next",
     "@theia/terminal": "next",
-    "@theia/electron": "next",
-    "m": "./m"
+    "@theia/electron": "next"
   },
   "devDependencies": {
     "@theia/cli": "next",
