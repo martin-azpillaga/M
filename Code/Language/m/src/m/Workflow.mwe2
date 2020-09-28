@@ -15,8 +15,6 @@ Workflow
 			{
 				baseName = "m"
 				rootPath = rootPath
-				eclipsePlugin = { enabled = true }
-				createEclipseMetaData = true
 			}
 			code = CodeConfig
 			{
@@ -25,12 +23,16 @@ Workflow
 				preferXtendStubs = false
 			}
 		}
-		language = StandardLanguage
+		language = XtextGeneratorLanguage
 		{
 			name = "m.M"
 			fileExtensions = "m"
-			serializer = { generateStub = false	}
-			scopeProvider = { generateStub = false }
+
+			fragment = grammarAccess.GrammarAccessFragment2 {}
+			fragment = ecore.EMFGeneratorFragment2 {}
+			fragment = serializer.SerializerFragment2 {}
+			fragment = resourceFactory.ResourceFactoryFragment2 {}
+			fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
 		}
 	}
 }

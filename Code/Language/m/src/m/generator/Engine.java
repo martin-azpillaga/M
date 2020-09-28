@@ -2,7 +2,7 @@ package m.generator;
 
 public enum Engine
 {
-	Unity("Unity"), Unreal("Unreal"), Godot("Godot");
+	UNITY("Unity"), UNREAL("Unreal"), GODOT("Godot");
 
 	String name;
 

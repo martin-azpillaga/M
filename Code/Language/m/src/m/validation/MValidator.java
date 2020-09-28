@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.xtext.EcoreUtil2;
-import org.eclipse.xtext.validation.Check;
 
 import m.main.Game;
 import m.library.Library;
@@ -35,7 +34,7 @@ import m.validation.problems.ProblemMessage;
 import m.validation.problems.ProblemMessage.Severity;
 import m.validation.problems.errors.ReadOnly;
 
-public class MValidator extends AbstractMValidator
+public class MValidator
 {
 	Context context;
 	Map<Library,List<Problem>> map;
@@ -94,7 +93,6 @@ public class MValidator extends AbstractMValidator
 		return minProblemContext.getInferenceData();
 	}
 	
-	@Check
 	public void validate(File file)
 	{
 		if (!file.eResource().getErrors().isEmpty()) return;
@@ -163,8 +161,6 @@ public class MValidator extends AbstractMValidator
 		{
 			game = contexts.get(library).infer();
 		}
-		
-		reportProblems(problemMessages);
 	}
 	
 	void validate(Function function) {
@@ -284,25 +280,6 @@ public class MValidator extends AbstractMValidator
 			for (var argument : application.getArguments())
 			{
 				validate(argument);
-			}
-		}
-	}
-	
-	void reportProblems(List<ProblemMessage> messages)
-	{
-		for (var message : messages)
-		{
-			switch (message.severity)
-			{
-			case INFO:
-				info(message.message, message.source, message.feature);
-				break;
-			case WARNING:
-				warning(message.message, message.source, message.feature);
-				break;
-			case ERROR:
-				error(message.message, message.source, message.feature);
-				break;
 			}
 		}
 	}

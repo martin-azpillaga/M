@@ -2,6 +2,7 @@
 package m.generator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
@@ -15,7 +16,7 @@ public class Writer
 		YES, NO, END;
 	}
 
-	public static Keyword end = Keyword.END;
+	public static final Keyword end = Keyword.END;
 
 	private static String indent = "{";
 	private static String dedent = "}";
@@ -52,14 +53,7 @@ public class Writer
 
 	public static List<Object> lines(Object... lines)
 	{
-		var list = new ArrayList<Object>();
-
-		for (var line : lines)
-		{
-			list.add(line);
-		}
-
-		return list;
+		return Arrays.asList(lines);
 	}
 
 	public static void process(Object... lines)

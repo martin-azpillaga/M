@@ -40,9 +40,6 @@ jar {
     }
 }
 
-plugins.withId('war') {
-    webAppDirName = 'WebRoot'
-}
 apply plugin : 'eclipse'
 
 group = 'm'

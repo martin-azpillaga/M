@@ -2,7 +2,7 @@
   "name": "m-ls",
   "displayName": "M language server",
   "description": "Data-driven language for game developers",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "preview": true,
   "qna": false,
   "publisher": "azpillaga-world",
