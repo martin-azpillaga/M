@@ -7,19 +7,18 @@ repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
 }
-
 configurations {
     mwe2 {
         extendsFrom compile
     }
 }
 dependencies {
-    compile platform("org.eclipse.xtext:xtext-dev-bom:2.22.0")
-    compile "org.eclipse.xtext:org.eclipse.xtext:2.22.0"
-    compile "org.eclipse.xtext:org.eclipse.xtext.ide:2.22.0"
+    compile platform('org.eclipse.xtext:xtext-dev-bom:2.22.0')
+    compile 'org.eclipse.xtext:org.eclipse.xtext:2.22.0'
+    compile 'org.eclipse.xtext:org.eclipse.xtext.ide:2.22.0'
     mwe2 'org.eclipse.emf:org.eclipse.emf.mwe2.launch'
-    mwe2 "org.eclipse.xtext:org.eclipse.xtext.common.types:2.22.0"
-    mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:2.22.0"
+    mwe2 'org.eclipse.xtext:org.eclipse.xtext.common.types:2.22.0'
+    mwe2 'org.eclipse.xtext:org.eclipse.xtext.xtext.generator:2.22.0'
     mwe2 'org.eclipse.xtext:xtext-antlr-generator'
     annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.2.0'
 }
@@ -32,6 +31,7 @@ task generateXtextLanguage(type: JavaExec) {
     args += '-p'
     args += "rootPath=/${projectDir}"
 }
+compileJava.dependsOn(generateXtextLanguage)
 
 sourceCompatibility = '13'
 mainClassName = 'm.main.Main'
@@ -39,10 +39,8 @@ sourceSets {
     main {
         java.srcDirs = ['m/src', 'm/src-gen']
         resources.srcDirs = ['m/src', 'm/src-gen']
+        resources.exclude '**/*.g', '**/*.mwe2', '**/*.xtend', '**/*._trace'
     }
-}
-sourceSets.all {
-    resources.exclude '**/*.g', '**/*.mwe2', '**/*.xtend', '**/*._trace'
 }
 jar {
     from('model') {
@@ -52,21 +50,18 @@ jar {
         attributes 'Bundle-SymbolicName' : project.name
     }
 }
-
 compileJava {
     options.compilerArgs = [
-        "--release", "8"
+        '--release', '8'
     ]
 }
-
 shadowJar {
-
     from(project.convention.getPlugin(JavaPluginConvention).sourceSets.main.output)
     configurations = [project.configurations.runtime]
     exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'schema/*',
         '.options', '.api_description', '*.profile', '*.html', 'about.*', 'about_files/*',
         'plugin.xml', 'systembundle.properties', 'profile.list')
     append('plugin.properties')
-    baseName = "M"
-    classifier = ""
+    baseName = 'M'
+    classifier = ''
 }
