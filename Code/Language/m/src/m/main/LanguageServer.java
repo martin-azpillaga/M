@@ -593,12 +593,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		var semantic = node.getSemanticElement();
 		var grammatic = node.getGrammarElement();
 		
-		if (semantic.eContainer() instanceof BindingBlock && ((BindingBlock)semantic.eContainer()).getExpression() == semantic)
-		{
-			var x = 5;
-			x = x+x;
-		}
-		else if (semantic instanceof Cell || semantic instanceof Value && semantic.eContainer() instanceof Cell)
+		if (semantic instanceof Cell || semantic instanceof Value && semantic.eContainer() instanceof Cell)
 		{
 			Cell cell;
 			if (semantic instanceof Cell)
@@ -839,6 +834,10 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				statement = container;
 				container = temp;
 			}
+		}
+		else
+		{
+			
 		}
         
 		return CompletableFuture.supplyAsync(() -> Either.forLeft(result));

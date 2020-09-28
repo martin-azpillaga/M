@@ -809,7 +809,7 @@ public class Unity
 					"",
 					"protected override void OnStartRunning()",
 					"{",
-						"var entities = query.ToEntityArray(Allocator.Temp);",
+						"var entities = query.ToEntityArray(Allocator.TempJob);",
 						"",
 						"foreach (var entity in entities)",
 						"{",
@@ -1010,7 +1010,7 @@ public class Unity
 					"{",
 						"public EntityManager manager;",
 						"public EntityCommandBuffer ecb;",
-						"public ArchetypeChunkEntityType entityType;",
+						"[ReadOnly] public ArchetypeChunkEntityType entityType;",
 						foreach(constants.entrySet(), e->"public "+unity(e.getValue())+" "+e.getKey()+";"),
 						foreach(function.getQueries().keySet(), q->"[DeallocateOnJobCompletion] public NativeArray<ArchetypeChunk> chunks_"+q+";"),
 						foreach(nativeComponents.entrySet(), e->(e.getValue()?"":"[ReadOnly] ")+"public ArchetypeChunkComponentType<"+jobComponent(e.getKey())+"> "+e.getKey()+"Type;"),
@@ -2012,6 +2012,10 @@ public class Unity
 		for (var file : directory.listFiles())
 		{
 			if (file.getName().endsWith(".cs"))
+			{
+				file.delete();
+			}
+			if (file.getName().endsWith((".cs.meta")))
 			{
 				file.delete();
 			}
