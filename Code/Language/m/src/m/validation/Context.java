@@ -13,11 +13,12 @@ import java.util.Stack;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
-import m.generator.Game;
+import m.main.Game;
 import m.library.Library;
 import m.library.types.*;
 import m.m.*;
 import m.main.InferenceData;
+import m.main.UserFunction;
 import m.validation.problems.Problem;
 import m.validation.problems.errors.RedefinedSymbol;
 import m.validation.problems.errors.UndefinedSymbol;
@@ -297,24 +298,22 @@ public class Context {
 	
 	public Game infer()
 	{
-		var game = new Game();
+		var game = new Game(library);
 		
 		for (var component : userComponents.entrySet())
 		{
 			var type = inference.infer(component.getValue());
 			if (type != null)
 			{
-				game.components.put(component.getKey(), type);
+				game.addComponent(component.getKey(), type);
 			}
 		}
 		
 		for (var function : userFunctions.values())
 		{
-			game.systems.add(function);
+			var userFunction = new UserFunction(function, new FunctionType(null, AtomicType.UNIT));
+			game.addFunction(userFunction);
 		}
-		
-		game.library = library;
-		game.inference = inference;
 		
 		return game;
 	}

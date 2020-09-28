@@ -67,7 +67,6 @@ import org.eclipse.xtext.parser.IParser;
 
 import m.MStandaloneSetup;
 import m.generator.Engine;
-import m.generator.Game;
 import m.generator.MGenerator;
 import m.library.Library;
 import m.library.symbols.Component;
@@ -95,9 +94,9 @@ import m.validation.rules.ExpressionNode;
 
 public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer, LanguageClientAware, TextDocumentService, WorkspaceService
 {
-	List<Workspace> workspaces;
 	LanguageClient client;
-	
+	List<Workspace> workspaces;
+
 	IParser parser;
 	MValidator validator;
 	MGenerator generator;
@@ -408,8 +407,9 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				if (cell.getComponent() == value)
 				{
 					var standard = library.getComponent(value.getName());
-					var info = workspace.game.inference.info(cell);
-					var type = Library.ENGLISH.name(workspace.game.inference.infer(cell));
+
+					var info = workspace.game.inference.infer(cell);
+					var type = Library.ENGLISH.getName(workspace.game.inference.infer(cell));
 
 					if (info == null)
 					{
@@ -437,7 +437,16 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				else
 				{
 					var function = EcoreUtil2.getContainerOfType(cell, Function.class);
-					var query = workspace.game.queries.get(function).get(value.getName());
+					UserFunction userFunction = null;
+					for (var f : workspace.game.getFunctions())
+					{
+						if (f.getName() == function.getName())
+						{
+							userFunction = f;
+							break;
+						}
+					}
+					var query = userFunction.getQueries().get(value.getName());
 					
 					if (query == null)
 					{
@@ -459,11 +468,11 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 						{
 							if (standard == null)
 							{
-								result = "User variable\n\nType: " + library.name(type);
+								result = "User variable\n\nType: " + library.getName(type);
 							}
 							else
 							{
-								result = "Standard variable\n\nType: " + library.name(type);
+								result = "Standard variable\n\nType: " + library.getName(type);
 							}
 						}
 					}
@@ -480,7 +489,16 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			else
 			{
 				var function = EcoreUtil2.getContainerOfType(value, Function.class);
-				var query = workspace.game.queries.get(function).get(value.getName());
+				UserFunction userFunction = null;
+				for (var f : workspace.game.getFunctions())
+				{
+					if (f.getName() == function.getName())
+					{
+						userFunction = f;
+						break;
+					}
+				}
+				var query = userFunction.getQueries().get(value.getName());
 				
 				if (query == null)
 				{
@@ -502,11 +520,11 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 					{
 						if (standard == null)
 						{
-							result = "User value\n\nType: " + library.name(type);
+							result = "User value\n\nType: " + library.getName(type);
 						}
 						else
 						{
-							result = "Standard value\n\nType: " + library.name(type);
+							result = "Standard value\n\nType: " + library.getName(type);
 						}
 					}
 				}
@@ -526,7 +544,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			var standard = library.getFunction(binary.getOperator());
 			if (standard != null)
 			{
-				result = "Standard operator\n\nType: " + library.name(standard.getType());
+				result = "Standard operator\n\nType: " + library.getName(standard.getType());
 			}
 		}
 		else if (semantic instanceof Unary)
@@ -535,7 +553,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			var standard = library.getFunction(unary.getOperator());
 			if (standard != null)
 			{
-				result = "Standard operator\n\nType: " + library.name(standard.getType());
+				result = "Standard operator\n\nType: " + library.getName(standard.getType());
 			}
 		}
 		else if (semantic instanceof Application)
@@ -544,7 +562,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			var standard = library.getFunction(application.getName());
 			if (standard != null)
 			{
-				result = "Standard function\n\nType: " + library.name(standard.getType());
+				result = "Standard function\n\nType: " + library.getName(standard.getType());
 			}
 		}
 
@@ -575,12 +593,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		var semantic = node.getSemanticElement();
 		var grammatic = node.getGrammarElement();
 		
-		if (semantic.eContainer() instanceof BindingBlock && ((BindingBlock)semantic.eContainer()).getExpression() == semantic)
-		{
-			var x = 5;
-			x = x+x;
-		}
-		else if (semantic instanceof Cell || semantic instanceof Value && semantic.eContainer() instanceof Cell)
+		if (semantic instanceof Cell || semantic instanceof Value && semantic.eContainer() instanceof Cell)
 		{
 			Cell cell;
 			if (semantic instanceof Cell)
@@ -604,7 +617,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				}
                 var item = new CompletionItem(component);
 				item.setDocumentation(library.getDescription(library.getComponent(component)));
-				item.setDetail(library.name(workspace.game.components.get(component)));
+				item.setDetail(library.getName(workspace.game.components.get(component)));
                 item.setKind(CompletionItemKind.Class);
                 result.add(item);
             }
@@ -612,7 +625,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			{
                 var item = new CompletionItem(library.getName(component));
 				item.setDocumentation(library.getDescription(component));
-				item.setDetail(library.name(component.getType()));
+				item.setDetail(library.getName(component.getType()));
                 item.setKind(CompletionItemKind.Enum);
                 result.add(item);
 			}
@@ -647,7 +660,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				{
 					var name = ((BindingBlock) statement).getExpression().getName();
 					var item = new CompletionItem(name);
-					item.setDetail(library.name(AtomicType.ENTITY));
+					item.setDetail(library.getName(AtomicType.ENTITY));
 					item.setSortText("0"+name);
 					item.setKind(CompletionItemKind.Variable);
 					result.add(item);
@@ -686,7 +699,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				{
 					var name = ((BindingBlock) container).getExpression().getName();
 					var item = new CompletionItem(name);
-					item.setDetail(library.name(AtomicType.ENTITY));
+					item.setDetail(library.getName(AtomicType.ENTITY));
 					item.setSortText("0"+name);
 					item.setKind(CompletionItemKind.Variable);
 					result.add(item);
@@ -768,7 +781,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				{
 					var name = ((BindingBlock) container).getExpression().getName();
 					var item = new CompletionItem(name);
-					item.setDetail(library.name(AtomicType.ENTITY));
+					item.setDetail(library.getName(AtomicType.ENTITY));
 					item.setSortText("0"+name);
 					item.setKind(CompletionItemKind.Variable);
 					result.add(item);
@@ -822,6 +835,10 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				container = temp;
 			}
 		}
+		else
+		{
+			
+		}
         
 		return CompletableFuture.supplyAsync(() -> Either.forLeft(result));
     }
@@ -852,9 +869,9 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				var parameters = new ArrayList<ParameterInformation>();
 				for (var i = 0; i < type.getParameters().length; i++)
 				{
-					parameters.add(new ParameterInformation("Parameter "+i, library.name(type.getParameters()[i])));
+					parameters.add(new ParameterInformation("Parameter "+i, library.getName(type.getParameters()[i])));
 				}
-				var info = new SignatureInformation(name + " : " + library.name(type), library.getDescription(standard), parameters);
+				var info = new SignatureInformation(name + " : " + library.getName(type), library.getDescription(standard), parameters);
 				list.add(info);
 				help.setSignatures(list);
 				if (params.getContext().getTriggerCharacter() != null)
@@ -1033,7 +1050,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			}
 		}
 
-		var game = new Game();
+		var game = new Game(Library.ENGLISH);
 			
 		for (var component : totalComponents.entrySet())
 		{
@@ -1043,15 +1060,10 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		
 		for (var function : totalFunctions.values())
 		{
-			game.systems.add(function);
+			game.functions.add(new UserFunction(function, new FunctionType(null, AtomicType.UNIT)));
 		}
 
-		game.library = Library.ENGLISH;
 		game.inference = inference;
-		for (var function : game.systems)
-		{
-			game.queries.put(function, generator.collectQueries(function, game));
-		}
 
 		workspace.game = game;
 

@@ -47,7 +47,7 @@ public class IncompatibleTypes implements Problem
 				{
 					if (!types.contains(typing.getType()))
 					{
-						base += "\n" + library.name(typing.getType()) + " -> " + typing.getSymbol() + " : " + library.name(typing.getSymbol().getType());
+						base += "\n" + library.getName(typing.getType()) + " -> " + typing.getSymbol() + " : " + library.getName(typing.getSymbol().getType());
 						types.add(typing.getType());
 						errors.add(current);
 					}
