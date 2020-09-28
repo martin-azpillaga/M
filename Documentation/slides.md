@@ -157,3 +157,21 @@ I recommend you to check out the Developer Guide at minim.tools/M.
 Feel free to contact me at martin@minim.tools.
 
 Thanks for watching.
+
+## Description
+
+It's a research heavy project.
+I have rewritten the whole codebase at least three times, probably more.
+
+## Links
+
+[Build](https://github.com/martin-azpillaga/M/releases/latest/download/m.vsix)
+
+[Video](https://minim.tools/M#presentation-video)
+
+Email
+martin@minim.tools
+
+[Website](https://minim.tools/M)
+
+## Plan

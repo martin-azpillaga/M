@@ -1,6 +1,6 @@
 module.exports = {
     base: '/M/',
-    title: 'Project M',
+    title: 'M',
     description: 'A data-driven programming language for game developers',
     theme: 'yuu',
     themeConfig: {
