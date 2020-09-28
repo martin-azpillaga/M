@@ -106,7 +106,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ls
-          path: Code/Language/build/libs/Language-ls-ls.jar
+          path: Code/Language/build/libs/M.jar
   content:
     runs-on: ubuntu-latest
     needs: structure
@@ -174,7 +174,7 @@ jobs:
       - name: Build ide for browser
         working-directory: Tests
         run: |
-          cp ../Language-ls-ls.jar ls.jar
+          cp ../M.jar ls.jar
           yarn
           yarn theia build
       - name: Run tests
@@ -197,7 +197,7 @@ jobs:
           name: ls
       - name: Move language server
         run: |
-          mv Language-ls-ls.jar Code/Extension/ls.jar
+          mv M.jar Code/Extension/ls.jar
       - name: Install vsce
         run: |
           sudo npm install -g vsce
