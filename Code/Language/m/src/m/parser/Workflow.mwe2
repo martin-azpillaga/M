@@ -31,6 +31,7 @@ Workflow
 
 			fragment = grammarAccess.GrammarAccessFragment2 {}
 			fragment = ecore.EMFGeneratorFragment2 {}
+			fragment = serializer.SerializerFragment2 { generateStub = false }
 			fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
 		}
 	}

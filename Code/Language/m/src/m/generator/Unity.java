@@ -2010,6 +2010,10 @@ public class Unity
 	private void cleanCSharpFiles(String path)
 	{
 		var directory = new File(path);
+		if (!directory.exists())
+		{
+			return;
+		}
 		for (var file : directory.listFiles())
 		{
 			if (file.getName().endsWith(".cs"))
