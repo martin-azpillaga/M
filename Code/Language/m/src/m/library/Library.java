@@ -330,11 +330,11 @@ public enum Library
 		case EXP: return "e raised to the number";
 		case FLOOR: return "Highest integer lower or equal to the number";
 		case FRACTIONALPART: return "Fractional part of the number";
-		case GET_COLOR: return "Value of the property of the material of the entity";
-		case GET_INTEGER: return "Value of the property of the material of the entity";
-		case GET_KEYWORD: return "Value of the property of the material of the entity";
-		case GET_NUMBER: return "Value of the property of the material of the entity";
-		case GET_TEXTURE: return "Value of the property of the material of the entity";
+		case GET_COLOR: return "Value of the color property of the material";
+		case GET_INTEGER: return "Value of the integer property of the material";
+		case GET_KEYWORD: return "Value of the boolean property of the material";
+		case GET_NUMBER: return "Value of the number property of the material";
+		case GET_TEXTURE: return "Value of the texture property of the material";
 		case GREATER: return "True if the first number is higher than the second";
 		case GREATEROREQUAL: return "True if the first number is higher or equal to the second";
 		case HALT: return "Stop the execution";
@@ -378,12 +378,12 @@ public enum Library
 		case ROUND: return "The number rounded up or down";
 		case SCREENSHOT: return "Take a screenshot";
 		case SCREEN_OVERLAPS: return "All the entities whose colliders are overlaping the entity's colliders";
-		case SET_COLOR: return "Set the property of the material of the entity";
-		case SET_INTEGER: return "Set the property of the material of the entity";
-		case SET_KEYWORD: return "Set the property of the material of the entity";
-		case SET_NUMBER: return "Set the property of the material of the entity";
-		case SET_TEXTURE: return "Set the property of the material of the entity";
-		case SET_TRIGGER: return "Set the property of the material of the entity";
+		case SET_COLOR: return "Set the color property of the material";
+		case SET_INTEGER: return "Set the integer property of the material";
+		case SET_KEYWORD: return "Set the boolean property of the material";
+		case SET_NUMBER: return "Set the number property of the material";
+		case SET_TEXTURE: return "Set the texture property of the material";
+		case SET_TRIGGER: return "Set the property of the material";
 		case SIGN: return "1 if the number is positive or zero, -1 otherwise";
 		case SIN: return "Sine of the angle";
 		case SIZE: return "Size of the list of entities";
@@ -687,10 +687,7 @@ public enum Library
 			return "Problema honen izena ezarri gabe dago";
 		}
 	},
-	function ->
-	{
-		return "";
-	}
+	function ->	""
 	);
 	
 	Map<Value, String> valueToName;
@@ -733,8 +730,8 @@ public enum Library
 		nameToProblem = reverse(problems, problemTypes);
 
 		functionToDescription = forward(functionDescriptions, Function.values());
-		componentToDescription = new HashMap<Component,String>();
-		valueToDescription = new HashMap<Value,String>();
+		componentToDescription = new HashMap<>();
+		valueToDescription = new HashMap<>();
 	}
 	
 	private <A,B> HashMap<A,B> forward(java.util.function.Function<A,B> f, A[] values)

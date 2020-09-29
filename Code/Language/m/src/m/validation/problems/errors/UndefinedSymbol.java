@@ -13,8 +13,8 @@ import m.validation.problems.ProblemMessage.Severity;
 
 public class UndefinedSymbol implements Problem
 {
-	public EObject source;
-	public EStructuralFeature feature;
+	EObject source;
+	EStructuralFeature feature;
 	
 	public UndefinedSymbol(EObject source, EStructuralFeature feature)
 	{

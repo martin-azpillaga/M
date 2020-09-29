@@ -216,10 +216,11 @@ public class Unity
 	
 	private void resolvePackages()
 	{
-		if (fileSystem.isFile("Packages/manifest.json"))
+		var file = "Packages/manifest.json";
+		if (fileSystem.isFile(file))
 		{
 			var regenerate = false;
-			var current = fileSystem.readTextFile("Packages/manifest.json").toString();
+			var current = fileSystem.readTextFile(file).toString();
 			var manifest = new Gson().fromJson(current, PackageManifest.class);
 			var dependencies = manifest.dependencies;
 
@@ -246,7 +247,7 @@ public class Unity
 			if (regenerate)
 			{
 				var json = new Gson().toJson(manifest);
-				fileSystem.generateFile("Packages/manifest.json", json);
+				fileSystem.generateFile(file, json);
 			}
 		}
 		else
@@ -289,7 +290,7 @@ public class Unity
 			map.put("com.unity.modules.wind", "1.0.0");  
 			map.put("com.unity.modules.xr", "1.0.0");
 			var json = new Gson().toJson(new PackageManifest(map));
-			fileSystem.generateFile("Packages/manifest.json", json);
+			fileSystem.generateFile(file, json);
 		}
 	}
 

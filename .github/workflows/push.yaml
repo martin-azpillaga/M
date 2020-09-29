@@ -83,7 +83,6 @@ jobs:
       - name: Build language server
         working-directory: Code/Language
         run: |
-          mkdir m.ide m.ui
           gradle shadowJar
       - name: Check Java and Javascript
         env:

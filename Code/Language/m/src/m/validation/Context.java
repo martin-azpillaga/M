@@ -194,7 +194,6 @@ public class Context {
 					{
 						inference.bind(arguments[i], parameters.get(i), PARAMETER_ARGUMENT);
 					}
-					// Bind result with all the return statements
 				}
 				else
 				{
@@ -252,7 +251,6 @@ public class Context {
 						inference.type (source, new Typing(result, LIBRARY_FUNCTION, function));
 					}
 				}
-				// Check for type variables
 				for (var typeName : variables.entrySet())
 				{
 					var expressions = variables.get(typeName.getKey());

@@ -3,7 +3,7 @@ package m.validation.problems.errors;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Stack;
+import java.util.ArrayDeque;
 
 import m.library.Library;
 import m.library.types.Type;
@@ -28,7 +28,7 @@ public class IncompatibleTypes implements Problem
 		var list = new ArrayList<ProblemMessage>();
 		
 		var visited = new HashSet<ExpressionNode>();
-		var stack = new Stack<ExpressionNode>();
+		var stack = new ArrayDeque<ExpressionNode>();
 		var current = node;
 		stack.push(current);
 		

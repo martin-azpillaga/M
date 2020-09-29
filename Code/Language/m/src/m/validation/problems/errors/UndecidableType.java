@@ -3,7 +3,7 @@ package m.validation.problems.errors;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Stack;
+import java.util.ArrayDeque;
 
 import m.library.Library;
 import m.validation.problems.Problem;
@@ -27,20 +27,20 @@ public class UndecidableType implements Problem
 		var message = library.getProblem(this.getClass());
 		
 		var visited = new HashSet<ExpressionNode>();
-		var stack = new Stack<ExpressionNode>();
+		var stack = new ArrayDeque<ExpressionNode>();
 		
 		stack.push(node);
 		
 		while (!stack.isEmpty())
 		{
-			var node = stack.pop();
+			var n = stack.pop();
 
-			if (!visited.contains(node))
+			if (!visited.contains(n))
 			{
-				list.add(new ProblemMessage(Severity.ERROR, message, node.expression, null));
-				visited.add(node);
+				list.add(new ProblemMessage(Severity.ERROR, message, n.expression, null));
+				visited.add(n);
 				
-				for (var binding : node.bindings)
+				for (var binding : n.bindings)
 				{
 					if (!visited.contains(binding.node))
 					{
@@ -49,8 +49,6 @@ public class UndecidableType implements Problem
 				}
 			}
 		}
-		
-
 		return list;
 	}
 
