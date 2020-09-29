@@ -14,12 +14,12 @@ configurations {
 }
 dependencies {
     compile platform('org.eclipse.xtext:xtext-dev-bom:2.22.0')
-    compile "org.eclipse.xtext:org.eclipse.xtext:2.22.0"
-    compile "org.eclipse.xtext:org.eclipse.xtext.ide:2.22.0"
+    compile 'org.eclipse.xtext:org.eclipse.xtext:2.22.0'
+    compile 'org.eclipse.xtext:org.eclipse.xtext.ide:2.22.0'
     annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.2.0'
     mwe2 'org.eclipse.emf:org.eclipse.emf.mwe2.launch'
-    mwe2 "org.eclipse.xtext:org.eclipse.xtext.common.types:2.22.0"
-    mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:2.22.0"
+    mwe2 'org.eclipse.xtext:org.eclipse.xtext.common.types:2.22.0'
+    mwe2 'org.eclipse.xtext:org.eclipse.xtext.xtext.generator:2.22.0'
     mwe2 'org.eclipse.xtext:xtext-antlr-generator'
 }
 sourceSets {
@@ -41,7 +41,7 @@ task generateXtextLanguage(type: JavaExec) {
     main = 'org.eclipse.emf.mwe2.launch.runtime.Mwe2Launcher'
     classpath = configurations.mwe2
     inputs.file('m/src/m/parser/M.xtext')
-    args += 'm/src/m/parser/Workflow.mwe2'
+    args += 'm/src/m/parser/GenerateParser.mwe2'
     args += '-p'
     args += "rootPath=/${projectDir}"
 }
