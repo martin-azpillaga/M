@@ -26,6 +26,7 @@ Workflow
 		language = XtextGeneratorLanguage
 		{
 			name = "m.M"
+			grammarUri = "m/src/m/parser/M.xtext"
 			fileExtensions = "m"
 
 			fragment = grammarAccess.GrammarAccessFragment2 {}
