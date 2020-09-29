@@ -1,6 +1,6 @@
 plugins {
-    id 'java'
     id 'com.github.johnrengelman.shadow' version '5.1.0'
+    id 'java'
     id 'application'
 }
 repositories {
@@ -14,13 +14,27 @@ configurations {
 }
 dependencies {
     compile platform('org.eclipse.xtext:xtext-dev-bom:2.22.0')
-    compile 'org.eclipse.xtext:org.eclipse.xtext:2.22.0'
-    compile 'org.eclipse.xtext:org.eclipse.xtext.ide:2.22.0'
-    mwe2 'org.eclipse.emf:org.eclipse.emf.mwe2.launch'
-    mwe2 'org.eclipse.xtext:org.eclipse.xtext.common.types:2.22.0'
-    mwe2 'org.eclipse.xtext:org.eclipse.xtext.xtext.generator:2.22.0'
-    mwe2 'org.eclipse.xtext:xtext-antlr-generator'
+    compile "org.eclipse.xtext:org.eclipse.xtext:2.22.0"
+    compile "org.eclipse.xtext:org.eclipse.xtext.ide:2.22.0"
     annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.2.0'
+    mwe2 'org.eclipse.emf:org.eclipse.emf.mwe2.launch'
+    mwe2 "org.eclipse.xtext:org.eclipse.xtext.common.types:2.22.0"
+    mwe2 "org.eclipse.xtext:org.eclipse.xtext.xtext.generator:2.22.0"
+    mwe2 'org.eclipse.xtext:xtext-antlr-generator'
+}
+sourceSets {
+    main {
+        java.srcDirs = ['m/src', 'm/src-gen']
+        resources.srcDirs = ['m/src', 'm/src-gen']
+        resources.exclude '**/*.g', '**/*.mwe2', '**/*.xtend', '**/*._trace'
+    }
+}
+mainClassName = 'm.main.Main'
+sourceCompatibility = '13'
+compileJava {
+    options.compilerArgs = [
+        '--release', '8'
+    ]
 }
 
 task generateXtextLanguage(type: JavaExec) {
@@ -33,35 +47,13 @@ task generateXtextLanguage(type: JavaExec) {
 }
 compileJava.dependsOn(generateXtextLanguage)
 
-sourceCompatibility = '13'
-mainClassName = 'm.main.Main'
-sourceSets {
-    main {
-        java.srcDirs = ['m/src', 'm/src-gen']
-        resources.srcDirs = ['m/src', 'm/src-gen']
-        resources.exclude '**/*.g', '**/*.mwe2', '**/*.xtend', '**/*._trace'
-    }
-}
-jar {
-    from('model') {
-        into('model')
-    }
-    manifest {
-        attributes 'Bundle-SymbolicName' : project.name
-    }
-}
-compileJava {
-    options.compilerArgs = [
-        '--release', '8'
-    ]
-}
 shadowJar {
     from(project.convention.getPlugin(JavaPluginConvention).sourceSets.main.output)
     configurations = [project.configurations.runtime]
     exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'schema/*',
         '.options', '.api_description', '*.profile', '*.html', 'about.*', 'about_files/*',
         'plugin.xml', 'systembundle.properties', 'profile.list')
-    append('plugin.properties')
     baseName = 'M'
     classifier = ''
+    append('plugin.properties')
 }
