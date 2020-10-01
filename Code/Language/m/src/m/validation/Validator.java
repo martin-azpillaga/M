@@ -6,14 +6,13 @@ import static m.m.MPackage.Literals.BINDING_BLOCK__NAME;
 import static m.m.MPackage.Literals.BLOCK__NAME;
 import static m.m.MPackage.Literals.UNARY__OPERATOR;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.StringReader;
+
+import com.google.inject.Inject;
 
 import org.eclipse.xtext.EcoreUtil2;
+import org.eclipse.xtext.parser.IParser;
 
-import m.main.Game;
 import m.library.Library;
 import m.m.Application;
 import m.m.Assignment;
@@ -29,150 +28,76 @@ import m.m.Statement;
 import m.m.Unary;
 import m.m.Value;
 import m.main.InferenceData;
-import m.validation.problems.Problem;
-import m.validation.problems.ProblemMessage;
-import m.validation.problems.ProblemMessage.Severity;
-import m.validation.problems.errors.ReadOnly;
+import m.validation.problems.errors.SyntaxError;
 
-public class MValidator
+public class Validator
 {
+	@Inject IParser parser;
 	Context context;
-	Map<Library,List<Problem>> map;
-	Map<Library, Context> contexts;
-	public static Game game;
-	Library currentLibrary;
-	List<Problem> currentProblems;
-	
-	public Game getGame()
+
+	public InferenceData validate(String text)
 	{
-		return game;
-	}
-	
-	public InferenceData localValidate(File file)
-	{
-		map = new HashMap<>();
-		contexts = new HashMap<>();
-		
+		var parseResult = parser.parse(new StringReader(text));		
+		var file = (File) parseResult.getRootASTElement();
+
+		var minProblems = Integer.MAX_VALUE;
+		Context minProblemContext = null;
+
 		for (var library : Library.values())
 		{
-			currentProblems = new ArrayList<Problem>();
-			context = new Context(currentProblems, library);
-			map.put(library, currentProblems);
-			contexts.put(library, context);
-			this.currentLibrary = library;
-			
-			for (var function : file.getFunctions())
+			context = new Context(library);
+			validate(file);
+
+			if (context.problems.size() < minProblems)
 			{
-				context.declareFunction(function);
-			}
-			// Can become a single pass if done with delayed checking
-			for (var cell : EcoreUtil2.getAllContentsOfType(file, Cell.class))
-			{
-				context.declareComponent(cell);
-			}
-			for (var function : file.getFunctions())
-			{
-				validate(function);
+				minProblems = context.problems.size();
+				minProblemContext = context;
 			}
 		}
-		
-		var minProblems = Integer.MAX_VALUE;
-		Library library = null;
-		
-		for (var entry : map.entrySet())
+
+		var result = minProblemContext.getInferenceData();
+		result.text = text;
+		result.rootNode = parseResult.getRootNode();
+		result.rootObject = file;
+		for (var problem : parseResult.getSyntaxErrors())
 		{
-			if (entry.getValue().size() < minProblems)
-			{
-				minProblems = entry.getValue().size();
-				library = entry.getKey();
-			}
+			result.problems.add(new SyntaxError(problem.getSyntaxErrorMessage().getMessage()));
 		}
-		
-		var minProblemContext = contexts.get(library);
-		
-		return minProblemContext.getInferenceData();
+
+		return result;
 	}
-	
-	public void validate(File file)
+
+	void validate(File file)
 	{
-		if (!file.eResource().getErrors().isEmpty()) return;
-		
-		
-		map = new HashMap<>();
-		contexts = new HashMap<>();
-		
-		for (var library : Library.values())
+		for (var function : file.getFunctions())
 		{
-			currentProblems = new ArrayList<Problem>();
-			context = new Context(currentProblems, library);
-			map.put(library, currentProblems);
-			contexts.put(library, context);
-			this.currentLibrary = library;
-			
-			for (var function : file.getFunctions())
-			{
-				context.declareFunction(function);
-			}
-			// Can become a single pass if done with delayed checking
-			for (var cell : EcoreUtil2.getAllContentsOfType(file, Cell.class))
-			{
-				context.declareComponent(cell);
-			}
-			for (var function : file.getFunctions())
-			{
-				validate(function);
-			}
-			
-			context.checkConsistency();
+			context.declareFunction(function);
 		}
-		
-		var minProblems = Integer.MAX_VALUE;
-		List<Problem> list = null;
-		Library library = null;
-		
-		for (var entry : map.entrySet())
+		for (var cell : EcoreUtil2.getAllContentsOfType(file, Cell.class))
 		{
-			if (entry.getValue().size() < minProblems)
-			{
-				minProblems = entry.getValue().size();
-				list = entry.getValue();
-				library = entry.getKey();
-			}
+			context.declareComponent(cell);
 		}
-		
-		var problemMessages = new ArrayList<ProblemMessage>();
-		
-		var hasErrors = false;
-		if (list != null)
+
+		for (var function : file.getFunctions())
 		{
-			for (var problem : list)
-			{
-				for (var message : problem.messages(library))
-				{
-					problemMessages.add(message);
-					if (message.severity == Severity.ERROR)
-					{
-						hasErrors = true;
-					}
-				}
-			}
-		}
-		if (!hasErrors)
-		{
-			game = contexts.get(library).infer();
+			validate(function);
 		}
 	}
 	
-	void validate(Function function) {
+	private void validate(Function function)
+	{
 		context.push();
-		for (var statement : function.getStatements()) {
+		for (var statement : function.getStatements())
+		{
 			validate(statement);
 		}
 		context.pop();
 	}
 	
-	void validate(Statement statement) {
-		if (statement instanceof Block) {
+	private void validate(Statement statement)
+	{
+		if (statement instanceof Block)
+		{
 			var block = (Block) statement;
 			var name = block.getName();
 			var expression = block.getExpression();
@@ -221,10 +146,6 @@ public class MValidator
 			{
 				var value = (Value) atom;
 				
-				if (currentLibrary.getValue(value.getName()) != null)
-				{
-					currentProblems.add(new ReadOnly(value));
-				}
 				context.declareVariable(value);
 			}
 			else
@@ -234,7 +155,8 @@ public class MValidator
 		}
 	}
 	
-	void validate(Expression expression) {
+	private void validate(Expression expression)
+	{
 		if (expression instanceof Value)
 		{
 			var value = (Value) expression;
@@ -276,7 +198,6 @@ public class MValidator
 			var arguments = application.getArguments().toArray(new Expression[0]);
 			
 			context.accessFunction(name, arguments, application, APPLICATION__NAME);
-
 			for (var argument : application.getArguments())
 			{
 				validate(argument);

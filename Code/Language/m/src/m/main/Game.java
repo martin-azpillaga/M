@@ -7,14 +7,14 @@ import java.util.Map;
 
 import m.library.Library;
 import m.library.types.*;
-import m.validation.InferenceGraph;
+import m.validation.Inference;
 
 public class Game
 {
 	Library library;
 	Map<String, Type> components;
 	List<UserFunction> functions;
-	public InferenceGraph inference;
+	public Inference inference;
 
 	public Game(Library library)
 	{

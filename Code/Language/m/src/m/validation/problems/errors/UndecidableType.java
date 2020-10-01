@@ -42,9 +42,9 @@ public class UndecidableType implements Problem
 				
 				for (var binding : n.bindings)
 				{
-					if (!visited.contains(binding.node))
+					if (!visited.contains(binding.getNode()))
 					{
-						stack.push(binding.node);
+						stack.push(binding.getNode());
 					}
 				}
 			}

@@ -4,7 +4,7 @@ import org.eclipse.xtext.generator.JavaIoFileSystemAccess;
 import com.google.inject.Inject;
 import m.main.Game;
 
-public class MGenerator
+public class Generator
 {
 	@Inject
 	JavaIoFileSystemAccess fileSystem;

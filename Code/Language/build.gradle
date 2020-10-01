@@ -1,7 +1,7 @@
 plugins {
-    id 'com.github.johnrengelman.shadow' version '5.1.0'
     id 'java'
     id 'application'
+    id 'com.github.johnrengelman.shadow' version '5.1.0'
 }
 repositories {
     mavenCentral()
@@ -53,7 +53,7 @@ shadowJar {
     exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'schema/*',
         '.options', '.api_description', '*.profile', '*.html', 'about.*', 'about_files/*',
         'plugin.xml', 'systembundle.properties', 'profile.list')
+    append('plugin.properties')
     baseName = 'M'
     classifier = ''
-    append('plugin.properties')
 }

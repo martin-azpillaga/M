@@ -60,9 +60,9 @@ public class IncompatibleTypes implements Problem
 				
 				for (var binding : current.bindings)
 				{
-					if (!visited.contains(binding.node))
+					if (!visited.contains(binding.getNode()))
 					{
-						stack.push(binding.node);
+						stack.push(binding.getNode());
 					}
 				}
 			}

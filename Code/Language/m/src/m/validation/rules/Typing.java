@@ -9,17 +9,20 @@ public class Typing
 	TypingReason reason;
 	Symbol symbol;
 	
-	public Typing(Type type, TypingReason reason, Symbol symbol) {
+	public Typing(Type type, TypingReason reason, Symbol symbol)
+	{
 		this.type = type;
 		this.symbol = symbol;
 		this.reason = reason;
 	}
 	
-	public Symbol getSymbol() {
+	public Symbol getSymbol()
+	{
 		return symbol;
 	}
 	
-	public TypingReason getReason() {
+	public TypingReason getReason()
+	{
 		return reason;
 	}
 	

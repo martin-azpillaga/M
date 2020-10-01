@@ -4,7 +4,6 @@ import static m.m.MPackage.Literals.FUNCTION__NAME;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.file.Files;
@@ -67,7 +66,7 @@ import org.eclipse.xtext.parser.IParser;
 
 import m.MStandaloneSetup;
 import m.generator.Engine;
-import m.generator.MGenerator;
+import m.generator.Generator;
 import m.library.Library;
 import m.library.symbols.Component;
 import m.library.types.AtomicType;
@@ -82,8 +81,8 @@ import m.m.Function;
 import m.m.Statement;
 import m.m.Unary;
 import m.m.Value;
-import m.validation.InferenceGraph;
-import m.validation.MValidator;
+import m.validation.Inference;
+import m.validation.Validator;
 import m.validation.problems.Problem;
 import m.validation.problems.ProblemMessage.Severity;
 import m.validation.problems.errors.RedefinedSymbol;
@@ -98,9 +97,9 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 	List<Workspace> workspaces;
 
 	IParser parser;
-	MValidator validator;
-	MGenerator generator;
-    
+	Validator validator;
+	Generator generator;
+	
     
 	// 1 Connection
 	
@@ -115,8 +114,8 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 	public CompletableFuture<InitializeResult> initialize(InitializeParams params)
 	{
 		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
-		validator = injector.getInstance(MValidator.class);
-		generator = injector.getInstance(MGenerator.class);
+		validator = injector.getInstance(Validator.class);
+		generator = injector.getInstance(Generator.class);
 		parser = injector.getInstance(IParser.class);
 
         var workspaceFolders = new WorkspaceFoldersOptions();
@@ -988,7 +987,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			}
 		}
 		
-		var inference = new InferenceGraph(totalNodes);
+		var inference = new Inference(totalNodes);
 		var problems = inference.check();
 		
 		for (var problem : problems)
@@ -1109,6 +1108,29 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 	{
 		var diagnostics = new ArrayList<Diagnostic>();
 
+		/*
+		for (var syntaxError : parseResult.getSyntaxErrors())
+		{
+			var character = character(fileText, syntaxError.getOffset());
+			var endCharacter = character(fileText, syntaxError.getEndOffset());
+			
+			var position = new Position(syntaxError.getStartLine()-1, character);
+			var positionEnd = new Position(syntaxError.getStartLine()-1, Math.max(endCharacter, character+1));
+			
+			var range = new Range(position, positionEnd);
+			
+			var message = syntaxError.getSyntaxErrorMessage().getMessage();
+			
+			if (message.equals("mismatched input '<EOF>' expecting '}'"))
+			{
+				message = "Expecting a statement or }";
+			}
+
+			data.problems.add(new SyntaxError(message));
+			
+			result.add(new Diagnostic(range, message));
+		}*/
+
 		for (var problem : problems)
 		{
 			if (problem instanceof SyntaxError)
@@ -1143,59 +1165,13 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 	
 	
 	
-	private List<Diagnostic> localInference(String f, Workspace workspace, String fileText)
+	private List<Diagnostic> localInference(String file, Workspace workspace, String text)
 	{
-		var result = new ArrayList<Diagnostic>();
+		var data = validator.validate(text);
 
-		var data = new InferenceData();
+		workspace.files.put(file, data);
 		
-		var parseResult = parser.parse(new StringReader(fileText));
-		
-		
-		var file = (m.m.File) parseResult.getRootASTElement();
-		
-		if (file == null)
-		{
-			data.text = fileText;
-			workspace.files.put(f, data);
-		}
-		else
-		{
-			data = validator.localValidate(file);
-			data.rootObject = file;
-			data.rootNode = parseResult.getRootNode();
-			data.text = fileText;
-
-			result.addAll(toDiagnostics(data.problems, fileText));
-		}
-
-
-		for (var syntaxError : parseResult.getSyntaxErrors())
-		{
-			var character = character(fileText, syntaxError.getOffset());
-			var endCharacter = character(fileText, syntaxError.getEndOffset());
-			
-			var position = new Position(syntaxError.getStartLine()-1, character);
-			var positionEnd = new Position(syntaxError.getStartLine()-1, Math.max(endCharacter, character+1));
-			
-			var range = new Range(position, positionEnd);
-			
-			var message = syntaxError.getSyntaxErrorMessage().getMessage();
-			
-			if (message.equals("mismatched input '<EOF>' expecting '}'"))
-			{
-				message = "Expecting a statement or }";
-			}
-
-			data.problems.add(new SyntaxError(message));
-			
-			result.add(new Diagnostic(range, message));
-		}
-
-			
-		workspace.files.put(f, data);
-		
-		return result;
+		return toDiagnostics(data.problems, text);
 	}
 
 	private void generateCode(Game game, Workspace workspace)

@@ -1,13 +1,24 @@
 package m.validation.rules;
 
-public class Binding {
-	public BindingReason reason;
-	public ExpressionNode node;
+public class Binding
+{
+	BindingReason reason;
+	ExpressionNode node;
 	
 	public Binding(ExpressionNode node, BindingReason reason)
 	{
 		this.node = node;
 		this.reason = reason;
+	}
+
+	public BindingReason getReason()
+	{
+		return reason;
+	}
+
+	public ExpressionNode getNode()
+	{
+		return node;
 	}
 	
 	public enum BindingReason
@@ -18,5 +29,4 @@ public class Binding {
 		RESULT_RETURN,
 		POLYMORPHISM
 	}
-
 }

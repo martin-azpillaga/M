@@ -7,7 +7,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import static m.generator.Writer.Keyword.*;
+import static m.generator.Writer.Keyword.YES;
+import static m.generator.Writer.Keyword.NO;
+import static m.generator.Writer.Keyword.END;
 
 public class Writer 
 {
