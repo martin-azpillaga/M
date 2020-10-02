@@ -45,10 +45,10 @@ public class IncompatibleTypes implements Problem
 				
 				for (var typing : current.typings)
 				{
-					if (!types.contains(typing.getType()))
+					if (!types.contains(typing.type))
 					{
-						base += "\n" + library.getName(typing.getType()) + " -> " + typing.getSymbol() + " : " + library.getName(typing.getSymbol().getType());
-						types.add(typing.getType());
+						base += "\n" + library.getName(typing.type) + " -> " + typing.symbol + " : " + library.getName(typing.symbol.getType());
+						types.add(typing.type);
 						errors.add(current);
 					}
 				}

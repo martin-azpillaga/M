@@ -4,8 +4,8 @@ import static m.library.types.AtomicType.NUMBER;
 
 import m.library.types.Type;
 
-public enum Value implements Symbol{
-	
+public enum Value implements Symbol
+{	
 	EPSILON(NUMBER),
 	PI(NUMBER),
 	E(NUMBER),
@@ -18,11 +18,13 @@ public enum Value implements Symbol{
 	
 	Type type;
 	
-	Value (Type type) {
+	Value (Type type)
+	{
 		this.type = type;
 	}
 	
-	public Type getType() {
+	public Type getType()
+	{
 		return type;
 	}
 }

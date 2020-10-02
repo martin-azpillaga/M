@@ -4,8 +4,8 @@ import static m.library.types.AtomicType.*;
 import m.library.types.AtomicType;
 import m.library.types.Type;
 
-public enum Component implements Symbol{
-	
+public enum Component implements Symbol
+{	
 	POSITION(NUMBER3),
 	ROTATION(QUATERNION),
 	SCALE(NUMBER3),
@@ -69,11 +69,13 @@ public enum Component implements Symbol{
 	
 	Type type;
 	
-	Component (Type type) {
+	Component (Type type)
+	{
 		this.type = type;
 	}
 	
-	public Type getType() {
+	public Type getType()
+	{
 		return type;
 	}
 }

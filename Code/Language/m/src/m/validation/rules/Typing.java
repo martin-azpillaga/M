@@ -5,30 +5,15 @@ import m.library.types.*;
 
 public class Typing
 {
-	Type type;
-	TypingReason reason;
-	Symbol symbol;
+	public final Type type;
+	public final TypingReason reason;
+	public final Symbol symbol;
 	
 	public Typing(Type type, TypingReason reason, Symbol symbol)
 	{
 		this.type = type;
 		this.symbol = symbol;
 		this.reason = reason;
-	}
-	
-	public Symbol getSymbol()
-	{
-		return symbol;
-	}
-	
-	public TypingReason getReason()
-	{
-		return reason;
-	}
-	
-	public Type getType()
-	{
-		return type;
 	}
 	
 	public enum TypingReason

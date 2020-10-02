@@ -7,7 +7,8 @@ import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
 
-public enum Function implements Symbol{
+public enum Function implements Symbol
+{
 	ABS(NUMBER, NUMBER),
 	SIGN(NUMBER, NUMBER),
 	CEIL(NUMBER, NUMBER),
@@ -149,11 +150,13 @@ public enum Function implements Symbol{
 	
 	Type type;
 	
-	Function (Type returnType, Type... parameters) {
+	Function (Type returnType, Type... parameters)
+	{
 		this.type = new FunctionType(parameters, returnType);
 	}
 	
-	public Type getType() {
+	public Type getType()
+	{
 		return type;
 	}
 }

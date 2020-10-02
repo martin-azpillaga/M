@@ -76,7 +76,7 @@ public class Unity
 	Library library;
 	IFileSystemAccess2 fileSystem;
 	
-	Set<String> namespaces = new HashSet<>();
+	Set<String> namespaces;
 	UserFunction currentFunction;
 	boolean jobified;
 	HashSet<String> variables;
@@ -112,11 +112,12 @@ public class Unity
 	public void generate(Game game, IFileSystemAccess2 fileSystem)
 	{
 		this.game = game;
-		this.library = game.getLibrary();
+		this.library = game.library;
 		this.fileSystem = fileSystem;
-		this.variables = new HashSet<String>();
+		this.variables = new HashSet<>();
 		this.stack = new Stack<>();
-		this.overlapNames = new HashMap<Application, String>();
+		this.overlapNames = new HashMap<>();
+		this.namespaces = new HashSet<>();
 		
 		resolvePackages();
 		
@@ -124,7 +125,7 @@ public class Unity
 		
 		resolveAssembly();
 
-		for (var component : game.getComponents().entrySet())
+		for (var component : game.components.entrySet())
 		{
 			fileSystem.generateFile
 			(
@@ -135,10 +136,10 @@ public class Unity
 
 		var systems = new ArrayList<UserFunction>();
 
-		for (var function : game.getFunctions())
+		for (var function : game.functions)
 		{
-			var type = function.getType();
-			if (type.getParameters() == null && type.getReturnType() == UNIT)
+			var type = function.type;
+			if (type.parameterTypes == null && type.returnType == UNIT)
 			{
 				systems.add(function);
 				fileSystem.generateFile
@@ -192,7 +193,7 @@ public class Unity
 		);
 
 		jobified = true;
-		for (var component : game.getComponents().entrySet())
+		for (var component : game.components.entrySet())
 		{
 			fileSystem.generateFile
 			(
@@ -200,10 +201,10 @@ public class Unity
 				generateDataComponent(component.getKey(), component.getValue())
 			);
 		}
-		for (var function : game.getFunctions())
+		for (var function : game.functions)
 		{
-			var type = function.getType();
-			if (type.getParameters() == null && type.getReturnType() == UNIT)
+			var type = function.type;
+			if (type.parameterTypes == null && type.returnType == UNIT)
 			{
 				fileSystem.generateFile
 				(
@@ -433,7 +434,7 @@ public class Unity
 					foreach(systems, s->lines
 					(
 						"public bool "+s.getName()+" = true;",
-						foreach(s.getQueries().keySet(), q->"[SerializeField] List<GameObject> "+s.getName()+"_"+q+" = new List<GameObject>();"),
+						foreach(s.queries.keySet(), q->"[SerializeField] List<GameObject> "+s.getName()+"_"+q+" = new List<GameObject>();"),
 						iff(!systems.isEmpty() && s != systems.get(systems.size()-1)),
 						"[Space]",
 						end
@@ -458,7 +459,7 @@ public class Unity
 					"{",
 						foreach(systems, s->lines
 						(
-							foreach(s.getQueries().entrySet(), q->lines
+							foreach(s.queries.entrySet(), q->lines
 							(
 								s.getName()+"_"+q.getKey()+".Clear();"
 							))
@@ -470,7 +471,7 @@ public class Unity
 						"{",
 							foreach(systems, s->lines
 							(
-								foreach(s.getQueries().entrySet(), q->lines
+								foreach(s.queries.entrySet(), q->lines
 								(
 									iff (!q.getValue().isEmpty()),
 									"if ("+foreach(q.getValue().keySet(), c->"go.GetComponent<"+component(c)+">()", " && ")+")",
@@ -517,7 +518,7 @@ public class Unity
 					"{",
 						foreach(systems, s->lines
 						(
-							foreach(s.getQueries().keySet(), q->"{"+s.getName()+"_"+q+", new List<Type>{"+foreach(s.getQueries().get(q).keySet(),c->"typeof("+component(c)+")",", ")+"}},")
+							foreach(s.queries.keySet(), q->"{"+s.getName()+"_"+q+", new List<Type>{"+foreach(s.queries.get(q).keySet(),c->"typeof("+component(c)+")",", ")+"}},")
 						)),
 					"};",
 					"int selected;",
@@ -599,7 +600,7 @@ public class Unity
 				"",
 				"enum Query",
 				"{",
-					foreach(systems, s->foreach(s.getQueries().keySet(),q->s.getName()+"_"+q+","," ")),
+					foreach(systems, s->foreach(s.queries.keySet(),q->s.getName()+"_"+q+","," ")),
 				"}",
 			"}"
 		);
@@ -692,7 +693,7 @@ public class Unity
 			"{",
 				"protected override void OnUpdate()",
 				"{",
-					foreach(game.getComponents().entrySet(), e->lines
+					foreach(game.components.entrySet(), e->lines
 					(
 						iff(e.getValue() == ENTITY),
 						"Entities.ForEach(("+component(e.getKey())+" component) =>",
@@ -742,7 +743,7 @@ public class Unity
 				"{",
 					"var entity = GetPrimaryEntity(root);",
 					"",
-					foreach(game.getComponents().entrySet(), e->lines
+					foreach(game.components.entrySet(), e->lines
 					(
 					"var "+unreserved(e.getKey())+" = root.GetComponent<"+component(e.getKey())+">();",
 					"if ("+unreserved(e.getKey())+")",
@@ -880,7 +881,7 @@ public class Unity
 		}
 
 		var extraComponents = extraComponents(function);
-		var queries = function.getQueries();
+		var queries = function.queries;
 
 		for (var entry : extraComponents.entrySet())
 		{
@@ -898,7 +899,7 @@ public class Unity
 		var nativeComponents = new HashMap<String,Boolean>();
 		var hybridComponents = new HashMap<String,Boolean>();
 
-		for (var componentSet : function.getQueries().values())
+		for (var componentSet : function.queries.values())
 		{
 			for (var entry : componentSet.entrySet())
 			{
@@ -937,7 +938,7 @@ public class Unity
 		namespaces.add("static Unity.Entities.ComponentType");
 		
 		currentFunction = function;
-		overlapNames = new HashMap<Application,String>();
+		overlapNames = new HashMap<>();
 
 		var overlaps = overlaps(function);
 
@@ -955,7 +956,7 @@ public class Unity
 				"public class "+unreserved(function.getName())+"Jobified : SystemBase",
 				"{",
 					"EndSimulationEntityCommandBufferSystem ecbSystem;",
-					foreach(function.getQueries().keySet(), q->"EntityQuery "+q+";"),
+					foreach(function.queries.keySet(), q->"EntityQuery "+q+";"),
 					
 					iff(overlaps.size() != 0),
 					"",
@@ -965,7 +966,7 @@ public class Unity
 					"protected override void OnCreate()",
 					"{",
 						"ecbSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();",
-						foreach(function.getQueries().entrySet(), e->lines
+						foreach(function.queries.entrySet(), e->lines
 						(
 							iff (e.getValue().isEmpty()),
 							e.getKey()+" = GetEntityQuery(new ComponentType[]{});",
@@ -988,7 +989,7 @@ public class Unity
 							"ecb = ecbSystem.CreateCommandBuffer(),",
 							"entityType = GetArchetypeChunkEntityType(),",
 							foreach(constants.keySet(), c->c+" = "+variable(c)+","),
-							foreach(function.getQueries().keySet(), q->"chunks_"+q+" = "+q+".CreateArchetypeChunkArray(TempJob),"),
+							foreach(function.queries.keySet(), q->"chunks_"+q+" = "+q+".CreateArchetypeChunkArray(TempJob),"),
 							foreach(nativeComponents.entrySet(), e->e.getKey()+"Type = GetArchetypeChunkComponentType<"+jobComponent(e.getKey())+">("+!e.getValue()+"),"),
 							iff(overlaps.size() != 0),
 							"collisionWorld = physics.PhysicsWorld.CollisionWorld,",
@@ -1013,7 +1014,7 @@ public class Unity
 						"public EntityCommandBuffer ecb;",
 						"[ReadOnly] public ArchetypeChunkEntityType entityType;",
 						foreach(constants.entrySet(), e->"public "+unity(e.getValue())+" "+e.getKey()+";"),
-						foreach(function.getQueries().keySet(), q->"[DeallocateOnJobCompletion] public NativeArray<ArchetypeChunk> chunks_"+q+";"),
+						foreach(function.queries.keySet(), q->"[DeallocateOnJobCompletion] public NativeArray<ArchetypeChunk> chunks_"+q+";"),
 						foreach(nativeComponents.entrySet(), e->(e.getValue()?"":"[ReadOnly] ")+"public ArchetypeChunkComponentType<"+jobComponent(e.getKey())+"> "+e.getKey()+"Type;"),
 						iff(overlaps.size() != 0),
 						"public CollisionWorld collisionWorld;",
@@ -1043,7 +1044,7 @@ public class Unity
 		namespaces.add("System.Collections.Generic");
 
 		currentFunction = function;
-		overlapNames = new HashMap<Application,String>();
+		overlapNames = new HashMap<>();
 
 		var lines = lines
 		(
@@ -1096,9 +1097,9 @@ public class Unity
 				var a = block.getExpression().getName();
 				var extras = extraComponents(currentFunction);
 				var components = new ArrayList<String>();
-				if (currentFunction.getQueries().containsKey(a))
+				if (currentFunction.queries.containsKey(a))
 				{
-					components.addAll(currentFunction.getQueries().get(a).keySet());
+					components.addAll(currentFunction.queries.get(a).keySet());
 				}
 				if (extras.containsKey(a))
 				{
@@ -1114,7 +1115,7 @@ public class Unity
 					var nativeComponents = new HashSet<String>();
 					var hybridComponents = new HashSet<String>();
 
-					for (var component : currentFunction.getQueries().get(a).keySet())
+					for (var component : currentFunction.queries.get(a).keySet())
 					{
 						if (valueType(component))
 						{
@@ -1266,7 +1267,7 @@ public class Unity
 					code = "(int)("+code+")";
 				}
 				
-				if (currentFunction.getQueries().containsKey(entity))
+				if (currentFunction.queries.containsKey(entity))
 				{
 					if (jobified)
 					{
@@ -1376,7 +1377,10 @@ public class Unity
 	
 	private String application(m.library.symbols.Function standard, List<Expression> args)
 	{
-		String x = "",y = "",z = "";
+		var x = "";
+		var y = "";
+		var z = "";
+
 		if (!args.isEmpty())
 		{
 			x = code(args.get(0));
@@ -1519,7 +1523,7 @@ public class Unity
 		for (var application : EcoreUtil2.getAllContentsOfType(function, Application.class))
 		{
 			var name = application.getName();
-			var standard = game.getLibrary().getFunction(name);
+			var standard = game.library.getFunction(name);
 			if (standard == SET_TRIGGER || standard == IN_STATE || standard == ACTIVATE_PARAMETER || standard == DEACTIVATE_PARAMETER )
 			{
 				var entity = ((Value)application.getArguments().get(0)).getName();
@@ -2049,7 +2053,7 @@ public class Unity
 		}
 		else
 		{
-			return valueType(game.getComponents().get(component));
+			return valueType(game.components.get(component));
 		}
 	}
 }
@@ -2078,10 +2082,15 @@ class AssemblyDefinition
 
 class PackageManifest
 {
-	public Map<String,String> dependencies;
+	Map<String,String> dependencies;
 
 	public PackageManifest(Map<String,String> dependencies)
 	{
 		this.dependencies = dependencies;
+	}
+
+	public Map<String,String> getDependencies()
+	{
+		return dependencies;
 	}
 }

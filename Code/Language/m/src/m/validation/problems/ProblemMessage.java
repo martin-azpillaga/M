@@ -5,10 +5,10 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 
 public class ProblemMessage
 {
-	public EObject source;
-	public EStructuralFeature feature;
-	public String message;
-	public Severity severity;
+	public final EObject source;
+	public final EStructuralFeature feature;
+	public final String message;
+	public final Severity severity;
 	
 	public ProblemMessage(Severity severity, String message, EObject source, EStructuralFeature feature)
 	{

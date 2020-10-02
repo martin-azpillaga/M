@@ -829,17 +829,17 @@ public enum Library
 		}
 		else if (type instanceof TypeVariable)
 		{
-			return ((TypeVariable) type).getName();
+			return ((TypeVariable) type).name;
 		}
 		else if (type instanceof FunctionType)
 		{
 			var functionType = (FunctionType) type;
 			var result = new ArrayList<String>();
-			for (var p : functionType.getParameters())
+			for (var p : functionType.parameterTypes)
 			{
 				result.add(getName(p));
 			}
-			return String.join(" × ", result) + " -> " + getName(functionType.getReturnType());
+			return String.join(" × ", result) + " -> " + getName(functionType.returnType);
 		}
 		else
 		{

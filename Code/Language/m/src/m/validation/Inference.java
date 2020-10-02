@@ -59,7 +59,7 @@ public class Inference
 					
 					for (var typing : node.typings)
 					{
-						types.add(typing.getType());
+						types.add(typing.type);
 					}
 					
 					for (var binding : node.bindings)

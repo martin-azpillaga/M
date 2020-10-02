@@ -5,9 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.emf.ecore.EObject;
+import org.eclipse.xtext.nodemodel.INode;
+
 import m.m.Cell;
 import m.m.Expression;
+import m.m.Function;
 import m.main.InferenceData;
+import m.validation.problems.Problem;
 import m.validation.rules.Binding;
 import m.validation.rules.Binding.BindingReason;
 import m.validation.rules.ExpressionNode;
@@ -55,19 +60,16 @@ public class LocalInference
 		return node;
     }
     
-    public InferenceData getInferenceData(Map<String, Cell> components)
+    public InferenceData buildData(String text, INode rootNode, EObject file, Map<String, Cell> cells, Map<String,Function> functions, List<Problem> problems)
 	{
-		var data = new InferenceData();
-		
-		data.nodes.addAll(this.list);
-		
-		for (var component : components.entrySet())
+        var components = new HashMap<String, ExpressionNode>();
+        for (var cell : cells.entrySet())
 		{
-			var node = map.get(component.getValue());
+			var node = map.get(cell.getValue());
 			
-			data.components.put(component.getKey(), node);
-		}
-		
-		return data;
+			components.put(cell.getKey(), node);
+        }
+        
+        return new InferenceData(text, rootNode, file, list, components, functions, problems);
 	}
 }

@@ -7,9 +7,9 @@ import m.m.Expression;
 
 public class ExpressionNode
 {
-	public Expression expression;
-	public List<Binding> bindings;
-	public List<Typing> typings;
+	public final Expression expression;
+	public final List<Binding> bindings;
+	public final List<Typing> typings;
 	
 	public ExpressionNode(Expression expression)
 	{

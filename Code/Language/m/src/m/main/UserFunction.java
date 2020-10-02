@@ -15,8 +15,8 @@ import m.library.types.FunctionType;
 
 public class UserFunction extends FunctionImpl
 {
-    FunctionType type;
-    Map<String,HashMap<String,Boolean>> queries;
+    public final FunctionType type;
+    public final Map<String,HashMap<String,Boolean>> queries;
 
     public UserFunction(Function function, FunctionType type)
     {
@@ -24,22 +24,12 @@ public class UserFunction extends FunctionImpl
         this.parameters = function.getParameters();
         this.statements = function.getStatements();
         this.type = type;
-        collectQueries();
-    }
-
-    public FunctionType getType()
-    {
-        return type;
-    }
-
-    public Map<String,HashMap<String,Boolean>> getQueries()
-    {
-        return queries;
-    }
-
-    private void collectQueries()
+        this.queries = collectQueries();
+	}
+	
+    private HashMap<String,HashMap<String,Boolean>> collectQueries()
 	{
-		queries = new HashMap<String, HashMap<String,Boolean>>();
+		var queries = new HashMap<String,HashMap<String,Boolean>>();
 		
 		for (var binding : EcoreUtil2.getAllContentsOfType(this, BindingBlock.class))
 		{
@@ -79,6 +69,8 @@ public class UserFunction extends FunctionImpl
 				setComponentAccess(name, component, false);
 			}
 		}
+
+		return queries;
 	}
 	
 	private void setComponentAccess(String entity, String component, boolean writeAccess)

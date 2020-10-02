@@ -1,23 +1,13 @@
 package m.library.types;
 
-public class FunctionType implements Type {
-	
-	Type[] parameters;
-	Type returnType;
+public class FunctionType implements Type
+{
+	public final Type[] parameterTypes;
+	public final Type returnType;
 	
 	public FunctionType(Type[] parameters, Type returnType)
 	{
-		this.parameters = parameters;
+		this.parameterTypes = parameters;
 		this.returnType = returnType;
-	}
-	
-	public Type[] getParameters()
-	{
-		return parameters;
-	}
-	
-	public Type getReturnType()
-	{
-		return returnType;
 	}
 }

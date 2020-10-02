@@ -12,6 +12,7 @@ import java.util.Stack;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.xtext.nodemodel.INode;
 
 import m.library.Library;
 import m.library.types.*;
@@ -41,7 +42,7 @@ public class Context
 	public Context(Library library)
 	{
 		this.inference = new LocalInference();
-		this.problems = new ArrayList<Problem>();
+		this.problems = new ArrayList<>();
 		this.library = library;
 		
 		this.userVariables = new HashMap<>();
@@ -49,7 +50,7 @@ public class Context
 		this.userComponents = new HashMap<>();
 		
 		this.stack = new Stack<>();
-		this.accessedValues = new HashSet<Value>();
+		this.accessedValues = new HashSet<>();
 	}
 	
 	public void declareVariable(Value value)
@@ -118,8 +119,6 @@ public class Context
 		}
 	}
 	
-	
-	
 	public void accessVariable(Value value)
 	{
 		if (value == null) return;
@@ -184,10 +183,10 @@ public class Context
 		{
 			var type = (FunctionType) standard.getType();
 			
-			var parameterTypes = type.getParameters();
-			var returnType = type.getReturnType();
+			var parameterTypes = type.parameterTypes;
+			var returnType = type.returnType;
 			
-			var variables = new HashMap<String, ArrayList<Expression>>();
+			var typeVariables = new HashMap<String, ArrayList<Expression>>();
 			
 			if (parameterTypes.length == arguments.length)
 			{
@@ -196,12 +195,12 @@ public class Context
 					if (parameterTypes[i] instanceof TypeVariable)
 					{
 						var typeVariable = (TypeVariable) parameterTypes[i];
-						var typeName = typeVariable.getName();
-						if (!variables.containsKey(typeName))
+						var typeName = typeVariable.name;
+						if (!typeVariables.containsKey(typeName))
 						{
-							variables.put(typeName, new ArrayList<>());
+							typeVariables.put(typeName, new ArrayList<>());
 						}
-						variables.get(typeName).add(arguments[i]);
+						typeVariables.get(typeName).add(arguments[i]);
 					}
 					else
 					{
@@ -213,21 +212,21 @@ public class Context
 					if (returnType instanceof TypeVariable)
 					{
 						var typeVariable = (TypeVariable) returnType;
-						var typeName = typeVariable.getName();
-						if (!variables.containsKey(typeName))
+						var typeName = typeVariable.name;
+						if (!typeVariables.containsKey(typeName))
 						{
-							variables.put(typeName, new ArrayList<>());
+							typeVariables.put(typeName, new ArrayList<>());
 						}
-						variables.get(typeName).add(source);
+						typeVariables.get(typeName).add(source);
 					}
 					else
 					{
 						inference.type (source, new Typing(returnType, LIBRARY_FUNCTION, standard));
 					}
 				}
-				for (var typeName : variables.entrySet())
+				for (var typeName : typeVariables.entrySet())
 				{
-					var expressions = variables.get(typeName.getKey());
+					var expressions = typeVariables.get(typeName.getKey());
 					for (var i = 1; i < expressions.size(); i++)
 					{
 						inference.bind(expressions.get(0), expressions.get(i), POLYMORPHISM);
@@ -265,7 +264,6 @@ public class Context
 		}
 	}
 	
-	
 	public void push()
 	{
 		stack.push(new HashMap<>(userVariables));
@@ -286,14 +284,9 @@ public class Context
 		}
 		userVariables = popped;
 	}
-	
 
-
-	public InferenceData getInferenceData()
+	public InferenceData buildData(String text, INode node, File file)
 	{
-		var result = inference.getInferenceData(userComponents);
-		result.functions.putAll(userFunctions);
-		result.problems = problems;
-		return result;
+		return inference.buildData(text, node, file, userComponents, userFunctions, problems);
 	}
 }

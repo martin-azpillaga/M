@@ -20,9 +20,9 @@ public class Writer
 
 	public static final Keyword end = Keyword.END;
 
-	private static String indent = "{";
-	private static String dedent = "}";
-	private static String indentationString = "\t";
+	private static final String indent = "{";
+	private static final String dedent = "}";
+	private static final String indentationString = "\t";
 
 	private static int indentation;
 	private static StringBuilder builder;

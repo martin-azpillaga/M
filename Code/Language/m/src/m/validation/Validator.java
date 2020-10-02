@@ -55,10 +55,7 @@ public class Validator
 			}
 		}
 
-		var result = minProblemContext.getInferenceData();
-		result.text = text;
-		result.rootNode = parseResult.getRootNode();
-		result.rootObject = file;
+		var result = minProblemContext.buildData(text, parseResult.getRootNode(), file);
 		for (var problem : parseResult.getSyntaxErrors())
 		{
 			result.problems.add(new SyntaxError(problem.getSyntaxErrorMessage().getMessage()));

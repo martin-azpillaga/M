@@ -11,40 +11,16 @@ import m.validation.Inference;
 
 public class Game
 {
-	Library library;
-	Map<String, Type> components;
-	List<UserFunction> functions;
-	public Inference inference;
+	public final Library library;
+	public final Map<String, Type> components;
+	public final List<UserFunction> functions;
+	public final Inference inference;
 
-	public Game(Library library)
+	public Game(Library library, Inference inference)
 	{
 		this.library = library;
 		this.components = new HashMap<>();
 		this.functions = new ArrayList<>();
-	}
-
-	public Library getLibrary()
-	{
-		return library;
-	}
-
-	public Map<String, Type> getComponents()
-	{
-		return components;
-	}
-
-	public List<UserFunction> getFunctions()
-	{
-		return functions;
-	}
-
-	public void addComponent(String name, Type type)
-	{
-		components.put(name, type);
-	}
-
-	public void addFunction(UserFunction function)
-	{
-		functions.add(function);
+		this.inference = inference;
 	}
 }

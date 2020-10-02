@@ -437,7 +437,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				{
 					var function = EcoreUtil2.getContainerOfType(cell, Function.class);
 					UserFunction userFunction = null;
-					for (var f : workspace.game.getFunctions())
+					for (var f : workspace.game.functions)
 					{
 						if (f.getName() == function.getName())
 						{
@@ -445,7 +445,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 							break;
 						}
 					}
-					var query = userFunction.getQueries().get(value.getName());
+					var query = userFunction.queries.get(value.getName());
 					
 					if (query == null)
 					{
@@ -489,7 +489,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			{
 				var function = EcoreUtil2.getContainerOfType(value, Function.class);
 				UserFunction userFunction = null;
-				for (var f : workspace.game.getFunctions())
+				for (var f : workspace.game.functions)
 				{
 					if (f.getName() == function.getName())
 					{
@@ -497,7 +497,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 						break;
 					}
 				}
-				var query = userFunction.getQueries().get(value.getName());
+				var query = userFunction.queries.get(value.getName());
 				
 				if (query == null)
 				{
@@ -720,7 +720,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				}
 				else
 				{
-					statements = new ArrayList<Statement>();
+					statements = new ArrayList<>();
 				}
 
 				for (var s : statements)
@@ -802,7 +802,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				}
 				else
 				{
-					statements = new ArrayList<Statement>();
+					statements = new ArrayList<>();
 				}
 
 				for (var s : statements)
@@ -866,9 +866,9 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			{
 				var type = (FunctionType) standard.getType();
 				var parameters = new ArrayList<ParameterInformation>();
-				for (var i = 0; i < type.getParameters().length; i++)
+				for (var i = 0; i < type.parameterTypes.length; i++)
 				{
-					parameters.add(new ParameterInformation("Parameter "+i, library.getName(type.getParameters()[i])));
+					parameters.add(new ParameterInformation("Parameter "+i, library.getName(type.parameterTypes[i])));
 				}
 				var info = new SignatureInformation(name + " : " + library.getName(type), library.getDescription(standard), parameters);
 				list.add(info);
@@ -955,14 +955,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				{
 					var bindingA = new Binding(existing, BindingReason.SAME_COMPONENT);
 					var bindingB = new Binding(data.components.get(component), BindingReason.SAME_COMPONENT);
-					var crossReference = new CrossReference();
-					crossReference.fileA = currentFile;
-					crossReference.nodeA = data.components.get(component);
-					crossReference.bindingA = bindingA;
-					
-					crossReference.fileB = definedIn.get(component);
-					crossReference.nodeB = existing;
-					crossReference.bindingB = bindingB;
+					var crossReference = new CrossReference(currentFile, data.components.get(component), bindingA, definedIn.get(component), existing, bindingB);
 					
 					crossReferences.add(crossReference);
 					
@@ -1049,7 +1042,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			}
 		}
 
-		var game = new Game(Library.ENGLISH);
+		var game = new Game(Library.ENGLISH, inference);
 			
 		for (var component : totalComponents.entrySet())
 		{
@@ -1061,8 +1054,6 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		{
 			game.functions.add(new UserFunction(function, new FunctionType(null, AtomicType.UNIT)));
 		}
-
-		game.inference = inference;
 
 		workspace.game = game;
 
@@ -1187,9 +1178,9 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				{
 					for (var engine : Engine.values())
 					{
-						if (line.startsWith(engine.getName()))
+						if (line.startsWith(engine.name))
 						{
-							var output = line.substring((engine.getName()+": ").length());
+							var output = line.substring((engine.name+": ").length());
 							if (output.startsWith("./"))
 							{
 								output = output.replace(".", workspace.root);
@@ -1208,7 +1199,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		{
 			for (var engine : Engine.values())
 			{
-				var defaultPath = Paths.get(workspace.root, "Output", engine.getName()).toString();
+				var defaultPath = Paths.get(workspace.root, "Output", engine.name).toString();
 				generator.generate(game, engine, defaultPath);
 			}
 		}

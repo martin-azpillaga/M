@@ -1,7 +1,5 @@
 package m.main;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,11 +12,22 @@ import m.validation.rules.ExpressionNode;
 
 public class InferenceData
 {
-	public List<ExpressionNode> nodes = new ArrayList<>();
-	public Map<String, ExpressionNode> components = new HashMap<>();
-	public Map<String, Function> functions = new HashMap<>();
-	public List<Problem> problems = new ArrayList<>();
-	public EObject rootObject;
-	public String text;
-	public INode rootNode;
+	public final String text;
+	public final INode rootNode;
+	public final EObject rootObject;
+	public final List<ExpressionNode> nodes;
+	public final Map<String, ExpressionNode> components;
+	public final Map<String, Function> functions;
+	public final List<Problem> problems;
+
+	public InferenceData(String text, INode rootNode, EObject rootObject, List<ExpressionNode> nodes, Map<String, ExpressionNode> components, Map<String, Function> functions, List<Problem> problems)
+	{
+		this.text = text;
+		this.rootNode = rootNode;
+		this.rootObject = rootObject;
+		this.nodes = nodes;
+		this.components = components;
+		this.functions = functions;
+		this.problems = problems;
+	}
 }
