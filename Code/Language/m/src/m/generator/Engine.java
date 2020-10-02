@@ -4,10 +4,10 @@ public enum Engine
 {
 	UNITY("Unity"), UNREAL("Unreal"), GODOT("Godot");
 
-	public final String name;
+	public final String identifier;
 
 	Engine(String name)
 	{
-		this.name = name;
+		this.identifier = name;
 	}
 }

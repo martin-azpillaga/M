@@ -20,14 +20,19 @@ public class Writer
 
 	public static final Keyword end = Keyword.END;
 
-	private static final String indent = "{";
-	private static final String dedent = "}";
-	private static final String indentationString = "\t";
+	private static final String INDENT = "{";
+	private static final String DEDENT = "}";
+	private static final String INDENTATION_STRING = "\t";
 
 	private static int indentation;
 	private static StringBuilder builder;
 	private static boolean skipping;
 
+	private Writer()
+	{
+		
+	}
+	
 	public static <T> List<Object> foreach(Collection<T> collection, Function<T,Object> function)
 	{
 		var list = new ArrayList<Object>();
@@ -105,7 +110,7 @@ public class Writer
 		{
 			return;
 		}
-		else if (line instanceof String && ((String)line).startsWith(dedent))
+		else if (line instanceof String && ((String)line).startsWith(DEDENT))
 		{
 			indentation--;
 		}
@@ -113,7 +118,7 @@ public class Writer
 		indentation();
 		builder.append(line);
 		builder.append("\n");
-		if (line.equals(indent))
+		if (line.equals(INDENT))
 		{
 			indentation++;
 		}
@@ -123,7 +128,7 @@ public class Writer
 	{
 		for (var i = 0; i < indentation; i++)
 		{
-			builder.append(indentationString);
+			builder.append(INDENTATION_STRING);
 		}
 	}
 }

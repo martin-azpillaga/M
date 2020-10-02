@@ -1,11 +1,11 @@
 package m.validation;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
 
 import m.library.types.Type;
 import m.m.Expression;
@@ -18,13 +18,13 @@ public class Inference
 {
 	List<ExpressionNode> list;
 	Map<Expression, ExpressionNode> map;
-	Map<ExpressionNode, Type> inference;
+	Map<ExpressionNode, Type> result;
 	
 	public Inference(List<ExpressionNode> nodes)
 	{
 		this.list = nodes;
 		this.map = new HashMap<>();
-		this.inference = new HashMap<>();
+		this.result = new HashMap<>();
 	}
 	
 	public List<Problem> check()
@@ -33,9 +33,9 @@ public class Inference
 		
 		var index = 0;
 		var visited = new ArrayList<ExpressionNode>();
-		var stack = new Stack<ExpressionNode>();
+		var stack = new ArrayDeque<ExpressionNode>();
 		
-		HashSet<Type> types = new HashSet<>();
+		HashSet<Type> types;
 		
 		for (var root : list)
 		{
@@ -50,7 +50,7 @@ public class Inference
 				continue;
 			}
 		
-			while (!stack.empty())
+			while (!stack.isEmpty())
 			{
 				var node = stack.pop();
 				if (!visited.contains(node))
@@ -64,15 +64,15 @@ public class Inference
 					
 					for (var binding : node.bindings)
 					{
-						if (!visited.contains(binding.getNode()))
+						if (!visited.contains(binding.node))
 						{
-							stack.push(binding.getNode());
+							stack.push(binding.node);
 						}
 					}
 				}
 			}
 			
-			if (types.size() == 0)
+			if (types.isEmpty())
 			{
 				problems.add(new UndecidableType(root));
 			}
@@ -82,7 +82,7 @@ public class Inference
 				
 				for (var i = index; i < visited.size(); i++)
 				{
-					inference.put(visited.get(i), type);
+					result.put(visited.get(i), type);
 				}
 			}
 			else if (types.size() > 1)
@@ -96,7 +96,7 @@ public class Inference
 	
 	public Type infer(Expression a)
 	{
-		for (var entry : inference.entrySet())
+		for (var entry : result.entrySet())
 		{
 			if (a == entry.getKey().expression)
 			{
@@ -108,7 +108,7 @@ public class Inference
 
 	public ExpressionNode info(Expression a)
 	{
-		for (var entry : inference.entrySet())
+		for (var entry : result.entrySet())
 		{
 			if (a == entry.getKey().expression)
 			{
@@ -120,6 +120,6 @@ public class Inference
 	
 	public Type infer(ExpressionNode node)
 	{
-		return inference.get(node);
+		return result.get(node);
 	}	
 }

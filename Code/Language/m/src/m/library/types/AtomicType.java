@@ -27,5 +27,6 @@ public enum AtomicType implements Type
 	ANIMATOR,
 	
 	ENTITY,
-	ENTITY_LIST;
+	ENTITY_LIST
+	;
 }

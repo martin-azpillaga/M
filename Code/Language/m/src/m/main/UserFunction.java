@@ -29,15 +29,15 @@ public class UserFunction extends FunctionImpl
 	
     private HashMap<String,HashMap<String,Boolean>> collectQueries()
 	{
-		var queries = new HashMap<String,HashMap<String,Boolean>>();
+		var result = new HashMap<String,HashMap<String,Boolean>>();
 		
 		for (var binding : EcoreUtil2.getAllContentsOfType(this, BindingBlock.class))
 		{
 			var entity = binding.getExpression().getName();
 			
-			if (!queries.containsKey(entity))
+			if (!result.containsKey(entity))
 			{
-				queries.put(entity, new HashMap<>());
+				result.put(entity, new HashMap<>());
 			}
 		}
 		
@@ -55,14 +55,7 @@ public class UserFunction extends FunctionImpl
 			if (container instanceof Assignment)
 			{
 				var assignment = (Assignment) container;
-				if (cell == assignment.getAtom())
-				{
-					setComponentAccess(name, component, true);
-				}
-				else
-				{
-					setComponentAccess(name, component, false);
-				}
+				setComponentAccess(name, component, cell == assignment.getAtom());
 			}
 			else
 			{
@@ -70,7 +63,7 @@ public class UserFunction extends FunctionImpl
 			}
 		}
 
-		return queries;
+		return result;
 	}
 	
 	private void setComponentAccess(String entity, String component, boolean writeAccess)

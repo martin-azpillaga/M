@@ -91,7 +91,7 @@ import m.validation.rules.Binding;
 import m.validation.rules.Binding.BindingReason;
 import m.validation.rules.ExpressionNode;
 
-public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer, LanguageClientAware, TextDocumentService, WorkspaceService
+public class Server implements org.eclipse.lsp4j.services.LanguageServer, LanguageClientAware, TextDocumentService, WorkspaceService
 {
 	LanguageClient client;
 	List<Workspace> workspaces;
@@ -340,7 +340,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			}
 			else
 			{
-				client.publishDiagnostics(new PublishDiagnosticsParams("file://"+entry.getKey(), new ArrayList<Diagnostic>()));
+				client.publishDiagnostics(new PublishDiagnosticsParams("file://"+entry.getKey(), new ArrayList<>()));
 			}
 		}
 	}
@@ -439,7 +439,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 					UserFunction userFunction = null;
 					for (var f : workspace.game.functions)
 					{
-						if (f.getName() == function.getName())
+						if (f.getName().equals(function.getName()))
 						{
 							userFunction = f;
 							break;
@@ -478,10 +478,14 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 					else
 					{
 						result = "Entity query\n\n";
+						var builder = new StringBuilder(result);
 						for (var component : query.entrySet())
 						{
-							result += "* " + component.getKey() + "\n\n";
+							builder.append("* ");
+							builder.append(component.getKey());
+							builder.append("\n\n");
 						}
+						result = builder.toString();
 					}
 				}
 			}
@@ -491,7 +495,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				UserFunction userFunction = null;
 				for (var f : workspace.game.functions)
 				{
-					if (f.getName() == function.getName())
+					if (f.getName().equals(function.getName()))
 					{
 						userFunction = f;
 						break;
@@ -530,10 +534,14 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				else
 				{
 					result = "Entity query\n\n";
+					var builder = new StringBuilder(result);
 					for (var component : query.entrySet())
 					{
-						result += "* " + component.getKey() + "\n\n";
+						builder.append("* ");
+						builder.append(component.getKey());
+						builder.append("\n\n");
 					}
+					result = builder.toString();
 				}
 			}
 		}
@@ -606,11 +614,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 
 			for (var component : workspace.game.components.keySet())
             {
-				if (cell.getComponent() != null && cell.getComponent().getName() != null && cell.getComponent().getName().equals(component))
-				{
-					continue;
-				}
-				if (component == null)
+				if (component == null || cell.getComponent() != null && cell.getComponent().getName() != null && cell.getComponent().getName().equals(component))
 				{
 					continue;
 				}
@@ -834,10 +838,6 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				container = temp;
 			}
 		}
-		else
-		{
-			
-		}
         
 		return CompletableFuture.supplyAsync(() -> Either.forLeft(result));
     }
@@ -988,7 +988,6 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 			for (var message : problem.messages(Library.ENGLISH))
 			{
 				var file = fileOf(message.source, workspace);
-				text = workspace.files.get(file).text;
 				
 				var node = NodeModelUtils.getNode(message.source);
 				if (node == null)
@@ -1007,7 +1006,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				
 				if (!diagnostics.containsKey(file))
 				{
-					diagnostics.put(file, new ArrayList<Diagnostic>());
+					diagnostics.put(file, new ArrayList<>());
 				}
 				diagnostics.get(file).add(diagnostic);
 				
@@ -1069,7 +1068,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 	{
 		if (! diagnostics.containsKey(file))
 		{
-			diagnostics.put(file, new ArrayList<Diagnostic>());
+			diagnostics.put(file, new ArrayList<>());
 		}
 
 		var redefined = new RedefinedSymbol(function, FUNCTION__NAME);
@@ -1178,9 +1177,9 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 				{
 					for (var engine : Engine.values())
 					{
-						if (line.startsWith(engine.name))
+						if (line.startsWith(engine.identifier))
 						{
-							var output = line.substring((engine.name+": ").length());
+							var output = line.substring((engine.identifier+": ").length());
 							if (output.startsWith("./"))
 							{
 								output = output.replace(".", workspace.root);
@@ -1199,7 +1198,7 @@ public class LanguageServer implements org.eclipse.lsp4j.services.LanguageServer
 		{
 			for (var engine : Engine.values())
 			{
-				var defaultPath = Paths.get(workspace.root, "Output", engine.name).toString();
+				var defaultPath = Paths.get(workspace.root, "Output", engine.identifier).toString();
 				generator.generate(game, engine, defaultPath);
 			}
 		}

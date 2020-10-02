@@ -20,6 +20,7 @@ Workflow
 			{
 				encoding = "UTF-8"
 				lineDelimiter = "\n"
+				preferXtendStubs = false
 			}
 		}
 		language = XtextGeneratorLanguage

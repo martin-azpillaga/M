@@ -98,6 +98,7 @@ jobs:
           -Dsonar.organization=martin-azpillaga \
           -Dsonar.projectKey=martin-azpillaga_M \
           -Dsonar.sources=Tests,Code/Language/m/src,Code/Extension \
+          -Dsonar.java.binaries=Code/Language/build/classes \
           -Dsonar.java.libraries=$HOME/.gradle/caches/modules-2/files-2.1 \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.login=c1285d7b6c459b50e7eee08102a94f4b68bd70f9

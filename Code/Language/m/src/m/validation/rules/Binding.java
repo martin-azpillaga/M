@@ -2,23 +2,13 @@ package m.validation.rules;
 
 public class Binding
 {
-	BindingReason reason;
-	ExpressionNode node;
+	public final BindingReason reason;
+	public final ExpressionNode node;
 	
 	public Binding(ExpressionNode node, BindingReason reason)
 	{
 		this.node = node;
 		this.reason = reason;
-	}
-
-	public BindingReason getReason()
-	{
-		return reason;
-	}
-
-	public ExpressionNode getNode()
-	{
-		return node;
 	}
 	
 	public enum BindingReason

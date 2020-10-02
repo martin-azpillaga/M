@@ -8,7 +8,7 @@ public class Main
 {
 	public static void main(String[] arguments)
 	{
-		var languageServer = new LanguageServer();
+		var languageServer = new Server();
 		
 		if (arguments.length == 0)
 		{

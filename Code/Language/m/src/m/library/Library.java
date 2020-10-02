@@ -1,6 +1,7 @@
 package m.library;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -730,8 +731,8 @@ public enum Library
 		nameToProblem = reverse(problems, problemTypes);
 
 		functionToDescription = forward(functionDescriptions, Function.values());
-		componentToDescription = new HashMap<>();
-		valueToDescription = new HashMap<>();
+		componentToDescription = new EnumMap<>(Component.class);
+		valueToDescription = new EnumMap<>(Value.class);
 	}
 	
 	private <A,B> HashMap<A,B> forward(java.util.function.Function<A,B> f, A[] values)

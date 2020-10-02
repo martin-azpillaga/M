@@ -7,9 +7,9 @@ import java.util.Map;
 
 public class Workspace
 {
+	Game game;
 	public final String root;
 	public final Map<String, InferenceData> files;
-	public Game game;
 	public final List<CrossReference> crossReferences;
 	
 	public Workspace(String root)
@@ -17,5 +17,15 @@ public class Workspace
 		this.root = root;
 		this.files = new HashMap<>();
 		this.crossReferences = new ArrayList<>();
+	}
+
+	public Game getGame()
+	{
+		return game;
+	}
+
+	public void setGame(Game game)
+	{
+		this.game = game;
 	}
 }

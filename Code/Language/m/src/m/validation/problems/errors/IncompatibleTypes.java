@@ -42,16 +42,21 @@ public class IncompatibleTypes implements Problem
 			if (!visited.contains(current))
 			{
 				visited.add(current);
+
+				var string = new StringBuilder(base);
 				
 				for (var typing : current.typings)
 				{
 					if (!types.contains(typing.type))
 					{
-						base += "\n" + library.getName(typing.type) + " -> " + typing.symbol + " : " + library.getName(typing.symbol.getType());
+						string.append("\n").append(library.getName(typing.type)).append(" -> ")
+							.append(typing.symbol).append(" : ").append(library.getName(typing.symbol.getType()));
 						types.add(typing.type);
 						errors.add(current);
 					}
 				}
+				
+				base = string.toString();
 				
 				if (types.size() >= 2)
 				{
@@ -60,9 +65,9 @@ public class IncompatibleTypes implements Problem
 				
 				for (var binding : current.bindings)
 				{
-					if (!visited.contains(binding.getNode()))
+					if (!visited.contains(binding.node))
 					{
-						stack.push(binding.getNode());
+						stack.push(binding.node);
 					}
 				}
 			}

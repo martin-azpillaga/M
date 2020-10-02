@@ -35,14 +35,15 @@ import static m.library.types.AtomicType.UNIT;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.Stack;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
@@ -80,12 +81,20 @@ public class Unity
 	UserFunction currentFunction;
 	boolean jobified;
 	HashSet<String> variables;
-	Stack<HashSet<String>> stack;
+	Deque<HashSet<String>> stack;
 	HashMap<Application,String> overlapNames;
+
+	static final String ENTITIES = "Unity.Entities";
+	static final String TRANSFORMS = "Unity.Transforms";
+	static final String PHYSICS = "Unity.Physics";
+	static final String MATHEMATICS = "Unity.Mathematics";
+	static final String ENGINE = "UnityEngine";
+	static final String NAMESPACE = "namespace M";
+
 	
-	final static String[] csharpReserved = new String[]
+	static final String[] csharpReserved = new String[]
 	{
-		"abstract", "as", "base", "bool",	
+		"abstract", "as", "base", "bool",
 		"break", "byte", "case", "catch",	
 		"char", "checked", "class", "const",	
 		"continue", "decimal", "default", "delegate",	
@@ -115,7 +124,7 @@ public class Unity
 		this.library = game.library;
 		this.fileSystem = fileSystem;
 		this.variables = new HashSet<>();
-		this.stack = new Stack<>();
+		this.stack = new ArrayDeque<>();
 		this.overlapNames = new HashMap<>();
 		this.namespaces = new HashSet<>();
 		
@@ -217,33 +226,31 @@ public class Unity
 	
 	private void resolvePackages()
 	{
+		final var version100 = "1.0.0";
+
+		var needed = new HashMap<String,String>();
+		needed.put("com.unity.entities", "0.11.1-preview.4");
+		needed.put("com.unity.inputsystem", version100);
+		needed.put("com.unity.rendering.hybrid", "0.5.2-preview.4");
+		needed.put("com.unity.physics", "0.4.1-preview");
+
 		var file = "Packages/manifest.json";
+
 		if (fileSystem.isFile(file))
 		{
+			
 			var regenerate = false;
 			var current = fileSystem.readTextFile(file).toString();
 			var manifest = new Gson().fromJson(current, PackageManifest.class);
 			var dependencies = manifest.dependencies;
 
-			if (!dependencies.containsKey("com.unity.entities"))
+			for (var dependency : needed.entrySet())
 			{
-				regenerate = true;
-				dependencies.put("com.unity.entities", "0.11.1-preview.4");
-			}
-			if (!dependencies.containsKey("com.unity.inputsystem"))
-			{
-				regenerate = true;
-				dependencies.put("com.unity.inputsystem", "1.0.0");
-			}
-			if (!dependencies.containsKey("com.unity.rendering.hybrid"))
-			{
-				regenerate = true;
-				dependencies.put("com.unity.rendering.hybrid", "0.5.2-preview.4");
-			}
-			if (!dependencies.containsKey("com.unity.physics"))
-			{
-				regenerate = true;
-				dependencies.put("com.unity.physics", "0.4.1-preview");
+				if (!dependencies.containsKey(dependency.getKey()))
+				{
+					regenerate = true;
+					dependencies.put(dependency.getKey(), dependency.getValue());
+				}
 			}
 			if (regenerate)
 			{
@@ -254,42 +261,42 @@ public class Unity
 		else
 		{
 			var map = new HashMap<String,String>();
-			map.put("com.unity.entities", "0.11.1-preview.4");
-			map.put("com.unity.inputsystem", "1.0.0");
-			map.put("com.unity.rendering.hybrid", "0.5.2-preview.4");
-			map.put("com.unity.physics", "0.4.1-preview");
-			map.put("com.unity.ugui", "1.0.0");  
-			map.put("com.unity.modules.ai", "1.0.0");  
-			map.put("com.unity.modules.androidjni", "1.0.0");  
-			map.put("com.unity.modules.animation", "1.0.0");  
-			map.put("com.unity.modules.assetbundle", "1.0.0");  
-			map.put("com.unity.modules.audio", "1.0.0");  
-			map.put("com.unity.modules.cloth", "1.0.0");  
-			map.put("com.unity.modules.director", "1.0.0");  
-			map.put("com.unity.modules.imageconversion", "1.0.0");  
-			map.put("com.unity.modules.imgui", "1.0.0");  
-			map.put("com.unity.modules.jsonserialize", "1.0.0");  
-			map.put("com.unity.modules.particlesystem", "1.0.0");  
-			map.put("com.unity.modules.physics", "1.0.0");  
-			map.put("com.unity.modules.physics2d", "1.0.0");  
-			map.put("com.unity.modules.screencapture", "1.0.0");  
-			map.put("com.unity.modules.terrain", "1.0.0");  
-			map.put("com.unity.modules.terrainphysics", "1.0.0");  
-			map.put("com.unity.modules.tilemap", "1.0.0");  
-			map.put("com.unity.modules.ui", "1.0.0");  
-			map.put("com.unity.modules.uielements", "1.0.0");  
-			map.put("com.unity.modules.umbra", "1.0.0");  
-			map.put("com.unity.modules.unityanalytics", "1.0.0");  
-			map.put("com.unity.modules.unitywebrequest", "1.0.0");  
-			map.put("com.unity.modules.unitywebrequestassetbundle", "1.0.0");  
-			map.put("com.unity.modules.unitywebrequestaudio", "1.0.0");  
-			map.put("com.unity.modules.unitywebrequesttexture", "1.0.0");  
-			map.put("com.unity.modules.unitywebrequestwww", "1.0.0");  
-			map.put("com.unity.modules.vehicles", "1.0.0");  
-			map.put("com.unity.modules.video", "1.0.0");  
-			map.put("com.unity.modules.vr", "1.0.0");  
-			map.put("com.unity.modules.wind", "1.0.0");  
-			map.put("com.unity.modules.xr", "1.0.0");
+			for (var dependency : needed.entrySet())
+			{
+				map.put(dependency.getKey(), dependency.getValue());
+			}
+			map.put("com.unity.ugui", version100);  
+			map.put("com.unity.modules.ai", version100);  
+			map.put("com.unity.modules.androidjni", version100);  
+			map.put("com.unity.modules.animation", version100);  
+			map.put("com.unity.modules.assetbundle", version100);  
+			map.put("com.unity.modules.audio", version100);  
+			map.put("com.unity.modules.cloth", version100);  
+			map.put("com.unity.modules.director", version100);  
+			map.put("com.unity.modules.imageconversion", version100);  
+			map.put("com.unity.modules.imgui", version100);  
+			map.put("com.unity.modules.jsonserialize", version100);  
+			map.put("com.unity.modules.particlesystem", version100);  
+			map.put("com.unity.modules.physics", version100);  
+			map.put("com.unity.modules.physics2d", version100);  
+			map.put("com.unity.modules.screencapture", version100);  
+			map.put("com.unity.modules.terrain", version100);  
+			map.put("com.unity.modules.terrainphysics", version100);  
+			map.put("com.unity.modules.tilemap", version100);  
+			map.put("com.unity.modules.ui", version100);  
+			map.put("com.unity.modules.uielements", version100);  
+			map.put("com.unity.modules.umbra", version100);  
+			map.put("com.unity.modules.unityanalytics", version100);  
+			map.put("com.unity.modules.unitywebrequest", version100);  
+			map.put("com.unity.modules.unitywebrequestassetbundle", version100);  
+			map.put("com.unity.modules.unitywebrequestaudio", version100);  
+			map.put("com.unity.modules.unitywebrequesttexture", version100);  
+			map.put("com.unity.modules.unitywebrequestwww", version100);  
+			map.put("com.unity.modules.vehicles", version100);  
+			map.put("com.unity.modules.video", version100);  
+			map.put("com.unity.modules.vr", version100);  
+			map.put("com.unity.modules.wind", version100);  
+			map.put("com.unity.modules.xr", version100);
 			var json = new Gson().toJson(new PackageManifest(map));
 			fileSystem.generateFile(file, json);
 		}
@@ -301,10 +308,10 @@ public class Unity
 		var gson = new Gson();
 		var needed = ImmutableList.of
 		(
-			"Unity.Entities",
-			"Unity.Transforms",
-			"Unity.Physics",
-			"Unity.Mathematics",
+			ENTITIES,
+			TRANSFORMS,
+			PHYSICS,
+			MATHEMATICS,
 			"Unity.Jobs",
 			"Unity.Collections",
 			"Unity.InputSystem",
@@ -351,11 +358,11 @@ public class Unity
 	private String generateComponent(String name, Type type)
 	{
 		namespaces.clear();
-		namespaces.add("UnityEngine");
+		namespaces.add(ENGINE);
 
 		var lines = lines
 		(
-			"namespace M",
+			NAMESPACE,
 			"{",
 				"public class "+unreserved(name)+" : MonoBehaviour",
 				"{",
@@ -388,13 +395,13 @@ public class Unity
 	private String generateDataComponent(String name, Type type)
 	{
 		namespaces.clear();
-		namespaces.add("Unity.Entities");
+		namespaces.add(ENTITIES);
 
 		var classifier = valueType(type) ? "struct" : "class";
 
 		var lines = lines
 		(
-			"namespace M",
+			NAMESPACE,
 			"{",
 				"public "+classifier+" "+name+"Data : IComponentData",
 				"{",
@@ -424,7 +431,7 @@ public class Unity
 			"using System.Collections.Generic;",
 			"using System.Linq;",
 			"",
-			"namespace M",
+			NAMESPACE,
 			"{",
 				"public class SystemDebugger : MonoBehaviour",
 				"{",
@@ -504,7 +511,7 @@ public class Unity
 			"using System.Collections.Generic;",
 			"using static M.Query;",
 			"",
-			"namespace M",
+			NAMESPACE,
 			"{",
 				"public class EntityDebugger : MonoBehaviour",
 				"{",
@@ -620,7 +627,7 @@ public class Unity
 			"using Unity.Entities;",
 			"using System.Linq;",
 			"",
-			"namespace M",
+			NAMESPACE,
 			"{",
 				"public class SystemRunner : SystemBase",
 				"{",
@@ -798,7 +805,7 @@ public class Unity
 			"using Unity.Entities;",
 			"using Unity.Collections;",
 			"",
-			"namespace M",
+			NAMESPACE,
 			"{",
 				"public class FixRectTransforms : SystemBase",
 				"{",
@@ -840,7 +847,7 @@ public class Unity
 			"using Unity.Entities;",
 			"using UnityEngine.UI;",
 			"",
-			"namespace M",
+			NAMESPACE,
 			"{",
 				"[UpdateInGroup(typeof(PresentationSystemGroup))]",
 				"public class SyncPoint : SystemBase",
@@ -888,7 +895,7 @@ public class Unity
 			var entity = entry.getKey();
 			if (!queries.containsKey(entity))
 			{
-				queries.put(entity, new HashMap<String,Boolean>());
+				queries.put(entity, new HashMap<>());
 			}
 			for (var component : entry.getValue())
 			{
@@ -929,8 +936,8 @@ public class Unity
 		}
 
 		namespaces.clear();
-		namespaces.add("UnityEngine");
-		namespaces.add("Unity.Entities");
+		namespaces.add(ENGINE);
+		namespaces.add(ENTITIES);
 		namespaces.add("Unity.Jobs");
 		namespaces.add("Unity.Collections");
 		namespaces.add("Unity.Burst");
@@ -942,23 +949,23 @@ public class Unity
 
 		var overlaps = overlaps(function);
 
-		if (overlaps.size() != 0)
+		if (! overlaps.isEmpty())
 		{
-			namespaces.add("Unity.Mathematics");
-			namespaces.add("Unity.Physics");
+			namespaces.add(MATHEMATICS);
+			namespaces.add(PHYSICS);
 			namespaces.add("Unity.Physics.Systems");
 		}
 
 		var lines = lines
 		(
-			"namespace M",
+			NAMESPACE,
 			"{",
 				"public class "+unreserved(function.getName())+"Jobified : SystemBase",
 				"{",
 					"EndSimulationEntityCommandBufferSystem ecbSystem;",
 					foreach(function.queries.keySet(), q->"EntityQuery "+q+";"),
 					
-					iff(overlaps.size() != 0),
+					iff(! overlaps.isEmpty()),
 					"",
 					"BuildPhysicsWorld physics;",
 					end,
@@ -975,7 +982,7 @@ public class Unity
 							e.getKey()+" = GetEntityQuery("+foreach(e.getValue().entrySet(), c->"Read"+(c.getValue()?"Write":"Only")+"<"+jobComponent(c.getKey())+">()", ", ")+");",
 							end
 						)),
-						iff(overlaps.size() != 0),
+						iff(! overlaps.isEmpty()),
 						"",
 						"physics = World.DefaultGameObjectInjectionWorld.GetExistingSystem<BuildPhysicsWorld>();",
 						end,
@@ -991,7 +998,7 @@ public class Unity
 							foreach(constants.keySet(), c->c+" = "+variable(c)+","),
 							foreach(function.queries.keySet(), q->"chunks_"+q+" = "+q+".CreateArchetypeChunkArray(TempJob),"),
 							foreach(nativeComponents.entrySet(), e->e.getKey()+"Type = GetArchetypeChunkComponentType<"+jobComponent(e.getKey())+">("+!e.getValue()+"),"),
-							iff(overlaps.size() != 0),
+							iff(! overlaps.isEmpty()),
 							"collisionWorld = physics.PhysicsWorld.CollisionWorld,",
 							end,
 						"};",
@@ -1016,11 +1023,11 @@ public class Unity
 						foreach(constants.entrySet(), e->"public "+unity(e.getValue())+" "+e.getKey()+";"),
 						foreach(function.queries.keySet(), q->"[DeallocateOnJobCompletion] public NativeArray<ArchetypeChunk> chunks_"+q+";"),
 						foreach(nativeComponents.entrySet(), e->(e.getValue()?"":"[ReadOnly] ")+"public ArchetypeChunkComponentType<"+jobComponent(e.getKey())+"> "+e.getKey()+"Type;"),
-						iff(overlaps.size() != 0),
+						iff(! overlaps.isEmpty()),
 						"public CollisionWorld collisionWorld;",
 						end,
 						"",
-						(overlaps.size() != 0 ? "unsafe " : "")+"public void Execute()",
+						(! overlaps.isEmpty() ? "unsafe " : "")+"public void Execute()",
 						"{",
 							foreach(function.getStatements(), s->code(s)),
 						"}",
@@ -1040,7 +1047,7 @@ public class Unity
 	private String generateSystem(UserFunction function)
 	{
 		namespaces.clear();
-		namespaces.add("UnityEngine");
+		namespaces.add(ENGINE);
 		namespaces.add("System.Collections.Generic");
 
 		currentFunction = function;
@@ -1048,7 +1055,7 @@ public class Unity
 
 		var lines = lines
 		(
-			"namespace M",
+			NAMESPACE,
 			"{",
 				"public class "+unreserved(function.getName()),
 				"{",
@@ -1088,7 +1095,7 @@ public class Unity
 
 		if (statement instanceof BindingBlock)
 		{
-			stack.push(new HashSet<String>(variables));
+			stack.push(new HashSet<>(variables));
 			
 			var block = (BindingBlock) statement;
 			var name = block.getName();
@@ -1179,7 +1186,7 @@ public class Unity
 		}
 		else if (statement instanceof Block)
 		{
-			stack.push(new HashSet<String>(variables));
+			stack.push(new HashSet<>(variables));
 			var block = (Block) statement;
 			var name = block.getName();
 			
@@ -1396,67 +1403,67 @@ public class Unity
 		
 		switch (standard)
 		{
-		case ABS: namespaces.add("Unity.Mathematics"); return "math.abs("+x+")";
-		case ACOS: namespaces.add("Unity.Mathematics"); return "math.acos("+x+")";
+		case ABS: namespaces.add(MATHEMATICS); return "math.abs("+x+")";
+		case ACOS: namespaces.add(MATHEMATICS); return "math.acos("+x+")";
 		case ADD: return "if (("+y+").GetComponent<"+simpleComponent(x)+">() == null){("+y+").AddComponent<"+simpleComponent(x)+">();"+"}";
 		case ADDITION: return x+" + "+y;
 		case AND: return x+" && "+y;
-		case ASIN: namespaces.add("Unity.Mathematics"); return "math.asin("+x+")";
+		case ASIN: namespaces.add(MATHEMATICS); return "math.asin("+x+")";
 		case ASSIGNMENT: return x+" = "+y;
-		case ATAN: namespaces.add("Unity.Mathematics"); return "math.atan("+x+")";
-		case CEIL: namespaces.add("Unity.Mathematics"); return "math.ceil("+x+")";
-		case CLAMP: namespaces.add("Unity.Mathematics"); return "math.clamp("+x+", ("+y+").x, ("+y+").y)";
-		case COS: namespaces.add("Unity.Mathematics"); return "math.cos("+x+")";
+		case ATAN: namespaces.add(MATHEMATICS); return "math.atan("+x+")";
+		case CEIL: namespaces.add(MATHEMATICS); return "math.ceil("+x+")";
+		case CLAMP: namespaces.add(MATHEMATICS); return "math.clamp("+x+", ("+y+").x, ("+y+").y)";
+		case COS: namespaces.add(MATHEMATICS); return "math.cos("+x+")";
 		case CREATE: return jobified ? "ecb.Instantiate("+x+")" : "GameObject.Instantiate<GameObject>("+x+")";
-		case CROSS: namespaces.add("Unity.Mathematics"); return "((Vector3)math.cross("+x+","+y+"))";
+		case CROSS: namespaces.add(MATHEMATICS); return "((Vector3)math.cross("+x+","+y+"))";
 		case DESTROY: return jobified ? "ecb.DestroyEntity(entity_"+x+")" : "GameObject.Destroy("+x+")";
-		case DISTANCE: namespaces.add("Unity.Mathematics"); return "math.distance("+x+", "+y+")";
+		case DISTANCE: namespaces.add(MATHEMATICS); return "math.distance("+x+", "+y+")";
 		case DIVISION: return x+" / "+y;
-		case DOT: namespaces.add("Unity.Mathematics"); return "math.dot("+x+", "+y+")";
+		case DOT: namespaces.add(MATHEMATICS); return "math.dot("+x+", "+y+")";
 		case EQUAL: return x+" == "+y;
-		case EXP: namespaces.add("Unity.Mathematics"); return "math.exp("+x+")";
-		case FLOOR: namespaces.add("Unity.Mathematics"); return "math.floor("+x+")";
-		case FRACTIONALPART: namespaces.add("Unity.Mathematics"); return "math.frac("+x+")";
+		case EXP: namespaces.add(MATHEMATICS); return "math.exp("+x+")";
+		case FLOOR: namespaces.add(MATHEMATICS); return "math.floor("+x+")";
+		case FRACTIONALPART: namespaces.add(MATHEMATICS); return "math.frac("+x+")";
 		case GREATER: return x+" > "+y;
 		case GREATEROREQUAL: return x+" >= "+y;
 		case HALT: return "#if UNITY_EDITOR\nUnityEditor.EditorApplication.isPlaying = false;\n#endif\nApplication.Quit()";
 		case HAS: return "(("+y+").GetComponent<"+simpleComponent(x)+">() != null)";
 		case IN: return jobified ? "("+y+").Contains(entity_"+x+")" : "("+y+").Contains("+x+")";
 		case INEQUAL: return x+" != "+y;
-		case INTEGERPART: namespaces.add("Unity.Mathematics"); return "math.trunc("+x+")";
+		case INTEGERPART: namespaces.add(MATHEMATICS); return "math.trunc("+x+")";
 		case INVERSE: return "(1 / ("+x+"))";
-		case LERP: namespaces.add("Unity.Mathematics"); return "math.lerp("+x+", ("+y+").x, ("+y+").y)";
-		case LOG: namespaces.add("Unity.Mathematics"); return "math.log("+x+")";
+		case LERP: namespaces.add(MATHEMATICS); return "math.lerp("+x+", ("+y+").x, ("+y+").y)";
+		case LOG: namespaces.add(MATHEMATICS); return "math.log("+x+")";
 		case LOWER: return x+" < "+y;
 		case LOWEROREQUAL: return x+" <= "+y;
 		case MULTIPLICATION: return x+" * "+y;
-		case NORM: namespaces.add("Unity.Mathematics"); return "math.length("+x+")";
-		case NORMALIZE: namespaces.add("Unity.Mathematics"); return "((Vector3)math.normalize("+x+"))";
+		case NORM: namespaces.add(MATHEMATICS); return "math.length("+x+")";
+		case NORMALIZE: namespaces.add(MATHEMATICS); return "((Vector3)math.normalize("+x+"))";
 		case NOT: return "! ("+x+")";
 		case OR: return x+" || "+y;
 		case PLAY_ONCE: return "("+x+").GetComponent<AudioSource>().PlayOneShot("+y+")";
-		case POW: namespaces.add("Unity.Mathematics"); return "math.pow("+x+", "+y+")";
-		case PROPORTIONAL: namespaces.add("Unity.Mathematics"); return "math.remap("+x+", ("+y+").x, ("+y+").y, ("+z+").x, ("+z+").y)";
+		case POW: namespaces.add(MATHEMATICS); return "math.pow("+x+", "+y+")";
+		case PROPORTIONAL: namespaces.add(MATHEMATICS); return "math.remap("+x+", ("+y+").x, ("+y+").y, ("+z+").x, ("+z+").y)";
 		case RANDOM: return (jobified ? "SystemRunner.random.NextFloat(" : "UnityEngine.Random.Range(")+"("+x+").x, ("+x+").y)";
 		case READ_NUMBER: return "("+x+").ReadValue<float>()";
 		case READ_TRIGGERED: return "("+x+").triggered";
 		case READ_VECTOR: return "("+x+").ReadValue<Vector2>()";
 		case RECIPROCAL: return "-("+x+")";
-		case REFLECT: namespaces.add("Unity.Mathematics"); return "((Vector3)math.reflect("+x+", "+y+"))";
-		case REFRACT: namespaces.add("Unity.Mathematics"); return "((Vector3)math.refract("+x+", "+y+", "+z+"))";
+		case REFLECT: namespaces.add(MATHEMATICS); return "((Vector3)math.reflect("+x+", "+y+"))";
+		case REFRACT: namespaces.add(MATHEMATICS); return "((Vector3)math.refract("+x+", "+y+", "+z+"))";
 		case REMOVE: return "if (("+y+").GetComponent<"+simpleComponent(x)+">() != null){ GameObject.Destroy(("+y+").GetComponent<"+simpleComponent(x)+">());}";
-		case ROUND: namespaces.add("Unity.Mathematics"); return "math.round("+x+")";
+		case ROUND: namespaces.add(MATHEMATICS); return "math.round("+x+")";
 		case SET_COLOR: return "("+x+").SetColor("+y+", "+z+")";
 		case SET_NUMBER: return "("+x+").SetFloat("+y+", "+z+")";
 		case SET_TRIGGER: return "("+x+").GetComponent<Animator>().SetTrigger("+y+")";
-		case SIGN: namespaces.add("Unity.Mathematics"); return "math.sign("+x+")";
-		case SIN: namespaces.add("Unity.Mathematics"); return "math.sin("+x+")";
+		case SIGN: namespaces.add(MATHEMATICS); return "math.sign("+x+")";
+		case SIN: namespaces.add(MATHEMATICS); return "math.sin("+x+")";
 		case SIZE: return "("+x+").Count()";
-		case SQRT: namespaces.add("Unity.Mathematics"); return "math.sqrt("+x+")";
+		case SQRT: namespaces.add(MATHEMATICS); return "math.sqrt("+x+")";
 		case IN_STATE: return "("+x+").GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("+y+")";
 		case SUBTRACTION: return "("+x+") - ("+y+")";
-		case TAN: namespaces.add("Unity.Mathematics"); return "math.tan("+x+")";
-		case UNLERP: namespaces.add("Unity.Mathematics"); return "math.unlerp("+x+", ("+y+").x, ("+y+").y)";
+		case TAN: namespaces.add(MATHEMATICS); return "math.tan("+x+")";
+		case UNLERP: namespaces.add(MATHEMATICS); return "math.unlerp("+x+", ("+y+").x, ("+y+").y)";
 		case WRITE: return "if (Debug.isDebugBuild){ Debug.Log("+x+"); }";
 		case WRITEERROR: return "if (Debug.isDebugBuild){ Debug.LogError("+x+"); }";
 		case WRITE_WARNING: return "if (Debug.isDebugBuild){ Debug.LogWarning("+x+"); }";
@@ -1465,7 +1472,7 @@ public class Unity
 		case OVERLAPS:
 			if (jobified)
 			{
-				
+				break;
 			}
 			else
 			{
@@ -1486,12 +1493,12 @@ public class Unity
 		case SET_INTEGER: return "("+x+".SetInt("+y+", (int)("+z+"))";
 		case SET_KEYWORD: return "if ("+z+"){ ("+x+").EnableKeyword("+y+"); }else{ ("+x+").DisableKeyword("+y+"); }";
 		case SET_TEXTURE: return "("+x+").SetTexture("+y+", "+z+")";
-		case DEGREES: namespaces.add("Unity.Mathematics"); return "math.degrees("+x+")";
-		case MAX: namespaces.add("Unity.Mathematics"); return "math.max("+x+", "+y+")";
-		case MIN: namespaces.add("Unity.Mathematics"); return "math.min("+x+", "+y+")";
-		case RADIANS: namespaces.add("Unity.Mathematics"); return "math.radians("+x+")";
-		case SLERP: namespaces.add("Unity.Mathematics"); return "math.slerp("+x+", "+y+", "+z+")";
-		case STEP: namespaces.add("Unity.Mathematics"); return "math.step("+x+", "+y+")";
+		case DEGREES: namespaces.add(MATHEMATICS); return "math.degrees("+x+")";
+		case MAX: namespaces.add(MATHEMATICS); return "math.max("+x+", "+y+")";
+		case MIN: namespaces.add(MATHEMATICS); return "math.min("+x+", "+y+")";
+		case RADIANS: namespaces.add(MATHEMATICS); return "math.radians("+x+")";
+		case SLERP: namespaces.add(MATHEMATICS); return "math.slerp("+x+", "+y+", "+z+")";
+		case STEP: namespaces.add(MATHEMATICS); return "math.step("+x+", "+y+")";
 		case BREAKPOINT: return "Debug.Break()";
 		case PAUSE: return "("+x+").GetComponent<AudioSource>().Pause()";
 		case PLAY: return "("+x+").GetComponent<AudioSource>().Play()";
@@ -1529,7 +1536,7 @@ public class Unity
 				var entity = ((Value)application.getArguments().get(0)).getName();
 				if (!map.containsKey(entity))
 				{
-					map.put(entity, new HashSet<String>());
+					map.put(entity, new HashSet<>());
 				}
 				map.get(entity).add("Animator");
 			}
@@ -1538,7 +1545,7 @@ public class Unity
 				var a = ((Value)application.getArguments().get(0)).getName();
 				if (!map.containsKey(a))
 				{
-					map.put(a, new HashSet<String>());
+					map.put(a, new HashSet<>());
 				}
 				map.get(a).add("AudioSource");
 			}
@@ -1547,7 +1554,7 @@ public class Unity
 				var a = ((Value)application.getArguments().get(0)).getName();
 				if (!map.containsKey(a))
 				{
-					map.put(a, new HashSet<String>());
+					map.put(a, new HashSet<>());
 				}
 				map.get(a).add("Rigidbody");
 			}
@@ -1556,10 +1563,10 @@ public class Unity
 				var a = ((Value)application.getArguments().get(0)).getName();
 				if (!map.containsKey(a))
 				{
-					map.put(a, new HashSet<String>());
+					map.put(a, new HashSet<>());
 				}
-				namespaces.add("Unity.Physics");
-				namespaces.add("Unity.Transforms");
+				namespaces.add(PHYSICS);
+				namespaces.add(TRANSFORMS);
 				map.get(a).add("PhysicsCollider");
 				map.get(a).add("Translation");
 
@@ -1581,22 +1588,22 @@ public class Unity
 			case EPSILON:
 				return "Float.Epsilon";
 			case PI:
-				namespaces.add("Unity.Mathematics");
+				namespaces.add(MATHEMATICS);
 				return "math.PI";
 			case E:
-				namespaces.add("Unity.Mathematics");
+				namespaces.add(MATHEMATICS);
 				return "math.E";
 			case TIME_SINCE_START:
-				namespaces.add("UnityEngine");
+				namespaces.add(ENGINE);
 				return "UnityEngine.Time.time";
 			case FIXED_DELTA_TIME:
-				namespaces.add("UnityEngine");
+				namespaces.add(ENGINE);
 				return "UnityEngine.Time.fixedDeltaTime";
 			case DELTA_TIME:
-				namespaces.add("UnityEngine");
+				namespaces.add(ENGINE);
 				return "UnityEngine.Time.deltaTime";
 			case TIME_SCALE:
-				namespaces.add("UnityEngine");
+				namespaces.add(ENGINE);
 				return "UnityEngine.Time.timeScale";
 			}
 			return "undefinedVariable";
@@ -1714,17 +1721,17 @@ public class Unity
 			case DISPLAY: return "Camera";
 			case CULLING: return "Camera";
 			case ORTHOGRAPHIC_SIZE: return "Camera";
+			case TEXT_COLOR:
+			case TEXT_MATERIAL:
+			case TEXT:
 			case FONT: namespaces.add("UnityEngine.UI"); return "Text";
-			case IMAGE: namespaces.add("UnityEngine.UI"); return "RawImage";
-			case IMAGE_COLOR: namespaces.add("UnityEngine.UI"); return "RawImage";
+			case IMAGE:
+			case IMAGE_COLOR:
 			case IMAGE_MATERIAL: namespaces.add("UnityEngine.UI"); return "RawImage";
 			case SLIDER_VALUE: namespaces.add("UnityEngine.UI"); return "Slider";
-			case TEXT: namespaces.add("UnityEngine.UI"); return "Text";
 			case TEXTFIELD_VALUE: namespaces.add("UnityEngine.UI"); return "InputField";
-			case TEXT_COLOR: namespaces.add("UnityEngine.UI"); return "Text";
-			case TEXT_MATERIAL: namespaces.add("UnityEngine.UI"); return "Text";
 			case TOGGLED: namespaces.add("UnityEngine.UI"); return "Toggle";
-			case ANCHOR_MIN: namespaces.add("UnityEngine.UI"); return "RectTransform";
+			case ANCHOR_MIN:
 			case ANCHOR_MAX: namespaces.add("UnityEngine.UI"); return "RectTransform";
 			}
 		}
@@ -1752,7 +1759,7 @@ public class Unity
 		}
 		else if (name.equals("Translation"))
 		{
-			namespaces.add("Unity.Transforms");
+			namespaces.add(TRANSFORMS);
 			return "Translation";
 		}
 		if (found == Component.TEXT && jobified)
@@ -1775,9 +1782,9 @@ public class Unity
 		{
 			switch (found)
 			{
-			case VELOCITY: namespaces.add("Unity.Physics"); return "PhysicsVelocity";
-			case POSITION: namespaces.add("Unity.Transforms"); return "Translation";
-			case ANGULAR_VELOCITY: namespaces.add("Unity.Physics"); return "PhysicsVelocity";
+			case POSITION: namespaces.add(TRANSFORMS); return "Translation";
+			case VELOCITY:
+			case ANGULAR_VELOCITY: namespaces.add(PHYSICS); return "PhysicsVelocity";
 			case AUDIOCLIP: return "AudioSource";
 			case BACKGROUND: return "Camera";
 			case EMISSION: return "Light";
@@ -1813,17 +1820,17 @@ public class Unity
 			case DISPLAY: return "Camera";
 			case CULLING: return "Camera";
 			case ORTHOGRAPHIC_SIZE: return "Camera";
+			case TEXT_COLOR:
+			case TEXT_MATERIAL:
 			case FONT: namespaces.add("UnityEngine.UI"); return "Text";
-			case IMAGE: namespaces.add("UnityEngine.UI"); return "RawImage";
-			case IMAGE_COLOR: namespaces.add("UnityEngine.UI"); return "RawImage";
+			case IMAGE:
+			case IMAGE_COLOR:
 			case IMAGE_MATERIAL: namespaces.add("UnityEngine.UI"); return "RawImage";
 			case SLIDER_VALUE: namespaces.add("UnityEngine.UI"); return "Slider";
 			case TEXT: namespaces.add("UnityEngine.UI"); return "M.textData";
 			case TEXTFIELD_VALUE: namespaces.add("UnityEngine.UI"); return "InputField";
-			case TEXT_COLOR: namespaces.add("UnityEngine.UI"); return "Text";
-			case TEXT_MATERIAL: namespaces.add("UnityEngine.UI"); return "Text";
 			case TOGGLED: namespaces.add("UnityEngine.UI"); return "Toggle";
-			case ANCHOR_MIN: namespaces.add("UnityEngine.UI"); return "RectTransform";
+			case ANCHOR_MIN:
 			case ANCHOR_MAX: namespaces.add("UnityEngine.UI"); return "RectTransform";
 			}
 		}
@@ -1906,12 +1913,12 @@ public class Unity
 			case ENTITY:
 				if (jobified)
 				{
-					namespaces.add("Unity.Entities");
+					namespaces.add(ENTITIES);
 					return "Entity";
 				}
 				else
 				{
-					namespaces.add("UnityEngine");
+					namespaces.add(ENGINE);
 					return "GameObject";
 				}
 			case NUMBER:
@@ -1919,23 +1926,23 @@ public class Unity
 			case NUMBER2:
 				if (jobified)
 				{
-					namespaces.add("Unity.Mathematics");
+					namespaces.add(MATHEMATICS);
 					return "float2";
 				}
 				else
 				{
-					namespaces.add("UnityEngine");
+					namespaces.add(ENGINE);
 					return "Vector2";
 				}
 			case NUMBER3:
 			if (jobified)
 			{
-				namespaces.add("Unity.Mathematics");
+				namespaces.add(MATHEMATICS);
 				return "float3";
 			}
 			else
 			{
-				namespaces.add("UnityEngine");
+				namespaces.add(ENGINE);
 				return "Vector3";
 			}
 			case PROPOSITION:
@@ -1944,12 +1951,12 @@ public class Unity
 				namespaces.add("System.Collections.Generic");
 				if (jobified)
 				{
-					namespaces.add("Unity.Entities");
+					namespaces.add(ENTITIES);
 					return "List<Entity>";
 				}
 				else
 				{
-					namespaces.add("UnityEngine");
+					namespaces.add(ENGINE);
 					return "List<GameObject>";
 				}
 			case INPUT:
@@ -1960,16 +1967,16 @@ public class Unity
 			case UNIT:
 				return "void";
 			case COLOR:
-				namespaces.add("UnityEngine");
+				namespaces.add(ENGINE);
 				return "Color";
 			case MESH:
-				namespaces.add("UnityEngine");
+				namespaces.add(ENGINE);
 				return "Mesh";
 			case MATERIAL:
-				namespaces.add("UnityEngine");
+				namespaces.add(ENGINE);
 				return "Material";
 			case ANIMATOR:
-				namespaces.add("UnityEngine");
+				namespaces.add(ENGINE);
 				return "Animator";
 			case COMPONENT:
 				return "Error (type component shouldnt be)";
@@ -1983,19 +1990,19 @@ public class Unity
 				namespaces.add("UnityEngine.UI");
 				return "Image";
 			case AUDIOCLIP:
-				namespaces.add("UnityEngine");
+				namespaces.add(ENGINE);
 				return "AudioClip";
 			case QUATERNION:
-				namespaces.add("UnityEngine");
+				namespaces.add(ENGINE);
 				return "Quaternion";
 			case TEXTURE:
-				namespaces.add("UnityEngine");
+				namespaces.add(ENGINE);
 				return "Texture";
 			case COLLIDER:
-				namespaces.add("UnityEngine");
+				namespaces.add(ENGINE);
 				return "Collider";
 			case RECT:	
-				namespaces.add("UnityEngine");
+				namespaces.add(ENGINE);
 				return "Rect";
 			}
 			return "Undefined";

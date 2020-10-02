@@ -2,13 +2,14 @@ package m.validation;
 
 import static m.validation.rules.Binding.BindingReason.*;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -35,7 +36,7 @@ public class Context
 	Map<String, Value> userVariables;
 	Map<String, Cell> userComponents;
 	Map<String, Function> userFunctions;
-	Stack<Map<String,Value>> stack;
+	Deque<Map<String,Value>> stack;
 	
 	Set<Value> accessedValues;
 	
@@ -49,7 +50,7 @@ public class Context
 		this.userFunctions = new HashMap<>();
 		this.userComponents = new HashMap<>();
 		
-		this.stack = new Stack<>();
+		this.stack = new ArrayDeque<>();
 		this.accessedValues = new HashSet<>();
 	}
 	
@@ -272,14 +273,11 @@ public class Context
 	public void pop()
 	{
 		var popped = stack.pop();
-		for (var value : userVariables.keySet())
+		for (var entry : userVariables.entrySet())
 		{
-			if (!popped.containsKey(value))
+			if (!popped.containsKey(entry.getKey()) && !accessedValues.contains(entry.getValue()))
 			{
-				if (!accessedValues.contains(userVariables.get(value)))
-				{
-					problems.add(new UnusedValue(userVariables.get(value)));
-				}	
+				problems.add(new UnusedValue(entry.getValue()));
 			}
 		}
 		userVariables = popped;
