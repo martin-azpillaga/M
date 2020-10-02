@@ -170,7 +170,7 @@ jobs:
           sudo apt-get install libx11-dev libxkbfile-dev
       - name: Build tests
         run: |
-          pandoc README.md -t json | node Tests/reader.js > Tests/test.js
+          pandoc README.md -t json | node Tests/generateTests.js > Tests/test.js
       - name: Build ide for browser
         working-directory: Tests
         run: |

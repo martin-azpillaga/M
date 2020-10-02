@@ -73,7 +73,7 @@
     "onCommand:m.open",
     "onCommand:m.restart"
   ],
-  "main": "./extension.js",
+  "main": "./main.js",
   "dependencies": {
     "lookpath": "^1.1.0",
     "openurl": "^1.1.1",
