@@ -39,20 +39,20 @@
         "extensions": [
           ".Ⲙ"
         ],
-        "configuration": "./language-configuration.json"
+        "configuration": "./declarative features/brackets.json"
       }
     ],
     "snippets": [
       {
         "language": "m",
-        "path": "./snippets.json"
+        "path": "./declarative features/snippets.json"
       }
     ],
     "grammars": [
       {
         "language": "m",
         "scopeName": "source.m",
-        "path": "./m.tmLanguage.json"
+        "path": "./declarative features/highlighting.json"
       }
     ],
     "commands": [
