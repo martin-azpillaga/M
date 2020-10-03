@@ -15,7 +15,7 @@ import m.validation.rules.ExpressionNode;
 
 public class UndecidableType extends Problem
 {
-	ExpressionNode node;
+	public final ExpressionNode node;
 	
 	public UndecidableType(ExpressionNode node)
 	{

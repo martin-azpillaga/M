@@ -26,7 +26,7 @@ public class RedefinedSymbol extends Problem
 	public List<Diagnostic> diagnostics(Library library, String text)
 	{
 		var list = new ArrayList<Diagnostic>();
-		var problem = new Diagnostic(getRange(source,text), library.getProblem(this.getClass()), DiagnosticSeverity.Error, "M", "4");
+		var problem = new Diagnostic(getRange(source,feature,text), library.getProblem(this.getClass()), DiagnosticSeverity.Error, "M", "4");
 		list.add(problem);
 		return list;
 	}

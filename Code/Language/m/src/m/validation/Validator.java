@@ -28,7 +28,7 @@ import m.m.Function;
 import m.m.Statement;
 import m.m.Unary;
 import m.m.Value;
-import m.main.InferenceData;
+import m.main.FileData;
 import m.validation.problems.errors.SyntaxError;
 
 public class Validator
@@ -36,25 +36,24 @@ public class Validator
 	@Inject IParser parser;
 	Context context;
 
-	public InferenceData validate(String text)
+	public FileData validate(String text)
 	{
 		var parseResult = parser.parse(new StringReader(text));		
 		var file = (File) parseResult.getRootASTElement();
 
-		if (file == null)
+		FileData result;
+
+		if (file != null)
 		{
-			var result = new InferenceData(parseResult.getRootNode());
-			for (var problem : parseResult.getSyntaxErrors())
-			{
-				result.problems.add(new SyntaxError(problem));
-			}
-			return result;
+			context = new Context(Library.ENGLISH);
+			validate(file);
+			result = context.buildData(text, parseResult.getRootNode(), file);
 		}
-
-		context = new Context(Library.ENGLISH);
-		validate(file);
-
-		var result = context.buildData(text, parseResult.getRootNode(), file);
+		else
+		{
+			result = new FileData(parseResult.getRootNode());
+		}
+		
 		for (var problem : parseResult.getSyntaxErrors())
 		{
 			result.problems.add(new SyntaxError(problem));

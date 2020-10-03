@@ -9,7 +9,7 @@ public class Workspace
 {
 	Game game;
 	public final String root;
-	public final Map<String, InferenceData> files;
+	public final Map<String, FileData> files;
 	public final List<CrossReference> crossReferences;
 	
 	public Workspace(String root)

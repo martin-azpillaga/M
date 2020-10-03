@@ -13,7 +13,7 @@ import m.m.MFactory;
 import m.validation.problems.Problem;
 import m.validation.rules.ExpressionNode;
 
-public class InferenceData
+public class FileData
 {
 	public final String text;
 	public final INode rootNode;
@@ -23,7 +23,7 @@ public class InferenceData
 	public final Map<String, Function> functions;
 	public final List<Problem> problems;
 
-	public InferenceData(String text, INode rootNode, EObject rootObject, List<ExpressionNode> nodes, Map<String, ExpressionNode> components, Map<String, Function> functions, List<Problem> problems)
+	public FileData(String text, INode rootNode, EObject rootObject, List<ExpressionNode> nodes, Map<String, ExpressionNode> components, Map<String, Function> functions, List<Problem> problems)
 	{
 		this.text = text;
 		this.rootNode = rootNode;
@@ -34,7 +34,7 @@ public class InferenceData
 		this.problems = problems;
 	}
 
-	public InferenceData(INode rootNode)
+	public FileData(INode rootNode)
 	{
 		this.text = "";
 		this.rootNode = rootNode;

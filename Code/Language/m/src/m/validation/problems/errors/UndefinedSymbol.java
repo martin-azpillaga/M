@@ -27,7 +27,7 @@ public class UndefinedSymbol extends Problem
 	{
 		var list = new ArrayList<Diagnostic>();
 		var message = library.getProblem(this.getClass());
-		var problem = new Diagnostic(getRange(source,text), message, DiagnosticSeverity.Error, "M", "3");
+		var problem = new Diagnostic(getRange(source,feature,text), message, DiagnosticSeverity.Error, "M", "3");
 		list.add(problem);
 		return list;
 	}
