@@ -40,9 +40,7 @@ import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.ParameterInformation;
-import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
-import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SignatureHelpOptions;
@@ -83,10 +81,7 @@ import m.m.Unary;
 import m.m.Value;
 import m.validation.Inference;
 import m.validation.Validator;
-import m.validation.problems.Problem;
-import m.validation.problems.ProblemMessage.Severity;
 import m.validation.problems.errors.RedefinedSymbol;
-import m.validation.problems.errors.SyntaxError;
 import m.validation.rules.Binding;
 import m.validation.rules.Binding.BindingReason;
 import m.validation.rules.ExpressionNode;
@@ -96,7 +91,6 @@ public class Server implements org.eclipse.lsp4j.services.LanguageServer, Langua
 	LanguageClient client;
 	List<Workspace> workspaces;
 
-	IParser parser;
 	Validator validator;
 	Generator generator;
 	
@@ -116,7 +110,6 @@ public class Server implements org.eclipse.lsp4j.services.LanguageServer, Langua
 		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
 		validator = injector.getInstance(Validator.class);
 		generator = injector.getInstance(Generator.class);
-		parser = injector.getInstance(IParser.class);
 
         var workspaceFolders = new WorkspaceFoldersOptions();
 		workspaceFolders.setSupported(true);
@@ -177,6 +170,8 @@ public class Server implements org.eclipse.lsp4j.services.LanguageServer, Langua
 		
 		var workspace = new Workspace(root);
 		workspaces.add(workspace);
+
+		var diagnosticsOfFile = new HashMap<String,List<Diagnostic>>();
 		
 		try (var folder = Files.walk(Paths.get(root)))
 		{
@@ -186,7 +181,8 @@ public class Server implements org.eclipse.lsp4j.services.LanguageServer, Langua
 				{
 					try
 					{
-						localInference(f.toString(), workspace, new String(Files.readAllBytes(Paths.get(f.toString()))));
+						var diagnostics = localInference(f.toString(), workspace, new String(Files.readAllBytes(Paths.get(f.toString()))));
+						diagnosticsOfFile.put(f.toString(), diagnostics);
 					}
 					catch (IOException e)
 					{
@@ -198,6 +194,11 @@ public class Server implements org.eclipse.lsp4j.services.LanguageServer, Langua
 		catch (IOException e)
 		{
 			write(e.getMessage());
+		}
+
+		for (var entry : diagnosticsOfFile.entrySet())
+		{
+			client.publishDiagnostics(new PublishDiagnosticsParams("file://"+entry.getKey(), entry.getValue()));
 		}
 	}
 
@@ -407,29 +408,21 @@ public class Server implements org.eclipse.lsp4j.services.LanguageServer, Langua
 				{
 					var standard = library.getComponent(value.getName());
 
-					var info = workspace.game.inference.infer(cell);
-					var type = Library.ENGLISH.getName(workspace.game.inference.infer(cell));
-
-					if (info == null)
+					if (standard != null)
 					{
-						if (standard != null)
-						{
-							result = "Standard component";
-						}
-						else
-						{
-							result = "User component";
-						}
+						var type = library.getName(standard.getType());
+						result = "Standard component : " + type;
 					}
 					else
 					{
-						if (standard == null)
+						var type = workspace.game.components.get(value.getName());
+						if (type != null)
 						{
-							result = "User component\n\nType: " + type;
+							result = "User component : " + library.getName(type);
 						}
 						else
 						{
-							result = "Standard component\n\nType: " + type;
+							result = "User component : ?";
 						}
 					}
 				}
@@ -449,29 +442,23 @@ public class Server implements org.eclipse.lsp4j.services.LanguageServer, Langua
 					
 					if (query == null)
 					{
-						var type = workspace.game.inference.infer(value);
 						var standard = library.getValue(value.getName());
 
-						if (type == null)
+						if (standard != null)
 						{
-							if (standard == null)
-							{
-								result = "User variable";
-							}
-							else
-							{
-								result = "Standard variable";
-							}
+							var type = library.getName(standard.getType());
+							result = "Standard value : " + type;
 						}
 						else
 						{
-							if (standard == null)
+							var type = workspace.game.values.get(value);
+							if (type != null)
 							{
-								result = "User variable\n\nType: " + library.getName(type);
+								result = "User value : " + library.getName(type);
 							}
 							else
 							{
-								result = "Standard variable\n\nType: " + library.getName(type);
+								result = "user value : ?";
 							}
 						}
 					}
@@ -505,29 +492,23 @@ public class Server implements org.eclipse.lsp4j.services.LanguageServer, Langua
 				
 				if (query == null)
 				{
-					var type = workspace.game.inference.infer(value);
 					var standard = library.getValue(value.getName());
-					
-					if (type == null)
+
+					if (standard != null)
 					{
-						if (standard == null)
-						{
-							result = "User value";
-						}
-						else
-						{
-							result = "Standard value";
-						}
+						var type = library.getName(standard.getType());
+						result = "Standard value : " + type;
 					}
 					else
 					{
-						if (standard == null)
+						var type = workspace.game.values.get(value);
+						if (type != null)
 						{
-							result = "User value\n\nType: " + library.getName(type);
+							result = "User value : " + library.getName(type);
 						}
 						else
 						{
-							result = "Standard value\n\nType: " + library.getName(type);
+							result = "user value : ?";
 						}
 					}
 				}
@@ -985,31 +966,9 @@ public class Server implements org.eclipse.lsp4j.services.LanguageServer, Langua
 		
 		for (var problem : problems)
 		{
-			for (var message : problem.messages(Library.ENGLISH))
+			for (var d : problem.diagnostics(Library.ENGLISH, text))
 			{
-				var file = fileOf(message.source, workspace);
-				
-				var node = NodeModelUtils.getNode(message.source);
-				if (node == null)
-				{
-					continue;
-				}
-				var range = new Range(new Position(node.getStartLine()-1, character(text,node.getOffset())), new Position(node.getEndLine()-1, character(text,node.getEndOffset())));
-				var severity = DiagnosticSeverity.Information;
-				switch (message.severity)
-				{
-				case INFO: severity = DiagnosticSeverity.Information; break;
-				case WARNING: severity = DiagnosticSeverity.Warning; break;
-				case ERROR: severity = DiagnosticSeverity.Error; break;
-				}
-				var diagnostic = new Diagnostic(range, message.message, severity, "");
-				
-				if (!diagnostics.containsKey(file))
-				{
-					diagnostics.put(file, new ArrayList<>());
-				}
-				diagnostics.get(file).add(diagnostic);
-				
+				//diagnostics.put(file, d);
 			}
 		}
 		
@@ -1031,9 +990,9 @@ public class Server implements org.eclipse.lsp4j.services.LanguageServer, Langua
 		{
 			for (var problem : localData.problems)
 			{
-				for (var message : problem.messages(Library.ENGLISH))
+				for (var diagnostic : problem.diagnostics(Library.ENGLISH, localData.text))
 				{
-					if (message.severity == Severity.ERROR)
+					if (diagnostic.getSeverity() == DiagnosticSeverity.Error)
 					{
 						hasErrors = true;
 					}
@@ -1041,7 +1000,7 @@ public class Server implements org.eclipse.lsp4j.services.LanguageServer, Langua
 			}
 		}
 
-		var game = new Game(Library.ENGLISH, inference);
+		var game = new Game(Library.ENGLISH);
 			
 		for (var component : totalComponents.entrySet())
 		{
@@ -1072,13 +1031,10 @@ public class Server implements org.eclipse.lsp4j.services.LanguageServer, Langua
 		}
 
 		var redefined = new RedefinedSymbol(function, FUNCTION__NAME);
-		var problems = new ArrayList<Problem>();
-		problems.add(redefined);
 
-		var converted = toDiagnostics(problems, workspace.files.get(file).text);
-		for (var c : converted)
+		for (var diagnostic : redefined.diagnostics(Library.ENGLISH, workspace.files.get(file).text))
 		{
-			diagnostics.get(file).add(c);
+			diagnostics.get(file).add(diagnostic);
 		}
 	}
 
@@ -1093,64 +1049,6 @@ public class Server implements org.eclipse.lsp4j.services.LanguageServer, Langua
 		}
 		return "";
 	}
-
-	private List<Diagnostic> toDiagnostics(List<Problem> problems, String text)
-	{
-		var diagnostics = new ArrayList<Diagnostic>();
-
-		/*
-		for (var syntaxError : parseResult.getSyntaxErrors())
-		{
-			var character = character(fileText, syntaxError.getOffset());
-			var endCharacter = character(fileText, syntaxError.getEndOffset());
-			
-			var position = new Position(syntaxError.getStartLine()-1, character);
-			var positionEnd = new Position(syntaxError.getStartLine()-1, Math.max(endCharacter, character+1));
-			
-			var range = new Range(position, positionEnd);
-			
-			var message = syntaxError.getSyntaxErrorMessage().getMessage();
-			
-			if (message.equals("mismatched input '<EOF>' expecting '}'"))
-			{
-				message = "Expecting a statement or }";
-			}
-
-			data.problems.add(new SyntaxError(message));
-			
-			result.add(new Diagnostic(range, message));
-		}*/
-
-		for (var problem : problems)
-		{
-			if (problem instanceof SyntaxError)
-			{
-				continue;
-			}
-			for (var message : problem.messages(Library.ENGLISH))
-			{
-				var node = NodeModelUtils.getNode(message.source);
-				if (node == null)
-				{
-					write("Node for "+message.source+ "not found");
-					continue;
-				}
-				var range = new Range(new Position(node.getStartLine()-1, character(text,node.getOffset())), new Position(node.getEndLine()-1, character(text,node.getEndOffset())));
-				var severity = DiagnosticSeverity.Information;
-				switch (message.severity)
-				{
-				case INFO: severity = DiagnosticSeverity.Information; break;
-				case WARNING: severity = DiagnosticSeverity.Warning; break;
-				case ERROR: severity = DiagnosticSeverity.Error; break;
-				}
-				var diagnostic = new Diagnostic(range, message.message, severity, "");
-				
-				diagnostics.add(diagnostic);
-				
-			}
-		}
-		return diagnostics;
-	}
 	
 	
 	
@@ -1160,8 +1058,15 @@ public class Server implements org.eclipse.lsp4j.services.LanguageServer, Langua
 		var data = validator.validate(text);
 
 		workspace.files.put(file, data);
+
+		var diagnostics = new ArrayList<Diagnostic>();
+
+		for (var problem : data.problems)
+		{
+			diagnostics.addAll(problem.diagnostics(Library.ENGLISH, text));
+		}
 		
-		return toDiagnostics(data.problems, text);
+		return diagnostics;
 	}
 
 	private void generateCode(Game game, Workspace workspace)

@@ -5,13 +5,13 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import m.library.Library;
 import m.validation.problems.Problem;
-import m.validation.problems.ProblemMessage;
-import m.validation.problems.ProblemMessage.Severity;
 
-public class UndefinedSymbol implements Problem
+public class UndefinedSymbol extends Problem
 {
 	EObject source;
 	EStructuralFeature feature;
@@ -23,13 +23,12 @@ public class UndefinedSymbol implements Problem
 	}
 	
 	@Override
-	public List<ProblemMessage> messages(Library library)
+	public List<Diagnostic> diagnostics(Library library, String text)
 	{
-		var list = new ArrayList<ProblemMessage>();
+		var list = new ArrayList<Diagnostic>();
 		var message = library.getProblem(this.getClass());
-		var problem = new ProblemMessage(Severity.ERROR, message, source, feature);
+		var problem = new Diagnostic(getRange(source,text), message, DiagnosticSeverity.Error, "M", "3");
 		list.add(problem);
 		return list;
 	}
-
 }

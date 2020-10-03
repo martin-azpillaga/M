@@ -3,13 +3,14 @@ package m.validation.problems.warnings;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
+
 import m.library.Library;
 import m.m.Value;
 import m.validation.problems.Problem;
-import m.validation.problems.ProblemMessage;
-import m.validation.problems.ProblemMessage.Severity;
 
-public class UnusedValue implements Problem
+public class UnusedValue extends Problem
 {
 	Value value;
 	
@@ -17,14 +18,14 @@ public class UnusedValue implements Problem
 	{
 		this.value = value;
 	}
-	
+
 	@Override
-	public List<ProblemMessage> messages(Library library)
+	public List<Diagnostic> diagnostics(Library library, String text)
 	{
-		var list = new ArrayList<ProblemMessage>();
-		var message = library.getProblem(this.getClass());
-		var problem = new ProblemMessage(Severity.WARNING, message, value, null);
-		list.add(problem);
+		var list = new ArrayList<Diagnostic>();
+		
+		list.add(new Diagnostic(getRange(value,text), library.getProblem(getClass()), DiagnosticSeverity.Warning, "M", "6"));
+
 		return list;
 	}
 }

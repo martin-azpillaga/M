@@ -57,11 +57,6 @@
     ],
     "commands": [
       {
-        "command": "m.open",
-        "title": "Open Visual editor",
-        "category": "M"
-      },
-      {
         "command": "m.restart",
         "title": "Restart M language server",
         "category": "M"
@@ -70,7 +65,6 @@
   },
   "activationEvents": [
     "onLanguage:m",
-    "onCommand:m.open",
     "onCommand:m.restart"
   ],
   "main": "./main.js",

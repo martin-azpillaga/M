@@ -12,6 +12,7 @@ import com.google.inject.Inject;
 
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.parser.IParser;
+import org.eclipse.xtext.services.XtextGrammarAccess.ParserRuleElements;
 
 import m.library.Library;
 import m.m.Application;
@@ -40,25 +41,23 @@ public class Validator
 		var parseResult = parser.parse(new StringReader(text));		
 		var file = (File) parseResult.getRootASTElement();
 
-		var minProblems = Integer.MAX_VALUE;
-		Context minProblemContext = null;
-
-		for (var library : Library.values())
+		if (file == null)
 		{
-			context = new Context(library);
-			validate(file);
-
-			if (context.problems.size() < minProblems)
+			var result = new InferenceData(parseResult.getRootNode());
+			for (var problem : parseResult.getSyntaxErrors())
 			{
-				minProblems = context.problems.size();
-				minProblemContext = context;
+				result.problems.add(new SyntaxError(problem));
 			}
+			return result;
 		}
 
-		var result = minProblemContext.buildData(text, parseResult.getRootNode(), file);
+		context = new Context(Library.ENGLISH);
+		validate(file);
+
+		var result = context.buildData(text, parseResult.getRootNode(), file);
 		for (var problem : parseResult.getSyntaxErrors())
 		{
-			result.problems.add(new SyntaxError(problem.getSyntaxErrorMessage().getMessage()));
+			result.problems.add(new SyntaxError(problem));
 		}
 
 		return result;

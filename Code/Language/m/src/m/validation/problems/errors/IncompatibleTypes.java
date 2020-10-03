@@ -3,16 +3,18 @@ package m.validation.problems.errors;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
+
 import java.util.ArrayDeque;
 
 import m.library.Library;
 import m.library.types.Type;
 import m.validation.problems.Problem;
-import m.validation.problems.ProblemMessage;
-import m.validation.problems.ProblemMessage.Severity;
 import m.validation.rules.ExpressionNode;
 
-public class IncompatibleTypes implements Problem
+public class IncompatibleTypes extends Problem
 {
 	ExpressionNode node;
 	
@@ -20,12 +22,12 @@ public class IncompatibleTypes implements Problem
 	{
 		this.node = node;
 	}
-	
+
 	@Override
-	public List<ProblemMessage> messages(Library library)
+	public List<Diagnostic> diagnostics(Library library, String text)
 	{
 		var base = library.getProblem(this.getClass());
-		var list = new ArrayList<ProblemMessage>();
+		var list = new ArrayList<Diagnostic>();
 		
 		var visited = new HashSet<ExpressionNode>();
 		var stack = new ArrayDeque<ExpressionNode>();
@@ -77,11 +79,11 @@ public class IncompatibleTypes implements Problem
 		{
 			if (errors.contains(n))
 			{
-				list.add(new ProblemMessage(Severity.ERROR, base, n.expression, null));
+				list.add(new Diagnostic(getRange(n.expression,text), base, DiagnosticSeverity.Error, "M", "1"));
 			}
 			else
 			{
-				list.add(new ProblemMessage(Severity.WARNING, base, n.expression, null));				
+				list.add(new Diagnostic(getRange(n.expression,text), base, DiagnosticSeverity.Warning, "M", "1"));
 			}
 		}
 		

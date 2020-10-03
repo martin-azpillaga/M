@@ -3,15 +3,17 @@ package m.validation.problems.errors;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
+
 import java.util.ArrayDeque;
 
 import m.library.Library;
 import m.validation.problems.Problem;
-import m.validation.problems.ProblemMessage;
-import m.validation.problems.ProblemMessage.Severity;
 import m.validation.rules.ExpressionNode;
 
-public class UndecidableType implements Problem
+public class UndecidableType extends Problem
 {
 	ExpressionNode node;
 	
@@ -21,10 +23,10 @@ public class UndecidableType implements Problem
 	}
 	
 	@Override
-	public List<ProblemMessage> messages(Library library)
+	public List<Diagnostic> diagnostics(Library library, String text)
 	{
-		var list = new ArrayList<ProblemMessage>();
-		var message = library.getProblem(this.getClass());
+		var list = new ArrayList<Diagnostic>();
+		var message = library.getProblem(getClass());
 		
 		var visited = new HashSet<ExpressionNode>();
 		var stack = new ArrayDeque<ExpressionNode>();
@@ -37,7 +39,7 @@ public class UndecidableType implements Problem
 
 			if (!visited.contains(n))
 			{
-				list.add(new ProblemMessage(Severity.ERROR, message, n.expression, null));
+				list.add(new Diagnostic(getRange(n.expression,text), message, DiagnosticSeverity.Error, "M", "2"));
 				visited.add(n);
 				
 				for (var binding : n.bindings)
@@ -51,5 +53,4 @@ public class UndecidableType implements Problem
 		}
 		return list;
 	}
-
 }

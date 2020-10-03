@@ -1,5 +1,7 @@
 package m.main;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -7,6 +9,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.nodemodel.INode;
 
 import m.m.Function;
+import m.m.MFactory;
 import m.validation.problems.Problem;
 import m.validation.rules.ExpressionNode;
 
@@ -29,5 +32,16 @@ public class InferenceData
 		this.components = components;
 		this.functions = functions;
 		this.problems = problems;
+	}
+
+	public InferenceData(INode rootNode)
+	{
+		this.text = "";
+		this.rootNode = rootNode;
+		this.rootObject = MFactory.eINSTANCE.createFile();
+		this.nodes = new ArrayList<>();
+		this.components = new HashMap<>();
+		this.functions = new HashMap<>();
+		this.problems = new ArrayList<>();
 	}
 }

@@ -20,6 +20,7 @@ import m.validation.problems.errors.RedefinedSymbol;
 import m.validation.problems.errors.UndecidableType;
 import m.validation.problems.errors.UndefinedSymbol;
 import m.validation.problems.warnings.UnusedValue;
+import m.validation.problems.errors.SyntaxError;
 
 public enum Library
 {
@@ -295,6 +296,10 @@ public enum Library
 		else if (problem == UnusedValue.class)
 		{
 			return "Unused value";
+		}
+		else if (problem == SyntaxError.class)
+		{
+			return "Syntax error";
 		}
 		else
 		{
@@ -725,7 +730,7 @@ public enum Library
 		typeToName = forward(atomicTypes, AtomicType.values());
 		nameToType = reverse(atomicTypes, AtomicType.values());
 		
-		var problemTypes = new Class[] {UndecidableType.class, IncompatibleTypes.class, UndefinedSymbol.class, RedefinedSymbol.class, ReadOnly.class, UnusedValue.class};
+		var problemTypes = new Class[] {UndecidableType.class, IncompatibleTypes.class, UndefinedSymbol.class, RedefinedSymbol.class, ReadOnly.class, UnusedValue.class, SyntaxError.class};
 		
 		problemToName = forward(problems, problemTypes);
 		nameToProblem = reverse(problems, problemTypes);

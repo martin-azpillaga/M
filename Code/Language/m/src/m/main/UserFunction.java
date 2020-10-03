@@ -55,25 +55,25 @@ public class UserFunction extends FunctionImpl
 			if (container instanceof Assignment)
 			{
 				var assignment = (Assignment) container;
-				setComponentAccess(name, component, cell == assignment.getAtom());
+				setComponentAccess(result, name, component, cell == assignment.getAtom());
 			}
 			else
 			{
-				setComponentAccess(name, component, false);
+				setComponentAccess(result, name, component, false);
 			}
 		}
 
 		return result;
 	}
 	
-	private void setComponentAccess(String entity, String component, boolean writeAccess)
+	private void setComponentAccess(HashMap<String,HashMap<String,Boolean>> result, String entity, String component, boolean writeAccess)
 	{
-		if (queries.containsKey(entity))
+		if (result.containsKey(entity))
 		{
-			var components = queries.get(entity);
+			var components = result.get(entity);
 			if (!components.containsKey(component) || !components.get(component))
 			{
-				queries.get(entity).put(component, writeAccess);
+				result.get(entity).put(component, writeAccess);
 			}
 		}
 	}
