@@ -12,7 +12,6 @@ import com.google.inject.Inject;
 
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.parser.IParser;
-import org.eclipse.xtext.services.XtextGrammarAccess.ParserRuleElements;
 
 import m.library.Library;
 import m.m.Application;

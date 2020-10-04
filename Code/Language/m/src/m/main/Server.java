@@ -2,6 +2,7 @@ package m.main;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -9,6 +10,7 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.CompletionParams;
+import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
@@ -22,6 +24,7 @@ import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SignatureHelpOptions;
@@ -116,12 +119,13 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 			while(iterator.hasNext())
 			{
 				var project = iterator.next();
-				if (project.path.equals(uri))
+				if (project.root.equals(uri))
 				{
 					iterator.remove();
 				}
 			}
 		}
+		publishDiagnostics();
 	}
 
 	@Override
@@ -154,6 +158,7 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 				}
 			}
 		}
+		publishDiagnostics();
 	}	
 	
 	
@@ -189,6 +194,22 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 		{
 			project.fileChanged(uri, text);
 		}
+		publishDiagnostics();
+	}
+
+	private void publishDiagnostics()
+	{
+		var diagnostics = new HashMap<String,List<Diagnostic>>();
+
+		for (var project : projects)
+		{
+			diagnostics.putAll(project.getDiagnostics());
+		}
+
+		for (var entry : diagnostics.entrySet())
+		{
+			client.publishDiagnostics(new PublishDiagnosticsParams(entry.getKey(), entry.getValue()));
+		}
 	}
 	
 	
@@ -203,7 +224,7 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 
 		for (var project : projects)
 		{
-			result += project.hover(params.getTextDocument().getUri(), params.getPosition());
+			result += project.game.hover(params.getTextDocument().getUri(), params.getPosition());
 		}
 
 		var contents = new MarkupContent("markdown", result);
@@ -219,7 +240,7 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 		{
 			if (project.contains(path))
 			{
-				var result = project.completions(path, params.getPosition());
+				var result = project.game.completions(path, params.getPosition());
 
 				return CompletableFuture.supplyAsync(() -> Either.forLeft(result));
 			}
@@ -235,7 +256,7 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 		{
 			if (project.contains(path))
 			{
-				var result = project.signature(path, params.getPosition());
+				var result = project.game.signature(path, params.getPosition());
 
 				return CompletableFuture.supplyAsync(() -> result);
 			}

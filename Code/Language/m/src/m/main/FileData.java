@@ -22,6 +22,7 @@ public class FileData
 	public final Map<String, ExpressionNode> components;
 	public final Map<String, Function> functions;
 	public final List<Problem> problems;
+	public final List<CrossReference> crossReferences;
 
 	public FileData(String text, INode rootNode, EObject rootObject, List<ExpressionNode> nodes, Map<String, ExpressionNode> components, Map<String, Function> functions, List<Problem> problems)
 	{
@@ -32,6 +33,7 @@ public class FileData
 		this.components = components;
 		this.functions = functions;
 		this.problems = problems;
+		this.crossReferences = new ArrayList<>();
 	}
 
 	public FileData(INode rootNode)
@@ -43,5 +45,6 @@ public class FileData
 		this.components = new HashMap<>();
 		this.functions = new HashMap<>();
 		this.problems = new ArrayList<>();
+		this.crossReferences = new ArrayList<>();
 	}
 }
