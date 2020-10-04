@@ -142,9 +142,7 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 	@Override
 	public void didChangeConfiguration(DidChangeConfigurationParams params)
 	{
-		// No configuration is sync'ed between server and client
-		// All configuration is stored in configuration files like m.project
-		// so that the projects are more portable
+
 	}
 
 	@Override
@@ -274,7 +272,7 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 	{
 		var uri = params.getTextDocument().getUri();
 		var path = decode(uri);
-		
+
 		for (var project : projects)
 		{
 			if (project.contains(path))

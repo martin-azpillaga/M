@@ -15,10 +15,6 @@ import m.generator.Generator;
 import m.library.Library;
 import m.validation.Validator;
 
-// Generic two step project
-// Local validation for each file and a global validation pass INCREMENTAL
-// Stores diagnostics on each file
-// Generate code if no error diagnostics
 public class Project
 {
     String root;

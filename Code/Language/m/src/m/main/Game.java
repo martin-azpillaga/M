@@ -5,13 +5,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.CompletionItemKind;
+import org.eclipse.lsp4j.ParameterInformation;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.SignatureHelp;
+import org.eclipse.lsp4j.SignatureHelpParams;
+import org.eclipse.lsp4j.SignatureInformation;
+import org.eclipse.xtext.EcoreUtil2;
+import org.eclipse.xtext.TerminalRule;
+import org.eclipse.xtext.nodemodel.INode;
+import org.eclipse.xtext.nodemodel.impl.CompositeNode;
+import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
+import org.eclipse.xtext.nodemodel.impl.HiddenLeafNode;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 
 import m.library.Library;
 import m.library.types.*;
+import m.m.Application;
+import m.m.Assignment;
+import m.m.Binary;
+import m.m.BindingBlock;
+import m.m.Block;
+import m.m.Cell;
+import m.m.Function;
+import m.m.Statement;
+import m.m.Unary;
 import m.m.Value;
+import m.library.symbols.Component;
 
 public class Game
 {
@@ -28,30 +50,24 @@ public class Game
 		this.values = new HashMap<>();
 	}
 
+	public String hover(String path, Position position)
+	{
+		return "";
+	}
 
-    public String hover(String path, Position position)
+    public String hover(Position position, String text, INode rootNode)
     {
-        /*
 		var result = "";
-		
-		var file = decode(params.getTextDocument().getUri());
-		var workspace = findWorkspace(file);
-		var library = workspace.game.library;
-		var localData = workspace.files.get(file);
 
-		var text = localData.text;
-		var position = params.getPosition();
 		var offset = offset(text, position.getLine(), position.getCharacter());
 		
-		var node = NodeModelUtils.findLeafNodeAtOffset(localData.rootNode, offset);
+		var node = NodeModelUtils.findLeafNodeAtOffset(rootNode, offset);
 		
 		if (node instanceof HiddenLeafNode)
 		{
-			var hover = new Hover();
-			var contents = new MarkupContent("markdown", result);
-			hover.setContents(contents);
-			return CompletableFuture.supplyAsync(() -> hover);
+			return "";
 		}
+		
 		var semantic = node.getSemanticElement();
 		
 		if (semantic instanceof Function)
@@ -82,7 +98,7 @@ public class Game
 					}
 					else
 					{
-						var type = workspace.game.components.get(value.getName());
+						var type = components.get(value.getName());
 						if (type != null)
 						{
 							result = "User component : " + library.getName(type);
@@ -97,7 +113,7 @@ public class Game
 				{
 					var function = EcoreUtil2.getContainerOfType(cell, Function.class);
 					UserFunction userFunction = null;
-					for (var f : workspace.game.functions)
+					for (var f : functions)
 					{
 						if (f.getName().equals(function.getName()))
 						{
@@ -118,7 +134,7 @@ public class Game
 						}
 						else
 						{
-							var type = workspace.game.values.get(value);
+							var type = values.get(value);
 							if (type != null)
 							{
 								result = "User value : " + library.getName(type);
@@ -147,7 +163,7 @@ public class Game
 			{
 				var function = EcoreUtil2.getContainerOfType(value, Function.class);
 				UserFunction userFunction = null;
-				for (var f : workspace.game.functions)
+				for (var f : functions)
 				{
 					if (f.getName().equals(function.getName()))
 					{
@@ -168,7 +184,7 @@ public class Game
 					}
 					else
 					{
-						var type = workspace.game.values.get(value);
+						var type = values.get(value);
 						if (type != null)
 						{
 							result = "User value : " + library.getName(type);
@@ -221,27 +237,22 @@ public class Game
 			}
 		}
 
-		var hover = new Hover();
-		var contents = new MarkupContent("markdown", result);
-		hover.setContents(contents);
-		return CompletableFuture.supplyAsync(() -> hover);*/
-        return "hover";
-    }
+		return result;
+	}
+	
+	public List<CompletionItem> completions(String path, Position position)
+	{
+		return new ArrayList<CompletionItem>();
+	}
 
-    public List<CompletionItem> completions(String path, Position position)
+    public List<CompletionItem> completions(Position position, INode rootNode)
     {
         var result = new ArrayList<CompletionItem>();
-        /*
-		var file = decode(params.getTextDocument().getUri());
-		var workspace = findWorkspace(file);
-		var library = workspace.game.library;
-		var localData = workspace.files.get(file);
 
-		var text = localData.text;
-		var position = params.getPosition();
+		var text = rootNode.getText();
 		var offset = offset(text, position.getLine(), position.getCharacter());
 		
-		var node = NodeModelUtils.findLeafNodeAtOffset(localData.rootNode, offset-1);
+		var node = NodeModelUtils.findLeafNodeAtOffset(rootNode, offset-1);
 		
 		var semantic = node.getSemanticElement();
 		var grammatic = node.getGrammarElement();
@@ -258,7 +269,7 @@ public class Game
 				cell = (Cell) semantic.eContainer();
 			}
 
-			for (var component : workspace.game.components.keySet())
+			for (var component : components.keySet())
             {
 				if (component == null || cell.getComponent() != null && cell.getComponent().getName() != null && cell.getComponent().getName().equals(component))
 				{
@@ -266,7 +277,7 @@ public class Game
 				}
                 var item = new CompletionItem(component);
 				item.setDocumentation(library.getDescription(library.getComponent(component)));
-				item.setDetail(library.getName(workspace.game.components.get(component)));
+				item.setDetail(library.getName(components.get(component)));
                 item.setKind(CompletionItemKind.Class);
                 result.add(item);
             }
@@ -314,7 +325,7 @@ public class Game
 					item.setKind(CompletionItemKind.Variable);
 					result.add(item);
 				}
-				// identifier lost in a block
+				
 				var siblings = node.getParent().getParent().getChildren();
 				for (var sibling : siblings)
 				{
@@ -484,22 +495,23 @@ public class Game
 				container = temp;
 			}
 		}
-        */
-		return result;
-    }
 
-    public SignatureHelp signature(String path, Position position)
+		return result;
+	}
+	
+	public SignatureHelp signature(String path, Position position)
+	{
+		return new SignatureHelp();
+	}
+
+    public SignatureHelp signature(INode rootNode, Position position, SignatureHelpParams params)
     {
         var help = new SignatureHelp();
-        /*
-        var file = decode(params.getTextDocument().getUri());
-		var workspace = findWorkspace(file);
-		var library = workspace.game.library;
 
-		var offset = offset(workspace.files.get(file).text, params.getPosition().getLine(), params.getPosition().getCharacter());
-		var node = NodeModelUtils.findLeafNodeAtOffset(workspace.files.get(file).rootNode, offset-1);
+		var text = rootNode.getText();
+		var offset = offset(text, position.getLine(), position.getCharacter());
+		var node = NodeModelUtils.findLeafNodeAtOffset(rootNode, offset-1);
 
-		var help = new SignatureHelp();
 		var list = new ArrayList<SignatureInformation>();
 		
 		if (node != null && node.getSemanticElement() instanceof Application)
@@ -527,13 +539,10 @@ public class Game
 				{
 					help.setActiveParameter(application.getArguments().size()-1);
 				}
-				return CompletableFuture.supplyAsync(()->help);
 			}
 		}
 
-		
-		
-		help.setSignatures(list);*/
+		help.setSignatures(list);
 		return help;
 	}
 	
