@@ -1,5 +1,7 @@
 package m.main;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -81,7 +83,8 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 		for (var folder : params.getWorkspaceFolders())
 		{
 			var uri = folder.getUri();
-			projects.add(new Project(uri));
+			var path = decode(uri);
+			projects.add(new Project(path));
 		}
 		
 		return CompletableFuture.supplyAsync(()->new InitializeResult(capabilities));
@@ -114,18 +117,20 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 		for (var added : params.getEvent().getAdded())
 		{
 			var uri = added.getUri();
-			projects.add(new Project(uri));
+			var path = decode(uri);
+			projects.add(new Project(path));
 		}
 		for (var removed : params.getEvent().getRemoved())
 		{
 			var uri = removed.getUri();
+			var path = decode(uri);
 
 			var iterator = projects.iterator();
 
 			while(iterator.hasNext())
 			{
 				var project = iterator.next();
-				if (project.root.equals(uri))
+				if (project.root.equals(path))
 				{
 					iterator.remove();
 				}
@@ -148,19 +153,20 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 		for (var change : params.getChanges())
 		{
 			var uri = change.getUri();
+			var path = decode(uri);
 
 			if (change.getType() == FileChangeType.Created)
 			{
 				for (var project : projects)
 				{
-					project.fileAdded(uri);
+					project.fileAdded(path);
 				}
 			}
 			else if (change.getType() == FileChangeType.Deleted)
 			{
 				for (var project : projects)
 				{
-					project.fileDeleted(uri);
+					project.fileDeleted(path);
 				}
 			}
 		}
@@ -196,9 +202,11 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 
 	private void onChange(String uri, String text)
 	{
+		var path = decode(uri);
+
 		for (var project : projects)
 		{
-			project.fileChanged(uri, text);
+			project.fileChanged(path, text);
 		}
 		publishDiagnostics();
 	}
@@ -214,7 +222,8 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 
 		for (var entry : diagnostics.entrySet())
 		{
-			client.publishDiagnostics(new PublishDiagnosticsParams(entry.getKey(), entry.getValue()));
+			var uri = encode(entry.getKey());
+			client.publishDiagnostics(new PublishDiagnosticsParams(uri, entry.getValue()));
 		}
 	}
 	
@@ -228,9 +237,13 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 		var hover = new Hover();
 		var result = "";
 
+		var position = params.getPosition();
+		var uri = params.getTextDocument().getUri();
+		var path = decode(uri);
+
 		for (var project : projects)
 		{
-			result += project.game.hover(params.getTextDocument().getUri(), params.getPosition());
+			result += project.game.hover(path, position);
 		}
 
 		var contents = new MarkupContent("markdown", result);
@@ -241,7 +254,9 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 	@Override
 	public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(CompletionParams params)
 	{
-		var path = params.getTextDocument().getUri();
+		var uri = params.getTextDocument().getUri();
+		var path = decode(uri);
+
 		for (var project : projects)
 		{
 			if (project.contains(path))
@@ -257,7 +272,9 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 	@Override
 	public CompletableFuture<SignatureHelp> signatureHelp(SignatureHelpParams params)
 	{
-		var path = params.getTextDocument().getUri();
+		var uri = params.getTextDocument().getUri();
+		var path = decode(uri);
+		
 		for (var project : projects)
 		{
 			if (project.contains(path))
@@ -268,5 +285,32 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 			}
 		}
 		return null;
+	}
+
+	private String encode(String path)
+	{
+		return path;
+	}
+
+	private String decode(String path)
+	{
+		var result = "";
+		try
+		{
+			result = URLDecoder.decode(path.replace("file://", ""),"UTF-8");
+		}
+		catch (UnsupportedEncodingException e)
+		{
+			result = "Unsupported encoding UTF-8";
+		}
+
+		var os = System.getProperty("os.name");
+
+		if (os.startsWith("Win"))
+		{
+			result = result.substring(1);
+		}
+
+		return result;
 	}
 }

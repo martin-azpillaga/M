@@ -1,30 +1,19 @@
 package m.main;
 
-import static m.m.MPackage.Literals.FUNCTION__NAME;
-
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.lsp4j.Diagnostic;
 
-import m.MStandaloneSetup;
 import m.generator.Engine;
 import m.generator.Generator;
 import m.library.Library;
-import m.m.Function;
 import m.validation.Validator;
-import m.validation.LocalValidator;
-import m.validation.problems.errors.RedefinedSymbol;
 
 // Generic two step project
 // Local validation for each file and a global validation pass INCREMENTAL
@@ -44,7 +33,7 @@ public class Project
 		this.generator = new Generator();
 		this.validator = new Validator();
 
-        try (var walk = Files.walk(Paths.get(decode(root))))
+        try (var walk = Files.walk(Paths.get(root)))
 		{
 			walk.forEach(f -> 
 			{
@@ -76,32 +65,28 @@ public class Project
         return new HashMap<>();
     }
 
-    public void fileAdded(String uri)
+    public void fileAdded(String file)
     {
-        if (!contains(uri)) return;
+        if (!contains(file)) return;
 
 		try
 		{
-			var text = new String(Files.readAllBytes(Paths.get(decode(uri))));
-			fileChanged(uri, text);
+			var text = new String(Files.readAllBytes(Paths.get(file)));
+			fileChanged(file, text);
 		}
 		catch (IOException e){}
     }
 
-    public void fileDeleted(String uri)
+    public void fileDeleted(String file)
     {
-		if (!contains(uri)) return;
-
-        var file = decode(uri);
+		if (!contains(file)) return;
 
 		validator.delete(file);
     }
 
-    public void fileChanged(String uri, String text)
+    public void fileChanged(String modifiedFile, String text)
     {
-        if (!contains(uri)) return;
-
-		var modifiedFile = decode(uri);
+        if (!contains(modifiedFile)) return;
 		
 		var globalData = validator.validate(modifiedFile, text);
 
@@ -147,33 +132,7 @@ public class Project
 		}
 		else
 		{
-			for (var engine : Engine.values())
-			{
-				var defaultPath = Paths.get(decode(root), "Output", engine.identifier).toString();
-				generator.generate(game, engine, defaultPath);
-			}
+			generator.generate(game, Paths.get(root));
 		}
 	}
-	
-	private String decode(String path)
-	{
-		var result = "";
-		try
-		{
-			result = URLDecoder.decode(path.replace("file://", ""),"UTF-8");
-		}
-		catch (UnsupportedEncodingException e)
-		{
-			result = "Unsupported encoding UTF-8";
-		}
-
-		var os = System.getProperty("os.name");
-
-		if (os.startsWith("Win"))
-		{
-			result = result.substring(1);
-		}
-
-		return result;
-    }
 }
