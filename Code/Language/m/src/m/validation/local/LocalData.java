@@ -1,4 +1,4 @@
-package m.main;
+package m.validation.local;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +13,7 @@ import m.m.MFactory;
 import m.validation.problems.Problem;
 import m.validation.rules.ExpressionNode;
 
-public class FileData
+public class LocalData
 {
 	public final String text;
 	public final INode rootNode;
@@ -23,7 +23,7 @@ public class FileData
 	public final Map<String, Function> functions;
 	public final List<Problem> problems;
 
-	public FileData(String text, INode rootNode, EObject rootObject, List<ExpressionNode> nodes, Map<String, ExpressionNode> components, Map<String, Function> functions, List<Problem> problems)
+	public LocalData(String text, INode rootNode, EObject rootObject, List<ExpressionNode> nodes, Map<String, ExpressionNode> components, Map<String, Function> functions, List<Problem> problems)
 	{
 		this.text = text;
 		this.rootNode = rootNode;
@@ -34,7 +34,7 @@ public class FileData
 		this.problems = problems;
 	}
 
-	public FileData(INode rootNode)
+	public LocalData(INode rootNode)
 	{
 		this.text = "";
 		this.rootNode = rootNode;

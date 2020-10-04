@@ -1,4 +1,4 @@
-package m.validation;
+package m.validation.local;
 
 import static m.m.MPackage.Literals.APPLICATION__NAME;
 import static m.m.MPackage.Literals.BINARY__OPERATOR;
@@ -28,7 +28,6 @@ import m.m.Function;
 import m.m.Statement;
 import m.m.Unary;
 import m.m.Value;
-import m.main.FileData;
 import m.validation.problems.errors.SyntaxError;
 
 public class LocalValidator
@@ -42,12 +41,12 @@ public class LocalValidator
 		injector.injectMembers(this);
 	}
 
-	public FileData validate(String text)
+	public LocalData validate(String text)
 	{
 		var parseResult = parser.parse(new StringReader(text));		
 		var file = (File) parseResult.getRootASTElement();
 
-		FileData result;
+		LocalData result;
 
 		if (file != null)
 		{
@@ -57,7 +56,7 @@ public class LocalValidator
 		}
 		else
 		{
-			result = new FileData(parseResult.getRootNode());
+			result = new LocalData(parseResult.getRootNode());
 		}
 		
 		for (var problem : parseResult.getSyntaxErrors())

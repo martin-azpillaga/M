@@ -285,6 +285,8 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 		return null;
 	}
 
+
+
 	private String encode(String path)
 	{
 		return path;

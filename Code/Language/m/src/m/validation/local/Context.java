@@ -1,4 +1,4 @@
-package m.validation;
+package m.validation.local;
 
 import static m.validation.rules.Binding.BindingReason.*;
 
@@ -18,7 +18,6 @@ import org.eclipse.xtext.nodemodel.INode;
 import m.library.Library;
 import m.library.types.*;
 import m.m.*;
-import m.main.FileData;
 import m.validation.problems.Problem;
 import m.validation.problems.errors.RedefinedSymbol;
 import m.validation.problems.errors.UndefinedSymbol;
@@ -283,7 +282,7 @@ public class Context
 		userVariables = popped;
 	}
 
-	public FileData buildData(String text, INode node, File file)
+	public LocalData buildData(String text, INode node, File file)
 	{
 		return inference.buildData(text, node, file, userComponents, userFunctions, problems);
 	}

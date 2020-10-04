@@ -1,4 +1,4 @@
-package m.validation;
+package m.validation.local;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,7 +11,6 @@ import org.eclipse.xtext.nodemodel.INode;
 import m.m.Cell;
 import m.m.Expression;
 import m.m.Function;
-import m.main.FileData;
 import m.validation.problems.Problem;
 import m.validation.rules.Binding;
 import m.validation.rules.Binding.BindingReason;
@@ -60,7 +59,7 @@ public class LocalInference
 		return node;
     }
     
-    public FileData buildData(String text, INode rootNode, EObject file, Map<String, Cell> cells, Map<String,Function> functions, List<Problem> problems)
+    public LocalData buildData(String text, INode rootNode, EObject file, Map<String, Cell> cells, Map<String,Function> functions, List<Problem> problems)
 	{
         var components = new HashMap<String, ExpressionNode>();
         for (var cell : cells.entrySet())
@@ -70,6 +69,6 @@ public class LocalInference
 			components.put(cell.getKey(), node);
         }
         
-        return new FileData(text, rootNode, file, list, components, functions, problems);
+        return new LocalData(text, rootNode, file, list, components, functions, problems);
 	}
 }

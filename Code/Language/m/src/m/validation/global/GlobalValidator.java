@@ -1,4 +1,4 @@
-package m.validation;
+package m.validation.global;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -11,15 +11,16 @@ import java.util.Set;
 import m.m.Cell;
 
 import m.library.types.Type;
+import m.validation.local.LocalValidator;
 import m.validation.rules.ExpressionNode;
 
-public class Validator
+public class GlobalValidator
 {
     Map<String, Set<Cluster>> fileToClusters;
     Map<String, Cluster> componentToCluster;
     LocalValidator localValidator;
 
-    public Validator()
+    public GlobalValidator()
     {
         fileToClusters = new HashMap<>();
         componentToCluster = new HashMap<>();

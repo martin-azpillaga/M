@@ -13,13 +13,13 @@ import org.eclipse.lsp4j.Diagnostic;
 import m.generator.Engine;
 import m.generator.Generator;
 import m.library.Library;
-import m.validation.Validator;
+import m.validation.global.GlobalValidator;
 
 public class Project
 {
     String root;
 
-	Validator validator;
+	GlobalValidator validator;
     Generator generator;
 	public Game game;
 
@@ -27,7 +27,7 @@ public class Project
     {
 		this.root = root;
 		this.generator = new Generator();
-		this.validator = new Validator();
+		this.validator = new GlobalValidator();
 
         try (var walk = Files.walk(Paths.get(root)))
 		{
