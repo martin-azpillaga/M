@@ -51,6 +51,18 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 	}
 	
 	@Override
+	public TextDocumentService getTextDocumentService()
+	{
+		return this;
+	}
+
+	@Override
+	public WorkspaceService getWorkspaceService()
+	{
+		return this;
+	}
+
+	@Override
 	public CompletableFuture<InitializeResult> initialize(InitializeParams params)
 	{
         var options = new WorkspaceFoldersOptions();
@@ -74,17 +86,11 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 		
 		return CompletableFuture.supplyAsync(()->new InitializeResult(capabilities));
 	}
-	
-	@Override
-	public TextDocumentService getTextDocumentService()
-	{
-		return this;
-	}
 
 	@Override
-	public WorkspaceService getWorkspaceService()
+	public void initialized()
 	{
-		return this;
+		publishDiagnostics();
 	}
 	
 	@Override

@@ -1,201 +1,268 @@
 package m.validation;
 
-import static m.m.MPackage.Literals.APPLICATION__NAME;
-import static m.m.MPackage.Literals.BINARY__OPERATOR;
-import static m.m.MPackage.Literals.BINDING_BLOCK__NAME;
-import static m.m.MPackage.Literals.BLOCK__NAME;
-import static m.m.MPackage.Literals.UNARY__OPERATOR;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-import java.io.StringReader;
-
-import com.google.inject.Inject;
-
-import org.eclipse.xtext.EcoreUtil2;
-import org.eclipse.xtext.parser.IParser;
-
-import m.library.Library;
-import m.m.Application;
-import m.m.Assignment;
-import m.m.Binary;
-import m.m.BindingBlock;
-import m.m.Block;
 import m.m.Cell;
-import m.m.Delegation;
-import m.m.Expression;
-import m.m.File;
-import m.m.Function;
-import m.m.Statement;
-import m.m.Unary;
-import m.m.Value;
-import m.main.FileData;
-import m.validation.problems.errors.SyntaxError;
+
+import m.library.types.Type;
+import m.validation.rules.ExpressionNode;
 
 public class Validator
 {
-	@Inject IParser parser;
-	Context context;
+    Map<String, Set<Cluster>> fileToClusters;
+    Map<String, Cluster> componentToCluster;
+    LocalValidator localValidator;
 
-	public FileData validate(String text)
-	{
-		var parseResult = parser.parse(new StringReader(text));		
-		var file = (File) parseResult.getRootASTElement();
+    public Validator()
+    {
+        fileToClusters = new HashMap<>();
+        componentToCluster = new HashMap<>();
+        localValidator = new LocalValidator();
+    }
 
-		FileData result;
+    public GlobalData validate(String modifiedFile, String text)
+    {
+        var modifiedData = localValidator.validate(text);
 
-		if (file != null)
-		{
-			context = new Context(Library.ENGLISH);
-			validate(file);
-			result = context.buildData(text, parseResult.getRootNode(), file);
-		}
-		else
-		{
-			result = new FileData(parseResult.getRootNode());
-		}
+        invalidateObsoleteMemory(modifiedFile);
+
+        validate(modifiedData.nodes, modifiedFile);
+
+        return collectData();
+    }
+
+    public GlobalData delete(String file)
+    {
+        invalidateObsoleteMemory(file);
+        
+        return collectData();
+    }
+
+    private List<ExpressionNode> invalidateObsoleteMemory(String modifiedFile)
+    {
+        var affectedNodes = new ArrayList<ExpressionNode>();
+
+        var clusters = fileToClusters.get(modifiedFile);
+
+        if (clusters == null)
+        {
+            return new ArrayList<ExpressionNode>();
+        }
+
+        for (var cluster : clusters)
+        {
+            cluster.fileToTypes.remove(modifiedFile);
+            cluster.fileToNodes.remove(modifiedFile);
+
+            if (cluster.fileToNodes.isEmpty())
+            {
+                for (var component : cluster.componentToFiles.keySet())
+                {
+                    componentToCluster.remove(component);
+                }
+            }
+            else
+            {
+                for (var entry : cluster.componentToFiles.entrySet())
+                {
+                    var component = entry.getKey();
+                    var files = entry.getValue();
+
+                    files.remove(modifiedFile);
+
+                    if (files.isEmpty())
+                    {
+                        componentToCluster.remove(component);
+                    }
+                }
+
+                for (var node : cluster.fileToNodes.values())
+                {
+                    affectedNodes.add(node);
+                }
+            }
+        }
+
+        fileToClusters.remove(modifiedFile);
+
+        return affectedNodes;
+    }
+
+    private void validate(List<ExpressionNode> nodes, String modifiedFile)
+    {
+        var stack = new ArrayDeque<ExpressionNode>();
+		var visited = new ArrayList<ExpressionNode>();
 		
-		for (var problem : parseResult.getSyntaxErrors())
+		for (var rootNode : nodes)
 		{
-			result.problems.add(new SyntaxError(problem));
-		}
+			if (visited.contains(rootNode))
+			{
+				continue;
+			}
+			stack.push(rootNode);
+            var cluster = new Cluster();
+            cluster.fileToNodes.put(modifiedFile, rootNode);
+            
+            while (!stack.isEmpty())
+			{
+                var node = stack.pop();
 
-		return result;
-	}
+                visited.add(node);
 
-	void validate(File file)
-	{
-		for (var function : file.getFunctions())
-		{
-			context.declareFunction(function);
-		}
-		for (var cell : EcoreUtil2.getAllContentsOfType(file, Cell.class))
-		{
-			context.declareComponent(cell);
-		}
+                cluster = validate(node, cluster, modifiedFile);
 
-		for (var function : file.getFunctions())
-		{
-			validate(function);
-		}
-	}
-	
-	private void validate(Function function)
-	{
-		context.push();
-		for (var statement : function.getStatements())
-		{
-			validate(statement);
-		}
-		context.pop();
-	}
-	
-	private void validate(Statement statement)
-	{
-		if (statement instanceof Block)
-		{
-			var block = (Block) statement;
-			var name = block.getName();
-			var expression = block.getExpression();
-			
-			context.accessBlock(name, expression, block, BLOCK__NAME);
-			validate(expression);
-			context.push();
-			for (var s : block.getStatements())
-			{
-				validate(s);
-			}
-			context.pop();
-		}
-		else if (statement instanceof BindingBlock)
-		{
-			var block = (BindingBlock) statement;
-			var name = block.getName();
-			var value = block.getExpression();
-			
-			context.push();
-			context.declareVariable(value);
-			context.accessBlock(name, value, block, BINDING_BLOCK__NAME);
-			for (var s : block.getStatements())
-			{
-				validate(s);
-			}
-			context.pop();
-		}
-		else if (statement instanceof Delegation)
-		{
-			var delegation = (Delegation) statement;
-			var application = delegation.getApplication();
-			
-			validate(application);
-		}
-		else if (statement instanceof Assignment)
-		{
-			var assignment = (Assignment) statement;
-			var atom = assignment.getAtom();
-			var expression = assignment.getExpression();
-			
-			context.accessFunction("=", new Expression[] {atom, expression}, null, null);
-			validate(expression);
-			
-			if (atom instanceof Value)
-			{
-				var value = (Value) atom;
-				
-				context.declareVariable(value);
-			}
-			else
-			{
-				validate(atom);
-			}
-		}
-	}
-	
-	private void validate(Expression expression)
-	{
-		if (expression instanceof Value)
-		{
-			var value = (Value) expression;
-			
-			context.accessVariable(value);
-		}
-		else if (expression instanceof Cell)
-		{
-			var cell = (Cell) expression;
-			var entity = cell.getEntity();
-			
-			context.accessVariable(entity);
-			context.accessComponent(cell);
-		}
-		else if (expression instanceof Binary)
-		{
-			var binary = (Binary) expression;
-			var left = binary.getLeft();
-			var right = binary.getRight();
-			var operator = binary.getOperator();
-			
-			context.accessFunction(operator, new Expression[] {left, right}, binary, BINARY__OPERATOR);
-			validate(left);
-			validate(right);
-		}
-		else if (expression instanceof Unary)
-		{
-			var unary = (Unary) expression;
-			var e =  unary.getExpression();
-			var operator = unary.getOperator();
-			
-			context.accessFunction(operator, new Expression[] {e}, unary, UNARY__OPERATOR);
-			validate(e);
-		}
-		else if (expression instanceof Application)
-		{
-			var application = (Application) expression;
-			var name = application.getName();
-			var arguments = application.getArguments().toArray(new Expression[0]);
-			
-			context.accessFunction(name, arguments, application, APPLICATION__NAME);
-			for (var argument : application.getArguments())
-			{
-				validate(argument);
-			}
-		}
-	}
+                for (var binding : node.bindings)
+                {
+                    var boundNode = binding.node;
+                    if (!visited.contains(boundNode))
+                    {
+                        stack.push(boundNode);
+                    }
+                }
+            }
+
+            var clusters = fileToClusters.get(modifiedFile);
+            if (clusters == null)
+            {
+                clusters = new HashSet<Cluster>();
+                fileToClusters.put(modifiedFile, clusters);
+            }
+            clusters.add(cluster);
+        }
+    }
+
+    private Cluster validate(ExpressionNode node, Cluster cluster, String modifiedFile)
+    {
+        var expression = node.expression;
+        if (expression instanceof Cell)
+        {
+            var cell = (Cell) expression;
+            if (cell.getComponent() != null)
+            {
+                var component = cell.getComponent().getName();
+
+                var componentFiles = cluster.componentToFiles.get(modifiedFile);
+                if (componentFiles == null)
+                {
+                    componentFiles = new HashSet<String>();
+                    cluster.componentToFiles.put(component, componentFiles);
+                }
+                componentFiles.add(modifiedFile);
+
+
+                var definitionCluster = componentToCluster.get(component);
+                if (definitionCluster != null)
+                {
+                    // Merge clusters
+                    for (var entry : cluster.fileToTypes.entrySet())
+                    {
+                        var file = entry.getKey();
+                        var types = entry.getValue();
+
+                        var definitionClusterTypes = definitionCluster.fileToTypes.get(file);
+                        if (definitionClusterTypes == null)
+                        {
+                            definitionCluster.fileToTypes.put(file, types);
+                        }
+                        else
+                        {
+                            definitionClusterTypes.addAll(types);
+                        }
+                    }
+                    for (var entry : cluster.fileToNodes.entrySet())
+                    {
+                        var file = entry.getKey();
+                        var entryNode = entry.getValue();
+
+                        definitionCluster.fileToNodes.put(file, entryNode);
+                    }
+                    for (var entry : cluster.componentToFiles.entrySet())
+                    {
+                        var entryComponent = entry.getKey();
+                        var files = entry.getValue();
+
+                        var definitionFiles = definitionCluster.componentToFiles.get(entryComponent);
+                        if (definitionFiles == null)
+                        {
+                            definitionCluster.componentToFiles.put(entryComponent, files);
+                        }
+                        else
+                        {
+                            definitionFiles.addAll(files);
+                        }
+                    }
+                    cluster = definitionCluster;
+                }
+                else
+                {
+                    componentToCluster.put(component, cluster);
+                }
+            }
+        }
+        for (var typing : node.typings)
+        {
+            var types = cluster.fileToTypes.get(modifiedFile);
+            if (types == null)
+            {
+                types = new HashSet<Type>();
+
+                cluster.fileToTypes.put(modifiedFile, types);
+            }
+            types.add(typing.type);
+        }
+        return cluster;
+    }
+
+    private GlobalData collectData()
+    {
+        var data = new GlobalData();
+
+        for (var entry : componentToCluster.entrySet())
+        {
+            var component = entry.getKey();
+            var cluster = entry.getValue();
+
+            var types = new HashSet<Type>();
+
+            for (var typeSet : cluster.fileToTypes.values())
+            {
+                types.addAll(typeSet);
+            }
+
+            if (types.isEmpty())
+            {
+                data.hasErrors = true;
+            }
+            else if (types.size() == 1)
+            {
+                data.components.put(component, types.iterator().next());
+            }
+            else
+            {
+                data.hasErrors = true;
+            }
+        }
+
+        return data;
+    }
+}
+
+class Cluster
+{
+    public Map<String, Set<Type>> fileToTypes;
+    public Map<String, ExpressionNode> fileToNodes;
+    public Map<String, Set<String>> componentToFiles;
+
+    public Cluster()
+    {
+        fileToTypes = new HashMap<>();
+        fileToNodes = new HashMap<>();
+        componentToFiles = new HashMap<>();
+    }
 }

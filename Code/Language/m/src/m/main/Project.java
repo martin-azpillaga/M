@@ -16,18 +16,14 @@ import java.util.Map;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import m.MStandaloneSetup;
 import m.generator.Engine;
 import m.generator.Generator;
 import m.library.Library;
-import m.library.types.AtomicType;
-import m.library.types.FunctionType;
 import m.m.Function;
-import m.validation.GlobalValidator;
-import m.validation.Inference;
 import m.validation.Validator;
+import m.validation.LocalValidator;
 import m.validation.problems.errors.RedefinedSymbol;
 
 // Generic two step project
@@ -37,23 +33,17 @@ import m.validation.problems.errors.RedefinedSymbol;
 public class Project
 {
     String root;
-	Map<String,FileData> files;
-	List<CrossReference> crossReferences;
 
-    Validator validator;
+	Validator validator;
     Generator generator;
-	GlobalValidator globalValidator;
 	public Game game;
 
-    public Project(String path)
+    public Project(String root)
     {
-		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
-		this.validator = injector.getInstance(Validator.class);
-		this.generator = injector.getInstance(Generator.class);
-		this.root = path;
-		this.globalValidator = new GlobalValidator();
+		this.root = root;
+		this.generator = new Generator();
+		this.validator = new Validator();
 
-		this.files = new HashMap<>();
         try (var walk = Files.walk(Paths.get(decode(root))))
 		{
 			walk.forEach(f -> 
@@ -64,9 +54,7 @@ public class Project
 					try
 					{
 						var text = new String(Files.readAllBytes(f));
-						var data = validator.validate(text);
-						files.put(file, data);
-						globalValidator.validate(file, data);
+						validator.validate(file,text);
 					}
 					catch (IOException e)
 					{
@@ -104,11 +92,9 @@ public class Project
     {
 		if (!contains(uri)) return;
 
-        var filePath = decode(uri);
+        var file = decode(uri);
 
-		files.remove(filePath);
-		
-		globalValidator.delete(filePath);
+		validator.delete(file);
     }
 
     public void fileChanged(String uri, String text)
@@ -117,11 +103,7 @@ public class Project
 
 		var modifiedFile = decode(uri);
 		
-		var modifiedData = validator.validate(text);
-
-		files.put(modifiedFile,modifiedData);
-		
-		var globalData = globalValidator.validate(modifiedFile, modifiedData);
+		var globalData = validator.validate(modifiedFile, text);
 
 		game = new Game(Library.ENGLISH);
 
@@ -132,33 +114,6 @@ public class Project
 			generateCode(game);
 		}
     }
-
-	private void reportRedefinedFunction(Function function, String file, Map<String,List<Diagnostic>> diagnostics)
-	{
-		if (! diagnostics.containsKey(file))
-		{
-			diagnostics.put(file, new ArrayList<>());
-		}
-
-		var redefined = new RedefinedSymbol(function, FUNCTION__NAME);
-
-		for (var diagnostic : redefined.diagnostics(Library.ENGLISH, files.get(file).text))
-		{
-			diagnostics.get(file).add(diagnostic);
-		}
-	}
-
-	private String fileOf(EObject o)
-	{
-		for (var file : files.entrySet())
-		{
-			if (EcoreUtil.getRoot(o, true) == file.getValue().rootObject)
-			{
-				return file.getKey();
-			}
-		}
-		return "";
-	}
 
 	private void generateCode(Game game)
 	{		
