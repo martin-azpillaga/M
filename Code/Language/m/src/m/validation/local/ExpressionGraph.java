@@ -5,24 +5,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.xtext.nodemodel.INode;
+import org.eclipse.lsp4j.Diagnostic;
 
-import m.m.Cell;
 import m.m.Expression;
 import m.m.Function;
-import m.validation.problems.Problem;
-import m.validation.rules.Binding;
-import m.validation.rules.Binding.BindingReason;
-import m.validation.rules.ExpressionNode;
-import m.validation.rules.Typing;
+import m.validation.local.rules.Binding;
+import m.validation.local.rules.Binding.BindingReason;
+import m.validation.local.rules.ExpressionNode;
+import m.validation.local.rules.Typing;
 
-public class LocalInference 
+public class ExpressionGraph 
 {
 	List<ExpressionNode> list;
 	Map<Expression, ExpressionNode> map;
 	
-	public LocalInference()
+	public ExpressionGraph()
 	{
 		list = new ArrayList<>();
 		map = new HashMap<>();
@@ -59,16 +56,8 @@ public class LocalInference
 		return node;
     }
     
-    public LocalData buildData(String text, INode rootNode, EObject file, Map<String, Cell> cells, Map<String,Function> functions, List<Problem> problems)
+    public LocalData buildData(Map<String,Function> functions, List<Diagnostic> problems)
 	{
-        var components = new HashMap<String, ExpressionNode>();
-        for (var cell : cells.entrySet())
-		{
-			var node = map.get(cell.getValue());
-			
-			components.put(cell.getKey(), node);
-        }
-        
-        return new LocalData(text, rootNode, file, list, components, functions, problems);
+		return new LocalData(list, functions, problems);
 	}
 }

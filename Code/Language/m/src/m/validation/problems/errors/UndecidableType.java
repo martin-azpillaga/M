@@ -11,7 +11,7 @@ import java.util.ArrayDeque;
 
 import m.library.Library;
 import m.validation.problems.Problem;
-import m.validation.rules.ExpressionNode;
+import m.validation.local.rules.ExpressionNode;
 
 public class UndecidableType extends Problem
 {

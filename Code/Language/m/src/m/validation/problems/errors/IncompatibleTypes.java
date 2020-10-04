@@ -12,7 +12,7 @@ import java.util.ArrayDeque;
 import m.library.Library;
 import m.library.types.Type;
 import m.validation.problems.Problem;
-import m.validation.rules.ExpressionNode;
+import m.validation.local.rules.ExpressionNode;
 
 public class IncompatibleTypes extends Problem
 {

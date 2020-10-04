@@ -52,16 +52,19 @@ public class LocalValidator
 		{
 			context = new Context(Library.ENGLISH);
 			validate(file);
-			result = context.buildData(text, parseResult.getRootNode(), file);
+			result = context.buildData(text);
 		}
 		else
 		{
-			result = new LocalData(parseResult.getRootNode());
+			result = new LocalData();
 		}
 		
 		for (var problem : parseResult.getSyntaxErrors())
 		{
-			result.problems.add(new SyntaxError(problem));
+			for (var diagnostic : new SyntaxError(problem).diagnostics(Library.ENGLISH, text))
+			{
+				result.diagnostics.add(diagnostic);
+			}
 		}
 
 		return result;

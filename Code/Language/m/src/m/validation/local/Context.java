@@ -1,6 +1,8 @@
 package m.validation.local;
 
-import static m.validation.rules.Binding.BindingReason.*;
+import static m.validation.local.rules.Binding.BindingReason.*;
+import static m.validation.local.rules.Typing.TypingReason.*;
+import static m.m.MPackage.Literals.*;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -13,7 +15,7 @@ import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.xtext.nodemodel.INode;
+import org.eclipse.lsp4j.Diagnostic;
 
 import m.library.Library;
 import m.library.types.*;
@@ -22,13 +24,11 @@ import m.validation.problems.Problem;
 import m.validation.problems.errors.RedefinedSymbol;
 import m.validation.problems.errors.UndefinedSymbol;
 import m.validation.problems.warnings.UnusedValue;
-import m.validation.rules.Typing;
-import static m.validation.rules.Typing.TypingReason.*;
-import static m.m.MPackage.Literals.*;
+import m.validation.local.rules.Typing;
 
 public class Context
 {
-	LocalInference inference;
+	ExpressionGraph graph;
 	List<Problem> problems;
 	Library library;
 	
@@ -41,7 +41,7 @@ public class Context
 	
 	public Context(Library library)
 	{
-		this.inference = new LocalInference();
+		this.graph = new ExpressionGraph();
 		this.problems = new ArrayList<>();
 		this.library = library;
 		
@@ -72,7 +72,7 @@ public class Context
 			var declaration = userVariables.get(name);
 			if (declaration != null)
 			{
-				inference.bind(value, declaration, SAME_VARIABLE);				
+				graph.bind(value, declaration, SAME_VARIABLE);				
 			}
 			else
 			{
@@ -128,11 +128,11 @@ public class Context
 		var standard = library.getValue(name);
 		if (standard != null)
 		{
-			inference.type(value, new Typing(standard.getType(), LIBRARY_VARIABLE, standard));
+			graph.type(value, new Typing(standard.getType(), STANDARD_VARIABLE, standard));
 		}
 		else if (userVariables.containsKey(name) && userVariables.get(name) != value)
 		{
-			inference.bind(value, userVariables.get(name), SAME_VARIABLE);
+			graph.bind(value, userVariables.get(name), SAME_VARIABLE);
 			accessedValues.add(userVariables.get(name));
 		}
 		else
@@ -150,7 +150,7 @@ public class Context
 		var standard = library.getComponent(name);
 		if (standard != null)
 		{
-			inference.type(cell, new Typing(standard.getType(), LIBRARY_COMPONENT, standard));
+			graph.type(cell, new Typing(standard.getType(), STANDARD_COMPONENT, standard));
 		}
 		else
 		{
@@ -158,7 +158,7 @@ public class Context
 			
 			if (userComponent != null && userComponent != cell)
 			{
-				inference.bind(cell, userComponent, SAME_COMPONENT);
+				graph.bind(cell, userComponent, SAME_COMPONENT);
 			}
 		}
 	}
@@ -168,7 +168,7 @@ public class Context
 		var standard = library.getBlock(name);
 		if (standard != null)
 		{
-			inference.type(expression, new Typing(standard.getType(), LIBRARY_BLOCK, standard));
+			graph.type(expression, new Typing(standard.getType(), STANDARD_BLOCK, standard));
 		}
 		else
 		{
@@ -204,7 +204,7 @@ public class Context
 					}
 					else
 					{
-						inference.type(arguments[i], new Typing(parameterTypes[i], LIBRARY_FUNCTION, standard));
+						graph.type(arguments[i], new Typing(parameterTypes[i], STANDARD_FUNCTION, standard));
 					}
 				}
 				if (source instanceof Expression)
@@ -221,7 +221,7 @@ public class Context
 					}
 					else
 					{
-						inference.type (source, new Typing(returnType, LIBRARY_FUNCTION, standard));
+						graph.type (source, new Typing(returnType, STANDARD_FUNCTION, standard));
 					}
 				}
 				for (var typeName : typeVariables.entrySet())
@@ -229,7 +229,7 @@ public class Context
 					var expressions = typeVariables.get(typeName.getKey());
 					for (var i = 1; i < expressions.size(); i++)
 					{
-						inference.bind(expressions.get(0), expressions.get(i), POLYMORPHISM);
+						graph.bind(expressions.get(0), expressions.get(i), POLYMORPHISM);
 					}
 				}
 			}
@@ -249,7 +249,7 @@ public class Context
 				{
 					for (var i = 0; i < arguments.length; i++)
 					{
-						inference.bind(arguments[i], parameters.get(i), PARAMETER_ARGUMENT);
+						graph.bind(arguments[i], parameters.get(i), PARAMETER_ARGUMENT);
 					}
 				}
 				else
@@ -282,8 +282,16 @@ public class Context
 		userVariables = popped;
 	}
 
-	public LocalData buildData(String text, INode node, File file)
+	public LocalData buildData(String text)
 	{
-		return inference.buildData(text, node, file, userComponents, userFunctions, problems);
+		var diagnostics = new ArrayList<Diagnostic>();
+		for (var problem : problems)
+		{
+			for (var diagnostic : problem.diagnostics(library, text))
+			{
+				diagnostics.add(diagnostic);
+			}
+		}
+		return graph.buildData(userFunctions, diagnostics);
 	}
 }

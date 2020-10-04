@@ -13,6 +13,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import m.generator.Engine;
 import m.generator.Generator;
 import m.library.Library;
+import m.validation.global.GlobalData;
 import m.validation.global.GlobalValidator;
 
 public class Project
@@ -22,12 +23,14 @@ public class Project
 	GlobalValidator validator;
     Generator generator;
 	public Game game;
+	Map<String,List<Diagnostic>> diagnostics;
 
     public Project(String root)
     {
 		this.root = root;
 		this.generator = new Generator();
 		this.validator = new GlobalValidator();
+		this.diagnostics = new HashMap<>();
 
         try (var walk = Files.walk(Paths.get(root)))
 		{
@@ -58,7 +61,7 @@ public class Project
 
     public Map<String,List<Diagnostic>> getDiagnostics()
     {
-        return new HashMap<>();
+        return diagnostics;
     }
 
     public void fileAdded(String file)
@@ -77,7 +80,9 @@ public class Project
     {
 		if (!contains(file)) return;
 
-		validator.delete(file);
+		var globalData = validator.delete(file);
+
+		check(globalData);
     }
 
     public void fileChanged(String modifiedFile, String text)
@@ -86,15 +91,22 @@ public class Project
 		
 		var globalData = validator.validate(modifiedFile, text);
 
+		check(globalData);
+	}
+	
+	private void check(GlobalData globalData)
+	{
+		diagnostics = globalData.diagnostics;
+
 		game = new Game(Library.ENGLISH);
 
 		game.components.putAll(globalData.components);
 
-		if (!globalData.hasErrors)
+		if (globalData.diagnostics.isEmpty())
 		{
 			generateCode(game);
 		}
-    }
+	}
 
 	private void generateCode(Game game)
 	{		

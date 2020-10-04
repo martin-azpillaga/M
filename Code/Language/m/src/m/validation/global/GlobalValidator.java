@@ -8,28 +8,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import m.m.Cell;
+import org.eclipse.lsp4j.Diagnostic;
 
+import m.m.Cell;
+import m.m.Function;
 import m.library.types.Type;
 import m.validation.local.LocalValidator;
-import m.validation.rules.ExpressionNode;
+import m.validation.local.rules.ExpressionNode;
 
 public class GlobalValidator
 {
     Map<String, Set<Cluster>> fileToClusters;
     Map<String, Cluster> componentToCluster;
     LocalValidator localValidator;
+    Map<String,List<Diagnostic>> localDiagnostics;
+    Map<String,Map<String,Function>> localFunctions;
 
     public GlobalValidator()
     {
         fileToClusters = new HashMap<>();
         componentToCluster = new HashMap<>();
         localValidator = new LocalValidator();
+        localDiagnostics = new HashMap<>();
+        localFunctions = new HashMap<>();
     }
 
     public GlobalData validate(String modifiedFile, String text)
     {
         var modifiedData = localValidator.validate(text);
+        
+        localDiagnostics.put(modifiedFile, modifiedData.diagnostics);
+        localFunctions.put(modifiedFile, modifiedData.functions);
 
         invalidateObsoleteMemory(modifiedFile);
 
@@ -228,6 +237,15 @@ public class GlobalValidator
     {
         var data = new GlobalData();
 
+        data.diagnostics = new HashMap<String,List<Diagnostic>>(localDiagnostics);
+        for (var functionMap : localFunctions.values())
+        {
+            for (var function : functionMap.values())
+            {
+                data.functions.add(function);
+            }
+        }
+
         for (var entry : componentToCluster.entrySet())
         {
             var component = entry.getKey();
@@ -242,7 +260,7 @@ public class GlobalValidator
 
             if (types.isEmpty())
             {
-                data.hasErrors = true;
+
             }
             else if (types.size() == 1)
             {
@@ -250,7 +268,7 @@ public class GlobalValidator
             }
             else
             {
-                data.hasErrors = true;
+
             }
         }
 
