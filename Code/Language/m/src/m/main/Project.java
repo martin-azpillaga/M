@@ -25,14 +25,10 @@ import m.library.Library;
 import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.m.Function;
-import m.validation.Clusterizer;
+import m.validation.GlobalValidator;
 import m.validation.Inference;
 import m.validation.Validator;
 import m.validation.problems.errors.RedefinedSymbol;
-import m.validation.problems.errors.UndecidableType;
-import m.validation.rules.Binding;
-import m.validation.rules.Binding.BindingReason;
-import m.validation.rules.ExpressionNode;
 
 // Generic two step project
 // Local validation for each file and a global validation pass INCREMENTAL
@@ -46,8 +42,8 @@ public class Project
 
     Validator validator;
     Generator generator;
+	GlobalValidator globalValidator;
 	public Game game;
-	Clusterizer clusterizer;
 
     public Project(String path)
     {
@@ -55,7 +51,7 @@ public class Project
 		this.validator = injector.getInstance(Validator.class);
 		this.generator = injector.getInstance(Generator.class);
 		this.root = path;
-		this.clusterizer = new Clusterizer();
+		this.globalValidator = new GlobalValidator();
 
 		this.files = new HashMap<>();
         try (var walk = Files.walk(Paths.get(decode(root))))
@@ -70,6 +66,7 @@ public class Project
 						var text = new String(Files.readAllBytes(f));
 						var data = validator.validate(text);
 						files.put(file, data);
+						globalValidator.validate(file, data);
 					}
 					catch (IOException e)
 					{
@@ -111,166 +108,30 @@ public class Project
 
 		files.remove(filePath);
 		
-		globalInference(filePath);
+		globalValidator.delete(filePath);
     }
 
     public void fileChanged(String uri, String text)
     {
         if (!contains(uri)) return;
 
-        var filePath = decode(uri);
-
-		files.put(filePath,validator.validate(text));
+		var modifiedFile = decode(uri);
 		
-		globalInference(filePath);
-    }
+		var modifiedData = validator.validate(text);
 
-
-    private void globalInference(String modifiedFile)
-	{
-		var modifiedData = files.get(modifiedFile);
-
-		clusterizer.clusterize(modifiedFile, modifiedData);
-
-		for (var crossReference : modifiedData.crossReferences)
-		{
-			crossReference.nodeB.bindings.remove(crossReference.bindingB);
-		}
-
-		modifiedData.crossReferences.clear();
-
-
-		var diagnostics = new HashMap<String, List<Diagnostic>>();
-        
-        // Delete previous crossReferences to this file
+		files.put(modifiedFile,modifiedData);
 		
-		// Incremental build
-		// Only compare other files to the modified one for creating cross references
-		var totalComponents = new HashMap<String, ExpressionNode>();
-		var totalFunctions = new HashMap<String, Function>();
-		var definedIn = new HashMap<String,String>();
-		
-
-		for (var entry : files.entrySet())
-		{
-			var currentFile = entry.getKey();
-			var data = entry.getValue();
-			
-			for (var component : data.components.keySet())
-			{
-				var existing = totalComponents.get(component);
-				if (existing == null)
-				{
-					definedIn.put(component, currentFile);
-					totalComponents.put(component, data.components.get(component));
-				}
-				else
-				{
-					var bindingA = new Binding(existing, BindingReason.SAME_COMPONENT);
-					var bindingB = new Binding(data.components.get(component), BindingReason.SAME_COMPONENT);
-					var crossReference = new CrossReference(currentFile, data.components.get(component), bindingA, definedIn.get(component), existing, bindingB);
-					
-					crossReferences.add(crossReference);
-					
-					data.components.get(component).bindings.add(bindingA);
-					existing.bindings.add(bindingB);
-				}
-			}
-			
-			for (var function : data.functions.entrySet())
-			{
-				if (totalFunctions.containsKey(function.getKey()))
-				{
-					var file = fileOf(totalFunctions.get(function.getKey()));
-
-					reportRedefinedFunction(totalFunctions.get(function.getKey()), file, diagnostics);
-					reportRedefinedFunction(function.getValue(), currentFile, diagnostics);
-				}
-				else
-				{
-					totalFunctions.put(function.getKey(), function.getValue());
-				}
-			}
-		}
-		
-		// Here
-		var inference = new Inference(files.get(modifiedFile).nodes);
-		var problems = inference.check();
-		
-		for (var problem : problems)
-		{
-			FileData data = null;
-			String file;
-			if (problem instanceof UndecidableType)
-			{
-				var undecidable = (UndecidableType) problem;
-				var root = EcoreUtil.getRoot(undecidable.node.expression, true);	
-				for (var entry : files.entrySet())
-				{
-					if (entry.getValue().rootObject == root)
-					{
-						file = entry.getKey();
-						data = entry.getValue();
-						break;
-					}
-				}
-
-				
-			}
-			for (var d : problem.diagnostics(Library.ENGLISH, data.text))
-			{
-				//diagnostics.put(file, d);
-			}
-		}
-		
-		// Check for global and local errors
-		var hasErrors = false;
-		
-		for (var list : diagnostics.values())
-		{
-			for (var i = 0; i < list.size() && !hasErrors; i++)
-			{
-				if (list.get(i).getSeverity() == DiagnosticSeverity.Error)
-				{
-					hasErrors = true;
-				}
-			}
-		}
-
-		for (var localData : files.values())
-		{
-			for (var problem : localData.problems)
-			{
-				for (var diagnostic : problem.diagnostics(Library.ENGLISH, localData.text))
-				{
-					if (diagnostic.getSeverity() == DiagnosticSeverity.Error)
-					{
-						hasErrors = true;
-					}
-				}
-			}
-		}
+		var globalData = globalValidator.validate(modifiedFile, modifiedData);
 
 		game = new Game(Library.ENGLISH);
-			
-		for (var component : totalComponents.entrySet())
-		{
-			var type = inference.infer(component.getValue());
-			game.components.put(component.getKey(), type);
-		}
-		
-		for (var function : totalFunctions.values())
-		{
-			game.functions.add(new UserFunction(function, new FunctionType(null, AtomicType.UNIT)));
-		}
 
-		this.game = game;
+		game.components.putAll(globalData.components);
 
-		if (!hasErrors)
+		if (!globalData.hasErrors)
 		{
 			generateCode(game);
 		}
-	}
+    }
 
 	private void reportRedefinedFunction(Function function, String file, Map<String,List<Diagnostic>> diagnostics)
 	{
