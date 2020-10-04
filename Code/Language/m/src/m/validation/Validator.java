@@ -159,45 +159,7 @@ public class Validator
                 var definitionCluster = componentToCluster.get(component);
                 if (definitionCluster != null)
                 {
-                    // Merge clusters
-                    for (var entry : cluster.fileToTypes.entrySet())
-                    {
-                        var file = entry.getKey();
-                        var types = entry.getValue();
-
-                        var definitionClusterTypes = definitionCluster.fileToTypes.get(file);
-                        if (definitionClusterTypes == null)
-                        {
-                            definitionCluster.fileToTypes.put(file, types);
-                        }
-                        else
-                        {
-                            definitionClusterTypes.addAll(types);
-                        }
-                    }
-                    for (var entry : cluster.fileToNodes.entrySet())
-                    {
-                        var file = entry.getKey();
-                        var entryNode = entry.getValue();
-
-                        definitionCluster.fileToNodes.put(file, entryNode);
-                    }
-                    for (var entry : cluster.componentToFiles.entrySet())
-                    {
-                        var entryComponent = entry.getKey();
-                        var files = entry.getValue();
-
-                        var definitionFiles = definitionCluster.componentToFiles.get(entryComponent);
-                        if (definitionFiles == null)
-                        {
-                            definitionCluster.componentToFiles.put(entryComponent, files);
-                        }
-                        else
-                        {
-                            definitionFiles.addAll(files);
-                        }
-                    }
-                    cluster = definitionCluster;
+                    cluster = merge(cluster, definitionCluster);
                 }
                 else
                 {
@@ -217,6 +179,48 @@ public class Validator
             types.add(typing.type);
         }
         return cluster;
+    }
+
+    private Cluster merge(Cluster cluster, Cluster definitionCluster)
+    {
+        for (var entry : cluster.fileToTypes.entrySet())
+        {
+            var file = entry.getKey();
+            var types = entry.getValue();
+
+            var definitionClusterTypes = definitionCluster.fileToTypes.get(file);
+            if (definitionClusterTypes == null)
+            {
+                definitionCluster.fileToTypes.put(file, types);
+            }
+            else
+            {
+                definitionClusterTypes.addAll(types);
+            }
+        }
+        for (var entry : cluster.fileToNodes.entrySet())
+        {
+            var file = entry.getKey();
+            var entryNode = entry.getValue();
+
+            definitionCluster.fileToNodes.put(file, entryNode);
+        }
+        for (var entry : cluster.componentToFiles.entrySet())
+        {
+            var entryComponent = entry.getKey();
+            var files = entry.getValue();
+
+            var definitionFiles = definitionCluster.componentToFiles.get(entryComponent);
+            if (definitionFiles == null)
+            {
+                definitionCluster.componentToFiles.put(entryComponent, files);
+            }
+            else
+            {
+                definitionFiles.addAll(files);
+            }
+        }
+        return definitionCluster;
     }
 
     private GlobalData collectData()

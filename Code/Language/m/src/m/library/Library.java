@@ -760,11 +760,7 @@ public enum Library
 		{
 			var mapped = f.apply(value);
 			
-			if (map.containsKey(mapped))
-			{
-				// Error
-			}
-			else
+			if (!map.containsKey(mapped))
 			{
 				map.put(mapped, value);
 			}
