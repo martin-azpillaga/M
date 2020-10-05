@@ -8,7 +8,7 @@ import java.util.Map;
 import org.eclipse.lsp4j.Diagnostic;
 
 import m.library.types.Type;
-import m.m.Function;
+import m.model.Function;
 
 public class GlobalData
 {

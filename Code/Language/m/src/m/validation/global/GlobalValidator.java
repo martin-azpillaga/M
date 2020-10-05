@@ -10,8 +10,8 @@ import java.util.Set;
 
 import org.eclipse.lsp4j.Diagnostic;
 
-import m.m.Cell;
-import m.m.Function;
+import m.model.Cell;
+import m.model.Function;
 import m.library.types.Type;
 import m.validation.local.LocalValidator;
 import m.validation.local.rules.ExpressionNode;

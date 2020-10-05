@@ -3,7 +3,7 @@ package m.validation.local.rules;
 import java.util.ArrayList;
 import java.util.List;
 
-import m.m.Expression;
+import m.model.Expression;
 
 public class ExpressionNode
 {

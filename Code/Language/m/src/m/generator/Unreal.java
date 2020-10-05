@@ -2,7 +2,7 @@ package m.generator;
 
 import org.eclipse.xtext.generator.IFileSystemAccess2;
 
-import m.main.Game;
+import m.model.Game;
 
 public class Unreal
 {

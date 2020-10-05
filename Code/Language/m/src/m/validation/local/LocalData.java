@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.lsp4j.Diagnostic;
-import m.m.Function;
+import m.model.Function;
 import m.validation.local.rules.ExpressionNode;
 
 public class LocalData

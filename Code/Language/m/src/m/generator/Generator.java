@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 import com.google.inject.Inject;
 import m.MStandaloneSetup;
 
-import m.main.Game;
+import m.model.Game;
 
 public class Generator
 {

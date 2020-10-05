@@ -55,20 +55,20 @@ import m.library.Library;
 import m.library.symbols.Component;
 import m.library.types.AtomicType;
 import m.library.types.Type;
-import m.m.Application;
-import m.m.Assignment;
-import m.m.Binary;
-import m.m.BindingBlock;
-import m.m.Block;
-import m.m.Cell;
-import m.m.Delegation;
-import m.m.Expression;
-import m.m.Function;
-import m.m.Statement;
-import m.m.Unary;
-import m.m.Value;
-import m.main.Game;
-import m.main.UserFunction;
+import m.model.Application;
+import m.model.Assignment;
+import m.model.Binary;
+import m.model.BindingBlock;
+import m.model.Block;
+import m.model.Cell;
+import m.model.Delegation;
+import m.model.Expression;
+import m.model.Function;
+import m.model.Statement;
+import m.model.Unary;
+import m.model.Value;
+import m.model.Game;
+import m.model.UserFunction;
 
 public class Unity
 {

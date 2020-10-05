@@ -2,7 +2,7 @@ package m.validation.local;
 
 import static m.validation.local.rules.Binding.BindingReason.*;
 import static m.validation.local.rules.Typing.TypingReason.*;
-import static m.m.MPackage.Literals.*;
+import static m.model.ModelPackage.Literals.*;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import org.eclipse.lsp4j.Diagnostic;
 
 import m.library.Library;
 import m.library.types.*;
-import m.m.*;
+import m.model.*;
 import m.validation.problems.Problem;
 import m.validation.problems.errors.RedefinedSymbol;
 import m.validation.problems.errors.UndefinedSymbol;

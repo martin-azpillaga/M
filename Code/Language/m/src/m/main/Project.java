@@ -13,6 +13,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import m.generator.Engine;
 import m.generator.Generator;
 import m.library.Library;
+import m.model.Game;
 import m.validation.global.GlobalData;
 import m.validation.global.GlobalValidator;
 

@@ -1,7 +1,7 @@
 grammar m.M hidden(BLANKS)
 
 import "http://www.eclipse.org/emf/2002/Ecore"
-generate m "azpillaga.world/M"
+generate model "minim.tools/M"
 
 File: functions+=Function*;
 Function: name=(IDENTIFIER|OPERATOR) '(' (parameters+=Value (',' parameters+=Value)*)? ')' '{' statements+=Statement* '}';

@@ -1,4 +1,4 @@
-package m.main;
+package m.model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,16 +23,6 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 
 import m.library.Library;
 import m.library.types.*;
-import m.m.Application;
-import m.m.Assignment;
-import m.m.Binary;
-import m.m.BindingBlock;
-import m.m.Block;
-import m.m.Cell;
-import m.m.Function;
-import m.m.Statement;
-import m.m.Unary;
-import m.m.Value;
 import m.library.symbols.Component;
 
 public class Game
@@ -353,7 +343,7 @@ public class Game
 			}
 			var container = statement.eContainer();
 
-			while(! (container instanceof m.m.File))
+			while(! (container instanceof m.model.File))
 			{
 				if (container instanceof BindingBlock)
 				{
@@ -435,7 +425,7 @@ public class Game
 			EObject statement = EcoreUtil2.getContainerOfType(semantic, Statement.class);
 			var container = statement.eContainer();
 
-			while(! (container instanceof m.m.File))
+			while(! (container instanceof m.model.File))
 			{
 				if (container instanceof BindingBlock)
 				{

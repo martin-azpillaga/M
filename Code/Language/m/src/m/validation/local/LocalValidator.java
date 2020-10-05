@@ -1,10 +1,10 @@
 package m.validation.local;
 
-import static m.m.MPackage.Literals.APPLICATION__NAME;
-import static m.m.MPackage.Literals.BINARY__OPERATOR;
-import static m.m.MPackage.Literals.BINDING_BLOCK__NAME;
-import static m.m.MPackage.Literals.BLOCK__NAME;
-import static m.m.MPackage.Literals.UNARY__OPERATOR;
+import static m.model.ModelPackage.Literals.APPLICATION__NAME;
+import static m.model.ModelPackage.Literals.BINARY__OPERATOR;
+import static m.model.ModelPackage.Literals.BINDING_BLOCK__NAME;
+import static m.model.ModelPackage.Literals.BLOCK__NAME;
+import static m.model.ModelPackage.Literals.UNARY__OPERATOR;
 
 import java.io.StringReader;
 
@@ -15,19 +15,19 @@ import org.eclipse.xtext.parser.IParser;
 
 import m.MStandaloneSetup;
 import m.library.Library;
-import m.m.Application;
-import m.m.Assignment;
-import m.m.Binary;
-import m.m.BindingBlock;
-import m.m.Block;
-import m.m.Cell;
-import m.m.Delegation;
-import m.m.Expression;
-import m.m.File;
-import m.m.Function;
-import m.m.Statement;
-import m.m.Unary;
-import m.m.Value;
+import m.model.Application;
+import m.model.Assignment;
+import m.model.Binary;
+import m.model.BindingBlock;
+import m.model.Block;
+import m.model.Cell;
+import m.model.Delegation;
+import m.model.Expression;
+import m.model.File;
+import m.model.Function;
+import m.model.Statement;
+import m.model.Unary;
+import m.model.Value;
 import m.validation.problems.errors.SyntaxError;
 
 public class LocalValidator

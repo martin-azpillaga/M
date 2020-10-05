@@ -7,7 +7,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 
 import m.library.Library;
-import m.m.Value;
+import m.model.Value;
 import m.validation.problems.Problem;
 
 public class ReadOnly extends Problem

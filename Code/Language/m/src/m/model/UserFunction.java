@@ -1,10 +1,6 @@
-package m.main;
+package m.model;
 
-import m.m.Assignment;
-import m.m.BindingBlock;
-import m.m.Cell;
-import m.m.Function;
-import m.m.impl.FunctionImpl;
+import m.model.impl.FunctionImpl;
 
 import java.util.HashMap;
 import java.util.Map;

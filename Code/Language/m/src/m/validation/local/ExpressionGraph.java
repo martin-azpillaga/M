@@ -7,8 +7,8 @@ import java.util.Map;
 
 import org.eclipse.lsp4j.Diagnostic;
 
-import m.m.Expression;
-import m.m.Function;
+import m.model.Expression;
+import m.model.Function;
 import m.validation.local.rules.Binding;
 import m.validation.local.rules.Binding.BindingReason;
 import m.validation.local.rules.ExpressionNode;

@@ -54,7 +54,7 @@ jobs:
           npx npm-groovy-lint -i "**/node_modules/**/*"
       - name: Lint Json
         run: |
-          find . -not -wholename "*node_modules*" -name "*.json" -not -name "*local-storage.json" -exec sh -c 'npx jsonlint {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
+          (find . -not -wholename "*node_modules*" -name "*.json" -not -name "*local-storage.json" -exec sh -c 'npx jsonlint {} > current && cmp current {}' \; | grep differ) || exit 0
       - name: Lint Javascript
         run: |
           find . -not -wholename "*node_modules*" -name "*.js" -exec sh -c 'npx js-beautify {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
