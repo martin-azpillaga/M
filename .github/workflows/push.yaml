@@ -57,7 +57,7 @@ jobs:
           (find . -not -wholename "*node_modules*" -name "*.json" -not -name "*local-storage.json" -exec sh -c 'npx jsonlint {} > current && cmp current {}' \; | grep differ) || exit 0
       - name: Lint Javascript
         run: |
-          find . -not -wholename "*node_modules*" -name "*.js" -exec sh -c 'npx js-beautify {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
+          (find . -not -wholename "*node_modules*" -name "*.js" -exec sh -c 'npx js-beautify {} > current && cmp current {}' \; | grep differ) || exit 0
       - name: Lint java
         run: |
           java -jar checkstyle-8.34-all.jar -c /sun_checks.xml Code/Language/m/src || exit 0
@@ -138,7 +138,7 @@ jobs:
           reveal-md Documentation/slides.md --separator "\n\n" --static presentation
           sudo rm -rf Documentation/
           git config --global user.name "Github actions"
-          git config --global user.email "media@azpillaga.world"  
+          git config --global user.email "media@azpillaga.world"
           git add .
           git commit -m "Deploy vuepress site using Github actions"
           git push
