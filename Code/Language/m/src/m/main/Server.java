@@ -1,5 +1,7 @@
 package m.main;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
@@ -35,22 +37,16 @@ import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.WorkspaceFoldersOptions;
 import org.eclipse.lsp4j.WorkspaceServerCapabilities;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
-import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
-public class Server implements LanguageServer, LanguageClientAware, WorkspaceService, TextDocumentService
+public class Server implements LanguageServer, WorkspaceService, TextDocumentService
 {
 	LanguageClient client;
 	List<Project> projects;
-
-	@Override
-	public void connect(LanguageClient client)
-	{
-		this.client = client;
-	}
 
 	@Override
 	public TextDocumentService getTextDocumentService()
@@ -62,6 +58,13 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 	public WorkspaceService getWorkspaceService()
 	{
 		return this;
+	}
+
+	public void connect(InputStream input, OutputStream output)
+	{
+		var launcher = LSPLauncher.createServerLauncher(this, input, output);
+		client = launcher.getRemoteProxy();
+		launcher.startListening();
 	}
 
 	@Override
