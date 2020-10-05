@@ -8,6 +8,6 @@ public class Godot
 {
 	public void generate(Game game, IFileSystemAccess2 fileSystem)
 	{
-		
+
 	}
 }

@@ -49,27 +49,30 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 	List<Project> projects;
 
 	@Override
-	public TextDocumentService getTextDocumentService()
-	{
-		return this;
-	}
-
-	@Override
 	public WorkspaceService getWorkspaceService()
 	{
 		return this;
 	}
 
+	@Override
+	public TextDocumentService getTextDocumentService()
+	{
+		return this;
+	}
+
+
 	public void connect(InputStream input, OutputStream output)
 	{
-		var launcher = LSPLauncher.createServerLauncher(this, input, output);
-		client = launcher.getRemoteProxy();
-		launcher.startListening();
+		var connection = LSPLauncher.createServerLauncher(this, input, output);
+		client = connection.getRemoteProxy();
+		connection.startListening();
 	}
 
 	@Override
 	public CompletableFuture<InitializeResult> initialize(InitializeParams params)
 	{
+		this.projects = new ArrayList<>();
+
 		var options = new WorkspaceFoldersOptions();
 		options.setSupported(true);
 		options.setChangeNotifications(true);
@@ -81,7 +84,6 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		capabilities.setCompletionProvider(new CompletionOptions(false, Arrays.asList(".")));
 		capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
 
-		projects = new ArrayList<>();
 
 		for (var folder : params.getWorkspaceFolders())
 		{
@@ -90,7 +92,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 			projects.add(new Project(path));
 		}
 
-		return CompletableFuture.supplyAsync(()->new InitializeResult(capabilities));
+		return CompletableFuture.supplyAsync(() -> new InitializeResult(capabilities));
 	}
 
 	@Override
