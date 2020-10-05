@@ -1,4 +1,4 @@
- 
+
 package m.generator;
 
 import java.util.ArrayList;
@@ -11,7 +11,7 @@ import static m.generator.Writer.Keyword.YES;
 import static m.generator.Writer.Keyword.NO;
 import static m.generator.Writer.Keyword.END;
 
-public class Writer 
+public class Writer
 {
 	enum Keyword
 	{
@@ -30,13 +30,13 @@ public class Writer
 
 	private Writer()
 	{
-		
+
 	}
-	
+
 	public static <T> List<Object> foreach(Collection<T> collection, Function<T,Object> function)
 	{
 		var list = new ArrayList<Object>();
-		
+
 		if (collection == null) return list;
 
 		for (var element : collection)
@@ -45,18 +45,18 @@ public class Writer
 		}
 		return list;
 	}
-	
+
 	public static <T> String foreach(Collection<T> set, java.util.function.Function<T,String> f, String separator)
 	{
 		if (set == null) return "";
-		
+
 		return String.join(separator, set.stream().map(f).collect(Collectors.toList()));
 	}
 
 	public static Keyword iff(boolean condition)
 	{
 		return condition ? YES : NO;
-	}	
+	}
 
 	public static List<Object> lines(Object... lines)
 	{
@@ -114,7 +114,7 @@ public class Writer
 		{
 			indentation--;
 		}
-		
+
 		indentation();
 		builder.append(line);
 		builder.append("\n");

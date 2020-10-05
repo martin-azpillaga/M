@@ -10,14 +10,14 @@ public enum Block implements Symbol
 	SELECTION(PROPOSITION),
 	ITERATION(PROPOSITION),
 	;
-	
+
 	Type type;
-	
+
 	Block (Type type)
 	{
 		this.type = type;
 	}
-	
+
 	public Type getType()
 	{
 		return type;

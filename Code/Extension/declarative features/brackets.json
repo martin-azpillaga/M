@@ -1,54 +1,54 @@
 {
-  "indentationRules": {
-    "increaseIndentPattern": "{",
-    "decreaseIndentPattern": "}"
-  },
-  "folding": {
-    "markers": {
-      "start": "{",
-      "end": "}"
-    }
-  },
-  "brackets": [
-    [
-      "{",
-      "}"
-    ],
-    [
-      "[",
-      "]"
-    ],
-    [
-      "(",
-      ")"
-    ]
-  ],
-  "autoClosingPairs": [
-    [
-      "{",
-      "}"
-    ],
-    [
-      "[",
-      "]"
-    ],
-    [
-      "(",
-      ")"
-    ]
-  ],
-  "surroundingPairs": [
-    [
-      "{",
-      "}"
-    ],
-    [
-      "[",
-      "]"
-    ],
-    [
-      "(",
-      ")"
-    ]
-  ]
+	"indentationRules": {
+		"increaseIndentPattern": "{",
+		"decreaseIndentPattern": "}"
+	},
+	"folding": {
+		"markers": {
+			"start": "{",
+			"end": "}"
+		}
+	},
+	"brackets": [
+		[
+			"{",
+			"}"
+		],
+		[
+			"[",
+			"]"
+		],
+		[
+			"(",
+			")"
+		]
+	],
+	"autoClosingPairs": [
+		[
+			"{",
+			"}"
+		],
+		[
+			"[",
+			"]"
+		],
+		[
+			"(",
+			")"
+		]
+	],
+	"surroundingPairs": [
+		[
+			"{",
+			"}"
+		],
+		[
+			"[",
+			"]"
+		],
+		[
+			"(",
+			")"
+		]
+	]
 }

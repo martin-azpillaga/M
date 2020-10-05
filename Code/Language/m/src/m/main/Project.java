@@ -18,23 +18,23 @@ import m.validation.global.GlobalValidator;
 
 public class Project
 {
-    String root;
+	String root;
 
 	GlobalValidator validator;
-    Generator generator;
+	Generator generator;
 	public Game game;
 	Map<String,List<Diagnostic>> diagnostics;
 
-    public Project(String root)
-    {
+	public Project(String root)
+	{
 		this.root = root;
 		this.generator = new Generator();
 		this.validator = new GlobalValidator();
 		this.diagnostics = new HashMap<>();
 
-        try (var walk = Files.walk(Paths.get(root)))
+		try (var walk = Files.walk(Paths.get(root)))
 		{
-			walk.forEach(f -> 
+			walk.forEach(f ->
 			{
 				var file = f.toString();
 				if (file.endsWith(".Ⲙ"))
@@ -46,7 +46,7 @@ public class Project
 					}
 					catch (IOException e)
 					{
-						
+
 					}
 				}
 			});
@@ -54,19 +54,19 @@ public class Project
 		catch (IOException e){}
 	}
 
-    public boolean contains(String path)
-    {
-        return path.startsWith(this.root);
-    }
+	public boolean contains(String path)
+	{
+		return path.startsWith(this.root);
+	}
 
-    public Map<String,List<Diagnostic>> getDiagnostics()
-    {
-        return diagnostics;
-    }
+	public Map<String,List<Diagnostic>> getDiagnostics()
+	{
+		return diagnostics;
+	}
 
-    public void fileAdded(String file)
-    {
-        if (!contains(file)) return;
+	public void fileAdded(String file)
+	{
+		if (!contains(file)) return;
 
 		try
 		{
@@ -74,26 +74,26 @@ public class Project
 			fileChanged(file, text);
 		}
 		catch (IOException e){}
-    }
+	}
 
-    public void fileDeleted(String file)
-    {
+	public void fileDeleted(String file)
+	{
 		if (!contains(file)) return;
 
 		var globalData = validator.delete(file);
 
 		check(globalData);
-    }
+	}
 
-    public void fileChanged(String modifiedFile, String text)
-    {
-        if (!contains(modifiedFile)) return;
-		
+	public void fileChanged(String modifiedFile, String text)
+	{
+		if (!contains(modifiedFile)) return;
+
 		var globalData = validator.validate(modifiedFile, text);
 
 		check(globalData);
 	}
-	
+
 	private void check(GlobalData globalData)
 	{
 		diagnostics = globalData.diagnostics;
@@ -109,9 +109,9 @@ public class Project
 	}
 
 	private void generateCode(Game game)
-	{		
+	{
 		var path = Paths.get(root.replace("/c:/", "C:/").replace("/d:/", "D:/").replace("/e:/",  "E:/"), "m.project");
-		
+
 		if (new File(path.toString()).exists())
 		{
 			try

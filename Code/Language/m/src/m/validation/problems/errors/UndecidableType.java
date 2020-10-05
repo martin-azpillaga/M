@@ -16,23 +16,23 @@ import m.validation.local.rules.ExpressionNode;
 public class UndecidableType extends Problem
 {
 	public final ExpressionNode node;
-	
+
 	public UndecidableType(ExpressionNode node)
 	{
 		this.node = node;
 	}
-	
+
 	@Override
 	public List<Diagnostic> diagnostics(Library library, String text)
 	{
 		var list = new ArrayList<Diagnostic>();
 		var message = library.getProblem(getClass());
-		
+
 		var visited = new HashSet<ExpressionNode>();
 		var stack = new ArrayDeque<ExpressionNode>();
-		
+
 		stack.push(node);
-		
+
 		while (!stack.isEmpty())
 		{
 			var n = stack.pop();
@@ -41,7 +41,7 @@ public class UndecidableType extends Problem
 			{
 				list.add(new Diagnostic(getRange(n.expression,text), message, DiagnosticSeverity.Error, "M", "2"));
 				visited.add(n);
-				
+
 				for (var binding : n.bindings)
 				{
 					if (!visited.contains(binding.node))

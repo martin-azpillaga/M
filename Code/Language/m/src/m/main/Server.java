@@ -45,13 +45,13 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 {
 	LanguageClient client;
 	List<Project> projects;
-	
+
 	@Override
 	public void connect(LanguageClient client)
 	{
 		this.client = client;
 	}
-	
+
 	@Override
 	public TextDocumentService getTextDocumentService()
 	{
@@ -67,26 +67,26 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 	@Override
 	public CompletableFuture<InitializeResult> initialize(InitializeParams params)
 	{
-        var options = new WorkspaceFoldersOptions();
+		var options = new WorkspaceFoldersOptions();
 		options.setSupported(true);
 		options.setChangeNotifications(true);
-		
+
 		var capabilities = new ServerCapabilities();
 		capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
 		capabilities.setWorkspace(new WorkspaceServerCapabilities(options));
 		capabilities.setHoverProvider(true);
 		capabilities.setCompletionProvider(new CompletionOptions(false, Arrays.asList(".")));
 		capabilities.setSignatureHelpProvider(new SignatureHelpOptions(Arrays.asList("(", ",")));
-		
+
 		projects = new ArrayList<>();
-		
+
 		for (var folder : params.getWorkspaceFolders())
 		{
 			var uri = folder.getUri();
 			var path = decode(uri);
 			projects.add(new Project(path));
 		}
-		
+
 		return CompletableFuture.supplyAsync(()->new InitializeResult(capabilities));
 	}
 
@@ -95,7 +95,7 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 	{
 		publishDiagnostics();
 	}
-	
+
 	@Override
 	public CompletableFuture<Object> shutdown()
 	{
@@ -169,17 +169,17 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 			}
 		}
 		publishDiagnostics();
-	}	
-	
-	
-	
+	}
+
+
+
 
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params)
 	{
 		onChange(params.getTextDocument().getUri(), params.getTextDocument().getText());
 	}
-	
+
 	@Override
 	public void didChange(DidChangeTextDocumentParams params)
 	{
@@ -189,13 +189,13 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 	@Override
 	public void didClose(DidCloseTextDocumentParams params)
 	{
-		
+
 	}
 
 	@Override
 	public void didSave(DidSaveTextDocumentParams params)
 	{
-		
+
 	}
 
 	private void onChange(String uri, String text)
@@ -224,11 +224,11 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 			client.publishDiagnostics(new PublishDiagnosticsParams(uri, entry.getValue()));
 		}
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	@Override
 	public CompletableFuture<Hover> hover(HoverParams params)
 	{
@@ -248,7 +248,7 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 		hover.setContents(contents);
 		return CompletableFuture.supplyAsync(() -> hover);
 	}
-	
+
 	@Override
 	public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(CompletionParams params)
 	{
@@ -265,8 +265,8 @@ public class Server implements LanguageServer, LanguageClientAware, WorkspaceSer
 			}
 		}
 		return null;
-    }
-	
+	}
+
 	@Override
 	public CompletableFuture<SignatureHelp> signatureHelp(SignatureHelpParams params)
 	{

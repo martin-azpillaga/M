@@ -12,14 +12,14 @@ import m.m.Function;
 
 public class GlobalData
 {
-    public Map<String,Type> components;
-    public List<Function> functions;
-    public Map<String,List<Diagnostic>> diagnostics;
+	public Map<String,Type> components;
+	public List<Function> functions;
+	public Map<String,List<Diagnostic>> diagnostics;
 
-    public GlobalData()
-    {
-        this.components = new HashMap<>();
-        this.functions = new ArrayList<>();
-        this.diagnostics = new HashMap<>();
-    }
+	public GlobalData()
+	{
+		this.components = new HashMap<>();
+		this.functions = new ArrayList<>();
+		this.diagnostics = new HashMap<>();
+	}
 }

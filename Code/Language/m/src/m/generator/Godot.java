@@ -6,8 +6,8 @@ import m.main.Game;
 
 public class Godot
 {
-    public void generate(Game game, IFileSystemAccess2 fileSystem)
+	public void generate(Game game, IFileSystemAccess2 fileSystem)
 	{
-        
-    }
+		
+	}
 }

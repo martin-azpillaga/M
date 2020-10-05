@@ -31,28 +31,28 @@ public class Context
 	ExpressionGraph graph;
 	List<Problem> problems;
 	Library library;
-	
+
 	Map<String, Value> userVariables;
 	Map<String, Cell> userComponents;
 	Map<String, Function> userFunctions;
 	Deque<Map<String,Value>> stack;
-	
+
 	Set<Value> accessedValues;
-	
+
 	public Context(Library library)
 	{
 		this.graph = new ExpressionGraph();
 		this.problems = new ArrayList<>();
 		this.library = library;
-		
+
 		this.userVariables = new HashMap<>();
 		this.userFunctions = new HashMap<>();
 		this.userComponents = new HashMap<>();
-		
+
 		this.stack = new ArrayDeque<>();
 		this.accessedValues = new HashSet<>();
 	}
-	
+
 	public void declareVariable(Value value)
 	{
 		if (value == null) return;
@@ -65,14 +65,14 @@ public class Context
 		}
 		else if (userComponents.containsKey(name) || userFunctions.containsKey(name))
 		{
-			problems.add(new RedefinedSymbol(value, VALUE__NAME));			
+			problems.add(new RedefinedSymbol(value, VALUE__NAME));
 		}
 		else
 		{
 			var declaration = userVariables.get(name);
 			if (declaration != null)
 			{
-				graph.bind(value, declaration, SAME_VARIABLE);				
+				graph.bind(value, declaration, SAME_VARIABLE);
 			}
 			else
 			{
@@ -80,7 +80,7 @@ public class Context
 			}
 		}
 	}
-	
+
 	public void declareComponent(Cell cell)
 	{
 		if (cell.getComponent() == null) return;
@@ -100,11 +100,11 @@ public class Context
 			userComponents.put(name, cell);
 		}
 	}
-	
+
 	public void declareFunction(Function function)
 	{
 		var name = function.getName();
-		
+
 		if (library.getValue(name) != null || library.getComponent(name) != null || library.getFunction(name) != null)
 		{
 			problems.add(new RedefinedSymbol(function, FUNCTION__NAME));
@@ -118,13 +118,13 @@ public class Context
 			userFunctions.put(name, function);
 		}
 	}
-	
+
 	public void accessVariable(Value value)
 	{
 		if (value == null) return;
-		
+
 		var name = value.getName();
-		
+
 		var standard = library.getValue(name);
 		if (standard != null)
 		{
@@ -140,7 +140,7 @@ public class Context
 			problems.add(new UndefinedSymbol(value, VALUE__NAME));
 		}
 	}
-	
+
 	public void accessComponent(Cell cell)
 	{
 		if (cell == null || cell.getComponent() == null) return;
@@ -155,14 +155,14 @@ public class Context
 		else
 		{
 			var userComponent = userComponents.get(name);
-			
+
 			if (userComponent != null && userComponent != cell)
 			{
 				graph.bind(cell, userComponent, SAME_COMPONENT);
 			}
 		}
 	}
-	
+
 	public void accessBlock(String name, Expression expression, EObject source, EStructuralFeature feature)
 	{
 		var standard = library.getBlock(name);
@@ -175,19 +175,19 @@ public class Context
 			problems.add(new UndefinedSymbol(source, feature));
 		}
 	}
-	
+
 	public void accessFunction(String name, Expression[] arguments, Expression source, EStructuralFeature feature)
 	{
 		var standard = library.getFunction(name);
 		if (standard != null)
 		{
 			var type = (FunctionType) standard.getType();
-			
+
 			var parameterTypes = type.parameterTypes;
 			var returnType = type.returnType;
-			
+
 			var typeVariables = new HashMap<String, ArrayList<Expression>>();
-			
+
 			if (parameterTypes.length == arguments.length)
 			{
 				for (var i = 0; i < arguments.length; i++)
@@ -236,7 +236,7 @@ public class Context
 			else
 			{
 				problems.add(new UndefinedSymbol(source, feature));
-			}			
+			}
 		}
 		else
 		{
@@ -244,7 +244,7 @@ public class Context
 			if (userFunction != null)
 			{
 				var parameters = userFunction.getParameters();
-				
+
 				if (parameters.size() == arguments.length)
 				{
 					for (var i = 0; i < arguments.length; i++)
@@ -263,12 +263,12 @@ public class Context
 			}
 		}
 	}
-	
+
 	public void push()
 	{
 		stack.push(new HashMap<>(userVariables));
 	}
-	
+
 	public void pop()
 	{
 		var popped = stack.pop();

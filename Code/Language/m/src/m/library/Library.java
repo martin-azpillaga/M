@@ -24,7 +24,7 @@ import m.validation.problems.errors.SyntaxError;
 
 public enum Library
 {
-	
+
 	ENGLISH
 	(
 	value -> {switch(value)
@@ -43,26 +43,26 @@ public enum Library
 		case ROTATION: return "rotation";
 		case SCALE: return "scale";
 		case PARENT: return "parent";
-		
+
 		case MASS: return "mass";
 		case INERTIA: return "inertia";
-		
+
 		case VELOCITY: return "velocity";
 		case ANGULAR_VELOCITY: return "angularVelocity";
 		case RESTITUTION: return "restitution";
 		case FRICTION: return "friction";
 		case KINEMATIC: return "kinematic";
-		
+
 		case NO_COLLISION_RESPONSE: return "crossable";
 		case RADIUS: return "radius";
 		case EXTENTS: return "extents";
 		case BOX_CENTER: return "boxCenter";
 		case SPHERE_CENTER: return "sphereCenter";
-		
+
 		case MESH: return "mesh";
 		case MATERIAL: return "material";
 		case SHADOW_RECEIVER: return "shadowReceiver";
-		
+
 		case NEAR: return "near";
 		case FAR: return "far";
 		case FOV: return "fieldOfView";
@@ -72,31 +72,31 @@ public enum Library
 		case VIEWPORT: return "viewport";
 		case RENDER_TEXTURE: return "renderTexture";
 		case DISPLAY: return "display";
-		
+
 		case EMISSION: return "emission";
 		case SPOT_ANGLE: return "spotAngle";
 		case RANGE: return "range";
 		case INTENSITY: return "intensity";
 		case INDIRECT_MULTIPLIER: return "bounceIntensity";
 		case COOKIE: return "cookie";
-		
+
 		case TEXT: return "text";
 		case FONT: return "font";
 		case TEXT_COLOR: return "textColor";
 		case TEXT_MATERIAL: return "textMaterial";
-		
+
 		case IMAGE: return "image";
 		case IMAGE_COLOR: return "imageColor";
 		case IMAGE_MATERIAL: return "imageMaterial";
-		
+
 		case TOGGLED: return "toggled";
 		case SLIDER_VALUE: return "sliderValue";
 		case TEXTFIELD_VALUE: return "writtenText";
-		
+
 		case ANCHOR_MIN: return "anchorMin";
 		case ANCHOR_MAX: return "anchorMax";
-		
-		
+
+
 		case AUDIOCLIP: return "audioClip";
 		case VOLUME: return "volume";
 		case PITCH: return "pitch";
@@ -119,15 +119,15 @@ public enum Library
 	case UNLERP: return "unlerp";
 	case PROPORTIONAL: return "proportional";
 	case SLERP: return "slerp";
-	
+
 	case MIN: return "min";
 	case MAX: return "max";
-	
+
 	case DEGREES: return "degrees";
 	case RADIANS: return "radians";
-	
+
 	case STEP: return "step";
-	
+
 	case CROSS: return "cross";
 	case DOT: return "dot";
 	case NORM: return "norm";
@@ -135,31 +135,31 @@ public enum Library
 	case DISTANCE: return "distance";
 	case REFLECT: return "reflect";
 	case REFRACT: return "refract";
-	
+
 	case OR: return "||";
 	case AND: return "&&";
 	case NOT: return "!";
-	
+
 	case ADDITION: return "+";
 	case SUBTRACTION: return "-";
 	case MULTIPLICATION: return "*";
 	case DIVISION: return "/";
-	
+
 	case EQUAL: return "==";
 	case INEQUAL: return "!=";
-	
+
 	case LOWER: return "<";
 	case LOWEROREQUAL: return "<=";
 	case GREATEROREQUAL: return ">=";
 	case GREATER: return ">";
-	
+
 	case SIZE: return "#";
 	case IN: return "@";
 	case X: return "x";
 	case Y: return "y";
 	case Z: return "z";
 	case XYZ: return "xyz";
-	
+
 	case SIN: return "sin";
 	case COS: return "cos";
 	case TAN: return "tan";
@@ -171,21 +171,21 @@ public enum Library
 	case POW: return "pow";
 	case SQRT: return "sqrt";
 	case RANDOM: return "random";
-	
+
 	case CREATE: return "create";
 	case DESTROY: return "destroy";
 	case ADD: return "add";
 	case REMOVE: return "remove";
 	case HAS: return "has";
-	
+
 	case WRITE: return "write";
 	case WRITEERROR: return "writeError";
 	case WRITE_WARNING: return "writeWarning";
 	case HALT: return "halt";
 	case BREAKPOINT: return "breakpoint";
 	case SCREENSHOT: return "screenshot";
-	
-	
+
+
 	case SET_NUMBER: return "setNumber";
 	case SET_COLOR: return "setColor";
 	case SET_KEYWORD: return "setBool";
@@ -196,43 +196,43 @@ public enum Library
 	case GET_KEYWORD: return "getBool";
 	case GET_TEXTURE: return "getTexture";
 	case GET_INTEGER: return "getInteger";
-	
+
 	case SET_TRIGGER: return "setTrigger";
 	case IN_STATE: return "inState";
 	case ACTIVATE_PARAMETER: return "enableParameter";
 	case DEACTIVATE_PARAMETER: return "disableParameter";
 	case PLAY_ANIMATION: return "playAnimation";
-	
+
 	case READ_TRIGGERED: return "readTriggered";
 	case READ_NUMBER: return "readNumber";
 	case READ_VECTOR: return "readVector";
-	
+
 	case TO_QUATERNION: return "quaternion";
 	case TO_NUMBER3: return "angles";
-	
+
 	case PLAY: return "play";
 	case PLAY_ONCE: return "playOnce";
 	case PAUSE: return "pause";
 	case UNPAUSE: return "unpause";
 	case STOP: return "stop";
-	
+
 	case OVER: return "over";
 	case TO_STRING: return "string";
 	case TO_NUMBER: return "number";
-	
+
 	case OVERLAPS: return "overlaps";
 	case SCREEN_OVERLAPS: return "screenOverlaps";
 	case ADD_FORCE: return "addForce";
 	case ADD_TORQUE: return "addTorque";
 	case CLOSEST_POINT: return "closestPoint";
-	
+
 	case IS_POSITIVE: return "isPositive";
 	case IS_NEGATIVE: return "isNegative";
 	case IS_ZERO: return "isZero";
-	
+
 	case WORLD_TO_VIEWPORT: return "worldToViewport";
 	case VIEWPORT_TO_WORLD: return "viewportToWorld";
-	
+
 	case ASSIGNMENT: return "=";
 	} return "";}
 	,
@@ -250,11 +250,11 @@ public enum Library
 	case NUMBER2: return "number2";
 	case NUMBER3: return "number3";
 	case UNIT: return "unit";
-	
+
 	case COMPONENT: return "component";
-	
+
 	case COLOR: return "color";
-	
+
 	case INPUT: return "input";
 	case MESH: return "mesh";
 	case MATERIAL: return "material";
@@ -263,7 +263,7 @@ public enum Library
 	case IMAGE: return "image";
 	case AUDIOCLIP: return "audioClip";
 	case ANIMATOR: return "animator";
-	
+
 	case ENTITY: return "entity";
 	case ENTITY_LIST: return "entityList";
 	case QUATERNION: return "quaternion";
@@ -434,8 +434,8 @@ public enum Library
 	case ROTATION: return "biraketa";
 	case SCALE: return "eskala";
 	case PARENT: return "gurasoa";
-	
-	
+
+
 	case MASS: return "masa";
 	case INERTIA: return "inertzia";
 	case VELOCITY: return "abiadura";
@@ -443,18 +443,18 @@ public enum Library
 	case RESTITUTION: return "restituzioa";
 	case FRICTION: return "marruskadura";
 	case KINEMATIC: return "kinematikoa";
-	
+
 	case NO_COLLISION_RESPONSE: return "gurutzagarria";
 	case RADIUS: return "erradioa";
 	case EXTENTS: return "dimentsioak";
 	case BOX_CENTER: return "kaixaZentrua";
 	case SPHERE_CENTER: return "esferaZentrua";
-	
-	
+
+
 	case MESH: return "malla";
 	case MATERIAL: return "materiala";
 	case SHADOW_RECEIVER: return "itzalJasotzailea";
-	
+
 	case NEAR: return "gertu";
 	case FAR: return "urruti";
 	case FOV: return "ikusmenAngelua";
@@ -464,31 +464,31 @@ public enum Library
 	case VIEWPORT: return "viewport";
 	case RENDER_TEXTURE: return "renderizazioEhundura";
 	case DISPLAY: return "pantaila";
-	
+
 	case EMISSION: return "emisioa";
 	case SPOT_ANGLE: return "fokoAngelua";
 	case RANGE: return "irismena";
 	case INTENSITY: return "intentsitatea";
 	case INDIRECT_MULTIPLIER: return "erreboteIntentsitatea";
 	case COOKIE: return "gaileta";
-	
+
 	case TEXT: return "testua";
 	case FONT: return "letraEstiloa";
 	case TEXT_COLOR: return "letraKolorea";
 	case TEXT_MATERIAL: return "letraMateriala";
-	
+
 	case IMAGE: return "irudia";
 	case IMAGE_COLOR: return "irudiKolorea";
 	case IMAGE_MATERIAL: return "irudiMateriala";
-	
+
 	case TOGGLED: return "sakatuta";
 	case SLIDER_VALUE: return "slideBalioa";
 	case TEXTFIELD_VALUE: return "idatzitakoTestua";
-	
+
 	case ANCHOR_MIN: return "euskarriaMin";
 	case ANCHOR_MAX: return "euskarriaMax";
-	
-	
+
+
 	case AUDIOCLIP: return "audioKlipa";
 	case VOLUME: return "bolumena";
 	case PITCH: return "tonua";
@@ -505,21 +505,21 @@ public enum Library
 	case FRACTIONALPART: return "fractionalPart";
 	case INVERSE: return "inverse";
 	case RECIPROCAL: return "reciprocal";
-	
+
 	case CLAMP: return "clamp";
 	case LERP: return "lerp";
 	case UNLERP: return "unlerp";
 	case PROPORTIONAL: return "proportional";
 	case SLERP: return "slerp";
-	
+
 	case MIN: return "min";
 	case MAX: return "max";
-	
+
 	case DEGREES: return "graduak";
 	case RADIANS: return "radianak";
-	
+
 	case STEP: return "step";
-	
+
 	case CROSS: return "cross";
 	case DOT: return "dot";
 	case NORM: return "norm";
@@ -527,31 +527,31 @@ public enum Library
 	case DISTANCE: return "distance";
 	case REFLECT: return "reflect";
 	case REFRACT: return "refract";
-	
+
 	case OR: return "||";
 	case AND: return "&&";
 	case NOT: return "!";
-	
+
 	case ADDITION: return "+";
 	case SUBTRACTION: return "-";
 	case MULTIPLICATION: return "*";
 	case DIVISION: return "/";
-	
+
 	case EQUAL: return "==";
 	case INEQUAL: return "!=";
-	
+
 	case LOWER: return "<";
 	case LOWEROREQUAL: return "<=";
 	case GREATEROREQUAL: return ">=";
 	case GREATER: return ">";
-	
+
 	case SIZE: return "#";
 	case IN: return "@";
 	case X: return "x";
 	case Y: return "y";
 	case Z: return "z";
 	case XYZ: return "xyz";
-	
+
 	case SIN: return "sin";
 	case COS: return "cos";
 	case TAN: return "tan";
@@ -563,21 +563,21 @@ public enum Library
 	case POW: return "pow";
 	case SQRT: return "sqrt";
 	case RANDOM: return "ausazko";
-	
+
 	case CREATE: return "sortu";
 	case DESTROY: return "desegin";
 	case ADD: return "gehitu";
 	case REMOVE: return "kendu";
 	case HAS: return "badu";
-	
+
 	case WRITE: return "idatzi";
 	case WRITEERROR: return "idatziAkatsa";
 	case WRITE_WARNING: return "idatziAholkua";
 	case HALT: return "amaitu";
 	case BREAKPOINT: return "gelditu";
 	case SCREENSHOT: return "argazkiaAtera";
-	
-	
+
+
 	case SET_NUMBER: return "ezarriZenbakia";
 	case SET_COLOR: return "ezarriKolorea";
 	case SET_INTEGER: return "ezarriOsoa";
@@ -588,43 +588,43 @@ public enum Library
 	case GET_INTEGER: return "hartuOsoa";
 	case GET_TEXTURE: return "hartuTexture";
 	case GET_KEYWORD: return "hartuProposizioa";
-	
+
 	case SET_TRIGGER: return "ezarriKakoa";
 	case IN_STATE: return "egoera";
 	case ACTIVATE_PARAMETER: return "jarriParametroa";
 	case DEACTIVATE_PARAMETER: return "kenduParametroa";
 	case PLAY_ANIMATION: return "aldatuAnimazioa";
-	
+
 	case READ_TRIGGERED: return "irakurriKakoa";
 	case READ_NUMBER: return "irakurriZenbakia";
 	case READ_VECTOR: return "irakurriBektorea";
-	
+
 	case TO_QUATERNION: return "kuaternioia";
 	case TO_NUMBER3: return "angeluak";
-	
+
 	case PLAY: return "hasi";
 	case PLAY_ONCE: return "playOnce";
 	case PAUSE: return "pause";
 	case UNPAUSE: return "unpause";
 	case STOP: return "stop";
-	
+
 	case OVER: return "saguaGainean";
 	case TO_NUMBER: return "zenbakia";
 	case TO_STRING: return "katea";
-	
+
 	case OVERLAPS: return "gainean";
 	case SCREEN_OVERLAPS: return "pantailaGainean";
 	case ADD_FORCE: return "gehituIndarra";
 	case ADD_TORQUE: return "gehituIndarAngeluarra";
 	case CLOSEST_POINT: return "puntuGertukoena";
-	
+
 	case IS_POSITIVE: return "positiboa";
 	case IS_NEGATIVE: return "negatiboa";
 	case IS_ZERO: return "zero";
-	
+
 	case WORLD_TO_VIEWPORT: return "mundutikPantailara";
 	case VIEWPORT_TO_WORLD: return "pantailatikMundura";
-	
+
 	case ASSIGNMENT: return "=";
 	} return "";},
 	block -> {switch(block)
@@ -641,11 +641,11 @@ public enum Library
 	case NUMBER2: return "zenbakia2";
 	case NUMBER3: return "zenbakia3";
 	case UNIT: return "hutsa";
-	
+
 	case COMPONENT: return "komponentea";
-	
+
 	case COLOR: return "kolorea";
-	
+
 	case INPUT: return "inputa";
 	case MESH: return "malla";
 	case MATERIAL: return "materiala";
@@ -654,7 +654,7 @@ public enum Library
 	case IMAGE: return "irudia";
 	case AUDIOCLIP: return "audioKlipa";
 	case ANIMATOR: return "animatzailea";
-	
+
 	case ENTITY: return "entitatea";
 	case ENTITY_LIST: return "entitateLista";
 	case QUATERNION: return "kuaternioia";
@@ -695,7 +695,7 @@ public enum Library
 	},
 	function ->	""
 	);
-	
+
 	Map<Value, String> valueToName;
 	Map<Component, String> componentToName;
 	Map<Function, String> functionToName;
@@ -705,19 +705,19 @@ public enum Library
 	Map<Function, String> functionToDescription;
 	Map<Component, String> componentToDescription;
 	Map<Value, String> valueToDescription;
-	
+
 	Map<String, Value> nameToValue;
 	Map<String, Component> nameToComponent;
 	Map<String, Function> nameToFunction;
 	Map<String, Block> nameToBlock;
 	Map<String, AtomicType> nameToType;
 	Map<String, Class<?>> nameToProblem;
-	
+
 	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Class<?>, String> problems,java.util.function.Function<Function, String> functionDescriptions)
 	{
 		valueToName = forward(values, Value.values());
 		nameToValue = reverse(values, Value.values());
-		
+
 		componentToName = forward(components, Component.values());
 		nameToComponent = reverse(components, Component.values());
 
@@ -729,9 +729,9 @@ public enum Library
 
 		typeToName = forward(atomicTypes, AtomicType.values());
 		nameToType = reverse(atomicTypes, AtomicType.values());
-		
+
 		var problemTypes = new Class[] {UndecidableType.class, IncompatibleTypes.class, UndefinedSymbol.class, RedefinedSymbol.class, ReadOnly.class, UnusedValue.class, SyntaxError.class};
-		
+
 		problemToName = forward(problems, problemTypes);
 		nameToProblem = reverse(problems, problemTypes);
 
@@ -739,51 +739,51 @@ public enum Library
 		componentToDescription = new EnumMap<>(Component.class);
 		valueToDescription = new EnumMap<>(Value.class);
 	}
-	
+
 	private <A,B> HashMap<A,B> forward(java.util.function.Function<A,B> f, A[] values)
 	{
 		var map = new HashMap<A,B>();
-		
+
 		for (var value : values)
 		{
 			map.put(value, f.apply(value));
 		}
-		
+
 		return map;
 	}
-	
+
 	private <A,B> HashMap<B,A> reverse(java.util.function.Function<A,B> f, A[] values)
 	{
 		var map = new HashMap<B,A>();
-		
+
 		for (var value : values)
 		{
 			var mapped = f.apply(value);
-			
+
 			if (!map.containsKey(mapped))
 			{
 				map.put(mapped, value);
 			}
 		}
-		
+
 		return map;
 	}
 	public Value getValue(String name) {
 		return nameToValue.get(name);
 	}
-	
+
 	public Component getComponent(String name) {
 		return nameToComponent.get(name);
 	}
-	
+
 	public Function getFunction(String name) {
 		return nameToFunction.get(name);
 	}
-	
+
 	public Block getBlock(String name) {
 		return nameToBlock.get(name);
 	}
-	
+
 	public String getProblem(Class<? extends Problem> problem)
 	{
 		return problemToName.get(problem);
@@ -820,13 +820,13 @@ public enum Library
 	{
 		return valueToName.get(value);
 	}
-	
+
 	public String getName(Type type)
 	{
 		if (type instanceof AtomicType)
 		{
 			var atomicType = (AtomicType) type;
-			
+
 			return typeToName.get(atomicType);
 		}
 		else if (type instanceof TypeVariable)

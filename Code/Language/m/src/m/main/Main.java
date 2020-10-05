@@ -11,7 +11,7 @@ public class Main
 	public static void main(String[] arguments) throws IOException
 	{
 		var server = new Server();
-		
+
 		if (arguments.length == 0)
 		{
 			connect(server, System.in, System.out);
@@ -33,7 +33,7 @@ public class Main
 
 		var client = launcher.getRemoteProxy();
 		server.connect(client);
-		
+
 		launcher.startListening();
 	}
 }

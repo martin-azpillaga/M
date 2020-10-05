@@ -13,7 +13,7 @@ import m.validation.problems.Problem;
 public class ReadOnly extends Problem
 {
 	Value value;
-	
+
 	public ReadOnly(Value value)
 	{
 		this.value = value;

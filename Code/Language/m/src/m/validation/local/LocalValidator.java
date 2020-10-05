@@ -43,7 +43,7 @@ public class LocalValidator
 
 	public LocalData validate(String text)
 	{
-		var parseResult = parser.parse(new StringReader(text));		
+		var parseResult = parser.parse(new StringReader(text));
 		var file = (File) parseResult.getRootASTElement();
 
 		LocalData result;
@@ -58,7 +58,7 @@ public class LocalValidator
 		{
 			result = new LocalData();
 		}
-		
+
 		for (var problem : parseResult.getSyntaxErrors())
 		{
 			for (var diagnostic : new SyntaxError(problem).diagnostics(Library.ENGLISH, text))
@@ -86,7 +86,7 @@ public class LocalValidator
 			validate(function);
 		}
 	}
-	
+
 	private void validate(Function function)
 	{
 		context.push();
@@ -96,7 +96,7 @@ public class LocalValidator
 		}
 		context.pop();
 	}
-	
+
 	private void validate(Statement statement)
 	{
 		if (statement instanceof Block)
@@ -104,7 +104,7 @@ public class LocalValidator
 			var block = (Block) statement;
 			var name = block.getName();
 			var expression = block.getExpression();
-			
+
 			context.accessBlock(name, expression, block, BLOCK__NAME);
 			validate(expression);
 			context.push();
@@ -119,7 +119,7 @@ public class LocalValidator
 			var block = (BindingBlock) statement;
 			var name = block.getName();
 			var value = block.getExpression();
-			
+
 			context.push();
 			context.declareVariable(value);
 			context.accessBlock(name, value, block, BINDING_BLOCK__NAME);
@@ -133,7 +133,7 @@ public class LocalValidator
 		{
 			var delegation = (Delegation) statement;
 			var application = delegation.getApplication();
-			
+
 			validate(application);
 		}
 		else if (statement instanceof Assignment)
@@ -141,14 +141,14 @@ public class LocalValidator
 			var assignment = (Assignment) statement;
 			var atom = assignment.getAtom();
 			var expression = assignment.getExpression();
-			
+
 			context.accessFunction("=", new Expression[] {atom, expression}, null, null);
 			validate(expression);
-			
+
 			if (atom instanceof Value)
 			{
 				var value = (Value) atom;
-				
+
 				context.declareVariable(value);
 			}
 			else
@@ -157,20 +157,20 @@ public class LocalValidator
 			}
 		}
 	}
-	
+
 	private void validate(Expression expression)
 	{
 		if (expression instanceof Value)
 		{
 			var value = (Value) expression;
-			
+
 			context.accessVariable(value);
 		}
 		else if (expression instanceof Cell)
 		{
 			var cell = (Cell) expression;
 			var entity = cell.getEntity();
-			
+
 			context.accessVariable(entity);
 			context.accessComponent(cell);
 		}
@@ -180,7 +180,7 @@ public class LocalValidator
 			var left = binary.getLeft();
 			var right = binary.getRight();
 			var operator = binary.getOperator();
-			
+
 			context.accessFunction(operator, new Expression[] {left, right}, binary, BINARY__OPERATOR);
 			validate(left);
 			validate(right);
@@ -190,7 +190,7 @@ public class LocalValidator
 			var unary = (Unary) expression;
 			var e =  unary.getExpression();
 			var operator = unary.getOperator();
-			
+
 			context.accessFunction(operator, new Expression[] {e}, unary, UNARY__OPERATOR);
 			validate(e);
 		}
@@ -199,7 +199,7 @@ public class LocalValidator
 			var application = (Application) expression;
 			var name = application.getName();
 			var arguments = application.getArguments().toArray(new Expression[0]);
-			
+
 			context.accessFunction(name, arguments, application, APPLICATION__NAME);
 			for (var argument : application.getArguments())
 			{

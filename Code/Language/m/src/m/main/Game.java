@@ -55,21 +55,21 @@ public class Game
 		return "";
 	}
 
-    public String hover(Position position, String text, INode rootNode)
-    {
+	public String hover(Position position, String text, INode rootNode)
+	{
 		var result = "";
 
 		var offset = offset(text, position.getLine(), position.getCharacter());
-		
+
 		var node = NodeModelUtils.findLeafNodeAtOffset(rootNode, offset);
-		
+
 		if (node instanceof HiddenLeafNode)
 		{
 			return "";
 		}
-		
+
 		var semantic = node.getSemanticElement();
-		
+
 		if (semantic instanceof Function)
 		{
 			var function = (Function) semantic;
@@ -81,9 +81,9 @@ public class Game
 		else if (semantic instanceof Value)
 		{
 			var value = (Value) semantic;
-			
+
 			var container = value.eContainer();
-			
+
 			if (container instanceof Cell)
 			{
 				var cell = (Cell) container;
@@ -122,7 +122,7 @@ public class Game
 						}
 					}
 					var query = userFunction.queries.get(value.getName());
-					
+
 					if (query == null)
 					{
 						var standard = library.getValue(value.getName());
@@ -172,7 +172,7 @@ public class Game
 					}
 				}
 				var query = userFunction.queries.get(value.getName());
-				
+
 				if (query == null)
 				{
 					var standard = library.getValue(value.getName());
@@ -239,24 +239,24 @@ public class Game
 
 		return result;
 	}
-	
+
 	public List<CompletionItem> completions(String path, Position position)
 	{
 		return new ArrayList<CompletionItem>();
 	}
 
-    public List<CompletionItem> completions(Position position, INode rootNode)
-    {
-        var result = new ArrayList<CompletionItem>();
+	public List<CompletionItem> completions(Position position, INode rootNode)
+	{
+		var result = new ArrayList<CompletionItem>();
 
 		var text = rootNode.getText();
 		var offset = offset(text, position.getLine(), position.getCharacter());
-		
+
 		var node = NodeModelUtils.findLeafNodeAtOffset(rootNode, offset-1);
-		
+
 		var semantic = node.getSemanticElement();
 		var grammatic = node.getGrammarElement();
-		
+
 		if (semantic instanceof Cell || semantic instanceof Value && semantic.eContainer() instanceof Cell)
 		{
 			Cell cell;
@@ -270,45 +270,45 @@ public class Game
 			}
 
 			for (var component : components.keySet())
-            {
+			{
 				if (component == null || cell.getComponent() != null && cell.getComponent().getName() != null && cell.getComponent().getName().equals(component))
 				{
 					continue;
 				}
-                var item = new CompletionItem(component);
+				var item = new CompletionItem(component);
 				item.setDocumentation(library.getDescription(library.getComponent(component)));
 				item.setDetail(library.getName(components.get(component)));
-                item.setKind(CompletionItemKind.Class);
-                result.add(item);
-            }
+				item.setKind(CompletionItemKind.Class);
+				result.add(item);
+			}
 			for (var component : Component.values())
 			{
-                var item = new CompletionItem(library.getName(component));
+				var item = new CompletionItem(library.getName(component));
 				item.setDocumentation(library.getDescription(component));
 				item.setDetail(library.getName(component.getType()));
-                item.setKind(CompletionItemKind.Enum);
-                result.add(item);
+				item.setKind(CompletionItemKind.Enum);
+				result.add(item);
 			}
 		}
 		else if (grammatic instanceof TerminalRule && ((TerminalRule)grammatic).getName().equals("IDENTIFIER"))
-		{			
+		{
 			for (var function : m.library.symbols.Function.values())
-            {
-                if (function != m.library.symbols.Function.ASSIGNMENT)
-                {
-                    var item = new CompletionItem(library.getName(function));
-                    item.setKind(CompletionItemKind.Function);
-                    result.add(item);
-                }
-            }
-
-            for (var value : m.library.symbols.Value.values())
-            {
-                var item = new CompletionItem(library.getName(value));
-                item.setKind(CompletionItemKind.Value);
-                result.add(item);
+			{
+				if (function != m.library.symbols.Function.ASSIGNMENT)
+				{
+					var item = new CompletionItem(library.getName(function));
+					item.setKind(CompletionItemKind.Function);
+					result.add(item);
+				}
 			}
-			
+
+			for (var value : m.library.symbols.Value.values())
+			{
+				var item = new CompletionItem(library.getName(value));
+				item.setKind(CompletionItemKind.Value);
+				result.add(item);
+			}
+
 			EObject statement = EcoreUtil2.getContainerOfType(semantic, Statement.class);
 			if (statement == null)
 			{
@@ -325,7 +325,7 @@ public class Game
 					item.setKind(CompletionItemKind.Variable);
 					result.add(item);
 				}
-				
+
 				var siblings = node.getParent().getParent().getChildren();
 				for (var sibling : siblings)
 				{
@@ -416,22 +416,22 @@ public class Game
 		else if (semantic instanceof Value)
 		{
 			for (var function : m.library.symbols.Function.values())
-            {
-                if (function != m.library.symbols.Function.ASSIGNMENT)
-                {
-                    var item = new CompletionItem(library.getName(function));
-                    item.setKind(CompletionItemKind.Function);
-                    result.add(item);
-                }
-            }
-
-            for (var value : m.library.symbols.Value.values())
-            {
-                var item = new CompletionItem(library.getName(value));
-                item.setKind(CompletionItemKind.Value);
-                result.add(item);
+			{
+				if (function != m.library.symbols.Function.ASSIGNMENT)
+				{
+					var item = new CompletionItem(library.getName(function));
+					item.setKind(CompletionItemKind.Function);
+					result.add(item);
+				}
 			}
-			
+
+			for (var value : m.library.symbols.Value.values())
+			{
+				var item = new CompletionItem(library.getName(value));
+				item.setKind(CompletionItemKind.Value);
+				result.add(item);
+			}
+
 			EObject statement = EcoreUtil2.getContainerOfType(semantic, Statement.class);
 			var container = statement.eContainer();
 
@@ -498,22 +498,22 @@ public class Game
 
 		return result;
 	}
-	
+
 	public SignatureHelp signature(String path, Position position)
 	{
 		return new SignatureHelp();
 	}
 
-    public SignatureHelp signature(INode rootNode, Position position, SignatureHelpParams params)
-    {
-        var help = new SignatureHelp();
+	public SignatureHelp signature(INode rootNode, Position position, SignatureHelpParams params)
+	{
+		var help = new SignatureHelp();
 
 		var text = rootNode.getText();
 		var offset = offset(text, position.getLine(), position.getCharacter());
 		var node = NodeModelUtils.findLeafNodeAtOffset(rootNode, offset-1);
 
 		var list = new ArrayList<SignatureInformation>();
-		
+
 		if (node != null && node.getSemanticElement() instanceof Application)
 		{
 			var application = (Application) node.getSemanticElement();
@@ -545,7 +545,7 @@ public class Game
 		help.setSignatures(list);
 		return help;
 	}
-	
+
 	private int offset(String text, int line, int character)
 	{
 		var count = 0;

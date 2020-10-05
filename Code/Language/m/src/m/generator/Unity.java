@@ -45,7 +45,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
 import com.google.gson.Gson;
 
 import org.eclipse.emf.ecore.EObject;
@@ -76,7 +75,7 @@ public class Unity
 	Game game;
 	Library library;
 	IFileSystemAccess2 fileSystem;
-	
+
 	Set<String> namespaces;
 	UserFunction currentFunction;
 	boolean jobified;
@@ -91,27 +90,27 @@ public class Unity
 	static final String ENGINE = "UnityEngine";
 	static final String NAMESPACE = "namespace M";
 
-	
+
 	static final String[] csharpReserved = new String[]
 	{
 		"abstract", "as", "base", "bool",
-		"break", "byte", "case", "catch",	
-		"char", "checked", "class", "const",	
-		"continue", "decimal", "default", "delegate",	
-		"do", "double", "else", "enum",	
-		"event", "explicit", "extern", "false",	
-		"finally", "fixed", "float", "for",	
-		"foreach", "goto", "if", "implicit",	
-		"in", "int", "interface", "internal",	
-		"is", "lock", "long", "namespace",	
-		"new", "null", "object", "operator",	
-		"out", "override", "params", "private",	
-		"protected", "public", "readonly", "ref",	
-		"return", "sbyte", "sealed", "short",	
-		"sizeof", "stackalloc", "static", "string",	
-		"struct", "switch", "this", "throw",	
-		"true", "try", "typeof", "uint",	
-		"ulong", "unchecked", "unsafe", "ushort",	
+		"break", "byte", "case", "catch",
+		"char", "checked", "class", "const",
+		"continue", "decimal", "default", "delegate",
+		"do", "double", "else", "enum",
+		"event", "explicit", "extern", "false",
+		"finally", "fixed", "float", "for",
+		"foreach", "goto", "if", "implicit",
+		"in", "int", "interface", "internal",
+		"is", "lock", "long", "namespace",
+		"new", "null", "object", "operator",
+		"out", "override", "params", "private",
+		"protected", "public", "readonly", "ref",
+		"return", "sbyte", "sealed", "short",
+		"sizeof", "stackalloc", "static", "string",
+		"struct", "switch", "this", "throw",
+		"true", "try", "typeof", "uint",
+		"ulong", "unchecked", "unsafe", "ushort",
 		"using", "virtual", "void", "volatile",
 		"while"
 	};
@@ -127,11 +126,11 @@ public class Unity
 		this.stack = new ArrayDeque<>();
 		this.overlapNames = new HashMap<>();
 		this.namespaces = new HashSet<>();
-		
+
 		resolvePackages();
-		
+
 		clean(Paths.get(fileSystem.getURI("").toString(), "Assets", "Code").toString().replace("file:", ""));
-		
+
 		resolveAssembly();
 
 		for (var component : game.components.entrySet())
@@ -223,7 +222,7 @@ public class Unity
 			}
 		}
 	}
-	
+
 	private void resolvePackages()
 	{
 		final var version100 = "1.0.0";
@@ -238,7 +237,7 @@ public class Unity
 
 		if (fileSystem.isFile(file))
 		{
-			
+
 			var regenerate = false;
 			var current = fileSystem.readTextFile(file).toString();
 			var manifest = new Gson().fromJson(current, PackageManifest.class);
@@ -265,37 +264,37 @@ public class Unity
 			{
 				map.put(dependency.getKey(), dependency.getValue());
 			}
-			map.put("com.unity.ugui", version100);  
-			map.put("com.unity.modules.ai", version100);  
-			map.put("com.unity.modules.androidjni", version100);  
-			map.put("com.unity.modules.animation", version100);  
-			map.put("com.unity.modules.assetbundle", version100);  
-			map.put("com.unity.modules.audio", version100);  
-			map.put("com.unity.modules.cloth", version100);  
-			map.put("com.unity.modules.director", version100);  
-			map.put("com.unity.modules.imageconversion", version100);  
-			map.put("com.unity.modules.imgui", version100);  
-			map.put("com.unity.modules.jsonserialize", version100);  
-			map.put("com.unity.modules.particlesystem", version100);  
-			map.put("com.unity.modules.physics", version100);  
-			map.put("com.unity.modules.physics2d", version100);  
-			map.put("com.unity.modules.screencapture", version100);  
-			map.put("com.unity.modules.terrain", version100);  
-			map.put("com.unity.modules.terrainphysics", version100);  
-			map.put("com.unity.modules.tilemap", version100);  
-			map.put("com.unity.modules.ui", version100);  
-			map.put("com.unity.modules.uielements", version100);  
-			map.put("com.unity.modules.umbra", version100);  
-			map.put("com.unity.modules.unityanalytics", version100);  
-			map.put("com.unity.modules.unitywebrequest", version100);  
-			map.put("com.unity.modules.unitywebrequestassetbundle", version100);  
-			map.put("com.unity.modules.unitywebrequestaudio", version100);  
-			map.put("com.unity.modules.unitywebrequesttexture", version100);  
-			map.put("com.unity.modules.unitywebrequestwww", version100);  
-			map.put("com.unity.modules.vehicles", version100);  
-			map.put("com.unity.modules.video", version100);  
-			map.put("com.unity.modules.vr", version100);  
-			map.put("com.unity.modules.wind", version100);  
+			map.put("com.unity.ugui", version100);
+			map.put("com.unity.modules.ai", version100);
+			map.put("com.unity.modules.androidjni", version100);
+			map.put("com.unity.modules.animation", version100);
+			map.put("com.unity.modules.assetbundle", version100);
+			map.put("com.unity.modules.audio", version100);
+			map.put("com.unity.modules.cloth", version100);
+			map.put("com.unity.modules.director", version100);
+			map.put("com.unity.modules.imageconversion", version100);
+			map.put("com.unity.modules.imgui", version100);
+			map.put("com.unity.modules.jsonserialize", version100);
+			map.put("com.unity.modules.particlesystem", version100);
+			map.put("com.unity.modules.physics", version100);
+			map.put("com.unity.modules.physics2d", version100);
+			map.put("com.unity.modules.screencapture", version100);
+			map.put("com.unity.modules.terrain", version100);
+			map.put("com.unity.modules.terrainphysics", version100);
+			map.put("com.unity.modules.tilemap", version100);
+			map.put("com.unity.modules.ui", version100);
+			map.put("com.unity.modules.uielements", version100);
+			map.put("com.unity.modules.umbra", version100);
+			map.put("com.unity.modules.unityanalytics", version100);
+			map.put("com.unity.modules.unitywebrequest", version100);
+			map.put("com.unity.modules.unitywebrequestassetbundle", version100);
+			map.put("com.unity.modules.unitywebrequestaudio", version100);
+			map.put("com.unity.modules.unitywebrequesttexture", version100);
+			map.put("com.unity.modules.unitywebrequestwww", version100);
+			map.put("com.unity.modules.vehicles", version100);
+			map.put("com.unity.modules.video", version100);
+			map.put("com.unity.modules.vr", version100);
+			map.put("com.unity.modules.wind", version100);
 			map.put("com.unity.modules.xr", version100);
 			var json = new Gson().toJson(new PackageManifest(map));
 			fileSystem.generateFile(file, json);
@@ -306,18 +305,16 @@ public class Unity
 	{
 		var file = "Assets/Code/M.asmdef";
 		var gson = new Gson();
-		var needed = ImmutableList.of
-		(
-			ENTITIES,
-			TRANSFORMS,
-			PHYSICS,
-			MATHEMATICS,
-			"Unity.Jobs",
-			"Unity.Collections",
-			"Unity.InputSystem",
-			"Unity.Burst",
-			"Unity.Entities.Hybrid"
-		);
+		var needed = new ArrayList<String>();
+		needed.add(ENTITIES);
+		needed.add(TRANSFORMS);
+		needed.add(PHYSICS);
+		needed.add(MATHEMATICS);
+		needed.add("Unity.Jobs");
+		needed.add("Unity.Collections");
+		needed.add("Unity.InputSystem");
+		needed.add("Unity.Burst");
+		needed.add("Unity.Entities.Hybrid");
 
 		if (fileSystem.isFile(file))
 		{
@@ -327,7 +324,7 @@ public class Unity
 			var assembly = gson.fromJson(text, AssemblyDefinition.class);
 
 			var references = assembly.references;
-			
+
 			for (var need : needed)
 			{
 				if (!references.contains(need))
@@ -350,11 +347,11 @@ public class Unity
 			fileSystem.generateFile(file, json);
 		}
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	private String generateComponent(String name, Type type)
 	{
 		namespaces.clear();
@@ -667,7 +664,7 @@ public class Unity
 							(
 								"if (!dataOriented && debugger."+s.getName()+")",
 								"{",
-									s.getName()+".Run(gameObjects);",	
+									s.getName()+".Run(gameObjects);",
 								"}"
 							)),
 						"}",
@@ -772,7 +769,7 @@ public class Unity
 					"}"
 					)),
 					"",
-					"Type[] engineTypes  = ",
+					"Type[] engineTypes = ",
 					"{",
 						"typeof(RectTransform),",
 						"typeof(Canvas),",
@@ -876,7 +873,7 @@ public class Unity
 	private String generateJobifiedSystem(UserFunction function)
 	{
 		var constants = new HashMap<String,Type>();
-		
+
 		var values = EcoreUtil2.getAllContentsOfType(function, Value.class);
 		for (var value : values)
 		{
@@ -930,7 +927,7 @@ public class Unity
 					else
 					{
 						hybridComponents.put(entry.getKey(), entry.getValue());
-					}					
+					}
 				}
 			}
 		}
@@ -943,7 +940,7 @@ public class Unity
 		namespaces.add("Unity.Burst");
 		namespaces.add("static Unity.Collections.Allocator");
 		namespaces.add("static Unity.Entities.ComponentType");
-		
+
 		currentFunction = function;
 		overlapNames = new HashMap<>();
 
@@ -964,7 +961,7 @@ public class Unity
 				"{",
 					"EndSimulationEntityCommandBufferSystem ecbSystem;",
 					foreach(function.queries.keySet(), q->"EntityQuery "+q+";"),
-					
+
 					iff(! overlaps.isEmpty()),
 					"",
 					"BuildPhysicsWorld physics;",
@@ -1087,7 +1084,7 @@ public class Unity
 		}
 		return list;
 	}
-	
+
 	private Object code(Statement statement)
 	{
 		Object result = "undefined";
@@ -1096,7 +1093,7 @@ public class Unity
 		if (statement instanceof BindingBlock)
 		{
 			stack.push(new HashSet<>(variables));
-			
+
 			var block = (BindingBlock) statement;
 			var name = block.getName();
 			if (library.getBlock(name) == QUERY)
@@ -1112,7 +1109,7 @@ public class Unity
 				{
 					components.addAll(extras.get(a));
 				}
-				
+
 				variables.add(a);
 
 				List<Object> lines = null;
@@ -1176,7 +1173,7 @@ public class Unity
 				}
 
 				variables = stack.pop();
-				
+
 				result = lines;
 			}
 			else
@@ -1189,7 +1186,7 @@ public class Unity
 			stack.push(new HashSet<>(variables));
 			var block = (Block) statement;
 			var name = block.getName();
-			
+
 			if (library.getBlock(name) == SELECTION)
 			{
 				var overlaps = overlaps(block.getExpression());
@@ -1200,7 +1197,7 @@ public class Unity
 				}
 
 				var condition = code(block.getExpression());
-				
+
 				result = lines
 				(
 					"if ("+condition+")",
@@ -1219,7 +1216,7 @@ public class Unity
 				}
 
 				var condition = code(block.getExpression());
-				
+
 				for (var overlap : overlaps)
 				{
 					detectedNow = true;
@@ -1233,7 +1230,7 @@ public class Unity
 					"}"
 				);
 			}
-			variables = stack.pop();			
+			variables = stack.pop();
 		}
 		else if (statement instanceof Assignment)
 		{
@@ -1248,7 +1245,7 @@ public class Unity
 				detectedNow = true;
 				overlapNames.put(overlap, "collisions_"+new Random().nextInt(1000000));
 			}
-			
+
 			if (atom instanceof Value)
 			{
 				var value = (Value) atom;
@@ -1268,12 +1265,12 @@ public class Unity
 				var cell = (Cell) atom;
 				var entity = cell.getEntity().getName();
 				var component = cell.getComponent().getName();
-				
+
 				if (library.getComponent(cell.getComponent().getName()) == DISPLAY)
 				{
 					code = "(int)("+code+")";
 				}
-				
+
 				if (currentFunction.queries.containsKey(entity))
 				{
 					if (jobified)
@@ -1334,7 +1331,7 @@ public class Unity
 
 		return result;
 	}
-	
+
 	private String code(Expression e)
 	{
 		if (e instanceof Binary)
@@ -1362,7 +1359,7 @@ public class Unity
 			var cell = (Cell) e;
 			var component = cell.getComponent().getName();
 			var entity = cell.getEntity().getName();
-			
+
 			return component+"_"+entity+"."+field(component);
 		}
 		else if (e instanceof Application)
@@ -1381,7 +1378,7 @@ public class Unity
 		}
 		return "undefined";
 	}
-	
+
 	private String application(m.library.symbols.Function standard, List<Expression> args)
 	{
 		var x = "";
@@ -1400,7 +1397,7 @@ public class Unity
 		{
 			z = code(args.get(2));
 		}
-		
+
 		switch (standard)
 		{
 		case ABS: namespaces.add(MATHEMATICS); return "math.abs("+x+")";
@@ -1522,11 +1519,11 @@ public class Unity
 		}
 		return "undefined";
 	}
-	
+
 	private HashMap<String, HashSet<String>> extraComponents(Function function)
 	{
 		var map = new HashMap<String, HashSet<String>>();
-		
+
 		for (var application : EcoreUtil2.getAllContentsOfType(function, Application.class))
 		{
 			var name = application.getName();
@@ -1573,10 +1570,10 @@ public class Unity
 
 			}
 		}
-		
+
 		return map;
 	}
-	
+
 
 	private String variable(String name)
 	{
@@ -1625,7 +1622,7 @@ public class Unity
 			return variable(name);
 		}
 	}
-	
+
 	private String unreserved(String name)
 	{
 		for (var i = 0; i < csharpReserved.length; i++)
@@ -1637,7 +1634,7 @@ public class Unity
 		}
 		return name;
 	}
-	
+
 	private String simpleComponent(String name)
 	{
 		var standard = library.getComponent(name);
@@ -1667,7 +1664,7 @@ public class Unity
 		{
 			return "M.textData";
 		}
-		
+
 		if (found == null)
 		{
 			for (var i = 0; i < csharpReserved.length; i++)
@@ -1766,7 +1763,7 @@ public class Unity
 		{
 			return "M.textData";
 		}
-		
+
 		if (found == null)
 		{
 			for (var i = 0; i < csharpReserved.length; i++)
@@ -1836,7 +1833,7 @@ public class Unity
 		}
 		return "undefined";
 	}
-	
+
 	private String field(String name)
 	{
 		var found = library.getComponent(name);
@@ -1901,8 +1898,8 @@ public class Unity
 			}
 		}
 		return "undefined";
-	}	
-	
+	}
+
 	private String unity(Type type)
 	{
 		if (type instanceof AtomicType)
@@ -2001,7 +1998,7 @@ public class Unity
 			case COLLIDER:
 				namespaces.add(ENGINE);
 				return "Collider";
-			case RECT:	
+			case RECT:
 				namespaces.add(ENGINE);
 				return "Rect";
 			}

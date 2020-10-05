@@ -17,7 +17,7 @@ import m.validation.local.rules.ExpressionNode;
 public class IncompatibleTypes extends Problem
 {
 	public final ExpressionNode node;
-	
+
 	public IncompatibleTypes(ExpressionNode node)
 	{
 		this.node = node;
@@ -28,25 +28,25 @@ public class IncompatibleTypes extends Problem
 	{
 		var base = library.getProblem(this.getClass());
 		var list = new ArrayList<Diagnostic>();
-		
+
 		var visited = new HashSet<ExpressionNode>();
 		var stack = new ArrayDeque<ExpressionNode>();
 		var current = node;
 		stack.push(current);
-		
+
 		var types = new HashSet<Type>();
 		var errors = new ArrayList<ExpressionNode>();
-		
+
 		while (!stack.isEmpty())
 		{
 			current = stack.pop();
-			
+
 			if (!visited.contains(current))
 			{
 				visited.add(current);
 
 				var string = new StringBuilder(base);
-				
+
 				for (var typing : current.typings)
 				{
 					if (!types.contains(typing.type))
@@ -57,14 +57,14 @@ public class IncompatibleTypes extends Problem
 						errors.add(current);
 					}
 				}
-				
+
 				base = string.toString();
-				
+
 				if (types.size() >= 2)
 				{
 					break;
 				}
-				
+
 				for (var binding : current.bindings)
 				{
 					if (!visited.contains(binding.node))
@@ -74,7 +74,7 @@ public class IncompatibleTypes extends Problem
 				}
 			}
 		}
-		
+
 		for (var n : visited)
 		{
 			if (errors.contains(n))
@@ -86,7 +86,7 @@ public class IncompatibleTypes extends Problem
 				list.add(new Diagnostic(getRange(n.expression,text), base, DiagnosticSeverity.Warning, "M", "1"));
 			}
 		}
-		
+
 		return list;
 	}
 }

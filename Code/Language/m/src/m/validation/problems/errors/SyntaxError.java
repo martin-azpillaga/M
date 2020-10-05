@@ -12,22 +12,22 @@ import m.validation.problems.Problem;
 
 public class SyntaxError extends Problem
 {
-    INode node;
+	INode node;
 
-    public SyntaxError(INode node)
-    {
-        this.node = node;
-    }
+	public SyntaxError(INode node)
+	{
+		this.node = node;
+	}
 
-    public List<Diagnostic> diagnostics(Library library, String text)
-    {
-        var list = new ArrayList<Diagnostic>();
+	public List<Diagnostic> diagnostics(Library library, String text)
+	{
+		var list = new ArrayList<Diagnostic>();
 
-        var message = library.getProblem(getClass());
+		var message = library.getProblem(getClass());
 
-        list.add(new Diagnostic(getRange(node, text), message, DiagnosticSeverity.Error, "M", "0"));
+		list.add(new Diagnostic(getRange(node, text), message, DiagnosticSeverity.Error, "M", "0"));
 
-        return list;
-    }
-    
+		return list;
+	}
+
 }

@@ -15,13 +15,13 @@ public class RedefinedSymbol extends Problem
 {
 	EObject source;
 	EStructuralFeature feature;
-	
+
 	public RedefinedSymbol(EObject source, EStructuralFeature feature)
 	{
 		this.source = source;
 		this.feature = feature;
 	}
-	
+
 	@Override
 	public List<Diagnostic> diagnostics(Library library, String text)
 	{

@@ -4,13 +4,13 @@ public class Binding
 {
 	public final BindingReason reason;
 	public final ExpressionNode node;
-	
+
 	public Binding(ExpressionNode node, BindingReason reason)
 	{
 		this.node = node;
 		this.reason = reason;
 	}
-	
+
 	public enum BindingReason
 	{
 		SAME_COMPONENT,
