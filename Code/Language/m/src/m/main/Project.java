@@ -111,7 +111,7 @@ public class Project
 
 	private void generateCode(Game game)
 	{
-		var path = Paths.get(root.replace("/c:/", "C:/").replace("/d:/", "D:/").replace("/e:/",  "E:/"), "m.project");
+		var path = Paths.get(root.replace("/c:/", "C:/").replace("/d:/", "D:/").replace("/e:/",  "E:/"), "Ⲙ.json");
 
 		if (new File(path.toString()).exists())
 		{

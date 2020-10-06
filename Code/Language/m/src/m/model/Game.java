@@ -516,7 +516,7 @@ public class Game
 				var parameters = new ArrayList<ParameterInformation>();
 				for (var i = 0; i < type.parameterTypes.length; i++)
 				{
-					parameters.add(new ParameterInformation("Parameter "+i, library.getName(type.parameterTypes[i])));
+					parameters.add(new ParameterInformation(i+"", library.getName(type.parameterTypes[i])));
 				}
 				var info = new SignatureInformation(name + " : " + library.getName(type), library.getDescription(standard), parameters);
 				list.add(info);

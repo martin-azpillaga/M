@@ -304,10 +304,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		{
 			result = URLDecoder.decode(path.replace("file://", ""),"UTF-8");
 		}
-		catch (UnsupportedEncodingException e)
-		{
-			result = "Unsupported encoding UTF-8";
-		}
+		catch (UnsupportedEncodingException e){}
 
 		var os = System.getProperty("os.name");
 
