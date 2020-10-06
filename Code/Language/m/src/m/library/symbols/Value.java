@@ -11,7 +11,6 @@ public enum Value implements Symbol
 	E(NUMBER),
 
 	DELTA_TIME(NUMBER),
-	FIXED_DELTA_TIME(NUMBER),
 	TIME_SINCE_START(NUMBER),
 	TIME_SCALE(NUMBER),
 	;

@@ -1594,9 +1594,6 @@ public class Unity
 			case TIME_SINCE_START:
 				namespaces.add(ENGINE);
 				return "UnityEngine.Time.time";
-			case FIXED_DELTA_TIME:
-				namespaces.add(ENGINE);
-				return "UnityEngine.Time.fixedDeltaTime";
 			case DELTA_TIME:
 				namespaces.add(ENGINE);
 				return "UnityEngine.Time.deltaTime";

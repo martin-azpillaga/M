@@ -1,7 +1,6 @@
 package m.library;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,12 +23,11 @@ public enum Library
 	value -> {switch(value)
 	{
 		case EPSILON: return "epsilon";
-		case DELTA_TIME: return "deltaTime";
 		case E: return "e";
-		case FIXED_DELTA_TIME: return "fixedDeltaTime";
 		case PI: return "pi";
-		case TIME_SCALE: return "timeScale";
 		case TIME_SINCE_START: return "timeSinceStart";
+		case DELTA_TIME: return "deltaTime";
+		case TIME_SCALE: return "timeScale";
 	} return "";},
 	component -> {switch(component)
 	{
@@ -289,8 +287,80 @@ public enum Library
 		case STANDARD_FUNCTION: return "Standard function";
 		case STANDARD_BLOCK: return "Standard block";
 	} return ""; },
-	value -> "",
-	component -> "",
+	value -> { switch(value)
+	{
+		case EPSILON: return "Smallest real number above zero";
+		case PI: return "Ratio between any circle's perimeter and it's diameter";
+		case E: return "Value of the natural exponential function at 1";
+		case TIME_SINCE_START: return "Time in seconds since the simulation started";
+		case DELTA_TIME: return "Time since the last frame";
+		case TIME_SCALE: return "Speed factor at which engine system like physics update. Default speed is 1.";
+	} return ""; },
+	component -> { switch (component)
+	{
+		case POSITION: return "position";
+		case ROTATION: return "rotation";
+		case SCALE: return "scale";
+		case PARENT: return "parent";
+
+		case MASS: return "mass";
+		case INERTIA: return "inertia";
+
+		case VELOCITY: return "velocity";
+		case ANGULAR_VELOCITY: return "angularVelocity";
+		case RESTITUTION: return "restitution";
+		case FRICTION: return "friction";
+		case KINEMATIC: return "kinematic";
+
+		case NO_COLLISION_RESPONSE: return "crossable";
+		case RADIUS: return "radius";
+		case EXTENTS: return "extents";
+		case BOX_CENTER: return "boxCenter";
+		case SPHERE_CENTER: return "sphereCenter";
+
+		case MESH: return "mesh";
+		case MATERIAL: return "material";
+		case SHADOW_RECEIVER: return "shadowReceiver";
+
+		case NEAR: return "near";
+		case FAR: return "far";
+		case FOV: return "fieldOfView";
+		case ORTHOGRAPHIC_SIZE: return "orthographicSize";
+		case BACKGROUND: return "background";
+		case CULLING: return "culling";
+		case VIEWPORT: return "viewport";
+		case RENDER_TEXTURE: return "renderTexture";
+		case DISPLAY: return "display";
+
+		case EMISSION: return "emission";
+		case SPOT_ANGLE: return "spotAngle";
+		case RANGE: return "range";
+		case INTENSITY: return "intensity";
+		case INDIRECT_MULTIPLIER: return "bounceIntensity";
+		case COOKIE: return "cookie";
+
+		case TEXT: return "text";
+		case FONT: return "font";
+		case TEXT_COLOR: return "textColor";
+		case TEXT_MATERIAL: return "textMaterial";
+
+		case IMAGE: return "image";
+		case IMAGE_COLOR: return "imageColor";
+		case IMAGE_MATERIAL: return "imageMaterial";
+
+		case TOGGLED: return "toggled";
+		case SLIDER_VALUE: return "sliderValue";
+		case TEXTFIELD_VALUE: return "writtenText";
+
+		case ANCHOR_MIN: return "anchorMin";
+		case ANCHOR_MAX: return "anchorMax";
+
+
+		case AUDIOCLIP: return "audioClip";
+		case VOLUME: return "volume";
+		case PITCH: return "pitch";
+		case LOOP: return "loop";
+	} return ""; },
 	function ->	{ switch(function)
 	{
 		case ABS: return "Absolute value of a number";
@@ -476,19 +546,24 @@ public enum Library
 
 		return map;
 	}
-	public Value getValue(String name) {
+
+	public Value getValue(String name)
+	{
 		return nameToValue.get(name);
 	}
 
-	public Component getComponent(String name) {
+	public Component getComponent(String name)
+	{
 		return nameToComponent.get(name);
 	}
 
-	public Function getFunction(String name) {
+	public Function getFunction(String name)
+	{
 		return nameToFunction.get(name);
 	}
 
-	public Block getBlock(String name) {
+	public Block getBlock(String name)
+	{
 		return nameToBlock.get(name);
 	}
 
@@ -504,8 +579,6 @@ public enum Library
 
 	public String getDescription(Component component)
 	{
-		if (component == null) return "Component description here";
-
 		return componentToDescription.get(component);
 	}
 
