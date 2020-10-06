@@ -1,0 +1,10 @@
+package m.library.problems;
+
+public enum Error
+{
+	UNDECIDABLE_TYPE,
+	INCOMPATIBLE_TYPES,
+	UNDEFINED_SYMBOL,
+	REDEFINED_SYMBOL,
+	READONLY_ASSIGNMENT
+}
