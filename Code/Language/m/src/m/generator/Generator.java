@@ -22,7 +22,7 @@ public class Generator
 	{
 		for (var engine : Engine.values())
 		{
-			var defaultPath = Paths.get(path.toString(), "Output", engine.identifier).toString();
+			var defaultPath = Paths.get(path.toString(), engine.identifier).toString();
 			generate(game, engine, defaultPath);
 		}
 	}

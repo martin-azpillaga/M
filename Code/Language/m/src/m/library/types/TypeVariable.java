@@ -2,14 +2,12 @@ package m.library.types;
 
 public class TypeVariable implements Type
 {
-	public static final TypeVariable A = new TypeVariable("a");
+	public static final TypeVariable A = new TypeVariable();
 
-	public final String name;
 	public final Type bound;
 
-	public TypeVariable(String name)
+	public TypeVariable()
 	{
-		this.name = name;
 		this.bound = null;
 	}
 }

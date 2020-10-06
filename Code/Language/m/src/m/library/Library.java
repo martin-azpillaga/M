@@ -289,6 +289,8 @@ public enum Library
 		case STANDARD_FUNCTION: return "Standard function";
 		case STANDARD_BLOCK: return "Standard block";
 	} return ""; },
+	value -> "",
+	component -> "",
 	function ->	{ switch(function)
 	{
 		case ABS: return "Absolute value of a number";
@@ -420,7 +422,7 @@ public enum Library
 	Map<String, Block> nameToBlock;
 	Map<String, AtomicType> nameToType;
 
-	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Problem, String> problems, java.util.function.Function<BindingReason, String> bindingReasons, java.util.function.Function<TypingReason, String> typingReasons, java.util.function.Function<Function, String> functionDescriptions)
+	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Problem, String> problems, java.util.function.Function<BindingReason, String> bindingReasons, java.util.function.Function<TypingReason, String> typingReasons, java.util.function.Function<Value, String> valueDescriptions, java.util.function.Function<Component, String> componentDescriptions, java.util.function.Function<Function, String> functionDescriptions)
 	{
 		valueToName = forward(values, Value.values());
 		nameToValue = reverse(values, Value.values());
@@ -441,9 +443,9 @@ public enum Library
 		bindingReasonToName = forward(bindingReasons, BindingReason.values());
 		typingReasonToName = forward(typingReasons, TypingReason.values());
 
+		valueToDescription = forward(valueDescriptions, Value.values());
+		componentToDescription = forward(componentDescriptions, Component.values());
 		functionToDescription = forward(functionDescriptions, Function.values());
-		componentToDescription = new EnumMap<>(Component.class);
-		valueToDescription = new EnumMap<>(Value.class);
 	}
 
 	private <A,B> HashMap<A,B> forward(java.util.function.Function<A,B> f, A[] values)
@@ -537,7 +539,7 @@ public enum Library
 		}
 		else if (type instanceof TypeVariable)
 		{
-			return ((TypeVariable) type).name;
+			return "T";
 		}
 		else if (type instanceof FunctionType)
 		{
@@ -551,7 +553,7 @@ public enum Library
 		}
 		else
 		{
-			return "unrecognized type";
+			return "";
 		}
 	}
 }

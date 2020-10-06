@@ -186,7 +186,7 @@ public class Context
 			var parameterTypes = type.parameterTypes;
 			var returnType = type.returnType;
 
-			var typeVariables = new HashMap<String, ArrayList<Expression>>();
+			var typeVariables = new HashMap<TypeVariable, ArrayList<Expression>>();
 
 			if (parameterTypes.length == arguments.length)
 			{
@@ -195,12 +195,11 @@ public class Context
 					if (parameterTypes[i] instanceof TypeVariable)
 					{
 						var typeVariable = (TypeVariable) parameterTypes[i];
-						var typeName = typeVariable.name;
-						if (!typeVariables.containsKey(typeName))
+						if (!typeVariables.containsKey(typeVariable))
 						{
-							typeVariables.put(typeName, new ArrayList<>());
+							typeVariables.put(typeVariable, new ArrayList<>());
 						}
-						typeVariables.get(typeName).add(arguments[i]);
+						typeVariables.get(typeVariable).add(arguments[i]);
 					}
 					else
 					{
@@ -212,12 +211,11 @@ public class Context
 					if (returnType instanceof TypeVariable)
 					{
 						var typeVariable = (TypeVariable) returnType;
-						var typeName = typeVariable.name;
-						if (!typeVariables.containsKey(typeName))
+						if (!typeVariables.containsKey(typeVariable))
 						{
-							typeVariables.put(typeName, new ArrayList<>());
+							typeVariables.put(typeVariable, new ArrayList<>());
 						}
-						typeVariables.get(typeName).add(source);
+						typeVariables.get(typeVariable).add(source);
 					}
 					else
 					{
