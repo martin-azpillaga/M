@@ -1,10 +1,14 @@
 package m.generator;
 
 import static m.generator.Writer.end;
+import static m.generator.Writer.exists;
 import static m.generator.Writer.foreach;
+import static m.generator.Writer.getBaseFolder;
 import static m.generator.Writer.iff;
 import static m.generator.Writer.lines;
+import static m.generator.Writer.readText;
 import static m.generator.Writer.write;
+import static m.generator.Writer.writeFile;
 import static m.library.symbols.Block.ITERATION;
 import static m.library.symbols.Block.QUERY;
 import static m.library.symbols.Block.SELECTION;
@@ -49,7 +53,6 @@ import com.google.gson.Gson;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.xtext.EcoreUtil2;
-import org.eclipse.xtext.generator.IFileSystemAccess2;
 
 import m.library.Library;
 import m.library.symbols.Component;
@@ -64,17 +67,16 @@ import m.model.Cell;
 import m.model.Delegation;
 import m.model.Expression;
 import m.model.Function;
+import m.model.Game;
 import m.model.Statement;
 import m.model.Unary;
-import m.model.Value;
-import m.model.Game;
 import m.model.UserFunction;
+import m.model.Value;
 
 public class Unity
 {
 	Game game;
 	Library library;
-	IFileSystemAccess2 fileSystem;
 
 	Set<String> namespaces;
 	UserFunction currentFunction;
@@ -117,11 +119,10 @@ public class Unity
 
 
 
-	public void generate(Game game, IFileSystemAccess2 fileSystem)
+	public void generate(Game game)
 	{
 		this.game = game;
 		this.library = game.library;
-		this.fileSystem = fileSystem;
 		this.variables = new HashSet<>();
 		this.stack = new ArrayDeque<>();
 		this.overlapNames = new HashMap<>();
@@ -129,13 +130,13 @@ public class Unity
 
 		resolvePackages();
 
-		clean(Paths.get(fileSystem.getURI("").toString(), "Assets", "Code").toString().replace("file:", ""));
+		clean(Paths.get(getBaseFolder(), "Assets", "Code").toString().replace("file:", ""));
 
 		resolveAssembly();
 
 		for (var component : game.components.entrySet())
 		{
-			fileSystem.generateFile
+			writeFile
 			(
 				"Assets/Code/Components/"+unreserved(component.getKey())+".cs",
 				generateComponent(component.getKey(), component.getValue())
@@ -150,7 +151,7 @@ public class Unity
 			if (type.parameterTypes == null && type.returnType == UNIT)
 			{
 				systems.add(function);
-				fileSystem.generateFile
+				writeFile
 				(
 					"Assets/Code/Systems/"+unreserved(function.getName())+".cs",
 					generateSystem(function)
@@ -158,43 +159,43 @@ public class Unity
 			}
 		}
 
-		fileSystem.generateFile
+		writeFile
 		(
 			"Assets/Code/Main/SystemRunner.cs",
 			systemRunner(systems)
 		);
 
-		fileSystem.generateFile
+		writeFile
 		(
 			"Assets/Code/Debugging/SystemDebugger.cs",
 			systemDebugger(systems)
 		);
 
-		fileSystem.generateFile
+		writeFile
 		(
 			"Assets/Code/Debugging/EntityDebugger.cs",
 			entityDebugger(systems)
 		);
 
-		fileSystem.generateFile
+		writeFile
 		(
 			"Assets/Code/Main/ConversionSystem.cs",
 			conversionSystem()
 		);
 
-		fileSystem.generateFile
+		writeFile
 		(
 			"Assets/Code/Fix/FixRectTransforms.cs",
 			fixRectTransforms()
 		);
 
-		fileSystem.generateFile
+		writeFile
 		(
 			"Assets/Code/Fix/textData.cs",
 			generateDataComponent("text", STRING)
 		);
 
-		fileSystem.generateFile
+		writeFile
 		(
 			"Assets/Code/Fix/SyncPoint.cs",
 			generateSyncPoint()
@@ -203,7 +204,7 @@ public class Unity
 		jobified = true;
 		for (var component : game.components.entrySet())
 		{
-			fileSystem.generateFile
+			writeFile
 			(
 				"Assets/Code/Components/Jobified/"+unreserved(component.getKey())+"Data.cs",
 				generateDataComponent(component.getKey(), component.getValue())
@@ -214,7 +215,7 @@ public class Unity
 			var type = function.type;
 			if (type.parameterTypes == null && type.returnType == UNIT)
 			{
-				fileSystem.generateFile
+				writeFile
 				(
 					"Assets/Code/Systems/Jobified/"+unreserved(function.getName())+"Jobified.cs",
 					generateJobifiedSystem(function)
@@ -235,11 +236,11 @@ public class Unity
 
 		var file = "Packages/manifest.json";
 
-		if (fileSystem.isFile(file))
+		if (exists(file))
 		{
 
 			var regenerate = false;
-			var current = fileSystem.readTextFile(file).toString();
+			var current = readText(file).toString();
 			var manifest = new Gson().fromJson(current, PackageManifest.class);
 			var dependencies = manifest.dependencies;
 
@@ -254,7 +255,7 @@ public class Unity
 			if (regenerate)
 			{
 				var json = new Gson().toJson(manifest);
-				fileSystem.generateFile(file, json);
+				writeFile(file, json);
 			}
 		}
 		else
@@ -297,7 +298,7 @@ public class Unity
 			map.put("com.unity.modules.wind", version100);
 			map.put("com.unity.modules.xr", version100);
 			var json = new Gson().toJson(new PackageManifest(map));
-			fileSystem.generateFile(file, json);
+			writeFile(file, json);
 		}
 	}
 
@@ -316,11 +317,11 @@ public class Unity
 		needed.add("Unity.Burst");
 		needed.add("Unity.Entities.Hybrid");
 
-		if (fileSystem.isFile(file))
+		if (exists(file))
 		{
 			var regenerate = false;
 
-			var text = fileSystem.readTextFile(file).toString();
+			var text = readText(file).toString();
 			var assembly = gson.fromJson(text, AssemblyDefinition.class);
 
 			var references = assembly.references;
@@ -337,14 +338,14 @@ public class Unity
 			if (regenerate)
 			{
 				var json = gson.toJson(assembly);
-				fileSystem.generateFile(file, json);
+				writeFile(file, json);
 			}
 		}
 		else
 		{
 			var assembly = new AssemblyDefinition("M",needed,true);
 			var json = gson.toJson(assembly, AssemblyDefinition.class);
-			fileSystem.generateFile(file, json);
+			writeFile(file, json);
 		}
 	}
 

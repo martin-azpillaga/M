@@ -1,32 +1,18 @@
 package m.generator;
 
-import org.eclipse.xtext.generator.JavaIoFileSystemAccess;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import com.google.inject.Inject;
-import m.MStandaloneSetup;
 
 import m.model.Game;
 
 public class Generator
 {
-	@Inject
-	JavaIoFileSystemAccess fileSystem;
-
-	public Generator()
-	{
-		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
-		injector.injectMembers(this);
-	}
-
 	public void generate(Game game, Engine engine, String path)
 	{
-		fileSystem.setOutputPath(path);
+		Writer.setBaseFolder(path);
 		switch (engine)
 		{
-			case UNITY: new Unity().generate(game, fileSystem); break;
+			case UNITY: new Unity().generate(game); break;
 			case UNREAL: break;
 			case GODOT: break;
 		}
