@@ -26,7 +26,7 @@ public class IncompatibleTypes extends Problem
 	@Override
 	public List<Diagnostic> diagnostics(Library library, String text)
 	{
-		var base = library.getProblem(this.getClass());
+		var base = library.getProblem(m.library.problems.Problem.INCOMPATIBLE_TYPES);
 		var list = new ArrayList<Diagnostic>();
 
 		var visited = new HashSet<ExpressionNode>();

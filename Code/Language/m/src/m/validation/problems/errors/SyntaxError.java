@@ -23,7 +23,7 @@ public class SyntaxError extends Problem
 	{
 		var list = new ArrayList<Diagnostic>();
 
-		var message = library.getProblem(getClass());
+		var message = library.getProblem(m.library.problems.Problem.SYNTAX_ERROR);
 
 		list.add(new Diagnostic(getRange(node, text), message, DiagnosticSeverity.Error, "M", "0"));
 

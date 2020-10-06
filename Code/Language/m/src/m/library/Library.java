@@ -14,6 +14,8 @@ import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.library.types.TypeVariable;
 import m.library.problems.Problem;
+import m.library.problems.TypingReason;
+import m.library.problems.BindingReason;
 
 public enum Library
 {
@@ -262,15 +264,30 @@ public enum Library
 	case TEXTURE: return "texture";
 	case COLLIDER: return "collider";
 	case RECT: return "rectangle";
-	} return "";},
+	} return ""; },
 	problem -> { switch (problem)
 	{
+		case SYNTAX_ERROR: return "Syntax error";
 		case UNDECIDABLE_TYPE: return "Undecidable type";
 		case INCOMPATIBLE_TYPES: return "Incompatible types";
 		case UNDEFINED_SYMBOL: return "Undefined symbol";
 		case REDEFINED_SYMBOL: return "Redefined symbol";
 		case READONLY_ASSIGNMENT: return "Readonly assignment";
 		case UNUSED_VALUE: return "Unused value";
+	} return ""; },
+	bindingReason -> { switch (bindingReason)
+	{
+		case SAME_VARIABLE: return "Same value";
+		case SAME_COMPONENT: return "Same component";
+		case SAME_FUNCTION: return "Same function";
+		case SAME_TYPE_VARIABLE: return "Same type variable";
+	} return ""; },
+	typingReason -> { switch (typingReason)
+	{
+		case STANDARD_VARIABLE: return "Standard value";
+		case STANDARD_COMPONENT: return "Standard component";
+		case STANDARD_FUNCTION: return "Standard function";
+		case STANDARD_BLOCK: return "Standard block";
 	} return ""; },
 	function ->	{ switch(function)
 	{
@@ -382,254 +399,6 @@ public enum Library
 		case Z: return "Third entry of the vector";
 	}
 	return "";}
-	),
-	EUSKARA(
-	value -> {switch(value)
-	{
-	case EPSILON: return "epsilon";
-	case PI: return "pi";
-	case E: return "e";
-	case DELTA_TIME: return "deltaDenbora";
-	case FIXED_DELTA_TIME: return "deltaDenboraZehaztua";
-	case TIME_SINCE_START: return "denbora";
-	case TIME_SCALE: return "denboraEskala";
-	} return "";},
-	component -> {switch(component)
-	{
-	case POSITION: return "kokapena";
-	case ROTATION: return "biraketa";
-	case SCALE: return "eskala";
-	case PARENT: return "gurasoa";
-
-
-	case MASS: return "masa";
-	case INERTIA: return "inertzia";
-	case VELOCITY: return "abiadura";
-	case ANGULAR_VELOCITY: return "abiaduraAngeluarra";
-	case RESTITUTION: return "restituzioa";
-	case FRICTION: return "marruskadura";
-	case KINEMATIC: return "kinematikoa";
-
-	case NO_COLLISION_RESPONSE: return "gurutzagarria";
-	case RADIUS: return "erradioa";
-	case EXTENTS: return "dimentsioak";
-	case BOX_CENTER: return "kaixaZentrua";
-	case SPHERE_CENTER: return "esferaZentrua";
-
-
-	case MESH: return "malla";
-	case MATERIAL: return "materiala";
-	case SHADOW_RECEIVER: return "itzalJasotzailea";
-
-	case NEAR: return "gertu";
-	case FAR: return "urruti";
-	case FOV: return "ikusmenAngelua";
-	case ORTHOGRAPHIC_SIZE: return "ikusmenTamaina";
-	case CULLING: return "irudikatu";
-	case BACKGROUND: return "atzealdea";
-	case VIEWPORT: return "viewport";
-	case RENDER_TEXTURE: return "renderizazioEhundura";
-	case DISPLAY: return "pantaila";
-
-	case EMISSION: return "emisioa";
-	case SPOT_ANGLE: return "fokoAngelua";
-	case RANGE: return "irismena";
-	case INTENSITY: return "intentsitatea";
-	case INDIRECT_MULTIPLIER: return "erreboteIntentsitatea";
-	case COOKIE: return "gaileta";
-
-	case TEXT: return "testua";
-	case FONT: return "letraEstiloa";
-	case TEXT_COLOR: return "letraKolorea";
-	case TEXT_MATERIAL: return "letraMateriala";
-
-	case IMAGE: return "irudia";
-	case IMAGE_COLOR: return "irudiKolorea";
-	case IMAGE_MATERIAL: return "irudiMateriala";
-
-	case TOGGLED: return "sakatuta";
-	case SLIDER_VALUE: return "slideBalioa";
-	case TEXTFIELD_VALUE: return "idatzitakoTestua";
-
-	case ANCHOR_MIN: return "euskarriaMin";
-	case ANCHOR_MAX: return "euskarriaMax";
-
-
-	case AUDIOCLIP: return "audioKlipa";
-	case VOLUME: return "bolumena";
-	case PITCH: return "tonua";
-	case LOOP: return "errepikapena";
-	} return "";},
-	function -> {switch(function)
-	{
-	case ABS: return "abs";
-	case SIGN: return "sign";
-	case CEIL: return "ceil";
-	case FLOOR: return "floor";
-	case ROUND: return "round";
-	case INTEGERPART: return "integerPart";
-	case FRACTIONALPART: return "fractionalPart";
-	case INVERSE: return "inverse";
-	case RECIPROCAL: return "reciprocal";
-
-	case CLAMP: return "clamp";
-	case LERP: return "lerp";
-	case UNLERP: return "unlerp";
-	case PROPORTIONAL: return "proportional";
-	case SLERP: return "slerp";
-
-	case MIN: return "min";
-	case MAX: return "max";
-
-	case DEGREES: return "graduak";
-	case RADIANS: return "radianak";
-
-	case STEP: return "step";
-
-	case CROSS: return "cross";
-	case DOT: return "dot";
-	case NORM: return "norm";
-	case NORMALIZE: return "normalize";
-	case DISTANCE: return "distance";
-	case REFLECT: return "reflect";
-	case REFRACT: return "refract";
-
-	case OR: return "||";
-	case AND: return "&&";
-	case NOT: return "!";
-
-	case ADDITION: return "+";
-	case SUBTRACTION: return "-";
-	case MULTIPLICATION: return "*";
-	case DIVISION: return "/";
-
-	case EQUAL: return "==";
-	case INEQUAL: return "!=";
-
-	case LOWER: return "<";
-	case LOWEROREQUAL: return "<=";
-	case GREATEROREQUAL: return ">=";
-	case GREATER: return ">";
-
-	case SIZE: return "#";
-	case IN: return "@";
-	case X: return "x";
-	case Y: return "y";
-	case Z: return "z";
-	case XYZ: return "xyz";
-
-	case SIN: return "sin";
-	case COS: return "cos";
-	case TAN: return "tan";
-	case ASIN: return "asin";
-	case ACOS: return "acos";
-	case ATAN: return "atan";
-	case EXP: return "exp";
-	case LOG: return "log";
-	case POW: return "pow";
-	case SQRT: return "sqrt";
-	case RANDOM: return "ausazko";
-
-	case CREATE: return "sortu";
-	case DESTROY: return "desegin";
-	case ADD: return "gehitu";
-	case REMOVE: return "kendu";
-	case HAS: return "badu";
-
-	case WRITE: return "idatzi";
-	case WRITEERROR: return "idatziAkatsa";
-	case WRITE_WARNING: return "idatziAholkua";
-	case HALT: return "amaitu";
-	case BREAKPOINT: return "gelditu";
-	case SCREENSHOT: return "argazkiaAtera";
-
-
-	case SET_NUMBER: return "ezarriZenbakia";
-	case SET_COLOR: return "ezarriKolorea";
-	case SET_INTEGER: return "ezarriOsoa";
-	case SET_TEXTURE: return "ezarriTexture";
-	case SET_KEYWORD: return "ezarriProposizioa";
-	case GET_NUMBER: return "hartuZenbakia";
-	case GET_COLOR: return "hartuKolorea";
-	case GET_INTEGER: return "hartuOsoa";
-	case GET_TEXTURE: return "hartuTexture";
-	case GET_KEYWORD: return "hartuProposizioa";
-
-	case SET_TRIGGER: return "ezarriKakoa";
-	case IN_STATE: return "egoera";
-	case ACTIVATE_PARAMETER: return "jarriParametroa";
-	case DEACTIVATE_PARAMETER: return "kenduParametroa";
-	case PLAY_ANIMATION: return "aldatuAnimazioa";
-
-	case READ_TRIGGERED: return "irakurriKakoa";
-	case READ_NUMBER: return "irakurriZenbakia";
-	case READ_VECTOR: return "irakurriBektorea";
-
-	case TO_QUATERNION: return "kuaternioia";
-	case TO_NUMBER3: return "angeluak";
-
-	case PLAY: return "hasi";
-	case PLAY_ONCE: return "playOnce";
-	case PAUSE: return "pause";
-	case UNPAUSE: return "unpause";
-	case STOP: return "stop";
-
-	case OVER: return "saguaGainean";
-	case TO_NUMBER: return "zenbakia";
-	case TO_STRING: return "katea";
-
-	case OVERLAPS: return "gainean";
-	case SCREEN_OVERLAPS: return "pantailaGainean";
-	case ADD_FORCE: return "gehituIndarra";
-	case ADD_TORQUE: return "gehituIndarAngeluarra";
-	case CLOSEST_POINT: return "puntuGertukoena";
-
-	case IS_POSITIVE: return "positiboa";
-	case IS_NEGATIVE: return "negatiboa";
-	case IS_ZERO: return "zero";
-
-	case WORLD_TO_VIEWPORT: return "mundutikPantailara";
-	case VIEWPORT_TO_WORLD: return "pantailatikMundura";
-
-	case ASSIGNMENT: return "=";
-	} return "";},
-	block -> {switch(block)
-	{
-	case QUERY: return "hartu";
-	case SELECTION: return "baldin";
-	case ITERATION: return "bitartean";
-	} return "";},
-	type -> {switch(type)
-	{
-	case STRING: return "katea";
-	case PROPOSITION: return "proposizioa";
-	case NUMBER: return "zenbakia";
-	case NUMBER2: return "zenbakia2";
-	case NUMBER3: return "zenbakia3";
-	case UNIT: return "hutsa";
-
-	case COMPONENT: return "komponentea";
-
-	case COLOR: return "kolorea";
-
-	case INPUT: return "inputa";
-	case MESH: return "malla";
-	case MATERIAL: return "materiala";
-	case FONT: return "letraEstiloa";
-	case TEXT: return "testua";
-	case IMAGE: return "irudia";
-	case AUDIOCLIP: return "audioKlipa";
-	case ANIMATOR: return "animatzailea";
-
-	case ENTITY: return "entitatea";
-	case ENTITY_LIST: return "entitateLista";
-	case QUATERNION: return "kuaternioia";
-	case TEXTURE: return "textura";
-	case COLLIDER: return "collider";
-	case RECT: return "rektangulua";
-	} return "";},
-	problem -> "",
-	function ->	""
 	);
 
 	Map<Value, String> valueToName;
@@ -638,18 +407,20 @@ public enum Library
 	Map<Block, String> blockToName;
 	Map<AtomicType, String> typeToName;
 	Map<Problem, String> problemToName;
-	Map<Function, String> functionToDescription;
-	Map<Component, String> componentToDescription;
+	Map<BindingReason, String> bindingReasonToName;
+	Map<TypingReason, String> typingReasonToName;
+
 	Map<Value, String> valueToDescription;
+	Map<Component, String> componentToDescription;
+	Map<Function, String> functionToDescription;
 
 	Map<String, Value> nameToValue;
 	Map<String, Component> nameToComponent;
 	Map<String, Function> nameToFunction;
 	Map<String, Block> nameToBlock;
 	Map<String, AtomicType> nameToType;
-	Map<String, Class<?>> nameToProblem;
 
-	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Problem, String> errors,java.util.function.Function<Function, String> functionDescriptions)
+	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Problem, String> problems, java.util.function.Function<BindingReason, String> bindingReasons, java.util.function.Function<TypingReason, String> typingReasons, java.util.function.Function<Function, String> functionDescriptions)
 	{
 		valueToName = forward(values, Value.values());
 		nameToValue = reverse(values, Value.values());
@@ -666,7 +437,9 @@ public enum Library
 		typeToName = forward(atomicTypes, AtomicType.values());
 		nameToType = reverse(atomicTypes, AtomicType.values());
 
-		problemToName = forward(errors, Problem.values());
+		problemToName = forward(problems, Problem.values());
+		bindingReasonToName = forward(bindingReasons, BindingReason.values());
+		typingReasonToName = forward(typingReasons, TypingReason.values());
 
 		functionToDescription = forward(functionDescriptions, Function.values());
 		componentToDescription = new EnumMap<>(Component.class);

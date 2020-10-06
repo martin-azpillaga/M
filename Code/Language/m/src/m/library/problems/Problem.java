@@ -4,6 +4,7 @@ import static m.library.problems.Problem.Kind.*;
 
 public enum Problem
 {
+	SYNTAX_ERROR(ERROR),
 	UNDECIDABLE_TYPE(ERROR),
 	INCOMPATIBLE_TYPES(ERROR),
 	UNDEFINED_SYMBOL(ERROR),

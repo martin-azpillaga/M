@@ -26,7 +26,7 @@ public class UndecidableType extends Problem
 	public List<Diagnostic> diagnostics(Library library, String text)
 	{
 		var list = new ArrayList<Diagnostic>();
-		var message = library.getProblem(getClass());
+		var message = library.getProblem(m.library.problems.Problem.UNDECIDABLE_TYPE);
 
 		var visited = new HashSet<ExpressionNode>();
 		var stack = new ArrayDeque<ExpressionNode>();

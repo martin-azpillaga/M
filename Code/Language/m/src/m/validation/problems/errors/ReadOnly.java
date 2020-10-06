@@ -24,7 +24,7 @@ public class ReadOnly extends Problem
 		var list = new ArrayList<Diagnostic>();
 
 		var range = getRange(value,text);
-		var message = library.getProblem(this.getClass());
+		var message = library.getProblem(m.library.problems.Problem.READONLY_ASSIGNMENT);
 
 		var diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Error, "M", "5");
 

@@ -26,7 +26,7 @@ public class UndefinedSymbol extends Problem
 	public List<Diagnostic> diagnostics(Library library, String text)
 	{
 		var list = new ArrayList<Diagnostic>();
-		var message = library.getProblem(this.getClass());
+		var message = library.getProblem(m.library.problems.Problem.UNDEFINED_SYMBOL);
 		var problem = new Diagnostic(getRange(source,feature,text), message, DiagnosticSeverity.Error, "M", "3");
 		list.add(problem);
 		return list;

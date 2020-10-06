@@ -24,7 +24,7 @@ public class UnusedValue extends Problem
 	{
 		var list = new ArrayList<Diagnostic>();
 
-		list.add(new Diagnostic(getRange(value,text), library.getProblem(getClass()), DiagnosticSeverity.Warning, "M", "6"));
+		list.add(new Diagnostic(getRange(value,text), library.getProblem(m.library.problems.Problem.UNUSED_VALUE), DiagnosticSeverity.Warning, "M", "6"));
 
 		return list;
 	}
