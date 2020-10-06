@@ -13,18 +13,10 @@ import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.library.types.TypeVariable;
-import m.validation.problems.Problem;
-import m.validation.problems.errors.IncompatibleTypes;
-import m.validation.problems.errors.ReadOnly;
-import m.validation.problems.errors.RedefinedSymbol;
-import m.validation.problems.errors.UndecidableType;
-import m.validation.problems.errors.UndefinedSymbol;
-import m.validation.problems.warnings.UnusedValue;
-import m.validation.problems.errors.SyntaxError;
+import m.library.problems.Problem;
 
 public enum Library
 {
-
 	ENGLISH
 	(
 	value -> {switch(value)
@@ -271,41 +263,15 @@ public enum Library
 	case COLLIDER: return "collider";
 	case RECT: return "rectangle";
 	} return "";},
-	problem ->
+	problem -> { switch (problem)
 	{
-		if (problem == IncompatibleTypes.class)
-		{
-			return "Incompatible types";
-		}
-		else if (problem == UndecidableType.class)
-		{
-			return "Undecidable type";
-		}
-		else if (problem == RedefinedSymbol.class)
-		{
-			return "Redefined symbol";
-		}
-		else if (problem == UndefinedSymbol.class)
-		{
-			return "Undefined symbol";
-		}
-		else if (problem == ReadOnly.class)
-		{
-			return "Read only value";
-		}
-		else if (problem == UnusedValue.class)
-		{
-			return "Unused value";
-		}
-		else if (problem == SyntaxError.class)
-		{
-			return "Syntax error";
-		}
-		else
-		{
-			return "Undefined name for problem";
-		}
-	},
+		case UNDECIDABLE_TYPE: return "Undecidable type";
+		case INCOMPATIBLE_TYPES: return "Incompatible types";
+		case UNDEFINED_SYMBOL: return "Undefined symbol";
+		case REDEFINED_SYMBOL: return "Redefined symbol";
+		case READONLY_ASSIGNMENT: return "Readonly assignment";
+		case UNUSED_VALUE: return "Unused value";
+	} return ""; },
 	function ->	{ switch(function)
 	{
 		case ABS: return "Absolute value of a number";
@@ -662,37 +628,7 @@ public enum Library
 	case COLLIDER: return "collider";
 	case RECT: return "rektangulua";
 	} return "";},
-	problem ->
-	{
-		if (problem == IncompatibleTypes.class)
-		{
-			return "Izaera bateraezinak";
-		}
-		else if (problem == UndecidableType.class)
-		{
-			return "Izaera ezarriezina";
-		}
-		else if (problem == RedefinedSymbol.class)
-		{
-			return "Simbolo hau dagoeneko definitua dago";
-		}
-		else if (problem == UndefinedSymbol.class)
-		{
-			return "Simbolo honek ez du definiziorik";
-		}
-		else if (problem == ReadOnly.class)
-		{
-			return "Ezin konstante baten balioa berrezarri";
-		}
-		else if (problem == UnusedValue.class)
-		{
-			return "Erabilerarik gabeko balioa";
-		}
-		else
-		{
-			return "Problema honen izena ezarri gabe dago";
-		}
-	},
+	problem -> "",
 	function ->	""
 	);
 
@@ -701,7 +637,7 @@ public enum Library
 	Map<Function, String> functionToName;
 	Map<Block, String> blockToName;
 	Map<AtomicType, String> typeToName;
-	Map<Class<?>, String> problemToName;
+	Map<Problem, String> problemToName;
 	Map<Function, String> functionToDescription;
 	Map<Component, String> componentToDescription;
 	Map<Value, String> valueToDescription;
@@ -713,7 +649,7 @@ public enum Library
 	Map<String, AtomicType> nameToType;
 	Map<String, Class<?>> nameToProblem;
 
-	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Class<?>, String> problems,java.util.function.Function<Function, String> functionDescriptions)
+	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Problem, String> errors,java.util.function.Function<Function, String> functionDescriptions)
 	{
 		valueToName = forward(values, Value.values());
 		nameToValue = reverse(values, Value.values());
@@ -730,10 +666,7 @@ public enum Library
 		typeToName = forward(atomicTypes, AtomicType.values());
 		nameToType = reverse(atomicTypes, AtomicType.values());
 
-		var problemTypes = new Class[] {UndecidableType.class, IncompatibleTypes.class, UndefinedSymbol.class, RedefinedSymbol.class, ReadOnly.class, UnusedValue.class, SyntaxError.class};
-
-		problemToName = forward(problems, problemTypes);
-		nameToProblem = reverse(problems, problemTypes);
+		problemToName = forward(errors, Problem.values());
 
 		functionToDescription = forward(functionDescriptions, Function.values());
 		componentToDescription = new EnumMap<>(Component.class);
@@ -784,7 +717,7 @@ public enum Library
 		return nameToBlock.get(name);
 	}
 
-	public String getProblem(Class<? extends Problem> problem)
+	public String getProblem(Problem problem)
 	{
 		return problemToName.get(problem);
 	}
