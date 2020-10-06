@@ -1,0 +1,24 @@
+name: Build
+
+on: push
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Checkout repository files
+      uses: actions/checkout@v1
+    - name: Analyze package.json
+      run: npx npm-package-json-lint -c .github/workflows/configuration/npm.json .
+
+    - name: Analyze markdown spelling
+      run: npx cspell --config .github/workflows/configuration/cspell.json **/*.md
+
+    - name: Analyze markdown grammar
+      run: |
+        npx write-good --no-illusion README.md NOTICE.md
+        find Documentation -exec npx write-good --no-illusion {} +

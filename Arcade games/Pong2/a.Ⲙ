@@ -1,0 +1,60 @@
+control ()
+{
+    foreach a:
+    {
+        a.position = a.position + a.direction * readNumber(a.controlInput) * deltaTime
+    }
+}
+
+
+serve ()
+{
+    foreach a:
+    {
+        if a.readyToServe
+        {
+            angle = random(a.serveAngle)
+            length = random(a.serveLength)
+            a.velocity = xyz(cos(angle),sin(angle),a.depth) * length
+
+            a.readyToServe = ! a.readyToServe
+        }
+    }
+}
+
+respawn ()
+{
+    foreach a:
+    {
+        foreach b:
+        {
+            if a @ overlaps(b)
+            {
+                destroy(a)
+                create(b.prefab)
+
+                foreach c:
+                {
+                    if c @ b.boards
+                    {
+                        c.text = string(number(c.text) + a.worth)
+                    }
+                }
+            }
+        }
+    }
+}
+
+restart ()
+{
+    foreach a:
+    {
+        if number(a.text) > a.maximumScore
+        {
+            foreach b:
+            {
+                b.text = string(b.resetScore)
+            }
+        }
+    }
+}
