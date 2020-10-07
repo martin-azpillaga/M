@@ -9,13 +9,13 @@ repositories {
 }
 configurations {
 	mwe2 {
-		extendsFrom compile
+		extendsFrom implementation
 	}
 }
 dependencies {
-	compile platform('org.eclipse.xtext:xtext-dev-bom:2.22.0')
-	compile 'org.eclipse.xtext:org.eclipse.xtext:2.22.0'
-	compile 'org.eclipse.xtext:org.eclipse.xtext.ide:2.22.0'
+	implementation platform('org.eclipse.xtext:xtext-dev-bom:2.22.0')
+	implementation 'org.eclipse.xtext:org.eclipse.xtext:2.22.0'
+	implementation 'org.eclipse.xtext:org.eclipse.xtext.ide:2.22.0'
 	annotationProcessor 'com.github.bsideup.jabel:jabel-javac-plugin:0.2.0'
 	mwe2 'org.eclipse.emf:org.eclipse.emf.mwe2.launch'
 	mwe2 'org.eclipse.xtext:org.eclipse.xtext.common.types:2.22.0'
@@ -30,7 +30,7 @@ sourceSets {
 	}
 }
 mainClassName = 'm.main.Main'
-sourceCompatibility = '13'
+sourceCompatibility = '11'
 compileJava {
 	options.compilerArgs = [
 		'--release', '8'
@@ -48,11 +48,11 @@ compileJava.dependsOn(generateXtextLanguage)
 
 shadowJar {
 	from(project.convention.getPlugin(JavaPluginConvention).sourceSets.main.output)
-	configurations = [project.configurations.runtime]
+	configurations = [project.configurations.runtimeClasspath]
 	exclude('META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA', 'schema/*',
 		'.options', '.api_description', '*.profile', '*.html', 'about.*', 'about_files/*',
 		'plugin.xml', 'systembundle.properties', 'profile.list')
 	append('plugin.properties')
-	baseName = 'M'
+	archiveBaseName = 'M'
 	classifier = ''
 }
