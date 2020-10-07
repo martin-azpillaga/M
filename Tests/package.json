@@ -1,45 +1,24 @@
 {
 	"name": "m-editor",
-	"version": "0.2.0",
-	"main": "src-gen/frontend/electron-main.js",
 	"private": true,
 	"dependencies": {
-		"@theia/callhierarchy": "next",
-		"@theia/file-search": "next",
-		"@theia/git": "next",
-		"@theia/markers": "next",
-		"@theia/messages": "next",
-		"@theia/mini-browser": "next",
-		"@theia/navigator": "next",
-		"@theia/outline-view": "next",
-		"@theia/plugin-ext-vscode": "next",
-		"@theia/preferences": "next",
-		"@theia/preview": "next",
-		"@theia/search-in-workspace": "next",
-		"@theia/terminal": "next",
-		"@theia/electron": "next"
+		"@theia/callhierarchy": "1.6.0",
+		"@theia/file-search": "1.6.0",
+		"@theia/git": "1.6.0",
+		"@theia/markers": "1.6.0",
+		"@theia/messages": "1.6.0",
+		"@theia/mini-browser": "1.6.0",
+		"@theia/navigator": "1.6.0",
+		"@theia/outline-view": "1.6.0",
+		"@theia/plugin-ext-vscode": "1.6.0",
+		"@theia/preferences": "1.6.0",
+		"@theia/preview": "1.6.0",
+		"@theia/search-in-workspace": "1.6.0",
+		"@theia/terminal": "1.6.0"
 	},
 	"devDependencies": {
-		"@theia/cli": "next",
-		"chai-as-promised": "7.1.1",
+		"@theia/cli": "1.6.0",
 		"mocha": "7.1.2",
-		"puppeteer": "3.1.0",
-		"electron-builder": "22.7.0"
-	},
-	"build": {
-		"appId": "azpillaga.world.m-theia",
-		"productName": "m",
-		"linux": {
-			"target": "AppImage",
-			"executableName": "m"
-		},
-		"win": {
-			"target": [
-				"portable"
-			]
-		},
-		"extraFiles": [
-			"ls.jar"
-		]
+		"puppeteer": "3.1.0"
 	}
 }

@@ -1,8 +1,5 @@
 const puppeteer = require('puppeteer');
-const chai = require('chai');
 const rimraf = require('rimraf');
-
-chai.should();
 
 let browser;
 let context;
