@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.gson.Gson;
+
 import org.eclipse.lsp4j.Diagnostic;
 
 import m.generator.Engine;
@@ -111,37 +113,43 @@ public class Project
 
 	private void generateCode(Game game)
 	{
-		var path = Paths.get(root.replace("/c:/", "C:/").replace("/d:/", "D:/").replace("/e:/",  "E:/"), "Ⲙ.json");
+		var path = Paths.get(root, "Ⲙ.json");
 
 		if (new File(path.toString()).exists())
 		{
 			try
 			{
-				var configuration = Files.readAllLines(path);
-				for (var line : configuration)
-				{
-					for (var engine : Engine.values())
-					{
-						if (line.startsWith(engine.identifier))
-						{
-							var output = line.substring((engine.identifier+": ").length());
-							if (output.startsWith("./"))
-							{
-								output = output.replace(".", root);
-							}
-							generator.generate(game, engine, output);
-						}
-					}
-				}
-			}
-			catch (IOException e)
-			{
+				var gson = new Gson();
+				var json = new String(Files.readAllBytes(path));
+				var configuration = gson.fromJson(json, Configuration.class);
 
+				generate(Engine.UNITY, configuration.Unity);
+				generate(Engine.UNREAL, configuration.Unreal);
+				generate(Engine.GODOT, configuration.Godot);
 			}
+			catch (IOException e){}
 		}
 		else
 		{
 			generator.generate(game, Paths.get(root));
 		}
 	}
+
+	private void generate(Engine engine, String path)
+	{
+		if (path == null) return;
+
+		if (path.startsWith("."))
+		{
+			path = path.replace(".", root);
+		}
+		generator.generate(game, engine, path);
+	}
+}
+
+class Configuration
+{
+	public String Unity;
+	public String Unreal;
+	public String Godot;
 }
