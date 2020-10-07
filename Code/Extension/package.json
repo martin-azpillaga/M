@@ -65,6 +65,7 @@
 	},
 	"activationEvents": [
 		"onLanguage:m",
+		"workspaceContains:**/*.Ⲙ",
 		"onCommand:m.restart"
 	],
 	"main": "./main.js",
