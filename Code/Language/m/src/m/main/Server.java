@@ -27,6 +27,7 @@ import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.HoverParams;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.InitializedParams;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.ServerCapabilities;
@@ -96,7 +97,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 	}
 
 	@Override
-	public void initialized()
+	public void initialized(InitializedParams params)
 	{
 		publishDiagnostics();
 	}
