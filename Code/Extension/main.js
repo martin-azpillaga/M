@@ -1,23 +1,14 @@
 const {
 	window,
 	commands,
-	ViewColumn,
-	Uri
+	workspace
 } = require("vscode");
-const {
-	lookpath
-} = require("lookpath");
 
 var {
 	LanguageClient
 } = require("vscode-languageclient");
-var {
-	workspace
-} = require('vscode');
 
-var path = require('path');
-
-const spawn = require('child_process').spawn;
+const { spawn, spawnSync } = require('child_process');
 
 var client;
 
@@ -28,17 +19,28 @@ exports.activate = async function(context) {
 			if (client) {
 				client.stop();
 			}
-			start();
+			connect(context);
 		})
 	);
 
-	var java = await lookpath("java");
-	if (!java) {
+	if (!java8Available()) {
 		var selection = window.showInformationMessage("M requires a Java 8+ runtime to execute. Please install and add Java 8+ to the path", "Install Java 8+");
 		selection.then(x => open("https://jdk.java.net/14/"));
 		return;
 	}
 
+	connect(context);
+}
+
+exports.deactivate = function() {
+	if (!client) {
+		return undefined;
+	}
+	client.stop();
+}
+
+function connect(context)
+{
 	var serverOptions = {
 		run: {
 			command: "java",
@@ -60,11 +62,26 @@ exports.activate = async function(context) {
 
 	client.start();
 }
-exports.deactivate = function() {
-	if (!client) {
-		return undefined;
+
+function java8Available()
+{
+	var childProcess = spawnSync("java", ["-version"]);
+	if (childProcess.error)
+	{
+		return false;
 	}
-	client.stop();
+
+	var output = childProcess.stderr.toString();
+	var version = output.split("\n")[0].split(" ")[2].replace(/"/g,"").split(".").map(x=>parseInt(x));
+
+	if (version[0] == 1)
+	{
+		return version[1] >= 8;
+	}
+	else
+	{
+		return version[0] >= 9;
+	}
 }
 
 function open(url)
