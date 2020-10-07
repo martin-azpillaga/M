@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+    <title>reveal-md</title>
+    <link rel="shortcut icon" href="./favicon.ico"/>
+    <link rel="stylesheet" href="./dist/reveal.css" />
+    <link rel="stylesheet" href="./dist/theme/black.css" id="theme" />
+    <link rel="stylesheet" href="./css/highlight/zenburn.css" />
+
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides"><section  data-markdown><script type="text/template"># Presentation</script></section><section  data-markdown><script type="text/template">Hi, I'm Martin.
+And I'm the creator of M.
+A new programming language for game developers.</script></section><section  data-markdown><script type="text/template">In this video, I will give an overview of the key features of M.
+For detailed information, visit the link to the documentation at the end of the video.</script></section><section  data-markdown><script type="text/template">Keep in mind, that the project is still in active development.
+Not all the features presented here are fully implemented yet.</script></section><section  data-markdown><script type="text/template">However, an early prototype of M is available for the public.
+And I will be using that throughout this demo.</script></section><section  data-markdown><script type="text/template">Ok, let'ss do this.</script></section><section  data-markdown><script type="text/template">## M is a tool</script></section><section  data-markdown><script type="text/template">One of the design goals of M is to be a tool that you can integrate in your workflow.
+It's not aiming to replace your development stack but rather complement it.</script></section><section  data-markdown><script type="text/template">Let me show you what I mean.</script></section><section  data-markdown><script type="text/template">### Editor of your choice</script></section><section  data-markdown><script type="text/template">M is a free and open source language server.
+An independendent application that communicates with code editors via the LSP.
+The Language Server provides rich development experience.</script></section><section  data-markdown><script type="text/template">It knows the answers to code editor requests like:
+Could you please complete this word?
+veloc  -> velocity
+or Is this file gramatically correct ?
+file icon -> No, error in line 10.</script></section><section  data-markdown><script type="text/template">In practice, you can develop a project in M using the editor of your choice.</script></section><section  data-markdown><script type="text/template">In this demo, I will use Microsoft's Visual Studio Code.</script></section><section  data-markdown><script type="text/template">I can search for the M language server extension in the marketplace, install it.
+And that's it, I'm ready to start developing!</script></section><section  data-markdown><script type="text/template">### Engine of your choice</script></section><section  data-markdown><script type="text/template">This is a simple project written in M.
+It consists of a single .m file that holds all the code.</script></section><section  data-markdown><script type="text/template">If you are a C or Java developer, you might find the syntax familiar.
+However, the execution semantics are quite different.</script></section><section  data-markdown><script type="text/template">Maybe you've spotted that there is a syntax error in this file.
+VSCode knows about it too, I missed a closing bracket.</script></section><section  data-markdown><script type="text/template">Let's fix it.
+Now that our project is free of errors, M has produced and output folder for us.</script></section><section  data-markdown><script type="text/template">Inside, you won't find an executable file.
+Instead, M generates code that game engines can understand.</script></section><section  data-markdown><script type="text/template">That's right.
+M is meant to be used Alongside your game engine, be it Unity, Unreal or Godot.</script></section><section  data-markdown><script type="text/template">M has generated readable C# Unity classes for every component and system.
+Similarly, M has generated C++ files for Unreal project.
+And GDScript scripts if you plan to work with Godot.
+All these files will be regenerated whenever we modify our .m source files.</script></section><section  data-markdown><script type="text/template">The idea is to use M to write the code and the game engine as the level editor.</script></section><section  data-markdown><script type="text/template">Let me open the Unity project. Pong demo ??</script></section><section  data-markdown><script type="text/template">Show the system debugger and entity debugger.</script></section><section  data-markdown><script type="text/template">M doesn't generate executable games, but game projects that you can edit using
+a game engine.</script></section><section  data-markdown><script type="text/template">You can inspect the generated code, tweak design values and customize the look
+with art pieces made in your favorite content creation program.</script></section><section  data-markdown><script type="text/template">## Properties</script></section><section  data-markdown><script type="text/template">But then, why use M in the first place?
+Why not develop the code in the engine's language?</script></section><section  data-markdown><script type="text/template">As every good tool, M solves one problem and one problem well.
+It is only when you combine it with other great tools that you can create
+something amazing.</script></section><section  data-markdown><script type="text/template">So what is the problem that M is trying to solve?
+To develop gameplay programming code in a simple, maintainable and performant way.
+Code that's easy to understand, gives the game designers maximal flexibility
+yet can run fast, using the resources of modern computers efficiently.</script></section><section  data-markdown><script type="text/template">### M is simple</script></section><section  data-markdown><script type="text/template">Which means it's easy to write and Specially easy to read.
+Being focused on the game development domain allows M to have a concise syntax.</script></section><section  data-markdown><script type="text/template">Its standard library defines components that are common in games like
+velocity, mass or materials.
+So you can focus on the components that are unique to your game.</script></section><section  data-markdown><script type="text/template">Defining new components is easy.
+Use them in a system and the type inference will deduce it's type.
+No need for class declarations or type annotations.
+M's powerful type inference will deduce all the types for you
+and show an error when something does not quite fit.</script></section><section  data-markdown><script type="text/template">### M is flexible</script></section><section  data-markdown><script type="text/template">M enforces data oriented design natively.</script></section><section  data-markdown><script type="text/template">In particular, it follows the Entity Component System paradigm to decouple
+the game into independent systems describing the logic and components
+that hold all the data.</script></section><section  data-markdown><script type="text/template">I can remove this system and I don't have to worry about affecting other parts.
+Which makes debugging code easier.</script></section><section  data-markdown><script type="text/template">More importantly, M improves the flexibility of game designers.
+M has no literal values.
+All the data is stored in components,
+which means that designers can tweak all the parameters from within the game editor.</script></section><section  data-markdown><script type="text/template">In fact, programming and designing become independent jobs,
+providing an important boost in team productivity.</script></section><section  data-markdown><script type="text/template">### M is powerful</script></section><section  data-markdown><script type="text/template">Don't get fooled by the simplicity.</script></section><section  data-markdown><script type="text/template">M can generate cache friendly and multithread ready code.</script></section><section  data-markdown><script type="text/template">Take a look.
+I can toggle this switch and now all the code is running in parallel across cores.</script></section><section  data-markdown><script type="text/template">Pong is a classic example that every game developer can understand,
+but M is capable of much more.
+You can code 3D games with animations, advanced physics, networking, AI...
+covering all areas of gameplay programming.</script></section><section  data-markdown><script type="text/template">And remember, if you find something missing, don't worry.
+You can always use the engine's language to solve it and use both
+approaches in collaboration.</script></section><section  data-markdown><script type="text/template">## Call to action</script></section><section  data-markdown><script type="text/template">That's it for this video.</script></section><section  data-markdown><script type="text/template">From here, I leave you with two options.
+If you are a hands on person, go to minim.tools/M and follow the Starter guide.
+If you are more interested in the theoretical and technical aspects,
+including some experimental features not mentioned in this video,
+I recommend you to check out the Developer Guide at minim.tools/M.</script></section><section  data-markdown><script type="text/template">Feel free to contact me at martin@minim.tools.</script></section><section  data-markdown><script type="text/template">Thanks for watching.</script></section><section  data-markdown><script type="text/template">## Description</script></section><section  data-markdown><script type="text/template">It's a research heavy project.
+I have rewritten the whole codebase at least three times, probably more.</script></section><section  data-markdown><script type="text/template">## Links</script></section><section  data-markdown><script type="text/template">[Build](https://github.com/martin-azpillaga/M/releases/latest/download/m.vsix)</script></section><section  data-markdown><script type="text/template">[Video](https://minim.tools/M#presentation-video)</script></section><section  data-markdown><script type="text/template">Email
+martin@minim.tools</script></section><section  data-markdown><script type="text/template">[Website](https://minim.tools/M)</script></section><section  data-markdown><script type="text/template">## Plan
+</script></section></div>
+    </div>
+
+    <script src="./dist/reveal.js"></script>
+
+    <script src="./plugin/markdown/markdown.js"></script>
+    <script src="./plugin/highlight/highlight.js"></script>
+    <script src="./plugin/zoom/zoom.js"></script>
+    <script src="./plugin/notes/notes.js"></script>
+    <script src="./plugin/math/math.js"></script>
+    <script>
+      function extend() {
+        var target = {};
+        for (var i = 0; i < arguments.length; i++) {
+          var source = arguments[i];
+          for (var key in source) {
+            if (source.hasOwnProperty(key)) {
+              target[key] = source[key];
+            }
+          }
+        }
+        return target;
+      }
+
+      // default options to init reveal.js
+      var defaultOptions = {
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+        transition: 'default', // none/fade/slide/convex/concave/zoom
+        plugins: [
+          RevealMarkdown,
+          RevealHighlight,
+          RevealZoom,
+          RevealNotes,
+          RevealMath
+        ]
+      };
+
+      // options from URL query string
+      var queryOptions = Reveal().getQueryHash() || {};
+
+      var options = extend(defaultOptions, {}, queryOptions);
+    </script>
+
+
+    <script>
+      Reveal.initialize(options);
+    </script>
+  </body>
+</html>
