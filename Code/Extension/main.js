@@ -17,6 +17,8 @@ var {
 
 var path = require('path');
 
+const spawn = require('child_process').spawn;
+
 var client;
 
 exports.activate = async function(context) {
@@ -33,7 +35,7 @@ exports.activate = async function(context) {
 	var java = await lookpath("java");
 	if (!java) {
 		var selection = window.showInformationMessage("M requires a Java 8+ runtime to execute. Please install and add Java 8+ to the path", "Install Java 8+");
-		selection.then(x => require("openurl").open("https://jdk.java.net/14/"));
+		selection.then(x => open("https://jdk.java.net/14/"));
 		return;
 	}
 
@@ -63,4 +65,17 @@ exports.deactivate = function() {
 		return undefined;
 	}
 	client.stop();
+}
+
+function open(url)
+{
+	var command = "";
+
+	switch (process.platform)
+	{
+		case "darwin": command = "open";
+		case "win32": command = "explorer.exe";
+		case "linux": command = "xdg-open";
+	}
+	spawn(command, [url]);
 }

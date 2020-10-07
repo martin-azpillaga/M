@@ -7,11 +7,6 @@ lookpath@^1.1.0:
   resolved "https://registry.yarnpkg.com/lookpath/-/lookpath-1.1.0.tgz#932d68371a2f0b4a5644f03d6a2b4728edba96d2"
   integrity sha512-B9NM7XpVfkyWqfOBI/UW0kVhGw7pJztsduch+1wkbYDi90mYK6/InFul3lG0hYko/VEcVMARVBJ5daFRc5aKCw==
 
-openurl@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/openurl/-/openurl-1.1.1.tgz#3875b4b0ef7a52c156f0db41d4609dbb0f94b387"
-  integrity sha1-OHW0sO96UsFW8NtB1GCduw+Us4c=
-
 semver@^6.3.0:
   version "6.3.0"
   resolved "https://registry.yarnpkg.com/semver/-/semver-6.3.0.tgz#ee0a64c8af5e8ceea67687b133761e1becbd1d3d"

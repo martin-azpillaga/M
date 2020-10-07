@@ -70,7 +70,6 @@
 	"main": "./main.js",
 	"dependencies": {
 		"lookpath": "^1.1.0",
-		"openurl": "^1.1.1",
 		"vscode-languageclient": "6.1.3"
 	}
 }
