@@ -2,39 +2,26 @@ package m.main;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import org.eclipse.lsp4j.launch.LSPLauncher;
 
 public class Main
 {
-	public static void main(String[] arguments)
+	public static void main(String[] arguments) throws IOException
 	{
-		var languageServer = new LanguageServer();
-		
+		var server = new Server();
+
 		if (arguments.length == 0)
 		{
-			var launcher = LSPLauncher.createServerLauncher(languageServer, System.in, System.out);
-			
-			var client = launcher.getRemoteProxy();
-			languageServer.connect(client);
-			
-			launcher.startListening();
+			server.connect(System.in, System.out);
 		}
 		else
 		{
 			var socketNumber = Integer.parseInt(arguments[0]);
+
 			try (var socket = new ServerSocket(socketNumber))
 			{
 				var clientSocket = socket.accept();
-				var launcher = LSPLauncher.createServerLauncher(languageServer, clientSocket.getInputStream(), clientSocket.getOutputStream());
-				
-				var client = launcher.getRemoteProxy();
-				languageServer.connect(client);
-				
-				launcher.startListening();
-			}
-			catch (IOException e)
-			{
-				e.printStackTrace();
+
+				server.connect(clientSocket.getInputStream(), clientSocket.getOutputStream());
 			}
 		}
 	}

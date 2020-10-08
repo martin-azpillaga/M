@@ -4,32 +4,32 @@ import static m.library.types.AtomicType.*;
 import m.library.types.AtomicType;
 import m.library.types.Type;
 
-public enum Component implements Symbol{
-	
+public enum Component implements Symbol
+{
 	POSITION(NUMBER3),
 	ROTATION(QUATERNION),
 	SCALE(NUMBER3),
 	PARENT(ENTITY),
-	
+
 	MASS(NUMBER),
-	INERTIA(NUMBER3),	
+	INERTIA(NUMBER3),
 	VELOCITY(NUMBER3),
 	ANGULAR_VELOCITY(NUMBER3),
 	RESTITUTION(NUMBER),
 	FRICTION(NUMBER),
 	KINEMATIC(PROPOSITION),
-	
+
 	NO_COLLISION_RESPONSE(PROPOSITION),
 	BOX_CENTER(NUMBER3),
 	SPHERE_CENTER(NUMBER3),
 	RADIUS(NUMBER),
 	EXTENTS(NUMBER3),
-	
-	
+
+
 	MESH(AtomicType.MESH),
 	MATERIAL(AtomicType.MATERIAL),
 	SHADOW_RECEIVER(PROPOSITION),
-	
+
 	NEAR(NUMBER),
 	FAR(NUMBER),
 	FOV(NUMBER),
@@ -39,7 +39,7 @@ public enum Component implements Symbol{
 	RENDER_TEXTURE(TEXTURE),
 	DISPLAY(NUMBER),
 	CULLING(NUMBER),
-	
+
 	ANCHOR_MIN(NUMBER2),
 	ANCHOR_MAX(NUMBER2),
 	TEXT(STRING),
@@ -52,28 +52,30 @@ public enum Component implements Symbol{
 	TOGGLED(PROPOSITION),
 	SLIDER_VALUE(NUMBER),
 	TEXTFIELD_VALUE(STRING),
-	
+
 	EMISSION(COLOR),
 	SPOT_ANGLE(NUMBER),
 	RANGE(NUMBER),
 	INTENSITY(NUMBER),
 	INDIRECT_MULTIPLIER(NUMBER),
 	COOKIE(TEXTURE),
-	
-	
+
+
 	AUDIOCLIP(AtomicType.AUDIOCLIP),
 	VOLUME(NUMBER),
 	PITCH(NUMBER),
 	LOOP(PROPOSITION)
 	;
-	
+
 	Type type;
-	
-	Component (Type type) {
+
+	Component (Type type)
+	{
 		this.type = type;
 	}
-	
-	public Type getType() {
+
+	public Type getType()
+	{
 		return type;
 	}
 }

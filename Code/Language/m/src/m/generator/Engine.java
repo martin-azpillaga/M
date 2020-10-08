@@ -2,17 +2,12 @@ package m.generator;
 
 public enum Engine
 {
-	Unity("Unity"), Unreal("Unreal"), Godot("Godot");
+	UNITY("Unity"), UNREAL("Unreal"), GODOT("Godot");
 
-	String name;
+	public final String identifier;
 
 	Engine(String name)
 	{
-		this.name = name;
-	}
-
-	public String getName()
-	{
-		return name;
+		this.identifier = name;
 	}
 }

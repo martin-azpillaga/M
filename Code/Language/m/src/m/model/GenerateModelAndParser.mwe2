@@ -1,0 +1,38 @@
+module m.Workflow
+
+import org.eclipse.xtext.xtext.generator.*
+import org.eclipse.xtext.xtext.generator.model.project.*
+
+var rootPath = ".."
+
+Workflow
+{
+	component = XtextGenerator
+	{
+		configuration = DefaultGeneratorModule
+		{
+			project = StandardProjectConfig
+			{
+				baseName = "m"
+				rootPath = rootPath
+			}
+			code = CodeConfig
+			{
+				encoding = "UTF-8"
+				lineDelimiter = "\n"
+				preferXtendStubs = false
+			}
+		}
+		language = XtextGeneratorLanguage
+		{
+			name = "m.M"
+			grammarUri = "m/src/m/model/Grammar.xtext"
+			fileExtensions = "m"
+
+			fragment = grammarAccess.GrammarAccessFragment2 {}
+			fragment = ecore.EMFGeneratorFragment2 {}
+			fragment = serializer.SerializerFragment2 { generateStub = false }
+			fragment = parser.antlr.XtextAntlrGeneratorFragment2 {}
+		}
+	}
+}

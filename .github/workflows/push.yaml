@@ -1,3 +1,4 @@
+name: Build
 on: push
 jobs:
   format:
@@ -54,10 +55,10 @@ jobs:
           npx npm-groovy-lint -i "**/node_modules/**/*"
       - name: Lint Json
         run: |
-          find . -not -wholename "*node_modules*" -name "*.json" -not -name "*local-storage.json" -exec sh -c 'npx jsonlint {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
+          (find . -not -wholename "*node_modules*" -name "*.json" -not -name "*local-storage.json" -exec sh -c 'npx jsonlint {} > current && cmp current {}' \; | grep differ) || exit 0
       - name: Lint Javascript
         run: |
-          find . -not -wholename "*node_modules*" -name "*.js" -exec sh -c 'npx js-beautify {} > current && cmp current {}' \; | grep differ && exit 1 || exit 0
+          (find . -not -wholename "*node_modules*" -name "*.js" -exec sh -c 'npx js-beautify {} > current && cmp current {}' \; | grep differ) || exit 0
       - name: Lint java
         run: |
           java -jar checkstyle-8.34-all.jar -c /sun_checks.xml Code/Language/m/src || exit 0
@@ -83,7 +84,6 @@ jobs:
       - name: Build language server
         working-directory: Code/Language
         run: |
-          mkdir m.ide m.ui
           gradle shadowJar
       - name: Check Java and Javascript
         env:
@@ -98,12 +98,19 @@ jobs:
           sonar-scanner \
           -Dsonar.organization=martin-azpillaga \
           -Dsonar.projectKey=martin-azpillaga_M \
-          -Dsonar.sources=Code/Editor,Code/Language/m/src,Code/Extension \
+          -Dsonar.sources=Tests,Code/Language/m/src,Code/Extension \
           -Dsonar.java.binaries=Code/Language/build/classes \
+          -Dsonar.java.libraries=$HOME/.gradle/caches/modules-2/files-2.1 \
           -Dsonar.host.url=https://sonarcloud.io \
           -Dsonar.login=c1285d7b6c459b50e7eee08102a94f4b68bd70f9
+      - name: Upload language server to github artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ls
+          path: Code/Language/build/libs/M.jar
   content:
     runs-on: ubuntu-latest
+    needs: structure
     timeout-minutes: 15
     steps:
       - name: Download repository
@@ -132,19 +139,23 @@ jobs:
           reveal-md Documentation/slides.md --separator "\n\n" --static presentation
           sudo rm -rf Documentation/
           git config --global user.name "Github actions"
-          git config --global user.email "media@azpillaga.world"  
+          git config --global user.email "media@azpillaga.world"
           git add .
           git commit -m "Deploy vuepress site using Github actions"
           git push
           git reset --hard
           git checkout -
-      - name: Install java 13
-        uses: actions/setup-java@v1
+  reliability:
+    needs: content
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - name: Download repository
+        uses: actions/checkout@v2
+      - name: Download language server
+        uses: actions/download-artifact@v2
         with:
-          java-version: '13'
-      - name: Install python 2.7
-        run: |
-          sudo apt-get install python2.7
+          name: ls
       - name: Install node 10
         uses: actions/setup-node@v1
         with:
@@ -158,45 +169,17 @@ jobs:
         run: |
           npm install -g yarn
           sudo apt-get install libx11-dev libxkbfile-dev
-      - name: Build language server
-        working-directory: Code/Language
-        run: |
-          mkdir m.ide m.ui
-          gradle shadowJar
-          cp build/libs/Language-ls-ls.jar ../Editor/ls.jar
       - name: Build tests
         run: |
-          pandoc README.md -t json | node Automation/reader.js > Code/Editor/test.js
-          cp Automation/mobot.js Code/Editor/mobot.js
-      - name: Upload Code/Editor folder to github artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: editor
-          path: Code/Editor
-  reliability:
-    needs: content
-    runs-on: ubuntu-latest
-    timeout-minutes: 100
-    steps:
-      - name: Download repository
-        uses: actions/checkout@v2
-      - name: Download editor folder
-        uses: actions/download-artifact@v2
-        with:
-          name: editor
-      - name: Install node 10
-        uses: actions/setup-node@v1
-        with:
-          node-version: '10.x'
-      - name: Install yarn and libx11
-        run: |
-          npm install -g yarn
-          sudo apt install libx11-dev libxkbfile-dev
+          pandoc README.md -t json | node Tests/generateTests.js > Tests/test.js
       - name: Build ide for browser
+        working-directory: Tests
         run: |
+          cp ../M.jar ls.jar
           yarn
           yarn theia build
       - name: Run tests
+        working-directory: Tests
         run: |
           mkdir workspace
           yarn theia start --app-target browser workspace &
@@ -209,13 +192,13 @@ jobs:
     steps:
       - name: Download repository
         uses: actions/checkout@v2
-      - name: Download editor folder
+      - name: Download language server
         uses: actions/download-artifact@v2
         with:
-          name: editor
+          name: ls
       - name: Move language server
         run: |
-          mv ls.jar Code/Extension/ls.jar
+          mv M.jar Code/Extension/ls.jar
       - name: Install vsce
         run: |
           sudo npm install -g vsce
@@ -226,10 +209,6 @@ jobs:
           cp ../../README.md README.md
           sudo npm install
           vsce package -o m.vsix
-      - name: Publish VSCode extension to marketplace
-        working-directory: Code/Extension
-        run: |
-          vsce publish || exit 0
       - name: Upload VSCode extension to github artifacts
         uses: actions/upload-artifact@v2
         with:

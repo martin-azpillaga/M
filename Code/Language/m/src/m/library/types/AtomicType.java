@@ -9,14 +9,14 @@ public enum AtomicType implements Type
 	NUMBER3,
 	QUATERNION,
 	UNIT,
-	
+
 	COMPONENT,
 	COLLIDER,
 	RECT,
-	
+
 	COLOR,
 	TEXTURE,
-	
+
 	INPUT,
 	MESH,
 	MATERIAL,
@@ -25,7 +25,8 @@ public enum AtomicType implements Type
 	IMAGE,
 	AUDIOCLIP,
 	ANIMATOR,
-	
+
 	ENTITY,
-	ENTITY_LIST;
+	ENTITY_LIST
+	;
 }
