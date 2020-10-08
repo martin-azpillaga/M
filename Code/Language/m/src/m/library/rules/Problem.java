@@ -1,6 +1,6 @@
-package m.library.problems;
+package m.library.rules;
 
-import static m.library.problems.Problem.Kind.*;
+import static m.library.rules.Problem.Kind.*;
 
 public enum Problem
 {

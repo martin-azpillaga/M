@@ -10,10 +10,13 @@ import java.util.Set;
 
 import m.model.Cell;
 import m.model.Function;
+import m.model.UserFunction;
+import m.library.types.AtomicType;
+import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.validation.local.LocalValidator;
 import m.validation.local.ExpressionNode;
-import m.validation.problems.Problem;
+import m.validation.Problem;
 
 public class GlobalValidator
 {
@@ -41,7 +44,7 @@ public class GlobalValidator
 
 		invalidateObsoleteMemory(modifiedFile);
 
-		validate(modifiedData.nodes, modifiedFile);
+		validate(modifiedData.expressionGraph, modifiedFile);
 
 		return collectData();
 	}
@@ -236,12 +239,12 @@ public class GlobalValidator
 	{
 		var data = new GlobalData();
 
-		data.diagnostics = new HashMap<String,List<Problem>>(localDiagnostics);
+		data.problems = new HashMap<String,List<Problem>>(localDiagnostics);
 		for (var functionMap : localFunctions.values())
 		{
 			for (var function : functionMap.values())
 			{
-				data.functions.add(function);
+				data.game.functions.add(new UserFunction(function, new FunctionType(new AtomicType[]{}, AtomicType.UNIT)));
 			}
 		}
 
@@ -263,7 +266,7 @@ public class GlobalValidator
 			}
 			else if (types.size() == 1)
 			{
-				data.components.put(component, types.iterator().next());
+				data.game.components.put(component, types.iterator().next());
 			}
 			else
 			{

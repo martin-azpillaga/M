@@ -5,10 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import m.library.problems.BindingReason;
+import m.library.rules.BindingReason;
 import m.model.Expression;
 import m.model.Function;
-import m.validation.problems.Problem;
+import m.validation.Problem;
 
 public class ExpressionGraph
 {

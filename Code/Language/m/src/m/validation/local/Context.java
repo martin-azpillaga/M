@@ -1,8 +1,10 @@
 package m.validation.local;
 
-import static m.library.problems.BindingReason.*;
-import static m.library.problems.TypingReason.*;
+import static m.library.rules.BindingReason.*;
+import static m.library.rules.Problem.*;
+import static m.library.rules.TypingReason.*;
 import static m.model.ModelPackage.Literals.*;
+import static m.validation.Problem.Severity.*;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -19,10 +21,7 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 import m.library.Library;
 import m.library.types.*;
 import m.model.*;
-import m.validation.problems.Problem;
-import m.validation.problems.errors.RedefinedSymbol;
-import m.validation.problems.errors.UndefinedSymbol;
-import m.validation.problems.warnings.UnusedValue;
+import m.validation.Problem;
 
 public class Context
 {
@@ -59,11 +58,11 @@ public class Context
 
 		if (library.getValue(name) != null || library.getComponent(name) != null || library.getFunction(name) != null)
 		{
-			problems.add(new RedefinedSymbol(value, VALUE__NAME));
+			problems.add(new Problem(value, VALUE__NAME, ERROR, library.getProblem(REDEFINED_SYMBOL)));
 		}
 		else if (userComponents.containsKey(name) || userFunctions.containsKey(name))
 		{
-			problems.add(new RedefinedSymbol(value, VALUE__NAME));
+			problems.add(new Problem(value, VALUE__NAME, ERROR, library.getProblem(REDEFINED_SYMBOL)));
 		}
 		else
 		{
@@ -87,11 +86,11 @@ public class Context
 
 		if (library.getValue(name) != null || library.getFunction(name) != null)
 		{
-			problems.add(new RedefinedSymbol(cell, CELL__COMPONENT));
+			problems.add(new Problem(cell, CELL__COMPONENT, ERROR, library.getProblem(REDEFINED_SYMBOL)));
 		}
 		else if (userFunctions.containsKey(name))
 		{
-			problems.add(new RedefinedSymbol(cell, CELL__COMPONENT));
+			problems.add(new Problem(cell, CELL__COMPONENT, ERROR, library.getProblem(REDEFINED_SYMBOL)));
 		}
 		else if (!userComponents.containsKey(name) && library.getComponent(name) == null)
 		{
@@ -105,11 +104,11 @@ public class Context
 
 		if (library.getValue(name) != null || library.getComponent(name) != null || library.getFunction(name) != null)
 		{
-			problems.add(new RedefinedSymbol(function, FUNCTION__NAME));
+			problems.add(new Problem(function, FUNCTION__NAME, ERROR, library.getProblem(REDEFINED_SYMBOL)));
 		}
 		else if (userComponents.containsKey(name) || userFunctions.containsKey(name))
 		{
-			problems.add(new RedefinedSymbol(function, FUNCTION__NAME));
+			problems.add(new Problem(function, FUNCTION__NAME, ERROR, library.getProblem(REDEFINED_SYMBOL)));
 		}
 		else
 		{
@@ -135,7 +134,7 @@ public class Context
 		}
 		else
 		{
-			problems.add(new UndefinedSymbol(value, VALUE__NAME));
+			problems.add(new Problem(value, VALUE__NAME, ERROR, library.getProblem(UNDEFINED_SYMBOL)));
 		}
 	}
 
@@ -170,7 +169,7 @@ public class Context
 		}
 		else
 		{
-			problems.add(new UndefinedSymbol(source, feature));
+			problems.add(new Problem(source, feature, ERROR, library.getProblem(UNDEFINED_SYMBOL)));
 		}
 	}
 
@@ -231,7 +230,7 @@ public class Context
 			}
 			else
 			{
-				problems.add(new UndefinedSymbol(source, feature));
+				problems.add(new Problem(source, feature, ERROR, library.getProblem(UNDEFINED_SYMBOL)));
 			}
 		}
 		else
@@ -250,12 +249,12 @@ public class Context
 				}
 				else
 				{
-					problems.add(new UndefinedSymbol(source, feature));
+					problems.add(new Problem(source, feature, ERROR, library.getProblem(UNDEFINED_SYMBOL)));
 				}
 			}
 			else
 			{
-				problems.add(new UndefinedSymbol(source, feature));
+				problems.add(new Problem(source, feature, ERROR, library.getProblem(UNDEFINED_SYMBOL)));
 			}
 		}
 	}
@@ -272,7 +271,7 @@ public class Context
 		{
 			if (!popped.containsKey(entry.getKey()) && !accessedValues.contains(entry.getValue()))
 			{
-				problems.add(new UnusedValue(entry.getValue()));
+				problems.add(new Problem(entry.getValue(), VALUE__NAME, WARNING, library.getProblem(UNUSED_VALUE)));
 			}
 		}
 		userVariables = popped;

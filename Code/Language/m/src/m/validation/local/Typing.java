@@ -1,6 +1,6 @@
 package m.validation.local;
 
-import m.library.problems.TypingReason;
+import m.library.rules.TypingReason;
 import m.library.symbols.Symbol;
 import m.library.types.Type;
 

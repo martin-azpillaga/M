@@ -1,4 +1,4 @@
-package m.library.problems;
+package m.library.rules;
 
 public enum TypingReason
 {

@@ -1,19 +1,14 @@
 package m.validation.local;
 
+import static m.library.rules.Problem.*;
 import static m.model.ModelPackage.Literals.APPLICATION__NAME;
 import static m.model.ModelPackage.Literals.BINARY__OPERATOR;
 import static m.model.ModelPackage.Literals.BINDING_BLOCK__NAME;
 import static m.model.ModelPackage.Literals.BLOCK__NAME;
 import static m.model.ModelPackage.Literals.UNARY__OPERATOR;
 
-import java.io.StringReader;
-
-import com.google.inject.Inject;
-
 import org.eclipse.xtext.EcoreUtil2;
-import org.eclipse.xtext.parser.IParser;
 
-import m.MStandaloneSetup;
 import m.library.Library;
 import m.model.Application;
 import m.model.Assignment;
@@ -25,25 +20,26 @@ import m.model.Delegation;
 import m.model.Expression;
 import m.model.File;
 import m.model.Function;
+import m.model.Parser;
 import m.model.Statement;
 import m.model.Unary;
 import m.model.Value;
-import m.validation.problems.errors.SyntaxError;
+import m.validation.Problem;
+import m.validation.Problem.Severity;
 
 public class LocalValidator
 {
-	@Inject IParser parser;
+	Parser parser;
 	Context context;
 
 	public LocalValidator()
 	{
-		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
-		injector.injectMembers(this);
+		parser = new Parser();
 	}
 
 	public LocalData validate(String text)
 	{
-		var parseResult = parser.parse(new StringReader(text));
+		var parseResult = parser.parse(text);
 		var file = (File) parseResult.getRootASTElement();
 
 		LocalData result;
@@ -61,7 +57,7 @@ public class LocalValidator
 
 		for (var problem : parseResult.getSyntaxErrors())
 		{
-			result.diagnostics.add(new SyntaxError(problem));
+			result.diagnostics.add(new Problem(problem, Severity.ERROR, Library.ENGLISH.getProblem(SYNTAX_ERROR)));
 		}
 
 		return result;

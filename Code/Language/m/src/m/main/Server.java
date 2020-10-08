@@ -6,8 +6,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.lsp4j.CompletionItem;
@@ -90,7 +90,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		{
 			var uri = folder.getUri();
 			var path = decode(uri);
-			projects.add(new Project(path));
+			projects.add(new Project(path, diagnostics->publishDiagnostics(diagnostics)));
 		}
 
 		return CompletableFuture.supplyAsync(() -> new InitializeResult(capabilities));
@@ -99,7 +99,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 	@Override
 	public void initialized(InitializedParams params)
 	{
-		publishDiagnostics();
+
 	}
 
 	@Override
@@ -124,7 +124,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		{
 			var uri = added.getUri();
 			var path = decode(uri);
-			projects.add(new Project(path));
+			projects.add(new Project(path, diagnostics -> publishDiagnostics(diagnostics)));
 		}
 		for (var removed : params.getEvent().getRemoved())
 		{
@@ -142,7 +142,6 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 				}
 			}
 		}
-		publishDiagnostics();
 	}
 
 	@Override
@@ -174,7 +173,6 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 				}
 			}
 		}
-		publishDiagnostics();
 	}
 
 
@@ -212,18 +210,10 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		{
 			project.fileChanged(path, text);
 		}
-		publishDiagnostics();
 	}
 
-	private void publishDiagnostics()
+	private void publishDiagnostics(Map<String,ArrayList<Diagnostic>> diagnostics)
 	{
-		var diagnostics = new HashMap<String,List<Diagnostic>>();
-
-		for (var project : projects)
-		{
-			diagnostics.putAll(project.getDiagnostics());
-		}
-
 		for (var entry : diagnostics.entrySet())
 		{
 			var uri = encode(entry.getKey());

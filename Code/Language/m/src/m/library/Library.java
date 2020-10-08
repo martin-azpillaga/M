@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import m.library.rules.BindingReason;
+import m.library.rules.Problem;
+import m.library.rules.TypingReason;
 import m.library.symbols.Block;
 import m.library.symbols.Component;
 import m.library.symbols.Function;
@@ -12,9 +15,6 @@ import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.library.types.TypeVariable;
-import m.library.problems.Problem;
-import m.library.problems.TypingReason;
-import m.library.problems.BindingReason;
 
 public enum Library
 {

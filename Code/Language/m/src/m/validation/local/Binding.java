@@ -1,6 +1,6 @@
 package m.validation.local;
 
-import m.library.problems.BindingReason;
+import m.library.rules.BindingReason;
 
 public class Binding
 {
