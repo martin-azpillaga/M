@@ -1,4 +1,6 @@
-package m.validation.local.rules;
+package m.validation.local;
+
+import m.library.problems.BindingReason;
 
 public class Binding
 {
@@ -9,14 +11,5 @@ public class Binding
 	{
 		this.node = node;
 		this.reason = reason;
-	}
-
-	public enum BindingReason
-	{
-		SAME_COMPONENT,
-		SAME_VARIABLE,
-		PARAMETER_ARGUMENT,
-		RESULT_RETURN,
-		POLYMORPHISM
 	}
 }

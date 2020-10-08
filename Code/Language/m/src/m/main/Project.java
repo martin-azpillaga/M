@@ -10,11 +10,15 @@ import java.util.Map;
 
 import com.google.gson.Gson;
 
+import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.SignatureHelp;
 
 import m.generator.Engine;
 import m.generator.Generator;
 import m.library.Library;
+import m.validation.problems.Problem;
 import m.model.Game;
 import m.validation.global.GlobalData;
 import m.validation.global.GlobalValidator;
@@ -26,7 +30,8 @@ public class Project
 	GlobalValidator validator;
 	Generator generator;
 	public Game game;
-	Map<String,List<Diagnostic>> diagnostics;
+	Map<String,List<Problem>> diagnostics;
+	Inspector inspector;
 
 	public Project(String root)
 	{
@@ -64,7 +69,7 @@ public class Project
 
 	public Map<String,List<Diagnostic>> getDiagnostics()
 	{
-		return diagnostics;
+		return new HashMap<String, List<Diagnostic>>();
 	}
 
 	public void fileAdded(String file)
@@ -97,6 +102,21 @@ public class Project
 		check(globalData);
 	}
 
+	public String hover(String file, Position position)
+	{
+		return inspector.hover(file, position);
+	}
+
+	public List<CompletionItem> completions(String file, Position position)
+	{
+		return inspector.completions(file, position);
+	}
+
+	public SignatureHelp signature(String file, Position position)
+	{
+		return inspector.signature(file, position);
+	}
+
 	private void check(GlobalData globalData)
 	{
 		diagnostics = globalData.diagnostics;
@@ -119,13 +139,8 @@ public class Project
 		{
 			try
 			{
-				var gson = new Gson();
-				var json = new String(Files.readAllBytes(path));
-				var configuration = gson.fromJson(json, Configuration.class);
-
-				generate(Engine.UNITY, configuration.Unity);
-				generate(Engine.UNREAL, configuration.Unreal);
-				generate(Engine.GODOT, configuration.Godot);
+				var configuration = new String(Files.readAllBytes(path));
+				generator.generate(game, root, configuration);
 			}
 			catch (IOException e){}
 		}
@@ -134,22 +149,4 @@ public class Project
 			generator.generate(game, Paths.get(root));
 		}
 	}
-
-	private void generate(Engine engine, String path)
-	{
-		if (path == null) return;
-
-		if (path.startsWith("."))
-		{
-			path = path.replace(".", root);
-		}
-		generator.generate(game, engine, path);
-	}
-}
-
-class Configuration
-{
-	public String Unity;
-	public String Unreal;
-	public String Godot;
 }

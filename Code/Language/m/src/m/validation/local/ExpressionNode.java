@@ -1,4 +1,4 @@
-package m.validation.local.rules;
+package m.validation.local;
 
 import java.util.ArrayList;
 import java.util.List;

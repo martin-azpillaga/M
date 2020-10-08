@@ -12,7 +12,7 @@ import java.util.ArrayDeque;
 import m.library.Library;
 import m.library.types.Type;
 import m.validation.problems.Problem;
-import m.validation.local.rules.ExpressionNode;
+import m.validation.local.ExpressionNode;
 
 public class IncompatibleTypes extends Problem
 {
@@ -23,7 +23,6 @@ public class IncompatibleTypes extends Problem
 		this.node = node;
 	}
 
-	@Override
 	public List<Diagnostic> diagnostics(Library library, String text)
 	{
 		var base = library.getProblem(m.library.problems.Problem.INCOMPATIBLE_TYPES);

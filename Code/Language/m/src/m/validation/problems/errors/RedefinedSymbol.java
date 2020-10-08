@@ -22,7 +22,6 @@ public class RedefinedSymbol extends Problem
 		this.feature = feature;
 	}
 
-	@Override
 	public List<Diagnostic> diagnostics(Library library, String text)
 	{
 		var list = new ArrayList<Diagnostic>();

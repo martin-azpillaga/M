@@ -8,20 +8,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.lsp4j.Diagnostic;
-
 import m.model.Cell;
 import m.model.Function;
 import m.library.types.Type;
 import m.validation.local.LocalValidator;
-import m.validation.local.rules.ExpressionNode;
+import m.validation.local.ExpressionNode;
+import m.validation.problems.Problem;
 
 public class GlobalValidator
 {
 	Map<String, Set<Cluster>> fileToClusters;
 	Map<String, Cluster> componentToCluster;
 	LocalValidator localValidator;
-	Map<String,List<Diagnostic>> localDiagnostics;
+	Map<String,List<Problem>> localDiagnostics;
 	Map<String,Map<String,Function>> localFunctions;
 
 	public GlobalValidator()
@@ -237,7 +236,7 @@ public class GlobalValidator
 	{
 		var data = new GlobalData();
 
-		data.diagnostics = new HashMap<String,List<Diagnostic>>(localDiagnostics);
+		data.diagnostics = new HashMap<String,List<Problem>>(localDiagnostics);
 		for (var functionMap : localFunctions.values())
 		{
 			for (var function : functionMap.values())

@@ -4,18 +4,13 @@ import java.util.List;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 
-import m.library.Library;
-
 public abstract class Problem
 {
-	public abstract List<Diagnostic> diagnostics(Library library, String text);
-
 	protected Range getRange(EObject o, String text)
 	{
 		var node = NodeModelUtils.getNode(o);

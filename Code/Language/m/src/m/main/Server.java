@@ -247,7 +247,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 
 		for (var project : projects)
 		{
-			result += project.game.hover(path, position);
+			result += project.hover(path, position);
 		}
 
 		var contents = new MarkupContent("markdown", result);
@@ -265,7 +265,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		{
 			if (project.contains(path))
 			{
-				var result = project.game.completions(path, params.getPosition());
+				var result = project.completions(path, params.getPosition());
 
 				return CompletableFuture.supplyAsync(() -> Either.forLeft(result));
 			}
@@ -283,7 +283,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		{
 			if (project.contains(path))
 			{
-				var result = project.game.signature(path, params.getPosition());
+				var result = project.signature(path, params.getPosition());
 
 				return CompletableFuture.supplyAsync(() -> result);
 			}

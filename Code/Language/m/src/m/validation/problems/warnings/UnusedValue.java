@@ -19,7 +19,6 @@ public class UnusedValue extends Problem
 		this.value = value;
 	}
 
-	@Override
 	public List<Diagnostic> diagnostics(Library library, String text)
 	{
 		var list = new ArrayList<Diagnostic>();

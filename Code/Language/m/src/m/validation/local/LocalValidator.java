@@ -61,10 +61,7 @@ public class LocalValidator
 
 		for (var problem : parseResult.getSyntaxErrors())
 		{
-			for (var diagnostic : new SyntaxError(problem).diagnostics(Library.ENGLISH, text))
-			{
-				result.diagnostics.add(diagnostic);
-			}
+			result.diagnostics.add(new SyntaxError(problem));
 		}
 
 		return result;

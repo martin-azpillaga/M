@@ -5,15 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.lsp4j.Diagnostic;
 import m.model.Function;
-import m.validation.local.rules.ExpressionNode;
+import m.validation.problems.Problem;
 
 public class LocalData
 {
 	public final List<ExpressionNode> nodes;
 	public final Map<String, Function> functions;
-	public final List<Diagnostic> diagnostics;
+	public final List<Problem> diagnostics;
 
 	public LocalData()
 	{
@@ -22,7 +21,7 @@ public class LocalData
 		this.diagnostics = new ArrayList<>();
 	}
 
-	public LocalData(List<ExpressionNode> nodes, Map<String,Function> functions, List<Diagnostic> diagnostics)
+	public LocalData(List<ExpressionNode> nodes, Map<String,Function> functions, List<Problem> diagnostics)
 	{
 		this.nodes = nodes;
 		this.functions = functions;

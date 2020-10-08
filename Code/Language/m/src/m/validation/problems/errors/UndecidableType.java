@@ -11,7 +11,7 @@ import java.util.ArrayDeque;
 
 import m.library.Library;
 import m.validation.problems.Problem;
-import m.validation.local.rules.ExpressionNode;
+import m.validation.local.ExpressionNode;
 
 public class UndecidableType extends Problem
 {
@@ -22,7 +22,6 @@ public class UndecidableType extends Problem
 		this.node = node;
 	}
 
-	@Override
 	public List<Diagnostic> diagnostics(Library library, String text)
 	{
 		var list = new ArrayList<Diagnostic>();

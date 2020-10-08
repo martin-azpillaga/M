@@ -1,7 +1,7 @@
 package m.validation.local;
 
-import static m.validation.local.rules.Binding.BindingReason.*;
-import static m.validation.local.rules.Typing.TypingReason.*;
+import static m.library.problems.BindingReason.*;
+import static m.library.problems.TypingReason.*;
 import static m.model.ModelPackage.Literals.*;
 
 import java.util.ArrayDeque;
@@ -15,7 +15,6 @@ import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.lsp4j.Diagnostic;
 
 import m.library.Library;
 import m.library.types.*;
@@ -24,7 +23,6 @@ import m.validation.problems.Problem;
 import m.validation.problems.errors.RedefinedSymbol;
 import m.validation.problems.errors.UndefinedSymbol;
 import m.validation.problems.warnings.UnusedValue;
-import m.validation.local.rules.Typing;
 
 public class Context
 {
@@ -227,7 +225,7 @@ public class Context
 					var expressions = typeVariables.get(typeName.getKey());
 					for (var i = 1; i < expressions.size(); i++)
 					{
-						graph.bind(expressions.get(0), expressions.get(i), POLYMORPHISM);
+						graph.bind(expressions.get(0), expressions.get(i), SAME_TYPE_VARIABLE);
 					}
 				}
 			}
@@ -247,7 +245,7 @@ public class Context
 				{
 					for (var i = 0; i < arguments.length; i++)
 					{
-						graph.bind(arguments[i], parameters.get(i), PARAMETER_ARGUMENT);
+						graph.bind(arguments[i], parameters.get(i), SAME_FUNCTION);
 					}
 				}
 				else
@@ -282,14 +280,6 @@ public class Context
 
 	public LocalData buildData(String text)
 	{
-		var diagnostics = new ArrayList<Diagnostic>();
-		for (var problem : problems)
-		{
-			for (var diagnostic : problem.diagnostics(library, text))
-			{
-				diagnostics.add(diagnostic);
-			}
-		}
-		return graph.buildData(userFunctions, diagnostics);
+		return graph.buildData(userFunctions, problems);
 	}
 }

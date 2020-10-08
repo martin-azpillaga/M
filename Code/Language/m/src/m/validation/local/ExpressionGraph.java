@@ -5,14 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.lsp4j.Diagnostic;
-
+import m.library.problems.BindingReason;
 import m.model.Expression;
 import m.model.Function;
-import m.validation.local.rules.Binding;
-import m.validation.local.rules.Binding.BindingReason;
-import m.validation.local.rules.ExpressionNode;
-import m.validation.local.rules.Typing;
+import m.validation.problems.Problem;
 
 public class ExpressionGraph
 {
@@ -56,7 +52,7 @@ public class ExpressionGraph
 		return node;
 	}
 
-	public LocalData buildData(Map<String,Function> functions, List<Diagnostic> problems)
+	public LocalData buildData(Map<String,Function> functions, List<Problem> problems)
 	{
 		return new LocalData(list, functions, problems);
 	}

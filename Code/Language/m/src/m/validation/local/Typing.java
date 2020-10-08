@@ -1,7 +1,8 @@
-package m.validation.local.rules;
+package m.validation.local;
 
+import m.library.problems.TypingReason;
 import m.library.symbols.Symbol;
-import m.library.types.*;
+import m.library.types.Type;
 
 public class Typing
 {
@@ -14,10 +15,5 @@ public class Typing
 		this.type = type;
 		this.symbol = symbol;
 		this.reason = reason;
-	}
-
-	public enum TypingReason
-	{
-		STANDARD_VARIABLE, STANDARD_COMPONENT, STANDARD_FUNCTION, STANDARD_BLOCK
 	}
 }
