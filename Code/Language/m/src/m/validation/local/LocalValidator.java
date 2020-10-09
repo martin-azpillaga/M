@@ -57,7 +57,7 @@ public class LocalValidator
 
 		for (var problem : parseResult.getSyntaxErrors())
 		{
-			result.diagnostics.add(new Problem(problem, Severity.ERROR, Library.ENGLISH.getProblem(SYNTAX_ERROR)));
+			result.problems.add(new Problem(problem, Severity.ERROR, Library.ENGLISH.getProblem(SYNTAX_ERROR)));
 		}
 
 		return result;

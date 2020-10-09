@@ -2,10 +2,7 @@ var {
 	LanguageClient
 } = require("vscode-languageclient");
 const {
-	window,
-	commands,
-	ViewColumn,
-	Uri
+	commands
 } = require("vscode");
 var {
 	workspace
@@ -40,7 +37,6 @@ function start() {
 		port: 5007
 	};
 	let serverOptions = () => {
-		// Connect to language server via socket
 		let socket = net.connect(connectionInfo);
 		let result = {
 			writer: socket,

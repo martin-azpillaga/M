@@ -90,7 +90,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		{
 			var uri = folder.getUri();
 			var path = decode(uri);
-			projects.add(new Project(path, diagnostics->publishDiagnostics(diagnostics)));
+			projects.add(new Project(path));
 		}
 
 		return CompletableFuture.supplyAsync(() -> new InitializeResult(capabilities));
@@ -99,7 +99,10 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 	@Override
 	public void initialized(InitializedParams params)
 	{
-
+		for (var project : projects)
+		{
+			project.setPublisher(this::publishDiagnostics);
+		}
 	}
 
 	@Override
@@ -124,7 +127,8 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		{
 			var uri = added.getUri();
 			var path = decode(uri);
-			projects.add(new Project(path, diagnostics -> publishDiagnostics(diagnostics)));
+			var project = new Project(path);
+			project.setPublisher(this::publishDiagnostics);
 		}
 		for (var removed : params.getEvent().getRemoved())
 		{

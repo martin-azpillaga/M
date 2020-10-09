@@ -2,6 +2,7 @@ package m.validation.local;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -12,12 +13,13 @@ import m.validation.Problem;
 
 public class ExpressionGraph
 {
+	HashSet<ExpressionNode> connectedComponents;
 	List<ExpressionNode> list;
 	Map<Expression, ExpressionNode> map;
 
 	public ExpressionGraph()
 	{
-		list = new ArrayList<>();
+		connectedComponents = new HashSet<>();
 		map = new HashMap<>();
 	}
 
@@ -30,6 +32,21 @@ public class ExpressionGraph
 
 		nodeA.bindings.add(new Binding(nodeB, reason));
 		nodeB.bindings.add(new Binding(nodeA, reason));
+
+		if (connectedComponents.contains(nodeA))
+		{
+			if (connectedComponents.contains(nodeB))
+			{
+				connectedComponents.remove(nodeB);
+			}
+		}
+		else
+		{
+			if (!connectedComponents.contains(nodeB))
+			{
+				connectedComponents.add(nodeB);
+			}
+		}
 	}
 
 	public void type(Expression a, Typing typing)
@@ -38,6 +55,11 @@ public class ExpressionGraph
 
 		var node = get(a);
 		node.typings.add(typing);
+
+		if (node.bindings.isEmpty())
+		{
+			connectedComponents.add(node);
+		}
 	}
 
 	private ExpressionNode get(Expression a)
@@ -46,7 +68,6 @@ public class ExpressionGraph
 		if (node == null)
 		{
 			node = new ExpressionNode(a);
-			list.add(node);
 			map.put(a, node);
 		}
 		return node;
@@ -54,6 +75,6 @@ public class ExpressionGraph
 
 	public LocalData buildData(Map<String,Function> functions, List<Problem> problems)
 	{
-		return new LocalData(list, functions, problems);
+		return new LocalData(connectedComponents, functions, problems);
 	}
 }

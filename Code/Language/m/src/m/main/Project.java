@@ -30,12 +30,11 @@ public class Project
 
 	Consumer<Map<String,ArrayList<Diagnostic>>> problemsChanged;
 
-	public Project(String root, Consumer<Map<String,ArrayList<Diagnostic>>> onProblemsChanged)
+	public Project(String root)
 	{
 		this.root = root;
 		this.generator = new Generator();
 		this.validator = new GlobalValidator();
-		this.problemsChanged = onProblemsChanged;
 		this.inspector = new Inspector();
 
 		try (var walk = Files.walk(Paths.get(root)))
@@ -58,6 +57,11 @@ public class Project
 			});
 		}
 		catch (IOException e){}
+	}
+
+	public void setPublisher(Consumer<Map<String,ArrayList<Diagnostic>>> onProblemsChanged)
+	{
+		this.problemsChanged = onProblemsChanged;
 	}
 
 	public boolean contains(String path)
@@ -146,7 +150,10 @@ public class Project
 			diagnosticMap.put(file, diagnostics);
 		}
 
-		problemsChanged.accept(diagnosticMap);
+		if (problemsChanged != null)
+		{
+			problemsChanged.accept(diagnosticMap);
+		}
 
 		var game = globalData.game;
 

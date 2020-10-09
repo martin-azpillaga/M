@@ -39,7 +39,7 @@ public class GlobalValidator
 	{
 		var modifiedData = localValidator.validate(text);
 
-		localDiagnostics.put(modifiedFile, modifiedData.diagnostics);
+		localDiagnostics.put(modifiedFile, modifiedData.problems);
 		localFunctions.put(modifiedFile, modifiedData.functions);
 
 		invalidateObsoleteMemory(modifiedFile);
@@ -106,12 +106,12 @@ public class GlobalValidator
 		return affectedNodes;
 	}
 
-	private void validate(List<ExpressionNode> nodes, String modifiedFile)
+	private void validate(Set<ExpressionNode> connectedComponents, String modifiedFile)
 	{
 		var stack = new ArrayDeque<ExpressionNode>();
 		var visited = new ArrayList<ExpressionNode>();
 
-		for (var rootNode : nodes)
+		for (var rootNode : connectedComponents)
 		{
 			if (visited.contains(rootNode))
 			{
