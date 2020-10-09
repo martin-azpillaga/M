@@ -9,13 +9,15 @@ import java.util.Map;
 import java.util.Set;
 
 import m.model.Cell;
-import m.model.Function;
+import m.model.Game;
 import m.model.UserFunction;
+import m.library.Library;
 import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.validation.local.LocalValidator;
 import m.validation.local.ExpressionNode;
+import m.validation.local.LocalData;
 import m.validation.Problem;
 
 public class GlobalValidator
@@ -23,24 +25,21 @@ public class GlobalValidator
 	Map<String, Set<Cluster>> fileToClusters;
 	Map<String, Cluster> componentToCluster;
 	LocalValidator localValidator;
-	Map<String,List<Problem>> localDiagnostics;
-	Map<String,Map<String,Function>> localFunctions;
+	Map<String,LocalData> localDatas;
 
 	public GlobalValidator()
 	{
 		fileToClusters = new HashMap<>();
 		componentToCluster = new HashMap<>();
 		localValidator = new LocalValidator();
-		localDiagnostics = new HashMap<>();
-		localFunctions = new HashMap<>();
+		localDatas = new HashMap<>();
 	}
 
 	public GlobalData validate(String modifiedFile, String text)
 	{
 		var modifiedData = localValidator.validate(text);
 
-		localDiagnostics.put(modifiedFile, modifiedData.problems);
-		localFunctions.put(modifiedFile, modifiedData.functions);
+		localDatas.put(modifiedFile, modifiedData);
 
 		invalidateObsoleteMemory(modifiedFile);
 
@@ -56,7 +55,7 @@ public class GlobalValidator
 		return collectData();
 	}
 
-	private List<ExpressionNode> invalidateObsoleteMemory(String modifiedFile)
+	private void invalidateObsoleteMemory(String modifiedFile)
 	{
 		var affectedNodes = new ArrayList<ExpressionNode>();
 
@@ -64,7 +63,7 @@ public class GlobalValidator
 
 		if (clusters == null)
 		{
-			return new ArrayList<ExpressionNode>();
+			return;
 		}
 
 		for (var cluster : clusters)
@@ -102,8 +101,6 @@ public class GlobalValidator
 		}
 
 		fileToClusters.remove(modifiedFile);
-
-		return affectedNodes;
 	}
 
 	private void validate(Set<ExpressionNode> connectedComponents, String modifiedFile)
@@ -113,10 +110,6 @@ public class GlobalValidator
 
 		for (var rootNode : connectedComponents)
 		{
-			if (visited.contains(rootNode))
-			{
-				continue;
-			}
 			stack.push(rootNode);
 			var cluster = new Cluster();
 			cluster.fileToNodes.put(modifiedFile, rootNode);
@@ -237,14 +230,32 @@ public class GlobalValidator
 
 	private GlobalData collectData()
 	{
-		var data = new GlobalData();
+		var problems = new HashMap<String,List<Problem>>();
 
-		data.problems = new HashMap<String,List<Problem>>(localDiagnostics);
-		for (var functionMap : localFunctions.values())
+		var game = new Game(Library.ENGLISH);
+
+		for (var entry : localDatas.entrySet())
 		{
-			for (var function : functionMap.values())
+			var file = entry.getKey();
+			var localData = entry.getValue();
+
+			for (var problem : localData.problems)
 			{
-				data.game.functions.add(new UserFunction(function, new FunctionType(new AtomicType[]{}, AtomicType.UNIT)));
+				var finalProblems = problems.get(file);
+				if (finalProblems == null)
+				{
+					finalProblems = new ArrayList<Problem>();
+					problems.put(file, finalProblems);
+				}
+				finalProblems.add(problem);
+			}
+
+			var systemType = new FunctionType(new AtomicType[]{}, AtomicType.UNIT);
+
+			for (var function : localData.functions.values())
+			{
+				var userFunction = new UserFunction(function, systemType);
+				game.functions.add(userFunction);
 			}
 		}
 
@@ -266,13 +277,15 @@ public class GlobalValidator
 			}
 			else if (types.size() == 1)
 			{
-				data.game.components.put(component, types.iterator().next());
+				game.components.put(component, types.iterator().next());
 			}
 			else
 			{
 
 			}
 		}
+
+		var data = new GlobalData(game, problems);
 
 		return data;
 	}
