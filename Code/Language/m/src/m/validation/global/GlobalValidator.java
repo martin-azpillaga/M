@@ -152,7 +152,7 @@ public class GlobalValidator
 			{
 				var component = cell.getComponent().getName();
 
-				var componentFiles = cluster.componentToFiles.get(modifiedFile);
+				var componentFiles = cluster.componentToFiles.get(component);
 				if (componentFiles == null)
 				{
 					componentFiles = new HashSet<String>();
@@ -214,6 +214,8 @@ public class GlobalValidator
 		{
 			var entryComponent = entry.getKey();
 			var files = entry.getValue();
+
+			componentToCluster.put(entryComponent, definitionCluster);
 
 			var definitionFiles = definitionCluster.componentToFiles.get(entryComponent);
 			if (definitionFiles == null)
