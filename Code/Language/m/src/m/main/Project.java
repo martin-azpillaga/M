@@ -14,7 +14,10 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.SignatureHelp;
+import org.eclipse.xtext.nodemodel.INode;
+import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 
 import m.generator.Generator;
 import m.validation.global.GlobalData;
@@ -137,12 +140,13 @@ public class Project
 				DiagnosticSeverity severity;
 				switch(problem.severity)
 				{
-					case INFORMATION: severity = DiagnosticSeverity.Information;
-					case WARNING: severity = DiagnosticSeverity.Warning;
-					case ERROR: severity = DiagnosticSeverity.Error;
-					default: severity = DiagnosticSeverity.Error;
+					case INFORMATION: severity = DiagnosticSeverity.Information; break;
+					case WARNING: severity = DiagnosticSeverity.Warning; break;
+					case ERROR: severity = DiagnosticSeverity.Error; break;
+					default: severity = DiagnosticSeverity.Error; break;
 				}
-				var diagnostic = new Diagnostic(null, problem.message);
+				var range = getRange(problem.node);
+				var diagnostic = new Diagnostic(range, problem.message);
 				diagnostic.setSeverity(severity);
 				diagnostics.add(diagnostic);
 			}
@@ -175,5 +179,29 @@ public class Project
 				generator.generate(game, Paths.get(root));
 			}
 		}
+	}
+
+	private Range getRange(INode node)
+	{
+		var text = node.getRootNode().getText();
+		return new Range
+		(
+			new Position(node.getStartLine()-1, character(text, node.getOffset())),
+			new Position(node.getEndLine()-1  , character(text, node.getOffset()+node.getLength()))
+		);
+	}
+
+	private int character(String text, int offset)
+	{
+		var count = 0;
+		for (var i = 0; i < offset && i < text.length(); i++)
+		{
+			count++;
+			if (text.charAt(i) == '\n')
+			{
+				count = 0;
+			}
+		}
+		return count;
 	}
 }

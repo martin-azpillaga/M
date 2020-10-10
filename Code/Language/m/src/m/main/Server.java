@@ -129,6 +129,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 			var path = decode(uri);
 			var project = new Project(path);
 			project.setPublisher(this::publishDiagnostics);
+			projects.add(project);
 		}
 		for (var removed : params.getEvent().getRemoved())
 		{
@@ -146,12 +147,6 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 				}
 			}
 		}
-	}
-
-	@Override
-	public void didChangeConfiguration(DidChangeConfigurationParams params)
-	{
-
 	}
 
 	@Override
@@ -177,6 +172,12 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 				}
 			}
 		}
+	}
+
+	@Override
+	public void didChangeConfiguration(DidChangeConfigurationParams params)
+	{
+
 	}
 
 
@@ -241,7 +242,10 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 
 		for (var project : projects)
 		{
-			result += project.hover(path, position);
+			if (project.contains(path))
+			{
+				result += project.hover(path, position);
+			}
 		}
 
 		var contents = new MarkupContent("markdown", result);

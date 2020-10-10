@@ -19,6 +19,7 @@ import m.validation.local.LocalValidator;
 import m.validation.local.ExpressionNode;
 import m.validation.local.LocalData;
 import m.validation.Problem;
+import m.validation.Problem.Severity;
 
 public class GlobalValidator
 {
@@ -39,9 +40,9 @@ public class GlobalValidator
 	{
 		var modifiedData = localValidator.validate(text);
 
-		localDatas.put(modifiedFile, modifiedData);
-
 		invalidateObsoleteMemory(modifiedFile);
+
+		localDatas.put(modifiedFile, modifiedData);
 
 		validate(modifiedData.expressionGraph, modifiedFile);
 
@@ -101,6 +102,7 @@ public class GlobalValidator
 		}
 
 		fileToClusters.remove(modifiedFile);
+		localDatas.remove(modifiedFile);
 	}
 
 	private void validate(Set<ExpressionNode> connectedComponents, String modifiedFile)
@@ -241,16 +243,7 @@ public class GlobalValidator
 			var file = entry.getKey();
 			var localData = entry.getValue();
 
-			for (var problem : localData.problems)
-			{
-				var finalProblems = problems.get(file);
-				if (finalProblems == null)
-				{
-					finalProblems = new ArrayList<Problem>();
-					problems.put(file, finalProblems);
-				}
-				finalProblems.add(problem);
-			}
+			problems.put(file, new ArrayList<Problem>(localData.problems));
 
 			var systemType = new FunctionType(new AtomicType[]{}, AtomicType.UNIT);
 
@@ -275,7 +268,17 @@ public class GlobalValidator
 
 			if (types.isEmpty())
 			{
+				for (var nodeEntry : cluster.fileToNodes.entrySet())
+				{
+					var file = nodeEntry.getKey();
+					var node = nodeEntry.getValue();
 
+					if (!problems.containsKey(file))
+					{
+						problems.put(file, new ArrayList<Problem>());
+					}
+					problems.get(file).add(new Problem(node.expression, null, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.Problem.UNDEFINED_SYMBOL)));
+				}
 			}
 			else if (types.size() == 1)
 			{
@@ -283,7 +286,17 @@ public class GlobalValidator
 			}
 			else
 			{
+				for (var nodeEntry : cluster.fileToNodes.entrySet())
+				{
+					var file = nodeEntry.getKey();
+					var node = nodeEntry.getValue();
 
+					if (!problems.containsKey(file))
+					{
+						problems.put(file, new ArrayList<Problem>());
+					}
+					problems.get(file).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.Problem.INCOMPATIBLE_TYPES)));
+				}
 			}
 		}
 
