@@ -9,53 +9,65 @@
 	"license": "AGPL-3.0-only",
 	"icon": "logo.png",
 	"homepage": "https://minim.tools/M",
-	"repository": {
+	"repository":
+	{
 		"type": "git",
 		"url": "https://github.com/martin-azpillaga/M"
 	},
-	"bugs": {
+	"bugs":
+	{
 		"email": "martin@minim.tools",
 		"url": "https://github.com/martin-azpillaga/M/issues"
 	},
-	"engines": {
+	"engines":
+	{
 		"vscode": "^1.43.0"
 	},
-	"categories": [
+	"categories":
+	[
 		"Programming Languages"
 	],
-	"keywords": [
+	"keywords":
+	[
 		"data-driven",
 		"programming language",
 		"game development"
 	],
-	"contributes": {
-		"languages": [
+	"contributes":
+	{
+		"languages":
+		[
 			{
 				"id": "m",
-				"aliases": [
+				"aliases":
+				[
 					"M",
 					"m"
 				],
-				"extensions": [
+				"extensions":
+				[
 					".Ⲙ"
 				],
 				"configuration": "./declarative features/brackets.json"
 			}
 		],
-		"snippets": [
+		"snippets":
+		[
 			{
 				"language": "m",
 				"path": "./declarative features/snippets.json"
 			}
 		],
-		"grammars": [
+		"grammars":
+		[
 			{
 				"language": "m",
 				"scopeName": "source.m",
 				"path": "./declarative features/highlighting.json"
 			}
 		],
-		"commands": [
+		"commands":
+		[
 			{
 				"command": "m.restart",
 				"title": "Restart M language server",
@@ -63,13 +75,15 @@
 			}
 		]
 	},
-	"activationEvents": [
-		"onLanguage:m",
+	"activationEvents":
+	[
 		"workspaceContains:**/*.Ⲙ",
+		"workspaceContains:Ⲙ.json",
 		"onCommand:m.restart"
 	],
 	"main": "./debug.js",
-	"dependencies": {
+	"dependencies":
+	{
 		"vscode-languageclient": "6.1.3"
 	}
 }

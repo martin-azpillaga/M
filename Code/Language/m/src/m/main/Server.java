@@ -116,7 +116,8 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 	@Override
 	public void exit()
 	{
-		System.exit(0);
+		//projects.clear();
+		//System.exit(0);
 	}
 
 
@@ -139,16 +140,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 			var uri = removed.getUri();
 			var path = decode(uri);
 
-			var iterator = projects.iterator();
-
-			while(iterator.hasNext())
-			{
-				var project = iterator.next();
-				if (project.root.equals(path))
-				{
-					iterator.remove();
-				}
-			}
+			projects.removeIf(project -> project.root.equals(path));
 		}
 	}
 
@@ -165,7 +157,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 				var text = read(uri);
 				for (var project : projects)
 				{
-					var diagnostics = project.add(file, text);
+					var diagnostics = project.modify(file, text);
 					publishDiagnostics(diagnostics);
 				}
 			}
@@ -224,13 +216,13 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		}
 	}
 
-	private void publishDiagnostics(Map<String,List<Diagnostic>> diagnostics)
+	private void publishDiagnostics(Map<String,List<Diagnostic>> diagnosticMap)
 	{
-		for (var entry : diagnostics.entrySet())
+		diagnosticMap.forEach((uri, diagnostics)->
 		{
-			var uri = encode(entry.getKey());
-			client.publishDiagnostics(new PublishDiagnosticsParams(uri, entry.getValue()));
-		}
+			var parameters = new PublishDiagnosticsParams(uri, diagnostics);
+			client.publishDiagnostics(parameters);
+		});
 	}
 
 

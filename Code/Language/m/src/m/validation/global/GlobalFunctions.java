@@ -8,7 +8,6 @@ import java.util.Map;
 import m.library.Library;
 import m.library.types.AtomicType;
 import m.library.types.FunctionType;
-import m.model.Function;
 import m.model.ModelPackage;
 import m.model.UserFunction;
 import m.validation.Problem;

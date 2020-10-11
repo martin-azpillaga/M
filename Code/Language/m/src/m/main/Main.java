@@ -9,15 +9,22 @@ public class Main
 	{
 		var server = new Server();
 
-		if (arguments.length == 0) {
+		if (arguments.length == 0)
+		{
 			server.connect(System.in, System.out);
-		} else {
+		}
+		else
+		{
 			var socketNumber = Integer.parseInt(arguments[0]);
 
-			try (var socket = new ServerSocket(socketNumber)) {
-				var clientSocket = socket.accept();
+			try (var socket = new ServerSocket(socketNumber))
+			{
+				while(true)
+				{
+					var clientSocket = socket.accept();
 
-				server.connect(clientSocket.getInputStream(), clientSocket.getOutputStream());
+					server.connect(clientSocket.getInputStream(), clientSocket.getOutputStream());
+				}
 			}
 		}
 	}

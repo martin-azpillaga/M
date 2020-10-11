@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Diagnostic;
@@ -18,48 +19,46 @@ import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.xtext.nodemodel.INode;
 
 import m.generator.Generator;
+import m.validation.Problem;
 import m.validation.global.GlobalData;
-import m.validation.global.GlobalValidator;
+import m.validation.global.Validator;
 
 public class Project
 {
 	String root;
 
-	GlobalValidator validator;
+	Validator validator;
 	Generator generator;
-	public final Inspector inspector;
+	Inspector inspector;
 
 	public Project(String root)
 	{
 		this.root = root;
 		this.generator = new Generator();
-		this.validator = new GlobalValidator();
+		this.validator = new Validator();
 		this.inspector = new Inspector();
 	}
 
 	public Map<String,List<Diagnostic>> initialize()
 	{
-		try (var walk = Files.walk(Paths.get(root)))
+		GlobalData data = null;
+		try
 		{
-			walk.forEach(f ->
-			{
-				var file = f.toString();
-				if (file.endsWith(".Ⲙ"))
-				{
-					try
-					{
-						var text = new String(Files.readAllBytes(f));
-						validator.validate(file,text);
-					}
-					catch (IOException e)
-					{
+			var mfiles = Files.walk(Paths.get(root)).filter(f->f.toString().endsWith(".Ⲙ")).collect(Collectors.toList());
 
-					}
-				}
-			});
+			for (var file : mfiles)
+			{
+				var text = new String(Files.readAllBytes(file));
+				data = validator.modify(file.toString(),text);
+			}
 		}
 		catch (IOException e){}
 
+		return check(data);
+	}
+
+	public Map<String,List<Diagnostic>> initialize(Map<String,String> files)
+	{
 		return null;
 	}
 
@@ -68,35 +67,22 @@ public class Project
 		return path.startsWith(this.root);
 	}
 
-	public Map<String,List<Diagnostic>> add(String file, String text)
-	{
-		if (!contains(file)) return null;
-
-		modify(file, text);
-
-		return null;
-	}
-
 	public Map<String,List<Diagnostic>> delete(String file)
 	{
 		if (!contains(file)) return null;
 
 		var globalData = validator.delete(file);
 
-		check(globalData);
-
-		return null;
+		return check(globalData);
 	}
 
 	public Map<String,List<Diagnostic>> modify(String modifiedFile, String text)
 	{
 		if (!contains(modifiedFile)) return null;
 
-		var globalData = validator.validate(modifiedFile, text);
+		var globalData = validator.modify(modifiedFile, text);
 
-		check(globalData);
-
-		return null;
+		return check(globalData);
 	}
 
 	public String hover(String file, Position position)
@@ -116,16 +102,45 @@ public class Project
 
 
 
-	private void check(GlobalData globalData)
+	private Map<String,List<Diagnostic>> check(GlobalData globalData)
 	{
-		var problemMap = globalData.problems;
-		var diagnosticMap = new HashMap<String, ArrayList<Diagnostic>>();
+		var diagnosticMap = convert(globalData.problems);
 
-		for (var entry : problemMap.entrySet())
+		var game = globalData.game;
+
+		if (diagnosticMap.isEmpty())
 		{
-			var file = entry.getKey();
-			var problems = entry.getValue();
+			var path = Paths.get(root, "Ⲙ.json");
 
+			if (new File(path.toString()).exists())
+			{
+				try
+				{
+					var configuration = new String(Files.readAllBytes(path));
+					generator.generate(game, root, configuration);
+				}
+				catch (IOException e){}
+			}
+			else
+			{
+				generator.generate(game, Paths.get(root));
+			}
+		}
+
+		return diagnosticMap;
+	}
+
+	private Map<String,List<Diagnostic>> convert(Map<String,List<Problem>> problemMap)
+	{
+		var diagnosticMap = new HashMap<String, List<Diagnostic>>();
+
+		if (problemMap == null)
+		{
+			return diagnosticMap;
+		}
+
+		problemMap.forEach((file, problems) ->
+		{
 			var diagnostics = new ArrayList<Diagnostic>();
 			for (var problem : problems)
 			{
@@ -144,28 +159,9 @@ public class Project
 			}
 
 			diagnosticMap.put(file, diagnostics);
-		}
+		});
 
-		var game = globalData.game;
-
-		if (globalData.problems.isEmpty())
-		{
-			var path = Paths.get(root, "Ⲙ.json");
-
-			if (new File(path.toString()).exists())
-			{
-				try
-				{
-					var configuration = new String(Files.readAllBytes(path));
-					generator.generate(game, root, configuration);
-				}
-				catch (IOException e){}
-			}
-			else
-			{
-				generator.generate(game, Paths.get(root));
-			}
-		}
+		return diagnosticMap;
 	}
 
 	private Range getRange(INode node)
