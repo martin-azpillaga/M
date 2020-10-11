@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Diagnostic;
@@ -17,7 +16,6 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.xtext.nodemodel.INode;
-import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 
 import m.generator.Generator;
 import m.validation.global.GlobalData;
@@ -31,15 +29,16 @@ public class Project
 	Generator generator;
 	public final Inspector inspector;
 
-	Consumer<Map<String,ArrayList<Diagnostic>>> problemsChanged;
-
 	public Project(String root)
 	{
 		this.root = root;
 		this.generator = new Generator();
 		this.validator = new GlobalValidator();
 		this.inspector = new Inspector();
+	}
 
+	public Map<String,List<Diagnostic>> initialize()
+	{
 		try (var walk = Files.walk(Paths.get(root)))
 		{
 			walk.forEach(f ->
@@ -60,11 +59,8 @@ public class Project
 			});
 		}
 		catch (IOException e){}
-	}
 
-	public void setPublisher(Consumer<Map<String,ArrayList<Diagnostic>>> onProblemsChanged)
-	{
-		this.problemsChanged = onProblemsChanged;
+		return null;
 	}
 
 	public boolean contains(String path)
@@ -72,39 +68,35 @@ public class Project
 		return path.startsWith(this.root);
 	}
 
-	public Map<String,List<Diagnostic>> getDiagnostics()
+	public Map<String,List<Diagnostic>> add(String file, String text)
 	{
-		return new HashMap<String, List<Diagnostic>>();
+		if (!contains(file)) return null;
+
+		modify(file, text);
+
+		return null;
 	}
 
-	public void fileAdded(String file)
+	public Map<String,List<Diagnostic>> delete(String file)
 	{
-		if (!contains(file)) return;
-
-		try
-		{
-			var text = new String(Files.readAllBytes(Paths.get(file)));
-			fileChanged(file, text);
-		}
-		catch (IOException e){}
-	}
-
-	public void fileDeleted(String file)
-	{
-		if (!contains(file)) return;
+		if (!contains(file)) return null;
 
 		var globalData = validator.delete(file);
 
 		check(globalData);
+
+		return null;
 	}
 
-	public void fileChanged(String modifiedFile, String text)
+	public Map<String,List<Diagnostic>> modify(String modifiedFile, String text)
 	{
-		if (!contains(modifiedFile)) return;
+		if (!contains(modifiedFile)) return null;
 
 		var globalData = validator.validate(modifiedFile, text);
 
 		check(globalData);
+
+		return null;
 	}
 
 	public String hover(String file, Position position)
@@ -152,11 +144,6 @@ public class Project
 			}
 
 			diagnosticMap.put(file, diagnostics);
-		}
-
-		if (problemsChanged != null)
-		{
-			problemsChanged.accept(diagnosticMap);
 		}
 
 		var game = globalData.game;

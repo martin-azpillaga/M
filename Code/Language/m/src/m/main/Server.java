@@ -3,11 +3,13 @@ package m.main;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.lsp4j.CompletionItem;
@@ -88,8 +90,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 
 		for (var folder : params.getWorkspaceFolders())
 		{
-			var uri = folder.getUri();
-			var path = decode(uri);
+			var path = decode(folder.getUri());
 			projects.add(new Project(path));
 		}
 
@@ -101,7 +102,8 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 	{
 		for (var project : projects)
 		{
-			project.setPublisher(this::publishDiagnostics);
+			var diagnostics = project.initialize();
+			publishDiagnostics(diagnostics);
 		}
 	}
 
@@ -128,8 +130,9 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 			var uri = added.getUri();
 			var path = decode(uri);
 			var project = new Project(path);
-			project.setPublisher(this::publishDiagnostics);
 			projects.add(project);
+			var diagnostics = project.initialize();
+			publishDiagnostics(diagnostics);
 		}
 		for (var removed : params.getEvent().getRemoved())
 		{
@@ -155,20 +158,23 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		for (var change : params.getChanges())
 		{
 			var uri = change.getUri();
-			var path = decode(uri);
+			var file = decode(uri);
 
 			if (change.getType() == FileChangeType.Created)
 			{
+				var text = read(uri);
 				for (var project : projects)
 				{
-					project.fileAdded(path);
+					var diagnostics = project.add(file, text);
+					publishDiagnostics(diagnostics);
 				}
 			}
 			else if (change.getType() == FileChangeType.Deleted)
 			{
 				for (var project : projects)
 				{
-					project.fileDeleted(path);
+					var diagnostics = project.delete(file);
+					publishDiagnostics(diagnostics);
 				}
 			}
 		}
@@ -213,11 +219,12 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 
 		for (var project : projects)
 		{
-			project.fileChanged(path, text);
+			var diagnostics = project.modify(path, text);
+			publishDiagnostics(diagnostics);
 		}
 	}
 
-	private void publishDiagnostics(Map<String,ArrayList<Diagnostic>> diagnostics)
+	private void publishDiagnostics(Map<String,List<Diagnostic>> diagnostics)
 	{
 		for (var entry : diagnostics.entrySet())
 		{
@@ -313,5 +320,20 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		}
 
 		return result;
+	}
+
+	private String read(String uri)
+	{
+		try
+		{
+			var url = new URI(uri).toURL();
+			var inputStream = url.openStream();
+			Scanner s = new Scanner(inputStream).useDelimiter("\\A");
+			String result = s.hasNext() ? s.next() : "";
+			s.close();
+			return result;
+		} catch (Exception e) {}
+
+		return "";
 	}
 }
