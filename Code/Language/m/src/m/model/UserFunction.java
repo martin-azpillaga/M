@@ -13,9 +13,11 @@ public class UserFunction extends FunctionImpl
 {
 	public final FunctionType type;
 	public final Map<String,HashMap<String,Boolean>> queries;
+	public final Function function;
 
 	public UserFunction(Function function, FunctionType type)
 	{
+		this.function = function;
 		this.name = function.getName();
 		this.parameters = function.getParameters();
 		this.statements = function.getStatements();

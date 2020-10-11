@@ -9,7 +9,9 @@ import java.util.Map;
 import java.util.Set;
 
 import m.model.Cell;
+import m.model.Function;
 import m.model.Game;
+import m.model.ModelPackage;
 import m.model.UserFunction;
 import m.library.Library;
 import m.library.types.AtomicType;
@@ -27,6 +29,8 @@ public class GlobalValidator
 	Map<String, Cluster> componentToCluster;
 	LocalValidator localValidator;
 	Map<String,LocalData> localDatas;
+	GlobalData data;
+	GlobalFunctions globalFunctions;
 
 	public GlobalValidator()
 	{
@@ -34,11 +38,15 @@ public class GlobalValidator
 		componentToCluster = new HashMap<>();
 		localValidator = new LocalValidator();
 		localDatas = new HashMap<>();
+		data = new GlobalData(new Game(Library.ENGLISH), new HashMap<String,List<Problem>>());
+		globalFunctions = new GlobalFunctions();
 	}
 
 	public GlobalData validate(String modifiedFile, String text)
 	{
 		var modifiedData = localValidator.validate(text);
+
+		globalFunctions.validate(data, modifiedFile, modifiedData);
 
 		invalidateObsoleteMemory(modifiedFile);
 
@@ -46,14 +54,16 @@ public class GlobalValidator
 
 		validate(modifiedData.expressionGraph, modifiedFile);
 
-		return collectData();
+		checkTypes();
+
+		return data;
 	}
 
 	public GlobalData delete(String file)
 	{
 		invalidateObsoleteMemory(file);
 
-		return collectData();
+		return checkTypes();
 	}
 
 	private void invalidateObsoleteMemory(String modifiedFile)
@@ -108,7 +118,7 @@ public class GlobalValidator
 	private void validate(Set<ExpressionNode> connectedComponents, String modifiedFile)
 	{
 		var stack = new ArrayDeque<ExpressionNode>();
-		var visited = new ArrayList<ExpressionNode>();
+		var visited = new HashSet<ExpressionNode>();
 
 		for (var rootNode : connectedComponents)
 		{
@@ -232,7 +242,7 @@ public class GlobalValidator
 		return definitionCluster;
 	}
 
-	private GlobalData collectData()
+	private GlobalData checkTypes()
 	{
 		var problems = new HashMap<String,List<Problem>>();
 
@@ -271,13 +281,34 @@ public class GlobalValidator
 				for (var nodeEntry : cluster.fileToNodes.entrySet())
 				{
 					var file = nodeEntry.getKey();
-					var node = nodeEntry.getValue();
+					var rootNode = nodeEntry.getValue();
 
-					if (!problems.containsKey(file))
+					var stack = new ArrayDeque<ExpressionNode>();
+					var visited = new HashSet<ExpressionNode>();
+
+					stack.push(rootNode);
+
+					while (!stack.isEmpty())
 					{
-						problems.put(file, new ArrayList<Problem>());
+						var node = stack.pop();
+
+						visited.add(node);
+
+						if (!problems.containsKey(file))
+						{
+							problems.put(file, new ArrayList<Problem>());
+						}
+						problems.get(file).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.Problem.UNDECIDABLE_TYPE)));
+
+						for (var binding : node.bindings)
+						{
+							var boundNode = binding.node;
+							if (!visited.contains(boundNode))
+							{
+								stack.push(boundNode);
+							}
+						}
 					}
-					problems.get(file).add(new Problem(node.expression, null, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.Problem.UNDEFINED_SYMBOL)));
 				}
 			}
 			else if (types.size() == 1)
