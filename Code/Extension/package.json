@@ -81,7 +81,7 @@
 		"workspaceContains:Ⲙ.json",
 		"onCommand:m.restart"
 	],
-	"main": "./debug.js",
+	"main": "./main.js",
 	"dependencies":
 	{
 		"vscode-languageclient": "6.1.3"

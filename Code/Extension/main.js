@@ -1,61 +1,73 @@
-const {
-	window,
-	commands,
-	workspace
-} = require("vscode");
-
-var {
-	LanguageClient
-} = require("vscode-languageclient");
-
+const { LanguageClient } = require("vscode-languageclient");
+const {	window, commands, workspace, debug } = require("vscode");
+const net = require('net');
 const { spawn, spawnSync } = require('child_process');
 
 var client;
 
-exports.activate = async function(context) {
+exports.activate = function(context)
+{
+	context.subscriptions.push(commands.registerCommand('m.restart', () =>
+	{
+		if (client)
+		{
+			client.stop();
+		}
+		start(context);
+	}));
 
-	context.subscriptions.push(
-		commands.registerCommand('m.restart', () => {
-			if (client) {
-				client.stop();
-			}
-			connect(context);
-		})
-	);
+	start(context);
+}
 
+function start(context)
+{
 	if (!java8Available()) {
 		var selection = window.showInformationMessage("M requires a Java 8+ runtime to execute. Please install and add Java 8+ to the path", "Install Java 8+");
 		selection.then(x => open("https://jdk.java.net/14/"));
 		return;
 	}
 
-	connect(context);
-}
+	var debugging = process.env.DEBUG === "true";
 
-exports.deactivate = function() {
-	if (!client) {
-		return undefined;
-	}
-	client.stop();
-}
+	var serverOptions;
 
-function connect(context)
-{
-	var serverOptions = {
-		run: {
-			command: "java",
-			args: ["-jar", context.asAbsolutePath("ls.jar")]
+	if (debugging)
+	{
+		serverOptions =
+		() =>
+		{
+			let socket = net.connect({port: 5007});
+			let result =
+			{
+				writer: socket,
+				reader: socket
+			};
+			return Promise.resolve(result);
 		}
-	};
+	}
+	else
+	{
+		serverOptions =
+		{
+			run:
+			{
+				command: "java",
+				args: ["-jar", context.asAbsolutePath("ls.jar")]
+			}
+		};
+	}
 
-	var clientOptions = {
-		documentSelector: [{
+	var clientOptions =
+	{
+		documentSelector:
+		[{
 			scheme: 'file',
 			language: 'm'
 		}],
-		synchronize: {
-			fileEvents: workspace.createFileSystemWatcher('**/*.Ⲙ')
-		}
+		synchronize:
+		{
+			fileEvents: [workspace.createFileSystemWatcher('**/*.Ⲙ'), workspace.createFileSystemWatcher('Ⲙ.json')]
+		},
 	};
 
 	client = new LanguageClient('mserver', 'm language server', serverOptions, clientOptions);
@@ -95,4 +107,14 @@ function open(url)
 		case "linux": command = "xdg-open";
 	}
 	spawn(command, [url]);
+}
+
+
+exports.deactivate = function deactivate()
+{
+	if (!client)
+	{
+		return undefined;
+	}
+	client.stop();
 }
