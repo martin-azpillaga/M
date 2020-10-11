@@ -41,13 +41,9 @@
 				"id": "m",
 				"aliases":
 				[
-					"M",
-					"m"
+					"Ⲙ"
 				],
-				"extensions":
-				[
-					".Ⲙ"
-				],
+				"filenamePatterns": ["**/*.Ⲙ","Ⲙ.json"],
 				"configuration": "./declarative features/brackets.json"
 			}
 		],
@@ -70,8 +66,8 @@
 		[
 			{
 				"command": "m.restart",
-				"title": "Restart M language server",
-				"category": "M"
+				"title": "Restart language server",
+				"category": "Ⲙ"
 			}
 		]
 	},

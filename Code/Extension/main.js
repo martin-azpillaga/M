@@ -1,13 +1,13 @@
 const { LanguageClient } = require("vscode-languageclient");
-const {	window, commands, workspace, debug } = require("vscode");
-const net = require('net');
-const { spawn, spawnSync } = require('child_process');
+const {	window, commands, workspace } = require("vscode");
+const { spawn, spawnSync } = require("child_process");
+const net = require("net");
 
 var client;
 
 exports.activate = function(context)
 {
-	context.subscriptions.push(commands.registerCommand('m.restart', () =>
+	context.subscriptions.push(commands.registerCommand("m.restart", () =>
 	{
 		if (client)
 		{
@@ -33,8 +33,7 @@ function start(context)
 
 	if (debugging)
 	{
-		serverOptions =
-		() =>
+		serverOptions =	() =>
 		{
 			let socket = net.connect({port: 5007});
 			let result =
@@ -61,16 +60,12 @@ function start(context)
 	{
 		documentSelector:
 		[{
-			scheme: 'file',
-			language: 'm'
-		}],
-		synchronize:
-		{
-			fileEvents: [workspace.createFileSystemWatcher('**/*.Ⲙ'), workspace.createFileSystemWatcher('Ⲙ.json')]
-		},
+			scheme: "file",
+			language: "m"
+		}]
 	};
 
-	client = new LanguageClient('mserver', 'm language server', serverOptions, clientOptions);
+	client = new LanguageClient("m language server", serverOptions, clientOptions);
 
 	client.start();
 }
