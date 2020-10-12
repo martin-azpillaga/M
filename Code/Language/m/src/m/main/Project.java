@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Diagnostic;
@@ -114,7 +115,7 @@ public class Project
 
 		var game = globalData.game;
 
-		var diagnosticMap = convert(globalData.problems);
+		var diagnosticMap = convert(globalData.problems, globalData.modifiedFiles);
 
 		var hasErrors = false;
 		for (var diagnosticList : diagnosticMap.values())
@@ -136,7 +137,7 @@ public class Project
 		return diagnosticMap;
 	}
 
-	private Map<String,List<Diagnostic>> convert(Map<String,List<Problem>> problemMap)
+	private Map<String,List<Diagnostic>> convert(Map<String,List<Problem>> problemMap, Set<String> filter)
 	{
 		var diagnosticMap = new HashMap<String, List<Diagnostic>>();
 
@@ -147,6 +148,11 @@ public class Project
 
 		problemMap.forEach((file, problems) ->
 		{
+			if (!filter.contains(file))
+			{
+				return;
+			}
+
 			var diagnostics = new ArrayList<Diagnostic>();
 			for (var problem : problems)
 			{
