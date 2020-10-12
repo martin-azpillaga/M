@@ -36,7 +36,7 @@ public class Generator
 		{
 			path = path.replace(".", root);
 		}
-		Writer.setBaseFolder(path);
+		IO.setBaseFolder(path);
 		switch (engine)
 		{
 			case UNITY: new Unity().generate(game); break;

@@ -1,14 +1,14 @@
 package m.generator;
 
-import static m.generator.Writer.end;
-import static m.generator.Writer.exists;
-import static m.generator.Writer.foreach;
-import static m.generator.Writer.getBaseFolder;
-import static m.generator.Writer.iff;
-import static m.generator.Writer.lines;
-import static m.generator.Writer.readText;
-import static m.generator.Writer.write;
-import static m.generator.Writer.writeFile;
+import static m.generator.IO.end;
+import static m.generator.IO.exists;
+import static m.generator.IO.foreach;
+import static m.generator.IO.getBaseFolder;
+import static m.generator.IO.iff;
+import static m.generator.IO.lines;
+import static m.generator.IO.readText;
+import static m.generator.IO.write;
+import static m.generator.IO.writeFile;
 import static m.library.symbols.Block.ITERATION;
 import static m.library.symbols.Block.QUERY;
 import static m.library.symbols.Block.SELECTION;

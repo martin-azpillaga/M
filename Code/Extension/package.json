@@ -73,6 +73,7 @@
 	},
 	"activationEvents":
 	[
+		"onLanguage:m",
 		"workspaceContains:**/*.Ⲙ",
 		"workspaceContains:Ⲙ.json",
 		"onCommand:m.restart"

@@ -5,17 +5,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Scanner;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static m.generator.Writer.Keyword.YES;
-import static m.generator.Writer.Keyword.NO;
-import static m.generator.Writer.Keyword.END;
+import static m.generator.IO.Keyword.YES;
+import static m.generator.IO.Keyword.NO;
+import static m.generator.IO.Keyword.END;
 
-public class Writer {
+public class IO {
 	enum Keyword {
 		YES, NO, END;
 	}
@@ -31,8 +34,35 @@ public class Writer {
 	private static boolean skipping;
 	private static String baseFolder;
 
-	private Writer() {
+	private IO() {
 
+	}
+
+	public static String read(String uri)
+	{
+		try
+		{
+			var url = new URI(uri).toURL();
+			var inputStream = url.openStream();
+			Scanner s = new Scanner(inputStream);
+			String result = s.hasNext() ? s.next() : "";
+			s.close();
+			return result;
+		} catch (Exception e) {}
+
+		return "";
+	}
+
+	public static String readPath(Path file)
+	{
+		try
+		{
+			return new String(Files.readAllBytes(file));
+		}
+		catch(IOException e)
+		{
+			return "";
+		}
 	}
 
 	public static String getBaseFolder()

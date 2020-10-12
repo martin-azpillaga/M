@@ -490,9 +490,9 @@ public class Inspector
 		return result;
 	}
 
-	public SignatureHelp signature(String path, Position position)
+	public List<SignatureInformation> signatures(String path, Position position)
 	{
-		return new SignatureHelp();
+		return new ArrayList<SignatureInformation>();
 	}
 
 	public SignatureHelp signature(INode rootNode, Position position, SignatureHelpParams params)

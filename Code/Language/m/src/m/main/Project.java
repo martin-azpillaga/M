@@ -1,6 +1,7 @@
 package m.main;
 
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -14,10 +15,11 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.SignatureHelp;
+import org.eclipse.lsp4j.SignatureInformation;
 import org.eclipse.xtext.nodemodel.INode;
 
 import m.generator.Generator;
+import m.generator.IO;
 import m.validation.Problem;
 import m.validation.global.GlobalData;
 import m.validation.global.Validator;
@@ -45,58 +47,59 @@ public class Project
 		GlobalData data = null;
 		try
 		{
-			var mfiles = Files.walk(Paths.get(root)).filter(f->f.toString().endsWith(".Ⲙ")).collect(Collectors.toList());
+			var mfiles = Files.walk(Paths.get(new URI(root))).filter(f->f.toString().endsWith(".Ⲙ")).collect(Collectors.toList());
 
 			for (var file : mfiles)
 			{
-				var text = new String(Files.readAllBytes(file));
+				var text = IO.readPath(file);
 				data = validator.modify(file.toString(),text);
 			}
 
-			var configurationFile = Paths.get(root,"Ⲙ.json");
+			var configurationFile = Paths.get(new URI(Paths.get(root,"Ⲙ.json").toString()));
 			if (Files.exists(configurationFile))
 			{
-				var json = new String(Files.readAllBytes(configurationFile));
+				var json = IO.readPath(configurationFile);
 				configuration = new Configuration(json);
 			}
 
 		}
-		catch (IOException e){}
+		catch (Exception e){}
 
-		return check(data);
-	}
-
-	public Map<String,List<Diagnostic>> initialize(Map<String,String> files)
-	{
-		return null;
-	}
-
-	public boolean contains(String path)
-	{
-		return path.startsWith(this.root);
+		if (data == null)
+		{
+			return new HashMap<>();
+		}
+		else
+		{
+			return check(data);
+		}
 	}
 
 	public Map<String,List<Diagnostic>> delete(String file)
 	{
-		if (!contains(file)) return null;
+		if (file.endsWith("Ⲙ.json"))
+		{
+			configuration = null;
+			return new HashMap<>();
+		}
+		else
+		{
+			var globalData = validator.delete(file);
 
-		var globalData = validator.delete(file);
-
-		return check(globalData);
+			return check(globalData);
+		}
 	}
 
-	public Map<String,List<Diagnostic>> modify(String modifiedFile, String text)
+	public Map<String,List<Diagnostic>> modify(String file, String text)
 	{
-		if (!contains(modifiedFile)) return null;
-
-		if (modifiedFile.endsWith("Ⲙ.json"))
+		if (file.endsWith("Ⲙ.json"))
 		{
 			configuration = new Configuration(text);
 			return new HashMap<>();
 		}
 		else
 		{
-			var globalData = validator.modify(modifiedFile, text);
+			var globalData = validator.modify(file, text);
 
 			return check(globalData);
 		}
@@ -112,9 +115,9 @@ public class Project
 		return inspector.completions(file, position);
 	}
 
-	public SignatureHelp signature(String file, Position position)
+	public List<SignatureInformation> signatures(String file, Position position)
 	{
-		return inspector.signature(file, position);
+		return inspector.signatures(file, position);
 	}
 
 
