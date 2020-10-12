@@ -38,6 +38,11 @@ public class IO {
 
 	}
 
+	public static boolean contains(String folder, String file)
+	{
+		return file.startsWith(folder);
+	}
+
 	public static String read(String uri)
 	{
 		try
@@ -51,6 +56,46 @@ public class IO {
 		} catch (Exception e) {}
 
 		return "";
+	}
+
+	public static List<String> filesWithExtension(String extension, String folder)
+	{
+		try
+		{
+			var path = Paths.get(new URI(folder));
+			return Files.walk(path)
+				.filter(p->p.toString().endsWith(extension))
+				.map(p->p.toUri().toString())
+				.collect(Collectors.toList());
+		}
+		catch (Exception e)
+		{
+			return new ArrayList<>();
+		}
+	}
+
+	public static String concat(String a, String b)
+	{
+		try
+		{
+			return new URI(Paths.get(a,b).toString()).toString();
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+
+	public static boolean existsFile(String file)
+	{
+		try
+		{
+			return Files.exists(Paths.get(new URI(file)));
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
 	}
 
 	public static String readPath(Path file)

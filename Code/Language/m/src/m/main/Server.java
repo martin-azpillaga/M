@@ -2,15 +2,11 @@ package m.main;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.lsp4j.CompletionItem;
@@ -121,7 +117,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 	@Override
 	public void exit()
 	{
-		System.exit(0);
+		//System.exit(0);
 	}
 
 
@@ -208,24 +204,6 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 
 	}
 
-	private void onChange(String file, String text)
-	{
-		for (var project : projectsContaining(file))
-		{
-			var diagnostics = project.modify(file, text);
-			publishDiagnostics(diagnostics);
-		}
-	}
-
-	private void publishDiagnostics(Map<String,List<Diagnostic>> diagnosticMap)
-	{
-		diagnosticMap.forEach((uri, diagnostics)->
-		{
-			var parameters = new PublishDiagnosticsParams(uri, diagnostics);
-			client.publishDiagnostics(parameters);
-		});
-	}
-
 
 
 
@@ -280,13 +258,16 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		return CompletableFuture.supplyAsync(() -> result);
 	}
 
+
+
+
 	private List<Project> projectsContaining(String file)
 	{
 		var result = new ArrayList<Project>();
 
-		projects.forEach((uri,project) ->
+		projects.forEach((folder,project) ->
 		{
-			if (file.startsWith(uri))
+			if (IO.contains(folder,file))
 			{
 				result.add(project);
 			}
@@ -298,5 +279,23 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		}
 
 		return result;
+	}
+
+	private void onChange(String file, String text)
+	{
+		for (var project : projectsContaining(file))
+		{
+			var diagnostics = project.modify(file, text);
+			publishDiagnostics(diagnostics);
+		}
+	}
+
+	private void publishDiagnostics(Map<String,List<Diagnostic>> diagnosticMap)
+	{
+		diagnosticMap.forEach((uri, diagnostics)->
+		{
+			var parameters = new PublishDiagnosticsParams(uri, diagnostics);
+			client.publishDiagnostics(parameters);
+		});
 	}
 }

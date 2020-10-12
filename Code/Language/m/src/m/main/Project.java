@@ -1,14 +1,9 @@
 package m.main;
 
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Diagnostic;
@@ -45,25 +40,19 @@ public class Project
 	public Map<String,List<Diagnostic>> initialize()
 	{
 		GlobalData data = null;
-		try
+
+		for (var file : IO.filesWithExtension("Ⲙ", root))
 		{
-			var mfiles = Files.walk(Paths.get(new URI(root))).filter(f->f.toString().endsWith(".Ⲙ")).collect(Collectors.toList());
-
-			for (var file : mfiles)
-			{
-				var text = IO.readPath(file);
-				data = validator.modify(file.toString(),text);
-			}
-
-			var configurationFile = Paths.get(new URI(Paths.get(root,"Ⲙ.json").toString()));
-			if (Files.exists(configurationFile))
-			{
-				var json = IO.readPath(configurationFile);
-				configuration = new Configuration(json);
-			}
-
+			var text = IO.read(file);
+			data = validator.modify(file.toString(),text);
 		}
-		catch (Exception e){}
+
+		var configurationFile = IO.concat(root, "Ⲙ.json");
+		if (IO.existsFile(configurationFile))
+		{
+			var json = IO.read(configurationFile);
+			configuration = new Configuration(json);
+		}
 
 		if (data == null)
 		{
