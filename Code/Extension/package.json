@@ -53,30 +53,13 @@
 				"language": "m",
 				"path": "./declarative features/snippets.json"
 			}
-		],
-		"grammars":
-		[
-			{
-				"language": "m",
-				"scopeName": "source.m",
-				"path": "./declarative features/highlighting.json"
-			}
-		],
-		"commands":
-		[
-			{
-				"command": "m.restart",
-				"title": "Restart language server",
-				"category": "Ⲙ"
-			}
 		]
 	},
 	"activationEvents":
 	[
 		"onLanguage:m",
 		"workspaceContains:**/*.Ⲙ",
-		"workspaceContains:Ⲙ.json",
-		"onCommand:m.restart"
+		"workspaceContains:Ⲙ.json"
 	],
 	"main": "./main.js",
 	"dependencies":
