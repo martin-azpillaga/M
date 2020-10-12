@@ -43,7 +43,7 @@ exports.activate = function (context)
 	{
 		documentSelector:
 		[
-			{ scheme: "file", language: "m"	},
+			{ scheme: "file", language: "Ⲙ"	},
 			{ scheme: "file", pattern: "**/Ⲙ.json" }
 		]
 	};
