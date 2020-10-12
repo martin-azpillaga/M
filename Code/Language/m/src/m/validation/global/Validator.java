@@ -24,11 +24,12 @@ import m.validation.Problem.Severity;
 public class Validator
 {
 	Map<String, Set<Cluster>> fileToClusters;
-	Map<String, Cluster> componentToCluster;
+	Map<String, Cluster> componentToCluster; // acceleration structure
 	LocalValidator localValidator;
 	Map<String,LocalData> localDatas;
 	GlobalData data;
-	GlobalFunctions globalFunctions;
+	FunctionChecker functionChecker;
+	TypeChecker typeChecker;
 
 	public Validator()
 	{
@@ -36,24 +37,28 @@ public class Validator
 		componentToCluster = new HashMap<>();
 		localValidator = new LocalValidator();
 		localDatas = new HashMap<>();
-		data = new GlobalData(new Game(Library.ENGLISH), new HashMap<String,List<Problem>>());
-		globalFunctions = new GlobalFunctions();
+		data = new GlobalData();
+		functionChecker = new FunctionChecker();
+		typeChecker = new TypeChecker();
 	}
 
-	public GlobalData modify(String modifiedFile, String text)
+	public GlobalData modify(String file, String text)
 	{
-		var modifiedData = localValidator.validate(text);
+		var localData = localValidator.validate(text);
 
-		globalFunctions.validate(data, modifiedFile, modifiedData);
+		data.problems.put(file, localData.problems);
 
-		invalidateObsoleteMemory(modifiedFile);
+		functionChecker.validate(data, file, localData);
 
-		localDatas.put(modifiedFile, modifiedData);
+		/*
+		invalidateObsoleteMemory(file);
 
-		validate(modifiedData.expressionGraph, modifiedFile);
+		localDatas.put(file, localData);
+
+		validate(localData.expressionGraph, file);
 
 		checkTypes();
-
+		*/
 		return data;
 	}
 
@@ -253,11 +258,9 @@ public class Validator
 
 			problems.put(file, new ArrayList<Problem>(localData.problems));
 
-			var systemType = new FunctionType(new AtomicType[]{}, AtomicType.UNIT);
-
 			for (var function : localData.functions.values())
 			{
-				var userFunction = new UserFunction(function, systemType);
+				var userFunction = new UserFunction(function, FunctionType.systemType);
 				game.functions.add(userFunction);
 			}
 		}
@@ -329,7 +332,7 @@ public class Validator
 			}
 		}
 
-		var data = new GlobalData(game, problems);
+		//var data = new GlobalData(game, problems);
 
 		return data;
 	}

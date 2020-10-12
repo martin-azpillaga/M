@@ -60,7 +60,7 @@ public class Project
 
 	public Map<String,List<Diagnostic>> delete(String file)
 	{
-		if (file.endsWith("Ⲙ.json"))
+		if (file.endsWith(".json"))
 		{
 			configuration = new Configuration();
 			return new HashMap<>();
@@ -75,7 +75,7 @@ public class Project
 
 	public Map<String,List<Diagnostic>> modify(String file, String text)
 	{
-		if (file.endsWith("Ⲙ.json"))
+		if (file.endsWith(".json"))
 		{
 			configuration.parse(text,root);
 			return new HashMap<>();
@@ -112,11 +112,23 @@ public class Project
 			return new HashMap<>();
 		}
 
-		var diagnosticMap = convert(globalData.problems);
-
 		var game = globalData.game;
 
-		if (diagnosticMap.isEmpty())
+		var diagnosticMap = convert(globalData.problems);
+
+		var hasErrors = false;
+		for (var diagnosticList : diagnosticMap.values())
+		{
+			for (var diagnostic : diagnosticList)
+			{
+				if (diagnostic.getSeverity() == DiagnosticSeverity.Error)
+				{
+					hasErrors = true;
+				}
+			}
+		}
+
+		if (!hasErrors)
 		{
 			generator.generate(game, configuration);
 		}

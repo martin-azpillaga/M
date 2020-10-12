@@ -8,16 +8,18 @@ public class Configuration
 	public String Unreal;
 	public String Godot;
 
+	Gson gson;
+
 	public Configuration()
 	{
 		this.Unity = "./Output/Unity";
 		this.Unreal = "./Output/Unreal";
 		this.Godot = "./Output/Godot";
+		this.gson = new Gson();
 	}
 
 	public void parse(String json, String root)
 	{
-		var gson = new Gson();
 		var configuration = gson.fromJson(json, getClass());
 		this.Unity = parsePath(configuration.Unity, root);
 		this.Unreal = parsePath(configuration.Unreal, root);

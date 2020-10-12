@@ -50,6 +50,7 @@ public class IO {
 			var url = new URI(uri).toURL();
 			var inputStream = url.openStream();
 			Scanner s = new Scanner(inputStream);
+			s.useDelimiter("\\A");
 			String result = s.hasNext() ? s.next() : "";
 			s.close();
 			return result;
@@ -117,7 +118,11 @@ public class IO {
 
 	public static void setBaseFolder(String folder)
 	{
-		baseFolder = folder;
+		try
+		{
+			baseFolder = Paths.get(new URI(folder)).toString();
+		}
+		catch (Exception e){}
 	}
 
 	public static boolean exists(String file)
@@ -195,9 +200,15 @@ public class IO {
 	{
 		try
 		{
-			Files.write(Paths.get(baseFolder,file), write(lines(lines)).getBytes());
+			var text = write(lines(lines)).getBytes();
+			var absolutePath = Paths.get(baseFolder,file);
+			Files.createDirectories(absolutePath.getParent());
+			Files.write(absolutePath, text);
 		}
-		catch (IOException e) {}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	private static void writeLine(Object line)

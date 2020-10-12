@@ -57,6 +57,7 @@ import org.eclipse.xtext.EcoreUtil2;
 import m.library.Library;
 import m.library.symbols.Component;
 import m.library.types.AtomicType;
+import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.model.Application;
 import m.model.Assignment;
@@ -148,7 +149,7 @@ public class Unity
 		for (var function : game.functions)
 		{
 			var type = function.type;
-			if (type.parameterTypes == null && type.returnType == UNIT)
+			if (type == FunctionType.systemType)
 			{
 				systems.add(function);
 				writeFile
