@@ -62,6 +62,10 @@ function start(context)
 		[{
 			scheme: "file",
 			language: "m"
+		},
+		{
+			scheme: "file",
+			pattern: "**/Ⲙ.json"
 		}]
 	};
 
