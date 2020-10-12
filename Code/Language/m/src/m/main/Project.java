@@ -1,6 +1,5 @@
 package m.main;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -22,6 +21,7 @@ import m.generator.Generator;
 import m.validation.Problem;
 import m.validation.global.GlobalData;
 import m.validation.global.Validator;
+import m.model.Configuration;
 
 public class Project
 {
@@ -30,6 +30,7 @@ public class Project
 	Validator validator;
 	Generator generator;
 	Inspector inspector;
+	Configuration configuration;
 
 	public Project(String root)
 	{
@@ -51,6 +52,14 @@ public class Project
 				var text = new String(Files.readAllBytes(file));
 				data = validator.modify(file.toString(),text);
 			}
+
+			var configurationFile = Paths.get(root,"Ⲙ.json");
+			if (Files.exists(configurationFile))
+			{
+				var json = new String(Files.readAllBytes(configurationFile));
+				configuration = new Configuration(json);
+			}
+
 		}
 		catch (IOException e){}
 
@@ -80,9 +89,17 @@ public class Project
 	{
 		if (!contains(modifiedFile)) return null;
 
-		var globalData = validator.modify(modifiedFile, text);
+		if (modifiedFile.endsWith("Ⲙ.json"))
+		{
+			configuration = new Configuration(text);
+			return new HashMap<>();
+		}
+		else
+		{
+			var globalData = validator.modify(modifiedFile, text);
 
-		return check(globalData);
+			return check(globalData);
+		}
 	}
 
 	public String hover(String file, Position position)
@@ -110,21 +127,7 @@ public class Project
 
 		if (diagnosticMap.isEmpty())
 		{
-			var path = Paths.get(root, "Ⲙ.json");
-
-			if (new File(path.toString()).exists())
-			{
-				try
-				{
-					var configuration = new String(Files.readAllBytes(path));
-					generator.generate(game, root, configuration);
-				}
-				catch (IOException e){}
-			}
-			else
-			{
-				generator.generate(game, Paths.get(root));
-			}
+			generator.generate(game, root, configuration);
 		}
 
 		return diagnosticMap;

@@ -289,12 +289,6 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 	}
 
 
-
-	private String encode(String path)
-	{
-		return path;
-	}
-
 	private String decode(String path)
 	{
 		var result = "";

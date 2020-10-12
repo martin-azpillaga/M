@@ -3,24 +3,39 @@ package m.generator;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import com.google.gson.Gson;
-
+import m.model.Configuration;
 import m.model.Game;
 
 public class Generator
 {
-	public void generate(Game game, String root, String configurationData)
+	public void generate(Game game, String root, Configuration configuration)
 	{
-		var gson = new Gson();
-		var configuration = gson.fromJson(configurationData, Configuration.class);
-
-		generate(game, Engine.UNITY, configuration.Unity);
-		generate(game, Engine.UNREAL, configuration.Unreal);
-		generate(game, Engine.GODOT, configuration.Godot);
+		if (configuration != null)
+		{
+			generate(game, Engine.UNITY, configuration.Unity, root);
+			generate(game, Engine.UNREAL, configuration.Unreal, root);
+			generate(game, Engine.GODOT, configuration.Godot, root);
+		}
+		else
+		{
+			for (var engine : Engine.values())
+			{
+				var defaultPath = Paths.get(root.toString(), engine.identifier).toString();
+				generate(game, engine, defaultPath, root);
+			}
+		}
 	}
 
-	public void generate(Game game, Engine engine, String path)
+	public void generate(Game game, Engine engine, String path, String root)
 	{
+		if (path == null)
+		{
+			return;
+		}
+		if (path.startsWith("./"))
+		{
+			path = path.replace(".", root);
+		}
 		Writer.setBaseFolder(path);
 		switch (engine)
 		{
@@ -35,25 +50,7 @@ public class Generator
 		for (var engine : Engine.values())
 		{
 			var defaultPath = Paths.get(path.toString(), engine.identifier).toString();
-			generate(game, engine, defaultPath);
+			generate(game, engine, defaultPath, defaultPath);
 		}
 	}
-
-	private void generate(Game game, Engine engine, String root, String path)
-	{
-		if (path == null) return;
-
-		if (path.startsWith("."))
-		{
-			path = path.replace(".", root);
-		}
-		generate(game, engine, path);
-	}
-}
-
-class Configuration
-{
-	public String Unity;
-	public String Unreal;
-	public String Godot;
 }
