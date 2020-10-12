@@ -15,9 +15,9 @@ public class Validator
 
 	public Validator()
 	{
-		localValidator = new LocalValidator();
-
 		data = new GlobalData();
+
+		localValidator = new LocalValidator();
 		functionChecker = new FunctionChecker(data);
 		typeChecker = new TypeChecker(data);
 	}
@@ -32,7 +32,7 @@ public class Validator
 
 		data.modifiedFiles.add(file);
 
-		var modified = functionChecker.validate(data, file, localData);
+		var modified = functionChecker.validate(file, localData);
 
 		data.modifiedFiles.addAll(modified);
 

@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Set;
 
 import m.library.Library;
-import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.model.ModelPackage;
 import m.model.UserFunction;
@@ -18,19 +17,19 @@ import m.validation.local.LocalData;
 
 public class FunctionChecker
 {
-	GlobalData data;
+	GlobalData memory;
 
 	Map<String,List<UserFunction>> fileToFunctions;
 	Map<String,Map<String,List<Problem>>> nameToProblems;
 
 	public FunctionChecker(GlobalData data)
 	{
-		this.data = data;
+		this.memory = data;
 		this.fileToFunctions = new HashMap<>();
 		this.nameToProblems = new HashMap<>();
 	}
 
-	public Set<String> validate(GlobalData memory, String newFile, LocalData newData)
+	public Set<String> validate(String newFile, LocalData newData)
 	{
 		// 1 Remove obsolete data from caches
 
@@ -80,17 +79,17 @@ public class FunctionChecker
 					{
 						nameExists = true;
 
-						var problems = getOrCreate(memory.problems, existingFile);
+						var problems = memory.problems.getOrDefault(existingFile, new ArrayList<Problem>());
 						var problem = new Problem(f.function, ModelPackage.Literals.FUNCTION__NAME, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.Problem.REDEFINED_SYMBOL));
 						problems.add(problem);
 
-						var problemsB = getOrCreate(memory.problems, newFile);
+						var problemsB = memory.problems.getOrDefault(newFile, new ArrayList<Problem>());
 						var problemB = new Problem(newFunction, ModelPackage.Literals.FUNCTION__NAME, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.Problem.REDEFINED_SYMBOL));
 						problemsB.add(problemB);
 
-						var nameProblems = getOrCreateMap(nameToProblems, name);
-						getOrCreate(nameProblems, existingFile).add(problem);
-						getOrCreate(nameProblems, newFile).add(problemB);
+						var nameProblems = nameToProblems.getOrDefault(name, new HashMap<String,List<Problem>>());
+						nameProblems.getOrDefault(existingFile, new ArrayList<>()).add(problem);
+						nameProblems.getOrDefault(newFile, new ArrayList<>()).add(problemB);
 					}
 				}
 			}
@@ -106,27 +105,5 @@ public class FunctionChecker
 		fileToFunctions.put(newFile, newFunctions);
 
 		return new HashSet<>();
-	}
-
-	private <K,V> List<V> getOrCreate(Map<K,List<V>> map, K key)
-	{
-		var existing = map.get(key);
-		if (existing == null)
-		{
-			existing = new ArrayList<V>();
-			map.put(key, existing);
-		}
-		return existing;
-	}
-
-	private <K,A,B> Map<A,B> getOrCreateMap(Map<K,Map<A,B>> map, K key)
-	{
-		var existing = map.get(key);
-		if (existing == null)
-		{
-			existing = new HashMap<A,B>();
-			map.put(key, existing);
-		}
-		return existing;
 	}
 }
