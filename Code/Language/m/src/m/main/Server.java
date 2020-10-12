@@ -183,13 +183,13 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params)
 	{
-		onChange(params.getTextDocument().getUri(), params.getTextDocument().getText());
+		modify(params.getTextDocument().getUri(), params.getTextDocument().getText());
 	}
 
 	@Override
 	public void didChange(DidChangeTextDocumentParams params)
 	{
-		onChange(params.getTextDocument().getUri(), params.getContentChanges().get(0).getText());
+		modify(params.getTextDocument().getUri(), params.getContentChanges().get(0).getText());
 	}
 
 	@Override
@@ -281,7 +281,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		return result;
 	}
 
-	private void onChange(String file, String text)
+	private void modify(String file, String text)
 	{
 		for (var project : projectsContaining(file))
 		{

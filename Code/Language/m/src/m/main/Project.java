@@ -35,6 +35,7 @@ public class Project
 		this.generator = new Generator();
 		this.validator = new Validator();
 		this.inspector = new Inspector();
+		this.configuration = new Configuration();
 	}
 
 	public Map<String,List<Diagnostic>> initialize()
@@ -44,31 +45,24 @@ public class Project
 		for (var file : IO.filesWithExtension("Ⲙ", root))
 		{
 			var text = IO.read(file);
-			data = validator.modify(file.toString(),text);
+			data = validator.modify(file,text);
 		}
 
 		var configurationFile = IO.concat(root, "Ⲙ.json");
 		if (IO.existsFile(configurationFile))
 		{
 			var json = IO.read(configurationFile);
-			configuration = new Configuration(json);
+			configuration.parse(json, root);
 		}
 
-		if (data == null)
-		{
-			return new HashMap<>();
-		}
-		else
-		{
-			return check(data);
-		}
+		return check(data);
 	}
 
 	public Map<String,List<Diagnostic>> delete(String file)
 	{
 		if (file.endsWith("Ⲙ.json"))
 		{
-			configuration = null;
+			configuration = new Configuration();
 			return new HashMap<>();
 		}
 		else
@@ -83,7 +77,7 @@ public class Project
 	{
 		if (file.endsWith("Ⲙ.json"))
 		{
-			configuration = new Configuration(text);
+			configuration.parse(text,root);
 			return new HashMap<>();
 		}
 		else
@@ -113,13 +107,18 @@ public class Project
 
 	private Map<String,List<Diagnostic>> check(GlobalData globalData)
 	{
+		if (globalData == null)
+		{
+			return new HashMap<>();
+		}
+
 		var diagnosticMap = convert(globalData.problems);
 
 		var game = globalData.game;
 
 		if (diagnosticMap.isEmpty())
 		{
-			generator.generate(game, root, configuration);
+			generator.generate(game, configuration);
 		}
 
 		return diagnosticMap;
