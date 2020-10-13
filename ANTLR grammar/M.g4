@@ -1,0 +1,16 @@
+grammar M;
+file: functions+=function* EOF;
+function: ID '(' ')' '{' statement* '}';
+statement: query # iteratio|selection #s|delegation#d|assignment#a;
+query: 'foreach' ID '{' statement* '}';
+selection: 'if' ID '{' statement* '}';
+delegation: application;
+assignment: expression '=' expression;
+expression: value|cell|application|unary|expression OPERATOR expression|'(' expression ')';
+value: ID;
+cell: ID '.' ID;
+unary: OPERATOR expression;
+application: ID '(' arguments ')';
+arguments: (expression (',' expression)*)?;
+ID: [a-z]+;
+OPERATOR: '+'|'-';
