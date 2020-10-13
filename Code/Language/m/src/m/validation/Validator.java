@@ -1,9 +1,9 @@
 package m.validation;
 
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import m.model.Game;
 import m.validation.global.FunctionChecker;
@@ -15,46 +15,62 @@ public class Validator
 	LocalValidator localValidator;
 	TypeChecker typeChecker;
 	FunctionChecker functionChecker;
+	Result result;
 
 	public Validator()
 	{
 		localValidator = new LocalValidator();
 		functionChecker = new FunctionChecker();
 		typeChecker = new TypeChecker();
+		result = new Result();
 	}
 
-	public Result modify(String file, String text)
+	public Result validate(String file, String text)
 	{
-		var result = new Result();
+		result.problems.clear();
 
-		result.modifiedFiles = new HashSet<>();
+		var localResult = localValidator.validate(text);
 
-		var localData = localValidator.validate(text);
+		var functions = functionChecker.validate(file, localResult);
 
-		result.problems.put(file, localData.problems);
+		var types = typeChecker.validate(file, localResult);
 
-		result.modifiedFiles.add(file);
 
-		var modified = functionChecker.validate(file, localData);
 
-		result.modifiedFiles.addAll(modified.keySet());
+		result.problems.put(file, localResult.problems);
+		functions.problems.forEach((f, problems)->
+		{
+			result.problems.getOrDefault(f, new ArrayList<Problem>()).addAll(problems);
+		});
+		types.problems.forEach((f, problems)->
+		{
+			result.problems.getOrDefault(f, new ArrayList<Problem>()).addAll(problems);
+		});
 
-		modified = typeChecker.validate(file, localData);
 
-		result.modifiedFiles.addAll(modified.keySet());
+		for (var component : types.invalidatedComponents)
+		{
+			result.game.components.remove(component);
+		}
+		result.game.components.putAll(types.newComponents);
 
-		return new Result();
+		for (var function : functions.invalidatedFunctions)
+		{
+			result.game.functions.remove(function);
+		}
+		result.game.functions.addAll(functions.newFunctions);
+
+		return result;
 	}
 
 	public Result delete(String file)
 	{
-		return new Result();
+		return result;
 	}
 
 	public class Result
 	{
 		public Game game;
 		public Map<String,List<Problem>> problems;
-		public Set<String> modifiedFiles;
 	}
 }

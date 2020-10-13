@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Diagnostic;
@@ -45,7 +44,7 @@ public class Project
 		for (var file : IO.filesWithExtension("Ⲙ", root))
 		{
 			var text = IO.read(file);
-			data = validator.modify(file,text);
+			data = validator.validate(file,text);
 		}
 
 		var configurationFile = IO.concat(root, "Ⲙ.json");
@@ -82,7 +81,7 @@ public class Project
 		}
 		else
 		{
-			var globalData = validator.modify(file, text);
+			var globalData = validator.validate(file, text);
 
 			return check(globalData);
 		}
@@ -114,7 +113,7 @@ public class Project
 
 		var game = globalData.game;
 
-		var diagnosticMap = convert(globalData.problems, globalData.modifiedFiles);
+		var diagnosticMap = convert(globalData.problems);
 
 		var hasErrors = false;
 		for (var diagnosticList : diagnosticMap.values())
@@ -136,7 +135,7 @@ public class Project
 		return diagnosticMap;
 	}
 
-	private Map<String,List<Diagnostic>> convert(Map<String,List<Problem>> problemMap, Set<String> filter)
+	private Map<String,List<Diagnostic>> convert(Map<String,List<Problem>> problemMap)
 	{
 		var diagnosticMap = new HashMap<String, List<Diagnostic>>();
 
@@ -147,11 +146,6 @@ public class Project
 
 		problemMap.forEach((file, problems) ->
 		{
-			if (!filter.contains(file))
-			{
-				return;
-			}
-
 			var diagnostics = new ArrayList<Diagnostic>();
 			for (var problem : problems)
 			{

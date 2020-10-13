@@ -277,7 +277,7 @@ public class Context
 		userVariables = popped;
 	}
 
-	public LocalData buildData(String text)
+	public LocalValidator.Result buildData(String text)
 	{
 		return graph.buildData(userFunctions, problems);
 	}

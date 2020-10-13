@@ -7,6 +7,13 @@ import static m.model.ModelPackage.Literals.BINDING_BLOCK__NAME;
 import static m.model.ModelPackage.Literals.BLOCK__NAME;
 import static m.model.ModelPackage.Literals.UNARY__OPERATOR;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.eclipse.xtext.EcoreUtil2;
 
 import m.library.Library;
@@ -37,12 +44,12 @@ public class LocalValidator
 		parser = new Parser();
 	}
 
-	public LocalData validate(String text)
+	public Result validate(String text)
 	{
 		var parseResult = parser.parse(text);
 		var file = (File) parseResult.getRootASTElement();
 
-		LocalData result;
+		Result result;
 
 		if (file != null)
 		{
@@ -52,7 +59,7 @@ public class LocalValidator
 		}
 		else
 		{
-			result = new LocalData();
+			result = new Result();
 		}
 
 		for (var problem : parseResult.getSyntaxErrors())
@@ -198,6 +205,27 @@ public class LocalValidator
 			{
 				validate(argument);
 			}
+		}
+	}
+
+	public static class Result
+	{
+		public final Set<ExpressionNode> expressionGraph;
+		public final Map<String, Function> functions;
+		public final List<Problem> problems;
+
+		public Result()
+		{
+			this.expressionGraph = new HashSet<>();
+			this.functions = new HashMap<>();
+			this.problems = new ArrayList<>();
+		}
+
+		public Result(Set<ExpressionNode> expressionGraph, Map<String,Function> functions, List<Problem> problems)
+		{
+			this.expressionGraph = expressionGraph;
+			this.functions = functions;
+			this.problems = problems;
 		}
 	}
 }

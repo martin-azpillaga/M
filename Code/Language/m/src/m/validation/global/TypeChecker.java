@@ -15,26 +15,23 @@ import m.model.Game;
 import m.validation.Problem;
 import m.validation.Problem.Severity;
 import m.validation.local.ExpressionNode;
-import m.validation.local.LocalData;
+import m.validation.local.LocalValidator;
 
 public class TypeChecker
 {
-	Map<String,Type> memory;
-
 	Map<String, Set<Cluster>> fileToClusters;
 	Map<String, Cluster> componentToCluster; // acceleration structure
 
 
 	public TypeChecker()
 	{
-		this.memory = null;
 		this.fileToClusters = new HashMap<>();
 		this.componentToCluster = new HashMap<>();
 	}
 
-	public Map<String,List<Problem>> validate(String file, LocalData localData)
+	public Result validate(String file, LocalValidator.Result localData)
 	{
-		return new HashMap<>();
+		return new Result();
 	}
 
 	private void invalidateObsoleteMemory(String modifiedFile)

@@ -72,8 +72,8 @@ public class ExpressionGraph
 		return node;
 	}
 
-	public LocalData buildData(Map<String,Function> functions, List<Problem> problems)
+	public LocalValidator.Result buildData(Map<String,Function> functions, List<Problem> problems)
 	{
-		return new LocalData(connectedComponents, functions, problems);
+		return new LocalValidator.Result(connectedComponents, functions, problems);
 	}
 }
