@@ -1,7 +1,6 @@
 package m.validation;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -68,7 +67,7 @@ public class Validator
 		return result;
 	}
 
-	public class Result
+	public static class Result
 	{
 		public Game game;
 		public Map<String,List<Problem>> problems;

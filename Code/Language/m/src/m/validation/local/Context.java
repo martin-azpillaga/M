@@ -22,6 +22,7 @@ import m.library.Library;
 import m.library.types.*;
 import m.model.*;
 import m.validation.Problem;
+import m.validation.local.ExpressionNode.Typing;
 
 public class Context
 {

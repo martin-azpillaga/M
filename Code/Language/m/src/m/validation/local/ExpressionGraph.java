@@ -9,6 +9,8 @@ import m.library.rules.BindingReason;
 import m.model.Expression;
 import m.model.Function;
 import m.validation.Problem;
+import m.validation.local.ExpressionNode.Binding;
+import m.validation.local.ExpressionNode.Typing;
 
 public class ExpressionGraph
 {
