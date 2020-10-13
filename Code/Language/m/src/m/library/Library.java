@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import m.library.rules.BindingReason;
-import m.library.rules.Problem;
+import m.library.rules.ProblemKind;
 import m.library.rules.TypingReason;
 import m.library.symbols.Block;
 import m.library.symbols.Component;
@@ -478,7 +478,7 @@ public enum Library
 	Map<Function, String> functionToName;
 	Map<Block, String> blockToName;
 	Map<AtomicType, String> typeToName;
-	Map<Problem, String> problemToName;
+	Map<ProblemKind, String> problemToName;
 	Map<BindingReason, String> bindingReasonToName;
 	Map<TypingReason, String> typingReasonToName;
 
@@ -492,7 +492,7 @@ public enum Library
 	Map<String, Block> nameToBlock;
 	Map<String, AtomicType> nameToType;
 
-	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Problem, String> problems, java.util.function.Function<BindingReason, String> bindingReasons, java.util.function.Function<TypingReason, String> typingReasons, java.util.function.Function<Value, String> valueDescriptions, java.util.function.Function<Component, String> componentDescriptions, java.util.function.Function<Function, String> functionDescriptions)
+	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<ProblemKind, String> problems, java.util.function.Function<BindingReason, String> bindingReasons, java.util.function.Function<TypingReason, String> typingReasons, java.util.function.Function<Value, String> valueDescriptions, java.util.function.Function<Component, String> componentDescriptions, java.util.function.Function<Function, String> functionDescriptions)
 	{
 		valueToName = forward(values, Value.values());
 		nameToValue = reverse(values, Value.values());
@@ -509,7 +509,7 @@ public enum Library
 		typeToName = forward(atomicTypes, AtomicType.values());
 		nameToType = reverse(atomicTypes, AtomicType.values());
 
-		problemToName = forward(problems, Problem.values());
+		problemToName = forward(problems, ProblemKind.values());
 		bindingReasonToName = forward(bindingReasons, BindingReason.values());
 		typingReasonToName = forward(typingReasons, TypingReason.values());
 
@@ -567,7 +567,7 @@ public enum Library
 		return nameToBlock.get(name);
 	}
 
-	public String getProblem(Problem problem)
+	public String getProblem(ProblemKind problem)
 	{
 		return problemToName.get(problem);
 	}

@@ -17,8 +17,7 @@ import org.eclipse.xtext.nodemodel.INode;
 import m.generator.Generator;
 import m.generator.IO;
 import m.validation.Problem;
-import m.validation.global.GlobalData;
-import m.validation.global.Validator;
+import m.validation.Validator;
 import m.model.Configuration;
 
 public class Project
@@ -41,7 +40,7 @@ public class Project
 
 	public Map<String,List<Diagnostic>> initialize()
 	{
-		GlobalData data = null;
+		Validator.Result data = null;
 
 		for (var file : IO.filesWithExtension("Ⲙ", root))
 		{
@@ -106,7 +105,7 @@ public class Project
 
 
 
-	private Map<String,List<Diagnostic>> check(GlobalData globalData)
+	private Map<String,List<Diagnostic>> check(Validator.Result globalData)
 	{
 		if (globalData == null)
 		{

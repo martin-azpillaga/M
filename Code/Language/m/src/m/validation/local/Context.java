@@ -1,7 +1,7 @@
 package m.validation.local;
 
 import static m.library.rules.BindingReason.*;
-import static m.library.rules.Problem.*;
+import static m.library.rules.ProblemKind.*;
 import static m.library.rules.TypingReason.*;
 import static m.model.ModelPackage.Literals.*;
 import static m.validation.Problem.Severity.*;

@@ -1,6 +1,6 @@
 package m.validation.local;
 
-import static m.library.rules.Problem.*;
+import static m.library.rules.ProblemKind.*;
 import static m.model.ModelPackage.Literals.APPLICATION__NAME;
 import static m.model.ModelPackage.Literals.BINARY__OPERATOR;
 import static m.model.ModelPackage.Literals.BINDING_BLOCK__NAME;

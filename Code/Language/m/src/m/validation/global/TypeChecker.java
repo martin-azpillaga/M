@@ -19,22 +19,22 @@ import m.validation.local.LocalData;
 
 public class TypeChecker
 {
-	GlobalData data;
+	Map<String,Type> memory;
 
 	Map<String, Set<Cluster>> fileToClusters;
 	Map<String, Cluster> componentToCluster; // acceleration structure
 
 
-	public TypeChecker(GlobalData data)
+	public TypeChecker()
 	{
-		this.data = data;
+		this.memory = null;
 		this.fileToClusters = new HashMap<>();
 		this.componentToCluster = new HashMap<>();
 	}
 
-	public Set<String> validate(String file, LocalData localData)
+	public Map<String,List<Problem>> validate(String file, LocalData localData)
 	{
-		return new HashSet<>();
+		return new HashMap<>();
 	}
 
 	private void invalidateObsoleteMemory(String modifiedFile)
@@ -212,7 +212,7 @@ public class TypeChecker
 		return definitionCluster;
 	}
 
-	private GlobalData checkTypes()
+	private Map<String,List<Problem>> checkTypes()
 	{
 		var problems = new HashMap<String,List<Problem>>();
 
@@ -252,7 +252,7 @@ public class TypeChecker
 						{
 							problems.put(file, new ArrayList<Problem>());
 						}
-						problems.get(file).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.Problem.UNDECIDABLE_TYPE)));
+						problems.get(file).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.ProblemKind.UNDECIDABLE_TYPE)));
 
 						for (var binding : node.bindings)
 						{
@@ -280,14 +280,28 @@ public class TypeChecker
 					{
 						problems.put(file, new ArrayList<Problem>());
 					}
-					problems.get(file).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.Problem.INCOMPATIBLE_TYPES)));
+					problems.get(file).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.ProblemKind.INCOMPATIBLE_TYPES)));
 				}
 			}
 		}
 
 		//var data = new GlobalData(game, problems);
 
-		return data;
+		return problems;
+	}
+
+	public static class Result
+	{
+		public final Map<String,Type> newComponents;
+		public final Set<String> invalidatedComponents;
+		public final Map<String,List<Problem>> problems;
+
+		public Result()
+		{
+			newComponents = new HashMap<>();
+			invalidatedComponents = new HashSet<>();
+			problems = new HashMap<>();
+		}
 	}
 }
 

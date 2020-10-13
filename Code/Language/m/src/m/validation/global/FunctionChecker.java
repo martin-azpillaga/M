@@ -2,10 +2,8 @@ package m.validation.global;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import m.library.Library;
 import m.library.types.FunctionType;
@@ -17,20 +15,21 @@ import m.validation.local.LocalData;
 
 public class FunctionChecker
 {
-	GlobalData memory;
+	List<UserFunction> memory;
 
 	Map<String,List<UserFunction>> fileToFunctions;
 	Map<String,Map<String,List<Problem>>> nameToProblems;
 
-	public FunctionChecker(GlobalData data)
+	public FunctionChecker()
 	{
-		this.memory = data;
+		this.memory = null;
 		this.fileToFunctions = new HashMap<>();
 		this.nameToProblems = new HashMap<>();
 	}
 
-	public Set<String> validate(String newFile, LocalData newData)
+	public Map<String, List<Problem>> validate(String newFile, LocalData newData)
 	{
+		var result = new HashMap<String, List<Problem>>();
 		// 1 Remove obsolete data from caches
 
 		// Remove functions present in last frame in this file from game
@@ -39,7 +38,7 @@ public class FunctionChecker
 		{
 			for (var obsoleteFunction : obsoleteFunctions)
 			{
-				memory.game.functions.remove(obsoleteFunction);
+				memory.remove(obsoleteFunction);
 
 				// Remove problems caused because of function name: remove from memory
 				var obsoleteProblems = nameToProblems.get(obsoleteFunction.getName());
@@ -50,7 +49,7 @@ public class FunctionChecker
 						var file = entry.getKey();
 						var problems = entry.getValue();
 
-						memory.problems.get(file).removeAll(problems);
+						//memory.problems.get(file).removeAll(problems);
 					}
 				}
 			}
@@ -79,12 +78,12 @@ public class FunctionChecker
 					{
 						nameExists = true;
 
-						var problems = memory.problems.getOrDefault(existingFile, new ArrayList<Problem>());
-						var problem = new Problem(f.function, ModelPackage.Literals.FUNCTION__NAME, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.Problem.REDEFINED_SYMBOL));
+						var problems = result.getOrDefault(existingFile, new ArrayList<Problem>());
+						var problem = new Problem(f.function, ModelPackage.Literals.FUNCTION__NAME, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.ProblemKind.REDEFINED_SYMBOL));
 						problems.add(problem);
 
-						var problemsB = memory.problems.getOrDefault(newFile, new ArrayList<Problem>());
-						var problemB = new Problem(newFunction, ModelPackage.Literals.FUNCTION__NAME, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.Problem.REDEFINED_SYMBOL));
+						var problemsB = result.getOrDefault(newFile, new ArrayList<Problem>());
+						var problemB = new Problem(newFunction, ModelPackage.Literals.FUNCTION__NAME, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.ProblemKind.REDEFINED_SYMBOL));
 						problemsB.add(problemB);
 
 						var nameProblems = nameToProblems.getOrDefault(name, new HashMap<String,List<Problem>>());
@@ -99,11 +98,11 @@ public class FunctionChecker
 
 			if (!nameExists)
 			{
-				memory.game.functions.add(userFunction);
+				memory.add(userFunction);
 			}
 		}
 		fileToFunctions.put(newFile, newFunctions);
 
-		return new HashSet<>();
+		return result;
 	}
 }
