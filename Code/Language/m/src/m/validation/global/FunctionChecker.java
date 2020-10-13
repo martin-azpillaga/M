@@ -7,11 +7,11 @@ import java.util.Map;
 
 import m.library.Library;
 import m.library.types.FunctionType;
+import m.model.Function;
 import m.model.ModelPackage;
 import m.model.UserFunction;
 import m.validation.Problem;
 import m.validation.Problem.Severity;
-import m.validation.local.LocalValidator;
 
 public class FunctionChecker
 {
@@ -31,7 +31,7 @@ public class FunctionChecker
 		public Map<String,List<Problem>> problems;
 	}
 
-	public Result validate(String newFile, LocalValidator.Result newData)
+	public Result validate(String newFile, Map<String,Function> newData)
 	{
 		var result = new Result();
 		// 1 Remove obsolete data from caches
@@ -52,7 +52,7 @@ public class FunctionChecker
 		fileToFunctions.remove(newFile);
 		var newFunctions = new ArrayList<UserFunction>();
 
-		for (var entry : newData.functions.entrySet())
+		for (var entry : newData.entrySet())
 		{
 			var name = entry.getKey();
 			var newFunction = entry.getValue();

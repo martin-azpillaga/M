@@ -15,7 +15,6 @@ import m.model.Game;
 import m.validation.Problem;
 import m.validation.Problem.Severity;
 import m.validation.local.ExpressionNode;
-import m.validation.local.LocalValidator;
 
 public class TypeChecker
 {
@@ -29,7 +28,7 @@ public class TypeChecker
 		this.componentToCluster = new HashMap<>();
 	}
 
-	public Result validate(String file, LocalValidator.Result localData)
+	public Result validate(String file, Set<ExpressionNode> localData)
 	{
 		return new Result();
 	}

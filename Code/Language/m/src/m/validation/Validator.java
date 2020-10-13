@@ -28,15 +28,15 @@ public class Validator
 	{
 		result.problems.clear();
 
-		var localResult = localValidator.validate(text);
+		var local = localValidator.validate(text);
 
-		var functions = functionChecker.validate(file, localResult);
+		var functions = functionChecker.validate(file, local.functions);
 
-		var types = typeChecker.validate(file, localResult);
+		var types = typeChecker.validate(file, local.expressionGraph);
 
 
 
-		result.problems.put(file, localResult.problems);
+		result.problems.put(file, local.problems);
 		functions.problems.forEach((f, problems)->
 		{
 			result.problems.getOrDefault(f, new ArrayList<Problem>()).addAll(problems);
