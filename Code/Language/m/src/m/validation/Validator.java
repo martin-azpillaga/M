@@ -7,27 +7,27 @@ import java.util.Map;
 
 import m.library.Library;
 import m.model.Game;
-import m.validation.global.FunctionChecker;
-import m.validation.global.TypeChecker;
-import m.validation.local.LocalValidator;
 
 public class Validator
 {
+	Result result;
+
 	Parser parser;
 	ScopeValidator scopeValidator;
 	TypeValidator typeValidator;
 
 	public Validator()
 	{
+		var library = Library.ENGLISH;
+
+		result = new Result(new Game(library), new HashMap<>());
 		parser = new Parser();
-		scopeValidator = new ScopeValidator();
+		scopeValidator = new ScopeValidator(library);
 		typeValidator = new TypeValidator();
 	}
 
 	public Result validate(String file, String text)
 	{
-		var result = new Result();
-
 		var parsed = parser.validate(text);
 
 		var scoped = scopeValidator.validate(file, parsed.file);
@@ -49,7 +49,7 @@ public class Validator
 
 	public Result delete(String file)
 	{
-		return new Result();
+		return result;
 	}
 
 	public static class Result
@@ -57,10 +57,10 @@ public class Validator
 		public Game game;
 		public Map<String,List<Problem>> problems;
 
-		public Result()
+		public Result(Game game, Map<String,List<Problem>> problems)
 		{
-			game = new Game(Library.ENGLISH);
-			problems = new HashMap<>();
+			this.game = game;
+			this.problems = problems;
 		}
 	}
 }

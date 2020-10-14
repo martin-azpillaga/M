@@ -85,6 +85,15 @@ public class ScopeValidator
 	{
 		var result = new Result();
 
+		validate(model);
+
+		result.expressionGraph = graph;
+
+		if ( ! problems.isEmpty())
+		{
+			result.problems.put(file, problems);
+		}
+
 		return result;
 	}
 
