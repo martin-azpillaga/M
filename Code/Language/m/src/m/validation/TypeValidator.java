@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import m.library.Library;
+import m.library.rules.ProblemKind;
 import m.library.types.Type;
 import m.model.Cell;
 import m.model.ExpressionGraph;
@@ -20,11 +21,15 @@ import m.validation.Problem.Severity;
 
 public class TypeValidator
 {
+	Result result;
+
 	Map<String, Set<Cluster>> fileToClusters;
 	Map<String, Cluster> componentToCluster; // acceleration structure
 
 	public TypeValidator()
 	{
+		this.result = new Result();
+
 		this.fileToClusters = new HashMap<>();
 		this.componentToCluster = new HashMap<>();
 	}
@@ -36,8 +41,6 @@ public class TypeValidator
 
 	public Result validate(String file, File model, ExpressionGraph graph)
 	{
-		var result = new Result();
-
 		invalidateObsoleteMemory(file);
 		validate(graph.connectedComponents, file);
 		checkTypes();
@@ -122,13 +125,7 @@ public class TypeValidator
 				}
 			}
 
-			var clusters = fileToClusters.get(modifiedFile);
-			if (clusters == null)
-			{
-				clusters = new HashSet<Cluster>();
-				fileToClusters.put(modifiedFile, clusters);
-			}
-			clusters.add(cluster);
+			fileToClusters.computeIfAbsent(modifiedFile, f->new HashSet<>()).add(cluster);
 		}
 	}
 
@@ -220,17 +217,21 @@ public class TypeValidator
 		return definitionCluster;
 	}
 
-	private Map<String,List<Problem>> checkTypes()
+	private void checkTypes()
 	{
-		var problems = new HashMap<String,List<Problem>>();
+		result.components.clear();
+		result.functions.clear();
+		result.problems.clear();
 
-		var game = new Game(Library.ENGLISH);
+		var allClusters = new HashSet<Cluster>();
 
-		for (var entry : componentToCluster.entrySet())
+		for (var clusterSet : fileToClusters.values())
 		{
-			var component = entry.getKey();
-			var cluster = entry.getValue();
+			allClusters.addAll(clusterSet);
+		}
 
+		for (var cluster : allClusters)
+		{
 			var types = new HashSet<Type>();
 
 			for (var typeSet : cluster.fileToTypes.values())
@@ -256,11 +257,7 @@ public class TypeValidator
 
 						visited.add(node);
 
-						if (!problems.containsKey(file))
-						{
-							problems.put(file, new ArrayList<Problem>());
-						}
-						problems.get(file).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.ProblemKind.UNDECIDABLE_TYPE)));
+						result.problems.computeIfAbsent(file, k->new ArrayList<>()).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.ProblemKind.UNDECIDABLE_TYPE)));
 
 						for (var binding : node.bindings)
 						{
@@ -275,27 +272,43 @@ public class TypeValidator
 			}
 			else if (types.size() == 1)
 			{
-				game.components.put(component, types.iterator().next());
+				for (var component : cluster.componentToFiles.keySet())
+				{
+					result.components.put(component, types.iterator().next());
+				}
 			}
 			else
 			{
 				for (var nodeEntry : cluster.fileToNodes.entrySet())
 				{
 					var file = nodeEntry.getKey();
-					var node = nodeEntry.getValue();
+					var rootNode = nodeEntry.getValue();
 
-					if (!problems.containsKey(file))
+					var stack = new ArrayDeque<ExpressionNode>();
+					var visited = new HashSet<ExpressionNode>();
+
+					stack.push(rootNode);
+
+					while (!stack.isEmpty())
 					{
-						problems.put(file, new ArrayList<Problem>());
+						var node = stack.pop();
+
+						visited.add(node);
+
+						result.problems.computeIfAbsent(file, k->new ArrayList<>()).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(ProblemKind.INCOMPATIBLE_TYPES)));
+
+						for (var binding : node.bindings)
+						{
+							var boundNode = binding.node;
+							if (!visited.contains(boundNode))
+							{
+								stack.push(boundNode);
+							}
+						}
 					}
-					problems.get(file).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.ProblemKind.INCOMPATIBLE_TYPES)));
 				}
 			}
 		}
-
-		//var data = new GlobalData(game, problems);
-
-		return problems;
 	}
 
 	public static class Result

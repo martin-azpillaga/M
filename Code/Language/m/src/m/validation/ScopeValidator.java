@@ -74,6 +74,7 @@ public class ScopeValidator
 
 	public Result validate(String file, File model)
 	{
+		graph = new ExpressionGraph();
 		problems.clear();
 		userVariables.clear();
 		userComponents.clear();
