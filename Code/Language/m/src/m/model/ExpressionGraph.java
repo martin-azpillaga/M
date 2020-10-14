@@ -1,4 +1,4 @@
-package m.validation.local;
+package m.model;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,13 +9,12 @@ import m.library.rules.BindingReason;
 import m.model.Expression;
 import m.model.Function;
 import m.validation.Problem;
-import m.validation.local.ExpressionNode.Binding;
-import m.validation.local.ExpressionNode.Typing;
+import m.model.ExpressionNode.Binding;
+import m.model.ExpressionNode.Typing;
 
 public class ExpressionGraph
 {
 	HashSet<ExpressionNode> connectedComponents;
-	List<ExpressionNode> list;
 	Map<Expression, ExpressionNode> map;
 
 	public ExpressionGraph()
@@ -72,10 +71,5 @@ public class ExpressionGraph
 			map.put(a, node);
 		}
 		return node;
-	}
-
-	public LocalValidator.Result buildData(Map<String,Function> functions, List<Problem> problems)
-	{
-		return new LocalValidator.Result(connectedComponents, functions, problems);
 	}
 }

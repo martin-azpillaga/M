@@ -1,4 +1,4 @@
-package m.validation.local;
+package m.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,6 @@ import m.library.rules.BindingReason;
 import m.library.rules.TypingReason;
 import m.library.symbols.Symbol;
 import m.library.types.Type;
-import m.model.Expression;
 
 public class ExpressionNode
 {

@@ -14,7 +14,7 @@ import m.model.Cell;
 import m.model.Game;
 import m.validation.Problem;
 import m.validation.Problem.Severity;
-import m.validation.local.ExpressionNode;
+import m.model.ExpressionNode;
 
 public class TypeChecker
 {

@@ -96,172 +96,172 @@ public enum Library
 	} return "";},
 	function -> {switch(function)
 	{
-	case ABS: return "abs";
-	case SIGN: return "sign";
-	case CEIL: return "ceil";
-	case FLOOR: return "floor";
-	case ROUND: return "round";
-	case INTEGERPART: return "integerPart";
-	case FRACTIONALPART: return "fractionalPart";
-	case INVERSE: return "inverse";
-	case RECIPROCAL: return "reciprocal";
+		case ABS: return "abs";
+		case SIGN: return "sign";
+		case CEIL: return "ceil";
+		case FLOOR: return "floor";
+		case ROUND: return "round";
+		case INTEGERPART: return "integerPart";
+		case FRACTIONALPART: return "fractionalPart";
+		case INVERSE: return "inverse";
+		case RECIPROCAL: return "reciprocal";
 
-	case CLAMP: return "clamp";
-	case LERP: return "lerp";
-	case UNLERP: return "unlerp";
-	case PROPORTIONAL: return "proportional";
-	case SLERP: return "slerp";
+		case CLAMP: return "clamp";
+		case LERP: return "lerp";
+		case UNLERP: return "unlerp";
+		case PROPORTIONAL: return "proportional";
+		case SLERP: return "slerp";
 
-	case MIN: return "min";
-	case MAX: return "max";
+		case MIN: return "min";
+		case MAX: return "max";
 
-	case DEGREES: return "degrees";
-	case RADIANS: return "radians";
+		case DEGREES: return "degrees";
+		case RADIANS: return "radians";
 
-	case STEP: return "step";
+		case STEP: return "step";
 
-	case CROSS: return "cross";
-	case DOT: return "dot";
-	case NORM: return "norm";
-	case NORMALIZE: return "normalize";
-	case DISTANCE: return "distance";
-	case REFLECT: return "reflect";
-	case REFRACT: return "refract";
+		case CROSS: return "cross";
+		case DOT: return "dot";
+		case NORM: return "norm";
+		case NORMALIZE: return "normalize";
+		case DISTANCE: return "distance";
+		case REFLECT: return "reflect";
+		case REFRACT: return "refract";
 
-	case OR: return "||";
-	case AND: return "&&";
-	case NOT: return "!";
+		case OR: return "||";
+		case AND: return "&&";
+		case NOT: return "!";
 
-	case ADDITION: return "+";
-	case SUBTRACTION: return "-";
-	case MULTIPLICATION: return "*";
-	case DIVISION: return "/";
+		case ADDITION: return "+";
+		case SUBTRACTION: return "-";
+		case MULTIPLICATION: return "*";
+		case DIVISION: return "/";
 
-	case EQUAL: return "==";
-	case INEQUAL: return "!=";
+		case EQUAL: return "==";
+		case INEQUAL: return "!=";
 
-	case LOWER: return "<";
-	case LOWEROREQUAL: return "<=";
-	case GREATEROREQUAL: return ">=";
-	case GREATER: return ">";
+		case LOWER: return "<";
+		case LOWEROREQUAL: return "<=";
+		case GREATEROREQUAL: return ">=";
+		case GREATER: return ">";
 
-	case SIZE: return "#";
-	case IN: return "@";
-	case X: return "x";
-	case Y: return "y";
-	case Z: return "z";
-	case XYZ: return "xyz";
+		case SIZE: return "#";
+		case IN: return "@";
+		case X: return "x";
+		case Y: return "y";
+		case Z: return "z";
+		case XYZ: return "xyz";
 
-	case SIN: return "sin";
-	case COS: return "cos";
-	case TAN: return "tan";
-	case ASIN: return "asin";
-	case ACOS: return "acos";
-	case ATAN: return "atan";
-	case EXP: return "exp";
-	case LOG: return "log";
-	case POW: return "pow";
-	case SQRT: return "sqrt";
-	case RANDOM: return "random";
+		case SIN: return "sin";
+		case COS: return "cos";
+		case TAN: return "tan";
+		case ASIN: return "asin";
+		case ACOS: return "acos";
+		case ATAN: return "atan";
+		case EXP: return "exp";
+		case LOG: return "log";
+		case POW: return "pow";
+		case SQRT: return "sqrt";
+		case RANDOM: return "random";
 
-	case CREATE: return "create";
-	case DESTROY: return "destroy";
-	case ADD: return "add";
-	case REMOVE: return "remove";
-	case HAS: return "has";
+		case CREATE: return "create";
+		case DESTROY: return "destroy";
+		case ADD: return "add";
+		case REMOVE: return "remove";
+		case HAS: return "has";
 
-	case WRITE: return "write";
-	case WRITEERROR: return "writeError";
-	case WRITE_WARNING: return "writeWarning";
-	case HALT: return "halt";
-	case BREAKPOINT: return "breakpoint";
-	case SCREENSHOT: return "screenshot";
+		case WRITE: return "write";
+		case WRITEERROR: return "writeError";
+		case WRITE_WARNING: return "writeWarning";
+		case HALT: return "halt";
+		case BREAKPOINT: return "breakpoint";
+		case SCREENSHOT: return "screenshot";
 
 
-	case SET_NUMBER: return "setNumber";
-	case SET_COLOR: return "setColor";
-	case SET_KEYWORD: return "setBool";
-	case SET_TEXTURE: return "setTexture";
-	case SET_INTEGER: return "setInteger";
-	case GET_NUMBER: return "getNumber";
-	case GET_COLOR: return "getColor";
-	case GET_KEYWORD: return "getBool";
-	case GET_TEXTURE: return "getTexture";
-	case GET_INTEGER: return "getInteger";
+		case SET_NUMBER: return "setNumber";
+		case SET_COLOR: return "setColor";
+		case SET_KEYWORD: return "setBool";
+		case SET_TEXTURE: return "setTexture";
+		case SET_INTEGER: return "setInteger";
+		case GET_NUMBER: return "getNumber";
+		case GET_COLOR: return "getColor";
+		case GET_KEYWORD: return "getBool";
+		case GET_TEXTURE: return "getTexture";
+		case GET_INTEGER: return "getInteger";
 
-	case SET_TRIGGER: return "setTrigger";
-	case IN_STATE: return "inState";
-	case ACTIVATE_PARAMETER: return "enableParameter";
-	case DEACTIVATE_PARAMETER: return "disableParameter";
-	case PLAY_ANIMATION: return "playAnimation";
+		case SET_TRIGGER: return "setTrigger";
+		case IN_STATE: return "inState";
+		case ACTIVATE_PARAMETER: return "enableParameter";
+		case DEACTIVATE_PARAMETER: return "disableParameter";
+		case PLAY_ANIMATION: return "playAnimation";
 
-	case READ_TRIGGERED: return "readTriggered";
-	case READ_NUMBER: return "readNumber";
-	case READ_VECTOR: return "readVector";
+		case READ_TRIGGERED: return "readTriggered";
+		case READ_NUMBER: return "readNumber";
+		case READ_VECTOR: return "readVector";
 
-	case TO_QUATERNION: return "quaternion";
-	case TO_NUMBER3: return "angles";
+		case TO_QUATERNION: return "quaternion";
+		case TO_NUMBER3: return "angles";
 
-	case PLAY: return "play";
-	case PLAY_ONCE: return "playOnce";
-	case PAUSE: return "pause";
-	case UNPAUSE: return "unpause";
-	case STOP: return "stop";
+		case PLAY: return "play";
+		case PLAY_ONCE: return "playOnce";
+		case PAUSE: return "pause";
+		case UNPAUSE: return "unpause";
+		case STOP: return "stop";
 
-	case OVER: return "over";
-	case TO_STRING: return "string";
-	case TO_NUMBER: return "number";
+		case OVER: return "over";
+		case TO_STRING: return "string";
+		case TO_NUMBER: return "number";
 
-	case OVERLAPS: return "overlaps";
-	case SCREEN_OVERLAPS: return "screenOverlaps";
-	case ADD_FORCE: return "addForce";
-	case ADD_TORQUE: return "addTorque";
-	case CLOSEST_POINT: return "closestPoint";
+		case OVERLAPS: return "overlaps";
+		case SCREEN_OVERLAPS: return "screenOverlaps";
+		case ADD_FORCE: return "addForce";
+		case ADD_TORQUE: return "addTorque";
+		case CLOSEST_POINT: return "closestPoint";
 
-	case IS_POSITIVE: return "isPositive";
-	case IS_NEGATIVE: return "isNegative";
-	case IS_ZERO: return "isZero";
+		case IS_POSITIVE: return "isPositive";
+		case IS_NEGATIVE: return "isNegative";
+		case IS_ZERO: return "isZero";
 
-	case WORLD_TO_VIEWPORT: return "worldToViewport";
-	case VIEWPORT_TO_WORLD: return "viewportToWorld";
+		case WORLD_TO_VIEWPORT: return "worldToViewport";
+		case VIEWPORT_TO_WORLD: return "viewportToWorld";
 
-	case ASSIGNMENT: return "=";
+		case ASSIGNMENT: return "=";
 	} return "";}
 	,
 	block -> {switch(block)
 	{
-	case SELECTION: return "if";
-	case ITERATION: return "while";
-	case QUERY: return "foreach";
+		case SELECTION: return "if";
+		case ITERATION: return "while";
+		case QUERY: return "foreach";
 	} return "";},
 	type -> {switch(type)
 	{
-	case STRING: return "string";
-	case PROPOSITION: return "proposition";
-	case NUMBER: return "number";
-	case NUMBER2: return "number2";
-	case NUMBER3: return "number3";
-	case UNIT: return "unit";
+		case STRING: return "string";
+		case PROPOSITION: return "proposition";
+		case NUMBER: return "number";
+		case NUMBER2: return "number2";
+		case NUMBER3: return "number3";
+		case UNIT: return "unit";
 
-	case COMPONENT: return "component";
+		case COMPONENT: return "component";
 
-	case COLOR: return "color";
+		case COLOR: return "color";
 
-	case INPUT: return "input";
-	case MESH: return "mesh";
-	case MATERIAL: return "material";
-	case FONT: return "font";
-	case TEXT: return "text";
-	case IMAGE: return "image";
-	case AUDIOCLIP: return "audioClip";
-	case ANIMATOR: return "animator";
+		case INPUT: return "input";
+		case MESH: return "mesh";
+		case MATERIAL: return "material";
+		case FONT: return "font";
+		case TEXT: return "text";
+		case IMAGE: return "image";
+		case AUDIOCLIP: return "audioClip";
+		case ANIMATOR: return "animator";
 
-	case ENTITY: return "entity";
-	case ENTITY_LIST: return "entityList";
-	case QUATERNION: return "quaternion";
-	case TEXTURE: return "texture";
-	case COLLIDER: return "collider";
-	case RECT: return "rectangle";
+		case ENTITY: return "entity";
+		case ENTITY_LIST: return "entityList";
+		case QUATERNION: return "quaternion";
+		case TEXTURE: return "texture";
+		case COLLIDER: return "collider";
+		case RECT: return "rectangle";
 	} return ""; },
 	problem -> { switch (problem)
 	{

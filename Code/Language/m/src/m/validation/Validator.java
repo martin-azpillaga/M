@@ -1,9 +1,11 @@
 package m.validation;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import m.library.Library;
 import m.model.Game;
 import m.validation.global.FunctionChecker;
 import m.validation.global.TypeChecker;
@@ -11,65 +13,54 @@ import m.validation.local.LocalValidator;
 
 public class Validator
 {
-	LocalValidator localValidator;
-	TypeChecker typeChecker;
-	FunctionChecker functionChecker;
-	Result result;
+	Parser parser;
+	ScopeValidator scopeValidator;
+	TypeValidator typeValidator;
 
 	public Validator()
 	{
-		localValidator = new LocalValidator();
-		functionChecker = new FunctionChecker();
-		typeChecker = new TypeChecker();
-		result = new Result();
+		parser = new Parser();
+		scopeValidator = new ScopeValidator();
+		typeValidator = new TypeValidator();
 	}
 
 	public Result validate(String file, String text)
 	{
-		result.problems.clear();
+		var result = new Result();
 
-		var local = localValidator.validate(text);
+		var parsed = parser.validate(text);
 
-		var functions = functionChecker.validate(file, local.functions);
+		var scoped = scopeValidator.validate(file, parsed.file);
 
-		var types = typeChecker.validate(file, local.expressionGraph);
+		var typed = typeValidator.validate(file, parsed.file, scoped.expressionGraph);
 
-
-
-		result.problems.put(file, local.problems);
-		functions.problems.forEach((f, problems)->
+		if (!parsed.problems.isEmpty())
 		{
-			result.problems.getOrDefault(f, new ArrayList<Problem>()).addAll(problems);
-		});
-		types.problems.forEach((f, problems)->
-		{
-			result.problems.getOrDefault(f, new ArrayList<Problem>()).addAll(problems);
-		});
-
-
-		for (var component : types.invalidatedComponents)
-		{
-			result.game.components.remove(component);
+			result.problems.put(file, parsed.problems);
 		}
-		result.game.components.putAll(types.newComponents);
+		scoped.problems.forEach((f,problems)-> result.problems.getOrDefault(f, new ArrayList<>()).addAll(problems));
+		typed .problems.forEach((f,problems)-> result.problems.getOrDefault(f, new ArrayList<>()).addAll(problems));
 
-		for (var function : functions.invalidatedFunctions)
-		{
-			result.game.functions.remove(function);
-		}
-		result.game.functions.addAll(functions.newFunctions);
+		result.game.components.putAll(typed.components);
+		result.game.functions.addAll(typed.functions);
 
 		return result;
 	}
 
 	public Result delete(String file)
 	{
-		return result;
+		return new Result();
 	}
 
 	public static class Result
 	{
 		public Game game;
 		public Map<String,List<Problem>> problems;
+
+		public Result()
+		{
+			game = new Game(Library.ENGLISH);
+			problems = new HashMap<>();
+		}
 	}
 }

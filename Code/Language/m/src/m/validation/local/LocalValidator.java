@@ -25,6 +25,7 @@ import m.model.Block;
 import m.model.Cell;
 import m.model.Delegation;
 import m.model.Expression;
+import m.model.ExpressionNode;
 import m.model.File;
 import m.model.Function;
 import m.model.Parser;
@@ -55,7 +56,7 @@ public class LocalValidator
 		{
 			context = new Context(Library.ENGLISH);
 			validate(file);
-			result = context.buildData(text);
+			result = null;
 		}
 		else
 		{
