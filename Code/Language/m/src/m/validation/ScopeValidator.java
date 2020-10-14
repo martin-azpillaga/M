@@ -1,12 +1,10 @@
 package m.validation;
 
 import static m.library.rules.BindingReason.SAME_COMPONENT;
-import static m.library.rules.BindingReason.SAME_FUNCTION;
 import static m.library.rules.BindingReason.SAME_TYPE_VARIABLE;
 import static m.library.rules.BindingReason.SAME_VARIABLE;
 import static m.library.rules.ProblemKind.REDEFINED_SYMBOL;
 import static m.library.rules.ProblemKind.UNDEFINED_SYMBOL;
-import static m.library.rules.ProblemKind.UNUSED_VALUE;
 import static m.library.rules.TypingReason.STANDARD_BLOCK;
 import static m.library.rules.TypingReason.STANDARD_COMPONENT;
 import static m.library.rules.TypingReason.STANDARD_FUNCTION;
@@ -15,27 +13,22 @@ import static m.model.ModelPackage.Literals.APPLICATION__NAME;
 import static m.model.ModelPackage.Literals.BINARY__OPERATOR;
 import static m.model.ModelPackage.Literals.BINDING_BLOCK__NAME;
 import static m.model.ModelPackage.Literals.BLOCK__NAME;
-import static m.model.ModelPackage.Literals.CELL__COMPONENT;
-import static m.model.ModelPackage.Literals.FUNCTION__NAME;
 import static m.model.ModelPackage.Literals.UNARY__OPERATOR;
 import static m.model.ModelPackage.Literals.VALUE__NAME;
 import static m.validation.Problem.Severity.ERROR;
-import static m.validation.Problem.Severity.WARNING;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.xtext.EcoreUtil2;
 
 import m.library.Library;
+import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.TypeVariable;
 import m.model.Application;
@@ -58,34 +51,36 @@ public class ScopeValidator
 {
 	ExpressionGraph graph;
 	List<Problem> problems;
+
+	Deque<Map<String,Value>> userVariables;
+	Map<String, Cell> userComponents;
+
 	Library library;
 
-	Map<String, Value> userVariables;
-	Map<String, Cell> userComponents;
-	Map<String, Function> userFunctions;
-	Deque<Map<String,Value>> stack;
-
-	Set<Value> accessedValues;
-
-	public ScopeValidator(Library library)
+	public ScopeValidator()
 	{
 		this.graph = new ExpressionGraph();
 		this.problems = new ArrayList<>();
-		this.library = library;
+		this.library = Library.ENGLISH;
 
-		this.userVariables = new HashMap<>();
-		this.userFunctions = new HashMap<>();
+		this.userVariables = new ArrayDeque<>();
 		this.userComponents = new HashMap<>();
+	}
 
-		this.stack = new ArrayDeque<>();
-		this.accessedValues = new HashSet<>();
+	public Result delete(String file)
+	{
+		return new Result();
 	}
 
 	public Result validate(String file, File model)
 	{
-		var result = new Result();
+		problems.clear();
+		userVariables.clear();
+		userComponents.clear();
 
 		validate(model);
+
+		var result = new Result();
 
 		result.expressionGraph = graph;
 
@@ -97,17 +92,8 @@ public class ScopeValidator
 		return result;
 	}
 
-	void validate(File file)
+	private void validate(File file)
 	{
-		for (var function : file.getFunctions())
-		{
-			declareFunction(function);
-		}
-		for (var cell : EcoreUtil2.getAllContentsOfType(file, Cell.class))
-		{
-			declareComponent(cell);
-		}
-
 		for (var function : file.getFunctions())
 		{
 			validate(function);
@@ -149,7 +135,7 @@ public class ScopeValidator
 
 			push();
 			declareVariable(value);
-			accessBlock(name, value, block, BINDING_BLOCK__NAME);
+			accessBindingBlock(name, value, block, BINDING_BLOCK__NAME);
 			for (var s : block.getStatements())
 			{
 				validate(s);
@@ -199,6 +185,7 @@ public class ScopeValidator
 			var entity = cell.getEntity();
 
 			accessVariable(entity);
+			declareComponent(cell);
 			accessComponent(cell);
 		}
 		else if (expression instanceof Binary)
@@ -235,73 +222,43 @@ public class ScopeValidator
 		}
 	}
 
-	public void declareVariable(Value value)
+	private void declareVariable(Value value)
 	{
 		if (value == null) return;
 
 		var name = value.getName();
 
-		if (library.getValue(name) != null || library.getComponent(name) != null || library.getFunction(name) != null)
-		{
-			problems.add(new Problem(value, VALUE__NAME, ERROR, library.getProblem(REDEFINED_SYMBOL)));
-		}
-		else if (userComponents.containsKey(name) || userFunctions.containsKey(name))
+		if (library.getValue(name) != null)
 		{
 			problems.add(new Problem(value, VALUE__NAME, ERROR, library.getProblem(REDEFINED_SYMBOL)));
 		}
 		else
 		{
-			var declaration = userVariables.get(name);
+			var declaration = userVariables.peek().get(name);
 			if (declaration != null)
 			{
 				graph.bind(value, declaration, SAME_VARIABLE);
 			}
 			else
 			{
-				userVariables.put(name, value);
+				userVariables.peek().put(name, value);
 			}
 		}
 	}
 
-	public void declareComponent(Cell cell)
+	private void declareComponent(Cell cell)
 	{
 		if (cell.getComponent() == null) return;
 
 		var name = cell.getComponent().getName();
 
-		if (library.getValue(name) != null || library.getFunction(name) != null)
-		{
-			problems.add(new Problem(cell, CELL__COMPONENT, ERROR, library.getProblem(REDEFINED_SYMBOL)));
-		}
-		else if (userFunctions.containsKey(name))
-		{
-			problems.add(new Problem(cell, CELL__COMPONENT, ERROR, library.getProblem(REDEFINED_SYMBOL)));
-		}
-		else if (!userComponents.containsKey(name) && library.getComponent(name) == null)
+		if (!userComponents.containsKey(name) && library.getComponent(name) == null)
 		{
 			userComponents.put(name, cell);
 		}
 	}
 
-	public void declareFunction(Function function)
-	{
-		var name = function.getName();
-
-		if (library.getValue(name) != null || library.getComponent(name) != null || library.getFunction(name) != null)
-		{
-			problems.add(new Problem(function, FUNCTION__NAME, ERROR, library.getProblem(REDEFINED_SYMBOL)));
-		}
-		else if (userComponents.containsKey(name) || userFunctions.containsKey(name))
-		{
-			problems.add(new Problem(function, FUNCTION__NAME, ERROR, library.getProblem(REDEFINED_SYMBOL)));
-		}
-		else
-		{
-			userFunctions.put(name, function);
-		}
-	}
-
-	public void accessVariable(Value value)
+	private void accessVariable(Value value)
 	{
 		if (value == null) return;
 
@@ -312,10 +269,9 @@ public class ScopeValidator
 		{
 			graph.type(value, new Typing(standard.getType(), STANDARD_VARIABLE, standard));
 		}
-		else if (userVariables.containsKey(name) && userVariables.get(name) != value)
+		else if (userVariables.peek().containsKey(name) && userVariables.peek().get(name) != value)
 		{
-			graph.bind(value, userVariables.get(name), SAME_VARIABLE);
-			accessedValues.add(userVariables.get(name));
+			graph.bind(value, userVariables.peek().get(name), SAME_VARIABLE);
 		}
 		else
 		{
@@ -323,7 +279,7 @@ public class ScopeValidator
 		}
 	}
 
-	public void accessComponent(Cell cell)
+	private void accessComponent(Cell cell)
 	{
 		if (cell == null || cell.getComponent() == null) return;
 
@@ -345,20 +301,7 @@ public class ScopeValidator
 		}
 	}
 
-	public void accessBlock(String name, Expression expression, EObject source, EStructuralFeature feature)
-	{
-		var standard = library.getBlock(name);
-		if (standard != null)
-		{
-			graph.type(expression, new Typing(standard.getType(), STANDARD_BLOCK, standard));
-		}
-		else
-		{
-			problems.add(new Problem(source, feature, ERROR, library.getProblem(UNDEFINED_SYMBOL)));
-		}
-	}
-
-	public void accessFunction(String name, Expression[] arguments, Expression source, EStructuralFeature feature)
+	private void accessFunction(String name, Expression[] arguments, Expression source, EStructuralFeature feature)
 	{
 		var standard = library.getFunction(name);
 		if (standard != null)
@@ -420,46 +363,51 @@ public class ScopeValidator
 		}
 		else
 		{
-			var userFunction = userFunctions.get(name);
-			if (userFunction != null)
-			{
-				var parameters = userFunction.getParameters();
-
-				if (parameters.size() == arguments.length)
-				{
-					for (var i = 0; i < arguments.length; i++)
-					{
-						graph.bind(arguments[i], parameters.get(i), SAME_FUNCTION);
-					}
-				}
-				else
-				{
-					problems.add(new Problem(source, feature, ERROR, library.getProblem(UNDEFINED_SYMBOL)));
-				}
-			}
-			else
-			{
-				problems.add(new Problem(source, feature, ERROR, library.getProblem(UNDEFINED_SYMBOL)));
-			}
+			problems.add(new Problem(source, feature, ERROR, library.getProblem(UNDEFINED_SYMBOL)));
 		}
 	}
 
-	public void push()
+	private void accessBlock(String name, Expression expression, EObject source, EStructuralFeature feature)
 	{
-		stack.push(new HashMap<>(userVariables));
-	}
-
-	public void pop()
-	{
-		var popped = stack.pop();
-		for (var entry : userVariables.entrySet())
+		var standard = name.equals(library.selection) || name.equals(library.iteration);
+		if (standard)
 		{
-			if (!popped.containsKey(entry.getKey()) && !accessedValues.contains(entry.getValue()))
-			{
-				problems.add(new Problem(entry.getValue(), VALUE__NAME, WARNING, library.getProblem(UNUSED_VALUE)));
-			}
+			graph.type(expression, new Typing(AtomicType.PROPOSITION, STANDARD_BLOCK, null));
 		}
-		userVariables = popped;
+		else
+		{
+			problems.add(new Problem(source, feature, ERROR, library.getProblem(UNDEFINED_SYMBOL)));
+		}
+	}
+
+	private void accessBindingBlock(String name, Expression expression, EObject source, EStructuralFeature feature)
+	{
+		var standard = name.equals(library.query);
+		if (standard)
+		{
+			graph.type(expression, new Typing(AtomicType.ENTITY, STANDARD_BLOCK, null));
+		}
+		else
+		{
+			problems.add(new Problem(source, feature, ERROR, library.getProblem(UNDEFINED_SYMBOL)));
+		}
+	}
+
+	private void push()
+	{
+		if (userVariables.isEmpty())
+		{
+			userVariables.push(new HashMap<>());
+		}
+		else
+		{
+			userVariables.push(new HashMap<>(userVariables.peek()));
+		}
+	}
+
+	private void pop()
+	{
+		userVariables.pop();
 	}
 
 	public static class Result

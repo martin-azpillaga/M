@@ -2,19 +2,15 @@ package m.model;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 
 import m.library.rules.BindingReason;
-import m.model.Expression;
-import m.model.Function;
-import m.validation.Problem;
 import m.model.ExpressionNode.Binding;
 import m.model.ExpressionNode.Typing;
 
 public class ExpressionGraph
 {
-	HashSet<ExpressionNode> connectedComponents;
+	public final HashSet<ExpressionNode> connectedComponents;
 	Map<Expression, ExpressionNode> map;
 
 	public ExpressionGraph()

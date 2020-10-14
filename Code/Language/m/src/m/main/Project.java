@@ -104,30 +104,18 @@ public class Project
 
 
 
-	private Map<String,List<Diagnostic>> check(Validator.Result globalData)
+	private Map<String,List<Diagnostic>> check(Validator.Result validationResult)
 	{
-		if (globalData == null)
+		if (validationResult == null)
 		{
 			return new HashMap<>();
 		}
 
-		var game = globalData.game;
+		var game = validationResult.game;
 
-		var diagnosticMap = convert(globalData.problems);
+		var diagnosticMap = convert(validationResult.problems);
 
-		var hasErrors = false;
-		for (var diagnosticList : diagnosticMap.values())
-		{
-			for (var diagnostic : diagnosticList)
-			{
-				if (diagnostic.getSeverity() == DiagnosticSeverity.Error)
-				{
-					hasErrors = true;
-				}
-			}
-		}
-
-		if (!hasErrors)
+		if (!validationResult.hasErrors)
 		{
 			generator.generate(game, configuration);
 		}

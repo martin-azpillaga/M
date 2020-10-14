@@ -7,7 +7,6 @@ import java.util.Map;
 import m.library.rules.BindingReason;
 import m.library.rules.ProblemKind;
 import m.library.rules.TypingReason;
-import m.library.symbols.Block;
 import m.library.symbols.Component;
 import m.library.symbols.Function;
 import m.library.symbols.Value;
@@ -20,6 +19,10 @@ public enum Library
 {
 	ENGLISH
 	(
+		"foreach",
+		"if",
+		"while",
+
 	value -> {switch(value)
 	{
 		case EPSILON: return "epsilon";
@@ -228,12 +231,6 @@ public enum Library
 		case ASSIGNMENT: return "=";
 	} return "";}
 	,
-	block -> {switch(block)
-	{
-		case SELECTION: return "if";
-		case ITERATION: return "while";
-		case QUERY: return "foreach";
-	} return "";},
 	type -> {switch(type)
 	{
 		case STRING: return "string";
@@ -476,7 +473,6 @@ public enum Library
 	Map<Value, String> valueToName;
 	Map<Component, String> componentToName;
 	Map<Function, String> functionToName;
-	Map<Block, String> blockToName;
 	Map<AtomicType, String> typeToName;
 	Map<ProblemKind, String> problemToName;
 	Map<BindingReason, String> bindingReasonToName;
@@ -489,11 +485,18 @@ public enum Library
 	Map<String, Value> nameToValue;
 	Map<String, Component> nameToComponent;
 	Map<String, Function> nameToFunction;
-	Map<String, Block> nameToBlock;
 	Map<String, AtomicType> nameToType;
 
-	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<ProblemKind, String> problems, java.util.function.Function<BindingReason, String> bindingReasons, java.util.function.Function<TypingReason, String> typingReasons, java.util.function.Function<Value, String> valueDescriptions, java.util.function.Function<Component, String> componentDescriptions, java.util.function.Function<Function, String> functionDescriptions)
+	public final String query;
+	public final String selection;
+	public final String iteration;
+
+	Library(String query, String selection, String iteration, java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<ProblemKind, String> problems, java.util.function.Function<BindingReason, String> bindingReasons, java.util.function.Function<TypingReason, String> typingReasons, java.util.function.Function<Value, String> valueDescriptions, java.util.function.Function<Component, String> componentDescriptions, java.util.function.Function<Function, String> functionDescriptions)
 	{
+		this.query = query;
+		this.selection = selection;
+		this.iteration = iteration;
+
 		valueToName = forward(values, Value.values());
 		nameToValue = reverse(values, Value.values());
 
@@ -502,9 +505,6 @@ public enum Library
 
 		functionToName = forward(functions, Function.values());
 		nameToFunction = reverse(functions, Function.values());
-
-		blockToName = forward(blocks, Block.values());
-		nameToBlock = reverse(blocks, Block.values());
 
 		typeToName = forward(atomicTypes, AtomicType.values());
 		nameToType = reverse(atomicTypes, AtomicType.values());
@@ -560,11 +560,6 @@ public enum Library
 	public Function getFunction(String name)
 	{
 		return nameToFunction.get(name);
-	}
-
-	public Block getBlock(String name)
-	{
-		return nameToBlock.get(name);
 	}
 
 	public String getProblem(ProblemKind problem)

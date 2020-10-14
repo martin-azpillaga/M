@@ -9,9 +9,6 @@ import static m.generator.IO.lines;
 import static m.generator.IO.readText;
 import static m.generator.IO.write;
 import static m.generator.IO.writeFile;
-import static m.library.symbols.Block.ITERATION;
-import static m.library.symbols.Block.QUERY;
-import static m.library.symbols.Block.SELECTION;
 import static m.library.symbols.Component.DISPLAY;
 import static m.library.symbols.Function.ACTIVATE_PARAMETER;
 import static m.library.symbols.Function.ADD_FORCE;
@@ -1098,7 +1095,7 @@ public class Unity
 
 			var block = (BindingBlock) statement;
 			var name = block.getName();
-			if (library.getBlock(name) == QUERY)
+			if (library.query.equals(name))
 			{
 				var a = block.getExpression().getName();
 				var extras = extraComponents(currentFunction);
@@ -1189,7 +1186,7 @@ public class Unity
 			var block = (Block) statement;
 			var name = block.getName();
 
-			if (library.getBlock(name) == SELECTION)
+			if (library.selection.equals(name))
 			{
 				var overlaps = overlaps(block.getExpression());
 				for (var overlap : overlaps)
@@ -1208,7 +1205,7 @@ public class Unity
 					"}"
 				);
 			}
-			else if (library.getBlock(name) == ITERATION)
+			else if (library.iteration.equals(name))
 			{
 				var overlaps = overlaps(block.getExpression());
 				for (var overlap : overlaps)

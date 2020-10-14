@@ -1,4 +1,4 @@
-package m.validation.global;
+package m.validation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,7 +10,6 @@ import m.library.types.FunctionType;
 import m.model.Function;
 import m.model.ModelPackage;
 import m.model.UserFunction;
-import m.validation.Problem;
 import m.validation.Problem.Severity;
 
 public class FunctionChecker
