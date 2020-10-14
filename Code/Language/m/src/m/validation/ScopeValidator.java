@@ -348,9 +348,8 @@ public class ScopeValidator
 						graph.type (source, new Typing(returnType, STANDARD_FUNCTION, standard));
 					}
 				}
-				for (var typeName : typeVariables.entrySet())
+				for (var expressions : typeVariables.values())
 				{
-					var expressions = typeVariables.get(typeName.getKey());
 					for (var i = 1; i < expressions.size(); i++)
 					{
 						graph.bind(expressions.get(0), expressions.get(i), SAME_TYPE_VARIABLE);

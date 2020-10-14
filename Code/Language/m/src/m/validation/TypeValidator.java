@@ -1,6 +1,5 @@
 package m.validation;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,18 +73,15 @@ public class TypeValidator
 			}
 			else
 			{
-				for (var entry : cluster.componentToFiles.entrySet())
+				cluster.componentToFiles.forEach((component,files)->
 				{
-					var component = entry.getKey();
-					var files = entry.getValue();
-
 					files.remove(modifiedFile);
 
 					if (files.isEmpty())
 					{
 						componentToCluster.remove(component);
 					}
-				}
+				});
 
 				for (var node : cluster.fileToNodes.values())
 				{
@@ -159,11 +155,8 @@ public class TypeValidator
 
 	private Cluster merge(Cluster cluster, Cluster definitionCluster)
 	{
-		for (var entry : cluster.fileToTypes.entrySet())
+		cluster.fileToTypes.forEach((file, types)->
 		{
-			var file = entry.getKey();
-			var types = entry.getValue();
-
 			var definitionClusterTypes = definitionCluster.fileToTypes.get(file);
 			if (definitionClusterTypes == null)
 			{
@@ -173,19 +166,15 @@ public class TypeValidator
 			{
 				definitionClusterTypes.addAll(types);
 			}
-		}
-		for (var entry : cluster.fileToNodes.entrySet())
-		{
-			var file = entry.getKey();
-			var entryNode = entry.getValue();
+		});
 
+		cluster.fileToNodes.forEach((file,entryNode)->
+		{
 			definitionCluster.fileToNodes.put(file, entryNode);
-		}
-		for (var entry : cluster.componentToFiles.entrySet())
-		{
-			var entryComponent = entry.getKey();
-			var files = entry.getValue();
+		});
 
+		cluster.componentToFiles.forEach((entryComponent, files)->
+		{
 			componentToCluster.put(entryComponent, definitionCluster);
 
 			var definitionFiles = definitionCluster.componentToFiles.get(entryComponent);
@@ -197,7 +186,8 @@ public class TypeValidator
 			{
 				definitionFiles.addAll(files);
 			}
-		}
+		});
+
 		return definitionCluster;
 	}
 
@@ -227,9 +217,11 @@ public class TypeValidator
 			{
 				cluster.fileToNodes.forEach((file,rootNode)->
 				{
+					var kind = Library.ENGLISH.getProblem(ProblemKind.UNDECIDABLE_TYPE);
+
 					for (var node : rootNode)
 					{
-						result.problems.computeIfAbsent(file, k->new ArrayList<>()).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.ProblemKind.UNDECIDABLE_TYPE)));
+						result.problems.computeIfAbsent(file,__->new ArrayList<>()).add(new Problem(node.expression, Severity.ERROR, kind));
 					}
 				});
 			}
@@ -244,9 +236,11 @@ public class TypeValidator
 			{
 				cluster.fileToNodes.forEach((file,rootNode)->
 				{
+					var kind = Library.ENGLISH.getProblem(ProblemKind.INCOMPATIBLE_TYPES);
+
 					for (var node : rootNode)
 					{
-						result.problems.computeIfAbsent(file, k->new ArrayList<>()).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.ProblemKind.INCOMPATIBLE_TYPES)));
+						result.problems.computeIfAbsent(file,__->new ArrayList<>()).add(new Problem(node.expression, Severity.ERROR, kind));
 					}
 				});
 			}

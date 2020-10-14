@@ -63,11 +63,11 @@ public class Validator
 	{
 		scope.forEach((f,problems)->
 		{
-			result.computeIfAbsent(f, k->new ArrayList<>()).addAll(problems);
+			result.computeIfAbsent(f,__->new ArrayList<>()).addAll(problems);
 		});
 		types.forEach((f,problems)->
 		{
-			result.computeIfAbsent(f, k -> new ArrayList<>()).addAll(problems);
+			result.computeIfAbsent(f,__-> new ArrayList<>()).addAll(problems);
 		});
 	}
 
