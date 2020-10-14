@@ -15,7 +15,6 @@ import m.model.Cell;
 import m.model.ExpressionGraph;
 import m.model.ExpressionNode;
 import m.model.File;
-import m.model.Game;
 import m.model.UserFunction;
 import m.validation.Problem.Severity;
 
@@ -24,7 +23,7 @@ public class TypeValidator
 	Result result;
 
 	Map<String, Set<Cluster>> fileToClusters;
-	Map<String, Cluster> componentToCluster; // acceleration structure
+	Map<String, Cluster> componentToCluster;
 
 	public TypeValidator()
 	{
@@ -34,17 +33,19 @@ public class TypeValidator
 		this.componentToCluster = new HashMap<>();
 	}
 
-	public Result delete(String file)
-	{
-		return new Result();
-	}
-
 	public Result validate(String file, File model, ExpressionGraph graph)
 	{
 		invalidateObsoleteMemory(file);
 		validate(graph.connectedComponents, file);
 		checkTypes();
 
+		return result;
+	}
+
+	public Result delete(String file)
+	{
+		invalidateObsoleteMemory(file);
+		checkTypes();
 		return result;
 	}
 
@@ -98,34 +99,17 @@ public class TypeValidator
 
 	private void validate(Set<ExpressionNode> connectedComponents, String modifiedFile)
 	{
-		var stack = new ArrayDeque<ExpressionNode>();
-		var visited = new HashSet<ExpressionNode>();
-
 		for (var rootNode : connectedComponents)
 		{
-			stack.push(rootNode);
 			var cluster = new Cluster();
 			cluster.fileToNodes.put(modifiedFile, rootNode);
 
-			while (!stack.isEmpty())
+			for (var node : rootNode)
 			{
-				var node = stack.pop();
-
-				visited.add(node);
-
 				cluster = validate(node, cluster, modifiedFile);
-
-				for (var binding : node.bindings)
-				{
-					var boundNode = binding.node;
-					if (!visited.contains(boundNode))
-					{
-						stack.push(boundNode);
-					}
-				}
 			}
 
-			fileToClusters.computeIfAbsent(modifiedFile, f->new HashSet<>()).add(cluster);
+			fileToClusters.computeIfAbsent(modifiedFile,__->new HashSet<>()).add(cluster);
 		}
 	}
 
@@ -241,34 +225,13 @@ public class TypeValidator
 
 			if (types.isEmpty())
 			{
-				for (var nodeEntry : cluster.fileToNodes.entrySet())
+				cluster.fileToNodes.forEach((file,rootNode)->
 				{
-					var file = nodeEntry.getKey();
-					var rootNode = nodeEntry.getValue();
-
-					var stack = new ArrayDeque<ExpressionNode>();
-					var visited = new HashSet<ExpressionNode>();
-
-					stack.push(rootNode);
-
-					while (!stack.isEmpty())
+					for (var node : rootNode)
 					{
-						var node = stack.pop();
-
-						visited.add(node);
-
 						result.problems.computeIfAbsent(file, k->new ArrayList<>()).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.ProblemKind.UNDECIDABLE_TYPE)));
-
-						for (var binding : node.bindings)
-						{
-							var boundNode = binding.node;
-							if (!visited.contains(boundNode))
-							{
-								stack.push(boundNode);
-							}
-						}
 					}
-				}
+				});
 			}
 			else if (types.size() == 1)
 			{
@@ -279,34 +242,13 @@ public class TypeValidator
 			}
 			else
 			{
-				for (var nodeEntry : cluster.fileToNodes.entrySet())
+				cluster.fileToNodes.forEach((file,rootNode)->
 				{
-					var file = nodeEntry.getKey();
-					var rootNode = nodeEntry.getValue();
-
-					var stack = new ArrayDeque<ExpressionNode>();
-					var visited = new HashSet<ExpressionNode>();
-
-					stack.push(rootNode);
-
-					while (!stack.isEmpty())
+					for (var node : rootNode)
 					{
-						var node = stack.pop();
-
-						visited.add(node);
-
-						result.problems.computeIfAbsent(file, k->new ArrayList<>()).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(ProblemKind.INCOMPATIBLE_TYPES)));
-
-						for (var binding : node.bindings)
-						{
-							var boundNode = binding.node;
-							if (!visited.contains(boundNode))
-							{
-								stack.push(boundNode);
-							}
-						}
+						result.problems.computeIfAbsent(file, k->new ArrayList<>()).add(new Problem(node.expression, Severity.ERROR, Library.ENGLISH.getProblem(m.library.rules.ProblemKind.INCOMPATIBLE_TYPES)));
 					}
-				}
+				});
 			}
 		}
 	}
