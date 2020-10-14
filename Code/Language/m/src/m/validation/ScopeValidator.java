@@ -21,8 +21,10 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -40,6 +42,7 @@ import m.model.Cell;
 import m.model.Delegation;
 import m.model.Expression;
 import m.model.ExpressionGraph;
+import m.model.ExpressionNode;
 import m.model.ExpressionNode.Typing;
 import m.model.File;
 import m.model.Function;
@@ -83,7 +86,7 @@ public class ScopeValidator
 
 		var result = new Result();
 
-		result.expressionGraph = graph;
+		result.expressionGraph = graph.connectedComponents;
 
 		if ( ! problems.isEmpty())
 		{
@@ -412,12 +415,12 @@ public class ScopeValidator
 
 	public static class Result
 	{
-		public ExpressionGraph expressionGraph;
+		public Set<ExpressionNode> expressionGraph;
 		public Map<String,List<Problem>> problems;
 
 		public Result()
 		{
-			this.expressionGraph = new ExpressionGraph();
+			this.expressionGraph = new HashSet<>();
 			this.problems = new HashMap<>();
 		}
 	}

@@ -11,7 +11,6 @@ import m.library.Library;
 import m.library.rules.ProblemKind;
 import m.library.types.Type;
 import m.model.Cell;
-import m.model.ExpressionGraph;
 import m.model.ExpressionNode;
 import m.model.File;
 import m.model.UserFunction;
@@ -32,10 +31,10 @@ public class TypeValidator
 		this.componentToCluster = new HashMap<>();
 	}
 
-	public Result validate(String file, File model, ExpressionGraph graph)
+	public Result validate(String file, File model, Set<ExpressionNode> connectedComponents)
 	{
 		invalidateObsoleteMemory(file);
-		validate(graph.connectedComponents, file);
+		validate(connectedComponents, file);
 		checkTypes();
 
 		return result;
