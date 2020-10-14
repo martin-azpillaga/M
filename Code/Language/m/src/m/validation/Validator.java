@@ -12,13 +12,13 @@ import m.model.Game;
 
 public class Validator
 {
-	Parser parser;
+	SyntaxValidator parser;
 	ScopeValidator scopeValidator;
 	TypeValidator typeValidator;
 
 	public Validator()
 	{
-		parser = new Parser();
+		parser = new SyntaxValidator();
 		scopeValidator = new ScopeValidator();
 		typeValidator = new TypeValidator();
 	}

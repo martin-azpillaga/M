@@ -13,11 +13,11 @@ import m.model.File;
 import m.parser.antlr.MParser;
 import m.validation.Problem.Severity;
 
-public class Parser
+public class SyntaxValidator
 {
-	@Inject MParser antlrParser;
+	@Inject MParser parser;
 
-	public Parser()
+	public SyntaxValidator()
 	{
 		var injector = new MStandaloneSetup().createInjectorAndDoEMFRegistration();
 		injector.injectMembers(this);
@@ -25,7 +25,7 @@ public class Parser
 
 	public Result validate(String text)
 	{
-		var parseResult = antlrParser.parse(new StringReader(text));
+		var parseResult = parser.parse(new StringReader(text));
 
 		var file = (File) parseResult.getRootASTElement();
 
