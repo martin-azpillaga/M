@@ -33,9 +33,9 @@ public class Validator
 
 		var typed = typeValidator.validate(file, parsed.file, scoped.expressionGraph);
 
-		result.problems.put(file, parsed.problems);
-
-		merge(result.problems, scoped.problems, typed.problems);
+		result.mergeProblems(file, parsed.problems);
+		result.mergeProblems(scoped.problems);
+		result.mergeProblems(typed.problems);
 
 		result.game.components.putAll(typed.components);
 		result.game.functions.addAll(typed.functions);
@@ -51,24 +51,13 @@ public class Validator
 
 		var typed = typeValidator.delete(file);
 
-		merge(result.problems, scoped.problems, typed.problems);
+		result.mergeProblems(scoped.problems);
+		result.mergeProblems(typed.problems);
 
 		result.game.components.putAll(typed.components);
 		result.game.functions.addAll(typed.functions);
 
 		return new Result(null,null);
-	}
-
-	private void merge(Map<String,List<Problem>> result, Map<String,List<Problem>> scope, Map<String,List<Problem>> types)
-	{
-		scope.forEach((f,problems)->
-		{
-			result.computeIfAbsent(f,__->new ArrayList<>()).addAll(problems);
-		});
-		types.forEach((f,problems)->
-		{
-			result.computeIfAbsent(f,__-> new ArrayList<>()).addAll(problems);
-		});
 	}
 
 	public static class Result
@@ -81,6 +70,26 @@ public class Validator
 		{
 			this.game = game;
 			this.problems = problems;
+		}
+
+		public void mergeProblems(String file, List<Problem> problems)
+		{
+			this.problems.put(file,problems);
+			checkForErrors();
+		}
+
+		public void mergeProblems(Map<String,List<Problem>> problems)
+		{
+			problems.forEach((f,list)->
+			{
+				this.problems.computeIfAbsent(f,__->new ArrayList<>()).addAll(list);
+			});
+			checkForErrors();
+		}
+
+		private void checkForErrors()
+		{
+			if (hasErrors) return;
 
 			problems.forEach((file,list)->
 			{

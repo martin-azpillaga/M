@@ -9,6 +9,7 @@ import java.util.Set;
 
 import m.library.Library;
 import m.library.rules.ProblemKind;
+import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.model.Cell;
 import m.model.ExpressionNode;
@@ -23,12 +24,15 @@ public class TypeValidator
 	Map<String, Set<Cluster>> fileToClusters;
 	Map<String, Cluster> componentToCluster;
 
+	Map<String, List<UserFunction>> fileToFunctions;
+
 	public TypeValidator()
 	{
 		this.result = new Result();
 
 		this.fileToClusters = new HashMap<>();
 		this.componentToCluster = new HashMap<>();
+		this.fileToFunctions = new HashMap<>();
 	}
 
 	public Result validate(String file, File model, Set<ExpressionNode> connectedComponents)
@@ -36,7 +40,7 @@ public class TypeValidator
 		invalidateObsoleteMemory(file);
 		validate(connectedComponents, file);
 		checkTypes();
-
+		gatherFunctions(file,model);
 		return result;
 	}
 
@@ -44,11 +48,14 @@ public class TypeValidator
 	{
 		invalidateObsoleteMemory(file);
 		checkTypes();
+		gatherFunctions(file, null);
 		return result;
 	}
 
 	private void invalidateObsoleteMemory(String modifiedFile)
 	{
+		fileToFunctions.remove(modifiedFile);
+
 		var affectedNodes = new ArrayList<ExpressionNode>();
 
 		var clusters = fileToClusters.get(modifiedFile);
@@ -118,14 +125,7 @@ public class TypeValidator
 			{
 				var component = cell.getComponent().getName();
 
-				var componentFiles = cluster.componentToFiles.get(component);
-				if (componentFiles == null)
-				{
-					componentFiles = new HashSet<String>();
-					cluster.componentToFiles.put(component, componentFiles);
-				}
-				componentFiles.add(modifiedFile);
-
+				cluster.componentToFiles.computeIfAbsent(component,__->new HashSet<>()).add(modifiedFile);
 
 				var definitionCluster = componentToCluster.get(component);
 				if (definitionCluster != null)
@@ -140,14 +140,7 @@ public class TypeValidator
 		}
 		for (var typing : node.typings)
 		{
-			var types = cluster.fileToTypes.get(modifiedFile);
-			if (types == null)
-			{
-				types = new HashSet<Type>();
-
-				cluster.fileToTypes.put(modifiedFile, types);
-			}
-			types.add(typing.type);
+			cluster.fileToTypes.computeIfAbsent(modifiedFile,__->new HashSet<>()).add(typing.type);
 		}
 		return cluster;
 	}
@@ -242,6 +235,25 @@ public class TypeValidator
 						result.problems.computeIfAbsent(file,__->new ArrayList<>()).add(new Problem(node.expression, Severity.ERROR, kind));
 					}
 				});
+			}
+		}
+	}
+
+	private void gatherFunctions(String file, File model)
+	{
+		var userFunctions = new ArrayList<UserFunction>();
+
+		for (var function : model.getFunctions())
+		{
+			userFunctions.add(new UserFunction(function, FunctionType.systemType));
+		}
+		fileToFunctions.put(file, userFunctions);
+
+		for (var functionList : fileToFunctions.values())
+		{
+			for (var function : functionList)
+			{
+				result.functions.add(function);
 			}
 		}
 	}
