@@ -9,7 +9,9 @@ public class Main
 	{
 		var server = new Server();
 
-		if (arguments.length == 0)
+		var debugging = arguments.length > 0;
+
+		if (!debugging)
 		{
 			server.connect(System.in, System.out);
 		}
@@ -19,9 +21,12 @@ public class Main
 
 			try (var socket = new ServerSocket(socketNumber))
 			{
-				var clientSocket = socket.accept();
+				while(true)
+				{
+					var clientSocket = socket.accept();
 
-				server.connect(clientSocket.getInputStream(), clientSocket.getOutputStream());
+					server.connect(clientSocket.getInputStream(), clientSocket.getOutputStream());
+				}
 			}
 		}
 	}

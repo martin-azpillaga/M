@@ -18,6 +18,13 @@ public class Problem
 		this.message = message;
 	}
 
+	public Problem(EObject o, Severity severity, String message)
+	{
+		this.node = NodeModelUtils.getNode(o);
+		this.severity = severity;
+		this.message = message;
+	}
+
 	public Problem(EObject o, EStructuralFeature feature, Severity severity, String message)
 	{
 		this.node = NodeModelUtils.findNodesForFeature(o, feature).get(0);

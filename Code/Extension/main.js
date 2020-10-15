@@ -1,64 +1,54 @@
-const {
-	window,
-	commands,
-	workspace
-} = require("vscode");
-
-var {
-	LanguageClient
-} = require("vscode-languageclient");
-
-const { spawn, spawnSync } = require('child_process');
+const { LanguageClient } = require("vscode-languageclient");
+const { window } = require("vscode");
+const { spawn, spawnSync } = require("child_process");
+const net = require("net");
 
 var client;
 
-exports.activate = async function(context) {
-
-	context.subscriptions.push(
-		commands.registerCommand('m.restart', () => {
-			if (client) {
-				client.stop();
-			}
-			connect(context);
-		})
-	);
-
-	if (!java8Available()) {
+exports.activate = function (context)
+{
+	if (!java8Available())
+	{
 		var selection = window.showInformationMessage("M requires a Java 8+ runtime to execute. Please install and add Java 8+ to the path", "Install Java 8+");
 		selection.then(x => open("https://jdk.java.net/14/"));
 		return;
 	}
 
-	connect(context);
-}
+	var debugging = process.env.DEBUG === "true";
 
-exports.deactivate = function() {
-	if (!client) {
-		return undefined;
+	var serverOptions;
+
+	if (debugging)
+	{
+		serverOptions = () =>
+		{
+			let socket = net.connect({ port: 5007 });
+			let result =
+			{
+				writer: socket,
+				reader: socket
+			};
+			return Promise.resolve(result);
+		}
 	}
-	client.stop();
-}
+	else
+	{
+		serverOptions =
+		{
+			run: { command: "java",	args: ["-jar", context.asAbsolutePath("ls.jar")] }
+		};
+	}
 
-function connect(context)
-{
-	var serverOptions = {
-		run: {
-			command: "java",
-			args: ["-jar", context.asAbsolutePath("ls.jar")]
-		}
+	var clientOptions =
+	{
+		documentSelector:
+		[
+			{ scheme: "file", language: "Ⲙ"	},
+			{ scheme: "file", pattern: "**/Ⲙ.json" }
+		]
 	};
 
-	var clientOptions = {
-		documentSelector: [{
-			scheme: 'file',
-			language: 'm'
-		}],
-		synchronize: {
-			fileEvents: workspace.createFileSystemWatcher('**/*.Ⲙ')
-		}
-	};
-
-	client = new LanguageClient('mserver', 'm language server', serverOptions, clientOptions);
+	client = new LanguageClient("m language server", serverOptions, clientOptions);
 
 	client.start();
 }
@@ -72,7 +62,7 @@ function java8Available()
 	}
 
 	var output = childProcess.stderr.toString();
-	var version = output.split("\n")[0].split(" ")[2].replace(/"/g,"").split(".").map(x=>parseInt(x));
+	var version = output.split("\n")[0].split(" ")[2].replace(/"/g, "").split(".").map(x => parseInt(x));
 
 	if (version[0] == 1)
 	{
@@ -94,5 +84,15 @@ function open(url)
 		case "win32": command = "explorer.exe";
 		case "linux": command = "xdg-open";
 	}
+
 	spawn(command, [url]);
+}
+
+
+exports.deactivate = function deactivate()
+{
+	if (client)
+	{
+		client.stop();
+	}
 }

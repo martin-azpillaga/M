@@ -5,17 +5,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Scanner;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import static m.generator.Writer.Keyword.YES;
-import static m.generator.Writer.Keyword.NO;
-import static m.generator.Writer.Keyword.END;
+import static m.generator.IO.Keyword.YES;
+import static m.generator.IO.Keyword.NO;
+import static m.generator.IO.Keyword.END;
 
-public class Writer {
+public class IO {
 	enum Keyword {
 		YES, NO, END;
 	}
@@ -31,8 +34,81 @@ public class Writer {
 	private static boolean skipping;
 	private static String baseFolder;
 
-	private Writer() {
+	private IO() {
 
+	}
+
+	public static boolean contains(String folder, String file)
+	{
+		return file.startsWith(folder);
+	}
+
+	public static String read(String uri)
+	{
+		try
+		{
+			var url = new URI(uri).toURL();
+			var inputStream = url.openStream();
+			Scanner s = new Scanner(inputStream);
+			s.useDelimiter("\\A");
+			String result = s.hasNext() ? s.next() : "";
+			s.close();
+			return result;
+		} catch (Exception e) {}
+
+		return "";
+	}
+
+	public static List<String> filesWithExtension(String extension, String folder)
+	{
+		try
+		{
+			var path = Paths.get(new URI(folder));
+			return Files.walk(path)
+				.filter(p->p.toString().endsWith(extension))
+				.map(p->p.toUri().toString())
+				.collect(Collectors.toList());
+		}
+		catch (Exception e)
+		{
+			return new ArrayList<>();
+		}
+	}
+
+	public static String concat(String a, String b)
+	{
+		try
+		{
+			return new URI(Paths.get(a,b).toString()).toString();
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+
+	public static boolean existsFile(String file)
+	{
+		try
+		{
+			return Files.exists(Paths.get(new URI(file)));
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+	}
+
+	public static String readPath(Path file)
+	{
+		try
+		{
+			return new String(Files.readAllBytes(file));
+		}
+		catch(IOException e)
+		{
+			return "";
+		}
 	}
 
 	public static String getBaseFolder()
@@ -42,7 +118,11 @@ public class Writer {
 
 	public static void setBaseFolder(String folder)
 	{
-		baseFolder = folder;
+		try
+		{
+			baseFolder = Paths.get(new URI(folder)).toString();
+		}
+		catch (Exception e){}
 	}
 
 	public static boolean exists(String file)
@@ -120,9 +200,15 @@ public class Writer {
 	{
 		try
 		{
-			Files.write(Paths.get(baseFolder,file), write(lines(lines)).getBytes());
+			var text = write(lines(lines)).getBytes();
+			var absolutePath = Paths.get(baseFolder,file);
+			Files.createDirectories(absolutePath.getParent());
+			Files.write(absolutePath, text);
 		}
-		catch (IOException e) {}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
 	private static void writeLine(Object line)

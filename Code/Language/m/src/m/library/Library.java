@@ -5,12 +5,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import m.library.rules.BindingReason;
-import m.library.rules.Problem;
+import m.library.rules.ProblemKind;
 import m.library.rules.TypingReason;
-import m.library.symbols.Block;
 import m.library.symbols.Component;
 import m.library.symbols.Function;
 import m.library.symbols.Value;
+import m.library.symbols.Classification;
 import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
@@ -20,6 +20,10 @@ public enum Library
 {
 	ENGLISH
 	(
+		"foreach",
+		"if",
+		"while",
+
 	value -> {switch(value)
 	{
 		case EPSILON: return "epsilon";
@@ -96,172 +100,166 @@ public enum Library
 	} return "";},
 	function -> {switch(function)
 	{
-	case ABS: return "abs";
-	case SIGN: return "sign";
-	case CEIL: return "ceil";
-	case FLOOR: return "floor";
-	case ROUND: return "round";
-	case INTEGERPART: return "integerPart";
-	case FRACTIONALPART: return "fractionalPart";
-	case INVERSE: return "inverse";
-	case RECIPROCAL: return "reciprocal";
+		case ABS: return "abs";
+		case SIGN: return "sign";
+		case CEIL: return "ceil";
+		case FLOOR: return "floor";
+		case ROUND: return "round";
+		case INTEGERPART: return "integerPart";
+		case FRACTIONALPART: return "fractionalPart";
+		case INVERSE: return "inverse";
+		case RECIPROCAL: return "reciprocal";
 
-	case CLAMP: return "clamp";
-	case LERP: return "lerp";
-	case UNLERP: return "unlerp";
-	case PROPORTIONAL: return "proportional";
-	case SLERP: return "slerp";
+		case CLAMP: return "clamp";
+		case LERP: return "lerp";
+		case UNLERP: return "unlerp";
+		case PROPORTIONAL: return "proportional";
+		case SLERP: return "slerp";
 
-	case MIN: return "min";
-	case MAX: return "max";
+		case MIN: return "min";
+		case MAX: return "max";
 
-	case DEGREES: return "degrees";
-	case RADIANS: return "radians";
+		case DEGREES: return "degrees";
+		case RADIANS: return "radians";
 
-	case STEP: return "step";
+		case STEP: return "step";
 
-	case CROSS: return "cross";
-	case DOT: return "dot";
-	case NORM: return "norm";
-	case NORMALIZE: return "normalize";
-	case DISTANCE: return "distance";
-	case REFLECT: return "reflect";
-	case REFRACT: return "refract";
+		case CROSS: return "cross";
+		case DOT: return "dot";
+		case NORM: return "norm";
+		case NORMALIZE: return "normalize";
+		case DISTANCE: return "distance";
+		case REFLECT: return "reflect";
+		case REFRACT: return "refract";
 
-	case OR: return "||";
-	case AND: return "&&";
-	case NOT: return "!";
+		case OR: return "||";
+		case AND: return "&&";
+		case NOT: return "!";
 
-	case ADDITION: return "+";
-	case SUBTRACTION: return "-";
-	case MULTIPLICATION: return "*";
-	case DIVISION: return "/";
+		case ADDITION: return "+";
+		case SUBTRACTION: return "-";
+		case MULTIPLICATION: return "*";
+		case DIVISION: return "/";
 
-	case EQUAL: return "==";
-	case INEQUAL: return "!=";
+		case EQUAL: return "==";
+		case INEQUAL: return "!=";
 
-	case LOWER: return "<";
-	case LOWEROREQUAL: return "<=";
-	case GREATEROREQUAL: return ">=";
-	case GREATER: return ">";
+		case LOWER: return "<";
+		case LOWEROREQUAL: return "<=";
+		case GREATEROREQUAL: return ">=";
+		case GREATER: return ">";
 
-	case SIZE: return "#";
-	case IN: return "@";
-	case X: return "x";
-	case Y: return "y";
-	case Z: return "z";
-	case XYZ: return "xyz";
+		case SIZE: return "#";
+		case IN: return "@";
+		case X: return "x";
+		case Y: return "y";
+		case Z: return "z";
+		case XYZ: return "xyz";
 
-	case SIN: return "sin";
-	case COS: return "cos";
-	case TAN: return "tan";
-	case ASIN: return "asin";
-	case ACOS: return "acos";
-	case ATAN: return "atan";
-	case EXP: return "exp";
-	case LOG: return "log";
-	case POW: return "pow";
-	case SQRT: return "sqrt";
-	case RANDOM: return "random";
+		case SIN: return "sin";
+		case COS: return "cos";
+		case TAN: return "tan";
+		case ASIN: return "asin";
+		case ACOS: return "acos";
+		case ATAN: return "atan";
+		case EXP: return "exp";
+		case LOG: return "log";
+		case POW: return "pow";
+		case SQRT: return "sqrt";
+		case RANDOM: return "random";
 
-	case CREATE: return "create";
-	case DESTROY: return "destroy";
-	case ADD: return "add";
-	case REMOVE: return "remove";
-	case HAS: return "has";
+		case CREATE: return "create";
+		case DESTROY: return "destroy";
+		case ADD: return "add";
+		case REMOVE: return "remove";
+		case HAS: return "has";
 
-	case WRITE: return "write";
-	case WRITEERROR: return "writeError";
-	case WRITE_WARNING: return "writeWarning";
-	case HALT: return "halt";
-	case BREAKPOINT: return "breakpoint";
-	case SCREENSHOT: return "screenshot";
+		case WRITE: return "write";
+		case WRITEERROR: return "writeError";
+		case WRITE_WARNING: return "writeWarning";
+		case HALT: return "halt";
+		case BREAKPOINT: return "breakpoint";
+		case SCREENSHOT: return "screenshot";
 
 
-	case SET_NUMBER: return "setNumber";
-	case SET_COLOR: return "setColor";
-	case SET_KEYWORD: return "setBool";
-	case SET_TEXTURE: return "setTexture";
-	case SET_INTEGER: return "setInteger";
-	case GET_NUMBER: return "getNumber";
-	case GET_COLOR: return "getColor";
-	case GET_KEYWORD: return "getBool";
-	case GET_TEXTURE: return "getTexture";
-	case GET_INTEGER: return "getInteger";
+		case SET_NUMBER: return "setNumber";
+		case SET_COLOR: return "setColor";
+		case SET_KEYWORD: return "setBool";
+		case SET_TEXTURE: return "setTexture";
+		case SET_INTEGER: return "setInteger";
+		case GET_NUMBER: return "getNumber";
+		case GET_COLOR: return "getColor";
+		case GET_KEYWORD: return "getBool";
+		case GET_TEXTURE: return "getTexture";
+		case GET_INTEGER: return "getInteger";
 
-	case SET_TRIGGER: return "setTrigger";
-	case IN_STATE: return "inState";
-	case ACTIVATE_PARAMETER: return "enableParameter";
-	case DEACTIVATE_PARAMETER: return "disableParameter";
-	case PLAY_ANIMATION: return "playAnimation";
+		case SET_TRIGGER: return "setTrigger";
+		case IN_STATE: return "inState";
+		case ACTIVATE_PARAMETER: return "enableParameter";
+		case DEACTIVATE_PARAMETER: return "disableParameter";
+		case PLAY_ANIMATION: return "playAnimation";
 
-	case READ_TRIGGERED: return "readTriggered";
-	case READ_NUMBER: return "readNumber";
-	case READ_VECTOR: return "readVector";
+		case READ_TRIGGERED: return "readTriggered";
+		case READ_NUMBER: return "readNumber";
+		case READ_VECTOR: return "readVector";
 
-	case TO_QUATERNION: return "quaternion";
-	case TO_NUMBER3: return "angles";
+		case TO_QUATERNION: return "quaternion";
+		case TO_NUMBER3: return "angles";
 
-	case PLAY: return "play";
-	case PLAY_ONCE: return "playOnce";
-	case PAUSE: return "pause";
-	case UNPAUSE: return "unpause";
-	case STOP: return "stop";
+		case PLAY: return "play";
+		case PLAY_ONCE: return "playOnce";
+		case PAUSE: return "pause";
+		case UNPAUSE: return "unpause";
+		case STOP: return "stop";
 
-	case OVER: return "over";
-	case TO_STRING: return "string";
-	case TO_NUMBER: return "number";
+		case OVER: return "over";
+		case TO_STRING: return "string";
+		case TO_NUMBER: return "number";
 
-	case OVERLAPS: return "overlaps";
-	case SCREEN_OVERLAPS: return "screenOverlaps";
-	case ADD_FORCE: return "addForce";
-	case ADD_TORQUE: return "addTorque";
-	case CLOSEST_POINT: return "closestPoint";
+		case OVERLAPS: return "overlaps";
+		case SCREEN_OVERLAPS: return "screenOverlaps";
+		case ADD_FORCE: return "addForce";
+		case ADD_TORQUE: return "addTorque";
+		case CLOSEST_POINT: return "closestPoint";
 
-	case IS_POSITIVE: return "isPositive";
-	case IS_NEGATIVE: return "isNegative";
-	case IS_ZERO: return "isZero";
+		case IS_POSITIVE: return "isPositive";
+		case IS_NEGATIVE: return "isNegative";
+		case IS_ZERO: return "isZero";
 
-	case WORLD_TO_VIEWPORT: return "worldToViewport";
-	case VIEWPORT_TO_WORLD: return "viewportToWorld";
+		case WORLD_TO_VIEWPORT: return "worldToViewport";
+		case VIEWPORT_TO_WORLD: return "viewportToWorld";
 
-	case ASSIGNMENT: return "=";
+		case ASSIGNMENT: return "=";
 	} return "";}
 	,
-	block -> {switch(block)
-	{
-	case SELECTION: return "if";
-	case ITERATION: return "while";
-	case QUERY: return "foreach";
-	} return "";},
 	type -> {switch(type)
 	{
-	case STRING: return "string";
-	case PROPOSITION: return "proposition";
-	case NUMBER: return "number";
-	case NUMBER2: return "number2";
-	case NUMBER3: return "number3";
-	case UNIT: return "unit";
+		case STRING: return "string";
+		case PROPOSITION: return "proposition";
+		case NUMBER: return "number";
+		case NUMBER2: return "number2";
+		case NUMBER3: return "number3";
+		case UNIT: return "unit";
 
-	case COMPONENT: return "component";
+		case COMPONENT: return "component";
 
-	case COLOR: return "color";
+		case COLOR: return "color";
 
-	case INPUT: return "input";
-	case MESH: return "mesh";
-	case MATERIAL: return "material";
-	case FONT: return "font";
-	case TEXT: return "text";
-	case IMAGE: return "image";
-	case AUDIOCLIP: return "audioClip";
-	case ANIMATOR: return "animator";
+		case INPUT: return "input";
+		case MESH: return "mesh";
+		case MATERIAL: return "material";
+		case FONT: return "font";
+		case TEXT: return "text";
+		case IMAGE: return "image";
+		case AUDIOCLIP: return "audioClip";
+		case ANIMATOR: return "animator";
 
-	case ENTITY: return "entity";
-	case ENTITY_LIST: return "entityList";
-	case QUATERNION: return "quaternion";
-	case TEXTURE: return "texture";
-	case COLLIDER: return "collider";
-	case RECT: return "rectangle";
+		case ENTITY: return "entity";
+		case ENTITY_LIST: return "entityList";
+		case QUATERNION: return "quaternion";
+		case TEXTURE: return "texture";
+		case COLLIDER: return "collider";
+		case RECT: return "rectangle";
 	} return ""; },
 	problem -> { switch (problem)
 	{
@@ -470,30 +468,50 @@ public enum Library
 		case Y: return "Second entry of the vector";
 		case Z: return "Third entry of the vector";
 	}
+	return "";},
+	classification -> { switch(classification)
+	{
+		case QUERY_ENTITY: return "Query entity";
+		case USER_VALUE: return "User value";
+		case USER_COMPONENT: return "User component";
+		case USER_SYSTEM: return "User system";
+
+		case STANDARD_VALUE: return "Standard value";
+		case STANDARD_COMPONENT: return "Standard component";
+		case STANDARD_OPERATOR: return "Standard operator";
+		case STANDARD_FUNCTION: return "Standard function";
+	}
 	return "";}
 	);
 
 	Map<Value, String> valueToName;
 	Map<Component, String> componentToName;
 	Map<Function, String> functionToName;
-	Map<Block, String> blockToName;
 	Map<AtomicType, String> typeToName;
-	Map<Problem, String> problemToName;
+	Map<ProblemKind, String> problemToName;
 	Map<BindingReason, String> bindingReasonToName;
 	Map<TypingReason, String> typingReasonToName;
 
 	Map<Value, String> valueToDescription;
 	Map<Component, String> componentToDescription;
 	Map<Function, String> functionToDescription;
+	Map<Classification, String> classificationToDescription;
 
 	Map<String, Value> nameToValue;
 	Map<String, Component> nameToComponent;
 	Map<String, Function> nameToFunction;
-	Map<String, Block> nameToBlock;
 	Map<String, AtomicType> nameToType;
 
-	Library(java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<Block,String> blocks, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<Problem, String> problems, java.util.function.Function<BindingReason, String> bindingReasons, java.util.function.Function<TypingReason, String> typingReasons, java.util.function.Function<Value, String> valueDescriptions, java.util.function.Function<Component, String> componentDescriptions, java.util.function.Function<Function, String> functionDescriptions)
+	public final String query;
+	public final String selection;
+	public final String iteration;
+
+	Library(String query, String selection, String iteration, java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<ProblemKind, String> problems, java.util.function.Function<BindingReason, String> bindingReasons, java.util.function.Function<TypingReason, String> typingReasons, java.util.function.Function<Value, String> valueDescriptions, java.util.function.Function<Component, String> componentDescriptions, java.util.function.Function<Function, String> functionDescriptions, java.util.function.Function<Classification,String> classifications)
 	{
+		this.query = query;
+		this.selection = selection;
+		this.iteration = iteration;
+
 		valueToName = forward(values, Value.values());
 		nameToValue = reverse(values, Value.values());
 
@@ -503,19 +521,18 @@ public enum Library
 		functionToName = forward(functions, Function.values());
 		nameToFunction = reverse(functions, Function.values());
 
-		blockToName = forward(blocks, Block.values());
-		nameToBlock = reverse(blocks, Block.values());
-
 		typeToName = forward(atomicTypes, AtomicType.values());
 		nameToType = reverse(atomicTypes, AtomicType.values());
 
-		problemToName = forward(problems, Problem.values());
+		problemToName = forward(problems, ProblemKind.values());
 		bindingReasonToName = forward(bindingReasons, BindingReason.values());
 		typingReasonToName = forward(typingReasons, TypingReason.values());
 
 		valueToDescription = forward(valueDescriptions, Value.values());
 		componentToDescription = forward(componentDescriptions, Component.values());
 		functionToDescription = forward(functionDescriptions, Function.values());
+
+		classificationToDescription = forward(classifications, Classification.values());
 	}
 
 	private <A,B> HashMap<A,B> forward(java.util.function.Function<A,B> f, A[] values)
@@ -562,12 +579,7 @@ public enum Library
 		return nameToFunction.get(name);
 	}
 
-	public Block getBlock(String name)
-	{
-		return nameToBlock.get(name);
-	}
-
-	public String getProblem(Problem problem)
+	public String getProblem(ProblemKind problem)
 	{
 		return problemToName.get(problem);
 	}
@@ -585,6 +597,11 @@ public enum Library
 	public String getDescription(Value value)
 	{
 		return valueToDescription.get(value);
+	}
+
+	public String getDescription(Classification classification)
+	{
+		return classificationToDescription.get(classification);
 	}
 
 	public String getName(Component component)

@@ -1,8 +1,8 @@
 package m.library.rules;
 
-import static m.library.rules.Problem.Kind.*;
+import static m.library.rules.ProblemKind.Severity.*;
 
-public enum Problem
+public enum ProblemKind
 {
 	SYNTAX_ERROR(ERROR),
 	UNDECIDABLE_TYPE(ERROR),
@@ -13,14 +13,14 @@ public enum Problem
 	UNUSED_VALUE(INFORMATION),
 	;
 
-	public final Kind kind;
+	public final Severity severity;
 
-	Problem(Kind kind)
+	ProblemKind(Severity severity)
 	{
-		this.kind = kind;
+		this.severity = severity;
 	}
 
-	public enum Kind
+	public enum Severity
 	{
 		ERROR, WARNING, INFORMATION
 	}

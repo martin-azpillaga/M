@@ -1,28 +1,29 @@
 package m.main;
 
+import static m.library.symbols.Classification.*;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
-import org.eclipse.lsp4j.ParameterInformation;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.SignatureHelp;
-import org.eclipse.lsp4j.SignatureHelpParams;
 import org.eclipse.lsp4j.SignatureInformation;
 import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.TerminalRule;
 import org.eclipse.xtext.nodemodel.INode;
 import org.eclipse.xtext.nodemodel.impl.CompositeNode;
 import org.eclipse.xtext.nodemodel.impl.CompositeNodeWithSemanticElement;
-import org.eclipse.xtext.nodemodel.impl.HiddenLeafNode;
 import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 
 import m.library.Library;
 import m.library.symbols.Component;
+import m.library.symbols.Classification;
 import m.library.types.AtomicType;
-import m.library.types.FunctionType;
 import m.model.Application;
 import m.model.Assignment;
 import m.model.Binary;
@@ -40,25 +41,33 @@ public class Inspector
 {
 	Library library;
 	Game game;
+	Map<String,INode> files;
 
-	public String hover(String path, Position position)
+	public Inspector()
 	{
-		return "";
+		this.files = new HashMap<>();
+		this.library = Library.ENGLISH;
 	}
 
-	public String hover(Position position, String text, INode rootNode)
+	public void update(String file, INode node, Game game)
 	{
-		var result = "";
+		files.put(file,node);
+		this.game = game;
+	}
 
-		var offset = offset(text, position.getLine(), position.getCharacter());
+	public void delete(String file)
+	{
+		files.remove(file);
+	}
 
-		var node = NodeModelUtils.findLeafNodeAtOffset(rootNode, offset);
+	public void update(Game game)
+	{
+		this.game = game;
+	}
 
-		if (node instanceof HiddenLeafNode)
-		{
-			return "";
-		}
-
+	public String hover(String file, Position position)
+	{
+		var node = nodeAt(file, position, false);
 		var semantic = node.getSemanticElement();
 
 		if (semantic instanceof Function)
@@ -66,7 +75,7 @@ public class Inspector
 			var function = (Function) semantic;
 			if (node.getText().equals(function.getName()))
 			{
-				result = "User system";
+				return library.getDescription(Classification.USER_SYSTEM);
 			}
 		}
 		else if (semantic instanceof Value)
@@ -84,19 +93,19 @@ public class Inspector
 
 					if (standard != null)
 					{
-						var type = library.getName(standard.getType());
-						result = "Standard component : " + type;
+						var type = standard.getType();
+						return library.getDescription(STANDARD_COMPONENT) + " : " + library.getName(type);
 					}
 					else
 					{
 						var type = game.components.get(value.getName());
 						if (type != null)
 						{
-							result = "User component : " + library.getName(type);
+							return library.getDescription(USER_COMPONENT) + " : " + library.getName(type);
 						}
 						else
 						{
-							result = "User component : ?";
+							return library.getDescription(USER_COMPONENT) + " : ?";
 						}
 					}
 				}
@@ -106,7 +115,7 @@ public class Inspector
 					UserFunction userFunction = null;
 					for (var f : game.functions)
 					{
-						if (f.getName().equals(function.getName()))
+						if (f.function==function)
 						{
 							userFunction = f;
 							break;
@@ -121,32 +130,32 @@ public class Inspector
 						if (standard != null)
 						{
 							var type = library.getName(standard.getType());
-							result = "Standard value : " + type;
+							return library.getDescription(STANDARD_VALUE)+ " : " + type;
 						}
 						else
 						{
 							var type = game.values.get(value);
 							if (type != null)
 							{
-								result = "User value : " + library.getName(type);
+								return library.getDescription(USER_VALUE) + " : " + library.getName(type);
 							}
 							else
 							{
-								result = "user value : ?";
+								return library.getDescription(USER_VALUE) + " : ?";
 							}
 						}
 					}
 					else
 					{
-						result = "Entity query\n\n";
-						var builder = new StringBuilder(result);
+						var builder = new StringBuilder();
+						builder.append(library.getDescription(QUERY_ENTITY)+"\n\n");
 						for (var component : query.entrySet())
 						{
 							builder.append("* ");
 							builder.append(component.getKey());
 							builder.append("\n\n");
 						}
-						result = builder.toString();
+						return builder.toString();
 					}
 				}
 			}
@@ -171,32 +180,32 @@ public class Inspector
 					if (standard != null)
 					{
 						var type = library.getName(standard.getType());
-						result = "Standard value : " + type;
+						return library.getDescription(STANDARD_VALUE) + " : " + type;
 					}
 					else
 					{
 						var type = game.values.get(value);
 						if (type != null)
 						{
-							result = "User value : " + library.getName(type);
+							return library.getDescription(USER_VALUE) + " : " + library.getName(type);
 						}
 						else
 						{
-							result = "user value : ?";
+							return library.getDescription(USER_VALUE) + " : ?";
 						}
 					}
 				}
 				else
 				{
-					result = "Entity query\n\n";
-					var builder = new StringBuilder(result);
+					var builder = new StringBuilder();
+					builder.append(library.getDescription(QUERY_ENTITY)+"\n\n");
 					for (var component : query.entrySet())
 					{
 						builder.append("* ");
 						builder.append(component.getKey());
 						builder.append("\n\n");
 					}
-					result = builder.toString();
+					return builder.toString();
 				}
 			}
 		}
@@ -206,7 +215,7 @@ public class Inspector
 			var standard = library.getFunction(binary.getOperator());
 			if (standard != null)
 			{
-				result = "Standard operator\n\nType: " + library.getName(standard.getType());
+				return library.getDescription(STANDARD_OPERATOR) + " : " + library.getName(standard.getType());
 			}
 		}
 		else if (semantic instanceof Unary)
@@ -215,7 +224,7 @@ public class Inspector
 			var standard = library.getFunction(unary.getOperator());
 			if (standard != null)
 			{
-				result = "Standard operator\n\nType: " + library.getName(standard.getType());
+				return library.getDescription(STANDARD_OPERATOR) + " : " + library.getName(standard.getType());
 			}
 		}
 		else if (semantic instanceof Application)
@@ -224,26 +233,18 @@ public class Inspector
 			var standard = library.getFunction(application.getName());
 			if (standard != null)
 			{
-				result = "Standard function\n\nType: " + library.getName(standard.getType());
+				return library.getDescription(STANDARD_OPERATOR) + " : " + library.getName(standard.getType());
 			}
 		}
 
-		return result;
+		return "";
 	}
 
-	public List<CompletionItem> completions(String path, Position position)
-	{
-		return new ArrayList<CompletionItem>();
-	}
-
-	public List<CompletionItem> completions(Position position, INode rootNode)
+	public List<CompletionItem> completions(String file, Position position)
 	{
 		var result = new ArrayList<CompletionItem>();
 
-		var text = rootNode.getText();
-		var offset = offset(text, position.getLine(), position.getCharacter());
-
-		var node = NodeModelUtils.findLeafNodeAtOffset(rootNode, offset-1);
+		var node = nodeAt(file, position, true);
 
 		var semantic = node.getSemanticElement();
 		var grammatic = node.getGrammarElement();
@@ -406,6 +407,15 @@ public class Inspector
 		}
 		else if (semantic instanceof Value)
 		{
+			var semanticContainer = semantic.eContainer();
+			if (semanticContainer instanceof BindingBlock)
+			{
+				var bindingBlock = (BindingBlock) semanticContainer;
+				if (bindingBlock.getExpression() == semantic)
+				{
+					return result;
+				}
+			}
 			for (var function : m.library.symbols.Function.values())
 			{
 				if (function != m.library.symbols.Function.ASSIGNMENT)
@@ -490,18 +500,11 @@ public class Inspector
 		return result;
 	}
 
-	public SignatureHelp signature(String path, Position position)
-	{
-		return new SignatureHelp();
-	}
-
-	public SignatureHelp signature(INode rootNode, Position position, SignatureHelpParams params)
+	public SignatureHelp signatures(String path, Position position, String triggerCharacter)
 	{
 		var help = new SignatureHelp();
 
-		var text = rootNode.getText();
-		var offset = offset(text, position.getLine(), position.getCharacter());
-		var node = NodeModelUtils.findLeafNodeAtOffset(rootNode, offset-1);
+		var node = nodeAt(path, position, true);
 
 		var list = new ArrayList<SignatureInformation>();
 
@@ -513,16 +516,11 @@ public class Inspector
 
 			if (standard != null)
 			{
-				var type = (FunctionType) standard.getType();
-				var parameters = new ArrayList<ParameterInformation>();
-				for (var i = 0; i < type.parameterTypes.length; i++)
-				{
-					parameters.add(new ParameterInformation(i+"", library.getName(type.parameterTypes[i])));
-				}
-				var info = new SignatureInformation(name + " : " + library.getName(type), library.getDescription(standard), parameters);
+				var type = standard.getType();
+				var info = new SignatureInformation(name + " : " + library.getName(type), library.getDescription(standard),null);
 				list.add(info);
 				help.setSignatures(list);
-				if (params.getContext().getTriggerCharacter() != null)
+				if (triggerCharacter != null)
 				{
 					help.setActiveParameter(application.getArguments().size());
 				}
@@ -535,6 +533,16 @@ public class Inspector
 
 		help.setSignatures(list);
 		return help;
+	}
+
+	private INode nodeAt(String file, Position position, boolean minusOne)
+	{
+		var rootNode = files.get(file);
+		var offset = offset(rootNode.getText(), position.getLine(), position.getCharacter());
+
+		var node = NodeModelUtils.findLeafNodeAtOffset(rootNode, minusOne && offset > 0 ? offset-1 : offset);
+
+		return node;
 	}
 
 	private int offset(String text, int line, int character)
@@ -551,6 +559,6 @@ public class Inspector
 				count++;
 			}
 		}
-		return text.length();
+		return text.length()-1;
 	}
 }

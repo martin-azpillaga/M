@@ -2,10 +2,9 @@ package m.main;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -29,6 +28,8 @@ import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.InitializedParams;
 import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.SignatureHelp;
@@ -44,10 +45,12 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
+import m.generator.IO;
+
 public class Server implements LanguageServer, WorkspaceService, TextDocumentService
 {
 	LanguageClient client;
-	List<Project> projects;
+	Map<String,Project> projects;
 
 	@Override
 	public WorkspaceService getWorkspaceService()
@@ -72,7 +75,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 	@Override
 	public CompletableFuture<InitializeResult> initialize(InitializeParams params)
 	{
-		this.projects = new ArrayList<>();
+		this.projects = new HashMap<>();
 
 		var options = new WorkspaceFoldersOptions();
 		options.setSupported(true);
@@ -89,8 +92,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		for (var folder : params.getWorkspaceFolders())
 		{
 			var uri = folder.getUri();
-			var path = decode(uri);
-			projects.add(new Project(path, diagnostics->publishDiagnostics(diagnostics)));
+			projects.put(uri, new Project(uri));
 		}
 
 		return CompletableFuture.supplyAsync(() -> new InitializeResult(capabilities));
@@ -99,7 +101,11 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 	@Override
 	public void initialized(InitializedParams params)
 	{
-
+		for (var project : projects.values())
+		{
+			var diagnostics = project.initialize();
+			publishDiagnostics(diagnostics);
+		}
 	}
 
 	@Override
@@ -111,7 +117,7 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 	@Override
 	public void exit()
 	{
-		System.exit(0);
+		//System.exit(0);
 	}
 
 
@@ -123,22 +129,43 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 		for (var added : params.getEvent().getAdded())
 		{
 			var uri = added.getUri();
-			var path = decode(uri);
-			projects.add(new Project(path, diagnostics -> publishDiagnostics(diagnostics)));
+			var project = new Project(uri);
+			projects.put(uri,project);
+
+			var diagnostics = project.initialize();
+			publishDiagnostics(diagnostics);
 		}
 		for (var removed : params.getEvent().getRemoved())
 		{
 			var uri = removed.getUri();
-			var path = decode(uri);
 
-			var iterator = projects.iterator();
+			projects.remove(uri);
+		}
+	}
 
-			while(iterator.hasNext())
+	@Override
+	public void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
+	{
+		for (var change : params.getChanges())
+		{
+			var file = change.getUri();
+
+			if (change.getType() == FileChangeType.Created)
 			{
-				var project = iterator.next();
-				if (project.root.equals(path))
+				var text = IO.read(file);
+
+				for (var project : projectsContaining(file))
 				{
-					iterator.remove();
+					var diagnostics = project.modify(file, text);
+					publishDiagnostics(diagnostics);
+				}
+			}
+			else if (change.getType() == FileChangeType.Deleted)
+			{
+				for (var project : projectsContaining(file))
+				{
+					var diagnostics = project.delete(file);
+					publishDiagnostics(diagnostics);
 				}
 			}
 		}
@@ -150,44 +177,19 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 
 	}
 
-	@Override
-	public void didChangeWatchedFiles(DidChangeWatchedFilesParams params)
-	{
-		for (var change : params.getChanges())
-		{
-			var uri = change.getUri();
-			var path = decode(uri);
-
-			if (change.getType() == FileChangeType.Created)
-			{
-				for (var project : projects)
-				{
-					project.fileAdded(path);
-				}
-			}
-			else if (change.getType() == FileChangeType.Deleted)
-			{
-				for (var project : projects)
-				{
-					project.fileDeleted(path);
-				}
-			}
-		}
-	}
-
 
 
 
 	@Override
 	public void didOpen(DidOpenTextDocumentParams params)
 	{
-		onChange(params.getTextDocument().getUri(), params.getTextDocument().getText());
+		modify(params.getTextDocument().getUri(), params.getTextDocument().getText());
 	}
 
 	@Override
 	public void didChange(DidChangeTextDocumentParams params)
 	{
-		onChange(params.getTextDocument().getUri(), params.getContentChanges().get(0).getText());
+		modify(params.getTextDocument().getUri(), params.getContentChanges().get(0).getText());
 	}
 
 	@Override
@@ -202,25 +204,6 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 
 	}
 
-	private void onChange(String uri, String text)
-	{
-		var path = decode(uri);
-
-		for (var project : projects)
-		{
-			project.fileChanged(path, text);
-		}
-	}
-
-	private void publishDiagnostics(Map<String,ArrayList<Diagnostic>> diagnostics)
-	{
-		for (var entry : diagnostics.entrySet())
-		{
-			var uri = encode(entry.getKey());
-			client.publishDiagnostics(new PublishDiagnosticsParams(uri, entry.getValue()));
-		}
-	}
-
 
 
 
@@ -228,18 +211,17 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 	@Override
 	public CompletableFuture<Hover> hover(HoverParams params)
 	{
-		var hover = new Hover();
+		var position = params.getPosition();
+		var file = params.getTextDocument().getUri();
+
 		var result = "";
 
-		var position = params.getPosition();
-		var uri = params.getTextDocument().getUri();
-		var path = decode(uri);
-
-		for (var project : projects)
+		for (var project : projectsContaining(file))
 		{
-			result += project.hover(path, position);
+			result += project.hover(file, position);
 		}
 
+		var hover = new Hover();
 		var contents = new MarkupContent("markdown", result);
 		hover.setContents(contents);
 		return CompletableFuture.supplyAsync(() -> hover);
@@ -248,62 +230,74 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 	@Override
 	public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(CompletionParams params)
 	{
-		var uri = params.getTextDocument().getUri();
-		var path = decode(uri);
+		var file = params.getTextDocument().getUri();
+		var position = params.getPosition();
 
-		for (var project : projects)
+		var result = new ArrayList<CompletionItem>();
+
+		for (var project : projectsContaining(file))
 		{
-			if (project.contains(path))
-			{
-				var result = project.completions(path, params.getPosition());
-
-				return CompletableFuture.supplyAsync(() -> Either.forLeft(result));
-			}
+			result.addAll(project.completions(file, position));
 		}
-		return null;
+
+		return CompletableFuture.supplyAsync(() -> Either.forLeft(result));
 	}
 
 	@Override
 	public CompletableFuture<SignatureHelp> signatureHelp(SignatureHelpParams params)
 	{
-		var uri = params.getTextDocument().getUri();
-		var path = decode(uri);
+		var file = params.getTextDocument().getUri();
 
-		for (var project : projects)
+		var result = new SignatureHelp();
+
+		for (var project : projectsContaining(file))
 		{
-			if (project.contains(path))
+			result = project.signatures(file, params.getPosition(), params.getContext().getTriggerCharacter());
+		}
+
+		var finalResult = result;
+
+		return CompletableFuture.supplyAsync(() -> finalResult);
+	}
+
+
+
+
+	private List<Project> projectsContaining(String file)
+	{
+		var result = new ArrayList<Project>();
+
+		projects.forEach((folder,project) ->
+		{
+			if (IO.contains(folder,file))
 			{
-				var result = project.signature(path, params.getPosition());
-
-				return CompletableFuture.supplyAsync(() -> result);
+				result.add(project);
 			}
-		}
-		return null;
-	}
+		});
 
-
-
-	private String encode(String path)
-	{
-		return path;
-	}
-
-	private String decode(String path)
-	{
-		var result = "";
-		try
+		if (result.isEmpty())
 		{
-			result = URLDecoder.decode(path.replace("file://", ""),"UTF-8");
-		}
-		catch (UnsupportedEncodingException e){}
-
-		var os = System.getProperty("os.name");
-
-		if (os.startsWith("Win"))
-		{
-			result = result.substring(1);
+			client.showMessage(new MessageParams(MessageType.Info, "Ⲙ file detected outside of workspace folders. Open the file in a workspace folder."));
 		}
 
 		return result;
+	}
+
+	private void modify(String file, String text)
+	{
+		for (var project : projectsContaining(file))
+		{
+			var diagnostics = project.modify(file, text);
+			publishDiagnostics(diagnostics);
+		}
+	}
+
+	private void publishDiagnostics(Map<String,List<Diagnostic>> diagnosticMap)
+	{
+		diagnosticMap.forEach((uri, diagnostics)->
+		{
+			var parameters = new PublishDiagnosticsParams(uri, diagnostics);
+			client.publishDiagnostics(parameters);
+		});
 	}
 }

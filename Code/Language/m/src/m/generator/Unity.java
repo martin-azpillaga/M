@@ -1,17 +1,14 @@
 package m.generator;
 
-import static m.generator.Writer.end;
-import static m.generator.Writer.exists;
-import static m.generator.Writer.foreach;
-import static m.generator.Writer.getBaseFolder;
-import static m.generator.Writer.iff;
-import static m.generator.Writer.lines;
-import static m.generator.Writer.readText;
-import static m.generator.Writer.write;
-import static m.generator.Writer.writeFile;
-import static m.library.symbols.Block.ITERATION;
-import static m.library.symbols.Block.QUERY;
-import static m.library.symbols.Block.SELECTION;
+import static m.generator.IO.end;
+import static m.generator.IO.exists;
+import static m.generator.IO.foreach;
+import static m.generator.IO.getBaseFolder;
+import static m.generator.IO.iff;
+import static m.generator.IO.lines;
+import static m.generator.IO.readText;
+import static m.generator.IO.write;
+import static m.generator.IO.writeFile;
 import static m.library.symbols.Component.DISPLAY;
 import static m.library.symbols.Function.ACTIVATE_PARAMETER;
 import static m.library.symbols.Function.ADD_FORCE;
@@ -57,6 +54,7 @@ import org.eclipse.xtext.EcoreUtil2;
 import m.library.Library;
 import m.library.symbols.Component;
 import m.library.types.AtomicType;
+import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.model.Application;
 import m.model.Assignment;
@@ -134,21 +132,23 @@ public class Unity
 
 		resolveAssembly();
 
-		for (var component : game.components.entrySet())
+		game.components.entrySet().removeIf(e-> library.getComponent(e.getKey()) != null);
+
+		game.components.forEach((name, type)->
 		{
 			writeFile
 			(
-				"Assets/Code/Components/"+unreserved(component.getKey())+".cs",
-				generateComponent(component.getKey(), component.getValue())
+				"Assets/Code/Components/"+unreserved(name)+".cs",
+				generateComponent(name, type)
 			);
-		}
+		});
 
 		var systems = new ArrayList<UserFunction>();
 
 		for (var function : game.functions)
 		{
 			var type = function.type;
-			if (type.parameterTypes == null && type.returnType == UNIT)
+			if (type == FunctionType.systemType)
 			{
 				systems.add(function);
 				writeFile
@@ -202,18 +202,18 @@ public class Unity
 		);
 
 		jobified = true;
-		for (var component : game.components.entrySet())
+		game.components.forEach((name, type)->
 		{
 			writeFile
 			(
-				"Assets/Code/Components/Jobified/"+unreserved(component.getKey())+"Data.cs",
-				generateDataComponent(component.getKey(), component.getValue())
+				"Assets/Code/Components/Jobified/"+unreserved(name)+"Data.cs",
+				generateDataComponent(name, type)
 			);
-		}
+		});
 		for (var function : game.functions)
 		{
 			var type = function.type;
-			if (type.parameterTypes == null && type.returnType == UNIT)
+			if (type == FunctionType.systemType)
 			{
 				writeFile
 				(
@@ -1097,7 +1097,7 @@ public class Unity
 
 			var block = (BindingBlock) statement;
 			var name = block.getName();
-			if (library.getBlock(name) == QUERY)
+			if (library.query.equals(name))
 			{
 				var a = block.getExpression().getName();
 				var extras = extraComponents(currentFunction);
@@ -1188,7 +1188,7 @@ public class Unity
 			var block = (Block) statement;
 			var name = block.getName();
 
-			if (library.getBlock(name) == SELECTION)
+			if (library.selection.equals(name))
 			{
 				var overlaps = overlaps(block.getExpression());
 				for (var overlap : overlaps)
@@ -1207,7 +1207,7 @@ public class Unity
 					"}"
 				);
 			}
-			else if (library.getBlock(name) == ITERATION)
+			else if (library.iteration.equals(name))
 			{
 				var overlaps = overlaps(block.getExpression());
 				for (var overlap : overlaps)

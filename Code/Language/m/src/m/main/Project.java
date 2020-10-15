@@ -1,103 +1,93 @@
 package m.main;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.SignatureHelp;
+import org.eclipse.xtext.nodemodel.INode;
 
 import m.generator.Generator;
-import m.validation.global.GlobalData;
-import m.validation.global.GlobalValidator;
+import m.generator.IO;
+import m.validation.Problem;
+import m.validation.Validator;
+import m.model.Configuration;
 
 public class Project
 {
 	String root;
 
-	GlobalValidator validator;
+	Validator validator;
 	Generator generator;
-	public final Inspector inspector;
+	Inspector inspector;
+	Configuration configuration;
 
-	Consumer<Map<String,ArrayList<Diagnostic>>> problemsChanged;
-
-	public Project(String root, Consumer<Map<String,ArrayList<Diagnostic>>> onProblemsChanged)
+	public Project(String root)
 	{
 		this.root = root;
 		this.generator = new Generator();
-		this.validator = new GlobalValidator();
-		this.problemsChanged = onProblemsChanged;
+		this.validator = new Validator();
 		this.inspector = new Inspector();
+		this.configuration = new Configuration(root);
+	}
 
-		try (var walk = Files.walk(Paths.get(root)))
+	public Map<String,List<Diagnostic>> initialize()
+	{
+		Validator.Result data = null;
+
+		for (var file : IO.filesWithExtension("Ⲙ", root))
 		{
-			walk.forEach(f ->
-			{
-				var file = f.toString();
-				if (file.endsWith(".Ⲙ"))
-				{
-					try
-					{
-						var text = new String(Files.readAllBytes(f));
-						validator.validate(file,text);
-					}
-					catch (IOException e)
-					{
-
-					}
-				}
-			});
+			var text = IO.read(file);
+			data = validator.validate(file,text);
+			inspector.update(file, data.rootNode, data.game);
 		}
-		catch (IOException e){}
-	}
 
-	public boolean contains(String path)
-	{
-		return path.startsWith(this.root);
-	}
-
-	public Map<String,List<Diagnostic>> getDiagnostics()
-	{
-		return new HashMap<String, List<Diagnostic>>();
-	}
-
-	public void fileAdded(String file)
-	{
-		if (!contains(file)) return;
-
-		try
+		var configurationFile = IO.concat(root, "Ⲙ.json");
+		if (IO.existsFile(configurationFile))
 		{
-			var text = new String(Files.readAllBytes(Paths.get(file)));
-			fileChanged(file, text);
+			var json = IO.read(configurationFile);
+			configuration.parse(json, root);
 		}
-		catch (IOException e){}
+
+		return check(data);
 	}
 
-	public void fileDeleted(String file)
+	public Map<String,List<Diagnostic>> delete(String file)
 	{
-		if (!contains(file)) return;
+		if (file.endsWith(".json"))
+		{
+			configuration = new Configuration(root);
+			return new HashMap<>();
+		}
+		else
+		{
+			var globalData = validator.delete(file);
+			inspector.delete(file);
 
-		var globalData = validator.delete(file);
-
-		check(globalData);
+			return check(globalData);
+		}
 	}
 
-	public void fileChanged(String modifiedFile, String text)
+	public Map<String,List<Diagnostic>> modify(String file, String text)
 	{
-		if (!contains(modifiedFile)) return;
+		if (file.endsWith(".json"))
+		{
+			configuration.parse(text,root);
+			return new HashMap<>();
+		}
+		else
+		{
+			var data = validator.validate(file, text);
+			inspector.update(file, data.rootNode, data.game);
 
-		var globalData = validator.validate(modifiedFile, text);
-
-		check(globalData);
+			return check(data);
+		}
 	}
 
 	public String hover(String file, Position position)
@@ -110,63 +100,87 @@ public class Project
 		return inspector.completions(file, position);
 	}
 
-	public SignatureHelp signature(String file, Position position)
+	public SignatureHelp signatures(String file, Position position, String triggerCharacter)
 	{
-		return inspector.signature(file, position);
+		return inspector.signatures(file, position, triggerCharacter);
 	}
 
 
 
-	private void check(GlobalData globalData)
+	private Map<String,List<Diagnostic>> check(Validator.Result validationResult)
 	{
-		var problemMap = globalData.problems;
-		var diagnosticMap = new HashMap<String, ArrayList<Diagnostic>>();
-
-		for (var entry : problemMap.entrySet())
+		if (validationResult == null)
 		{
-			var file = entry.getKey();
-			var problems = entry.getValue();
+			return new HashMap<>();
+		}
 
+		var game = validationResult.game;
+
+		var diagnosticMap = convert(validationResult.problems);
+
+		if (!validationResult.hasErrors)
+		{
+			generator.generate(game, configuration);
+		}
+
+		return diagnosticMap;
+	}
+
+	private Map<String,List<Diagnostic>> convert(Map<String,List<Problem>> problemMap)
+	{
+		var diagnosticMap = new HashMap<String, List<Diagnostic>>();
+
+		if (problemMap == null)
+		{
+			return diagnosticMap;
+		}
+
+		problemMap.forEach((file, problems) ->
+		{
 			var diagnostics = new ArrayList<Diagnostic>();
 			for (var problem : problems)
 			{
 				DiagnosticSeverity severity;
 				switch(problem.severity)
 				{
-					case INFORMATION: severity = DiagnosticSeverity.Information;
-					case WARNING: severity = DiagnosticSeverity.Warning;
-					case ERROR: severity = DiagnosticSeverity.Error;
-					default: severity = DiagnosticSeverity.Error;
+					case INFORMATION: severity = DiagnosticSeverity.Information; break;
+					case WARNING: severity = DiagnosticSeverity.Warning; break;
+					case ERROR: severity = DiagnosticSeverity.Error; break;
+					default: severity = DiagnosticSeverity.Error; break;
 				}
-				var diagnostic = new Diagnostic(null, problem.message);
+				var range = getRange(problem.node);
+				var diagnostic = new Diagnostic(range, problem.message);
 				diagnostic.setSeverity(severity);
 				diagnostics.add(diagnostic);
 			}
 
 			diagnosticMap.put(file, diagnostics);
-		}
+		});
 
-		problemsChanged.accept(diagnosticMap);
+		return diagnosticMap;
+	}
 
-		var game = globalData.game;
+	private Range getRange(INode node)
+	{
+		var text = node.getRootNode().getText();
+		return new Range
+		(
+			new Position(node.getStartLine()-1, character(text, node.getOffset())),
+			new Position(node.getEndLine()-1  , character(text, node.getOffset()+node.getLength()))
+		);
+	}
 
-		if (globalData.problems.isEmpty())
+	private int character(String text, int offset)
+	{
+		var count = 0;
+		for (var i = 0; i < offset && i < text.length(); i++)
 		{
-			var path = Paths.get(root, "Ⲙ.json");
-
-			if (new File(path.toString()).exists())
+			count++;
+			if (text.charAt(i) == '\n')
 			{
-				try
-				{
-					var configuration = new String(Files.readAllBytes(path));
-					generator.generate(game, root, configuration);
-				}
-				catch (IOException e){}
-			}
-			else
-			{
-				generator.generate(game, Paths.get(root));
+				count = 0;
 			}
 		}
+		return count;
 	}
 }
