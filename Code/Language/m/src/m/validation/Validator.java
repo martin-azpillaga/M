@@ -27,7 +27,9 @@ public class Validator
 
 	public Result validate(String file, String text)
 	{
-		var result = new Result(new Game(Library.ENGLISH), new HashMap<>());
+		var library = Library.ENGLISH;
+
+		var result = new Result(new Game(library), new HashMap<>());
 
 		var parsed = parser.validate(text);
 

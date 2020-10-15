@@ -472,6 +472,14 @@ public enum Library
 	classification -> { switch(classification)
 	{
 		case QUERY_ENTITY: return "Query entity";
+		case USER_VALUE: return "User value";
+		case USER_COMPONENT: return "User component";
+		case USER_SYSTEM: return "User system";
+
+		case STANDARD_VALUE: return "Standard value";
+		case STANDARD_COMPONENT: return "Standard component";
+		case STANDARD_OPERATOR: return "Standard operator";
+		case STANDARD_FUNCTION: return "Standard function";
 	}
 	return "";}
 	);

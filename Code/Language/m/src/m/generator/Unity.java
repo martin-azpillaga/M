@@ -132,14 +132,16 @@ public class Unity
 
 		resolveAssembly();
 
-		for (var component : game.components.entrySet())
+		game.components.entrySet().removeIf(e-> library.getComponent(e.getKey()) != null);
+
+		game.components.forEach((name, type)->
 		{
 			writeFile
 			(
-				"Assets/Code/Components/"+unreserved(component.getKey())+".cs",
-				generateComponent(component.getKey(), component.getValue())
+				"Assets/Code/Components/"+unreserved(name)+".cs",
+				generateComponent(name, type)
 			);
-		}
+		});
 
 		var systems = new ArrayList<UserFunction>();
 
@@ -200,18 +202,18 @@ public class Unity
 		);
 
 		jobified = true;
-		for (var component : game.components.entrySet())
+		game.components.forEach((name, type)->
 		{
 			writeFile
 			(
-				"Assets/Code/Components/Jobified/"+unreserved(component.getKey())+"Data.cs",
-				generateDataComponent(component.getKey(), component.getValue())
+				"Assets/Code/Components/Jobified/"+unreserved(name)+"Data.cs",
+				generateDataComponent(name, type)
 			);
-		}
+		});
 		for (var function : game.functions)
 		{
 			var type = function.type;
-			if (type.parameterTypes == null && type.returnType == UNIT)
+			if (type == FunctionType.systemType)
 			{
 				writeFile
 				(

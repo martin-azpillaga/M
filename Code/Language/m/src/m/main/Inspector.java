@@ -10,7 +10,6 @@ import java.util.Map;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
-import org.eclipse.lsp4j.ParameterInformation;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.lsp4j.SignatureInformation;
@@ -25,7 +24,6 @@ import m.library.Library;
 import m.library.symbols.Component;
 import m.library.symbols.Classification;
 import m.library.types.AtomicType;
-import m.library.types.FunctionType;
 import m.model.Application;
 import m.model.Assignment;
 import m.model.Binary;
@@ -51,9 +49,10 @@ public class Inspector
 		this.library = Library.ENGLISH;
 	}
 
-	public void update(String file, INode node)
+	public void update(String file, INode node, Game game)
 	{
 		files.put(file,node);
+		this.game = game;
 	}
 
 	public void delete(String file)
@@ -68,7 +67,7 @@ public class Inspector
 
 	public String hover(String file, Position position)
 	{
-		var node = nodeAt(file, position);
+		var node = nodeAt(file, position, false);
 		var semantic = node.getSemanticElement();
 
 		if (semantic instanceof Function)
@@ -116,7 +115,7 @@ public class Inspector
 					UserFunction userFunction = null;
 					for (var f : game.functions)
 					{
-						if (f.getName().equals(function.getName()))
+						if (f.function==function)
 						{
 							userFunction = f;
 							break;
@@ -245,7 +244,7 @@ public class Inspector
 	{
 		var result = new ArrayList<CompletionItem>();
 
-		var node = nodeAt(file, position);
+		var node = nodeAt(file, position, true);
 
 		var semantic = node.getSemanticElement();
 		var grammatic = node.getGrammarElement();
@@ -408,6 +407,15 @@ public class Inspector
 		}
 		else if (semantic instanceof Value)
 		{
+			var semanticContainer = semantic.eContainer();
+			if (semanticContainer instanceof BindingBlock)
+			{
+				var bindingBlock = (BindingBlock) semanticContainer;
+				if (bindingBlock.getExpression() == semantic)
+				{
+					return result;
+				}
+			}
 			for (var function : m.library.symbols.Function.values())
 			{
 				if (function != m.library.symbols.Function.ASSIGNMENT)
@@ -496,7 +504,7 @@ public class Inspector
 	{
 		var help = new SignatureHelp();
 
-		var node = nodeAt(path, position);
+		var node = nodeAt(path, position, true);
 
 		var list = new ArrayList<SignatureInformation>();
 
@@ -508,13 +516,8 @@ public class Inspector
 
 			if (standard != null)
 			{
-				var type = (FunctionType) standard.getType();
-				var parameters = new ArrayList<ParameterInformation>();
-				for (var i = 0; i < type.parameterTypes.length; i++)
-				{
-					parameters.add(new ParameterInformation(i+"", library.getName(type.parameterTypes[i])));
-				}
-				var info = new SignatureInformation(name + " : " + library.getName(type), library.getDescription(standard), parameters);
+				var type = standard.getType();
+				var info = new SignatureInformation(name + " : " + library.getName(type), library.getDescription(standard),null);
 				list.add(info);
 				help.setSignatures(list);
 				if (triggerCharacter != null)
@@ -532,12 +535,12 @@ public class Inspector
 		return help;
 	}
 
-	private INode nodeAt(String file, Position position)
+	private INode nodeAt(String file, Position position, boolean minusOne)
 	{
 		var rootNode = files.get(file);
 		var offset = offset(rootNode.getText(), position.getLine(), position.getCharacter());
 
-		var node = NodeModelUtils.findLeafNodeAtOffset(rootNode, offset > 0 ? offset-1 : 0);
+		var node = NodeModelUtils.findLeafNodeAtOffset(rootNode, minusOne && offset > 0 ? offset-1 : offset);
 
 		return node;
 	}
@@ -556,6 +559,6 @@ public class Inspector
 				count++;
 			}
 		}
-		return text.length();
+		return text.length()-1;
 	}
 }

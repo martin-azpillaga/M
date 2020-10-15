@@ -1,20 +1,25 @@
 package m.model;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
+
 import com.google.gson.Gson;
 
 public class Configuration
 {
+	String root;
 	public String Unity;
 	public String Unreal;
 	public String Godot;
 
 	Gson gson;
 
-	public Configuration()
+	public Configuration(String root)
 	{
-		this.Unity = "./Output/Unity";
-		this.Unreal = "./Output/Unreal";
-		this.Godot = "./Output/Godot";
+		this.Unity = parsePath("./Output/Unity", root);
+		this.Unreal = parsePath("./Output/Unreal", root);
+		this.Godot = parsePath("./Output/Godot", root);
 		this.gson = new Gson();
 	}
 

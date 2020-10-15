@@ -34,7 +34,7 @@ public class Project
 		this.generator = new Generator();
 		this.validator = new Validator();
 		this.inspector = new Inspector();
-		this.configuration = new Configuration();
+		this.configuration = new Configuration(root);
 	}
 
 	public Map<String,List<Diagnostic>> initialize()
@@ -45,7 +45,7 @@ public class Project
 		{
 			var text = IO.read(file);
 			data = validator.validate(file,text);
-			inspector.update(file, data.rootNode);
+			inspector.update(file, data.rootNode, data.game);
 		}
 
 		var configurationFile = IO.concat(root, "Ⲙ.json");
@@ -62,7 +62,7 @@ public class Project
 	{
 		if (file.endsWith(".json"))
 		{
-			configuration = new Configuration();
+			configuration = new Configuration(root);
 			return new HashMap<>();
 		}
 		else
@@ -84,7 +84,7 @@ public class Project
 		else
 		{
 			var data = validator.validate(file, text);
-			inspector.update(file, data.rootNode);
+			inspector.update(file, data.rootNode, data.game);
 
 			return check(data);
 		}
