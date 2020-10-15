@@ -74,7 +74,6 @@ public class Validator
 		{
 			this.game = game;
 			this.problems = problems;
-			this.rootNode = rootNode;
 		}
 
 		public void mergeProblems(String file, List<Problem> problems)

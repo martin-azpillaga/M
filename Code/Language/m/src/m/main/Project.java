@@ -10,7 +10,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.SignatureInformation;
+import org.eclipse.lsp4j.SignatureHelp;
 import org.eclipse.xtext.nodemodel.INode;
 
 import m.generator.Generator;
@@ -100,9 +100,9 @@ public class Project
 		return inspector.completions(file, position);
 	}
 
-	public List<SignatureInformation> signatures(String file, Position position)
+	public SignatureHelp signatures(String file, Position position, String triggerCharacter)
 	{
-		return inspector.signatures(file, position);
+		return inspector.signatures(file, position, triggerCharacter);
 	}
 
 

@@ -252,10 +252,12 @@ public class Server implements LanguageServer, WorkspaceService, TextDocumentSer
 
 		for (var project : projectsContaining(file))
 		{
-			result.getSignatures().addAll(project.signatures(file, params.getPosition()));
+			result = project.signatures(file, params.getPosition(), params.getContext().getTriggerCharacter());
 		}
 
-		return CompletableFuture.supplyAsync(() -> result);
+		var finalResult = result;
+
+		return CompletableFuture.supplyAsync(() -> finalResult);
 	}
 
 
