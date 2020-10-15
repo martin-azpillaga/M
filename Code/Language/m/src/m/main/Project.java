@@ -45,6 +45,7 @@ public class Project
 		{
 			var text = IO.read(file);
 			data = validator.validate(file,text);
+			inspector.update(file, data.rootNode);
 		}
 
 		var configurationFile = IO.concat(root, "Ⲙ.json");
@@ -67,6 +68,7 @@ public class Project
 		else
 		{
 			var globalData = validator.delete(file);
+			inspector.delete(file);
 
 			return check(globalData);
 		}
@@ -81,9 +83,10 @@ public class Project
 		}
 		else
 		{
-			var globalData = validator.validate(file, text);
+			var data = validator.validate(file, text);
+			inspector.update(file, data.rootNode);
 
-			return check(globalData);
+			return check(data);
 		}
 	}
 

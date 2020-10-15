@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.xtext.nodemodel.INode;
+
 import m.validation.Problem.Severity;
 
 import m.library.Library;
@@ -39,6 +41,7 @@ public class Validator
 
 		result.game.components.putAll(typed.components);
 		result.game.functions.addAll(typed.functions);
+		result.rootNode = parsed.rootNode;
 
 		return result;
 	}
@@ -57,7 +60,7 @@ public class Validator
 		result.game.components.putAll(typed.components);
 		result.game.functions.addAll(typed.functions);
 
-		return new Result(null,null);
+		return result;
 	}
 
 	public static class Result
@@ -65,11 +68,13 @@ public class Validator
 		public Game game;
 		public Map<String,List<Problem>> problems;
 		public boolean hasErrors;
+		public INode rootNode;
 
 		public Result(Game game, Map<String,List<Problem>> problems)
 		{
 			this.game = game;
 			this.problems = problems;
+			this.rootNode = rootNode;
 		}
 
 		public void mergeProblems(String file, List<Problem> problems)

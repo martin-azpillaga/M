@@ -1,7 +1,11 @@
 package m.main;
 
+import static m.library.symbols.Classification.*;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.lsp4j.CompletionItem;
@@ -21,6 +25,7 @@ import org.eclipse.xtext.nodemodel.util.NodeModelUtils;
 
 import m.library.Library;
 import m.library.symbols.Component;
+import m.library.symbols.Classification;
 import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.model.Application;
@@ -40,25 +45,32 @@ public class Inspector
 {
 	Library library;
 	Game game;
+	Map<String,INode> files;
 
-	public String hover(String path, Position position)
+	public Inspector()
 	{
-		return "";
+		this.files = new HashMap<>();
+		this.library = Library.ENGLISH;
 	}
 
-	public String hover(Position position, String text, INode rootNode)
+	public void update(String file, INode node)
 	{
-		var result = "";
+		files.put(file,node);
+	}
 
-		var offset = offset(text, position.getLine(), position.getCharacter());
+	public void delete(String file)
+	{
+		files.remove(file);
+	}
 
-		var node = NodeModelUtils.findLeafNodeAtOffset(rootNode, offset);
+	public void update(Game game)
+	{
+		this.game = game;
+	}
 
-		if (node instanceof HiddenLeafNode)
-		{
-			return "";
-		}
-
+	public String hover(String file, Position position)
+	{
+		var node = nodeAt(file, position);
 		var semantic = node.getSemanticElement();
 
 		if (semantic instanceof Function)
@@ -66,7 +78,7 @@ public class Inspector
 			var function = (Function) semantic;
 			if (node.getText().equals(function.getName()))
 			{
-				result = "User system";
+				return library.getDescription(Classification.USER_SYSTEM);
 			}
 		}
 		else if (semantic instanceof Value)
@@ -84,19 +96,19 @@ public class Inspector
 
 					if (standard != null)
 					{
-						var type = library.getName(standard.getType());
-						result = "Standard component : " + type;
+						var type = standard.getType();
+						return library.getDescription(STANDARD_COMPONENT) + " : " + library.getName(type);
 					}
 					else
 					{
 						var type = game.components.get(value.getName());
 						if (type != null)
 						{
-							result = "User component : " + library.getName(type);
+							return library.getDescription(USER_COMPONENT) + " : " + library.getName(type);
 						}
 						else
 						{
-							result = "User component : ?";
+							return library.getDescription(USER_COMPONENT) + " : ?";
 						}
 					}
 				}
@@ -121,32 +133,32 @@ public class Inspector
 						if (standard != null)
 						{
 							var type = library.getName(standard.getType());
-							result = "Standard value : " + type;
+							return library.getDescription(STANDARD_VALUE)+ " : " + type;
 						}
 						else
 						{
 							var type = game.values.get(value);
 							if (type != null)
 							{
-								result = "User value : " + library.getName(type);
+								return library.getDescription(USER_VALUE) + " : " + library.getName(type);
 							}
 							else
 							{
-								result = "user value : ?";
+								return library.getDescription(USER_VALUE) + " : ?";
 							}
 						}
 					}
 					else
 					{
-						result = "Entity query\n\n";
-						var builder = new StringBuilder(result);
+						var builder = new StringBuilder();
+						builder.append(library.getDescription(QUERY_ENTITY)+"\n\n");
 						for (var component : query.entrySet())
 						{
 							builder.append("* ");
 							builder.append(component.getKey());
 							builder.append("\n\n");
 						}
-						result = builder.toString();
+						return builder.toString();
 					}
 				}
 			}
@@ -171,32 +183,32 @@ public class Inspector
 					if (standard != null)
 					{
 						var type = library.getName(standard.getType());
-						result = "Standard value : " + type;
+						return library.getDescription(STANDARD_VALUE) + " : " + type;
 					}
 					else
 					{
 						var type = game.values.get(value);
 						if (type != null)
 						{
-							result = "User value : " + library.getName(type);
+							return library.getDescription(USER_VALUE) + " : " + library.getName(type);
 						}
 						else
 						{
-							result = "user value : ?";
+							return library.getDescription(USER_VALUE) + " : ?";
 						}
 					}
 				}
 				else
 				{
-					result = "Entity query\n\n";
-					var builder = new StringBuilder(result);
+					var builder = new StringBuilder();
+					builder.append(library.getDescription(QUERY_ENTITY)+"\n\n");
 					for (var component : query.entrySet())
 					{
 						builder.append("* ");
 						builder.append(component.getKey());
 						builder.append("\n\n");
 					}
-					result = builder.toString();
+					return builder.toString();
 				}
 			}
 		}
@@ -206,7 +218,7 @@ public class Inspector
 			var standard = library.getFunction(binary.getOperator());
 			if (standard != null)
 			{
-				result = "Standard operator\n\nType: " + library.getName(standard.getType());
+				return library.getDescription(STANDARD_OPERATOR) + " : " + library.getName(standard.getType());
 			}
 		}
 		else if (semantic instanceof Unary)
@@ -215,7 +227,7 @@ public class Inspector
 			var standard = library.getFunction(unary.getOperator());
 			if (standard != null)
 			{
-				result = "Standard operator\n\nType: " + library.getName(standard.getType());
+				return library.getDescription(STANDARD_OPERATOR) + " : " + library.getName(standard.getType());
 			}
 		}
 		else if (semantic instanceof Application)
@@ -224,13 +236,23 @@ public class Inspector
 			var standard = library.getFunction(application.getName());
 			if (standard != null)
 			{
-				result = "Standard function\n\nType: " + library.getName(standard.getType());
+				return library.getDescription(STANDARD_OPERATOR) + " : " + library.getName(standard.getType());
 			}
 		}
 
-		return result;
+		return "";
 	}
 
+	private INode nodeAt(String file, Position position)
+	{
+		var rootNode = files.get(file);
+		var offset = offset(rootNode.getText(), position.getLine(), position.getCharacter());
+
+		var node = NodeModelUtils.findLeafNodeAtOffset(rootNode, offset > 0 ? offset-1 : 0);
+
+		return node;
+	}
+	
 	public List<CompletionItem> completions(String path, Position position)
 	{
 		return new ArrayList<CompletionItem>();

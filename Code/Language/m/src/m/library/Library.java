@@ -10,6 +10,7 @@ import m.library.rules.TypingReason;
 import m.library.symbols.Component;
 import m.library.symbols.Function;
 import m.library.symbols.Value;
+import m.library.symbols.Classification;
 import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
@@ -467,6 +468,11 @@ public enum Library
 		case Y: return "Second entry of the vector";
 		case Z: return "Third entry of the vector";
 	}
+	return "";},
+	classification -> { switch(classification)
+	{
+		case QUERY_ENTITY: return "Query entity";
+	}
 	return "";}
 	);
 
@@ -481,6 +487,7 @@ public enum Library
 	Map<Value, String> valueToDescription;
 	Map<Component, String> componentToDescription;
 	Map<Function, String> functionToDescription;
+	Map<Classification, String> classificationToDescription;
 
 	Map<String, Value> nameToValue;
 	Map<String, Component> nameToComponent;
@@ -491,7 +498,7 @@ public enum Library
 	public final String selection;
 	public final String iteration;
 
-	Library(String query, String selection, String iteration, java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<ProblemKind, String> problems, java.util.function.Function<BindingReason, String> bindingReasons, java.util.function.Function<TypingReason, String> typingReasons, java.util.function.Function<Value, String> valueDescriptions, java.util.function.Function<Component, String> componentDescriptions, java.util.function.Function<Function, String> functionDescriptions)
+	Library(String query, String selection, String iteration, java.util.function.Function<Value, String> values, java.util.function.Function<Component, String> components, java.util.function.Function<Function, String> functions, java.util.function.Function<AtomicType, String> atomicTypes, java.util.function.Function<ProblemKind, String> problems, java.util.function.Function<BindingReason, String> bindingReasons, java.util.function.Function<TypingReason, String> typingReasons, java.util.function.Function<Value, String> valueDescriptions, java.util.function.Function<Component, String> componentDescriptions, java.util.function.Function<Function, String> functionDescriptions, java.util.function.Function<Classification,String> classifications)
 	{
 		this.query = query;
 		this.selection = selection;
@@ -516,6 +523,8 @@ public enum Library
 		valueToDescription = forward(valueDescriptions, Value.values());
 		componentToDescription = forward(componentDescriptions, Component.values());
 		functionToDescription = forward(functionDescriptions, Function.values());
+
+		classificationToDescription = forward(classifications, Classification.values());
 	}
 
 	private <A,B> HashMap<A,B> forward(java.util.function.Function<A,B> f, A[] values)
@@ -580,6 +589,11 @@ public enum Library
 	public String getDescription(Value value)
 	{
 		return valueToDescription.get(value);
+	}
+
+	public String getDescription(Classification classification)
+	{
+		return classificationToDescription.get(classification);
 	}
 
 	public String getName(Component component)
