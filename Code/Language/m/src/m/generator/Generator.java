@@ -24,7 +24,7 @@ public class Generator
 		switch (engine)
 		{
 			case UNITY: new Unity().generate(game); break;
-			case UNREAL: break;
+			case UNREAL: new Unreal().generate(game); break;
 			case GODOT: break;
 		}
 	}
