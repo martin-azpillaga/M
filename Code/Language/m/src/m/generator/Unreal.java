@@ -43,8 +43,8 @@ public class Unreal
 			foreach(includes, i-> "#include \""+i+"\""),
 			"#include \""+unreserved(name)+".generated.h\"",
 
-			"UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )",
-			"class MYPROJECT_API U"+unreserved(name)+" : public UActorComponent",
+			"UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent, DisplayName=\""+unreserved(name)+"\") )",
+			"class U"+unreserved(name)+"M : public UActorComponent",
 			"{",
 				"GENERATED_BODY()",
 				"",
@@ -74,7 +74,7 @@ public class Unreal
 				return "float";
 			case NUMBER2:
 				includes.add("Math/Vector2D.h");
-				return "FVector2";
+				return "FVector2D";
 			case NUMBER3:
 				includes.add("Math/Vector.h");
 				return "FVector";
