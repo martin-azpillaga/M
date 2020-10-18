@@ -68,10 +68,12 @@ public class Unreal
 			switch (atomic)
 			{
 			case ENTITY:
-				return "Actor";
+				includes.add("GameFramework/Actor.h");
+				return "AActor*";
 			case NUMBER:
 				return "float";
 			case NUMBER2:
+				includes.add("Math/Vector2D.h");
 				return "FVector2";
 			case NUMBER3:
 				includes.add("Math/Vector.h");
@@ -79,39 +81,20 @@ public class Unreal
 			case PROPOSITION:
 				return "bool";
 			case ENTITY_LIST:
-				return "undefined";
+				includes.add("Containers/Array.h");
+				includes.add("GameFramework/Actor.h");
+				return "TArray<AActor*>";
 			case INPUT:
-				return "String";
+				return "FString";
 			case STRING:
-				return "String";
-			case UNIT:
-				return "void";
+				return "FText";
 			case COLOR:
-				return "Color";
+				return "FColor";
 			case MESH:
-				return "Mesh";
+				return "UStaticMesh*";
 			case MATERIAL:
-				return "Material";
-			case ANIMATOR:
-				return "Animator";
-			case COMPONENT:
-				return "Error (type component shouldnt be)";
-			case FONT:
-				return "Font";
-			case TEXT:
-				return "Text";
-			case IMAGE:
-				return "Image";
-			case AUDIOCLIP:
-				return "AudioClip";
-			case QUATERNION:
-				return "Quaternion";
-			case TEXTURE:
-				return "Texture";
-			case COLLIDER:
-				return "Collider";
-			case RECT:
-				return "Rect";
+				includes.add("Materials/MaterialInstance.h");
+				return "UMaterialInstance*";
 			}
 			return "Undefined";
 		}
