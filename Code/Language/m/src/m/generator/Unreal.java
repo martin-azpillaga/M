@@ -2,7 +2,9 @@ package m.generator;
 
 import m.library.Library;
 import m.library.types.AtomicType;
+import m.library.types.FunctionType;
 import m.library.types.Type;
+import m.model.Function;
 import m.model.Game;
 import static m.generator.IO.*;
 
@@ -26,6 +28,17 @@ public class Unreal
 
 			writeFile("Components/"+unreserved(name)+".cpp", write("#include \""+unreserved(name)+".h\""));
 		});
+
+		for (var system : game.functions)
+		{
+			if (system.type == FunctionType.systemType)
+			{
+				var name = system.getName();
+
+				writeFile("Systems/"+unreserved(name)+".h", generateSystem(system));
+				writeFile("Systems/"+unreserved(name)+".cpp", generateSystem(system));
+			}
+		}
 	}
 
 	private String generateComponent(String name, Type type)
@@ -43,7 +56,7 @@ public class Unreal
 			foreach(includes, i-> "#include \""+i+"\""),
 			"#include \""+unreserved(name)+".generated.h\"",
 
-			"UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent, DisplayName=\""+unreserved(name)+"\") )",
+			"UCLASS( ClassGroup=\"M\", meta=(BlueprintSpawnableComponent, DisplayName=\""+unreserved(name)+"\") )",
 			"class U"+unreserved(name)+"M : public UActorComponent",
 			"{",
 				"GENERATED_BODY()",
@@ -53,6 +66,11 @@ public class Unreal
 				unrealType+" Value;",
 			"};"
 		);
+	}
+
+	private String generateSystem(Function system)
+	{
+		return "";
 	}
 
 	private String unreserved(String name)
