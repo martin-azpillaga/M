@@ -25,7 +25,7 @@ public class Generator
 		{
 			case UNITY: new Unity().generate(game); break;
 			case UNREAL: new Unreal().generate(game); break;
-			case GODOT: break;
+			case GODOT: new Godot().generate(game); break;
 		}
 	}
 }

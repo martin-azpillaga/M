@@ -92,17 +92,38 @@ public class Project
 
 	public String hover(String file, Position position)
 	{
-		return inspector.hover(file, position);
+		if (file.endsWith(".json"))
+		{
+			return "";
+		}
+		else
+		{
+			return inspector.hover(file, position);
+		}
 	}
 
 	public List<CompletionItem> completions(String file, Position position)
 	{
-		return inspector.completions(file, position);
+		if (file.endsWith(".json"))
+		{
+			return new ArrayList<>();
+		}
+		else
+		{
+			return inspector.completions(file, position);
+		}
 	}
 
 	public SignatureHelp signatures(String file, Position position, String triggerCharacter)
 	{
-		return inspector.signatures(file, position, triggerCharacter);
+		if (file.endsWith(".json"))
+		{
+			return new SignatureHelp();
+		}
+		else
+		{
+			return inspector.signatures(file, position, triggerCharacter);
+		}
 	}
 
 

@@ -25,10 +25,14 @@ public class Configuration
 
 	public void parse(String json, String root)
 	{
-		var configuration = gson.fromJson(json, getClass());
-		this.Unity = parsePath(configuration.Unity, root);
-		this.Unreal = parsePath(configuration.Unreal, root);
-		this.Godot = parsePath(configuration.Godot, root);
+		try
+		{
+			var configuration = gson.fromJson(json, getClass());
+			this.Unity = parsePath(configuration.Unity, root);
+			this.Unreal = parsePath(configuration.Unreal, root);
+			this.Godot = parsePath(configuration.Godot, root);
+		}
+		catch (Exception e){}
 	}
 
 	private String parsePath(String path, String root)
