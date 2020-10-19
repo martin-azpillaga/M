@@ -197,18 +197,18 @@ public class TypeValidator
 			allClusters.addAll(clusterSet);
 		}
 
-		var message = "";
 		var library = Library.ENGLISH;
 
 		for (var cluster : allClusters)
 		{
+			var message = "";
 			var types = new HashSet<Type>();
 
 			for (var typingSet : cluster.fileToTypes.values())
 			{
 				for (var typing : typingSet)
 				{
-					message += "\n\n"+library.getName(typing.type) + " : " + library.getName(typing.symbol) + " " + typing.reason;
+					message += "\n"+typing.reason+library.getName(typing.symbol)+" : "+library.getName(typing.type);
 					types.add(typing.type);
 				}
 			}
