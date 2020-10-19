@@ -82,7 +82,10 @@ public class ScopeValidator
 		userVariables.clear();
 		userComponents.clear();
 
-		validate(model);
+		if (model != null)
+		{
+			validate(model);
+		}
 
 		var result = new Result();
 

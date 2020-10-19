@@ -15,6 +15,7 @@ import m.model.Cell;
 import m.model.ExpressionNode;
 import m.model.File;
 import m.model.UserFunction;
+import m.model.ExpressionNode.Typing;
 import m.validation.Problem.Severity;
 
 public class TypeValidator
@@ -140,7 +141,7 @@ public class TypeValidator
 		}
 		for (var typing : node.typings)
 		{
-			cluster.fileToTypes.computeIfAbsent(modifiedFile,__->new HashSet<>()).add(typing.type);
+			cluster.fileToTypes.computeIfAbsent(modifiedFile,__->new HashSet<>()).add(typing);
 		}
 		return cluster;
 	}
@@ -196,13 +197,20 @@ public class TypeValidator
 			allClusters.addAll(clusterSet);
 		}
 
+		var message = "";
+		var library = Library.ENGLISH;
+
 		for (var cluster : allClusters)
 		{
 			var types = new HashSet<Type>();
 
-			for (var typeSet : cluster.fileToTypes.values())
+			for (var typingSet : cluster.fileToTypes.values())
 			{
-				types.addAll(typeSet);
+				for (var typing : typingSet)
+				{
+					message += "\n\n"+library.getName(typing.type) + " : " + library.getName(typing.symbol) + " " + typing.reason;
+					types.add(typing.type);
+				}
 			}
 
 			if (types.isEmpty())
@@ -226,9 +234,10 @@ public class TypeValidator
 			}
 			else
 			{
+				var errorMessage = message;
 				cluster.fileToNodes.forEach((file,rootNode)->
 				{
-					var kind = Library.ENGLISH.getProblem(ProblemKind.INCOMPATIBLE_TYPES);
+					var kind = Library.ENGLISH.getProblem(ProblemKind.INCOMPATIBLE_TYPES)+errorMessage;
 
 					for (var node : rootNode)
 					{
@@ -243,9 +252,12 @@ public class TypeValidator
 	{
 		var userFunctions = new ArrayList<UserFunction>();
 
-		for (var function : model.getFunctions())
+		if (model != null)
 		{
-			userFunctions.add(new UserFunction(function, FunctionType.systemType));
+			for (var function : model.getFunctions())
+			{
+				userFunctions.add(new UserFunction(function, FunctionType.systemType));
+			}
 		}
 		fileToFunctions.put(file, userFunctions);
 
@@ -268,7 +280,7 @@ public class TypeValidator
 
 class Cluster
 {
-	public Map<String, Set<Type>> fileToTypes;
+	public Map<String, Set<Typing>> fileToTypes;
 	public Map<String, ExpressionNode> fileToNodes;
 	public Map<String, Set<String>> componentToFiles;
 
