@@ -129,7 +129,7 @@ public class TypeValidator
 				cluster.componentToFiles.computeIfAbsent(component,__->new HashSet<>()).add(modifiedFile);
 
 				var definitionCluster = componentToCluster.get(component);
-				if (definitionCluster != null)
+				if (definitionCluster != null && definitionCluster != cluster)
 				{
 					cluster = merge(cluster, definitionCluster);
 				}
@@ -208,7 +208,7 @@ public class TypeValidator
 			{
 				for (var typing : typingSet)
 				{
-					message += "\n"+typing.reason+library.getName(typing.symbol)+" : "+library.getName(typing.type);
+					message += "\n"+library.getName(typing.symbol)+" : "+library.getName(typing.type);
 					types.add(typing.type);
 				}
 			}
@@ -234,10 +234,9 @@ public class TypeValidator
 			}
 			else
 			{
-				var errorMessage = message;
 				cluster.fileToNodes.forEach((file,rootNode)->
 				{
-					var kind = Library.ENGLISH.getProblem(ProblemKind.INCOMPATIBLE_TYPES)+errorMessage;
+					var kind = Library.ENGLISH.getProblem(ProblemKind.INCOMPATIBLE_TYPES);
 
 					for (var node : rootNode)
 					{
