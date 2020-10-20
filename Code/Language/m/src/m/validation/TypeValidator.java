@@ -102,13 +102,18 @@ public class TypeValidator
 
 	private void validate(Set<ExpressionNode> connectedComponents, String modifiedFile)
 	{
+		var visited = new HashSet<ExpressionNode>();
+
 		for (var rootNode : connectedComponents)
 		{
+			if (visited.contains(rootNode)) continue;
+
 			var cluster = new Cluster();
 			cluster.fileToNodes.put(modifiedFile, rootNode);
 
 			for (var node : rootNode)
 			{
+				visited.add(node);
 				cluster = validate(node, cluster, modifiedFile);
 			}
 
