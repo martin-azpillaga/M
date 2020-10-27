@@ -1,139 +1,183 @@
 M is a new programming language, designed for game developers.
 
-It increases the productivity of programmers and designers by complementing their workflow(s)
-with a simple and flexible tool.
+It increases the productivity of programmers and designers by complementing their workflows with a simple and flexible tool.
 
-It is (a) free and open source project/software, available for preview/-as a preview- on all major desktop platforms.
-/
-It is a free and open source project in active development.
-A prototype is available for all major desktop platforms.
+It's free and open source software, available -as a prototype- on all major desktop platforms.
 
 ## M complements your workflow
 
-It does not aim to replace existing tools, but complement them.
+### Pick your editor
 
-### Editor of your choice
+M is distributed as a language server.
 
-M is distributed/delivered/available as a language server. (an independent process...)
+It can be integrated in any code editor that implements the language server protocol, such as vscode or vim.
 
-(Modern) code editors can communicate with it via the language server protocol 
-(to provide a rich development experience)
+It extends the editor to support .Ⲙ files, with language features like signature helpers and code completions.
 
-It can be integrated in code editors that implement the LSP* protocol (such as VSCode, Eclipse or Vim).
+With M, all programmers can enjoy a rich development experience, right in their editor of choice.
 
-This means that programmers can use their editor of choice to develop in M, such as VSCode or Vim. (any uptodate code editor like vscode or vim)
+### Pick your engine
 
-### Engine of your choice
+The output of a program written in M is not an executable binary.
 
-The language server detects source files written in M and generates (a configurable) output.
+M generates source code files that game engines understand.
 
-However, the output is not an executable program, but source code that games engines (can) understand.
+It can write readable C# classes for Unity, C++ code for Unreal and GD scripts for Godot.
+
+The idea is to generate code with M and use the engine of choice to integrate it with the rest of the game.
+
+### Add M to your workflow
+
+As every good tool, M solves one problem and solves it well:
+
+Developing performant gameplay code in a simple and maintainable manner.
+
+No engine code, no game design, no art. M focuses on creating quality gameplay code.
+
+When combined with powerful code editors and game engines, it enables productive game development environments.
+
+Let me explain how.
 
 
 
+## M is simple
+
+The goal is to make writing and specially reading code an efficient process.
+
+### Minimalist grammar
+
+M has a familiar syntax, inherited from C-like languages.
+
+But it defines a minimal set of grammar rules, specially when compared to Java or C++.
+
+Programs are written by combining few, orthogonal building blocks.
+
+This defines a clear path for expressing the solution to programming problems.
+
+It keeps programmers focused on the problem rather than deciding on how to solve it, reducing the complexity.
+
+### Implicit type inference
+
+M has a powerful type system.
+
+It's capable of deducing the type of all expressions efficiently.
+
+It frees programmers from specifying types while offering helpful error messages when types don't check.
+
+This is possible thanks to a deduction algorithm based on M's game oriented standard library.
+
+The result is concise, clear and overall less complex code.
+
+### Performance by default
+
+From simple code, M generates performant gameplay code.
+
+It stores the data in contiguous memory for cache-friendly access.
+
+It analyzes the game logic for dependencies and outputs multithread ready jobs.
+
+Developers can inspect the generated code and squeeze more performance by overriding specific blocks of code.
+
+This reduces the presence of performance tricks in the code, improving readability and reducing the complexity.
 
 
 
-### Simplicity (first)
+## M is Flexible
 
-The goal is to make writing and specially reading code simple.
+### ECS architecture
 
-It starts with a familiar syntax, it inherits the syntax from C-like languages.
- 
- ### Minimal grammar
+M natively supports the entity component system paradigm.
 
-And defines a minimalist grammar.
-The grammar is minimalist,  specially when compared to Java or C++.
+It defines a clear separation between data and logic.
 
-Programs are written/composed (by) combining few orthogonal building blocks.
+Data is stored in components while systems define the logic that transforms this data.
 
-This defines a clear path for writing the solution to (programming) problems.
-Keeps programmers focused on the problem rather than designing/deciding on how to solve it.
+Game entities are created by mixing components together.
 
-This is possible thanks to a game oriented standard library that includes many components and functions related to game dev and the implicit type inference.
+The result is a flexible playground for designers.
 
-### Type inference
+They can define entities with new behavior by combining different sets of components.
 
-It supports entity component system architecture. Instead of working with classes and methods you work with systems and components.
+This enables the design of different games from the same codebase, without intervention of programmers.
 
-It also leads to code thats easier to maintain. Since everyone understands the building blocks and the boilerplate free grammar, reading a program written in M is easier.
+### Data-driven behavior
 
-Don't get fooled by its simplicity. We make a big effort to make the language server itself efficient and to output souce code that is performant: Multithread ready and cache friendly.
+M has no literal expressions.
 
-### Flexible
+It accepts no magic numbers nor hardcoded values.
 
-### Data oriented composition over inheritance
+All data is stored in components and exposed in the editor.
 
-composition over inheritance lets designers create new entities with new behaviour by mixing 
-M enforces data oriented design natively.
+This way, designers can tweak all the parameters to their taste from within the game editor.
 
-In particular, it follows the Entity Component System paradigm to decouple
-the game into independent systems describing the logic and components
-that hold all the data.
 
-### No literals
+With M, programming and designing become independent jobs, providing an important boost to team productivity.
 
-More importantly, M improves the flexibility of game designers.
 
-M has no literal values.
-All the data is stored in components,
-which means that designers can tweak all the parameters from within the game editor.
 
-With M, programming and designing become independent jobs,
-providing an important boost in team productivity.
-
-### The author
-
-My name is Martin. I'm 28. I started programming when I was 14 and haven't stopped since.
-
-I love learning. I graduated in Maths and Software Engineering in Barcelona and then went to Manchester for a masters in Mathematical logic. I (thoroughly) enjoyed my studies (a lot). Still, I think I have learned more thanks to my personal projects.
-
-I have always had a project going, from small games to programs to assist in math. I have finally found my passion in developing software tools. Programs that allow developers, including myself, be more productive.
-
-After starting developing M, I decided to focus on it seriously.
-
-I rejected a PhD offer from Manchester University, moved back to my parents' home and focus on developing my project.
-
-Thanks to some savings, a modest lifestyle and invaluable help from my parents, I have been able to keep developing M.
-
-And after three years of hard work I'm excited to share a prototype with the world and apply for this grant. I am a big proponent/fan of free software.  
-
-When I first heard of Epic Megagrants I thought it was only for big enterprises, but some months ago I saw some individuals got grants too.
-
-I will be honest. Now my savings are gone and soon I will start applying for developer jobs. I am ready to try it, but that will mean leaving M as a secondary project.
-
-Having the goal of applying for this grant has pushed me into polishing the poject into a presentable state.
-
-### Possible impact
+## Possible impact
 
 This project has been extremely ambitious since its inception.
 
-In the best case scenario, it could make an impact in the professional lives of millions of game developers. Making them more productive and hopefully enjoy their work even more.
-I want to clarify that I don't envision anyone dropping C#, C++ or GD for M, but use them together as part of the interdisciplinary game development teams.
+In the best case scenario, it can make an impact in the professional life of millions of game developers. Making them more productive and hopefully happier. I want to clarify that I don't envision anyone dropping C#, C++ or GDScript for M. Rather, I imagine developers using them together, as part of the interdisciplinary game development process.
 
-In the worst case, It would go unnoticed and be forgotten. It could happen for not eecuting the idea properly, lack of interest or poor marketing. But I believe in this project. Even in the worst case, it would have been my biggest achievement to date.
+In the worst case, it would go unnoticed and be forgotten. I acknowledge three main risks that could lead to this scenario: Not executing the idea properly, lack of interest and poor marketing. But, I believe in this project.
+
+
+## The author
+
+My name is Martin. I'm 28. I started programming when I was 14 and haven't stopped since.
+
+I love learning. I graduated in Math and Software Engineering in Barcelona and then moved to Manchester for a masters in Mathematical logic. I thoroughly enjoyed my studies. Still, I think I've learned more thanks to my personal projects.
+
+I've always had a project or two going, from small games to programs to assist in math. I have finally found my passion in developing software tools. Creating programs that allow developers, including myself, be more productive.
+
+The idea of M came around three years ago, while I was finishing the masters. After experimenting for a while, I saw the potential the project had, but also its ambitious scope.
+I rejected my PhD offer from Manchester University, moved back to my parents' home and decided to focus on developing the project.
+
+Thanks to a government grant, a modest lifestyle and invaluable help from my parents, I have been able to keep working on it. And after three years of hard work, I'm excited to share my first prototypes with the world and apply for this grant.
+
+When I first heard of Epic Megagrants I thought it was only for big enterprises, but I recently found some individual megagrant recipients and it filled me with motivation. Having the goal of applying for this grant has pushed me to polish the project into a presentable state and I'm thankful for that.
+
+Receiving this grant would mean a lot to me. The financial support and the approval from an industry giant would allow me to continue working full time in the project, add missing features and dedicate time to promote the project within the game developer audience.
+
+
 
 ### Current status
 
-M is a free and open source project (hosted in Github./(still) in active development).
+M is an open source project hosted on Github.
 
-A prototype for all major operating systems is (publicly) available for download.
+It's in active development with over 5000 contributions this year.
 
-A prototype exists in the form of an extension vscode based editors: Visual Studio Code and VSCodium.
+A prototype is available in the form of an extension for vscode based editors.
+
+The prototype supports the following main features:
+
+- Editor integration: Automatic detection and synchronization of M projects
+- Code validation: Syntax, scoping and type error checks
+- Code generation: Debug and high performance C# code generation for Unity.
+- Language services: Hover information, function signature helpers, code completions and diagnostic reports
+
+The next big feature I'm working on is C++ code generation for Unreal. Simplified generation has been successful, now I'm getting more familiar with both C++ and Unreal before starting with high performance code generation.
 
 ### Future plan
 
 I track the progress and pending tasks of the project using Github's issue tracker.
 
-The planning is publicly available and classifies the tasks depending on how they add/ the value they add to the project.
+The planning is publicly available and classifies the tasks depending on how they add value to the project.
 
 - Development tasks add new features
 - Documentation tasks make the project easier to learn
-- Maintenance: Easier to develop
-- User experience: Easier to use
-- Social: Easier to find and try out
+- Maintenance tasks make the project easier to develop
+- User experience tasks make it easier to use
+- Social tasks make it easier to find and try out
 
-To give an important example
+M is highly experimental and research driven. It has a pubic experimental branch that includes ideas and results of experiments that I have tried in the past and may find their way to the main branch. Noteworthy experimental features include:
 
-The ultimate goal is to keep dedicating hours to the development of the tool, on whatever becomes prioritary. And steadily make the prject a robust and complete solution that developers/programmers can rely on.
+- A visual coding interface based on Blockly.js
+- Custom code editor based on Theia
+- Support for multiple natural languages
+- Efficient incremental parsing using Tree-sitter
+- Headless language client for automated testing
 
+The ultimate goal is to keep dedicating hours to the project and steadily make a robust and complete solution that game developers can rely on.
