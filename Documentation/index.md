@@ -1,17 +1,17 @@
 ---
 home: true
 heroImage: https://avatars2.githubusercontent.com/u/6147446?s=400&u=c325f5bfc187e889f05cc872681ad1cb1ba6b3b5&v=4
-heroText: 
+heroText: M
 tagline: A data-driven programming language for game developers
 actionText: Get Started →
-actionLink: /0.%20Starter%20guide/0.%20Set%20up.html
+actionLink: /starter-guide/set-up.html
 features:
 - title: Simple
   details: M is minimalist. Programs are built by combining few orthogonal building blocks. Its powerful type system frees programmers from declaring types, resulting in clear and readable code.
 - title: Flexible
-  details: Use any editor with the language server protocol support like VS Code, and see the results in different engines. Unreal, Unity or Godot.
-- title: Tool
   details: 
+- title: Tool
+  details: Use any editor that supports the language server protocol like vscode, and generate gameplay code ready to be used in Unity, Unreal or Godot.
 footer: AGPL Licensed | Copyright © 2017-present Martin Azpillaga Aldalur
 ---
 
