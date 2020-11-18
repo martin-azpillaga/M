@@ -1,3 +1,5 @@
+# M
+
 M is a new programming language, designed for game developers.
 
 It increases the productivity of programmers and designers by complementing their workflows with a simple and flexible tool.
@@ -26,19 +28,17 @@ It can write readable C# classes for Unity, C++ code for Unreal and GD scripts f
 
 The idea is to generate code with M and use the engine of choice to integrate it with the rest of the game.
 
-### Add M to your workflow
+### The goal of M
 
 As every good tool, M solves one problem and solves it well:
 
-Developing performant gameplay code in a simple and maintainable manner.
+The development of flexible and performant gameplay code.
 
-No engine code, no game design, no art. M focuses on creating quality gameplay code.
+No engine code, no game design. M focuses on creating quality gameplay code.
 
 When combined with powerful code editors and game engines, it enables productive game development environments.
 
 Let me explain how.
-
-
 
 ## M is simple
 
@@ -68,7 +68,7 @@ This is possible thanks to a deduction algorithm based on M's game oriented stan
 
 The result is concise, clear and overall less complex code.
 
-### Performance by default
+### Performance defaults
 
 From simple code, M generates performant gameplay code.
 
@@ -78,9 +78,7 @@ It analyzes the game logic for dependencies and outputs multithread ready jobs.
 
 Developers can inspect the generated code and squeeze more performance by overriding specific blocks of code.
 
-This reduces the presence of performance tricks in the code, improving readability and reducing the complexity.
-
-
+This reduces the presence of performance tricks in the code, improving readability and reducing complexity.
 
 ## M is Flexible
 
@@ -98,7 +96,7 @@ The result is a flexible playground for designers.
 
 They can define entities with new behavior by combining different sets of components.
 
-This enables the design of different games from the same codebase, without intervention of programmers.
+This enables the design of different games from the same code base, without intervention of programmers.
 
 ### Data-driven behavior
 
@@ -110,19 +108,7 @@ All data is stored in components and exposed in the editor.
 
 This way, designers can tweak all the parameters to their taste from within the game editor.
 
-
 With M, programming and designing become independent jobs, providing an important boost to team productivity.
-
-
-
-## Possible impact
-
-This project has been extremely ambitious since its inception.
-
-In the best case scenario, it can make an impact in the professional life of millions of game developers. Making them more productive and hopefully happier. I want to clarify that I don't envision anyone dropping C#, C++ or GDScript for M. Rather, I imagine developers using them together, as part of the interdisciplinary game development process.
-
-In the worst case, it would go unnoticed and be forgotten. I acknowledge three main risks that could lead to this scenario: Not executing the idea properly, lack of interest and poor marketing. But, I believe in this project.
-
 
 ## The author
 
@@ -141,8 +127,6 @@ When I first heard of Epic Megagrants I thought it was only for big enterprises,
 
 Receiving this grant would mean a lot to me. The financial support and the approval from an industry giant would allow me to continue working full time in the project, add missing features and dedicate time to promote the project within the game developer audience.
 
-
-
 ### Current status
 
 M is an open source project hosted on Github.
@@ -158,19 +142,13 @@ The prototype supports the following main features:
 - Code generation: Debug and high performance C# code generation for Unity.
 - Language services: Hover information, function signature helpers, code completions and diagnostic reports
 
-The next big feature I'm working on is C++ code generation for Unreal. Simplified generation has been successful, now I'm getting more familiar with both C++ and Unreal before starting with high performance code generation.
+The next big feature I'm working on is C++ code generation for Unreal. Simplified generation has been successful, now I'm getting more familiar with both C++ and Unreal before starting with more sophisticated code generation.
 
 ### Future plan
 
 I track the progress and pending tasks of the project using Github's issue tracker.
 
-The planning is publicly available and classifies the tasks depending on how they add value to the project.
-
-- Development tasks add new features
-- Documentation tasks make the project easier to learn
-- Maintenance tasks make the project easier to develop
-- User experience tasks make it easier to use
-- Social tasks make it easier to find and try out
+The planning is publicly available and classifies the tasks depending on how they add value to the project. At the time of writing there are 118 issues open, from which 50 are marked as to be implemented. The rest are possibilities.
 
 M is highly experimental and research driven. It has a pubic experimental branch that includes ideas and results of experiments that I have tried in the past and may find their way to the main branch. Noteworthy experimental features include:
 
