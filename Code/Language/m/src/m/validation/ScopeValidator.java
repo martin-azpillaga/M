@@ -82,7 +82,10 @@ public class ScopeValidator
 		userVariables.clear();
 		userComponents.clear();
 
-		validate(model);
+		if (model != null)
+		{
+			validate(model);
+		}
 
 		var result = new Result();
 
@@ -256,7 +259,7 @@ public class ScopeValidator
 
 		var name = cell.getComponent().getName();
 
-		if (!userComponents.containsKey(name) && library.getComponent(name) == null)
+		if (!userComponents.containsKey(name))
 		{
 			userComponents.put(name, cell);
 		}
@@ -290,18 +293,17 @@ public class ScopeValidator
 		var name = cell.getComponent().getName();
 
 		var standard = library.getComponent(name);
+
+		var userComponent = userComponents.get(name);
+
+		if (userComponent != null && userComponent != cell)
+		{
+			graph.bind(cell, userComponent, SAME_COMPONENT);
+		}
+
 		if (standard != null)
 		{
 			graph.type(cell, new Typing(standard.getType(), STANDARD_COMPONENT, standard));
-		}
-		else
-		{
-			var userComponent = userComponents.get(name);
-
-			if (userComponent != null && userComponent != cell)
-			{
-				graph.bind(cell, userComponent, SAME_COMPONENT);
-			}
 		}
 	}
 

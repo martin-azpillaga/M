@@ -15,6 +15,7 @@ import m.model.Cell;
 import m.model.ExpressionNode;
 import m.model.File;
 import m.model.UserFunction;
+import m.model.ExpressionNode.Typing;
 import m.validation.Problem.Severity;
 
 public class TypeValidator
@@ -101,13 +102,18 @@ public class TypeValidator
 
 	private void validate(Set<ExpressionNode> connectedComponents, String modifiedFile)
 	{
+		var visited = new HashSet<ExpressionNode>();
+
 		for (var rootNode : connectedComponents)
 		{
+			if (visited.contains(rootNode)) continue;
+
 			var cluster = new Cluster();
 			cluster.fileToNodes.put(modifiedFile, rootNode);
 
 			for (var node : rootNode)
 			{
+				visited.add(node);
 				cluster = validate(node, cluster, modifiedFile);
 			}
 
@@ -128,7 +134,7 @@ public class TypeValidator
 				cluster.componentToFiles.computeIfAbsent(component,__->new HashSet<>()).add(modifiedFile);
 
 				var definitionCluster = componentToCluster.get(component);
-				if (definitionCluster != null)
+				if (definitionCluster != null && definitionCluster != cluster)
 				{
 					cluster = merge(cluster, definitionCluster);
 				}
@@ -140,7 +146,7 @@ public class TypeValidator
 		}
 		for (var typing : node.typings)
 		{
-			cluster.fileToTypes.computeIfAbsent(modifiedFile,__->new HashSet<>()).add(typing.type);
+			cluster.fileToTypes.computeIfAbsent(modifiedFile,__->new HashSet<>()).add(typing);
 		}
 		return cluster;
 	}
@@ -196,13 +202,20 @@ public class TypeValidator
 			allClusters.addAll(clusterSet);
 		}
 
+		var library = Library.ENGLISH;
+
 		for (var cluster : allClusters)
 		{
+			var message = "";
 			var types = new HashSet<Type>();
 
-			for (var typeSet : cluster.fileToTypes.values())
+			for (var typingSet : cluster.fileToTypes.values())
 			{
-				types.addAll(typeSet);
+				for (var typing : typingSet)
+				{
+					message += "\n"+library.getName(typing.symbol)+" : "+library.getName(typing.type);
+					types.add(typing.type);
+				}
 			}
 
 			if (types.isEmpty())
@@ -243,9 +256,12 @@ public class TypeValidator
 	{
 		var userFunctions = new ArrayList<UserFunction>();
 
-		for (var function : model.getFunctions())
+		if (model != null)
 		{
-			userFunctions.add(new UserFunction(function, FunctionType.systemType));
+			for (var function : model.getFunctions())
+			{
+				userFunctions.add(new UserFunction(function, FunctionType.systemType));
+			}
 		}
 		fileToFunctions.put(file, userFunctions);
 
@@ -268,7 +284,7 @@ public class TypeValidator
 
 class Cluster
 {
-	public Map<String, Set<Type>> fileToTypes;
+	public Map<String, Set<Typing>> fileToTypes;
 	public Map<String, ExpressionNode> fileToNodes;
 	public Map<String, Set<String>> componentToFiles;
 

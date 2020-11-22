@@ -12,6 +12,7 @@ public class ExpressionGraph
 {
 	public final HashSet<ExpressionNode> connectedComponents;
 	Map<Expression, ExpressionNode> map;
+	Map<ExpressionNode, ExpressionNode> root;
 
 	public ExpressionGraph()
 	{

@@ -122,7 +122,10 @@ public class IO {
 		{
 			baseFolder = Paths.get(new URI(folder)).toString();
 		}
-		catch (Exception e){}
+		catch (Exception e)
+		{
+			baseFolder = folder;
+		}
 	}
 
 	public static boolean exists(String file)

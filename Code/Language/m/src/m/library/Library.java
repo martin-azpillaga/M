@@ -11,6 +11,7 @@ import m.library.symbols.Component;
 import m.library.symbols.Function;
 import m.library.symbols.Value;
 import m.library.symbols.Classification;
+import m.library.symbols.Symbol;
 import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
@@ -607,6 +608,23 @@ public enum Library
 	public String getName(Component component)
 	{
 		return componentToName.get(component);
+	}
+
+	public String getName(Symbol symbol)
+	{
+		if (symbol instanceof Value)
+		{
+			return getName((Value) symbol);
+		}
+		else if (symbol instanceof Component)
+		{
+			return getName((Component) symbol);
+		}
+		else if (symbol instanceof Function)
+		{
+			return getName((Function) symbol);
+		}
+		return "?";
 	}
 
 	public String getName(Function function)

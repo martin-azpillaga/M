@@ -56,6 +56,8 @@ public class Validator
 
 		var typed = typeValidator.delete(file);
 
+		result.problems.put(file, new ArrayList<>());
+
 		result.mergeProblems(scoped.problems);
 		result.mergeProblems(typed.problems);
 

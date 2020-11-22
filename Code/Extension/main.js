@@ -1,5 +1,5 @@
 const { LanguageClient } = require("vscode-languageclient");
-const { window } = require("vscode");
+const { window, workspace } = require("vscode");
 const { spawn, spawnSync } = require("child_process");
 const net = require("net");
 
@@ -45,7 +45,16 @@ exports.activate = function (context)
 		[
 			{ scheme: "file", language: "Ⲙ"	},
 			{ scheme: "file", pattern: "**/Ⲙ.json" }
-		]
+		],
+		synchronize:
+		{
+			fileEvents:
+			[
+				workspace.createFileSystemWatcher("**/*.Ⲙ"),
+				workspace.createFileSystemWatcher("**/Ⲙ.json")
+			]
+		}
+
 	};
 
 	client = new LanguageClient("m language server", serverOptions, clientOptions);

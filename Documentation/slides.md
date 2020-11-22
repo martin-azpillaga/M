@@ -20,7 +20,7 @@ Ok, let'ss do this.
 One of the design goals of M is to be a tool that you can integrate in your workflow.
 It's not aiming to replace your development stack but rather complement it.
 
-Let me show you what I mean.
+Let me explain.
 
 ### Editor of your choice
 
@@ -53,10 +53,10 @@ Maybe you've spotted that there is a syntax error in this file.
 VSCode knows about it too, I missed a closing bracket.
 
 Let's fix it.
-Now that our project is free of errors, M has produced and output folder for us.
+Now that our project is free of errors, M has produced an output folder for us.
 
 Inside, you won't find an executable file.
-Instead, M generates code that game engines can understand.
+Instead, M generates source code that game engines can understand.
 
 That's right.
 M is meant to be used Alongside your game engine, be it Unity, Unreal or Godot.
@@ -150,8 +150,8 @@ That's it for this video.
 
 From here, I leave you with two options.
 If you are a hands on person, go to minim.tools/M and follow the Starter guide.
-If you are more interested in the theoretical and technical aspects,
-including some experimental features not mentioned in this video,
+If you are more interested in the technical aspects,
+including experimental features not mentioned in this video,
 I recommend you to check out the Developer Guide at minim.tools/M.
 
 Feel free to contact me at martin@minim.tools.
