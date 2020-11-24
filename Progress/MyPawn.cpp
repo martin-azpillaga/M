@@ -33,11 +33,20 @@ void AMyPawn::Tick(float DeltaTime)
 		auto inputName = Actor->FindComponentByClass<UInputName>();
 		if (direction && inputName)
 		{
-			const FName n = inputName->Value;
-				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%d"), InputComponent->GetAxisKeyValue(inputName->key)==1));
-				auto location = Actor->GetActorLocation() + GetInputAxisValue(inputName->Value) * direction->Value;
-				Actor->SetActorLocation(location);
-			
+			auto location = Actor->GetActorLocation() + GetInputAxisValue(inputName->Value) * direction->Value;
+			Actor->SetActorLocation(location);
+			TArray<AActor*> arr;
+			Actor->GetOverlappingActors(arr);
+			for (TActorIterator<AActor> ItB(GetWorld()); ItB; ++ItB)
+			{
+				AActor* b = *ItB;
+
+				auto bInput = b->FindComponentByClass<UInputName>();
+				if (bInput && arr.Contains(b))
+				{
+					GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%d"), arr.Num()));
+				}
+			}
 		}
 	}
 }
@@ -58,3 +67,4 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		}
 	}
 }
+
