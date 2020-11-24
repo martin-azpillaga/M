@@ -6,6 +6,7 @@
 #include "Ready.h"
 #include "StartingVelocity.h"
 #include "Components/TextRenderComponent.h"
+#include "Boards.h"
 
 AMyPawn::AMyPawn()
 {
@@ -66,8 +67,9 @@ void AMyPawn::Overlaps(float DeltaTime)
 			{
 				auto b = *ItB;
 				auto b_respawnPoint = b->FindComponentByClass<URespawnPoint>();
+				auto b_boards = b->FindComponentByClass<UBoards>();
 
-				if (b_respawnPoint && overlaps_a.Contains(b))
+				if (b_respawnPoint && b_boards && overlaps_a.Contains(b))
 				{
 					a->SetActorLocation(b_respawnPoint->Value);
 					a_ready->Value = !a_ready->Value;
@@ -77,7 +79,7 @@ void AMyPawn::Overlaps(float DeltaTime)
 						auto c = *Itc;
 						auto c_text = c->FindComponentByClass<UTextRenderComponent>();
 
-						if (c_text)
+						if (c_text && b_boards->Value.Contains(c))
 						{
 							auto value = FCString::Atof(*c_text->Text.ToString()) + 1;
 							c_text->SetText(FText::FromString(FString::Printf(TEXT("%f"),value)));
