@@ -1,18 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "InputName.generated.h"
+#include "StartingVelocity.generated.h"
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class PONGPLUSPLUS_API UInputName : public UActorComponent
+class PONGPLUSPLUS_API UStartingVelocity : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "M")
-	FName Value;
+	FVector Value;
 };

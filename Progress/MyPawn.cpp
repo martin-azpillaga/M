@@ -1,57 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "MyPawn.h"
 #include "Direction.h"
 #include "EngineUtils.h"
 #include "InputName.h"
+#include "RespawnPoint.h"
+#include "Ready.h"
+#include "StartingVelocity.h"
 
-// Sets default values
 AMyPawn::AMyPawn()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
-// Called when the game starts or when spawned
-void AMyPawn::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-// Called every frame
-void AMyPawn::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	for (TActorIterator<AActor> It(GetWorld()); It; ++It)
-	{
-		AActor* Actor = *It;
-		auto direction = Actor->FindComponentByClass<UDirection>();
-		auto inputName = Actor->FindComponentByClass<UInputName>();
-		if (direction && inputName)
-		{
-			auto location = Actor->GetActorLocation() + GetInputAxisValue(inputName->Value) * direction->Value;
-			Actor->SetActorLocation(location);
-			TArray<AActor*> arr;
-			Actor->GetOverlappingActors(arr);
-			for (TActorIterator<AActor> ItB(GetWorld()); ItB; ++ItB)
-			{
-				AActor* b = *ItB;
-
-				auto bInput = b->FindComponentByClass<UInputName>();
-				if (bInput && arr.Contains(b))
-				{
-					GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, FString::Printf(TEXT("%d"), arr.Num()));
-				}
-			}
-		}
-	}
-}
-
-// Called to bind functionality to input
 void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -63,8 +22,68 @@ void AMyPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		if (inputName)
 		{
 			PlayerInputComponent->BindAxis(inputName->Value);
-			PlayerInputComponent->BindAxisKey(inputName->key);
 		}
 	}
 }
 
+void AMyPawn::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	Control(DeltaTime);
+	Overlaps(DeltaTime);
+	Serve(DeltaTime);
+}
+
+void AMyPawn::Control(float DeltaTime)
+{
+	for (TActorIterator<AActor> Ita(GetWorld()); Ita; ++Ita)
+	{
+		auto a = *Ita;
+		auto a_direction = a->FindComponentByClass<UDirection>();
+		auto a_inputName = a->FindComponentByClass<UInputName>();
+		if (a_direction && a_inputName)
+		{
+			a->SetActorLocation(a->GetActorLocation() + GetInputAxisValue(a_inputName->Value) * a_direction->Value);
+		}
+	}
+}
+
+void AMyPawn::Overlaps(float DeltaTime)
+{
+	for (TActorIterator<AActor> Ita(GetWorld()); Ita; ++Ita)
+	{
+		auto a = *Ita;
+
+		TArray<AActor*> overlaps_a;
+		a->GetOverlappingActors(overlaps_a);
+
+		for (TActorIterator<AActor> ItB(GetWorld()); ItB; ++ItB)
+		{
+			auto b = *ItB;
+			auto b_respawnPoint = b->FindComponentByClass<URespawnPoint>();
+
+			if (b_respawnPoint && overlaps_a.Contains(b))
+			{
+				a->SetActorLocation(b_respawnPoint->Value);
+			}
+		}
+	}
+}
+
+void AMyPawn::Serve(float DeltaTime)
+{
+	for (TActorIterator<AActor> Ita(GetWorld()); Ita; ++Ita)
+	{
+		auto a = *Ita;
+
+		auto a_ready = a->FindComponentByClass<UReady>();
+		auto a_vel = a->FindComponentByClass<UStartingVelocity>();
+		auto a_body = a->FindComponentByClass<UPrimitiveComponent>();
+
+		if (a_ready && a_vel && a_body)
+		{
+			a_body->SetAllPhysicsLinearVelocity(a_vel->Value, false);
+		}
+	}
+}
