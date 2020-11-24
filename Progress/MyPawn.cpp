@@ -5,6 +5,7 @@
 #include "RespawnPoint.h"
 #include "Ready.h"
 #include "StartingVelocity.h"
+#include "Components/TextRenderComponent.h"
 
 AMyPawn::AMyPawn()
 {
@@ -54,18 +55,40 @@ void AMyPawn::Overlaps(float DeltaTime)
 	for (TActorIterator<AActor> Ita(GetWorld()); Ita; ++Ita)
 	{
 		auto a = *Ita;
+		auto a_ready = a->FindComponentByClass<UReady>();
 
-		TArray<AActor*> overlaps_a;
-		a->GetOverlappingActors(overlaps_a);
-
-		for (TActorIterator<AActor> ItB(GetWorld()); ItB; ++ItB)
+		if (a_ready)
 		{
-			auto b = *ItB;
-			auto b_respawnPoint = b->FindComponentByClass<URespawnPoint>();
+			TArray<AActor*> overlaps_a;
+			a->GetOverlappingActors(overlaps_a);
 
-			if (b_respawnPoint && overlaps_a.Contains(b))
+			for (TActorIterator<AActor> ItB(GetWorld()); ItB; ++ItB)
 			{
-				a->SetActorLocation(b_respawnPoint->Value);
+				auto b = *ItB;
+				auto b_respawnPoint = b->FindComponentByClass<URespawnPoint>();
+
+				if (b_respawnPoint && overlaps_a.Contains(b))
+				{
+					a->SetActorLocation(b_respawnPoint->Value);
+					a_ready->Value = !a_ready->Value;
+
+					for (TActorIterator<AActor> Itc(GetWorld()); Itc; ++Itc)
+					{
+						auto c = *Itc;
+						auto c_text = c->FindComponentByClass<UTextRenderComponent>();
+
+						if (c_text)
+						{
+							auto value = FCString::Atof(*c_text->Text.ToString()) + 1;
+							c_text->SetText(FText::FromString(FString::Printf(TEXT("%f"),value)));
+
+							if (FCString::Atof(*c_text->Text.ToString()) > 2)
+							{				
+								c_text->SetText(FText::FromString(FString::Printf(TEXT("%f"),0)));
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -83,7 +106,15 @@ void AMyPawn::Serve(float DeltaTime)
 
 		if (a_ready && a_vel && a_body)
 		{
-			a_body->SetAllPhysicsLinearVelocity(a_vel->Value, false);
+			if (a_ready->Value)
+			{
+				float min = -1;
+				float max = 1;
+				auto angle = FMath::RandRange(min,max);
+				auto vel = FMath::RandRange(40,100) * FVector(0, FMath::Cos(angle), FMath::Sin(angle));
+				a_body->SetAllPhysicsLinearVelocity(vel, false);
+				a_ready->Value = !a_ready->Value;
+			}
 		}
 	}
 }
