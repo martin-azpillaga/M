@@ -6,9 +6,12 @@ import m.library.types.FunctionType;
 import m.library.types.Type;
 import m.model.Function;
 import m.model.Game;
+import m.model.UserFunction;
+
 import static m.generator.IO.*;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 public class Unreal
 {
@@ -28,6 +31,9 @@ public class Unreal
 
 			writeFile("Components/"+unreserved(name)+".cpp", write("#include \""+unreserved(name)+".h\""));
 		});
+
+		writeFile("Systems.h",systemsHeader(game.functions));
+		writeFile("Systems.cpp",systemsCpp(game.functions));
 
 		for (var system : game.functions)
 		{
@@ -68,6 +74,43 @@ public class Unreal
 		);
 	}
 
+	private String systemsHeader(List<UserFunction> systems)
+	{
+		includes.clear();
+
+		return write
+		(
+			"#pragma once",
+			"#include \"CoreMinimal.h\"",
+			"#include \"GameFramework/Pawn.h\"",
+			"#include \"MyPawn.generated.h\"",
+			"",
+			"UCLASS()",
+			"class ASystems : public APawn",
+			"{",
+				"GENERATED_BODY()",
+				"",
+				"public:",
+				"ASystems();",
+				"virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;",
+				"virtual void Tick(float DeltaTime) override;",
+				"private:",
+				foreach(systems, s->"void "+s.getName()+"(float DeltaTime);"),
+			"};"
+		);
+	}
+
+	private String systemsCpp(List<UserFunction> systems)
+	{
+		includes.clear();
+		includes.add("Systems.h");
+		includes.add("EngineUtils.h");
+
+		return write
+		(
+		);
+	}
+
 	private String generateSystem(Function system)
 	{
 		return "";
@@ -103,7 +146,7 @@ public class Unreal
 				includes.add("GameFramework/Actor.h");
 				return "TArray<AActor*>";
 			case INPUT:
-				return "FString";
+				return "FName";
 			case STRING:
 				return "FText";
 			case COLOR:
