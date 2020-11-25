@@ -12,6 +12,7 @@ import static m.generator.IO.*;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 public class Unreal
 {
@@ -33,7 +34,7 @@ public class Unreal
 		});
 
 		writeFile("Systems.h",systemsHeader(game.functions));
-		writeFile("Systems.cpp",systemsCpp(game.functions));
+		writeFile("Systems.cpp",systemsCpp(game.functions, game.components));
 
 		for (var system : game.functions)
 		{
@@ -83,7 +84,7 @@ public class Unreal
 			"#pragma once",
 			"#include \"CoreMinimal.h\"",
 			"#include \"GameFramework/Pawn.h\"",
-			"#include \"MyPawn.generated.h\"",
+			"#include \"Systems.generated.h\"",
 			"",
 			"UCLASS()",
 			"class ASystems : public APawn",
@@ -100,14 +101,69 @@ public class Unreal
 		);
 	}
 
-	private String systemsCpp(List<UserFunction> systems)
+	private String systemsCpp(List<UserFunction> systems, Map<String, Type> components)
 	{
 		includes.clear();
 		includes.add("Systems.h");
 		includes.add("EngineUtils.h");
 
+		var inputs = new HashSet<String>();
+		components.forEach((name,type)->
+		{
+			if (type == AtomicType.INPUT)
+			{
+				inputs.add(name);
+			}
+		});
+
+		for (var input : inputs)
+		{
+			includes.add(input+".h");
+		}
+		var lines = lines
+		(
+			"ASystems::ASystems()",
+			"{",
+				"PrimaryActorTick.bCanEverTick = true;",
+			"}",
+			"",
+			"void ASystems::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)",
+			"{",
+				"Super::SetupPlayerInputComponent(PlayerInputComponent);",
+				"",
+				"for (TActorIterator<AActor> It(GetWorld()); It; ++It)",
+				"{",
+					"AActor* Actor = *It;",
+					foreach(inputs, i->lines
+					(
+						"auto "+i+" = Actor->FindComponentByClass<U"+i+"M>();",
+						"if ("+i+")",
+						"{",
+							"PlayerInputComponent->BindAxis("+i+"->Value);",
+						"}"
+					)),
+				"}",
+			"}",
+			"",
+			"void ASystems::Tick(float DeltaTime)",
+			"{",
+				"Super::Tick(DeltaTime);",
+				"",
+				foreach(systems, s->s.getName()+"(DeltaTime);"),
+			"}",
+			foreach(systems, s->lines
+			(
+			"void ASystems::"+s.getName()+"(float DeltaTime)",
+			"{",
+			"}"
+			))
+		);
+
 		return write
 		(
+			foreach(includes, i->"#include \""+i+"\""),
+			"",
+			lines
 		);
 	}
 
