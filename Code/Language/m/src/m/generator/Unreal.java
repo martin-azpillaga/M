@@ -4,8 +4,13 @@ import m.library.Library;
 import m.library.types.AtomicType;
 import m.library.types.FunctionType;
 import m.library.types.Type;
+import m.model.Assignment;
+import m.model.BindingBlock;
+import m.model.Block;
+import m.model.Delegation;
 import m.model.Function;
 import m.model.Game;
+import m.model.Statement;
 import m.model.UserFunction;
 
 import static m.generator.IO.*;
@@ -104,7 +109,6 @@ public class Unreal
 	private String systemsCpp(List<UserFunction> systems, Map<String, Type> components)
 	{
 		includes.clear();
-		includes.add("Systems.h");
 		includes.add("EngineUtils.h");
 
 		var inputs = new HashSet<String>();
@@ -118,7 +122,7 @@ public class Unreal
 
 		for (var input : inputs)
 		{
-			includes.add(input+".h");
+			includes.add("Components/"+input+".h");
 		}
 		var lines = lines
 		(
@@ -155,16 +159,50 @@ public class Unreal
 			(
 			"void ASystems::"+s.getName()+"(float DeltaTime)",
 			"{",
+				foreach(s.getStatements(), statement->code(statement)),
 			"}"
 			))
 		);
 
 		return write
 		(
+			"#include \"Systems.h\"",
 			foreach(includes, i->"#include \""+i+"\""),
 			"",
 			lines
 		);
+	}
+
+	private Object code(Statement statement)
+	{
+		if (statement instanceof BindingBlock)
+		{
+			var bindingBlock = (BindingBlock) statement;
+			var entity = bindingBlock.getExpression().getName();
+			var statements = bindingBlock.getStatements();
+
+			return lines
+			(
+			"for (TActorIterator<AActor> It"+entity+"(GetWorld()); It"+entity+"; ++It"+entity+")",
+			"{",
+				"auto "+entity+" = *It"+entity+";",
+				foreach(statements, s->code(s)),
+			"}"	
+			);
+		}
+		else if (statement instanceof Block)
+		{
+			return "";
+		}
+		else if (statement instanceof Assignment)
+		{
+			return "";
+		}
+		else if (statement instanceof Delegation)
+		{
+			return "";
+		}
+		return "";
 	}
 
 	private String generateSystem(Function system)
