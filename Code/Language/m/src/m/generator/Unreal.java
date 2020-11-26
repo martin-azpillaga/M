@@ -235,11 +235,33 @@ public class Unreal
 			var components = new ArrayList<String>();
 			if (currentFunction.queries.containsKey(entity))
 			{
-				components.addAll(currentFunction.queries.get(entity).keySet());
+				for (var c : currentFunction.queries.get(entity).keySet())
+				{
+					if (!component(c).isEmpty())
+					{
+						components.add(c);
+					}
+				}
+				
 			}
 			if (extras.containsKey(entity))
 			{
-				components.addAll(extras.get(entity));
+				for (var c : extras.get(entity))
+				{
+					if (!component(c).isEmpty())
+					{
+						components.add(c);
+					}
+				}
+			}
+
+			var overlaps = false;
+			for (var application : EcoreUtil2.getAllContentsOfType(bindingBlock, Application.class))
+			{
+				if (library.getFunction(application.getName())==OVERLAPS && ((Value)application.getArguments().get(0)).getName().equals(entity))
+				{
+					overlaps = true;
+				}
 			}
 
 			return lines
@@ -249,10 +271,19 @@ public class Unreal
 				"auto "+entity+" = *It"+entity+";",
 				foreach(components, c->"auto "+entity+"_"+c+" = "+entity+"->FindComponentByClass<"+component(c)+">();"),
 				"",
+				iff(overlaps),
+				"TArray<AActor*> overlaps_"+entity+";",
+				entity+"->GetOverlappingActors(overlaps_"+entity+");",
+				"",
+				end,
+				iff(components.size() > 0),
 				"if ("+foreach(components, c->entity+"_"+c, " && ")+")",
 				"{",
+				end,
 					foreach(statements, s->code(s)),
+				iff(components.size() > 0),
 				"}",
+				end,
 			"}"	
 			);
 		}
@@ -400,7 +431,7 @@ public class Unreal
 		case GREATEROREQUAL: return x+" >= "+y;
 		case HALT: return "#if UNITY_EDITOR\nUnityEditor.EditorApplication.isPlaying = false;\n#endif\nApplication.Quit()";
 		case HAS: return "";
-		case IN: return "("+y+").Contains(entity_"+x+")("+y+").Contains("+x+")";
+		case IN: return "("+y+").Contains("+x+")";
 		case INEQUAL: return x+" != "+y;
 		case INTEGERPART: return "math.trunc("+x+")";
 		case INVERSE: return "(1 / ("+x+"))";
@@ -442,7 +473,7 @@ public class Unreal
 		case SCREENSHOT: return "ScreenCapture.CaptureScreenshot((System.DateTime.Now+\".png\").Replace(\"/\", \"-\"), 1)";
 		case XYZ: return "FVector("+x+", "+y+", "+z+")";
 		case OVERLAPS:
-			return "";
+			return "overlaps_"+x;
 		case TO_NUMBER3: return "("+x+").eulerAngles";
 		case TO_QUATERNION: return "Quaternion.Euler(("+x+").x, ("+x+").y, ("+x+").z)";
 		case ADD_FORCE: return "("+x+").GetComponent<Rigidbody>().AddForce("+y+")";
@@ -498,6 +529,7 @@ public class Unreal
 			switch(standard)
 			{
 				case VELOCITY: return entity+"_"+component+"->SetAllPhysicsLinearVelocity("+code(expression)+", false);";
+				case POSITION: return "SetActorLocation("+code(expression)+");";
 			}
 			return "";
 		}
@@ -508,7 +540,11 @@ public class Unreal
 	{
 		var found = library.getComponent(name);
 
-		if (found == null)
+		if (name.equals("UPrimitiveComponent"))
+		{
+			return "UPrimitiveComponent";
+		}
+		else if (found == null)
 		{
 			includes.add("Components/"+name+".h");
 			return "U"+name+"M";
@@ -518,7 +554,7 @@ public class Unreal
 			switch (found)
 			{
 			case VELOCITY: return "UPrimitiveComponent";
-			case POSITION: return "Transform";
+			case POSITION: return "";
 			case ANGULAR_VELOCITY: return "Rigidbody";
 			case AUDIOCLIP: return "AudioSource";
 			case BACKGROUND: return "Camera";
@@ -586,7 +622,7 @@ public class Unreal
 			switch (found)
 			{
 			case VELOCITY: return "->GetPhysicsLinearVelocity(\"None\")";
-			case POSITION: return "Transform";
+			case POSITION: return "GetActorLocation()";
 			case ANGULAR_VELOCITY: return "Rigidbody";
 			case AUDIOCLIP: return "AudioSource";
 			case BACKGROUND: return "Camera";
