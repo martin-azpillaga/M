@@ -24,6 +24,8 @@ import static m.library.symbols.Function.*;
 import static m.library.symbols.Component.*;
 import static m.library.types.AtomicType.*;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,6 +44,8 @@ public class Unreal
 	{
 		this.library = game.library;
 		this.includes = new HashSet<>();
+
+		clean(Paths.get(getBaseFolder()).toString().replace("file:", ""));
 
 		game.components.entrySet().removeIf(e-> library.getComponent(e.getKey()) != null);
 		game.components.forEach((name, type)->
@@ -63,6 +67,32 @@ public class Unreal
 
 				writeFile("Systems/"+unreserved(name)+".h", generateSystem(system));
 				writeFile("Systems/"+unreserved(name)+".cpp", generateSystem(system));
+			}
+		}
+	}
+
+	private void clean(String path)
+	{
+		cleanCppFiles(Paths.get(path,"Components").toString());
+		cleanCppFiles(Paths.get(path,"Systems").toString());
+	}
+
+	private void cleanCppFiles(String path)
+	{
+		var directory = new File(path);
+		if (!directory.exists())
+		{
+			return;
+		}
+		for (var file : directory.listFiles())
+		{
+			if (file.getName().endsWith(".cpp"))
+			{
+				file.delete();
+			}
+			if (file.getName().endsWith((".h")))
+			{
+				file.delete();
 			}
 		}
 	}
