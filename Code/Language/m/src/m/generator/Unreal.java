@@ -258,6 +258,31 @@ public class Unreal
 		}
 		else if (statement instanceof Block)
 		{
+			var block = (Block) statement;
+			var name = block.getName();
+			var expression = block.getExpression();
+			var statements = block.getStatements();
+
+			if (name.equals(library.selection))
+			{
+				return lines
+				(
+					"if ("+code(expression)+")",
+					"{",
+						foreach(statements,s->code(s)),
+					"}"
+				);
+			}
+			else if (name.equals(library.iteration))
+			{
+				return lines
+				(
+					"while ("+code(expression)+")",
+					"{",
+						foreach(statements,s->code(s)),
+					"}"
+				);
+			}
 			return "";
 		}
 		else if (statement instanceof Assignment)
@@ -270,7 +295,7 @@ public class Unreal
 			{
 				var value = (Value) atom;
 
-				return value.getName()+" = "+code(expression);
+				return "auto "+value.getName()+" = "+code(expression)+";";
 			}
 			else
 			{
@@ -360,7 +385,7 @@ public class Unreal
 		case ATAN: return "math.atan("+x+")";
 		case CEIL: return "math.ceil("+x+")";
 		case CLAMP: return "math.clamp("+x+", ("+y+").x, ("+y+").y)";
-		case COS: return "math.cos("+x+")";
+		case COS: return "FMath::Cos("+x+")";
 		case CREATE: return "ecb.Instantiate("+x+")GameObject.Instantiate<GameObject>("+x+")";
 		case CROSS: return "((Vector3)math.cross("+x+","+y+"))";
 		case DESTROY: return "ecb.DestroyEntity(entity_"+x+")GameObject.Destroy("+x+")";
@@ -391,7 +416,7 @@ public class Unreal
 		case PLAY_ONCE: return "("+x+").GetComponent<AudioSource>().PlayOneShot("+y+")";
 		case POW: return "math.pow("+x+", "+y+")";
 		case PROPORTIONAL: return "math.remap("+x+", ("+y+").x, ("+y+").y, ("+z+").x, ("+z+").y)";
-		case RANDOM: return ("SystemRunner.random.NextFloat(UnityEngine.Random.Range(")+"("+x+").x, ("+x+").y)";
+		case RANDOM: return "FMath::RandRange("+x+".X, "+x+".Y)";
 		case READ_NUMBER: return "GetInputAxisValue("+x+")";
 		case READ_TRIGGERED: return "("+x+").triggered";
 		case READ_VECTOR: return "("+x+").ReadValue<Vector2>()";
@@ -404,7 +429,7 @@ public class Unreal
 		case SET_NUMBER: return "("+x+").SetFloat("+y+", "+z+")";
 		case SET_TRIGGER: return "("+x+").GetComponent<Animator>().SetTrigger("+y+")";
 		case SIGN: return "math.sign("+x+")";
-		case SIN: return "math.sin("+x+")";
+		case SIN: return "FMath::Sin("+x+")";
 		case SIZE: return "("+x+").Count()";
 		case SQRT: return "math.sqrt("+x+")";
 		case IN_STATE: return "("+x+").GetComponent<Animator>().GetCurrentAnimatorStateInfo(0).IsName("+y+")";
@@ -415,7 +440,7 @@ public class Unreal
 		case WRITEERROR: return "if (Debug.isDebugBuild){ Debug.LogError("+x+"); }";
 		case WRITE_WARNING: return "if (Debug.isDebugBuild){ Debug.LogWarning("+x+"); }";
 		case SCREENSHOT: return "ScreenCapture.CaptureScreenshot((System.DateTime.Now+\".png\").Replace(\"/\", \"-\"), 1)";
-		case XYZ: return "new Vector3("+x+", "+y+", "+z+")";
+		case XYZ: return "FVector("+x+", "+y+", "+z+")";
 		case OVERLAPS:
 			return "";
 		case TO_NUMBER3: return "("+x+").eulerAngles";
