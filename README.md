@@ -1,6 +1,6 @@
 # M
 
-A data-driven programming language for game developers.
+A data-oriented programming language for game developers.
 
 ## Installation
 
