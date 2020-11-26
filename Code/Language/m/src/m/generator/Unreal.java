@@ -505,8 +505,8 @@ public class Unreal
 		case Y: return "("+x+").y";
 		case Z: return "("+x+").z";
 		case OVER: return "(EventSystem.current.currentSelectedGameObject == "+x+")";
-		case TO_NUMBER: return "float.Parse("+x+", System.Globalization.CultureInfo.InvariantCulture)";
-		case TO_STRING: return "("+x+").ToString()";
+		case TO_NUMBER: return "FCString::Atof(*("+x+".ToString()))";
+		case TO_STRING: return "FString::Printf(TEXT(\"%f\"),"+x+")";
 		case IS_NEGATIVE: return "("+x+" < 0)";
 		case IS_POSITIVE: return "("+x+" > 0)";
 		case IS_ZERO: return "("+x+" == 0)";
@@ -530,6 +530,7 @@ public class Unreal
 			{
 				case VELOCITY: return entity+"_"+component+"->SetAllPhysicsLinearVelocity("+code(expression)+", false);";
 				case POSITION: return "SetActorLocation("+code(expression)+");";
+				case TEXT: return entity+"_"+component+"->SetText(FText::FromString("+code(expression)+"));";
 			}
 			return "";
 		}
@@ -594,7 +595,7 @@ public class Unreal
 			case TEXT_COLOR:
 			case TEXT_MATERIAL:
 			case TEXT:
-			case FONT: return "Text";
+			case FONT: includes.add("Components/TextRenderComponent.h"); return "UTextRenderComponent";
 			case IMAGE:
 			case IMAGE_COLOR:
 			case IMAGE_MATERIAL: return "RawImage";
@@ -662,7 +663,7 @@ public class Unreal
 			case TEXT_COLOR:
 			case TEXT_MATERIAL:
 			case TEXT:
-			case FONT: return "Text";
+			case FONT: return "->Text";
 			case IMAGE:
 			case IMAGE_COLOR:
 			case IMAGE_MATERIAL: return "RawImage";
