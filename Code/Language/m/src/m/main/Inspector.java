@@ -267,6 +267,10 @@ public class Inspector
 				{
 					continue;
 				}
+				if (library.getComponent(component) != null)
+				{
+					continue;
+				}
 				var item = new CompletionItem(component);
 				item.setDocumentation(library.getDescription(library.getComponent(component)));
 				item.setDetail(library.getName(game.components.get(component)));
