@@ -2007,10 +2007,13 @@ public class Unity
 
 	private void clean(String root)
 	{
-		cleanCSharpFiles(root+"/Components");
-		cleanCSharpFiles(root+"/Components/Jobified");
-		cleanCSharpFiles(root+"/Systems");
-		cleanCSharpFiles(root+"/Systems/Jobified");
+		cleanCSharpFiles(Paths.get(root,"Components").toString());
+		cleanCSharpFiles(Paths.get(root,"Components","Jobified").toString());
+		cleanCSharpFiles(Paths.get(root,"Systems").toString());
+		cleanCSharpFiles(Paths.get(root,"Systems","Jobified").toString());
+		cleanCSharpFiles(Paths.get(root,"Main").toString());
+		cleanCSharpFiles(Paths.get(root,"Fix").toString());
+		cleanCSharpFiles(Paths.get(root,"Debugging").toString());
 	}
 
 	private void cleanCSharpFiles(String path)

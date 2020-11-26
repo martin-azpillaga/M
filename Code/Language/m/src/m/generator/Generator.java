@@ -8,7 +8,17 @@ public class Generator
 	public void generate(Game game, Configuration configuration)
 	{
 		generate(game, Engine.UNITY, configuration.Unity);
+		// HACK: Queries need to be restart so that one engine does not affect the next ones
+		for (var function : game.functions)
+		{
+			function.queries = function.collectQueries();
+		}
 		generate(game, Engine.UNREAL, configuration.Unreal);
+		// HACK: Queries need to be restart so that one engine does not affect the next ones
+		for (var function : game.functions)
+		{
+			function.queries = function.collectQueries();
+		}
 		generate(game, Engine.GODOT, configuration.Godot);
 	}
 

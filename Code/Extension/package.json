@@ -1,12 +1,18 @@
 {
 	"name": "m-ls",
-	"version": "0.7.1",
+	"version": "0.7.3",
 	"publisher": "minim-tools",
 	"license": "AGPL-3.0-only",
 	"displayName": "M language server",
 	"description": "Data-driven language for game developers",
-	"categories": [ "Programming Languages" ],
-	"keywords": [ "data-driven", "programming language", "game development"	],
+	"categories": [
+		"Programming Languages"
+	],
+	"keywords": [
+		"data-driven",
+		"programming language",
+		"game development"
+	],
 	"preview": true,
 	"qna": false,
 	"icon": "logo.png",

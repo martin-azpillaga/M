@@ -12,7 +12,7 @@ import m.library.types.FunctionType;
 public class UserFunction extends FunctionImpl
 {
 	public final FunctionType type;
-	public final Map<String,HashMap<String,Boolean>> queries;
+	public Map<String,HashMap<String,Boolean>> queries;
 	public final Function function;
 
 	public UserFunction(Function function, FunctionType type)
@@ -25,7 +25,7 @@ public class UserFunction extends FunctionImpl
 		this.queries = collectQueries();
 	}
 
-	private HashMap<String,HashMap<String,Boolean>> collectQueries()
+	public HashMap<String,HashMap<String,Boolean>> collectQueries()
 	{
 		var result = new HashMap<String,HashMap<String,Boolean>>();
 
