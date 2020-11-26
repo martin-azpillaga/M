@@ -4,7 +4,7 @@ A data-oriented programming language for game developers.
 
 ## Installation
 
-Install the **M language server** extension from the VSCode or VSCodium marketplace.
+Install the **M language server** extension from the VSCode marketplace.
 
 ## Documentation
 
