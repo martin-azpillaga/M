@@ -9,7 +9,7 @@ features:
 - title: Simple
   details: M has a minimalist grammar, easy to learn and read. Its powerful type system frees programmers from declaring types, resulting in clear and readable code.
 - title: Flexible
-  details: M enforces data oriented design. All data is stored in components which allows designers to create entities with new behavior by combining different sets of components.
+  details: M enforces data oriented design. All data is stored in components which allows designers to create entities with new behavior independently from programmers.
 - title: Tool
   details: M complements your workflow. Develop in any LSP-compliant code editor and generate gameplay code ready for Unity, Unreal or Godot.
 footer: AGPL Licensed | Copyright © 2017-present Martin Azpillaga Aldalur
